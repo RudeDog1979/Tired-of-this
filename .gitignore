@@ -1,0 +1,6 @@
+build.log
+.cursor-video-frames/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.DS_Store

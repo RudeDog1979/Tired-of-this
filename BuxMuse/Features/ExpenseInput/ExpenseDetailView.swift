@@ -1,0 +1,373 @@
+//
+//  ExpenseDetailView.swift
+//  BuxMuse
+//
+//  Full-screen expense detail — shell aligned with SubscriptionDetailView.
+//
+
+import SwiftUI
+
+struct ExpenseDetailView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
+    @StateObject private var viewModel: ExpenseDetailViewModel
+    @State private var showCategorySheet = false
+    @State private var showEditSheet = false
+
+    let brain: BuxMuseBrain
+    let onUpdated: () -> Void
+
+    init(record: ExpenseRecord, brain: BuxMuseBrain, settingsManager: AppSettingsManager, onUpdated: @escaping () -> Void) {
+        self.brain = brain
+        self.onUpdated = onUpdated
+        _viewModel = StateObject(wrappedValue: ExpenseDetailViewModel(
+            record: record,
+            brain: brain,
+            settingsManager: settingsManager
+        ))
+    }
+
+    private var cardColor: Color {
+        colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
+    }
+
+    private var screenBackground: Color {
+        colorScheme == .dark ? Color(red: 13/255, green: 14/255, blue: 18/255) : Color(red: 242/255, green: 244/255, blue: 247/255)
+    }
+
+    var body: some View {
+        ZStack {
+            screenBackground.ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 24) {
+                    headerRow
+                    overviewCard
+                    intelligenceSections
+                    notesSection
+                    actionsSection
+                }
+                .padding(.bottom, 48)
+            }
+        }
+        .sheet(isPresented: $showCategorySheet) {
+            ExpenseCategorySheet(transaction: viewModel.record.toTransaction()) { category in
+                try? viewModel.changeCategory(category)
+                onUpdated()
+            }
+            .environmentObject(themeManager)
+        }
+        .sheet(isPresented: $showEditSheet) {
+            AddExpenseSheet(brain: brain, settingsManager: appSettingsManager, mode: .edit(viewModel.record.toTransaction()))
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(brain)
+                .onDisappear {
+                    viewModel.reloadRecord()
+                    onUpdated()
+                }
+        }
+    }
+
+    private var headerRow: some View {
+        HStack {
+            Button { dismiss() } label: {
+                ZStack {
+                    Circle()
+                        .fill(colorScheme == .dark ? Color.white.opacity(0.08) : .white)
+                        .frame(width: 44, height: 44)
+                        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                }
+            }
+            .buttonStyle(BuxMicroShrinkStyle())
+
+            Spacer()
+
+            Text(viewModel.record.name)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .lineLimit(1)
+
+            Spacer()
+
+            Button { showEditSheet = true } label: {
+                Text("Edit")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(themeManager.current.accentColor)
+            }
+            .buttonStyle(BuxMicroShrinkStyle())
+            .frame(width: 44, alignment: .trailing)
+        }
+        .padding(.horizontal, BuxLayout.marginHorizontal)
+        .padding(.top, 16)
+    }
+
+    private var overviewCard: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 28)
+                .fill(cardColor)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28)
+                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
+                )
+
+            VStack(spacing: 16) {
+                AsyncMerchantLogoView(merchantName: viewModel.record.name, size: 56)
+                    .shadow(radius: 4)
+
+                VStack(spacing: 4) {
+                    Text(viewModel.formattedAmount())
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+
+                    Text(viewModel.record.transactionCategory.displayName)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(themeManager.current.accentColor)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(themeManager.current.accentColor.opacity(0.12))
+                        .clipShape(Capsule())
+                }
+
+                Label(
+                    viewModel.record.date.formatted(date: .abbreviated, time: .shortened),
+                    systemImage: "calendar"
+                )
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.gray)
+
+                Button { showCategorySheet = true } label: {
+                    Text("Change category")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(themeManager.current.accentColor)
+                }
+                .buttonStyle(BuxMicroShrinkStyle())
+            }
+            .padding(28)
+        }
+        .padding(.horizontal, BuxLayout.marginHorizontal)
+    }
+
+    @ViewBuilder
+    private var intelligenceSections: some View {
+        let warnings = insightItems.filter(\.isWarning)
+        let standard = insightItems.filter { !$0.isWarning }
+
+        if !warnings.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("DETECTED PATTERN WARNINGS")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.red.opacity(0.8))
+                    .kerning(1.2)
+
+                ForEach(warnings, id: \.title) { item in
+                    HStack(spacing: 12) {
+                        Image(systemName: item.icon)
+                            .foregroundColor(.red)
+                        Text(item.body)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .multilineTextAlignment(.leading)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(16)
+                    .background(Color.red.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.red.opacity(0.12), lineWidth: 1)
+                    )
+                }
+            }
+            .padding(.horizontal, BuxLayout.marginHorizontal)
+        }
+
+        if !standard.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("INTELLIGENCE INSIGHTS")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .kerning(1.2)
+
+                VStack(alignment: .leading, spacing: 14) {
+                    ForEach(standard, id: \.title) { item in
+                        if item.title != standard.first?.title {
+                            Divider().opacity(0.08)
+                        }
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: item.icon)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(themeManager.current.accentColor)
+                                .frame(width: 22)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(item.title)
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(.gray)
+                                Text(item.body)
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.85) : Color(red: 40/255, green: 44/255, blue: 52/255))
+                            }
+                            Spacer(minLength: 0)
+                        }
+                    }
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(cardColor)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
+                )
+            }
+            .padding(.horizontal, BuxLayout.marginHorizontal)
+        }
+    }
+
+    private var notesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("NOTES")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                .kerning(1.2)
+
+            VStack(alignment: .leading, spacing: 12) {
+                TextField("Add a note", text: $viewModel.notesDraft, axis: .vertical)
+                    .lineLimit(3...6)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+
+                Button("Save note") {
+                    try? viewModel.saveNotes()
+                    onUpdated()
+                }
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(themeManager.current.accentColor)
+                .buttonStyle(BuxMicroShrinkStyle())
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(cardColor)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
+            )
+        }
+        .padding(.horizontal, BuxLayout.marginHorizontal)
+    }
+
+    private var actionsSection: some View {
+        VStack(spacing: 12) {
+            primaryAction("Convert to subscription", icon: "arrow.triangle.2.circlepath") {
+                try? viewModel.convertToSubscription()
+                onUpdated()
+            }
+            primaryAction("Mark as recurring", icon: "calendar.badge.clock") {
+                try? viewModel.markRecurring()
+                onUpdated()
+            }
+
+            Button {
+                try? viewModel.delete()
+                onUpdated()
+                dismiss()
+            } label: {
+                Text("Delete expense")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.red)
+                    .clipShape(Capsule())
+                    .shadow(color: Color.red.opacity(0.2), radius: 8, x: 0, y: 4)
+            }
+            .buttonStyle(BuxMicroShrinkStyle())
+        }
+        .padding(.horizontal, BuxLayout.marginHorizontal)
+    }
+
+    private func primaryAction(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                Text(title)
+                    .font(.system(size: 15, weight: .bold))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.gray)
+            }
+            .foregroundColor(colorScheme == .dark ? .white : .black)
+            .padding(16)
+            .background(cardColor)
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
+            )
+        }
+        .buttonStyle(BuxMicroShrinkStyle())
+    }
+
+    private struct InsightItem {
+        let title: String
+        let body: String
+        let icon: String
+        let isWarning: Bool
+    }
+
+    private var insightItems: [InsightItem] {
+        var items: [InsightItem] = []
+        let intel = viewModel.intelligence
+        if let s = intel.duplicateSummary {
+            items.append(.init(title: "Duplicate", body: s, icon: "exclamationmark.triangle.fill", isWarning: true))
+        }
+        if let s = intel.refundSummary {
+            items.append(.init(title: "Refund", body: s, icon: "exclamationmark.triangle.fill", isWarning: true))
+        }
+        if let s = intel.recurrenceSummary {
+            items.append(.init(title: "Recurrence", body: s, icon: "arrow.triangle.2.circlepath", isWarning: false))
+        }
+        if let s = intel.subscriptionSummary {
+            items.append(.init(title: "Subscription", body: s, icon: "repeat.circle", isWarning: false))
+        }
+        if let s = intel.heatZoneSummary {
+            items.append(.init(title: "Heat zone", body: s, icon: "flame", isWarning: false))
+        }
+        if let s = intel.futureImpactSummary {
+            items.append(.init(title: "Future impact", body: s, icon: "calendar.badge.clock", isWarning: false))
+        }
+        if let s = intel.habitSignatureSummary {
+            items.append(.init(title: "Habit signature", body: s, icon: "arrow.triangle.2.circlepath", isWarning: false))
+        }
+        if let s = intel.microCommitmentSummary {
+            items.append(.init(title: "Micro commitment", body: s, icon: "target", isWarning: false))
+        }
+        if let s = intel.emotionalTagSummary {
+            items.append(.init(title: "Emotional tag", body: s, icon: "face.smiling", isWarning: false))
+        }
+        if let s = intel.contextTagSummary {
+            items.append(.init(title: "Context", body: s, icon: "tag", isWarning: false))
+        }
+        if let s = intel.categoryInsight {
+            items.append(.init(title: "Category", body: s, icon: "chart.bar", isWarning: false))
+        }
+        if let s = intel.merchantInsight {
+            items.append(.init(title: "Merchant", body: s, icon: "building.2", isWarning: false))
+        }
+        if let s = intel.goalsImpact {
+            items.append(.init(title: "Goals", body: s, icon: "target", isWarning: false))
+        }
+        if let s = intel.subscriptionsImpact {
+            items.append(.init(title: "Subscriptions", body: s, icon: "creditcard", isWarning: false))
+        }
+        return items
+    }
+}
