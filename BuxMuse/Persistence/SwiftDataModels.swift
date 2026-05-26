@@ -392,7 +392,12 @@ extension ExpenseEntity {
             amount: MoneyAmount(value: amountValue, currencyCode: currencyCode),
             merchantName: name.isEmpty ? merchantName : name,
             category: category,
-            notes: notes
+            notes: notes,
+            isSubscriptionLike: isSubscriptionLike,
+            isTrial: isTrial,
+            nextExpectedDate: nextExpectedDate,
+            subscriptionStartDate: subscriptionStartDate,
+            trialEndDate: trialEndDate
         )
     }
 }

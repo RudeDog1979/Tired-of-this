@@ -1,0 +1,271 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project BuxMuse.xcodeproj -scheme BuxMuse -destination "generic/platform=iOS Simulator" build
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'BuxMuse' in project 'BuxMuse' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/momc --dry-run --action generate --swift-version 5.0 --sdkroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk --iphonesimulator-deployment-target 18.0 --module BuxMuse /Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/BuxMuse.xcdatamodeld /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/CoreDataGenerated/BuxMuse
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 8c357b94d4e406a923c08399a4adc044
+Build description path: /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/XCBuildData/8c357b94d4e406a923c08399a4adc044.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk /Users/rodolfo/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F73-6cfe768891a92b912361537c460fe42b.sdkstatcache
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -o /Users/rodolfo/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F73-6cfe768891a92b912361537c460fe42b.sdkstatcache
+
+ProcessInfoPlistFile /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator/BuxMuse.app/Info.plist /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/empty-BuxMuse.plist (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    builtin-infoPlistUtility /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/empty-BuxMuse.plist -producttype com.apple.product-type.application -genpkginfo /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator/BuxMuse.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/assetcatalog_generated_info.plist -o /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator/BuxMuse.app/Info.plist
+
+SwiftDriver BuxMuse normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name BuxMuse -Onone @/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/x86_64/BuxMuse.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -target x86_64-apple-ios18.0-simulator -g -module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator -F /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/x86_64 -c -j16 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F73-6cfe768891a92b912361537c460fe42b.sdkstatcache -output-file-map /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/x86_64/BuxMuse-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/x86_64/BuxMuse.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/x86_64/BuxMuse_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-generated-files.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-own-target-headers.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-project-headers.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources-normal/x86_64 -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/x86_64 -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/x86_64/BuxMuse-Swift.h -working-directory /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this -experimental-emit-module-separately -disable-cmo
+
+SwiftDriver BuxMuse normal arm64 com.apple.xcode.tools.swift.compiler (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name BuxMuse -Onone @/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/BuxMuse.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -target arm64-apple-ios18.0-simulator -g -module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator -F /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64 -c -j16 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F73-6cfe768891a92b912361537c460fe42b.sdkstatcache -output-file-map /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/BuxMuse-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/BuxMuse.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/BuxMuse_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-generated-files.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-own-target-headers.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-project-headers.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources-normal/arm64 -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/arm64 -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/BuxMuse-Swift.h -working-directory /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this -experimental-emit-module-separately -disable-cmo
+
+SwiftCompile normal arm64 Compiling\ SettingsModels.swift,\ AboutSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Models/SettingsModels.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/AboutSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Models/SettingsModels.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/AboutSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ SettingsBrain.swift,\ SettingsStore.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/SettingsBrain.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/SettingsStore.swift (in target 'BuxMuse' from project 'BuxMuse')
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/SettingsBrain.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/SettingsStore.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ AppearanceSettingsView.swift,\ BudgetSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/AppearanceSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/BudgetSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/AppearanceSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/BudgetSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ RootView.swift,\ KeychainHelper.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Core/App/RootView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/KeychainHelper.swift (in target 'BuxMuse' from project 'BuxMuse')
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Core/App/RootView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/KeychainHelper.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ FreelanceSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/FreelanceSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/FreelanceSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ SecuritySettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/SecuritySettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/SecuritySettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ Item+CoreDataClass.swift /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/CoreDataGenerated/BuxMuse/Item+CoreDataClass.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/CoreDataGenerated/BuxMuse/Item+CoreDataClass.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ RegionCurrencySettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/RegionCurrencySettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/RegionCurrencySettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ BuxMuseApp.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/BuxMuseApp.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/BuxMuseApp.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ Item+CoreDataProperties.swift /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/CoreDataGenerated/BuxMuse/Item+CoreDataProperties.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/CoreDataGenerated/BuxMuse/Item+CoreDataProperties.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ NotificationSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/NotificationSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/NotificationSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ DataSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/DataSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c -filelist /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/sources-1 -primary-file /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/DataSettingsView.swift -emit-dependencies-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/DataSettingsView.d -emit-const-values-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/DataSettingsView.swiftconstvalues -emit-reference-dependencies-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/DataSettingsView.swiftdeps -serialize-diagnostics-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/DataSettingsView.dia -emit-localized-strings -emit-localized-strings-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64 -target arm64-apple-ios18.0-simulator -module-can-import-version DeveloperToolsSupport 23.40.26 23.40.26 -module-can-import-version SwiftUI 7.5.3 7.5.3 -module-can-import-version UIKit 9126.5.5.2 9126.5.5 -disable-cross-import-overlay-search -swift-module-cross-import CoreData /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/CoreData.framework/Modules/CoreData.swiftcrossimport/CloudKit.swiftoverlay -swift-module-cross-import CoreData /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/CoreData.framework/Modules/CoreData.swiftcrossimport/CloudKit.swiftoverlay -swift-module-cross-import PhotosUI /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/PhotosUI.framework/Modules/PhotosUI.swiftcrossimport/SwiftUI.swiftoverlay -swift-module-cross-import PhotosUI /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/PhotosUI.framework/Modules/PhotosUI.swiftcrossimport/WidgetKit.swiftoverlay -swift-module-cross-import PhotosUI /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/PhotosUI.framework/Modules/PhotosUI.swiftcrossimport/SwiftUI.swiftoverlay -swift-module-cross-import PhotosUI /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/PhotosUI.framework/Modules/PhotosUI.swiftcrossimport/WidgetKit.swiftoverlay -swift-module-cross-import SwiftData /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/SwiftData.framework/Modules/SwiftData.swiftcrossimport/CoreData.swiftoverlay -swift-module-cross-import SwiftData /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/SwiftData.framework/Modules/SwiftData.swiftcrossimport/SwiftUI.swiftoverlay -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libPreviewsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#PreviewsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftDataMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftDataMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftUIMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftUIMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/BuxMuse-dependencies-2.json -debug-module-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/BuxMuse.swiftmodule -Xllvm -aarch64-use-tbi -enable-objc-interop -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -I /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator -F /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=5 -module-cache-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -profile-generate -profile-coverage-mapping -swift-version 5 -Onone -D DEBUG -serialize-debugging-options -const-gather-protocols-file /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/BuxMuse_const_extract_protocols.json -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -default-isolation\=MainActor -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/rodolfo/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -working-directory -Xcc /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this -enable-anonymous-context-mangled-names -file-compilation-dir /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F73-6cfe768891a92b912361537c460fe42b.sdkstatcache -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/swift-overrides.hmap -Xcc -iquote -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-generated-files.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-own-target-headers.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/BuxMuse-project-headers.hmap -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources-normal/arm64 -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/arm64 -Xcc -I/Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name BuxMuse -frontend-parseable-output -disable-clang-spi -clang-target arm64-apple-ios26.5-simulator -target-sdk-version 26.5 -target-sdk-name iphonesimulator26.5 -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -o /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/DataSettingsView.o -index-unit-output-path /BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/Objects-normal/arm64/DataSettingsView.o -index-store-path /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Index.noindex/DataStore -index-system-modules
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/DataSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:115:71: error: cannot find type 'FetchDescriptor' in scope
+            let expenses = (try? persistence.context.fetch(.init() as FetchDescriptor<ExpenseEntity>)) ?? []
+                                                                      ^~~~~~~~~~~~~~~
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:115:54: error: type 'Any' cannot conform to 'PersistentModel'
+            let expenses = (try? persistence.context.fetch(.init() as FetchDescriptor<ExpenseEntity>)) ?? []
+                                                     ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:115:54: note: only concrete types such as structs, enums and classes can conform to protocols
+            let expenses = (try? persistence.context.fetch(.init() as FetchDescriptor<ExpenseEntity>)) ?? []
+                                                     ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:115:54: note: required by instance method 'fetch' where 'T' = 'Any'
+            let expenses = (try? persistence.context.fetch(.init() as FetchDescriptor<ExpenseEntity>)) ?? []
+                                                     ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:116:68: error: cannot find type 'FetchDescriptor' in scope
+            let goals = (try? persistence.context.fetch(.init() as FetchDescriptor<GoalEntity>)) ?? []
+                                                                   ^~~~~~~~~~~~~~~
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:116:51: error: type 'Any' cannot conform to 'PersistentModel'
+            let goals = (try? persistence.context.fetch(.init() as FetchDescriptor<GoalEntity>)) ?? []
+                                                  ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:116:51: note: only concrete types such as structs, enums and classes can conform to protocols
+            let goals = (try? persistence.context.fetch(.init() as FetchDescriptor<GoalEntity>)) ?? []
+                                                  ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:116:51: note: required by instance method 'fetch' where 'T' = 'Any'
+            let goals = (try? persistence.context.fetch(.init() as FetchDescriptor<GoalEntity>)) ?? []
+                                                  ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:192:58: error: cannot find 'FetchDescriptor' in scope
+            let expenses = try persistence.context.fetch(FetchDescriptor<ExpenseEntity>())
+                                                         ^~~~~~~~~~~~~~~
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:192:52: error: generic parameter 'T' could not be inferred
+            let expenses = try persistence.context.fetch(FetchDescriptor<ExpenseEntity>())
+                                                   ^
+SwiftData.ModelContext.fetch:2:13: note: in call to function 'fetch'
+public func fetch<T>(_ descriptor: FetchDescriptor<T>) throws -> [T] where T : PersistentModel}
+            ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:195:55: error: cannot find 'FetchDescriptor' in scope
+            let goals = try persistence.context.fetch(FetchDescriptor<GoalEntity>())
+                                                      ^~~~~~~~~~~~~~~
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:195:49: error: generic parameter 'T' could not be inferred
+            let goals = try persistence.context.fetch(FetchDescriptor<GoalEntity>())
+                                                ^
+SwiftData.ModelContext.fetch:2:13: note: in call to function 'fetch'
+public func fetch<T>(_ descriptor: FetchDescriptor<T>) throws -> [T] where T : PersistentModel}
+            ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:202:54: error: 'saveQueue' is inaccessible due to 'private' protection level
+            let freelanceURL = FreelanceStore.shared.saveQueue.sync {
+                                                     ^~~~~~~~~
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/FreelanceHub/Core/FreelanceStore.swift:25:17: note: 'saveQueue' declared here
+    private let saveQueue = DispatchQueue(label: "com.buxmuse.freelance.save", qos: .utility)
+                ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:198:37: error: instance method 'save()' is not available due to missing import of defining module 'SwiftData'
+            try persistence.context.save()
+                                    ^
+/Users/rodolfo/Documents/My Apps/Tired of this/BuxMuse/Features/Settings/Views/DataSettingsView.swift:9:1: note: add import of module 'SwiftData'
+
+^
+
+SwiftCompile normal arm64 Compiling\ SettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/SettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/SettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ BuxMuse+CoreDataModel.swift /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/CoreDataGenerated/BuxMuse/BuxMuse+CoreDataModel.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/CoreDataGenerated/BuxMuse/BuxMuse+CoreDataModel.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal arm64 Compiling\ ProfileSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/ProfileSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal arm64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/ProfileSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ BuxMuse (in target 'BuxMuse' from project 'BuxMuse')
+EmitSwiftModule normal arm64 (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftEmitModule normal x86_64 Emitting\ module\ for\ BuxMuse (in target 'BuxMuse' from project 'BuxMuse')
+
+EmitSwiftModule normal x86_64 (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling BuxMuse+CoreDataModel.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 Compiling\ BuxMuseApp.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/BuxMuseApp.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/BuxMuseApp.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling Item+CoreDataClass.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 Compiling\ SettingsModels.swift,\ AboutSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Models/SettingsModels.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/AboutSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Models/SettingsModels.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal x86_64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/AboutSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling Item+CoreDataProperties.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 Compiling\ SettingsBrain.swift,\ SettingsStore.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/SettingsBrain.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/SettingsStore.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/SettingsBrain.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftCompile normal x86_64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Core/SettingsStore.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling BuxMuseApp.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 Compiling\ DataSettingsView.swift /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/DataSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this/BuxMuse/Features/Settings/Views/DataSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling RegionCurrencySettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 Compiling\ GeneratedAssetSymbols.swift /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'BuxMuse' from project 'BuxMuse')
+
+SwiftCompile normal x86_64 /Users/rodolfo/Library/Developer/Xcode/DerivedData/BuxMuse-fqpprjvxhpmtbhbugqyeoyuhnzqq/Build/Intermediates.noindex/BuxMuse.build/Debug-iphonesimulator/BuxMuse.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'BuxMuse' from project 'BuxMuse')
+    cd /Users/rodolfo/Documents/My\ Apps/Tired\ of\ this
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling NotificationSettingsView.swift (in target 'BuxMuse' from project 'BuxMuse')
+

@@ -15,6 +15,7 @@ struct BuxMuseApp: App {
             RootView()
                 .modelContainer(container.persistence.container)
                 .environmentObject(container)
+                .environmentObject(SettingsStore.shared)
                 .environmentObject(container.brain)
                 .environmentObject(container.persistence)
                 .environmentObject(container.themeManager)
@@ -26,6 +27,7 @@ struct BuxMuseApp: App {
                 .environmentObject(container.goalsSheetCoordinator)
                 .environmentObject(container.insightsEngine)
                 .environmentObject(container.insightsViewModel)
+                .environmentObject(container.freelanceStore)
                 .task {
                     _ = await ExpenseRenewalReminderScheduler.requestAuthorizationIfNeeded()
                 }

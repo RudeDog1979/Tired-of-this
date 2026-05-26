@@ -1,9 +1,10 @@
 //
 //  SettingsView.swift
 //  BuxMuse
+//
 //  Features/Settings/
 //
-//  Settings screen with the new Appearance Sheet sub-menu.
+//  Unified premium Settings Cockpit managing identity, budgets, security, and data.
 //
 
 import SwiftUI
@@ -12,108 +13,137 @@ struct SettingsView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
-    @State private var showAppearanceSheet = false
-    @State private var showLocalizationSheet = false
+    @ObservedObject private var store = SettingsStore.shared
 
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
     }
+    
     var cardColor: Color {
         colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 28) {
+        NavigationStack {
+            ZStack {
+                bgColor.ignoresSafeArea()
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 28) {
 
-                // Header
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Settings")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
-                    Text("Personalize your BuxMuse experience")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
-                }
-                .padding(.top, 64)
-
-                // Settings Rows Section (Clean modular layout)
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("GENERAL")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
-                        .kerning(1.2)
-
-                    VStack(spacing: 0) {
-                        // Appearance & Themes Sheet Trigger (Tactile)
-                        Button(action: { showAppearanceSheet = true }) {
-                            SettingsRow(
-                                icon: "paintpalette.fill",
-                                label: "Appearance & Themes",
-                                color: themeManager.current.accentColor,
-                                trailingText: themeManager.current.name
-                            )
+                        // Premium Header
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Settings")
+                                .font(.system(size: 32, weight: .bold))
+                                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            
+                            // User display name welcome message
+                            Text(store.userDisplayName != nil ? "Welcome, \(store.userDisplayName!)" : "Personalize your BuxMuse experience")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
                         }
-                        .buttonStyle(BuxMicroShrinkStyle())
+                        .padding(.top, 24)
 
-                        Divider().opacity(0.08)
+                        // Generate layout dynamically from SettingsBrain display structs
+                        let display = SettingsBrain.generateOverview(
+                            store: store,
+                            currentThemeName: themeManager.current.name,
+                            activeCurrencyCode: appSettingsManager.selectedCurrency.id,
+                            activeCurrencyFlag: appSettingsManager.selectedCurrency.flag
+                        )
+                        
+                        ForEach(display.sections) { section in
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text(section.title)
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                    .kerning(1.2)
+                                    .padding(.leading, 4)
 
-                        SettingsRow(icon: "bell.fill", label: "Notifications", color: .orange)
-                        Divider().opacity(0.08)
-                        SettingsRow(icon: "lock.fill", label: "Privacy & Security", color: themeManager.current.accentColor)
-                        Divider().opacity(0.08)
-                        SettingsRow(icon: "questionmark.circle.fill", label: "Help & Support", color: .teal)
-                    }
-                    .background(cardColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                    )
-                }
-
-                // LOCALIZATION & PREFERENCES
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("LOCALIZATION & PREFERENCES")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
-                        .kerning(1.2)
-
-                    VStack(spacing: 0) {
-                        Button(action: { showLocalizationSheet = true }) {
-                            SettingsRow(
-                                icon: "globe",
-                                label: "Currency & Region",
-                                color: .purple,
-                                trailingText: "\(appSettingsManager.selectedCurrency.flag) \(appSettingsManager.selectedCurrency.id)"
-                            )
+                                VStack(spacing: 0) {
+                                    ForEach(Array(section.rows.enumerated()), id: \.element.id) { index, row in
+                                        NavigationLink(value: row.destination) {
+                                            SettingsRow(
+                                                icon: row.iconName,
+                                                label: row.title,
+                                                color: Color(hex: row.hexColor),
+                                                trailingText: row.trailingText
+                                            )
+                                        }
+                                        .buttonStyle(.plain)
+                                        
+                                        if index < section.rows.count - 1 {
+                                            Divider().opacity(0.08)
+                                        }
+                                    }
+                                }
+                                .background(cardColor)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
+                                )
+                            }
                         }
-                        .buttonStyle(BuxMicroShrinkStyle())
+
+                        Spacer(minLength: 80)
                     }
-                    .background(cardColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                    )
+                    .buxScreenContentMargins()
                 }
-                Spacer(minLength: 100)
+                .buxReportsContainerWidth()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .buxScreenContentMargins()
+            .navigationDestination(for: SettingsDestinationType.self) { destination in
+                switch destination {
+                case .profile:
+                    ProfileSettingsView()
+                case .appearance:
+                    AppearanceSettingsView()
+                case .regionCurrency:
+                    RegionCurrencySettingsView()
+                case .budgets:
+                    BudgetSettingsView()
+                case .freelance:
+                    FreelanceSettingsView()
+                case .notifications:
+                    NotificationSettingsView()
+                case .security:
+                    SecuritySettingsView()
+                case .data:
+                    DataSettingsView()
+                case .about:
+                    AboutSettingsView()
+                }
+            }
         }
-        .buxReportsContainerWidth()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(bgColor.ignoresSafeArea())
-        .sheet(isPresented: $showAppearanceSheet) {
-            AppearanceThemePickerView()
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+    }
+}
+
+// MARK: - Color Hex Extension
+
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 1)
         }
-        .sheet(isPresented: $showLocalizationSheet) {
-            CurrencyRegionPickerView()
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 }
 
@@ -157,10 +187,11 @@ struct SettingsRow: View {
         }
         .padding(.horizontal, BuxLayout.section)
         .padding(.vertical, 14)
+        .contentShape(Rectangle())
     }
 }
 
-// MARK: - Appearance Theme Picker View (Bottom Sheet Grid Panel)
+// MARK: - Appearance Theme Picker View (Bottom Sheet Grid Panel) - PRESERVED UNCHANGED
 
 struct AppearanceThemePickerView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -178,7 +209,6 @@ struct AppearanceThemePickerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header bar inside sheet
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Appearance")
@@ -206,7 +236,6 @@ struct AppearanceThemePickerView: View {
             .padding(.top, 24)
             .padding(.bottom, 20)
             
-            // Grid of 8 Beautiful Themes
             ScrollView(showsIndicators: false) {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(AppTheme.all) { theme in
@@ -224,7 +253,7 @@ struct AppearanceThemePickerView: View {
     }
 }
 
-// MARK: - Theme Swatch Card (Grid card layout)
+// MARK: - Theme Swatch Card (Grid card layout) - PRESERVED UNCHANGED
 
 struct ThemeSwatchCard: View {
     @Environment(\.colorScheme) var colorScheme
@@ -235,7 +264,6 @@ struct ThemeSwatchCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 12) {
-                // Gradient preview sphere
                 ZStack {
                     Circle()
                         .fill(
@@ -291,7 +319,8 @@ struct ThemeSwatchCard: View {
     }
 }
 
-// MARK: - Currency Region Picker View (Frosted glass sheet selector)
+// MARK: - Currency Region Picker View (Frosted glass sheet selector) - PRESERVED UNCHANGED
+
 struct CurrencyRegionPickerView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var appSettingsManager: AppSettingsManager
@@ -318,7 +347,6 @@ struct CurrencyRegionPickerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header bar
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Currency & Region")
@@ -346,7 +374,6 @@ struct CurrencyRegionPickerView: View {
             .padding(.top, 24)
             .padding(.bottom, 20)
             
-            // Premium Search Bar
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : .black.opacity(0.4))
@@ -372,7 +399,6 @@ struct CurrencyRegionPickerView: View {
             .padding(.horizontal, BuxLayout.marginHorizontal)
             .padding(.bottom, 16)
             
-            // List of world currencies
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 12) {
                     if filteredCurrencies.isEmpty {
@@ -406,7 +432,8 @@ struct CurrencyRegionPickerView: View {
     }
 }
 
-// MARK: - Currency Row Card
+// MARK: - Currency Row Card - PRESERVED UNCHANGED
+
 struct CurrencyRowCard: View {
     @Environment(\.colorScheme) var colorScheme
     let currency: CurrencySetting

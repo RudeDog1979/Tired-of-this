@@ -71,6 +71,8 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
                     details[MerchantLogoEngine.normalizeMerchantName(merchant)] = detail
                 }
             }
+
+            BillingCycleAIEngine.appendUserDeclaredSubscriptions(to: &subs, details: &details, transactions: txs)
             
             let sortedSubs = subs.sorted(by: { abs($0.cost.value) > abs($1.cost.value) })
             

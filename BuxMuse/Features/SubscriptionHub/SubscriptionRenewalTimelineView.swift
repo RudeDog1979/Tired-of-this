@@ -28,18 +28,31 @@ struct SubscriptionRenewalTimelineView: View {
 
             if renewals.isEmpty {
                 emptyState
+            } else if renewals.count == 1 {
+                Button(action: { onSelect(renewals[0].merchantName) }) {
+                    renewalCard(for: renewals[0])
+                }
+                .buttonStyle(BuxMicroShrinkStyle())
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: BuxLayout.section) {
+                    HStack(spacing: 16) {
                         ForEach(renewals) { sub in
                             Button(action: { onSelect(sub.merchantName) }) {
                                 renewalCard(for: sub)
+                                    .containerRelativeFrame(.horizontal) { width, _ in
+                                        width - 40
+                                    }
                             }
                             .buttonStyle(BuxMicroShrinkStyle())
                         }
                     }
-                    .padding(.vertical, BuxLayout.tight)
+                    .scrollTargetLayout()
                 }
+                .scrollClipDisabled()
+                .scrollTargetBehavior(.viewAligned)
+                .safeAreaPadding(.horizontal, 20)
+                .safeAreaPadding(.vertical, 8)
+                .padding(.horizontal, -BuxLayout.marginHorizontal)
             }
         }
     }
@@ -52,38 +65,37 @@ struct SubscriptionRenewalTimelineView: View {
             Text("No upcoming renewals scheduled")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .frame(minHeight: SubscriptionHubStyle.timelineCardMinHeight)
         .padding(SubscriptionHubStyle.cardPadding)
         .subscriptionHubCard(cornerRadius: SubscriptionHubStyle.rowCardRadius)
     }
 
     private func renewalCard(for sub: SubscriptionInfo) -> some View {
-        VStack(alignment: .leading, spacing: BuxLayout.section) {
-            HStack(spacing: BuxLayout.section) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
                 AsyncMerchantLogoView(merchantName: sub.merchantName, size: 36)
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(sub.merchantName)
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
-                        .lineLimit(1)
+                        .multilineTextAlignment(.leading)
 
                     Text(sub.category.displayName)
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.gray)
-                        .lineLimit(1)
+                        .multilineTextAlignment(.leading)
                 }
-
-                Spacer(minLength: 0)
-
-                Text(appSettingsManager.format(sub.cost.value))
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            HStack {
+            Text(appSettingsManager.format(abs(sub.cost.value)))
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundColor(colorScheme == .dark ? .white : .black)
+
+            HStack(spacing: 6) {
                 Image(systemName: "clock.fill")
                     .font(.system(size: 12))
                     .foregroundColor(themeManager.current.accentColor)
@@ -91,22 +103,19 @@ struct SubscriptionRenewalTimelineView: View {
                 Text(Self.renewalDateFormatter.string(from: sub.nextRenewalDate))
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(colorScheme == .dark ? .white.opacity(0.6) : Color(red: 100/255, green: 110/255, blue: 130/255))
-                    .lineLimit(1)
-
-                Spacer(minLength: 0)
-
-                Text(sub.billingCycle.displayName)
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
-                    .padding(.horizontal, BuxLayout.tight)
-                    .padding(.vertical, 4)
-                    .background(themeManager.current.accentColor.opacity(0.12))
-                    .clipShape(Capsule())
+                    .multilineTextAlignment(.leading)
             }
+
+            Text(sub.billingCycle.displayName)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(themeManager.current.accentColor)
+                .padding(.horizontal, BuxLayout.tight)
+                .padding(.vertical, 4)
+                .background(themeManager.current.accentColor.opacity(0.12))
+                .clipShape(Capsule())
         }
         .padding(SubscriptionHubStyle.cardPadding)
-        .frame(width: SubscriptionHubStyle.timelineCardWidth)
-        .frame(minHeight: SubscriptionHubStyle.timelineCardMinHeight, alignment: .top)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .subscriptionHubCard(cornerRadius: SubscriptionHubStyle.rowCardRadius)
     }
 }

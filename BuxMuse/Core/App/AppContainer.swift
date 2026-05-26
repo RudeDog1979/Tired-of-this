@@ -23,9 +23,11 @@ final class AppContainer: ObservableObject {
     public let goalsSheetCoordinator: GoalsSheetCoordinator
     public let insightsEngine: InsightsEngine
     public let insightsViewModel: InsightsViewModel
+    public let freelanceStore: FreelanceStore
 
     init() {
         persistence = PersistenceController.shared
+        freelanceStore = FreelanceStore.shared
         themeManager = ThemeManager()
         appSettingsManager = AppSettingsManager()
         navigationCoordinator = NavigationCoordinator()
@@ -97,6 +99,13 @@ final class AppContainer: ObservableObject {
                     navigation: self.navigationCoordinator,
                     appSettings: self.appSettingsManager
                 )
+            }
+            .store(in: &cancellables)
+
+        SettingsStore.shared.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.brain.refreshExpenses()
             }
             .store(in: &cancellables)
     }

@@ -13,13 +13,21 @@ public struct DashboardSnapshot: Equatable {
     public var subscriptionCount: Int
     public var subscriptionHealthScore: Int
     public var currencyCode: String
+    public var totalBalance: Decimal
+    public var activeBudgetName: String?
+    public var activeBudgetLimit: Decimal
+    public var activeBudgetSpent: Decimal
 
     public static let empty = DashboardSnapshot(
         recentTransactions: [],
         subscriptionMonthlyTotal: 0,
         subscriptionCount: 0,
         subscriptionHealthScore: 100,
-        currencyCode: "USD"
+        currencyCode: "USD",
+        totalBalance: 0,
+        activeBudgetName: nil,
+        activeBudgetLimit: 0,
+        activeBudgetSpent: 0
     )
 }
 

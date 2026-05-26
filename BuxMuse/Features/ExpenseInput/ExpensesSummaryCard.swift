@@ -52,10 +52,8 @@ struct ExpensesSummaryCard: View {
         .frame(
             maxWidth: .infinity,
             minHeight: BuxLayout.expenseHeroSummaryHeight,
-            maxHeight: BuxLayout.expenseHeroSummaryHeight,
             alignment: .topLeading
         )
-        .clipShape(RoundedRectangle(cornerRadius: BuxLayout.expenseHeroCardCornerRadius, style: .continuous))
         .onAppear {
             withAnimation(.spring(response: 0.55, dampingFraction: 0.84)) {
                 isVisible = true

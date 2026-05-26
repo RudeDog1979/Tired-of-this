@@ -18,7 +18,8 @@ struct RootView: View {
     @EnvironmentObject private var goalsViewModel: GoalsViewModel
     @EnvironmentObject private var insightsViewModel: InsightsViewModel
     @EnvironmentObject private var brain: BuxMuseBrain
-
+    @Environment(\.scenePhase) private var scenePhase
+    @ObservedObject private var settingsStore = SettingsStore.shared
     @Namespace private var transactionNamespace
 
     var body: some View {
@@ -59,6 +60,11 @@ struct RootView: View {
         .onChange(of: navigationCoordinator.isBalanceVisible) { _, _ in
             brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
         }
+        .onChange(of: settingsStore.freelanceEnabled) { _, enabled in
+            if !enabled && navigationCoordinator.selectedTab == .freelance {
+                navigationCoordinator.selectedTab = .home
+            }
+        }
     }
 
     @ViewBuilder
@@ -81,8 +87,12 @@ struct RootView: View {
                 ExpenseTabView()
             }
 
-            Tab("Freelance", systemImage: "briefcase", value: AppTab.freelance) {
-                PlaceholderTabView(title: "Freelance", icon: "briefcase.fill")
+            if settingsStore.freelanceEnabled {
+                Tab("Freelance", systemImage: "briefcase", value: AppTab.freelance) {
+                    FreelanceHubView()
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                }
             }
 
             Tab("Settings", systemImage: "gearshape", value: AppTab.settings) {
@@ -156,6 +166,24 @@ struct RootView: View {
                 removal: .move(edge: .bottom).combined(with: .opacity)
             ))
             .zIndex(10)
+        }
+
+        if settingsStore.privacyBlurInAppSwitching && (scenePhase == .inactive || scenePhase == .background) {
+            Color.clear
+                .background(.ultraThickMaterial)
+                .ignoresSafeArea()
+                .overlay(
+                    VStack(spacing: 16) {
+                        Image(systemName: "lock.shield.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(themeManager.current.accentColor)
+                        Text("BuxMuse Vault Active")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                    }
+                )
+                .transition(.opacity)
+                .zIndex(999)
         }
     }
 }

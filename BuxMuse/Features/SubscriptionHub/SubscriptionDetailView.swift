@@ -25,15 +25,9 @@ struct SubscriptionDetailView: View {
     
     var body: some View {
         ZStack {
-            // Dark Backdrop
-            Color.black.opacity(colorScheme == .dark ? 0.6 : 0.4)
+            themeManager.screenBackground(for: colorScheme)
                 .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
-                        isPresented = false
-                    }
-                }
-            
+
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     // Header Row with Close
@@ -298,10 +292,6 @@ struct SubscriptionDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            (colorScheme == .dark ? Color(red: 13/255, green: 14/255, blue: 18/255) : Color(red: 242/255, green: 244/255, blue: 247/255))
-                .ignoresSafeArea()
-        )
     }
     
     private func formatDate(_ date: Date) -> String {

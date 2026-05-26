@@ -70,7 +70,7 @@ public final class BuxMuseBrain: ObservableObject {
 
             let prefs = try persistence.loadPreferences()
             navigation.restore(
-                tab: AppTab.from(storageKey: prefs.selectedTabRaw),
+                tab: .home, // Force HOME tab as the landing page every time the app opens
                 activeCategory: prefs.activeCategoryPill,
                 isBalanceVisible: prefs.isBalanceVisible
             )
@@ -295,6 +295,60 @@ public final class BuxMuseBrain: ObservableObject {
         let monthly = subs.reduce(Decimal(0)) { $0 + abs($1.cost.value) }
         let health = Self.subscriptionHealthScore(for: subs)
 
+        let totalBalance = txs.reduce(Decimal(0)) { $0 + $1.amount.value }
+        
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
+        let thisMonthTxs = txs.filter { $0.date >= startOfMonth }
+        
+        let budgetingMode = SettingsStore.shared.budgetingMode
+        let activeBudgetName: String?
+        let activeBudgetLimit: Decimal
+        let activeBudgetSpent: Decimal
+        
+        switch budgetingMode {
+        case .simple:
+            activeBudgetName = "Simple Monthly Budget"
+            activeBudgetLimit = SettingsStore.shared.simpleBudgetLimit
+            activeBudgetSpent = thisMonthTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+            
+        case .envelope:
+            let activeProfile = SettingsStore.shared.customBudgetProfiles.first(where: { $0.isActive })
+            activeBudgetName = activeProfile?.name
+            activeBudgetLimit = activeProfile?.targetAmount ?? 0
+            
+            var spent: Decimal = 0
+            if let activeProfile {
+                for category in activeProfile.categories {
+                    let categorySpent = thisMonthTxs
+                        .filter { tx in
+                            tx.category.displayName.localizedCaseInsensitiveCompare(category.name) == .orderedSame
+                        }
+                        .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+                    spent += categorySpent
+                }
+            }
+            activeBudgetSpent = spent
+            
+        case .custom:
+            let period = SettingsStore.shared.customBudgetPeriod
+            activeBudgetName = "Custom \(period.rawValue) Budget"
+            activeBudgetLimit = SettingsStore.shared.customBudgetLimit
+            
+            let startOfPeriod: Date
+            switch period {
+            case .weekly:
+                startOfPeriod = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) ?? now
+            case .monthly:
+                startOfPeriod = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
+            case .custom: // Treat custom as daily pacing
+                startOfPeriod = calendar.startOfDay(for: now)
+            }
+            let periodTxs = txs.filter { $0.date >= startOfPeriod }
+            activeBudgetSpent = periodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+        }
+
         let hubSnapshot = SubscriptionHubSnapshot(
             subscriptions: subs,
             totalMonthly: monthly,
@@ -306,7 +360,11 @@ public final class BuxMuseBrain: ObservableObject {
             subscriptionMonthlyTotal: monthly,
             subscriptionCount: subs.count,
             subscriptionHealthScore: health,
-            currencyCode: currency
+            currencyCode: currency,
+            totalBalance: totalBalance,
+            activeBudgetName: activeBudgetName,
+            activeBudgetLimit: activeBudgetLimit,
+            activeBudgetSpent: activeBudgetSpent
         )
 
         computeQueue.async { [weak self] in
@@ -467,6 +525,7 @@ public final class BuxMuseBrain: ObservableObject {
         let header = ExpensesHeaderDisplay(
             totalSpent: totalSpent,
             changeVsLastMonth: change,
+            monthlyTransactionCount: thisMonthRecords.count,
             biggestCategory: biggestCategory,
             biggestMerchant: biggestMerchant,
             sparklinePoints: sparkline,

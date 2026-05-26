@@ -20,6 +20,8 @@ struct DashboardView: View {
     @EnvironmentObject var goalsSheetCoordinator: GoalsSheetCoordinator
     @EnvironmentObject var insightsViewModel: InsightsViewModel
 
+    @ObservedObject private var settingsStore = SettingsStore.shared
+
     var transactionNamespace: Namespace.ID
 
     // Category pill horizontal slider expand state
@@ -122,7 +124,7 @@ struct DashboardView: View {
                                 HStack {
                                     MitchellSantosAvatarView(size: collapseValue(start: 44, end: 32))
                                     
-                                    Text("Mitchell Santos")
+                                    Text(settingsStore.userDisplayName ?? "Mitchell Santos")
                                         .font(.system(size: collapseValue(start: 15, end: 13), weight: .bold))
                                         .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
                                         .opacity(max(0, 1.0 + (scrollOffset / 140.0)))
@@ -151,7 +153,20 @@ struct DashboardView: View {
                                 // Balance Section collapses smoothly
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack(spacing: 6) {
-                                        Text("Total balance")
+                                        let balanceTitle: String = {
+                                            switch settingsStore.budgetingMode {
+                                            case .simple:
+                                                return "Remaining simple budget"
+                                            case .envelope, .custom:
+                                                if dashSnapshot.activeBudgetName != nil {
+                                                    return "Remaining budget"
+                                                } else {
+                                                    return "Total balance (no active budget)"
+                                                }
+                                            }
+                                        }()
+                                        
+                                        Text(balanceTitle)
                                             .font(.system(size: 13, weight: .medium))
                                             .foregroundColor(colorScheme == .dark ? .white.opacity(0.6) : Color(red: 100/255, green: 110/255, blue: 130/255))
                                             .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
@@ -166,7 +181,20 @@ struct DashboardView: View {
                                         .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
                                     }
                                     
-                                    Text(navigationCoordinator.isBalanceVisible ? appSettingsManager.format(Decimal(72829.62)) : "\(appSettingsManager.selectedCurrency.symbol) ••••••••")
+                                    let balanceToFormat: Decimal = {
+                                        switch settingsStore.budgetingMode {
+                                        case .simple:
+                                            return dashSnapshot.activeBudgetLimit - dashSnapshot.activeBudgetSpent
+                                        case .envelope, .custom:
+                                            if dashSnapshot.activeBudgetName != nil {
+                                                return dashSnapshot.activeBudgetLimit - dashSnapshot.activeBudgetSpent
+                                            } else {
+                                                return dashSnapshot.totalBalance
+                                            }
+                                        }
+                                    }()
+                                    
+                                    Text(navigationCoordinator.isBalanceVisible ? appSettingsManager.format(balanceToFormat) : "\(appSettingsManager.selectedCurrency.symbol) ••••••••")
                                         .font(.system(size: collapseValue(start: 38, end: 24), weight: .semibold, design: .rounded))
                                         .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
                                         .offset(y: collapseValue(start: 0, end: -10))
@@ -321,6 +349,100 @@ struct DashboardView: View {
                             y: themeManager.heroCardShadow(for: colorScheme).y
                         )
 
+                        if true {
+                            VStack(alignment: .leading, spacing: 12) {
+                                if let budgetName = dashSnapshot.activeBudgetName {
+                                    let limit = dashSnapshot.activeBudgetLimit
+                                    let spent = dashSnapshot.activeBudgetSpent
+                                    let remaining = limit - spent
+                                    let progress = limit > 0 ? min(1.0, max(0.0, Double(NSDecimalNumber(decimal: spent).doubleValue / NSDecimalNumber(decimal: limit).doubleValue))) : 0.0
+                                    
+                                    Button(action: {
+                                        withAnimation {
+                                            navigationCoordinator.selectedTab = .settings
+                                        }
+                                    }) {
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            HStack {
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text("ACTIVE BUDGET: \(budgetName.uppercased())")
+                                                        .font(.system(size: 11, weight: .bold))
+                                                        .foregroundColor(themeManager.current.accentColor)
+                                                        .kerning(1.1)
+                                                    
+                                                    Text("\(appSettingsManager.format(remaining)) left of \(appSettingsManager.format(limit))")
+                                                        .font(.system(size: 16, weight: .bold))
+                                                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                Text("\(Int(progress * 100))% spent")
+                                                    .font(.system(size: 12, weight: .bold))
+                                                    .foregroundColor(progress > 0.9 ? .red : .gray)
+                                            }
+                                            
+                                            // Progress Bar
+                                            GeometryReader { geometry in
+                                                ZStack(alignment: .leading) {
+                                                    RoundedRectangle(cornerRadius: 4)
+                                                        .fill(colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.05))
+                                                        .frame(height: 8)
+                                                    
+                                                    RoundedRectangle(cornerRadius: 4)
+                                                        .fill(LinearGradient(
+                                                            colors: progress > 0.9 ? [.red, .orange] : [themeManager.current.accentColor, themeManager.current.accentColor.opacity(0.7)],
+                                                            startPoint: .leading,
+                                                            endPoint: .trailing
+                                                        ))
+                                                        .frame(width: geometry.size.width * CGFloat(progress), height: 8)
+                                                }
+                                            }
+                                            .frame(height: 8)
+                                        }
+                                        .padding(16)
+                                        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
+                                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                                        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 24)
+                                    }
+                                    .buttonStyle(BuxMicroShrinkStyle())
+                                } else {
+                                    // Empty state: No active budget profile
+                                    Button(action: {
+                                        withAnimation {
+                                            navigationCoordinator.selectedTab = .settings
+                                        }
+                                    }) {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            HStack {
+                                                Image(systemName: "chart.pie.fill")
+                                                    .foregroundColor(themeManager.current.accentColor)
+                                                Text("No Active Budget Profile")
+                                                    .font(.system(size: 13, weight: .bold))
+                                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                                Spacer()
+                                                Image(systemName: "chevron.right")
+                                                    .font(.system(size: 12, weight: .bold))
+                                                    .foregroundColor(.gray)
+                                            }
+                                            
+                                            Text("You have enabled \(settingsStore.budgetingMode.rawValue) budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.")
+                                                .font(.system(size: 11, weight: .medium))
+                                                .foregroundColor(.gray)
+                                                .multilineTextAlignment(.leading)
+                                        }
+                                        .padding(16)
+                                        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
+                                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                                        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 24)
+                                    }
+                                    .buttonStyle(BuxMicroShrinkStyle())
+                                }
+                            }
+                            .padding(.horizontal, BuxLayout.marginHorizontal)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+
                         CategoryPillBar(
                             activeCategory: $navigationCoordinator.activeCategoryPill,
                             isExpanded: $isPillSectionExpanded
@@ -330,24 +452,27 @@ struct DashboardView: View {
                         // Category content — horizontal slide + bounce (original behavior)
                         ZStack(alignment: .topLeading) {
                             if navigationCoordinator.activeCategoryPill == "Expenses" {
-                                let totalMonthlySum = dashSnapshot.subscriptionMonthlyTotal
-                                let activeCount = dashSnapshot.subscriptionCount
-                                let computedHealth = dashSnapshot.subscriptionHealthScore
-                                
+                                let expenseHeader = brain.expenseInteractionSnapshot.header
+                                let monthlyTotal = Decimal(expenseHeader.totalSpent)
+                                let changeVsLast = expenseHeader.changeVsLastMonth
+                                let txnCount = expenseHeader.monthlyTransactionCount
+                                let changeFormatted = appSettingsManager.format(Decimal(abs(changeVsLast)))
+                                let changeTrend = changeVsLast >= 0 ? "+\(changeFormatted)" : "-\(changeFormatted)"
+                                let changeColor: Color = changeVsLast >= 0 ? .orange : .green
+
                                 HStack(alignment: .top, spacing: BuxLayout.section) {
-                                    // Subscription Monthly Cost Card
                                     Button(action: {
                                         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                                            navigationCoordinator.openSubscriptionHub()
+                                            navigationCoordinator.openExpensesTab()
                                         }
                                     }) {
                                         SubscriptionSummaryCardView(
-                                            title: "Monthly Subs",
-                                            cost: appSettingsManager.format(totalMonthlySum),
-                                            subtext: "Yearly: \(appSettingsManager.format(totalMonthlySum * 12))",
-                                            trendText: "AI Active",
-                                            trendColor: themeManager.current.accentColor,
-                                            icon: "arrow.triangle.2.circlepath",
+                                            title: "This Month",
+                                            cost: appSettingsManager.format(monthlyTotal),
+                                            subtext: expenseHeader.biggestCategory.map { "Top: \($0)" } ?? "All categories",
+                                            trendText: changeTrend,
+                                            trendColor: changeColor,
+                                            icon: "creditcard.fill",
                                             iconColor: themeManager.current.accentColor
                                         )
                                     }
@@ -361,21 +486,20 @@ struct DashboardView: View {
                                     .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
                                     .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                                     .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05), value: navigationCoordinator.isScreenLoaded)
-                                    
-                                    // Subscription Health / Count Card
+
                                     Button(action: {
                                         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                                            navigationCoordinator.openSubscriptionHub()
+                                            navigationCoordinator.openExpensesTab()
                                         }
                                     }) {
                                         SubscriptionSummaryCardView(
-                                            title: "Health Score",
-                                            cost: "\(activeCount) Active",
-                                            subtext: "Score: \(computedHealth)%",
-                                            trendText: "\(computedHealth)% Opt",
-                                            trendColor: computedHealth >= 80 ? .green : .orange,
-                                            icon: "heart.text.square.fill",
-                                            iconColor: computedHealth >= 80 ? .green : .orange
+                                            title: "Transactions",
+                                            cost: "\(txnCount) This Month",
+                                            subtext: expenseHeader.biggestMerchant.map { "Top: \($0)" } ?? "All merchants",
+                                            trendText: expenseHeader.microInsight ?? "On track",
+                                            trendColor: themeManager.current.accentColor,
+                                            icon: "list.bullet.rectangle.fill",
+                                            iconColor: themeManager.current.accentColor
                                         )
                                     }
                                     .buttonStyle(BuxmationPressCardStyle())
@@ -663,8 +787,9 @@ struct DashboardView: View {
                     .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.24), value: navigationCoordinator.isScreenLoaded)
                     .padding(.bottom, 120)
                 }
+                .padding(.horizontal, BuxLayout.marginHorizontal)
             }
-            .buxScrollContentMargins()
+            .scrollClipDisabled()
             .buxReportsContainerWidth()
             .coordinateSpace(name: "dashboard_scroll")
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
@@ -737,79 +862,91 @@ struct MitchellSantosAvatarView: View {
     var size: CGFloat = 44
     
     var body: some View {
-        ZStack {
-            // Circle background
-            Circle()
-                .fill(LinearGradient(
-                    colors: [Color(red: 224/255, green: 231/255, blue: 255/255), Color(red: 199/255, green: 210/255, blue: 254/255)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+        if let data = SettingsStore.shared.profileAvatarData, let img = UIImage(data: data) {
+            Image(uiImage: img)
+                .resizable()
+                .scaledToFill()
                 .frame(width: size, height: size)
-            
-            // Face skin
-            Circle()
-                .fill(Color(red: 245/255, green: 210/255, blue: 185/255))
-                .frame(width: size * 0.727, height: size * 0.727)
-                .offset(y: size * 0.022)
-            
-            // Hair (Purple)
-            Group {
-                Path { path in
-                    path.addArc(center: CGPoint(x: size * 0.5, y: size * 0.5), radius: size * 0.437, startAngle: .degrees(160), endAngle: .degrees(380), clockwise: false)
-                }
-                .fill(Color(red: 104/255, green: 58/255, blue: 180/255))
-                .frame(width: size * 0.727, height: size * 0.727)
-                .offset(y: -size * 0.09)
-                
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+                )
+        } else {
+            ZStack {
+                // Circle background
                 Circle()
+                    .fill(LinearGradient(
+                        colors: [Color(red: 224/255, green: 231/255, blue: 255/255), Color(red: 199/255, green: 210/255, blue: 254/255)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(width: size, height: size)
+                
+                // Face skin
+                Circle()
+                    .fill(Color(red: 245/255, green: 210/255, blue: 185/255))
+                    .frame(width: size * 0.727, height: size * 0.727)
+                    .offset(y: size * 0.022)
+                
+                // Hair (Purple)
+                Group {
+                    Path { path in
+                        path.addArc(center: CGPoint(x: size * 0.5, y: size * 0.5), radius: size * 0.437, startAngle: .degrees(160), endAngle: .degrees(380), clockwise: false)
+                    }
                     .fill(Color(red: 104/255, green: 58/255, blue: 180/255))
-                    .frame(width: size * 0.318, height: size * 0.318)
-                    .offset(x: -size * 0.18, y: -size * 0.22)
-            }
-            
-            // Glasses (Black round rims)
-            HStack(spacing: size * 0.045) {
-                Circle()
-                    .stroke(Color.black, lineWidth: size * 0.045)
-                    .frame(width: size * 0.204, height: size * 0.204)
+                    .frame(width: size * 0.727, height: size * 0.727)
+                    .offset(y: -size * 0.09)
+                    
+                    Circle()
+                        .fill(Color(red: 104/255, green: 58/255, blue: 180/255))
+                        .frame(width: size * 0.318, height: size * 0.318)
+                        .offset(x: -size * 0.18, y: -size * 0.22)
+                }
                 
-                Rectangle()
-                    .fill(Color.black)
-                    .frame(width: size * 0.068, height: size * 0.045)
-                    .offset(y: -size * 0.022)
+                // Glasses (Black round rims)
+                HStack(spacing: size * 0.045) {
+                    Circle()
+                        .stroke(Color.black, lineWidth: size * 0.045)
+                        .frame(width: size * 0.204, height: size * 0.204)
+                    
+                    Rectangle()
+                        .fill(Color.black)
+                        .frame(width: size * 0.068, height: size * 0.045)
+                        .offset(y: -size * 0.022)
+                    
+                    Circle()
+                        .stroke(Color.black, lineWidth: size * 0.045)
+                        .frame(width: size * 0.204, height: size * 0.204)
+                }
+                .offset(y: -size * 0.022)
                 
-                Circle()
-                    .stroke(Color.black, lineWidth: size * 0.045)
-                    .frame(width: size * 0.204, height: size * 0.204)
-            }
-            .offset(y: -size * 0.022)
-            
-            // Eyes inside glasses
-            HStack(spacing: size * 0.18) {
-                Circle()
-                    .fill(Color.black)
-                    .frame(width: size * 0.056, height: size * 0.056)
+                // Eyes inside glasses
+                HStack(spacing: size * 0.18) {
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: size * 0.056, height: size * 0.056)
+                    
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: size * 0.056, height: size * 0.056)
+                }
+                .offset(y: -size * 0.022)
                 
+                // Smile/Mouth
+                Path { path in
+                    path.addArc(center: CGPoint(x: size * 0.25, y: size * 0.125), radius: size * 0.187, startAngle: .degrees(10), endAngle: .degrees(170), clockwise: false)
+                }
+                .stroke(Color.black, lineWidth: size * 0.034)
+                .frame(width: size * 0.5, height: size * 0.25)
+                .offset(y: size * 0.136)
+            }
+            .frame(width: size, height: size)
+            .overlay(
                 Circle()
-                    .fill(Color.black)
-                    .frame(width: size * 0.056, height: size * 0.056)
-            }
-            .offset(y: -size * 0.022)
-            
-            // Smile/Mouth
-            Path { path in
-                path.addArc(center: CGPoint(x: size * 0.25, y: size * 0.125), radius: size * 0.187, startAngle: .degrees(10), endAngle: .degrees(170), clockwise: false)
-            }
-            .stroke(Color.black, lineWidth: size * 0.034)
-            .frame(width: size * 0.5, height: size * 0.25)
-            .offset(y: size * 0.136)
+                    .stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+            )
         }
-        .frame(width: size, height: size)
-        .overlay(
-            Circle()
-                .stroke(Color.white.opacity(0.8), lineWidth: 1.5)
-        )
     }
 }
 

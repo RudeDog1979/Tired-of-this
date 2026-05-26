@@ -49,14 +49,36 @@ public struct Transaction: Identifiable, Codable, Equatable {
     public let merchantName: String
     public let category: TransactionCategory
     public let notes: String?
-    
-    public init(id: UUID = UUID(), date: Date, amount: MoneyAmount, merchantName: String, category: TransactionCategory, notes: String? = nil) {
+    public let isSubscriptionLike: Bool
+    public let isTrial: Bool
+    public let nextExpectedDate: Date?
+    public let subscriptionStartDate: Date?
+    public let trialEndDate: Date?
+
+    public init(
+        id: UUID = UUID(),
+        date: Date,
+        amount: MoneyAmount,
+        merchantName: String,
+        category: TransactionCategory,
+        notes: String? = nil,
+        isSubscriptionLike: Bool = false,
+        isTrial: Bool = false,
+        nextExpectedDate: Date? = nil,
+        subscriptionStartDate: Date? = nil,
+        trialEndDate: Date? = nil
+    ) {
         self.id = id
         self.date = date
         self.amount = amount
         self.merchantName = merchantName
         self.category = category
         self.notes = notes
+        self.isSubscriptionLike = isSubscriptionLike
+        self.isTrial = isTrial
+        self.nextExpectedDate = nextExpectedDate
+        self.subscriptionStartDate = subscriptionStartDate
+        self.trialEndDate = trialEndDate
     }
 }
 

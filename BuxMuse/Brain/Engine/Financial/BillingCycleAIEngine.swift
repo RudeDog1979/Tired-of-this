@@ -170,7 +170,61 @@ public struct BillingCycleAIEngine {
             risks: risks
         )
     }
-    
+
+    /// Single user-declared subscription (no recurring history required).
+    public static func subscriptionFromUserDeclaration(_ transaction: Transaction) -> SubscriptionInfo? {
+        guard transaction.isSubscriptionLike || transaction.isTrial else { return nil }
+
+        let merchant = transaction.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !merchant.isEmpty else { return nil }
+
+        let nextRenewal: Date
+        if transaction.isTrial, let trialEnd = transaction.trialEndDate {
+            nextRenewal = trialEnd
+        } else if let next = transaction.nextExpectedDate {
+            nextRenewal = next
+        } else if let start = transaction.subscriptionStartDate {
+            nextRenewal = Calendar.current.date(byAdding: .month, value: 1, to: start) ?? transaction.date
+        } else {
+            nextRenewal = Calendar.current.date(byAdding: .month, value: 1, to: transaction.date) ?? transaction.date
+        }
+
+        let cost: MoneyAmount
+        if transaction.amount.value < 0 {
+            cost = transaction.amount
+        } else {
+            cost = MoneyAmount(value: -abs(transaction.amount.value), currencyCode: transaction.amount.currencyCode)
+        }
+
+        return SubscriptionInfo(
+            merchantName: merchant,
+            cost: cost,
+            billingCycle: .monthly,
+            nextRenewalDate: nextRenewal,
+            category: .subscriptions,
+            risks: []
+        )
+    }
+
+    /// Adds user-declared subscriptions not already detected from recurring history.
+    public static func appendUserDeclaredSubscriptions(
+        to subs: inout [SubscriptionInfo],
+        details: inout [String: SubscriptionDetail],
+        transactions: [Transaction]
+    ) {
+        var seen = Set(subs.map { MerchantLogoEngine.normalizeMerchantName($0.merchantName) })
+
+        for transaction in transactions.sorted(by: { $0.date > $1.date }) {
+            let norm = MerchantLogoEngine.normalizeMerchantName(transaction.merchantName)
+            guard !seen.contains(norm) else { continue }
+            guard let subInfo = subscriptionFromUserDeclaration(transaction) else { continue }
+
+            subs.append(subInfo)
+            details[norm] = subscriptionDetail(info: subInfo, allTransactions: transactions)
+            seen.insert(norm)
+        }
+    }
+
     /// Returns the detailed info for a specific subscription
     public static func subscriptionDetail(
         info: SubscriptionInfo,
@@ -233,12 +287,13 @@ public struct BillingCycleAIEngine {
         var alternatives: [String] = []
         var usageInsights = "Your subscription has been active for \(expenses.count) cycles. You interact with this service regularly."
         
+        let currency = info.cost.currencyCode
         let lowerMerchant = info.merchantName.lowercased()
         if lowerMerchant.contains("netflix") {
-            alternatives = ["Apple TV+ (Cheaper alternatives starting at $9.99/mo)", "Ad-supported plan ($6.99/mo)"]
-            usageInsights = "Active Netflix Premium account. Price increased by 15% in recent cycle. Consider moving to standard ad-supported tier to save $8.50/mo."
+            alternatives = ["Apple TV+ (Cheaper alternatives starting at \(currency) 9.99/mo)", "Ad-supported plan (\(currency) 6.99/mo)"]
+            usageInsights = "Active Netflix Premium account. Price increased by 15% in recent cycle. Consider moving to standard ad-supported tier to save \(currency) 8.50/mo."
         } else if lowerMerchant.contains("spotify") {
-            alternatives = ["YouTube Music (Included in Premium)", "Spotify Individual ($11.99/mo)"]
+            alternatives = ["YouTube Music (Included in Premium)", "Spotify Individual (\(currency) 11.99/mo)"]
             usageInsights = "Shared Spotify Family account. Consider Spotify Individual if only one person uses it."
         } else {
             alternatives = ["Downgrade plan", "Share a bundle with family"]

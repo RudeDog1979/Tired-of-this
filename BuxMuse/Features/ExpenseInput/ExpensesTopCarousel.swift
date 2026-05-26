@@ -10,6 +10,8 @@ import SwiftUI
 struct ExpensesTopCarousel: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let header: ExpensesHeaderDisplay
     let summary: ExpensesSummaryDisplay
@@ -17,6 +19,13 @@ struct ExpensesTopCarousel: View {
 
     @State private var pageIndex: Int? = 0
     @State private var cardReveal = false
+    @State private var activeDetailSheet: HeroSheetType?
+
+    private enum HeroSheetType: String, Identifiable {
+        case totalSpend
+        case monthlySummary
+        var id: String { rawValue }
+    }
 
     private var pages: [CarouselPage] {
         var items: [CarouselPage] = []
@@ -41,29 +50,45 @@ struct ExpensesTopCarousel: View {
         VStack(spacing: 10) {
             ZStack(alignment: .top) {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .top, spacing: 0) {
+                    HStack(alignment: .top, spacing: 16) {
                         ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
                             Group {
                                 switch page {
                                 case .totalSpend:
                                     totalSpendCard
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                                            impact.impactOccurred()
+                                            activeDetailSheet = .totalSpend
+                                        }
                                 case .monthlySummary:
                                     ExpensesSummaryCard(display: summary)
                                         .environmentObject(themeManager)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                                            impact.impactOccurred()
+                                            activeDetailSheet = .monthlySummary
+                                        }
                                 }
                             }
                             .frame(maxWidth: .infinity, minHeight: slotHeight, alignment: .top)
-                            .containerRelativeFrame(.horizontal)
+                            .containerRelativeFrame(.horizontal) { width, _ in
+                                width - 40
+                            }
                             .id(index)
                         }
                     }
                     .scrollTargetLayout()
                 }
                 .scrollClipDisabled()
-                .scrollTargetBehavior(.paging)
+                .scrollTargetBehavior(.viewAligned)
                 .scrollPosition(id: $pageIndex)
+                .safeAreaPadding(.horizontal, 20)
+                .safeAreaPadding(.vertical, 8)
             }
-            .frame(minHeight: slotHeight, alignment: .top)
+            .frame(minHeight: slotHeight + 16, alignment: .top)
             .padding(.bottom, BuxLayout.expenseHeroShadowBleed)
 
             if pages.count > 1 {
@@ -86,10 +111,21 @@ struct ExpensesTopCarousel: View {
                 cardReveal = true
             }
         }
-        .onChange(of: pageIndex) { _, _ in
-            cardReveal = false
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
-                cardReveal = true
+        .sheet(item: $activeDetailSheet) { sheetType in
+            switch sheetType {
+            case .totalSpend:
+                TotalSpendDetailSheet(header: header, formatAmount: formatAmount)
+                    .environmentObject(themeManager)
+                    .environmentObject(brain)
+                    .environmentObject(appSettingsManager)
+                    .presentationDetents([.fraction(0.88), .large])
+                    .presentationDragIndicator(.visible)
+            case .monthlySummary:
+                MonthlySummaryDetailSheet(summary: summary, formatAmount: formatAmount)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .presentationDetents([.fraction(0.88), .large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }

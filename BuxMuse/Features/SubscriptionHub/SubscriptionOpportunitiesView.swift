@@ -63,8 +63,8 @@ struct SubscriptionOpportunitiesView: View {
     }
 
     private func opportunityRow(_ item: SavingsOpportunityItem) -> some View {
-        VStack(alignment: .leading, spacing: BuxLayout.section) {
-            HStack(spacing: BuxLayout.section) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     Circle()
                         .fill(themeManager.current.accentColor.opacity(0.12))
@@ -75,34 +75,34 @@ struct SubscriptionOpportunitiesView: View {
                         .foregroundColor(themeManager.current.accentColor)
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(item.merchantName)
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
-                        .lineLimit(1)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     Text(item.description)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.gray)
-                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-
-                Spacer(minLength: 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 Text("Save \(appSettingsManager.format(item.monthlySavings))/mo")
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.green)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.trailing)
                     .minimumScaleFactor(0.85)
             }
 
-            HStack {
+            HStack(alignment: .center, spacing: 8) {
                 Text(item.savingsPhrase)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(themeManager.current.accentColor)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                Spacer(minLength: 0)
+                Spacer(minLength: 8)
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .bold))
@@ -114,6 +114,7 @@ struct SubscriptionOpportunitiesView: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .padding(SubscriptionHubStyle.cardPadding)
+        .fixedSize(horizontal: false, vertical: true)
         .subscriptionHubCard(cornerRadius: SubscriptionHubStyle.rowCardRadius)
     }
 }
