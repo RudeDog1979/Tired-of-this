@@ -124,7 +124,12 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
             amount: MoneyAmount(value: amountValue, currencyCode: currencyCode),
             merchantName: name,
             category: transactionCategory,
-            notes: notes
+            notes: notes,
+            isSubscriptionLike: isSubscriptionLike,
+            isTrial: isTrial,
+            nextExpectedDate: nextExpectedDate,
+            subscriptionStartDate: subscriptionStartDate,
+            trialEndDate: trialEndDate
         )
     }
 
@@ -389,7 +394,7 @@ public struct ExpenseInteractionDisplay {
     public var summary: ExpensesSummaryDisplay
     
     public static let empty = ExpenseInteractionDisplay(
-        header: ExpensesHeaderDisplay(totalSpent: 0, changeVsLastMonth: 0, biggestCategory: nil, biggestMerchant: nil, sparklinePoints: [], microInsight: nil),
+        header: ExpensesHeaderDisplay(totalSpent: 0, changeVsLastMonth: 0, monthlyTransactionCount: 0, biggestCategory: nil, biggestMerchant: nil, sparklinePoints: [], microInsight: nil),
         sections: [],
         summary: ExpensesSummaryDisplay(totalSpent: 0, categoryBreakdown: [], merchantBreakdown: [], trendPoints: [], prediction: nil)
     )
@@ -398,6 +403,7 @@ public struct ExpenseInteractionDisplay {
 public struct ExpensesHeaderDisplay {
     public var totalSpent: Double
     public var changeVsLastMonth: Double
+    public var monthlyTransactionCount: Int
     public var biggestCategory: String?
     public var biggestMerchant: String?
     public var sparklinePoints: [Double]
