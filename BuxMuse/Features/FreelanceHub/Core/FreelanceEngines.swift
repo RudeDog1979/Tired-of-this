@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import Vision
 import PDFKit
+import UIKit
 
 // MARK: - 1. Client Intelligence Engine
 
@@ -349,50 +350,23 @@ public final class FreelanceTaxEngine {
         let activeInvoices = invoices.filter { $0.status == .paid || $0.status == .sent || $0.status == .overdue }
         let totalGross = activeInvoices.reduce(Decimal(0)) { $0 + $1.subtotal }
         
-        // 2. Gather Deductible Expenses
-        let deductibleReceipts = receipts.filter { $0.isDeductible }
-        let totalDeductions = deductibleReceipts.reduce(Decimal(0)) { sum, receipt in
-            let categoryRule = taxProfile.deductionCategories.first { $0.categoryId == receipt.category }
-            let deductRatio: Decimal = {
-                switch categoryRule?.deductibilityType {
-                case .full: return 1.0
-                case .partial: return 0.5
-                case .limited: return 0.3
-                default: return 1.0
-                }
-            }()
-            return sum + (receipt.amount * deductRatio)
-        }
+        // 2. Gather Deductible Expenses (percentage-aware business expenses)
+        let totalDeductions = FreelanceDeductionMath.totalDeductible(receipts: receipts)
         
         // 3. Taxable Income
         let taxableIncome = max(Decimal(0), totalGross - totalDeductions)
         
-        // 4. Bracket Income Tax Calculation
-        var tax: Decimal = 0
-        var remainingIncome = taxableIncome
+        // 4. Income tax estimate from user-set effective rates
+        let breakdown = FreelanceIncomeTaxEngine.compute(
+            invoices: invoices,
+            receipts: receipts,
+            taxProfile: taxProfile
+        )
+        let tax = breakdown.totalEstimatedTax
         
-        let sortedBrackets = taxProfile.incomeTaxRules.sorted { $0.lowerBound < $1.lowerBound }
-        for bracket in sortedBrackets {
-            let lower = bracket.lowerBound
-            let upper = bracket.upperBound
-            let rate = bracket.rate
-            
-            if remainingIncome > 0 {
-                let taxableInThisBracket: Decimal
-                if let upper = upper {
-                    let bracketLimit = upper - lower
-                    taxableInThisBracket = min(remainingIncome, bracketLimit)
-                } else {
-                    taxableInThisBracket = remainingIncome
-                }
-                tax += taxableInThisBracket * rate
-                remainingIncome -= taxableInThisBracket
-            }
-        }
-        
-        // 5. VAT calculation
+        // 5. Indirect tax calculation (registration lives on tax profile)
         var vatOwed: Decimal = 0
-        if profile.vatRegistered {
+        if taxProfile.vatRegistered {
             // VAT generated on invoices minus VAT paid on expenses
             let invoiceVat = activeInvoices.reduce(Decimal(0)) { $0 + ($1.taxAmount) }
             let expenseVat = receipts.reduce(Decimal(0)) { $0 + ($1.vatAmount ?? 0) }
@@ -400,7 +374,7 @@ public final class FreelanceTaxEngine {
         }
         
         let net = totalGross - tax - vatOwed - totalDeductions
-        let overallTaxFraction = totalGross > 0 ? Double(truncating: ((tax + vatOwed) / totalGross) as NSDecimalNumber) : 0.0
+        let overallTaxFraction = totalGross > 0 ? Double(truncating: (tax / totalGross) as NSDecimalNumber) : breakdown.effectiveRate
         
         return TaxSimulationResult(
             totalGrossIncome: totalGross,
@@ -424,9 +398,6 @@ public final class FreelanceTaxEngine {
         newPurchasesAmount: Decimal
     ) -> TaxSimulationResult {
         
-        var simulatedProfile = profile
-        simulatedProfile.vatRegistered = vatToggled
-        
         // Extra Simulated Income
         let extraIncome = hypotheticalRateIncrease * Decimal(hypotheticalHoursCount)
         let totalSimGross = baseResult.totalGrossIncome + extraIncome
@@ -437,27 +408,9 @@ public final class FreelanceTaxEngine {
         
         let taxableIncome = max(Decimal(0), totalSimGross - totalSimDeductions)
         
-        // Bracket calculation
-        var tax: Decimal = 0
-        var remainingIncome = taxableIncome
-        let sortedBrackets = taxProfile.incomeTaxRules.sorted { $0.lowerBound < $1.lowerBound }
-        for bracket in sortedBrackets {
-            let lower = bracket.lowerBound
-            let upper = bracket.upperBound
-            let rate = bracket.rate
-            
-            if remainingIncome > 0 {
-                let taxableInThisBracket: Decimal
-                if let upper = upper {
-                    let bracketLimit = upper - lower
-                    taxableInThisBracket = min(remainingIncome, bracketLimit)
-                } else {
-                    taxableInThisBracket = remainingIncome
-                }
-                tax += taxableInThisBracket * rate
-                remainingIncome -= taxableInThisBracket
-            }
-        }
+        let incomeRate = (taxProfile.estimatedIncomeTaxRatePercent ?? 0) / 100
+        let seRate = (taxProfile.estimatedSelfEmployedRatePercent ?? 0) / 100
+        let tax = taxableIncome * (incomeRate + seRate)
         
         // VAT calculation
         var vatOwed: Decimal = 0
@@ -468,7 +421,7 @@ public final class FreelanceTaxEngine {
         }
         
         let net = totalSimGross - tax - vatOwed - totalSimDeductions
-        let overallTaxFraction = totalSimGross > 0 ? Double(truncating: ((tax + vatOwed) / totalSimGross) as NSDecimalNumber) : 0.0
+        let overallTaxFraction = totalSimGross > 0 ? Double(truncating: (tax / totalSimGross) as NSDecimalNumber) : 0
         
         return TaxSimulationResult(
             totalGrossIncome: totalSimGross,
@@ -552,14 +505,12 @@ public final class FreelanceDeductionEngine {
         taxProfile: FreelanceTaxProfile
     ) -> (totalDeductible: Decimal, opportunities: [DeductionOpportunity]) {
         
-        let deductibleReceipts = receipts.filter { $0.isDeductible }
-        let totalDeductible = deductibleReceipts.reduce(Decimal(0)) { $0 + $1.amount }
+        let totalDeductible = FreelanceDeductionMath.totalDeductible(receipts: receipts)
         
         var opportunities: [DeductionOpportunity] = []
-        
-        // 1. Analyze Category Coverage
+        let combinedRate = ((taxProfile.estimatedIncomeTaxRatePercent ?? 0) + (taxProfile.estimatedSelfEmployedRatePercent ?? 0)) / 100
         let softwareReceipts = receipts.filter { $0.category.lowercased().contains("software") || $0.category.lowercased().contains("cloud") }
-        let topTaxRate = taxProfile.incomeTaxRules.map(\.rate).max() ?? Decimal(0)
+        let deductibleReceipts = receipts.filter { $0.isDeductible }
 
         if !receipts.isEmpty && softwareReceipts.isEmpty {
             opportunities.append(DeductionOpportunity(
@@ -573,7 +524,7 @@ public final class FreelanceDeductionEngine {
         let largePurchases = receipts.filter { $0.amount > 1000 }
         if !largePurchases.isEmpty && deductibleReceipts.filter({ $0.category.lowercased().contains("hardware") }).isEmpty {
             let largest = largePurchases.map(\.amount).max() ?? 0
-            let estimatedSaving = largest * topTaxRate
+            let estimatedSaving = largest * combinedRate
             opportunities.append(DeductionOpportunity(
                 id: UUID(),
                 title: "Hardware Write-off Review",
@@ -586,51 +537,104 @@ public final class FreelanceDeductionEngine {
     }
 }
 
+// MARK: - Indirect tax label resolver
+
+public enum IndirectTaxLabelResolver {
+    private static let knownNames = [
+        "Sales Tax", "Consumption Tax", "VAT", "GST", "ITBIS", "IVA",
+        "HST", "PST", "QST", "IGI", "SUT", "BTW", "MwSt"
+    ]
+
+    /// Short name extracted from JSON / profile text (e.g. "GST", "ITBIS").
+    public static func shortName(from text: String) -> String {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "" }
+
+        for name in knownNames {
+            if trimmed.localizedCaseInsensitiveContains(name) {
+                return name == "Sales Tax" || name == "Consumption Tax" ? name : name.uppercased()
+            }
+        }
+
+        if let beforeParen = trimmed.split(separator: "(").first {
+            let segment = String(beforeParen).trimmingCharacters(in: .whitespaces)
+            if !segment.isEmpty { return segment }
+        }
+
+        return trimmed.components(separatedBy: .whitespaces).prefix(3).joined(separator: " ")
+    }
+
+    public static func registrationLabel(for taxProfile: FreelanceTaxProfile) -> String {
+        let name = shortName(from: taxProfile.effectiveIndirectTax)
+        if name.isEmpty { return "Indirect tax registered" }
+        return "Registered for \(name)"
+    }
+
+    public static func indirectTaxFieldLabel(for taxProfile: FreelanceTaxProfile) -> String {
+        let name = shortName(from: taxProfile.effectiveIndirectTax)
+        if name.isEmpty { return "Indirect Tax" }
+        return name
+    }
+}
+
 // MARK: - 8. Local Invoice PDF Renderer
 
 public final class FreelanceInvoicePDFRenderer {
     public static func generatePDF(
         invoice: FreelanceInvoice,
         client: FreelanceClient?,
-        profile: FreelanceProfile
+        profile: FreelanceProfile,
+        settings: FreelanceInvoiceSettings = FreelanceInvoiceSettings(),
+        countryCode: String = ""
     ) -> Data {
         let pdfMetaData = [
-            "Title": "Invoice \(invoice.invoiceNumber)",
+            "Title": "\(settings.documentLabel) \(invoice.invoiceNumber)",
             "Author": profile.businessName
         ]
         
         let format = UIGraphicsPDFRendererFormat()
         format.documentInfo = pdfMetaData as [String: Any]
         
-        // Standard US Letter Size: 8.5 x 11 inches = 612 x 792 points
         let pageWidth = 612.0
         let pageHeight = 792.0
         let pageBounds = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
         
         let renderer = UIGraphicsPDFRenderer(bounds: pageBounds, format: format)
+        let taxName = invoice.taxLabel.isEmpty ? "Tax" : invoice.taxLabel
+        let docLabel = settings.documentLabel.uppercased()
         
         return renderer.pdfData { context in
             context.beginPage()
             
-            // 1. Draw Company Header
-            let titleFont = UIFont.systemFont(ofSize: 24, weight: .bold)
+            let titleFont = UIFont.systemFont(ofSize: settings.defaultTemplate == .minimal ? 20 : 24, weight: .bold)
             let bodyFont = UIFont.systemFont(ofSize: 10, weight: .regular)
             let boldFont = UIFont.systemFont(ofSize: 10, weight: .bold)
             
-            // Header Text
+            var headerY = 40.0
+            let logoMaxSize = 48.0
+            
+            if settings.logoPosition != .none,
+               let data = profile.logoData,
+               let logo = UIImage(data: data) {
+                let aspect = logo.size.width / max(logo.size.height, 1)
+                let drawHeight = logoMaxSize
+                let drawWidth = min(logoMaxSize * 1.8, drawHeight * aspect)
+                let logoX = settings.logoPosition == .topRight ? pageWidth - 40 - drawWidth : 40.0
+                logo.draw(in: CGRect(x: logoX, y: headerY, width: drawWidth, height: drawHeight))
+                if settings.logoPosition == .topLeft { headerY += drawHeight + 8 }
+            }
+            
             let titleString = profile.businessName.isEmpty ? "Business Name" : profile.businessName
-            titleString.draw(at: CGPoint(x: 40, y: 40), withAttributes: [.font: titleFont])
+            titleString.draw(at: CGPoint(x: 40, y: headerY), withAttributes: [.font: titleFont])
             
             if !profile.displayName.isEmpty {
-                profile.displayName.draw(at: CGPoint(x: 40, y: 70), withAttributes: [.font: bodyFont])
+                profile.displayName.draw(at: CGPoint(x: 40, y: headerY + 30), withAttributes: [.font: bodyFont])
             }
-            let countryLine = profile.countryCode
-            countryLine.draw(at: CGPoint(x: 40, y: profile.displayName.isEmpty ? 70 : 85), withAttributes: [.font: bodyFont])
+            if !countryCode.isEmpty {
+                countryCode.draw(at: CGPoint(x: 40, y: headerY + (profile.displayName.isEmpty ? 30 : 45)), withAttributes: [.font: bodyFont])
+            }
             
-            // Invoice Label
-            let invLabel = "INVOICE"
-            let invFont = UIFont.systemFont(ofSize: 20, weight: .bold)
-            invLabel.draw(at: CGPoint(x: 480, y: 40), withAttributes: [.font: invFont])
+            docLabel.draw(at: CGPoint(x: 480, y: 40), withAttributes: [.font: UIFont.systemFont(ofSize: 20, weight: .bold)])
             
             let invNumStr = "Number: \(invoice.invoiceNumber)"
             invNumStr.draw(at: CGPoint(x: 450, y: 65), withAttributes: [.font: bodyFont])
@@ -641,41 +645,34 @@ public final class FreelanceInvoicePDFRenderer {
             let dueStr = "Due Date: \(formattedDate(invoice.dueDate))"
             dueStr.draw(at: CGPoint(x: 450, y: 95), withAttributes: [.font: bodyFont])
             
-            // Horizontal divider line
-            let context = context.cgContext
-            context.setStrokeColor(UIColor.gray.cgColor)
-            context.setLineWidth(1.0)
-            context.move(to: CGPoint(x: 40, y: 120))
-            context.addLine(to: CGPoint(x: 572, y: 120))
-            context.strokePath()
+            let cgContext = context.cgContext
+            cgContext.setStrokeColor(UIColor.gray.cgColor)
+            cgContext.setLineWidth(1.0)
+            cgContext.move(to: CGPoint(x: 40, y: 120))
+            cgContext.addLine(to: CGPoint(x: 572, y: 120))
+            cgContext.strokePath()
             
-            // 2. Draw Client Section
             let billToFont = UIFont.systemFont(ofSize: 12, weight: .bold)
             "BILL TO:".draw(at: CGPoint(x: 40, y: 135), withAttributes: [.font: billToFont])
             
             let clientName = client?.name ?? "Unknown Client"
             clientName.draw(at: CGPoint(x: 40, y: 155), withAttributes: [.font: boldFont])
             
-            let clientEmail = client?.email ?? ""
-            clientEmail.draw(at: CGPoint(x: 40, y: 170), withAttributes: [.font: bodyFont])
+            (client?.email ?? "").draw(at: CGPoint(x: 40, y: 170), withAttributes: [.font: bodyFont])
+            (client?.address ?? "").draw(at: CGPoint(x: 40, y: 185), withAttributes: [.font: bodyFont])
             
-            let clientAddress = client?.address ?? ""
-            clientAddress.draw(at: CGPoint(x: 40, y: 185), withAttributes: [.font: bodyFont])
+            cgContext.move(to: CGPoint(x: 40, y: 220))
+            cgContext.addLine(to: CGPoint(x: 572, y: 220))
+            cgContext.strokePath()
             
-            // 3. Draw Grid/Table of Line Items
-            context.move(to: CGPoint(x: 40, y: 220))
-            context.addLine(to: CGPoint(x: 572, y: 220))
-            context.strokePath()
-            
-            // Table Headers
             "Description".draw(at: CGPoint(x: 40, y: 225), withAttributes: [.font: boldFont])
             "Qty".draw(at: CGPoint(x: 380, y: 225), withAttributes: [.font: boldFont])
             "Unit Price".draw(at: CGPoint(x: 430, y: 225), withAttributes: [.font: boldFont])
             "Total".draw(at: CGPoint(x: 520, y: 225), withAttributes: [.font: boldFont])
             
-            context.move(to: CGPoint(x: 40, y: 240))
-            context.addLine(to: CGPoint(x: 572, y: 240))
-            context.strokePath()
+            cgContext.move(to: CGPoint(x: 40, y: 240))
+            cgContext.addLine(to: CGPoint(x: 572, y: 240))
+            cgContext.strokePath()
             
             var yOffset = 250.0
             for item in invoice.lineItems {
@@ -683,22 +680,21 @@ public final class FreelanceInvoicePDFRenderer {
                 String(format: "%.1f", item.quantity).draw(at: CGPoint(x: 380, y: yOffset), withAttributes: [.font: bodyFont])
                 "\(invoice.currencyCode) \(item.unitPrice)".draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: bodyFont])
                 "\(invoice.currencyCode) \(item.total)".draw(at: CGPoint(x: 520, y: yOffset), withAttributes: [.font: bodyFont])
-                
                 yOffset += 20.0
             }
             
-            context.move(to: CGPoint(x: 40, y: yOffset + 5))
-            context.addLine(to: CGPoint(x: 572, y: yOffset + 5))
-            context.strokePath()
+            cgContext.move(to: CGPoint(x: 40, y: yOffset + 5))
+            cgContext.addLine(to: CGPoint(x: 572, y: yOffset + 5))
+            cgContext.strokePath()
             
-            // 4. Draw Subtotal/VAT/Total
             yOffset += 15.0
             "Subtotal:".draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: boldFont])
             "\(invoice.currencyCode) \(invoice.subtotal)".draw(at: CGPoint(x: 520, y: yOffset), withAttributes: [.font: bodyFont])
             
-            if let vat = invoice.vatRate {
+            if invoice.taxAmount > 0 || invoice.vatRate != nil {
                 yOffset += 15.0
-                "VAT (\(vat)%):".draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: boldFont])
+                let rateSuffix = invoice.vatRate.map { " (\($0)%)" } ?? ""
+                "\(taxName)\(rateSuffix):".draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: boldFont])
                 "\(invoice.currencyCode) \(invoice.taxAmount)".draw(at: CGPoint(x: 520, y: yOffset), withAttributes: [.font: bodyFont])
             }
             
@@ -707,10 +703,16 @@ public final class FreelanceInvoicePDFRenderer {
             "TOTAL:".draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: finalTotalFont])
             "\(invoice.currencyCode) \(invoice.total)".draw(at: CGPoint(x: 520, y: yOffset), withAttributes: [.font: finalTotalFont])
             
-            // 5. Terms / Footer
-            "Payment Terms / Notes:".draw(at: CGPoint(x: 40, y: 650), withAttributes: [.font: boldFont])
+            var footerY = 650.0
+            "Payment Terms / Notes:".draw(at: CGPoint(x: 40, y: footerY), withAttributes: [.font: boldFont])
             let notesText = invoice.notes.isEmpty ? "Payment is due within \(profile.defaultInvoicePaymentTerms) days of invoice date." : invoice.notes
-            notesText.draw(in: CGRect(x: 40, y: 665, width: 500, height: 80), withAttributes: [.font: bodyFont])
+            notesText.draw(in: CGRect(x: 40, y: footerY + 15, width: 500, height: 60), withAttributes: [.font: bodyFont])
+            
+            if settings.showBankDetails, !settings.bankDetails.isEmpty {
+                footerY += 80
+                "Bank / Payment Details:".draw(at: CGPoint(x: 40, y: footerY), withAttributes: [.font: boldFont])
+                settings.bankDetails.draw(in: CGRect(x: 40, y: footerY + 15, width: 500, height: 50), withAttributes: [.font: bodyFont])
+            }
         }
     }
     

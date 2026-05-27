@@ -17,6 +17,7 @@ struct FreelanceReceiptsListView: View {
     
     @EnvironmentObject private var store: FreelanceStore
     @State private var showScanner = false
+    @State private var showExpenseEditor = false
     
     var body: some View {
         ZStack {
@@ -65,15 +66,23 @@ struct FreelanceReceiptsListView: View {
                 .scrollContentBackground(.hidden)
             }
         }
-        .navigationTitle("Receipts Sandbox")
+        .navigationTitle("Expenses & Receipts")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showScanner = true }) {
-                    Image(systemName: "camera.fill")
+                Menu {
+                    Button("Log expense") { showExpenseEditor = true }
+                    Button("Scan receipt") { showScanner = true }
+                } label: {
+                    Image(systemName: "plus")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
                 }
             }
+        }
+        .sheet(isPresented: $showExpenseEditor) {
+            FreelanceExpenseEditorView(receiptToEdit: nil)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
         }
         .sheet(isPresented: $showScanner) {
             FreelanceReceiptScannerView()
@@ -166,6 +175,7 @@ struct FreelanceReceiptScannerView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var store: FreelanceStore
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     
     // UI flow control
     @State private var isScanning = false
@@ -345,7 +355,7 @@ struct FreelanceReceiptScannerView: View {
             }
             .onChange(of: selectedPhotoItem) { _, item in
                 Task {
-                    if let data = try? await item?.loadTransferable(type: Data.self), let img = UIImage(data: data) {
+                    if let img = await PhotoImageLoader.loadUIImage(from: item) {
                         processCapturedImage(img)
                     }
                 }
@@ -412,16 +422,37 @@ struct FreelanceReceiptScannerView: View {
     
     private func saveReceipt() {
         let amt = Decimal(string: amount) ?? 0
+        let receiptId = UUID()
+        var localPath: String?
+        if let img = scannedImage {
+            localPath = persistReceiptImage(img, id: receiptId)
+        }
         let r = FreelanceReceipt(
+            id: receiptId,
             date: date,
             amount: amt,
-            currencyCode: store.profile.currencyCode,
+            currencyCode: appSettingsManager.selectedCurrency.id,
             merchant: merchant,
             category: category,
             isDeductible: isDeductible,
-            deductionStrength: strength
+            deductionStrength: strength,
+            localImagePath: localPath
         )
         store.addReceipt(r)
+    }
+
+    private func persistReceiptImage(_ image: UIImage, id: UUID) -> String? {
+        guard let data = image.jpegData(compressionQuality: 0.85) else { return nil }
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("FreelanceReceipts", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let file = dir.appendingPathComponent("\(id.uuidString).jpg")
+        do {
+            try data.write(to: file)
+            return file.path
+        } catch {
+            return nil
+        }
     }
 }
 
@@ -433,6 +464,7 @@ struct FreelanceReceiptDetailView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     
     var receipt: FreelanceReceipt
+    @State private var showEdit = false
     
     var body: some View {
         ZStack {
@@ -465,7 +497,11 @@ struct FreelanceReceiptDetailView: View {
                         infoRow(label: "AMOUNT", value: appSettingsManager.format(receipt.amount), isAmount: true)
                         infoRow(label: "DATE LOGGED", value: formattedDate(receipt.date))
                         infoRow(label: "CATEGORY", value: receipt.category)
-                        infoRow(label: "DEDUCTIBLE", value: receipt.isDeductible ? "Eligible (100%)" : "Non-Deductible")
+                        infoRow(label: "BUSINESS USE", value: receipt.businessUse.rawValue)
+                        infoRow(label: "DEDUCTIBLE", value: receipt.isDeductible ? "\(Int(receipt.deductiblePercentage))%" : "Non-Deductible")
+                        if receipt.isDeductible {
+                            infoRow(label: "DEDUCTIBLE AMOUNT", value: appSettingsManager.format(receipt.deductibleAmount))
+                        }
                     }
                     .padding(BuxLayout.section)
                     .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
@@ -483,7 +519,17 @@ struct FreelanceReceiptDetailView: View {
                 .padding(.top, BuxLayout.tight)
             }
         }
-        .navigationTitle("Receipt Details")
+        .navigationTitle("Expense Details")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Edit") { showEdit = true }
+            }
+        }
+        .sheet(isPresented: $showEdit) {
+            FreelanceExpenseEditorView(receiptToEdit: receipt)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+        }
     }
     
     private func infoRow(label: String, value: String, isAmount: Bool = false) -> some View {

@@ -12,6 +12,8 @@ struct FreelanceHubView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var store: FreelanceStore
+    @EnvironmentObject private var freelanceBrain: FreelanceBrain
+    @EnvironmentObject private var appDataManager: AppDataManager
     @ObservedObject private var settingsStore = SettingsStore.shared
 
     @State private var navigateToProfile = false
@@ -23,6 +25,11 @@ struct FreelanceHubView: View {
     @State private var navigateToCashflow = false
     @State private var navigateToDeductions = false
     @State private var navigateToTaxProfile = false
+    @State private var navigateToExpenses = false
+    @State private var navigateToIncomeTax = false
+    @State private var navigateToQuarterly = false
+    @State private var navigateToCompliance = false
+    @State private var navigateToInvoiceSettings = false
 
     @State private var showNewInvoice = false
     @State private var showNewClient = false
@@ -30,7 +37,7 @@ struct FreelanceHubView: View {
     @State private var showTimeTracker = false
 
     private var display: FreelanceHubDisplay {
-        FreelanceBrain.makeDisplay(from: store, settings: settingsStore, formatter: appSettingsManager)
+        freelanceBrain.hubDisplay
     }
 
     var body: some View {
@@ -106,8 +113,10 @@ struct FreelanceHubView: View {
                     .environmentObject(appSettingsManager)
             }
             .navigationDestination(isPresented: $navigateToTaxProfile) {
-                FreelanceTaxProfileEditorView()
+                FreelanceTaxReferenceView()
                     .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(appDataManager)
             }
             .navigationDestination(isPresented: $navigateToClients) {
                 FreelanceClientsListView()
@@ -141,6 +150,31 @@ struct FreelanceHubView: View {
             }
             .navigationDestination(isPresented: $navigateToDeductions) {
                 FreelanceDeductionsView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+            }
+            .navigationDestination(isPresented: $navigateToExpenses) {
+                FreelanceReceiptsListView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+            }
+            .navigationDestination(isPresented: $navigateToIncomeTax) {
+                FreelanceIncomeTaxCalculatorView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+            }
+            .navigationDestination(isPresented: $navigateToQuarterly) {
+                FreelanceQuarterlyTaxView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+            }
+            .navigationDestination(isPresented: $navigateToCompliance) {
+                FreelanceComplianceAssistantView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+            }
+            .navigationDestination(isPresented: $navigateToInvoiceSettings) {
+                FreelanceInvoiceSettingsView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
             }
@@ -189,9 +223,19 @@ struct FreelanceHubView: View {
                 Divider().padding(.leading, 44)
                 navRow(title: "Projects & Tasks", icon: "folder.fill", color: .purple) { navigateToProjects = true }
                 Divider().padding(.leading, 44)
-                navRow(title: "Receipts", icon: "doc.plaintext.fill", color: .teal) { navigateToReceipts = true }
+                navRow(title: "Receipts & Expenses", icon: "doc.plaintext.fill", color: .teal) { navigateToExpenses = true }
+                Divider().padding(.leading, 44)
+                navRow(title: "Income Tax Calculator", icon: "function", color: .mint) { navigateToIncomeTax = true }
+                Divider().padding(.leading, 44)
+                navRow(title: "Quarterly Tax", icon: "calendar.badge.clock", color: .pink) { navigateToQuarterly = true }
+                Divider().padding(.leading, 44)
+                navRow(title: "Compliance Assistant", icon: "checkmark.shield.fill", color: .cyan) { navigateToCompliance = true }
                 Divider().padding(.leading, 44)
                 navRow(title: "Tax Overview", icon: "percent", color: .red) { navigateToTax = true }
+                Divider().padding(.leading, 44)
+                navRow(title: "Tax Profile", icon: "doc.text.fill", color: .indigo) { navigateToTaxProfile = true }
+                Divider().padding(.leading, 44)
+                navRow(title: "Invoice Settings", icon: "gearshape.fill", color: .gray) { navigateToInvoiceSettings = true }
                 Divider().padding(.leading, 44)
                 navRow(title: "Cashflow Runway", icon: "chart.line.uptrend.xyaxis", color: .orange) { navigateToCashflow = true }
                 Divider().padding(.leading, 44)

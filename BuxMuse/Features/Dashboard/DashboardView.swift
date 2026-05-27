@@ -19,6 +19,7 @@ struct DashboardView: View {
     @EnvironmentObject var goalsViewModel: GoalsViewModel
     @EnvironmentObject var goalsSheetCoordinator: GoalsSheetCoordinator
     @EnvironmentObject var insightsViewModel: InsightsViewModel
+    @EnvironmentObject var freelanceBrain: FreelanceBrain
 
     @ObservedObject private var settingsStore = SettingsStore.shared
 
@@ -441,6 +442,14 @@ struct DashboardView: View {
                             }
                             .padding(.horizontal, BuxLayout.marginHorizontal)
                             .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+
+                        if settingsStore.freelanceEnabled {
+                            FreelanceDashboardWidget()
+                                .environmentObject(themeManager)
+                                .environmentObject(navigationCoordinator)
+                                .environmentObject(freelanceBrain)
+                                .padding(.top, 4)
                         }
 
                         CategoryPillBar(

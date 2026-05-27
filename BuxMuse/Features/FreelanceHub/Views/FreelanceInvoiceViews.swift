@@ -15,7 +15,20 @@ struct FreelanceInvoicesListView: View {
     
     @EnvironmentObject private var store: FreelanceStore
     @State private var showEditor = false
-    
+    @State private var searchText = ""
+    @State private var statusFilter: InvoiceStatus?
+
+    private var filteredInvoices: [FreelanceInvoice] {
+        store.invoices.filter { inv in
+            let matchesStatus = statusFilter == nil || inv.status == statusFilter
+            let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard !query.isEmpty else { return matchesStatus }
+            let clientName = store.clients.first { $0.id == inv.clientId }?.name.lowercased() ?? ""
+            let matchesSearch = inv.invoiceNumber.lowercased().contains(query) || clientName.contains(query)
+            return matchesStatus && matchesSearch
+        }
+    }
+
     var body: some View {
         ZStack {
             themeManager.screenBackground(for: colorScheme)
@@ -24,8 +37,10 @@ struct FreelanceInvoicesListView: View {
             if store.invoices.isEmpty {
                 emptyState
             } else {
-                List {
-                    ForEach(store.invoices) { invoice in
+                VStack(spacing: 0) {
+                    invoiceFilterBar
+                    List {
+                        ForEach(filteredInvoices) { invoice in
                         let client = store.clients.first { $0.id == invoice.clientId }
                         
                         NavigationLink(destination: FreelanceInvoiceDetailView(invoice: invoice).environmentObject(themeManager).environmentObject(appSettingsManager)) {
@@ -61,12 +76,26 @@ struct FreelanceInvoicesListView: View {
                         .listRowBackground(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : Color.white)
                     }
                     .onDelete(perform: deleteInvoice)
+                    }
+                    .scrollContentBackground(.hidden)
                 }
-                .scrollContentBackground(.hidden)
             }
         }
         .navigationTitle("Invoices Ledger")
+        .searchable(text: $searchText, prompt: "Search invoices or clients")
         .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("All") { statusFilter = nil }
+                    ForEach(InvoiceStatus.allCases) { status in
+                        Button(status.rawValue) { statusFilter = status }
+                    }
+                } label: {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(themeManager.current.accentColor)
+                }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showEditor = true }) {
                     Image(systemName: "plus")
@@ -82,6 +111,26 @@ struct FreelanceInvoicesListView: View {
         }
     }
     
+    private var invoiceFilterBar: some View {
+        HStack {
+            if let statusFilter {
+                Text(statusFilter.rawValue)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(themeManager.current.accentColor)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(themeManager.current.accentColor.opacity(0.12))
+                    .clipShape(Capsule())
+            }
+            Spacer()
+            Text("\(filteredInvoices.count) invoice(s)")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.gray)
+        }
+        .padding(.horizontal, BuxLayout.marginHorizontal)
+        .padding(.vertical, 8)
+    }
+
     private var emptyState: some View {
         VStack(spacing: BuxLayout.section) {
             Image(systemName: "doc.text.fill")
@@ -100,7 +149,7 @@ struct FreelanceInvoicesListView: View {
     }
     
     private func deleteInvoice(at offsets: IndexSet) {
-        let ids = offsets.map { store.invoices[$0].id }
+        let ids = offsets.map { filteredInvoices[$0].id }
         ids.forEach { store.deleteInvoice(id: $0) }
     }
     
@@ -135,6 +184,7 @@ struct FreelanceInvoiceEditorView: View {
     @State private var status: InvoiceStatus = .draft
     @State private var notes = ""
     @State private var vatRate = ""
+    @State private var taxLabel = "Tax"
     @State private var lineItems: [FreelanceInvoiceLineItem] = []
     
     // New Item fields
@@ -196,7 +246,10 @@ struct FreelanceInvoiceEditorView: View {
                     }
                     
                     Section("Tax Settings & Notes") {
-                        TextField("VAT / Tax Percentage (e.g. 20)", text: $vatRate)
+                        Text(taxLabel)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.gray)
+                        TextField("Tax Percentage (e.g. 20)", text: $vatRate)
                             .keyboardType(.decimalPad)
                         
                         TextField("Payment Terms & Bank Details", text: $notes)
@@ -210,7 +263,7 @@ struct FreelanceInvoiceEditorView: View {
                             Text(appSettingsManager.format(sub))
                         }
                         HStack {
-                            Text("Tax / VAT")
+                            Text(taxLabel)
                             Spacer()
                             Text(appSettingsManager.format(tax))
                         }
@@ -296,10 +349,21 @@ struct FreelanceInvoiceEditorView: View {
             if let vat = inv.vatRate {
                 vatRate = "\(vat)"
             }
+            taxLabel = inv.taxLabel
         } else {
             selectedClientId = store.clients.first?.id ?? UUID()
             invoiceNumber = store.nextInvoiceNumber()
+            taxLabel = resolvedTaxLabel()
+            if let defaultRate = store.invoiceSettings.defaultTaxRatePercent {
+                vatRate = "\(defaultRate)"
+            }
         }
+    }
+
+    private func resolvedTaxLabel() -> String {
+        let indirect = store.taxProfile.effectiveIndirectTax
+        let short = IndirectTaxLabelResolver.shortName(from: indirect)
+        return short.isEmpty ? "Tax" : short
     }
     
     private func calculatePreview() -> (Decimal, Decimal, Decimal) {
@@ -322,12 +386,13 @@ struct FreelanceInvoiceEditorView: View {
             issueDate: issueDate,
             dueDate: dueDate,
             status: status,
-            currencyCode: store.profile.currencyCode,
+            currencyCode: appSettingsManager.selectedCurrency.id,
             lineItems: lineItems,
             subtotal: sub,
             taxAmount: tax,
             total: grand,
             vatRate: vatDec,
+            taxLabel: taxLabel,
             notes: notes
         )
         
@@ -441,7 +506,13 @@ struct FreelanceInvoiceDetailView: View {
                     
                     // PDF Renderer & share launcher
                     Button(action: {
-                        pdfData = FreelanceInvoicePDFRenderer.generatePDF(invoice: invoice, client: client, profile: store.profile)
+                        pdfData = FreelanceInvoicePDFRenderer.generatePDF(
+                            invoice: invoice,
+                            client: client,
+                            profile: store.profile,
+                            settings: store.invoiceSettings,
+                            countryCode: appSettingsManager.selectedCountry.id
+                        )
                         showShareSheet = true
                     }) {
                         HStack(spacing: 8) {

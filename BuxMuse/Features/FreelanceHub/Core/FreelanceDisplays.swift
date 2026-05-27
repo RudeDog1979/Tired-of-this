@@ -100,6 +100,8 @@ public struct FreelanceTaxDisplay: Equatable {
     public var taxDeadlineDays: Int?
     public var taxDeadlineLabel: String
     public var needsTaxProfileSetup: Bool
+    public var primaryRulesPreview: String
+    public var incomeTypeLabel: String
 
     public static let empty = FreelanceTaxDisplay(
         grossIncomeFormatted: "—",
@@ -109,7 +111,9 @@ public struct FreelanceTaxDisplay: Equatable {
         totalDeductionsFormatted: "—",
         taxDeadlineDays: nil,
         taxDeadlineLabel: "Configure tax profile",
-        needsTaxProfileSetup: true
+        needsTaxProfileSetup: true,
+        primaryRulesPreview: "",
+        incomeTypeLabel: TaxIncomeType.selfEmployed.summaryLabel
     )
 }
 
@@ -169,4 +173,167 @@ public struct FreelanceAlertDisplay: Identifiable, Equatable {
     public var title: String
     public var message: String
     public var severity: String
+}
+
+/// Shared copy for self-employed tax reference content (JSON and UI).
+public enum TaxReferenceCopy {
+    public static let disclaimer = "This is informational reference text, not legal advice."
+}
+
+// MARK: - Brain snapshots (views read these — no inline engine calls)
+
+public struct TaxSandboxParams: Equatable {
+    public var indirectTaxRegistered: Bool
+    public var rateIncrease: Double
+    public var billableHours: Double
+    public var newPurchases: Double
+
+    public static let `default` = TaxSandboxParams(
+        indirectTaxRegistered: false,
+        rateIncrease: 0,
+        billableHours: 0,
+        newPurchases: 0
+    )
+}
+
+public struct TaxSandboxResultDisplay: Equatable {
+    public var grossIncomeFormatted: String
+    public var deductionsFormatted: String
+    public var taxableIncomeFormatted: String
+    public var estimatedTaxFormatted: String
+    public var netIncomeFormatted: String
+    public var indirectTaxFormatted: String
+    public var effectiveRatePercent: Int
+
+    public static let empty = TaxSandboxResultDisplay(
+        grossIncomeFormatted: "—",
+        deductionsFormatted: "—",
+        taxableIncomeFormatted: "—",
+        estimatedTaxFormatted: "—",
+        netIncomeFormatted: "—",
+        indirectTaxFormatted: "—",
+        effectiveRatePercent: 0
+    )
+}
+
+public struct TaxSandboxDisplay: Equatable {
+    public var currencyCode: String
+    public var incomeTypeLabel: String
+    public var countryLabel: String
+    public var primaryRulesPreview: String
+    public var indirectTaxNotes: String
+    public var indirectTaxRegistrationLabel: String
+    public var isProfileConfigured: Bool
+    public var base: TaxSandboxResultDisplay
+    public var simulated: TaxSandboxResultDisplay
+
+    public static let empty = TaxSandboxDisplay(
+        currencyCode: "USD",
+        incomeTypeLabel: TaxIncomeType.selfEmployed.summaryLabel,
+        countryLabel: "",
+        primaryRulesPreview: "",
+        indirectTaxNotes: "",
+        indirectTaxRegistrationLabel: "Indirect tax registered",
+        isProfileConfigured: false,
+        base: .empty,
+        simulated: .empty
+    )
+}
+
+public struct FreelanceDeductionsSnapshotDisplay: Equatable {
+    public var totalFormatted: String
+    public var opportunities: [FreelanceDeductionDisplay]
+
+    public static let empty = FreelanceDeductionsSnapshotDisplay(
+        totalFormatted: "—",
+        opportunities: []
+    )
+}
+
+// MARK: - Self-employed OS snapshots
+
+public struct IncomeTaxDisplay: Equatable {
+    public var totalIncomeFormatted: String
+    public var deductibleExpensesFormatted: String
+    public var taxableIncomeFormatted: String
+    public var incomeTaxFormatted: String
+    public var selfEmployedTaxFormatted: String
+    public var indirectTaxNetFormatted: String
+    public var totalEstimatedTaxFormatted: String
+    public var effectiveRatePercent: Int
+    public var ratesConfigured: Bool
+
+    public static let empty = IncomeTaxDisplay(
+        totalIncomeFormatted: "—",
+        deductibleExpensesFormatted: "—",
+        taxableIncomeFormatted: "—",
+        incomeTaxFormatted: "—",
+        selfEmployedTaxFormatted: "—",
+        indirectTaxNetFormatted: "—",
+        totalEstimatedTaxFormatted: "—",
+        effectiveRatePercent: 0,
+        ratesConfigured: false
+    )
+}
+
+public struct QuarterlyTaxDisplay: Equatable {
+    public var quarterLabel: String
+    public var periodRangeLabel: String
+    public var incomeTaxFormatted: String
+    public var selfEmployedTaxFormatted: String
+    public var indirectTaxFormatted: String
+    public var totalDueFormatted: String
+    public var setAsideFormatted: String
+    public var nextPaymentLabel: String
+    public var breakdown: IncomeTaxDisplay
+
+    public static let empty = QuarterlyTaxDisplay(
+        quarterLabel: "—",
+        periodRangeLabel: "—",
+        incomeTaxFormatted: "—",
+        selfEmployedTaxFormatted: "—",
+        indirectTaxFormatted: "—",
+        totalDueFormatted: "—",
+        setAsideFormatted: "—",
+        nextPaymentLabel: "Configure payment schedule",
+        breakdown: .empty
+    )
+}
+
+public struct ComplianceItemDisplay: Identifiable, Equatable {
+    public var id: String
+    public var question: String
+    public var answer: String
+    public var severity: String
+}
+
+public struct ComplianceDisplay: Equatable {
+    public var warnings: [ComplianceItemDisplay]
+    public var faq: [ComplianceItemDisplay]
+
+    public static let empty = ComplianceDisplay(warnings: [], faq: [])
+}
+
+public struct SelfEmployedDashboardDisplay: Equatable {
+    public var incomeFormatted: String
+    public var expensesFormatted: String
+    public var deductibleFormatted: String
+    public var netProfitFormatted: String
+    public var estimatedTaxFormatted: String
+    public var quarterlyDueFormatted: String
+    public var effectiveRatePercent: Int
+    public var runwayMonthsFormatted: String
+    public var hasData: Bool
+
+    public static let empty = SelfEmployedDashboardDisplay(
+        incomeFormatted: "—",
+        expensesFormatted: "—",
+        deductibleFormatted: "—",
+        netProfitFormatted: "—",
+        estimatedTaxFormatted: "—",
+        quarterlyDueFormatted: "—",
+        effectiveRatePercent: 0,
+        runwayMonthsFormatted: "—",
+        hasData: false
+    )
 }

@@ -19,6 +19,7 @@ public final class FreelanceStore: ObservableObject {
     @Published public var projects: [FreelanceProject] = []
     @Published public var receipts: [FreelanceReceipt] = []
     @Published public var taxProfile: FreelanceTaxProfile = FreelanceTaxProfile()
+    @Published public var invoiceSettings: FreelanceInvoiceSettings = FreelanceInvoiceSettings()
 
     private let saveQueue = DispatchQueue(label: "com.buxmuse.freelance.save", qos: .utility)
     private var isLoaded = false
@@ -97,17 +98,19 @@ public final class FreelanceStore: ObservableObject {
             invoices: invoices,
             projects: projects,
             receipts: receipts,
-            taxProfile: taxProfile
+            taxProfile: taxProfile,
+            invoiceSettings: invoiceSettings
         )
     }
 
     public func apply(_ snapshot: FreelanceSnapshot) {
         profile = snapshot.profile
         clients = snapshot.clients
-        invoices = snapshot.invoices
+        invoices = FreelanceInvoiceMaintenance.syncOverdueStatuses(invoices: snapshot.invoices)
         projects = snapshot.projects
         receipts = snapshot.receipts
         taxProfile = snapshot.taxProfile
+        invoiceSettings = snapshot.invoiceSettings
     }
 
     // MARK: - CRUD: Clients
@@ -154,13 +157,13 @@ public final class FreelanceStore: ObservableObject {
 
     public func nextInvoiceNumber() -> String {
         let year = Calendar.current.component(.year, from: Date())
-        let prefix = "INV-\(year)-"
+        let prefix = "\(invoiceSettings.numberPrefix)-\(year)-"
         let existing = invoices
             .map(\.invoiceNumber)
             .filter { $0.hasPrefix(prefix) }
             .compactMap { Int($0.replacingOccurrences(of: prefix, with: "")) }
         let next = (existing.max() ?? 0) + 1
-        return String(format: "%@%04d", prefix, next)
+        return invoiceSettings.formatInvoiceNumber(sequence: next, year: year)
     }
 
     // MARK: - CRUD: Projects
@@ -216,6 +219,19 @@ public final class FreelanceStore: ObservableObject {
         save()
     }
 
+    public func updateInvoiceSettings(_ updated: FreelanceInvoiceSettings) {
+        invoiceSettings = updated
+        save()
+    }
+
+    public func syncOverdueInvoicesIfNeeded() {
+        let synced = FreelanceInvoiceMaintenance.syncOverdueStatuses(invoices: invoices)
+        if synced != invoices {
+            invoices = synced
+            save()
+        }
+    }
+
     // MARK: - Empty defaults
 
     private func applyEmptyDefaults() {
@@ -242,6 +258,7 @@ public final class FreelanceStore: ObservableObject {
             deductionCategories: [],
             paymentSchedule: "annually"
         )
+        invoiceSettings = FreelanceInvoiceSettings()
     }
 
     public func resetAllData() {

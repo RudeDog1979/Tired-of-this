@@ -38,6 +38,23 @@ public enum DeductionStrength: String, Codable, CaseIterable, Identifiable {
     public var id: String { rawValue }
 }
 
+/// How the user primarily earns income — drives which saved tax rules are shown in summaries.
+public enum TaxIncomeType: String, Codable, CaseIterable, Identifiable {
+    case selfEmployed = "Self-employed"
+    case employed = "Employed"
+    case oneOff = "One-off / gig"
+
+    public var id: String { rawValue }
+
+    public var summaryLabel: String {
+        switch self {
+        case .selfEmployed: return "Self-employed tax rules"
+        case .employed: return "Employment tax rules"
+        case .oneOff: return "One-off / gig guidance"
+        }
+    }
+}
+
 // MARK: - Freelance Profile
 
 public struct FreelanceProfile: Codable, Equatable {
@@ -169,6 +186,7 @@ public struct FreelanceInvoice: Codable, Identifiable, Equatable {
     public var taxAmount: Decimal
     public var total: Decimal
     public var vatRate: Decimal? // In percentage, e.g. 20.0
+    public var taxLabel: String
     public var notes: String
     public var paymentDate: Date?
     public var externalReference: String?
@@ -187,6 +205,7 @@ public struct FreelanceInvoice: Codable, Identifiable, Equatable {
         taxAmount: Decimal = 0,
         total: Decimal = 0,
         vatRate: Decimal? = nil,
+        taxLabel: String = "Tax",
         notes: String = "",
         paymentDate: Date? = nil,
         externalReference: String? = nil,
@@ -204,10 +223,38 @@ public struct FreelanceInvoice: Codable, Identifiable, Equatable {
         self.taxAmount = taxAmount
         self.total = total
         self.vatRate = vatRate
+        self.taxLabel = taxLabel
         self.notes = notes
         self.paymentDate = paymentDate
         self.externalReference = externalReference
         self.projectId = projectId
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, clientId, invoiceNumber, issueDate, dueDate, status, currencyCode
+        case lineItems, subtotal, taxAmount, total, vatRate, taxLabel, notes
+        case paymentDate, externalReference, projectId
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        clientId = try c.decode(UUID.self, forKey: .clientId)
+        invoiceNumber = try c.decode(String.self, forKey: .invoiceNumber)
+        issueDate = try c.decode(Date.self, forKey: .issueDate)
+        dueDate = try c.decode(Date.self, forKey: .dueDate)
+        status = try c.decode(InvoiceStatus.self, forKey: .status)
+        currencyCode = try c.decode(String.self, forKey: .currencyCode)
+        lineItems = try c.decode([FreelanceInvoiceLineItem].self, forKey: .lineItems)
+        subtotal = try c.decode(Decimal.self, forKey: .subtotal)
+        taxAmount = try c.decode(Decimal.self, forKey: .taxAmount)
+        total = try c.decode(Decimal.self, forKey: .total)
+        vatRate = try c.decodeIfPresent(Decimal.self, forKey: .vatRate)
+        taxLabel = try c.decodeIfPresent(String.self, forKey: .taxLabel) ?? "Tax"
+        notes = try c.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        paymentDate = try c.decodeIfPresent(Date.self, forKey: .paymentDate)
+        externalReference = try c.decodeIfPresent(String.self, forKey: .externalReference)
+        projectId = try c.decodeIfPresent(UUID.self, forKey: .projectId)
     }
 }
 
@@ -299,6 +346,14 @@ public struct FreelanceReceipt: Codable, Identifiable, Equatable {
     public var linkedProjectId: UUID?
     public var localImagePath: String? // Locally saved scan image path
     public var notes: String
+    public var isBusiness: Bool
+    public var deductiblePercentage: Double
+    public var businessUse: ExpenseBusinessUse
+
+    /// Deductible amount after percentage (computed helper).
+    public var deductibleAmount: Decimal {
+        FreelanceDeductionMath.deductibleAmount(for: self)
+    }
     
     public init(
         id: UUID = UUID(),
@@ -314,7 +369,10 @@ public struct FreelanceReceipt: Codable, Identifiable, Equatable {
         linkedClientId: UUID? = nil,
         linkedProjectId: UUID? = nil,
         localImagePath: String? = nil,
-        notes: String = ""
+        notes: String = "",
+        isBusiness: Bool = true,
+        deductiblePercentage: Double = 100,
+        businessUse: ExpenseBusinessUse = .business
     ) {
         self.id = id
         self.date = date
@@ -330,6 +388,57 @@ public struct FreelanceReceipt: Codable, Identifiable, Equatable {
         self.linkedProjectId = linkedProjectId
         self.localImagePath = localImagePath
         self.notes = notes
+        self.isBusiness = isBusiness
+        self.deductiblePercentage = deductiblePercentage
+        self.businessUse = businessUse
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, date, amount, currencyCode, merchant, category, vatAmount, vatRate
+        case isDeductible, deductionStrength, linkedClientId, linkedProjectId
+        case localImagePath, notes, isBusiness, deductiblePercentage, businessUse
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        date = try c.decode(Date.self, forKey: .date)
+        amount = try c.decode(Decimal.self, forKey: .amount)
+        currencyCode = try c.decode(String.self, forKey: .currencyCode)
+        merchant = try c.decode(String.self, forKey: .merchant)
+        category = try c.decode(String.self, forKey: .category)
+        vatAmount = try c.decodeIfPresent(Decimal.self, forKey: .vatAmount)
+        vatRate = try c.decodeIfPresent(Decimal.self, forKey: .vatRate)
+        isDeductible = try c.decodeIfPresent(Bool.self, forKey: .isDeductible) ?? true
+        deductionStrength = try c.decodeIfPresent(DeductionStrength.self, forKey: .deductionStrength) ?? .strong
+        linkedClientId = try c.decodeIfPresent(UUID.self, forKey: .linkedClientId)
+        linkedProjectId = try c.decodeIfPresent(UUID.self, forKey: .linkedProjectId)
+        localImagePath = try c.decodeIfPresent(String.self, forKey: .localImagePath)
+        notes = try c.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        isBusiness = try c.decodeIfPresent(Bool.self, forKey: .isBusiness) ?? true
+        deductiblePercentage = try c.decodeIfPresent(Double.self, forKey: .deductiblePercentage) ?? 100
+        businessUse = try c.decodeIfPresent(ExpenseBusinessUse.self, forKey: .businessUse) ?? .business
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(date, forKey: .date)
+        try c.encode(amount, forKey: .amount)
+        try c.encode(currencyCode, forKey: .currencyCode)
+        try c.encode(merchant, forKey: .merchant)
+        try c.encode(category, forKey: .category)
+        try c.encodeIfPresent(vatAmount, forKey: .vatAmount)
+        try c.encodeIfPresent(vatRate, forKey: .vatRate)
+        try c.encode(isDeductible, forKey: .isDeductible)
+        try c.encode(deductionStrength, forKey: .deductionStrength)
+        try c.encodeIfPresent(linkedClientId, forKey: .linkedClientId)
+        try c.encodeIfPresent(linkedProjectId, forKey: .linkedProjectId)
+        try c.encodeIfPresent(localImagePath, forKey: .localImagePath)
+        try c.encode(notes, forKey: .notes)
+        try c.encode(isBusiness, forKey: .isBusiness)
+        try c.encode(deductiblePercentage, forKey: .deductiblePercentage)
+        try c.encode(businessUse, forKey: .businessUse)
     }
 }
 
@@ -389,6 +498,49 @@ public struct FreelanceTaxProfile: Codable, Identifiable, Equatable {
     public var deductionCategories: [DeductionCategoryRule]
     public var paymentSchedule: String
 
+    /// Optional JSON preset country (ISO code). Nil = fully custom profile.
+    public var selectedTaxCountry: String?
+    public var customIncomeTax: String?
+    public var customSelfEmployedTax: String?
+    public var customIndirectTax: String?
+    public var customNotes: String?
+    public var taxIncomeType: TaxIncomeType
+    /// User-set effective rates for calculator (never auto-filled from JSON).
+    public var estimatedIncomeTaxRatePercent: Decimal?
+    public var estimatedSelfEmployedRatePercent: Decimal?
+
+    public var effectiveIncomeTax: String { customIncomeTax ?? "" }
+    public var effectiveSelfEmployedTax: String { customSelfEmployedTax ?? "" }
+    public var effectiveIndirectTax: String { customIndirectTax ?? "" }
+    public var effectiveNotes: String { customNotes ?? "" }
+
+    /// Primary rule text for the selected income type (used in hub + sandbox summaries).
+    public var primaryTaxRulesText: String {
+        switch taxIncomeType {
+        case .selfEmployed:
+            if !effectiveSelfEmployedTax.isEmpty { return effectiveSelfEmployedTax }
+            return effectiveIncomeTax
+        case .employed:
+            return effectiveIncomeTax
+        case .oneOff:
+            if !effectiveNotes.isEmpty { return effectiveNotes }
+            return effectiveSelfEmployedTax
+        }
+    }
+
+    public var isTaxProfileConfigured: Bool {
+        !primaryTaxRulesText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, countryCode, regionCode, businessType, vatRegistered
+        case incomeTaxRules, vatRules, deductionCategories, paymentSchedule
+        case selectedTaxCountry, customIncomeTax, customSelfEmployedTax
+        case customIndirectTax, customNotes, taxIncomeType
+        case estimatedIncomeTaxRatePercent, estimatedSelfEmployedRatePercent
+        case customVAT
+    }
+
     public init(
         id: UUID = UUID(),
         countryCode: String = "US",
@@ -398,7 +550,15 @@ public struct FreelanceTaxProfile: Codable, Identifiable, Equatable {
         incomeTaxRules: [TaxBracketRule] = [],
         vatRules: [VatRule] = [],
         deductionCategories: [DeductionCategoryRule] = [],
-        paymentSchedule: String = "annually"
+        paymentSchedule: String = "annually",
+        selectedTaxCountry: String? = nil,
+        customIncomeTax: String? = nil,
+        customSelfEmployedTax: String? = nil,
+        customIndirectTax: String? = nil,
+        customNotes: String? = nil,
+        taxIncomeType: TaxIncomeType = .selfEmployed,
+        estimatedIncomeTaxRatePercent: Decimal? = nil,
+        estimatedSelfEmployedRatePercent: Decimal? = nil
     ) {
         self.id = id
         self.countryCode = countryCode
@@ -409,6 +569,57 @@ public struct FreelanceTaxProfile: Codable, Identifiable, Equatable {
         self.vatRules = vatRules
         self.deductionCategories = deductionCategories
         self.paymentSchedule = paymentSchedule
+        self.selectedTaxCountry = selectedTaxCountry
+        self.customIncomeTax = customIncomeTax
+        self.customSelfEmployedTax = customSelfEmployedTax
+        self.customIndirectTax = customIndirectTax
+        self.customNotes = customNotes
+        self.taxIncomeType = taxIncomeType
+        self.estimatedIncomeTaxRatePercent = estimatedIncomeTaxRatePercent
+        self.estimatedSelfEmployedRatePercent = estimatedSelfEmployedRatePercent
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        countryCode = try container.decode(String.self, forKey: .countryCode)
+        regionCode = try container.decodeIfPresent(String.self, forKey: .regionCode)
+        businessType = try container.decode(BusinessType.self, forKey: .businessType)
+        vatRegistered = try container.decode(Bool.self, forKey: .vatRegistered)
+        incomeTaxRules = try container.decode([TaxBracketRule].self, forKey: .incomeTaxRules)
+        vatRules = try container.decode([VatRule].self, forKey: .vatRules)
+        deductionCategories = try container.decode([DeductionCategoryRule].self, forKey: .deductionCategories)
+        paymentSchedule = try container.decode(String.self, forKey: .paymentSchedule)
+        selectedTaxCountry = try container.decodeIfPresent(String.self, forKey: .selectedTaxCountry)
+        customIncomeTax = try container.decodeIfPresent(String.self, forKey: .customIncomeTax)
+        customSelfEmployedTax = try container.decodeIfPresent(String.self, forKey: .customSelfEmployedTax)
+        customIndirectTax = try container.decodeIfPresent(String.self, forKey: .customIndirectTax)
+            ?? container.decodeIfPresent(String.self, forKey: .customVAT)
+        customNotes = try container.decodeIfPresent(String.self, forKey: .customNotes)
+        taxIncomeType = try container.decodeIfPresent(TaxIncomeType.self, forKey: .taxIncomeType) ?? .selfEmployed
+        estimatedIncomeTaxRatePercent = try container.decodeIfPresent(Decimal.self, forKey: .estimatedIncomeTaxRatePercent)
+        estimatedSelfEmployedRatePercent = try container.decodeIfPresent(Decimal.self, forKey: .estimatedSelfEmployedRatePercent)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(countryCode, forKey: .countryCode)
+        try container.encodeIfPresent(regionCode, forKey: .regionCode)
+        try container.encode(businessType, forKey: .businessType)
+        try container.encode(vatRegistered, forKey: .vatRegistered)
+        try container.encode(incomeTaxRules, forKey: .incomeTaxRules)
+        try container.encode(vatRules, forKey: .vatRules)
+        try container.encode(deductionCategories, forKey: .deductionCategories)
+        try container.encode(paymentSchedule, forKey: .paymentSchedule)
+        try container.encodeIfPresent(selectedTaxCountry, forKey: .selectedTaxCountry)
+        try container.encodeIfPresent(customIncomeTax, forKey: .customIncomeTax)
+        try container.encodeIfPresent(customSelfEmployedTax, forKey: .customSelfEmployedTax)
+        try container.encodeIfPresent(customIndirectTax, forKey: .customIndirectTax)
+        try container.encodeIfPresent(customNotes, forKey: .customNotes)
+        try container.encode(taxIncomeType, forKey: .taxIncomeType)
+        try container.encodeIfPresent(estimatedIncomeTaxRatePercent, forKey: .estimatedIncomeTaxRatePercent)
+        try container.encodeIfPresent(estimatedSelfEmployedRatePercent, forKey: .estimatedSelfEmployedRatePercent)
     }
 }
 
@@ -421,6 +632,7 @@ public struct FreelanceSnapshot: Codable, Equatable {
     public var projects: [FreelanceProject]
     public var receipts: [FreelanceReceipt]
     public var taxProfile: FreelanceTaxProfile
+    public var invoiceSettings: FreelanceInvoiceSettings
 
     public init(
         profile: FreelanceProfile,
@@ -428,7 +640,8 @@ public struct FreelanceSnapshot: Codable, Equatable {
         invoices: [FreelanceInvoice],
         projects: [FreelanceProject],
         receipts: [FreelanceReceipt],
-        taxProfile: FreelanceTaxProfile
+        taxProfile: FreelanceTaxProfile,
+        invoiceSettings: FreelanceInvoiceSettings = FreelanceInvoiceSettings()
     ) {
         self.profile = profile
         self.clients = clients
@@ -436,5 +649,32 @@ public struct FreelanceSnapshot: Codable, Equatable {
         self.projects = projects
         self.receipts = receipts
         self.taxProfile = taxProfile
+        self.invoiceSettings = invoiceSettings
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case profile, clients, invoices, projects, receipts, taxProfile, invoiceSettings
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        profile = try c.decode(FreelanceProfile.self, forKey: .profile)
+        clients = try c.decode([FreelanceClient].self, forKey: .clients)
+        invoices = try c.decode([FreelanceInvoice].self, forKey: .invoices)
+        projects = try c.decode([FreelanceProject].self, forKey: .projects)
+        receipts = try c.decode([FreelanceReceipt].self, forKey: .receipts)
+        taxProfile = try c.decode(FreelanceTaxProfile.self, forKey: .taxProfile)
+        invoiceSettings = try c.decodeIfPresent(FreelanceInvoiceSettings.self, forKey: .invoiceSettings) ?? FreelanceInvoiceSettings()
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(profile, forKey: .profile)
+        try c.encode(clients, forKey: .clients)
+        try c.encode(invoices, forKey: .invoices)
+        try c.encode(projects, forKey: .projects)
+        try c.encode(receipts, forKey: .receipts)
+        try c.encode(taxProfile, forKey: .taxProfile)
+        try c.encode(invoiceSettings, forKey: .invoiceSettings)
     }
 }
