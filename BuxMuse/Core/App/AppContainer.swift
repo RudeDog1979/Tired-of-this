@@ -23,14 +23,32 @@ final class AppContainer: ObservableObject {
     public let goalsSheetCoordinator: GoalsSheetCoordinator
     public let insightsEngine: InsightsEngine
     public let insightsViewModel: InsightsViewModel
-    public let freelanceStore: FreelanceStore
+    public let studioStore: StudioStore
+    public let studioBrain: StudioBrain
+    public let appDataManager: AppDataManager
 
     init() {
         persistence = PersistenceController.shared
-        freelanceStore = FreelanceStore.shared
+        studioStore = StudioStore.shared
         themeManager = ThemeManager()
         appSettingsManager = AppSettingsManager()
         navigationCoordinator = NavigationCoordinator()
+
+        let settingsStore = SettingsStore.shared
+        settingsStore.applyBrandThemesAppearance(to: themeManager)
+        StudioTimerController.shared.attach(store: studioStore)
+        StudioTimerDisplayMonitor.shared.start()
+        StudioTimerController.shared.refreshLiveActivity()
+        studioBrain = StudioBrain(
+            store: studioStore,
+            settings: settingsStore,
+            appSettings: appSettingsManager
+        )
+        appDataManager = AppDataManager(
+            studioStore: studioStore,
+            taxManager: TaxManager.shared,
+            appSettings: appSettingsManager
+        )
 
         let financialEngine: FinancialIntelligenceEngine
         if #available(iOS 26, *) {
@@ -64,9 +82,34 @@ final class AppContainer: ObservableObject {
         )
 
         wirePersistenceSideEffects()
+        migrateLegacyFreelanceLocale()
+        studioBrain.refreshAll()
+        scheduleEngagementRefresh(forceTips: true)
+    }
+
+    func scheduleEngagementRefresh(forceTips: Bool = false) {
+        Task { @MainActor in
+            await brain.refreshEngagement(
+                countryCode: appSettingsManager.selectedCountry.id,
+                settings: SettingsStore.shared,
+                appSettings: appSettingsManager,
+                studioAlerts: studioBrain.hubDisplay.alerts,
+                studioInvoices: studioStore.invoices,
+                taxDeadlineDays: studioBrain.hubDisplay.taxSummary.taxDeadlineDays,
+                forceTips: forceTips
+            )
+        }
     }
 
     private func wirePersistenceSideEffects() {
+        brain.$dashboardSnapshot
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleEngagementRefresh()
+            }
+            .store(in: &cancellables)
+
         navigationCoordinator.objectWillChange
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
@@ -102,12 +145,64 @@ final class AppContainer: ObservableObject {
             }
             .store(in: &cancellables)
 
+        appSettingsManager.$selectedCountry
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.brain.persistPreferences(
+                    navigation: self.navigationCoordinator,
+                    appSettings: self.appSettingsManager
+                )
+                self.scheduleEngagementRefresh(forceTips: true)
+            }
+            .store(in: &cancellables)
+
+        studioBrain.$hubDisplay
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleEngagementRefresh()
+            }
+            .store(in: &cancellables)
+
+        studioStore.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleEngagementRefresh()
+            }
+            .store(in: &cancellables)
+
         SettingsStore.shared.objectWillChange
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.brain.refreshExpenses()
+                guard let self else { return }
+                self.brain.refreshExpenses()
+                self.scheduleEngagementRefresh()
             }
             .store(in: &cancellables)
+    }
+
+    private func migrateLegacyFreelanceLocale() {
+        let migrationKey = "studio_locale_migrated_v1"
+        guard !UserDefaults.standard.bool(forKey: migrationKey) else { return }
+
+        let legacyProfile = studioStore.profile
+        if let country = CountryCatalog.country(for: legacyProfile.countryCode),
+           country.id != appSettingsManager.selectedCountry.id {
+            appSettingsManager.updateCountry(country, suggestCurrency: false)
+        }
+        if let currency = AppSettingsManager.availableCurrencies.first(where: { $0.id == legacyProfile.currencyCode }),
+           currency.id != appSettingsManager.selectedCurrency.id {
+            appSettingsManager.applyCurrency(currency, persist: true)
+        }
+        if legacyProfile.vatRegistered && !studioStore.taxProfile.vatRegistered {
+            var taxProfile = studioStore.taxProfile
+            taxProfile.vatRegistered = true
+            studioStore.updateTaxProfile(taxProfile)
+        }
+
+        UserDefaults.standard.set(true, forKey: migrationKey)
     }
 
 }

@@ -14,9 +14,8 @@ public final class PersistenceController: ObservableObject {
     public static let shared = PersistenceController()
 
     public let container: ModelContainer
+    /// App-wide main-queue context (`container.mainContext`). Never use from background queues.
     public private(set) var context: ModelContext
-
-    private let saveQueue = DispatchQueue(label: "com.buxmuse.persistence.save", qos: .utility)
 
     /// Bumped when SwiftData models change incompatibly (avoids loadIssueModelContainer on old stores).
     private static let storeName = "BuxMuse_v3"
@@ -38,19 +37,48 @@ public final class PersistenceController: ObservableObject {
             UserPreferencesEntity.self,
             ThemeEntity.self
         ])
-        let config = ModelConfiguration(
-            Self.storeName,
-            schema: schema,
-            isStoredInMemoryOnly: inMemory
-        )
+
+        let config: ModelConfiguration
+        if inMemory {
+            config = ModelConfiguration(
+                Self.storeName,
+                schema: schema,
+                isStoredInMemoryOnly: true
+            )
+        } else {
+            let storeURL = Self.prepareOnDiskStoreURL()
+            config = ModelConfiguration(
+                Self.storeName,
+                schema: schema,
+                url: storeURL,
+                allowsSave: true
+            )
+        }
 
         do {
             container = try Self.openContainer(schema: schema, configuration: config)
-            context = ModelContext(container)
+            context = container.mainContext
             context.autosaveEnabled = false
         } catch {
             fatalError("SwiftData container failed: \(error)")
         }
+    }
+
+    /// Ensures on-disk Library folders exist before SwiftData / Core Data open SQLite (fixes errno 2 on first device launch).
+    private static func prepareOnDiskStoreURL() -> URL {
+        let fm = FileManager.default
+        for directory in [FileManager.SearchPathDirectory.applicationSupportDirectory, .cachesDirectory] {
+            guard let url = fm.urls(for: directory, in: .userDomainMask).first else { continue }
+            if fm.fileExists(atPath: url.path) { continue }
+            do {
+                try fm.createDirectory(at: url, withIntermediateDirectories: true)
+            } catch {
+                print("SwiftData: failed to create \(directory) directory: \(error)")
+            }
+        }
+        let supportURL = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? fm.temporaryDirectory
+        return supportURL.appendingPathComponent("\(storeName).store", isDirectory: false)
     }
 
     private static func openContainer(schema: Schema, configuration: ModelConfiguration) throws -> ModelContainer {
@@ -204,12 +232,22 @@ public final class PersistenceController: ObservableObject {
         try context.save()
     }
 
-    func scheduleDebouncedSave(_ block: @escaping @Sendable () throws -> Void) {
-        saveQueue.async {
-            Task { @MainActor in
-                try? block()
-            }
-        }
+    // MARK: - Data control (Settings export / purge)
+
+    func fetchAllExpenseEntities() throws -> [ExpenseEntity] {
+        try context.fetch(FetchDescriptor<ExpenseEntity>())
+    }
+
+    func fetchAllGoalEntities() throws -> [GoalEntity] {
+        try context.fetch(FetchDescriptor<GoalEntity>())
+    }
+
+    func purgeExpensesAndGoals() throws {
+        let expenses = try fetchAllExpenseEntities()
+        expenses.forEach { context.delete($0) }
+        let goals = try fetchAllGoalEntities()
+        goals.forEach { context.delete($0) }
+        try context.save()
     }
 }
 
@@ -220,7 +258,7 @@ extension AppTab {
         switch self {
         case .home: return "home"
         case .expense: return "expense"
-        case .freelance: return "freelance"
+        case .studio: return "studio"
         case .settings: return "settings"
         }
     }
@@ -228,7 +266,8 @@ extension AppTab {
     static func from(storageKey: String) -> AppTab {
         switch storageKey {
         case "expense": return .expense
-        case "freelance": return .freelance
+        case "freelance": return .studio
+        case "studio": return .studio
         case "settings": return .settings
         default: return .home
         }

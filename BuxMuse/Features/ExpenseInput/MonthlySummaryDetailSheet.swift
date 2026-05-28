@@ -78,7 +78,7 @@ struct MonthlySummaryDetailSheet: View {
 
             Text(formatAmount(Decimal(summary.totalSpent)))
                 .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .contentTransition(.numericText())
 
             if let prediction = summary.prediction {
@@ -160,14 +160,7 @@ struct MonthlySummaryDetailSheet: View {
             }
         }
         .padding(20)
-        .background(
-            themeManager.cardFill(for: colorScheme),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-        )
+        .expensesThemedCardChrome(cornerRadius: 20)
     }
 
     private func categoryRow(name: String, value: Double, percentage: Double) -> some View {
@@ -196,7 +189,7 @@ struct MonthlySummaryDetailSheet: View {
                 // Category Name
                 Text(name)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 Spacer()
 
@@ -204,7 +197,7 @@ struct MonthlySummaryDetailSheet: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(formatAmount(Decimal(value)))
                         .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
                     Text(String(format: "%.0f%%", percentage))
                         .font(.caption2.bold())
@@ -259,14 +252,7 @@ struct MonthlySummaryDetailSheet: View {
             }
         }
         .padding(20)
-        .background(
-            themeManager.cardFill(for: colorScheme),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-        )
+        .expensesThemedCardChrome(cornerRadius: 20)
     }
 
     private func merchantRow(index: Int, name: String, value: Double, ratio: Double) -> some View {
@@ -285,11 +271,11 @@ struct MonthlySummaryDetailSheet: View {
                 HStack {
                     Text(name)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Spacer()
                     Text(formatAmount(Decimal(value)))
                         .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 }
 
                 // Visual bar representing size compared to top merchant
@@ -321,7 +307,7 @@ struct MonthlySummaryDetailSheet: View {
                     .foregroundColor(.yellow)
                 Text("BuxMuse Intelligence")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
 
             Text("Your recurring subscriptions account for roughly \(String(format: "%.0f%%", subscriptionPercentage)) of your overall spending. Taking advantage of multi-month prepayments could unlock up to 15% in annual savings across active plans.")
@@ -330,14 +316,7 @@ struct MonthlySummaryDetailSheet: View {
                 .lineSpacing(4)
         }
         .padding(20)
-        .background(
-            themeManager.cardFill(for: colorScheme),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-        )
+        .expensesThemedCardChrome(cornerRadius: 20)
     }
 
     // Utility icons based on category names

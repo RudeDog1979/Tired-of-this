@@ -45,7 +45,7 @@ struct SubscriptionDetailView: View {
                                 
                                 Image(systemName: "chevron.left")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }
                         }
                         
@@ -53,7 +53,7 @@ struct SubscriptionDetailView: View {
                         
                         Text(detail.info.merchantName)
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         
                         Spacer()
                         
@@ -78,7 +78,7 @@ struct SubscriptionDetailView: View {
                             VStack(spacing: 4) {
                                 Text(appSettingsManager.format(detail.info.cost.value))
                                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 
                                 Text(detail.info.billingCycle.displayName)
                                     .font(.system(size: 13, weight: .bold))
@@ -104,7 +104,7 @@ struct SubscriptionDetailView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("PRICE HISTORY")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                 .kerning(1.2)
                             
                             ZStack {
@@ -176,7 +176,7 @@ struct SubscriptionDetailView: View {
                                         .foregroundColor(.red)
                                     Text(risk.description)
                                         .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
                                     Spacer()
@@ -197,7 +197,7 @@ struct SubscriptionDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("BUDGET IMPACTS IF CANCELLED")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                             .kerning(1.2)
                         
                         HStack(spacing: 16) {
@@ -211,7 +211,7 @@ struct SubscriptionDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("HOW TO CANCEL")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                             .kerning(1.2)
                         
                         Text(detail.cancellationSteps)
@@ -232,7 +232,7 @@ struct SubscriptionDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("INTELLIGENCE INSIGHTS")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                             .kerning(1.2)
                         
                         VStack(alignment: .leading, spacing: 14) {
@@ -244,7 +244,7 @@ struct SubscriptionDetailView: View {
                                 Divider().opacity(0.08)
                                 Text("Suggested Alternatives:")
                                     .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 
                                 ForEach(detail.alternatives, id: \.self) { alt in
                                     HStack(spacing: 8) {

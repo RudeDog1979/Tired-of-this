@@ -1,0 +1,321 @@
+{
+  "regions": {
+    "ES": {
+      "home_tip": "Para vuelos económicos, busca tarifas los martes o miércoles por la tarde; siempre usa el modo incógnito y considera aeropuertos alternativos para evitar tarifas ocultas.",
+      "scam": {
+        "title": "Estafa del 'Falso Soporte Técnico'",
+        "desc": "Los estafadores llaman haciéndose pasar por soporte técnico de Microsoft o tu banco, pidiendo acceso remoto a tu ordenador o datos bancarios. Nunca concedas acceso ni reveles información personal."
+      },
+      "alert": {
+        "title": "Alerta de Phishing Bancario por SMS",
+        "desc": "Cuidado con SMS que piden actualizar datos bancarios con un enlace sospechoso; son intentos de phishing para robar tus credenciales."
+      },
+      "ticker": [
+        "Inflación en la eurozona se modera ligeramente en mayo.",
+        "El Banco Central Europeo evalúa próximas subidas de tipos."
+      ]
+    },
+    "PL": {
+      "home_tip": "Aby znaleźć tanie loty, szukaj we wtorki lub środy po południu; zawsze korzystaj z trybu incognito i rozważ loty z alternatywnych lotnisk, aby uniknąć ukrytych opłat.",
+      "scam": {
+        "title": "Oszustwo 'Na Paczkę'",
+        "desc": "Otrzymujesz SMS-a z prośbą o dopłatę do przesyłki z linkiem do fałszywej strony. Celem jest wyłudzenie danych karty lub dostępu do bankowości."
+      },
+      "alert": {
+        "title": "Ostrożnie z Fałszywymi Inwestycjami",
+        "desc": "Uważaj na oferty 'szybkich zysków' z kryptowalut lub akcji, które obiecują nierealne zwroty; często to piramidy finansowe."
+      },
+      "ticker": [
+        "Złoty umacnia się wobec euro i dolara.",
+        "Rząd ogłasza nowe programy wsparcia dla małych firm."
+      ]
+    },
+    "FR": {
+      "home_tip": "Pour des vols économiques, recherchez les tarifs le mardi ou le mercredi après-midi; utilisez toujours la navigation privée et envisagez des aéroports alternatifs pour éviter les frais cachés.",
+      "scam": {
+        "title": "Arnaque au Faux Conseiller Bancaire",
+        "desc": "Des appels inattendus de 'votre banque' demandant vos codes pour 'sécuriser' votre compte sont des tentatives de fraude. Ne donnez jamais vos identifiants."
+      },
+      "alert": {
+        "title": "Vulnérabilité Critique dans les Mises à Jour Logiciel",
+        "desc": "Assurez-vous que tous vos logiciels sont à jour pour patcher les vulnérabilités de sécurité récentes. Les cybercriminels exploitent souvent les failles connues."
+      },
+      "ticker": [
+        "L'économie française ralentit, prévisions de croissance revues à la baisse.",
+        "Nouvelles mesures fiscales pour soutenir le pouvoir d'achat."
+      ]
+    },
+    "DE": {
+      "home_tip": "Für günstige Flüge suchen Sie dienstags oder mittwochs nachmittags nach Tarifen; nutzen Sie immer den Inkognito-Modus und ziehen Sie alternative Flughäfen in Betracht, um versteckte Gebühren zu vermeiden.",
+      "scam": {
+        "title": "Phishing-Angriffe über DHL/Post",
+        "desc": "Seien Sie vorsichtig bei E-Mails oder SMS, die Sie auffordern, Ihre Lieferadresse zu bestätigen oder Zollgebühren zu zahlen. Diese führen oft zu gefälschten Websites."
+      },
+      "alert": {
+        "title": "Erhöhte Gefahr durch Ransomware-Angriffe",
+        "desc": "Sichern Sie Ihre Daten regelmäßig extern und öffnen Sie keine unbekannten E-Mail-Anhänge, um sich vor Erpressersoftware zu schützen."
+      },
+      "ticker": [
+        "Inflation in Deutschland leicht gesunken, EZB unter Druck.",
+        "Arbeitsmarkt stabilisiert sich trotz globaler Unsicherheiten."
+      ]
+    },
+    "PT": {
+      "home_tip": "Para voos económicos, procure tarifas às terças ou quartas-feiras à tarde; use sempre o modo incógnito e considere aeroportos alternativos para evitar taxas ocultas.",
+      "scam": {
+        "title": "Golpe do Falso Suporte de TI",
+        "desc": "Indivíduos se passam por técnicos de TI de grandes empresas, solicitando acesso remoto ao seu computador para 'resolver problemas' e roubar dados."
+      },
+      "alert": {
+        "title": "Ataques de 'Smishing' por SMS",
+        "desc": "Não clique em links em SMS que pedem verificação de dados bancários ou prometem prémios; são tentativas de roubo de informações pessoais."
+      },
+      "ticker": [
+        "Taxa de juros básica permanece inalterada pelo Banco Central.",
+        "Mercado de trabalho português mostra sinais de recuperação."
+      ]
+    },
+    "IT": {
+      "home_tip": "Per voli economici, cerca tariffe il martedì o il mercoledì pomeriggio; usa sempre la modalità in incognito e valuta aeroporti alternativi per evitare costi nascosti.",
+      "scam": {
+        "title": "Truffa del Falso Investimento Online",
+        "desc": "Attenzione a piattaforme di investimento online che promettono rendimenti irrealistici; sono spesso schemi Ponzi o truffe per estorcere denaro."
+      },
+      "alert": {
+        "title": "Campagne di Phishing tramite PEC",
+        "desc": "Diffidate da email PEC che sembrano provenire da enti pubblici e richiedono dati personali o pagamenti urgenti; sono spesso fraudolente."
+      },
+      "ticker": [
+        "L'inflazione italiana rallenta, impatto sul potere d'acquisto.",
+        "Il governo annuncia nuove misure per il bonus casa."
+      ]
+    },
+    "NL": {
+      "home_tip": "Voor voordelige vluchten zoekt u dinsdag- of woensdagmiddag naar prijzen; gebruik altijd de incognitomodus en overweeg alternatieve luchthavens om verborgen kosten te vermijden.",
+      "scam": {
+        "title": "CEO-Fraude (Whaling)",
+        "desc": "Criminelen doen zich voor als CEO van een bedrijf en instrueren medewerkers om grote bedragen over te maken naar valse rekeningen. Controleer altijd via een tweede kanaal."
+      },
+      "alert": {
+        "title": "Toegenomen Risico op Accountovernames",
+        "desc": "Gebruik unieke, sterke wachtwoorden en schakel overal tweefactorauthenticatie in om uw online accounts te beveiligen."
+      },
+      "ticker": [
+        "Nederlandse economie krimpt licht in eerste kwartaal.",
+        "Huizenprijzen stabiliseren na periode van sterke stijging."
+      ]
+    },
+    "SE": {
+      "home_tip": "För billiga flyg, sök efter priser på tisdagar eller onsdagar eftermiddagar; använd alltid inkognitoläge och överväg alternativa flygplatser för att undvika dolda avgifter.",
+      "scam": {
+        "title": "Bedrägerier med Falska SMS om Paketleveranser",
+        "desc": "Få inte panik över SMS som ber dig betala en liten avgift eller uppdatera leveransinformation för ett paket; dessa leder ofta till phishing."
+      },
+      "alert": {
+        "title": "Dataintrång hos Stora Företag – Byt Lösenord!",
+        "desc": "Om du får besked om ett dataintrång hos en tjänst du använder, byt omedelbart lösenordet, särskilt om du återanvänder det."
+      },
+      "ticker": [
+        "Riksbanken höjer styrräntan ytterligare för att bekämpa inflationen.",
+        "Arbetslösheten sjunker något trots ekonomisk avmattning."
+      ]
+    },
+    "NO": {
+      "home_tip": "For rimelige flyreiser, søk etter priser tirsdag eller onsdag ettermiddag; bruk alltid inkognitomodus og vurder alternative flyplasser for å unngå skjulte avgifter.",
+      "scam": {
+        "title": "Spoofing-svindel (Bank-ID)",
+        "desc": "Kriminelle ringer og utgir seg for å være fra banken din, ber deg bruke BankID for å 'bekrefte' noe, og tømmer kontoen din. Banken din vil aldri be deg om dette."
+      },
+      "alert": {
+        "title": "Falske Investeringsplattformer på Sosiale Medier",
+        "desc": "Vær skeptisk til annonser på sosiale medier som lover ekstremt høy avkastning på investeringer; disse er nesten alltid svindel."
+      },
+      "ticker": [
+        "Oljeprisen stiger, positivt for norsk økonomi.",
+        "Norges Bank holder renten uendret etter siste møte."
+      ]
+    },
+    "DK": {
+      "home_tip": "For billige flyrejser, søg efter priser tirsdag eller onsdag eftermiddag; brug altid inkognitotilstand og overvej alternative lufthavne for at undgå skjulte gebyrer.",
+      "scam": {
+        "title": "Svindel med Skattevæsenet (Phishing)",
+        "desc": "Falske e-mails eller SMS udgiver sig for at være fra Skat og beder dig klikke på et link for at modtage refusion eller betale manglende skat."
+      },
+      "alert": {
+        "title": "Øget Aktivitet af Malware Via Falske Apps",
+        "desc": "Download kun apps fra officielle app-butikker; falske apps kan indeholde malware, der stjæler dine data."
+      },
+      "ticker": [
+        "Dansk inflation falder, men forbrugerpriser forbliver høje.",
+        "Regeringen præsenterer ny grøn investeringspakke."
+      ]
+    },
+    "FI": {
+      "home_tip": "Edullisia lentoja varten etsi hintoja tiistai- tai keskiviikkoiltapäivisin; käytä aina incognito-tilaa ja harkitse vaihtoehtoisia lentokenttiä piilokulujen välttämiseksi.",
+      "scam": {
+        "title": "Puhelinhuijaukset: Tekninen Tuki",
+        "desc": "Huijarit soittavat ja esiintyvät teknisenä tukena, pyytäen etäkäyttöä tietokoneeseesi tai pankkitunnuksiasi. Älä koskaan anna niitä."
+      },
+      "alert": {
+        "title": "Varo huijausviestejä pankkien nimissä",
+        "desc": "Pankit eivät koskaan kysy verkkopankkitunnuksia tai kortin tietoja sähköpostitse tai tekstiviestillä. Ole varovainen epäilyttävien linkkien kanssa."
+      },
+      "ticker": [
+        "Suomen talouskasvu hidastuu ennakoitua enemmän.",
+        "Hallitus valmistelee uusia työllisyystoimia."
+      ]
+    },
+    "RU": {
+      "home_tip": "Для экономичных рейсов ищите билеты во вторник или среду после обеда; всегда используйте режим инкогнито и рассматривайте альтернативные аэропорты, чтобы избежать скрытых сборов.",
+      "scam": {
+        "title": "Мошенничество 'Ваш банк'",
+        "desc": "Звонки от 'службы безопасности банка' с просьбой срочно перевести деньги на 'безопасный счет' – это классическая схема мошенничества. Ваш банк никогда так не делает."
+      },
+      "alert": {
+        "title": "Внимание: Поддельные онлайн-магазины",
+        "desc": "При покупках в интернете проверяйте репутацию магазина и используйте безопасные способы оплаты. Многие сайты могут быть фишинговыми."
+      },
+      "ticker": [
+        "Рубль укрепился на фоне стабилизации мировых рынков.",
+        "Центробанк анонсировал снижение ключевой ставки."
+      ]
+    },
+    "UA": {
+      "home_tip": "Для економних рейсів шукайте квитки у вівторок або середу вдень; завжди використовуйте режим інкогніто та розглядайте альтернативні аеропорти, щоб уникнути прихованих комісій.",
+      "scam": {
+        "title": "Шахрайство з 'Соціальними Виплатами'",
+        "desc": "Остерігайтеся повідомлень або дзвінків, що пропонують фальшиві соціальні виплати, для отримання яких потрібно ввести дані банківської картки."
+      },
+      "alert": {
+        "title": "Кібератака на державні ресурси",
+        "desc": "Будьте пильні щодо підозрілих електронних листів з посиланнями на державні сайти; перевіряйте URL-адреси перед переходом."
+      },
+      "ticker": [
+        "Гривня зміцнюється після нового траншу міжнародної допомоги.",
+        "Уряд розглядає програми підтримки малого бізнесу."
+      ]
+    },
+    "TR": {
+      "home_tip": "Ekonomik uçuşlar için Salı veya Çarşamba öğleden sonra bilet arayın; her zaman gizli modu kullanın ve gizli ücretlerden kaçınmak için alternatif havalimanlarını düşünün.",
+      "scam": {
+        "title": "Sahte Banka Müşteri Hizmetleri Dolandırıcılığı",
+        "desc": "Telefonla arayıp banka çalışanı gibi davranarak bilgilerinizi veya şifrenizi isteyen kişilere itibar etmeyin. Bankalar şifre istemez."
+      },
+      "alert": {
+        "title": "Kimlik Avı (Phishing) E-postalarına Dikkat",
+        "desc": "E-posta ile gelen, kişisel bilgilerinizi veya banka şifrelerinizi isteyen linklere tıklamayın. Bu tür e-postalar genellikle kimlik avıdır."
+      },
+      "ticker": [
+        "Enflasyon beklentilerin üzerinde, TCMB faiz artırımına gidebilir.",
+        "Yeni konut kredisi paketleri piyasayı canlandırmaya hazırlanıyor."
+      ]
+    },
+    "JP": {
+      "home_tip": "航空券をお得に予約するには、火曜日または水曜日の午後に料金を検索しましょう。隠れた手数料を避けるため、常にシークレットモードを使い、代替空港も検討してください。",
+      "scam": {
+        "title": "オレオレ詐欺（なりすまし詐欺）",
+        "desc": "家族や親戚を装い、緊急の金銭要求をしてくる詐欺が増えています。必ず本人に直接確認し、安易に送金しないようにしましょう。"
+      },
+      "alert": {
+        "title": "不審なSMSメッセージ（スミッシング）に注意",
+        "desc": "身に覚えのない配送通知や未払い請求のSMSに記載されたリンクはクリックしないでください。個人情報詐取の可能性があります。"
+      },
+      "ticker": [
+        "日経平均株価、一時3万円台を回復。",
+        "円安進行、政府・日銀の動向に注目集まる。"
+      ]
+    },
+    "KR": {
+      "home_tip": "저렴한 항공권을 찾으려면 화요일 또는 수요일 오후에 검색하세요. 숨겨진 요금을 피하기 위해 항상 시크릿 모드를 사용하고 대체 공항도 고려해보세요.",
+      "scam": {
+        "title": "보이스피싱 (정부기관 사칭)",
+        "desc": "정부기관이나 금융기관을 사칭하여 개인정보나 계좌 이체를 요구하는 전화가 늘고 있습니다. 절대 개인정보를 알려주거나 돈을 보내지 마세요."
+      },
+      "alert": {
+        "title": "피싱 이메일 및 스미싱 문자 주의보",
+        "desc": "출처가 불분명한 이메일이나 문자 메시지의 링크를 클릭하지 마세요. 개인 금융 정보 탈취를 목적으로 하는 피싱일 수 있습니다."
+      },
+      "ticker": [
+        "코스피 지수, 외국인 매수세에 상승 마감.",
+        "정부, 청년층 주거 안정 대책 발표."
+      ]
+    },
+    "CN": {
+      "home_tip": "想预订便宜机票，请在周二或周三下午搜索价格；务必使用无痕模式，并考虑备用机场以避免隐藏费用。",
+      "scam": {
+        "title": "虚假投资理财诈骗",
+        "desc": "警惕任何承诺高额回报、低风险的投资项目，特别是通过陌生人推荐的平台。许多是“杀猪盘”等骗局。"
+      },
+      "alert": {
+        "title": "钓鱼网站和恶意软件威胁",
+        "desc": "不点击不明链接，不下载未知来源的软件。定期更新操作系统和杀毒软件，保护个人数据安全。"
+      },
+      "ticker": [
+        "中国经济一季度增长超预期，消费市场回暖。",
+        "央行发布最新金融数据，M2增速放缓。"
+      ]
+    },
+    "AE": {
+      "home_tip": "لرحلات جوية اقتصادية، ابحث عن الأسعار بعد ظهر يوم الثلاثاء أو الأربعاء؛ استخدم دائمًا وضع التصفح المتخفي وفكر في المطارات البديلة لتجنب الرسوم الخفية.",
+      "scam": {
+        "title": "احتيال الرسائل النصية 'فوز بجائزة'",
+        "desc": "كن حذرًا من الرسائل النصية التي تبلغك بفوزك بجائزة تتطلب دفع رسوم أو مشاركة معلومات شخصية. إنها غالبًا عمليات احتيال."
+      },
+      "alert": {
+        "title": "تنبيه أمني: التصيد الاحتيالي عبر البريد الإلكتروني",
+        "desc": "لا تفتح رسائل البريد الإلكتروني المشبوهة أو تنقر على الروابط التي تطلب معلوماتك المصرفية؛ البنوك لا تطلب هذه التفاصيل عبر البريد."
+      },
+      "ticker": [
+        "أسعار النفط العالمية تشهد ارتفاعًا مستمرًا.",
+        "الإمارات تعلن عن مبادرات جديدة لدعم القطاع الخاص."
+      ]
+    },
+    "US": {
+      "home_tip": "For cheaper flights, search for fares on Tuesday or Wednesday afternoons; always use incognito mode and consider alternative airports to avoid sneaky fees.",
+      "scam": {
+        "title": "Grandparent Scam",
+        "desc": "Scammers call elderly individuals, posing as a grandchild in distress needing urgent money for bail or medical emergencies. Always verify the story with other family members."
+      },
+      "alert": {
+        "title": "IRS Impersonation Phone Calls",
+        "desc": "The IRS will never call to demand immediate payment, threaten arrest, or ask for credit/debit card numbers over the phone. Hang up on such calls."
+      },
+      "ticker": [
+        "Inflation cools slightly, Fed rate hike expectations shift.",
+        "Tech stocks rally as quarterly earnings beat forecasts."
+      ]
+    },
+    "DEFAULT": {
+      "home_tip": "For cheaper flights, search for fares on Tuesday or Wednesday afternoons; always use incognito mode and consider alternative airports to avoid sneaky fees.",
+      "scam": {
+        "title": "Romance Scams on Dating Apps",
+        "desc": "Be wary of individuals on dating apps who quickly express strong feelings and then ask for money due to a sudden emergency or investment opportunity."
+      },
+      "alert": {
+        "title": "Phishing via Social Media Direct Messages",
+        "desc": "Exercise caution with unsolicited DMs on social media containing links, even from known contacts, as accounts can be compromised."
+      },
+      "ticker": [
+        "Global markets show mixed reactions to economic data.",
+        "Cryptocurrency regulations tightening in several countries."
+      ]
+    },
+    "IN": {
+      "home_tip": "सस्ते फ्लाइट टिकट के लिए मंगल या बुध दोपहर में किराए खोजें; हमेशा इनकॉग्निटो मोड का उपयोग करें और छिपे शुल्क से बचने के लिए वैकल्पिक हवाई अड्डों पर विचार करें।",
+      "scam": {
+        "title": "नकली बैंक सपोर्ट घोटाला",
+        "desc": "धोखेबाज अक्सर बैंक या तकनीकी सहायता का रूप धारण करके रिमोट एक्सेस या OTP मांगते हैं। कभी भी अपना पिन, OTP या कार्ड विवरण साझा न करें।"
+      },
+      "alert": {
+        "title": "SMS फिशिंग (स्मिशिंग) चेतावनी",
+        "desc": "बैंक अपडेट या कैशबैक के नाम पर आने वाले संदिग्ध SMS लिंक पर क्लिक न करें — ये अक्सर खाता खाली करने के लिए होते हैं।"
+      },
+      "ticker": [
+        "भारतीय अर्थव्यवस्था में उपभोक्ता खर्च में मजबूती के संकेत।",
+        "RBI नीतिगत दरों पर बाजार की नजर।"
+      ]
+    }
+  },
+  "updatedAt": "2026-05-27T07:12:22Z",
+  "version": 4
+}

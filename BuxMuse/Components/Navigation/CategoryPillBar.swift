@@ -13,6 +13,8 @@ struct CategoryPillBar: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @Binding var activeCategory: String
     @Binding var isExpanded: Bool
+    /// Home dashboard preview — slightly stronger theme wash on the pill track and selection chip.
+    var usesDashboardTint: Bool = false
 
     private let categories = ["Expenses", "Subscriptions", "Goals", "Insights"]
     private let pillSpring = Animation.buxLiquidSpring
@@ -22,10 +24,15 @@ struct CategoryPillBar: View {
     var body: some View {
         HStack(spacing: 0) {
             ZStack(alignment: .leading) {
-                // Shell — single capsule; grows with expanded width (no fade-in tray)
-                Capsule()
-                    .fill(themeManager.pillTrackFill(for: colorScheme))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ZStack {
+                    Capsule()
+                        .fill(themeManager.pillTrackFill(for: colorScheme))
+                    if usesDashboardTint {
+                        Capsule()
+                            .fill(DashboardThemeTint.pillTrackWash(themeManager: themeManager, colorScheme: colorScheme))
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 HStack(spacing: 0) {
                     ForEach(Array(categories.enumerated()), id: \.element) { index, category in
@@ -50,6 +57,15 @@ struct CategoryPillBar: View {
         .fixedSize(horizontal: !isExpanded, vertical: true)
         .compositingGroup()
         .clipShape(Capsule())
+        .overlay {
+            Capsule()
+                .stroke(
+                    usesDashboardTint
+                        ? DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme)
+                        : (colorScheme == .dark ? Color.clear : Color.black.opacity(0.10)),
+                    lineWidth: 1
+                )
+        }
         .shadow(
             color: isExpanded ? .clear : themeManager.pillFloatingShadow(for: colorScheme),
             radius: isExpanded ? 0 : 10,
@@ -86,7 +102,9 @@ struct CategoryPillBar: View {
                     Capsule()
                         .fill(
                             isExpanded
-                                ? themeManager.pillActiveChipFill(for: colorScheme)
+                                ? (usesDashboardTint
+                                    ? DashboardThemeTint.pillActiveChipFill(themeManager: themeManager, colorScheme: colorScheme)
+                                    : themeManager.pillActiveChipFill(for: colorScheme))
                                 : Color.clear
                         )
                         .matchedGeometryEffect(id: "activePillBg", in: pillNamespace)
@@ -142,5 +160,13 @@ extension ThemeManager {
             return (Color.black.opacity(0.2), 12, 6)
         }
         return (Color.black.opacity(0.06), 14, 6)
+    }
+
+    /// Expense list rows — lighter than hero; keeps cards off the mesh background.
+    func listCardShadow(for colorScheme: ColorScheme) -> (color: Color, radius: CGFloat, y: CGFloat) {
+        if colorScheme == .dark {
+            return (Color.black.opacity(0.28), 10, 5)
+        }
+        return (Color.black.opacity(0.07), 8, 4)
     }
 }

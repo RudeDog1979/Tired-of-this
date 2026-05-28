@@ -13,14 +13,24 @@ public final class BuxMuseBrain: ObservableObject {
     @Published public private(set) var dashboardSnapshot: DashboardSnapshot = .empty
     @Published public private(set) var subscriptionHubSnapshot: SubscriptionHubSnapshot = .empty
     @Published public private(set) var expenseInteractionSnapshot: ExpenseInteractionDisplay = .empty
+    /// Expenses tab list source — always loaded on the main actor (never via background `@Query`).
+    @Published private(set) var expenseRecords: [ExpenseRecord] = []
     @Published public private(set) var isHydrated: Bool = false
 
+    @Published public var dailyTipDisplay: DailyTipDisplay = .empty
+    @Published public var notificationInboxDisplay: NotificationInboxDisplay = .empty
+    @Published public var tipNeedsAttention: Bool = false
+    @Published public var tipPulseToken: Int = 0
+
     let persistence: PersistenceController
+    let tipsEngine = BuxTipsEngine()
+    let inboxEngine = BuxNotificationInboxEngine()
+    var didPulseTipThisSession = false
     public let financialBridge: FinancialEngineBridge
     public let goalsEngine: GoalsEngine
     public let insightsEngine: InsightsEngine
+    let merchantBrain: MerchantBrain
 
-    private let computeQueue = DispatchQueue(label: "com.buxmuse.brain.compute", qos: .userInitiated)
     private var saveWorkItem: DispatchWorkItem?
     private var snapshotWorkItem: DispatchWorkItem?
     private var cancellables = Set<AnyCancellable>()
@@ -38,6 +48,10 @@ public final class BuxMuseBrain: ObservableObject {
         self.financialBridge = financialBridge
         self.goalsEngine = goalsEngine
         self.insightsEngine = insightsEngine
+        self.merchantBrain = MerchantBrain(
+            persistence: persistence,
+            financialEngine: financialBridge.engine
+        )
 
         NotificationCenter.default.publisher(for: .buxMuseFinancialDataDidChange)
             .receive(on: RunLoop.main)
@@ -88,9 +102,10 @@ public final class BuxMuseBrain: ObservableObject {
             print("Brain hydration error: \(error)")
         }
 
+        reloadExpenseRecordsFromStore()
         refreshSnapshotsImmediately()
-        if let records = try? persistence.fetchAllExpenseRecords() {
-            updateExpenseInteractionSnapshot(records: records, currency: appSettings.selectedCurrency)
+        if !expenseRecords.isEmpty {
+            updateExpenseInteractionSnapshot(records: expenseRecords, currency: appSettings.selectedCurrency)
         }
         isHydrated = true
     }
@@ -116,19 +131,20 @@ public final class BuxMuseBrain: ObservableObject {
         do {
             let transactions = try persistence.fetchAllExpenses()
             loadTransactionsIntoEngine(transactions)
+            reloadExpenseRecordsFromStore()
             refreshSnapshotsImmediately()
             financialBridge.objectWillChange.send()
-            
-            // Recompute expense interaction display
-            Task {
-                let display = await generateExpenseInteractionDisplay()
-                await MainActor.run {
-                    self.expenseInteractionSnapshot = display
-                }
+
+            Task { @MainActor in
+                expenseInteractionSnapshot = await generateExpenseInteractionDisplay()
             }
         } catch {
             print("refreshExpenses failed: \(error)")
         }
+    }
+
+    private func reloadExpenseRecordsFromStore() {
+        expenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
     }
 
     @discardableResult
@@ -163,10 +179,19 @@ public final class BuxMuseBrain: ObservableObject {
     }
 
     @discardableResult
-    func saveExpenseRecord(_ record: ExpenseRecord) throws -> ExpenseRecord {
+    func saveExpenseRecord(_ record: ExpenseRecord, merchantSelection: MerchantSelection? = nil) throws -> ExpenseRecord {
         var working = record
         let userDeclaredSubscription = working.isSubscriptionLike || working.isTrial
         let all = (try? persistence.fetchAllExpenseRecords()) ?? []
+        let normalizedMerchant = MerchantLogoEngine.normalizeMerchantName(working.merchantName)
+        if SettingsStore.shared.isSubscriptionCancelled(normalizedMerchant: normalizedMerchant) {
+            working.isSubscriptionLike = false
+            working.isTrial = false
+            working.nextExpectedDate = nil
+            working.subscriptionStartDate = nil
+            working.trialEndDate = nil
+            working.renewalReminderDays = nil
+        }
         let subs = financialEngine.activeSubscriptions()
         let analysis = ExpenseIntelligenceEngine.analyze(record: working, allRecords: all, activeSubscriptions: subs)
         working.isRecurring = analysis.isRecurring
@@ -184,9 +209,9 @@ public final class BuxMuseBrain: ObservableObject {
         }
         working.heatZoneBucket = analysis.heatZoneBucket
 
-        let saved = try persistence.upsertExpenseRecord(working)
+        let saved = try persistence.upsertExpenseRecord(working, merchantSelection: merchantSelection)
         refreshExpenses()
-        Task {
+        Task { @MainActor in
             await ExpenseRenewalReminderScheduler.schedule(for: saved)
         }
         return saved
@@ -197,8 +222,26 @@ public final class BuxMuseBrain: ObservableObject {
         refreshExpenses()
     }
 
-    public func changeExpenseCategory(id: UUID, category: TransactionCategory) throws {
-        try persistence.updateExpenseCategory(id: id, category: category)
+    public func changeExpenseCategory(id: UUID, category: TransactionCategory, categoryId: UUID? = nil) throws {
+        try persistence.updateExpenseCategory(id: id, category: category, categoryId: categoryId)
+        refreshExpenses()
+    }
+
+    public func cancelSubscription(merchantName: String) throws {
+        let normalized = MerchantLogoEngine.normalizeMerchantName(merchantName)
+        SettingsStore.shared.registerCancelledSubscription(normalizedMerchant: normalized)
+
+        let records = (try? persistence.fetchAllExpenseRecords()) ?? []
+        for var record in records where MerchantLogoEngine.normalizeMerchantName(record.merchantName) == normalized {
+            record.isSubscriptionLike = false
+            record.isTrial = false
+            record.nextExpectedDate = nil
+            record.subscriptionStartDate = nil
+            record.trialEndDate = nil
+            record.renewalReminderDays = nil
+            ExpenseRenewalReminderScheduler.cancel(for: record.id)
+            _ = try persistence.upsertExpenseRecord(record)
+        }
         refreshExpenses()
     }
 
@@ -274,20 +317,34 @@ public final class BuxMuseBrain: ObservableObject {
 
     public func scheduleSnapshotRefresh() {
         snapshotWorkItem?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            self?.rebuildSnapshotsOffMain()
+        let work = DispatchWorkItem { @MainActor [weak self] in
+            self?.rebuildSnapshots()
         }
         snapshotWorkItem = work
-        computeQueue.asyncAfter(deadline: .now() + 0.05, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: work)
     }
 
     private func refreshSnapshotsImmediately() {
-        rebuildSnapshotsOffMain()
+        rebuildSnapshots()
     }
 
-    private func rebuildSnapshotsOffMain() {
+    private func rebuildSnapshots() {
         let txs = financialBridge.engine.allTransactions().sorted { $0.date > $1.date }
-        let recent = Array(txs.prefix(5))
+        let expenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
+        let recordsById = Dictionary(uniqueKeysWithValues: expenseRecords.map { ($0.id, $0) })
+        let recent = Array(txs.prefix(5)).map { tx in
+            let record = recordsById[tx.id]
+            let emotion = record?.emotion
+            return DashboardRecentTransaction(
+                id: tx.id,
+                date: tx.date,
+                amount: tx.amount,
+                merchantName: tx.merchantName,
+                category: tx.category,
+                emotion: emotion,
+                emotionSymbol: emotion.flatMap { EmotionalTaggingEngine.tag(for: $0)?.symbol }
+            )
+        }
         let subs = financialBridge.engine.activeSubscriptions()
         let currency = txs.first?.amount.currencyCode
             ?? subs.first?.cost.currencyCode
@@ -317,13 +374,22 @@ public final class BuxMuseBrain: ObservableObject {
             let activeProfile = SettingsStore.shared.customBudgetProfiles.first(where: { $0.isActive })
             activeBudgetName = activeProfile?.name
             activeBudgetLimit = activeProfile?.targetAmount ?? 0
-            
+
+            let categoryRecords = (try? persistence.fetchAllCategoryRecords()) ?? []
+            let expenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
+            let recordsById = Dictionary(uniqueKeysWithValues: expenseRecords.map { ($0.id, $0) })
+
             var spent: Decimal = 0
             if let activeProfile {
                 for category in activeProfile.categories {
                     let categorySpent = thisMonthTxs
                         .filter { tx in
-                            tx.category.displayName.localizedCaseInsensitiveCompare(category.name) == .orderedSame
+                            Self.transactionMatchesEnvelopeCategory(
+                                tx,
+                                envelopeName: category.name,
+                                recordsById: recordsById,
+                                categoryRecords: categoryRecords
+                            )
                         }
                         .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
                     spent += categorySpent
@@ -367,14 +433,9 @@ public final class BuxMuseBrain: ObservableObject {
             activeBudgetSpent: activeBudgetSpent
         )
 
-        computeQueue.async { [weak self] in
-            guard let self else { return }
-            Task { @MainActor in
-                self.dashboardSnapshot = dashSnapshot
-                self.subscriptionHubSnapshot = hubSnapshot
-                self.persistIntelligenceCache(subs: subs, currency: currency)
-            }
-        }
+        dashboardSnapshot = dashSnapshot
+        subscriptionHubSnapshot = hubSnapshot
+        persistIntelligenceCache(subs: subs, currency: currency)
     }
 
     nonisolated private static func subscriptionHealthScore(for subs: [SubscriptionInfo]) -> Int {
@@ -430,15 +491,13 @@ public final class BuxMuseBrain: ObservableObject {
         }
     }
 
-    private func scheduleSave(_ block: @escaping () throws -> Void) {
+    private func scheduleSave(_ block: @escaping @MainActor () throws -> Void) {
         saveWorkItem?.cancel()
-        let work = DispatchWorkItem {
-            Task { @MainActor in
-                try? block()
-            }
+        let work = DispatchWorkItem { @MainActor in
+            try? block()
         }
         saveWorkItem = work
-        computeQueue.asyncAfter(deadline: .now() + 0.25, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: work)
     }
 
     private func persistIntelligenceCache(subs: [SubscriptionInfo], currency: String) {
@@ -541,13 +600,17 @@ public final class BuxMuseBrain: ObservableObject {
                     id: r.id,
                     name: r.name,
                     amount: r.amountDouble,
-                    amountFormatted: AppSettingsManager.format(amount: abs(r.amountDouble), currency: currency),
+                    amountFormatted: AppSettingsManager.format(
+                        amount: abs(r.amountDouble),
+                        currency: AppSettingsManager.currencySetting(for: r.currencyCode)
+                    ),
                     date: r.date,
                     category: r.transactionCategory.displayName,
                     merchant: r.merchantName,
                     heatZone: r.heatZoneBucket,
                     habitSignature: r.habitSignatureId,
                     emotion: r.emotion,
+                    emotionSymbol: r.emotion.flatMap { EmotionalTaggingEngine.tag(for: $0)?.symbol },
                     context: r.contextTag
                 )
             }
@@ -571,5 +634,33 @@ public final class BuxMuseBrain: ObservableObject {
         )
 
         return ExpenseInteractionDisplay(header: header, sections: sections, summary: summary)
+    }
+
+    private static func transactionMatchesEnvelopeCategory(
+        _ tx: Transaction,
+        envelopeName: String,
+        recordsById: [UUID: ExpenseRecord],
+        categoryRecords: [ExpenseCategoryRecord]
+    ) -> Bool {
+        if let record = recordsById[tx.id], let categoryId = record.categoryId,
+           let custom = categoryRecords.first(where: { $0.id == categoryId }) {
+            if custom.name.localizedCaseInsensitiveCompare(envelopeName) == .orderedSame {
+                return true
+            }
+        }
+
+        if tx.category.displayName.localizedCaseInsensitiveCompare(envelopeName) == .orderedSame {
+            return true
+        }
+
+        if let record = recordsById[tx.id], let categoryId = record.categoryId,
+           let custom = categoryRecords.first(where: { $0.id == categoryId }),
+           let raw = custom.systemCategoryRaw,
+           let system = TransactionCategory(rawValue: raw),
+           system.displayName.localizedCaseInsensitiveCompare(envelopeName) == .orderedSame {
+            return true
+        }
+
+        return false
     }
 }

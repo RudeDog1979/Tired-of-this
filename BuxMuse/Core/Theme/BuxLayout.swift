@@ -33,8 +33,12 @@ enum BuxLayout {
     /// Vertical room below hero cards so list rows don't clip shadows.
     static let expenseHeroShadowBleed: CGFloat = 12
 
+    /// Extra list top inset so large title + search drawer sit above scroll content (Studio invoices).
+    static let invoicesNavChromeScrollInset: CGFloat = 16
+    static let sheetBottomClearance: CGFloat = BuxTokens.sheetBottomClearance
+
     static func horizontalMargin(for width: CGFloat) -> CGFloat {
-        width < compactWidthThreshold ? marginHorizontalCompact : marginHorizontal
+        BuxTokens.horizontalMargin(for: width)
     }
 }
 
@@ -87,11 +91,21 @@ extension View {
         buxListContentMargins()
     }
 
+    /// Adaptive horizontal margins — prefer on all root screens.
+    func buxAdaptiveMargins() -> some View {
+        buxScreenContentMargins()
+    }
+
     func buxCardOutline(themeManager: ThemeManager, colorScheme: ColorScheme, cornerRadius: CGFloat) -> some View {
         overlay(
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
+                .stroke(themeManager.themedCardStroke(for: colorScheme), lineWidth: 1)
         )
+    }
+
+    /// Hero elevation — soft Apple Music shadow. Use on large static cards only.
+    func buxHeroElevation(themeManager: ThemeManager, colorScheme: ColorScheme, cornerRadius: CGFloat = BuxTokens.Radius.hero) -> some View {
+        buxSurface(elevation: .hero, themeManager: themeManager, colorScheme: colorScheme, cornerRadius: cornerRadius)
     }
 
     func buxReportsContainerWidth() -> some View {

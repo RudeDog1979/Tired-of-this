@@ -20,11 +20,12 @@ struct SecuritySettingsView: View {
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
     }
-    
+
     var body: some View {
         ZStack {
             bgColor.ignoresSafeArea()
-            
+            BuxHeroMeshBackground()
+
             Form {
                 Section("BIOMETRIC ACCESS") {
                     Toggle(isOn: Binding(
@@ -70,7 +71,7 @@ struct SecuritySettingsView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Secure App Passcode")
                                 .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("Numeric secondary passcode backup")
                                 .font(.system(size: 11))
                                 .foregroundColor(.gray)
@@ -116,6 +117,7 @@ struct SecuritySettingsView: View {
                 store.setPasscode(pin)
                 store.save()
             }
+            .environment(\.settingsEnhancedTint, true)
         }
         .confirmationDialog("Disable PIN Code?", isPresented: $showPasscodeClearConfirmation, titleVisibility: .visible) {
             Button("Remove Passcode", role: .destructive) {
@@ -192,7 +194,7 @@ struct PasscodeSetupSheet: View {
                 VStack(spacing: 12) {
                     Text(passcodeStep == 1 ? "Enter a 4-Digit Passcode" : "Confirm your Passcode")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
                     Text("This code secures BuxMuse locally on your device.")
                         .font(.system(size: 13))
@@ -237,7 +239,7 @@ struct PasscodeSetupSheet: View {
                             Circle().fill(Color.clear)
                             Image(systemName: "delete.left.fill")
                                 .font(.system(size: 24))
-                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         }
                         .frame(width: 72, height: 72)
                     }
@@ -245,7 +247,13 @@ struct PasscodeSetupSheet: View {
                 .padding(.horizontal, 40)
                 .padding(.bottom, 48)
             }
-            .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
+            .background {
+                ZStack {
+                    themeManager.screenBackground(for: colorScheme)
+                    BuxHeroMeshBackground()
+                }
+                .ignoresSafeArea()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
@@ -270,7 +278,7 @@ struct PasscodeSetupSheet: View {
                     .fill(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.03))
                 Text(text)
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
             .frame(width: 72, height: 72)
         }

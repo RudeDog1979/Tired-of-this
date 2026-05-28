@@ -54,7 +54,7 @@ struct SubscriptionCategoryDetailView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(group.category.displayName)
                                         .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         .lineLimit(1)
 
                                     Text("\(group.subscriptionsCount) Active • \(Int(round(group.proportion)))% of total")
@@ -67,7 +67,7 @@ struct SubscriptionCategoryDetailView: View {
 
                                 Text(appSettingsManager.format(group.totalCost.value))
                                     .font(.system(size: 14, weight: .bold, design: .rounded))
-                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }
                         }
                     }

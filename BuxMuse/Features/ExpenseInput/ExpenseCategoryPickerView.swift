@@ -14,16 +14,18 @@ struct ExpenseCategoryPickerView: View {
 
     @Binding var selectedCategoryId: UUID?
     @Binding var selectedCategory: TransactionCategory
+    var emphasizeOnAppear: Bool = false
 
     @State private var categories: [ExpenseCategoryRecord] = []
     @State private var showCreateCategory = false
+    @State private var emphasisPulse = false
     @Namespace private var pillNamespace
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("CATEGORY")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                 .kerning(1.2)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -35,8 +37,23 @@ struct ExpenseCategoryPickerView: View {
                 }
                 .padding(.horizontal, 4)
             }
+            .buxHorizontalScrollEdgeFade(background: Color(uiColor: .secondarySystemGroupedBackground))
         }
-        .onAppear(perform: reload)
+        .padding(.vertical, emphasizeOnAppear && emphasisPulse ? 4 : 0)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(themeManager.current.accentColor.opacity(emphasisPulse ? 0.45 : 0), lineWidth: 2)
+        )
+        .onAppear {
+            reload()
+            guard emphasizeOnAppear else { return }
+            withAnimation(.easeInOut(duration: 0.55).repeatCount(2, autoreverses: true)) {
+                emphasisPulse = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation { emphasisPulse = false }
+            }
+        }
         .sheet(isPresented: $showCreateCategory) {
             ExpenseCategoryEditorSheet { name, icon, color in
                 if let created = try? brain.createCategory(name: name, icon: icon, color: color) {

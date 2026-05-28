@@ -16,14 +16,23 @@ public struct GoalMomentumResult {
 }
 
 public final class GoalsMomentumEngine {
-    
+
     public init() {}
-    
+
     /// Computes momentum and generates customized action cards.
-    public func computeMomentum(goal: Goal) -> GoalMomentumResult {
+    public func computeMomentum(
+        goal: Goal,
+        currencyCode: String = AppSettingsManager.preferredCurrencyCode
+    ) -> GoalMomentumResult {
         let contributions = goal.contributions.sorted(by: { $0.date > $1.date })
         let now = Date()
-        
+        let format = { (amount: Decimal) in
+            AppSettingsManager.format(
+                amount: amount,
+                currency: AppSettingsManager.currencySetting(for: currencyCode)
+            )
+        }
+
         // 1. If no contributions, user is stalled
         guard !contributions.isEmpty else {
             let daysSinceCreated = now.timeIntervalSince(goal.createdAt) / 86400.0
@@ -32,7 +41,7 @@ public final class GoalsMomentumEngine {
                 score: score,
                 statusDescription: daysSinceCreated > 14 ? "Stalled" : "Awaiting Kickstart",
                 microActions: [
-                    "Deposit £10 today to initialize momentum.",
+                    "Deposit \(format(10)) today to initialize momentum.",
                     "Set a calendar reminder for weekly goal updates."
                 ],
                 habitActions: [
@@ -41,35 +50,35 @@ public final class GoalsMomentumEngine {
                 ]
             )
         }
-        
+
         // 2. Classify contributions into recent (last 30 days) and previous (30-60 days ago)
         let thirtyDaysAgo = now.addingTimeInterval(-30.0 * 86400.0)
         let sixtyDaysAgo = now.addingTimeInterval(-60.0 * 86400.0)
-        
+
         let recentContributions = contributions.filter { $0.date >= thirtyDaysAgo }
         let prevContributions = contributions.filter { $0.date >= sixtyDaysAgo && $0.date < thirtyDaysAgo }
-        
+
         let recentSum = recentContributions.reduce(Decimal(0)) { $0 + $1.amount }
         let prevSum = prevContributions.reduce(Decimal(0)) { $0 + $1.amount }
-        
+
         let recentSumDouble = NSDecimalNumber(decimal: recentSum).doubleValue
         let prevSumDouble = NSDecimalNumber(decimal: prevSum).doubleValue
-        
+
         var score: Double = 0.0
         var status = "Consistent Momentum"
         var micro: [String] = []
         var habit: [String] = []
-        
+
         if recentSumDouble == 0 && prevSumDouble == 0 {
             // Stalled for more than 60 days
             score = -0.8
             status = "Stalled"
             micro = [
-                "Make a small £5 micro-contribution to break the dry spell.",
+                "Make a small \(format(5)) micro-contribution to break the dry spell.",
                 "Review your budget to see where cash has been leak-drained."
             ]
             habit = [
-                "Automate a micro-savings deposit of £1 per day.",
+                "Automate a micro-savings deposit of \(format(1)) per day.",
                 "Link savings goals to positive daily habits."
             ]
         } else if recentSumDouble > 0 && prevSumDouble == 0 {
@@ -77,7 +86,7 @@ public final class GoalsMomentumEngine {
             score = 0.6
             status = "Accelerating"
             micro = [
-                "Double down! Try to add another £20 while in this active streak.",
+                "Double down! Try to add another \(format(20)) while in this active streak.",
                 "Share your savings milestone with a trusted partner."
             ]
             habit = [
@@ -89,7 +98,7 @@ public final class GoalsMomentumEngine {
             score = -0.4
             status = "Slowing Down"
             micro = [
-                "Re-engage today by allocating just £10 to this goal.",
+                "Re-engage today by allocating just \(format(10)) to this goal.",
                 "Audit recent purchases to identify saving leakages."
             ]
             habit = [
@@ -115,7 +124,7 @@ public final class GoalsMomentumEngine {
                 status = "Slowing Down"
                 micro = [
                     "Adjust your milestone targets slightly to feel less pressure.",
-                    "Audit subscriptions to redirect a quick £15 today."
+                    "Audit subscriptions to redirect a quick \(format(15)) today."
                 ]
                 habit = [
                     "Try 'zero-spend days' once a week to free up cash.",
@@ -134,7 +143,7 @@ public final class GoalsMomentumEngine {
                 ]
             }
         }
-        
+
         return GoalMomentumResult(
             score: score,
             statusDescription: status,

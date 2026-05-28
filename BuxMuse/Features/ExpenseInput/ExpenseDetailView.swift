@@ -16,6 +16,10 @@ struct ExpenseDetailView: View {
     @StateObject private var viewModel: ExpenseDetailViewModel
     @State private var showCategorySheet = false
     @State private var showEditSheet = false
+    /// Keeps mood visuals on screen while fading out after clear/save.
+    @State private var presentedEmotionId: String?
+    @State private var emotionTintOpacity: Double = 0
+    @State private var emotionWatermarkOpacity: Double = 0
 
     let brain: BuxMuseBrain
     let onUpdated: () -> Void
@@ -30,35 +34,52 @@ struct ExpenseDetailView: View {
         ))
     }
 
-    private var cardColor: Color {
-        colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
-    }
-
-    private var screenBackground: Color {
-        colorScheme == .dark ? Color(red: 13/255, green: 14/255, blue: 18/255) : Color(red: 242/255, green: 244/255, blue: 247/255)
-    }
-
     var body: some View {
-        ZStack {
-            screenBackground.ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+                BuxHeroMeshBackground()
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    headerRow
-                    overviewCard
-                    intelligenceSections
-                    notesSection
-                    actionsSection
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        overviewCard
+                        intelligenceSections
+                        notesSection
+                        actionsSection
+                    }
+                    .padding(.bottom, 48)
                 }
-                .padding(.bottom, 48)
             }
+            .navigationTitle(viewModel.record.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { dismiss() } label: {
+                        ZStack {
+                            Circle()
+                                .fill(colorScheme == .dark ? Color.white.opacity(0.08) : .white)
+                                .frame(width: 44, height: 44)
+                                .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        }
+                    }
+                    .buttonStyle(BuxMicroShrinkStyle())
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Edit") { showEditSheet = true }
+                }
+            }
+            .environment(\.expensesEnhancedTint, true)
         }
         .sheet(isPresented: $showCategorySheet) {
-            ExpenseCategorySheet(transaction: viewModel.record.toTransaction()) { category in
-                try? viewModel.changeCategory(category)
+            ExpenseCategorySheet(transaction: viewModel.record.toTransaction()) { category, categoryId in
+                try? viewModel.changeCategory(category, categoryId: categoryId)
                 onUpdated()
             }
             .environmentObject(themeManager)
+            .environmentObject(brain)
         }
         .sheet(isPresented: $showEditSheet) {
             AddExpenseSheet(brain: brain, settingsManager: appSettingsManager, mode: .edit(viewModel.record.toTransaction()))
@@ -70,52 +91,88 @@ struct ExpenseDetailView: View {
                     onUpdated()
                 }
         }
+        .onAppear {
+            syncEmotionPresentation(animated: false)
+        }
+        .onChange(of: viewModel.record.emotion) { _, _ in
+            syncEmotionPresentation(animated: true)
+        }
     }
 
-    private var headerRow: some View {
-        HStack {
-            Button { dismiss() } label: {
-                ZStack {
-                    Circle()
-                        .fill(colorScheme == .dark ? Color.white.opacity(0.08) : .white)
-                        .frame(width: 44, height: 44)
-                        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
+    private func syncEmotionPresentation(animated: Bool) {
+        let activeId = normalizedEmotionId(viewModel.record.emotion)
+
+        if let activeId {
+            presentedEmotionId = activeId
+            if animated {
+                emotionTintOpacity = 0
+                emotionWatermarkOpacity = 0
+                withAnimation(BuxMotion.emotionFadeIn) {
+                    emotionTintOpacity = 1
+                    emotionWatermarkOpacity = 1
                 }
+            } else {
+                emotionTintOpacity = 1
+                emotionWatermarkOpacity = 1
             }
-            .buttonStyle(BuxMicroShrinkStyle())
-
-            Spacer()
-
-            Text(viewModel.record.name)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
-                .lineLimit(1)
-
-            Spacer()
-
-            Button { showEditSheet = true } label: {
-                Text("Edit")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
-            }
-            .buttonStyle(BuxMicroShrinkStyle())
-            .frame(width: 44, alignment: .trailing)
+            return
         }
-        .padding(.horizontal, BuxLayout.marginHorizontal)
-        .padding(.top, 16)
+
+        guard presentedEmotionId != nil || emotionTintOpacity > 0.01 else { return }
+
+        if animated {
+            withAnimation(BuxMotion.emotionFadeOut) {
+                emotionTintOpacity = 0
+                emotionWatermarkOpacity = 0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + BuxMotion.emotionFadeOutDuration) {
+                guard normalizedEmotionId(viewModel.record.emotion) == nil else { return }
+                presentedEmotionId = nil
+            }
+        } else {
+            emotionTintOpacity = 0
+            emotionWatermarkOpacity = 0
+            presentedEmotionId = nil
+        }
+    }
+
+    private func normalizedEmotionId(_ raw: String?) -> String? {
+        let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     private var overviewCard: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 28)
-                .fill(cardColor)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 28)
-                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
+        let emotion = presentedEmotionId
+        let emotionTag = emotion.flatMap { EmotionalTaggingEngine.tag(for: $0) }
+        let moodAccent = EmotionalTagAppearance.accent(for: emotion, colorScheme: colorScheme)
+        let brandAccent = themeManager.current.accentColor
+        let cornerRadius: CGFloat = 28
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        let shadow = themeManager.heroCardShadow(for: colorScheme)
+
+        return ZStack {
+            BuxThemedCardPlateBackground(cornerRadius: cornerRadius)
+
+            if emotion != nil {
+                EmotionalTagAppearance.cardBackground(
+                    tagId: emotion,
+                    colorScheme: colorScheme,
+                    base: themeManager.cardFill(for: colorScheme),
+                    cornerRadius: cornerRadius,
+                    tintOpacity: emotionTintOpacity
                 )
+
+                if let tag = emotionTag {
+                    EmotionalTagAppearance.watermark(
+                        tag: tag,
+                        colorScheme: colorScheme,
+                        scale: .detailCard,
+                        opacity: emotionWatermarkOpacity,
+                        includeLabel: true
+                    )
+                    .clipShape(shape)
+                }
+            }
 
             VStack(spacing: 16) {
                 AsyncMerchantLogoView(merchantName: viewModel.record.name, size: 56)
@@ -124,15 +181,23 @@ struct ExpenseDetailView: View {
                 VStack(spacing: 4) {
                     Text(viewModel.formattedAmount())
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                     Text(viewModel.record.transactionCategory.displayName)
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(brandAccent)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
-                        .background(themeManager.current.accentColor.opacity(0.12))
-                        .clipShape(Capsule())
+                        .background {
+                            Capsule()
+                                .fill(brandAccent.opacity(0.12))
+                            if let moodAccent {
+                                Capsule()
+                                    .fill(moodAccent.opacity(0.12))
+                                    .opacity(emotionTintOpacity)
+                            }
+                        }
+                        .animation(BuxMotion.emotionFadeOut, value: emotionTintOpacity)
                 }
 
                 Label(
@@ -140,7 +205,7 @@ struct ExpenseDetailView: View {
                     systemImage: "calendar"
                 )
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.gray)
+                .foregroundColor(themeManager.labelSecondary(for: colorScheme))
 
                 Button { showCategorySheet = true } label: {
                     Text("Change category")
@@ -151,6 +216,35 @@ struct ExpenseDetailView: View {
             }
             .padding(28)
         }
+        .compositingGroup()
+        .clipShape(shape)
+        .overlay(
+            ZStack {
+                shape.stroke(
+                    DashboardThemeTint.themedCardStroke(
+                        themeManager: themeManager,
+                        colorScheme: colorScheme
+                    ),
+                    lineWidth: 1
+                )
+                if emotion != nil {
+                    shape.stroke(
+                        EmotionalTagAppearance.cardStroke(
+                            for: emotion,
+                            colorScheme: colorScheme,
+                            fallback: DashboardThemeTint.themedCardStroke(
+                                themeManager: themeManager,
+                                colorScheme: colorScheme
+                            )
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .opacity(emotionTintOpacity)
+                }
+            }
+        )
+        .animation(BuxMotion.emotionFadeOut, value: emotionTintOpacity)
+        .shadow(color: shadow.color, radius: shadow.radius, x: 0, y: shadow.y)
         .padding(.horizontal, BuxLayout.marginHorizontal)
     }
 
@@ -172,7 +266,7 @@ struct ExpenseDetailView: View {
                             .foregroundColor(.red)
                         Text(item.body)
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .multilineTextAlignment(.leading)
                         Spacer(minLength: 0)
                     }
@@ -192,7 +286,7 @@ struct ExpenseDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("INTELLIGENCE INSIGHTS")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                     .kerning(1.2)
 
                 VStack(alignment: .leading, spacing: 14) {
@@ -219,12 +313,7 @@ struct ExpenseDetailView: View {
                 }
                 .padding(20)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(cardColor)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                )
+                .expensesThemedCardChrome(cornerRadius: 20)
             }
             .padding(.horizontal, BuxLayout.marginHorizontal)
         }
@@ -234,14 +323,14 @@ struct ExpenseDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("NOTES")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                 .kerning(1.2)
 
             VStack(alignment: .leading, spacing: 12) {
                 TextField("Add a note", text: $viewModel.notesDraft, axis: .vertical)
                     .lineLimit(3...6)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 Button("Save note") {
                     try? viewModel.saveNotes()
@@ -253,12 +342,7 @@ struct ExpenseDetailView: View {
             }
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(cardColor)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-            )
+            .expensesThemedCardChrome(cornerRadius: 20)
         }
         .padding(.horizontal, BuxLayout.marginHorizontal)
     }
@@ -304,14 +388,9 @@ struct ExpenseDetailView: View {
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.gray)
             }
-            .foregroundColor(colorScheme == .dark ? .white : .black)
+            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             .padding(16)
-            .background(cardColor)
-            .clipShape(RoundedRectangle(cornerRadius: 18))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-            )
+            .expensesThemedCardChrome(cornerRadius: 18)
         }
         .buttonStyle(BuxMicroShrinkStyle())
     }

@@ -73,6 +73,12 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
             }
 
             BillingCycleAIEngine.appendUserDeclaredSubscriptions(to: &subs, details: &details, transactions: txs)
+
+            let cancelledMerchants = Set(UserDefaults.standard.stringArray(forKey: "buxmuse.cancelledSubscriptionMerchants") ?? [])
+            subs = subs.filter {
+                !cancelledMerchants.contains(MerchantLogoEngine.normalizeMerchantName($0.merchantName))
+            }
+            details = details.filter { !cancelledMerchants.contains($0.key) }
             
             let sortedSubs = subs.sorted(by: { abs($0.cost.value) > abs($1.cost.value) })
             

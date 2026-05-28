@@ -78,7 +78,7 @@ struct SubscriptionOpportunitiesView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.merchantName)
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
 
                     Text(item.description)

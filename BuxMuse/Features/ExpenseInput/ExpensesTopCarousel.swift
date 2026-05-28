@@ -118,12 +118,14 @@ struct ExpensesTopCarousel: View {
                     .environmentObject(themeManager)
                     .environmentObject(brain)
                     .environmentObject(appSettingsManager)
+                    .environment(\.expensesEnhancedTint, true)
                     .presentationDetents([.fraction(0.88), .large])
                     .presentationDragIndicator(.visible)
             case .monthlySummary:
                 MonthlySummaryDetailSheet(summary: summary, formatAmount: formatAmount)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .environment(\.expensesEnhancedTint, true)
                     .presentationDetents([.fraction(0.88), .large])
                     .presentationDragIndicator(.visible)
             }
@@ -136,11 +138,11 @@ struct ExpensesTopCarousel: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Total Spend")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                     Text(formatAmount(Decimal(header.totalSpent)))
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .contentTransition(.numericText())
                 }
 
@@ -246,23 +248,50 @@ struct ExpensesTopCarousel: View {
 
 struct ExpenseHeroCardChrome: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
-    let themeManager: ThemeManager
+    @Environment(\.expensesEnhancedTint) private var expensesEnhancedTint
+    @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
+
+    init() {}
 
     func body(content: Content) -> some View {
+        let cornerRadius = BuxLayout.expenseHeroCardCornerRadius
         let shadow = themeManager.heroCardShadow(for: colorScheme)
-
-        return content
+        let padded = content
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .topLeading)
-            .background(
-                themeManager.cardFill(for: colorScheme),
-                in: RoundedRectangle(cornerRadius: BuxLayout.expenseHeroCardCornerRadius, style: .continuous)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: BuxLayout.expenseHeroCardCornerRadius, style: .continuous)
-                    .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-            )
-            .shadow(color: shadow.color, radius: shadow.radius, x: 0, y: shadow.y)
+
+        Group {
+            if expensesEnhancedTint && settings.brandThemesEnabled {
+                padded
+                    .background {
+                        BuxThemedCardPlateBackground(cornerRadius: cornerRadius)
+                    }
+                    .compositingGroup()
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .stroke(
+                                DashboardThemeTint.themedCardStroke(
+                                    themeManager: themeManager,
+                                    colorScheme: colorScheme
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+            } else {
+                padded
+                    .background(
+                        themeManager.cardFill(for: colorScheme),
+                        in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
+                    )
+            }
+        }
+        .shadow(color: shadow.color, radius: shadow.radius, x: 0, y: shadow.y)
     }
 }
 
@@ -286,6 +315,7 @@ private extension View {
 
 extension View {
     func expenseHeroCardChrome(themeManager: ThemeManager, colorScheme: ColorScheme) -> some View {
-        modifier(ExpenseHeroCardChrome(themeManager: themeManager))
+        _ = (themeManager, colorScheme)
+        return modifier(ExpenseHeroCardChrome())
     }
 }

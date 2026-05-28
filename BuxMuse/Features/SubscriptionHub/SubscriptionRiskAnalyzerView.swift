@@ -58,7 +58,7 @@ struct SubscriptionRiskAnalyzerView: View {
                                     HStack {
                                         Text(item.subName)
                                             .font(.system(size: 14, weight: .bold))
-                                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                             .lineLimit(1)
 
                                         Spacer(minLength: 4)
@@ -74,7 +74,7 @@ struct SubscriptionRiskAnalyzerView: View {
 
                                     Text(item.risk.description)
                                         .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
                                 }

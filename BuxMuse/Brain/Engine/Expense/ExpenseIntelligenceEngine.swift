@@ -39,7 +39,7 @@ struct ExpenseIntelligenceEngine {
         let subscription = detectSubscriptionLike(record: record, history: sameMerchant, subscriptions: activeSubscriptions)
         let heatZone = HeatZoneEngine.analyze(record: record, allRecords: allRecords)
         let habit = HabitSignatureEngine.generateSignature(for: record, history: sameMerchant)
-        let futureImpact = FutureImpactEngine.project(amount: record.amountValue)
+        let futureImpact = FutureImpactEngine.project(amount: record.amountValue, currencyCode: record.currencyCode)
         let emotionSummary = EmotionalTaggingEngine.analyze(emotion: record.emotion)
         let contextSummary = ContextTaggingEngine.analyze(context: record.contextTag)
         let microCommitment = MicroCommitmentEngine.generate(for: record)

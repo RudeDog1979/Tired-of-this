@@ -21,21 +21,16 @@ struct NotesField: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("NOTES (OPTIONAL)")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                 .kerning(1.2)
             
             TextField("Add a note...", text: $notes)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .tint(themeManager.current.accentColor)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
-                .background(cardColor)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                )
+                .expensesThemedCardChrome(cornerRadius: 16)
         }
     }
 }

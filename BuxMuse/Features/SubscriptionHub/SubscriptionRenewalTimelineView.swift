@@ -80,7 +80,7 @@ struct SubscriptionRenewalTimelineView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(sub.merchantName)
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .multilineTextAlignment(.leading)
 
                     Text(sub.category.displayName)
@@ -93,7 +93,7 @@ struct SubscriptionRenewalTimelineView: View {
 
             Text(appSettingsManager.format(abs(sub.cost.value)))
                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundColor(colorScheme == .dark ? .white : .black)
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             HStack(spacing: 6) {
                 Image(systemName: "clock.fill")

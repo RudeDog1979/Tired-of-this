@@ -16,7 +16,7 @@ struct ExpensesSummaryCard: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Monthly Summary")
                 .font(.system(size: 18, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .heroSummaryReveal(isVisible: isVisible, delay: 0)
 
             HStack(spacing: 16) {

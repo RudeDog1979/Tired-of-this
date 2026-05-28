@@ -19,11 +19,12 @@ struct BudgetSettingsView: View {
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
     }
-    
+
     var body: some View {
         ZStack {
             bgColor.ignoresSafeArea()
-            
+            BuxHeroMeshBackground()
+
             Form {
                 Section("BUDGET METHOD") {
                     Picker("Budgeting Mode", selection: $store.budgetingMode) {
@@ -102,7 +103,7 @@ struct BudgetSettingsView: View {
                                     HStack(spacing: 8) {
                                         Text(profile.name)
                                             .font(.system(size: 15, weight: .bold))
-                                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         if profile.isActive {
                                             Text("Active")
                                                 .font(.system(size: 10, weight: .bold))
@@ -156,6 +157,7 @@ struct BudgetSettingsView: View {
                     store.save()
                 }
             }
+            .environment(\.settingsEnhancedTint, true)
         }
         .sheet(isPresented: $showCreator) {
             BudgetProfileEditorView(profile: CustomBudgetProfile(name: "", categories: [])) { newProfile in
@@ -169,6 +171,7 @@ struct BudgetSettingsView: View {
                 }
                 store.save()
             }
+            .environment(\.settingsEnhancedTint, true)
         }
         .onChange(of: store.budgetingMode) { _, _ in store.save() }
         .onChange(of: store.defaultBudgetPeriod) { _, _ in store.save() }
@@ -218,7 +221,8 @@ struct BudgetProfileEditorView: View {
             ZStack {
                 themeManager.screenBackground(for: colorScheme)
                     .ignoresSafeArea()
-                
+                BuxHeroMeshBackground()
+
                 Form {
                     Section("PROFILE GENERAL DETAILS") {
                         TextField("Profile Name (e.g. Summer Travel)", text: $profile.name)
@@ -283,11 +287,11 @@ struct BudgetProfileEditorView: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    BuxToolbarSaveButton(isDirty: !profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
                         onSave(profile)
+                        BuxSaveFeedback.success()
                         dismiss()
                     }
-                    .disabled(profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }

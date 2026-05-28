@@ -14,6 +14,7 @@ struct SpendingCategoryStackCard: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
     let item: SpendingCategoryItem
+    var includesDashboardChrome = true
 
     var body: some View {
         HStack(spacing: 16) {
@@ -30,11 +31,11 @@ struct SpendingCategoryStackCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 Text("\(item.transactionsCount) transactions")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
 
             Spacer()
@@ -42,18 +43,16 @@ struct SpendingCategoryStackCard: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(item.amount)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 Text(item.percentage)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 18)
+        .dashboardChromeIfNeeded(includesDashboardChrome, cornerRadius: 18)
     }
 }
 
@@ -61,6 +60,7 @@ struct SpendingCategoryStackCard: View {
 
 struct SpendingCategoryRow: View {
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
     let item: SpendingCategoryItem
 
     var body: some View {
@@ -78,11 +78,11 @@ struct SpendingCategoryRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 Text("\(item.transactionsCount) transactions")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
 
             Spacer()
@@ -90,11 +90,11 @@ struct SpendingCategoryRow: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(item.amount)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 Text(item.percentage)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
         }
         .padding(.horizontal, 16)
@@ -108,6 +108,7 @@ struct TransactionRowCard: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
     let item: TransactionItem
+    var includesDashboardChrome = true
 
     var body: some View {
         HStack(spacing: 16) {
@@ -118,29 +119,27 @@ struct TransactionRowCard: View {
 
                 Image(systemName: item.icon)
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 Text(item.date)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
 
             Spacer()
 
             Text(item.amount)
                 .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundColor(item.isPositive ? Color(red: 46/255, green: 204/255, blue: 113/255) : (colorScheme == .dark ? .white : .black))
+                .foregroundColor(item.isPositive ? Color(red: 46/255, green: 204/255, blue: 113/255) : (themeManager.labelPrimary(for: colorScheme)))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 18)
+        .dashboardChromeIfNeeded(includesDashboardChrome, cornerRadius: 18)
     }
 }
 
@@ -153,6 +152,7 @@ struct SubscriptionCardView: View {
     let cost: String
     let billingDate: String
     let accentColor: Color
+    var includesDashboardChrome = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -169,7 +169,7 @@ struct SubscriptionCardView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(cost)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
@@ -180,7 +180,7 @@ struct SubscriptionCardView: View {
 
                 Text(billingDate)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -189,9 +189,7 @@ struct SubscriptionCardView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .topLeading)
-        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 24)
+        .dashboardChromeIfNeeded(includesDashboardChrome, cornerRadius: 24)
     }
 }
 
@@ -205,6 +203,7 @@ struct GoalCardView: View {
     let target: String
     let progress: Double
     let accentColor: Color
+    var includesDashboardChrome = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -221,7 +220,7 @@ struct GoalCardView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(saved)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 Text(title)
                     .font(.system(size: 13, weight: .bold))
@@ -243,14 +242,12 @@ struct GoalCardView: View {
 
                 Text("Target: \(target)")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 24)
+        .dashboardChromeIfNeeded(includesDashboardChrome, cornerRadius: 24)
     }
 }
 
@@ -263,6 +260,7 @@ struct InsightCardView: View {
     let value: String
     let description: String
     let accentColor: Color
+    var includesDashboardChrome = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -285,12 +283,12 @@ struct InsightCardView: View {
 
                 Text(title)
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     .lineLimit(1)
 
                 Text(description)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -299,9 +297,7 @@ struct InsightCardView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .topLeading)
-        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 24)
+        .dashboardChromeIfNeeded(includesDashboardChrome, cornerRadius: 24)
     }
 }
 
@@ -315,6 +311,7 @@ struct CryptoCardView: View {
     let valueText: String
     let subvalueText: String
     let trendText: String
+    var includesDashboardChrome = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -345,12 +342,12 @@ struct CryptoCardView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(valueText)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 HStack(spacing: 4) {
                     Text(subvalueText)
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
 
                     Spacer(minLength: 4)
 
@@ -362,9 +359,7 @@ struct CryptoCardView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 24)
+        .dashboardChromeIfNeeded(includesDashboardChrome, cornerRadius: 24)
     }
 }
 
@@ -379,6 +374,7 @@ struct SubscriptionSummaryCardView: View {
     let trendColor: Color
     let icon: String
     let iconColor: Color
+    var includesDashboardChrome = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -395,7 +391,7 @@ struct SubscriptionSummaryCardView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(cost)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
@@ -415,7 +411,7 @@ struct SubscriptionSummaryCardView: View {
 
                 Text(subtext)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -424,8 +420,7 @@ struct SubscriptionSummaryCardView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .topLeading)
-        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 24)
+        .dashboardChromeIfNeeded(includesDashboardChrome, cornerRadius: 24)
     }
 }
+

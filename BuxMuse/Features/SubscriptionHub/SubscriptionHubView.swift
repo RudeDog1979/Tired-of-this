@@ -91,7 +91,8 @@ struct SubscriptionHubView: View {
                     detail: detail,
                     onCancelTriggered: { name in
                         withAnimation {
-                            viewModel.simulateCancel(merchantName: name)
+                            try? brain.cancelSubscription(merchantName: name)
+                            viewModel.refreshData()
                         }
                     },
                     isPresented: $showDetailSheet
@@ -119,7 +120,7 @@ struct SubscriptionHubView: View {
         ZStack {
             Text("Subscription Hub")
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             HStack {
                 Button(action: {
@@ -135,7 +136,7 @@ struct SubscriptionHubView: View {
 
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     }
                 }
                 .buttonStyle(BuxMicroShrinkStyle())
@@ -186,7 +187,7 @@ struct SubscriptionHubView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(appSettingsManager.format(viewModel.totalMonthlyCost.value))
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
 
@@ -201,6 +202,22 @@ struct SubscriptionHubView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(colorScheme == .dark ? .white.opacity(0.6) : Color(red: 100/255, green: 110/255, blue: 130/255))
                     .lineLimit(2)
+
+                if viewModel.totalWeeklyCost.value > 0 || viewModel.totalIrregularCost.value > 0 {
+                    HStack(spacing: 12) {
+                        if viewModel.totalWeeklyCost.value > 0 {
+                            Text("Weekly subs: \(appSettingsManager.format(viewModel.totalWeeklyCost.value))")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.gray)
+                        }
+                        if viewModel.totalIrregularCost.value > 0 {
+                            Text("Irregular: \(appSettingsManager.format(viewModel.totalIrregularCost.value))")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.gray)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                }
             }
             .padding(SubscriptionHubStyle.cardPadding)
             .frame(maxWidth: .infinity, alignment: .leading)

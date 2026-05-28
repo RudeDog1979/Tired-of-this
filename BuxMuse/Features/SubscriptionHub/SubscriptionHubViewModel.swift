@@ -192,8 +192,48 @@ public final class SubscriptionHubViewModel: ObservableObject {
             self.burnRateCancellationProjection = "No subscriptions active to optimize."
         }
         
-        // Historical increase: mock trend
-        self.burnRateQuarterlyIncrease = priceHikeSum > 0 ? 12.4 : 0.0
+        // Historical increase from subscription spend (last 90 days vs prior 90 days)
+        self.burnRateQuarterlyIncrease = Self.computeQuarterlyBurnIncrease(
+            subscriptions: allSubs,
+            engine: engine
+        )
+    }
+
+    private static func computeQuarterlyBurnIncrease(
+        subscriptions: [SubscriptionInfo],
+        engine: FinancialIntelligenceEngine
+    ) -> Double {
+        guard !subscriptions.isEmpty else { return 0 }
+
+        let now = Date()
+        let calendar = Calendar.current
+        guard let currentStart = calendar.date(byAdding: .day, value: -90, to: now),
+              let previousStart = calendar.date(byAdding: .day, value: -180, to: now) else {
+            return 0
+        }
+
+        let normalizedMerchants = Set(subscriptions.map {
+            MerchantLogoEngine.normalizeMerchantName($0.merchantName)
+        })
+
+        let subscriptionTxs = engine.allTransactions().filter { tx in
+            tx.amount.value < 0 &&
+            normalizedMerchants.contains(MerchantLogoEngine.normalizeMerchantName(tx.merchantName))
+        }
+
+        let currentTotal = subscriptionTxs
+            .filter { $0.date >= currentStart }
+            .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+        let previousTotal = subscriptionTxs
+            .filter { $0.date >= previousStart && $0.date < currentStart }
+            .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+
+        guard previousTotal > 0 else { return 0 }
+
+        let current = NSDecimalNumber(decimal: currentTotal).doubleValue
+        let previous = NSDecimalNumber(decimal: previousTotal).doubleValue
+        let increase = ((current - previous) / previous) * 100
+        return increase > 0 ? increase : 0
     }
 
     public func loadDetail(for merchantName: String) {
@@ -203,12 +243,29 @@ public final class SubscriptionHubViewModel: ObservableObject {
     }
     
     public func simulateCancel(merchantName: String) {
-        // Find transaction IDs for this merchant and delete them in testing or support active dismissal
+        // Legacy entry point — prefer BuxMuseBrain.cancelSubscription to preserve transaction history.
+        let normalized = MerchantLogoEngine.normalizeMerchantName(merchantName)
+        SettingsStore.shared.registerCancelledSubscription(normalizedMerchant: normalized)
+
         let txs = engine.allTransactions().filter {
-            MerchantLogoEngine.normalizeMerchantName($0.merchantName) == MerchantLogoEngine.normalizeMerchantName(merchantName)
+            MerchantLogoEngine.normalizeMerchantName($0.merchantName) == normalized
         }
         for tx in txs {
-            engine.deleteTransaction(id: tx.id)
+            var updated = tx
+            updated = Transaction(
+                id: tx.id,
+                date: tx.date,
+                amount: tx.amount,
+                merchantName: tx.merchantName,
+                category: tx.category,
+                notes: tx.notes,
+                isSubscriptionLike: false,
+                isTrial: false,
+                nextExpectedDate: nil,
+                subscriptionStartDate: nil,
+                trialEndDate: nil
+            )
+            engine.updateTransaction(updated)
         }
         refreshData()
     }

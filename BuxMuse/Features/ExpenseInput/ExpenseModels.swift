@@ -221,6 +221,7 @@ struct ExpenseMerchantRecord: Identifiable, Equatable, Hashable {
     public let id: UUID
     public var normalizedName: String
     public var name: String
+    public var disambiguator: String
     public var logoURL: String?
     public var localLogoPath: String?
     public var cluster: String?
@@ -232,6 +233,7 @@ struct ExpenseMerchantRecord: Identifiable, Equatable, Hashable {
             id: entity.id,
             normalizedName: entity.normalizedName,
             name: entity.name,
+            disambiguator: entity.disambiguator,
             logoURL: entity.logoURL,
             localLogoPath: entity.localLogoPath,
             cluster: entity.cluster,
@@ -428,6 +430,7 @@ public struct ExpenseRowDisplay: Identifiable {
     public var heatZone: String?
     public var habitSignature: String?
     public var emotion: String?
+    public var emotionSymbol: String?
     public var context: String?
 }
 

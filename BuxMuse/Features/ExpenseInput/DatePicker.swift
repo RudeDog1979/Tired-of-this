@@ -21,7 +21,7 @@ struct DateFieldPicker: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("DATE")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                 .kerning(1.2)
             
             HStack {
@@ -38,12 +38,7 @@ struct DateFieldPicker: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            .background(cardColor)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-            )
+            .expensesThemedCardChrome(cornerRadius: 16)
         }
     }
 }

@@ -4,7 +4,7 @@
 //
 
 import SwiftUI
-import SwiftData
+import Combine
 
 @main
 struct BuxMuseApp: App {
@@ -13,12 +13,12 @@ struct BuxMuseApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .modelContainer(container.persistence.container)
                 .environmentObject(container)
                 .environmentObject(SettingsStore.shared)
                 .environmentObject(container.brain)
                 .environmentObject(container.persistence)
                 .environmentObject(container.themeManager)
+                .environment(\.themeManager, container.themeManager)
                 .environmentObject(container.appSettingsManager)
                 .environmentObject(container.navigationCoordinator)
                 .environmentObject(container.financialBridge)
@@ -27,9 +27,19 @@ struct BuxMuseApp: App {
                 .environmentObject(container.goalsSheetCoordinator)
                 .environmentObject(container.insightsEngine)
                 .environmentObject(container.insightsViewModel)
-                .environmentObject(container.freelanceStore)
+                .environmentObject(container.studioStore)
+                .environmentObject(container.studioBrain)
+                .environmentObject(container.appDataManager)
                 .task {
                     _ = await ExpenseRenewalReminderScheduler.requestAuthorizationIfNeeded()
+                    container.scheduleEngagementRefresh(forceTips: true)
+                }
+                .onReceive(Timer.publish(every: 12 * 60 * 60, on: .main, in: .common).autoconnect()) { _ in
+                    container.scheduleEngagementRefresh()
+                }
+                .onOpenURL { url in
+                    guard StudioTimerDeepLink.matches(url) else { return }
+                    container.navigationCoordinator.openStudioLogTime()
                 }
         }
     }

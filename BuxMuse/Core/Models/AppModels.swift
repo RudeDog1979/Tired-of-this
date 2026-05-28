@@ -12,7 +12,7 @@ import SwiftUI
 enum AppTab {
     case home
     case expense
-    case freelance
+    case studio
     case settings
 }
 

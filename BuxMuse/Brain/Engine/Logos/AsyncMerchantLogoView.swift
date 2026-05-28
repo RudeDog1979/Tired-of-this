@@ -70,11 +70,17 @@ public struct AsyncMerchantLogoView: View {
         guard let domain = MerchantLogoEngine.resolveDomain(for: merchantName) else {
             return
         }
-        
-        // 3. Fetch in background asynchronously without blocking UI
+
+        Task { @MainActor in
+            guard ConnectivityBrain.shared.shouldFetchMerchantIcons else { return }
+            fetchRemoteLogo(domain: domain, cacheKey: key)
+        }
+    }
+
+    private func fetchRemoteLogo(domain: String, cacheKey: String) {
         DispatchQueue.global(qos: .userInitiated).async {
             // Google API
-            let googleUrl = URL(string: "https://www.google.com/s2/favicons?sz=256&domain=\(domain)")!
+            let googleUrl = URL(string: MerchantLogoEngine.googleFaviconURL(for: domain))!
             
             // Build a privacy-safe URLRequest without cookies, analytics, or identifiers
             var request = URLRequest(url: googleUrl, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 5.0)
@@ -85,28 +91,28 @@ public struct AsyncMerchantLogoView: View {
                 if let data = data,
                    let img = UIImage(data: data),
                    img.size.width > 16 { // Ensure it's a valid icon size, not empty pixel
-                    LightweightLogoCache.shared.saveImage(img, forKey: key)
+                    LightweightLogoCache.shared.saveImage(img, forKey: cacheKey)
                     DispatchQueue.main.async {
                         self.image = img
                     }
                     return
                 }
-                
+
                 // Fallback to DuckDuckGo API
                 let ddgUrl = URL(string: "https://icons.duckduckgo.com/ip3/\(domain).ico")!
                 var ddgRequest = URLRequest(url: ddgUrl, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 5.0)
                 ddgRequest.httpShouldHandleCookies = false
-                
+
                 URLSession.shared.dataTask(with: ddgRequest) { data, response, error in
                     if let data = data,
                        let img = UIImage(data: data) {
-                        LightweightLogoCache.shared.saveImage(img, forKey: key)
+                        LightweightLogoCache.shared.saveImage(img, forKey: cacheKey)
                         DispatchQueue.main.async {
                             self.image = img
                         }
                     }
                 }.resume()
-                
+
             }.resume()
         }
     }

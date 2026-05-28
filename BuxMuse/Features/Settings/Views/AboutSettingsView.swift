@@ -15,13 +15,14 @@ struct AboutSettingsView: View {
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
     }
-    
+
     var body: some View {
         ZStack {
             bgColor.ignoresSafeArea()
-            
+            BuxHeroMeshBackground()
+
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 28) {
+                VStack(spacing: BuxTokens.block) {
                     
                     // Brand Header
                     VStack(spacing: 12) {
@@ -39,7 +40,7 @@ struct AboutSettingsView: View {
                         VStack(spacing: 4) {
                             Text("BuxMuse")
                                 .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("Your Premium Offline Co-pilot")
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundColor(.gray)
@@ -64,7 +65,7 @@ struct AboutSettingsView: View {
                                     .foregroundColor(.green)
                                 Text("100% on-device local sandbox parsing. Your bank statements and scanned documents never touch the cloud.")
                                     .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }
                             
                             Divider().padding(.vertical, 4)
@@ -74,16 +75,11 @@ struct AboutSettingsView: View {
                                     .foregroundColor(.red)
                                 Text("Zero network analytics trackers. Zero external APIs. BuxMuse operates fully private and autonomous.")
                                     .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }
                         }
                         .padding(20)
-                        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                        )
+                        .settingsThemedCardChrome(cornerRadius: 20)
                         .padding(.horizontal, 20)
                     }
                     
@@ -106,12 +102,7 @@ struct AboutSettingsView: View {
                                 .padding(.horizontal, BuxLayout.section)
                                 .padding(.vertical, 12)
                         }
-                        .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                        )
+                        .settingsThemedCardChrome(cornerRadius: 20)
                         .padding(.horizontal, 20)
                     }
                 }

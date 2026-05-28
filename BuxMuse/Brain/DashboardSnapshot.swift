@@ -7,8 +7,18 @@
 
 import Foundation
 
+public struct DashboardRecentTransaction: Identifiable, Equatable {
+    public var id: UUID
+    public var date: Date
+    public var amount: MoneyAmount
+    public var merchantName: String
+    public var category: TransactionCategory
+    public var emotion: String?
+    public var emotionSymbol: String?
+}
+
 public struct DashboardSnapshot: Equatable {
-    public var recentTransactions: [Transaction]
+    public var recentTransactions: [DashboardRecentTransaction]
     public var subscriptionMonthlyTotal: Decimal
     public var subscriptionCount: Int
     public var subscriptionHealthScore: Int

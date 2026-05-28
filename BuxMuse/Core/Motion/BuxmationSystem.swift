@@ -8,45 +8,30 @@
 
 import SwiftUI
 
-// MARK: - Global Spring Physics
+// MARK: - Global Spring Physics (delegates to BuxMotion design tokens)
 
 extension Animation {
-    /// Primitive 3: Soft Bounce — the core premium liquid feel.
-    static var buxBounce: Animation {
-        if #available(iOS 17.0, *) {
-            return .spring(response: 0.5, dampingFraction: 0.65)
-        } else {
-            return .spring(response: 0.5, dampingFraction: 0.65)
-        }
+    static var buxBounce: Animation { BuxMotion.bounce }
+    static var buxSoftPress: Animation { BuxMotion.press }
+    static var buxSnap: Animation { BuxMotion.snap }
+    static var buxHeavy: Animation { BuxMotion.heavy }
+    static var buxPressStretch: Animation {
+        BuxMotion.reducedMotion ? .easeInOut(duration: 0.15) : .spring(response: 0.16, dampingFraction: 0.85)
     }
 
-    /// Quick snappy response for micro-interactions.
-    static var buxSnap: Animation {
-        .spring(response: 0.25, dampingFraction: 0.6)
-    }
-
-    /// Slower, weightier response for large element transitions.
-    static var buxHeavy: Animation {
-        .spring(response: 0.6, dampingFraction: 0.72)
-    }
-
-    /// Staggered entrance: add an index-based delay.
     static func buxStagger(index: Int, base: Double = 0.05) -> Animation {
-        buxBounce.delay(Double(index) * base)
+        BuxMotion.stagger(index: index, base: base)
     }
 
-    /// Liquid pill expand/collapse and selection slide (GIF-style water).
-    static var buxLiquidSpring: Animation {
-        .spring(response: 0.55, dampingFraction: 0.62)
+    static func buxStaggerCascade(index: Int, base: Double = 0.05) -> Animation {
+        BuxMotion.reducedMotion ? BuxMotion.bounce : BuxMotion.bounce.delay(Double(index) * base)
     }
 
-    /// Dashboard category deck — slide from right with visible bounce (no fade).
-    static var buxCategorySpring: Animation {
-        .spring(response: 0.48, dampingFraction: 0.62)
-    }
+    static var buxLiquidSpring: Animation { BuxMotion.liquid }
+    static var buxCategorySpring: Animation { BuxMotion.slide }
 
     static func buxCategoryCardDelay(index: Int) -> Animation {
-        buxCategorySpring.delay(Double(index) * 0.055)
+        BuxMotion.categoryCardDelay(index: index)
     }
 }
 
@@ -157,12 +142,34 @@ extension View {
 
 // MARK: - Primitive 1: Micro-Shrink Button Style
 
+/// Soft press feedback for buttons — gentle spring, safe inside ScrollView.
+struct BuxPressFeedbackStyle: ButtonStyle {
+    var pressedScale: CGFloat = 0.985
+    var pressedOpacity: CGFloat = 0.96
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? pressedScale : 1.0)
+            .opacity(configuration.isPressed ? pressedOpacity : 1.0)
+            .animation(.buxSoftPress, value: configuration.isPressed)
+    }
+}
+
+/// Scroll-friendly card / row tap — plain Button, no drag gesture.
+struct BuxCardButton<Label: View>: View {
+    let action: () -> Void
+    @ViewBuilder var label: () -> Label
+
+    var body: some View {
+        Button(action: action, label: label)
+            .buttonStyle(BuxPressFeedbackStyle())
+    }
+}
+
 /// Taps on cards, pills, buttons, rows — instant tactile feedback.
 struct BuxMicroShrinkStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.buxSnap, value: configuration.isPressed)
+        BuxPressFeedbackStyle().makeBody(configuration: configuration)
     }
 }
 
@@ -296,17 +303,20 @@ struct BuxDimOverlay: View {
 // in CustomTabBar and FAB — no separate modifier needed.
 
 // MARK: - Legacy: BuxmationPressCardStyle (kept for compatibility)
-// This is equivalent to BuxMicroShrinkStyle with shadow compression.
+// Scale-only press — no shadow animation (shadow animating inside ScrollView causes lag).
 struct BuxmationPressCardStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
+        BuxPressFeedbackStyle(pressedScale: 0.96, pressedOpacity: 0.90).makeBody(configuration: configuration)
+    }
+}
+
+/// Home dashboard cards: no system button chrome; press feedback only.
+struct BuxDashboardCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .shadow(
-                color: Color.black.opacity(configuration.isPressed ? 0.02 : 0.04),
-                radius: configuration.isPressed ? 3 : 8,
-                x: 0, y: 3
-            )
-            .animation(.buxSnap, value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.90 : 1)
+            .animation(.buxSoftPress, value: configuration.isPressed)
     }
 }
 
@@ -314,8 +324,8 @@ struct BuxmationPressCardStyle: ButtonStyle {
 struct MorphingPillButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.buxSnap, value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.985 : 1.0)
+            .animation(.buxSoftPress, value: configuration.isPressed)
     }
 }
 
@@ -385,4 +395,224 @@ extension View {
         modifier(BuxSuccessPopModifier(isActive: isActive))
     }
 
+}
+
+// MARK: - Semantic toolbar & chip styles (Freelance Hub, sheets, designer)
+
+/// Segment / chip controls in designer panels.
+struct BuxChipButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        BuxPressFeedbackStyle(pressedScale: 0.95, pressedOpacity: 0.88).makeBody(configuration: configuration)
+    }
+}
+
+/// Filled primary actions (Save Invoice, Export PDF).
+struct BuxPrimaryFillButtonStyle: ButtonStyle {
+    var isEnabled: Bool = true
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(isEnabled && configuration.isPressed ? 0.985 : 1.0)
+            .opacity(isEnabled ? (configuration.isPressed ? 0.96 : 1.0) : 0.55)
+            .animation(.buxSoftPress, value: configuration.isPressed)
+    }
+}
+
+/// Outlined / secondary actions (Save Default, Mark Sent).
+struct BuxSecondaryFillButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.985 : 1.0)
+            .opacity(configuration.isPressed ? 0.92 : 1.0)
+            .animation(.buxSoftPress, value: configuration.isPressed)
+    }
+}
+
+// MARK: - Bux Action Buttons (unified CTA system)
+
+enum BuxActionButtonRole {
+    case primary
+    case secondary
+    /// Status actions — green paid, blue sent, etc.
+    case tinted(Color)
+}
+
+enum BuxActionButtonSize {
+    case compact
+    case regular
+    case large
+
+    var height: CGFloat {
+        switch self {
+        case .compact: return 34
+        case .regular: return 44
+        case .large: return BuxLayout.pillHeight
+        }
+    }
+
+    var fontSize: CGFloat {
+        switch self {
+        case .compact: return 13
+        case .regular, .large: return 15
+        }
+    }
+
+    var iconSize: CGFloat {
+        switch self {
+        case .compact: return 13
+        case .regular, .large: return 15
+        }
+    }
+
+    var horizontalPadding: CGFloat {
+        switch self {
+        case .compact: return 14
+        case .regular: return 18
+        case .large: return 20
+        }
+    }
+}
+
+private struct BuxActionPressStyle: ButtonStyle {
+    var isEnabled: Bool = true
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(
+                x: isEnabled && configuration.isPressed ? 0.965 : 1.0,
+                y: isEnabled && configuration.isPressed ? 1.015 : 1.0
+            )
+            .opacity(isEnabled ? (configuration.isPressed ? 0.94 : 1.0) : 0.55)
+            .animation(.buxPressStretch, value: configuration.isPressed)
+            .onChange(of: configuration.isPressed) { _, pressed in
+                if pressed && isEnabled {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred(intensity: 0.85)
+                }
+            }
+    }
+}
+
+struct BuxActionButton: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    let title: String
+    let systemImage: String
+    let role: BuxActionButtonRole
+    let accent: Color
+    var expands: Bool = false
+    var size: BuxActionButtonSize = .large
+    var isEnabled: Bool = true
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: systemImage)
+                    .font(.system(size: size.iconSize, weight: .semibold))
+                Text(title)
+                    .font(.system(size: size.fontSize, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .padding(.horizontal, size.horizontalPadding)
+            .frame(maxWidth: expands ? .infinity : nil)
+            .frame(height: size.height)
+            .foregroundStyle(foregroundColor)
+            .background(backgroundColor)
+            .clipShape(Capsule())
+            .overlay {
+                if showsBorder {
+                    Capsule()
+                        .strokeBorder(borderColor, lineWidth: 1)
+                }
+            }
+            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
+        }
+        .buttonStyle(BuxActionPressStyle(isEnabled: isEnabled))
+        .disabled(!isEnabled)
+    }
+
+    private var tintColor: Color {
+        switch role {
+        case .primary, .secondary: accent
+        case .tinted(let color): color
+        }
+    }
+
+    private var foregroundColor: Color {
+        switch role {
+        case .primary:
+            return isEnabled ? .white : Color.white.opacity(0.65)
+        case .secondary, .tinted:
+            return isEnabled ? tintColor : tintColor.opacity(0.45)
+        }
+    }
+
+    private var backgroundColor: Color {
+        switch role {
+        case .primary:
+            return isEnabled ? tintColor : Color(UIColor.systemGray3)
+        case .secondary, .tinted:
+            let wash = colorScheme == .dark ? 0.24 : 0.14
+            return isEnabled ? tintColor.opacity(wash) : tintColor.opacity(wash * 0.45)
+        }
+    }
+
+    private var showsBorder: Bool {
+        switch role {
+        case .primary: return false
+        case .secondary, .tinted: return isEnabled
+        }
+    }
+
+    private var borderColor: Color {
+        tintColor.opacity(colorScheme == .dark ? 0.45 : 0.32)
+    }
+
+    private var shadowColor: Color {
+        guard isEnabled, case .primary = role else { return .clear }
+        return tintColor.opacity(colorScheme == .dark ? 0.18 : 0.14)
+    }
+
+    private var shadowRadius: CGFloat {
+        role.isPrimary && isEnabled ? BuxTokens.Shadow.ctaRadius : 0
+    }
+
+    private var shadowY: CGFloat {
+        role.isPrimary && isEnabled ? BuxTokens.Shadow.ctaY : 0
+    }
+}
+
+private extension BuxActionButtonRole {
+    var isPrimary: Bool {
+        if case .primary = self { return true }
+        return false
+    }
+}
+
+extension View {
+    /// Primary filled pill — solid accent, white label.
+    func buxPrimaryPillStyle(accent: Color, controlSize: ControlSize = .regular) -> some View {
+        self
+            .font(.system(size: controlSize == .large ? 15 : 14, weight: .semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, controlSize == .large ? 20 : 16)
+            .frame(height: controlSize == .large ? BuxLayout.pillHeight : 44)
+            .background(accent)
+            .clipShape(Capsule())
+            .buttonStyle(BuxActionPressStyle())
+    }
+
+    /// Secondary tinted pill — accent wash background, accent label.
+    func buxSecondaryPillStyle(accent: Color, controlSize: ControlSize = .regular) -> some View {
+        self
+            .font(.system(size: controlSize == .small ? 13 : controlSize == .large ? 15 : 14, weight: .semibold))
+            .foregroundStyle(accent)
+            .padding(.horizontal, controlSize == .small ? 12 : controlSize == .large ? 20 : 16)
+            .frame(height: controlSize == .small ? 34 : controlSize == .large ? BuxLayout.pillHeight : 44)
+            .background(accent.opacity(0.14))
+            .clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(accent.opacity(0.3), lineWidth: 1))
+            .buttonStyle(BuxActionPressStyle())
+    }
 }

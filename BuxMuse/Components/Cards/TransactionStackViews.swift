@@ -12,21 +12,28 @@ import SwiftUI
 
 struct RecentTransactionsSectionView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dashboardEnhancedTint) private var dashboardEnhancedTint
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
-    let transactions: [Transaction]
+    let transactions: [DashboardRecentTransaction]
     let onSeeMore: () -> Void
 
     private var cardColor: Color {
         themeManager.cardFill(for: colorScheme)
     }
 
+    private var cardStroke: Color {
+        dashboardEnhancedTint
+            ? DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme)
+            : themeManager.subtleCardStroke(for: colorScheme)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
             Text("Recent transactions")
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             if transactions.isEmpty {
                 Text("No transactions yet. Add an expense to see activity here.")
@@ -55,19 +62,22 @@ struct RecentTransactionsSectionView: View {
         }
     }
 
-    private func recentRow(for tx: Transaction) -> some View {
+    private func recentRow(for tx: DashboardRecentTransaction) -> some View {
         HStack(spacing: 14) {
             AsyncMerchantLogoView(merchantName: tx.merchantName, size: 40)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(tx.merchantName)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)
 
                 Text(tx.category.displayName)
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(
+                        EmotionalTagAppearance.accent(for: tx.emotion, colorScheme: colorScheme)
+                            ?? themeManager.current.accentColor
+                    )
             }
 
             Spacer()
@@ -75,7 +85,7 @@ struct RecentTransactionsSectionView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(appSettingsManager.format(tx.amount.value))
                     .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                 Text(tx.date, style: .date)
                     .font(.system(size: 11, weight: .medium))
@@ -84,9 +94,49 @@ struct RecentTransactionsSectionView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(cardColor)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .buxCardOutline(themeManager: themeManager, colorScheme: colorScheme, cornerRadius: 18)
+        .modifier(RecentTransactionRowChromeModifier(
+            transaction: tx,
+            cardColor: cardColor,
+            cardStroke: cardStroke
+        ))
+    }
+}
+
+// MARK: - Row chrome
+
+private struct RecentTransactionRowChromeModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dashboardEnhancedTint) private var dashboardEnhancedTint
+    let transaction: DashboardRecentTransaction
+    let cardColor: Color
+    let cardStroke: Color
+
+    func body(content: Content) -> some View {
+        if dashboardEnhancedTint,
+           transaction.emotion == nil {
+            content.dashboardThemedCardChrome(cornerRadius: 18)
+        } else if let emotion = transaction.emotion, let symbol = transaction.emotionSymbol {
+            content.background {
+                EmotionalListCardChrome(
+                    cornerRadius: 18,
+                    isDark: colorScheme == .dark,
+                    base: cardColor,
+                    fallbackStroke: cardStroke,
+                    emotionId: emotion,
+                    symbol: symbol
+                )
+                .equatable()
+            }
+        } else {
+            content.background {
+                PlainExpenseListCardChrome(
+                    cornerRadius: 18,
+                    base: cardColor,
+                    stroke: cardStroke
+                )
+                .equatable()
+            }
+        }
     }
 }
 

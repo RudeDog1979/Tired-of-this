@@ -24,7 +24,7 @@ struct ExpenseNoteSheet: View {
             VStack(spacing: 20) {
                 Text("Add note")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .padding(.top, 24)
 
                 Text(merchantName)

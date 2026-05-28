@@ -31,11 +31,12 @@ typealias BuxDetailSectionHeader = SubscriptionHubSectionHeader
 struct SubscriptionHubSectionHeader: View {
     let title: String
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
 
     var body: some View {
         Text(title)
             .font(.system(size: 11, weight: .bold))
-            .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
             .kerning(1.2)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -50,12 +51,7 @@ struct SubscriptionHubCardSurface: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .background(themeManager.cardFill(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-            )
+            .buxThemedCardChrome(cornerRadius: cornerRadius)
     }
 }
 

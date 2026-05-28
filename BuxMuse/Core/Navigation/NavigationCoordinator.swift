@@ -20,7 +20,14 @@ final class NavigationCoordinator: ObservableObject {
     /// Driven by bottom search accessory (iOS 26) or toolbar search button (iOS 18).
     @Published var isExpenseSearchPresented: Bool = false
 
+    /// Increments when user selects a tab — drives tab-bar icon animations.
+    @Published private(set) var tabSelectionTick: Int = 0
+
     init() {}
+
+    func registerTabSelection() {
+        tabSelectionTick += 1
+    }
 
     func restore(tab: AppTab, activeCategory: String, isBalanceVisible: Bool) {
         selectedTab = tab
@@ -49,5 +56,21 @@ final class NavigationCoordinator: ObservableObject {
 
     func dismissExpenseSearch() {
         isExpenseSearchPresented = false
+    }
+
+    /// Set when the Studio timer Live Activity is tapped (`buxmuse://studio/log-time`).
+    @Published var openStudioLogTimeRequest = false
+
+    func openStudioLogTime() {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            selectedTab = .studio
+            openStudioLogTimeRequest = true
+        }
+    }
+
+    func consumeStudioLogTimeRequest() -> Bool {
+        guard openStudioLogTimeRequest else { return false }
+        openStudioLogTimeRequest = false
+        return true
     }
 }

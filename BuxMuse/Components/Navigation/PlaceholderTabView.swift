@@ -25,7 +25,7 @@ struct PlaceholderTabView: View {
             
             Text(title)
                 .font(.system(size: 24, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white : .black)
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             
             Text("BuxMuse custom component interface under development.")
                 .font(.system(size: 14, weight: .medium))

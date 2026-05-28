@@ -11,16 +11,19 @@ struct ExpenseCategorySheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var brain: BuxMuseBrain
 
     let transaction: Transaction
-    let onSelect: (TransactionCategory) -> Void
+    let onSelect: (TransactionCategory, UUID?) -> Void
 
     @State private var selected: TransactionCategory
+    @State private var selectedCategoryId: UUID?
 
-    init(transaction: Transaction, onSelect: @escaping (TransactionCategory) -> Void) {
+    init(transaction: Transaction, onSelect: @escaping (TransactionCategory, UUID?) -> Void) {
         self.transaction = transaction
         self.onSelect = onSelect
         _selected = State(initialValue: transaction.category)
+        _selectedCategoryId = State(initialValue: nil)
     }
 
     var body: some View {
@@ -31,18 +34,22 @@ struct ExpenseCategorySheet: View {
             VStack(spacing: 20) {
                 Text("Change category")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .padding(.top, 24)
 
                 Text(transaction.merchantName)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
 
-                CategoryPicker(selectedCategory: $selected)
+                ExpenseCategoryPickerView(
+                    selectedCategoryId: $selectedCategoryId,
+                    selectedCategory: $selected
+                )
+                .environmentObject(brain)
 
                 Button(action: {
                     withAnimation(.buxSnap) {
-                        onSelect(selected)
+                        onSelect(selected, selectedCategoryId)
                     }
                     dismiss()
                 }) {
@@ -61,5 +68,11 @@ struct ExpenseCategorySheet: View {
             }
         }
         .presentationDetents([.medium])
+        .onAppear {
+            if let record = try? brain.fetchExpenseRecord(id: transaction.id) {
+                selected = record.transactionCategory
+                selectedCategoryId = record.categoryId
+            }
+        }
     }
 }

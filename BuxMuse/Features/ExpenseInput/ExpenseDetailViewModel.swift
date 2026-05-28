@@ -38,7 +38,8 @@ final class ExpenseDetailViewModel: ObservableObject {
     }
 
     func formattedAmount() -> String {
-        settingsManager.format(record.amountValue)
+        let currency = AppSettingsManager.currencySetting(for: record.currencyCode)
+        return AppSettingsManager.format(amount: record.amountValue, currency: currency)
     }
 
     func saveNotes() throws {
@@ -50,8 +51,8 @@ final class ExpenseDetailViewModel: ObservableObject {
         try brain.deleteExpense(id: record.id)
     }
 
-    func changeCategory(_ category: TransactionCategory) throws {
-        try brain.changeExpenseCategory(id: record.id, category: category)
+    func changeCategory(_ category: TransactionCategory, categoryId: UUID? = nil) throws {
+        try brain.changeExpenseCategory(id: record.id, category: category, categoryId: categoryId)
         reloadRecord()
     }
 

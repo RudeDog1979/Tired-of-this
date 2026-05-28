@@ -13,7 +13,9 @@ public enum SettingsDestinationType: String, Codable, CaseIterable {
     case appearance
     case regionCurrency
     case budgets
-    case freelance
+    case studio
+    case invoicePayment
+    case mileage
     case notifications
     case security
     case data
@@ -123,19 +125,41 @@ public final class SettingsBrain {
             destination: .budgets
         )
         
-        let freelanceStatus = store.freelanceEnabled ? "Enabled" : "Disabled"
-        let freelanceRow = SettingsRowDisplay(
-            title: "Freelance Hub",
+        let studioStatus = store.studioEnabled ? "On" : "Off"
+        let studioRow = SettingsRowDisplay(
+            title: "Studio",
             subtitle: "Business profile, invoices, tax",
-            iconName: "briefcase.fill",
-            hexColor: "#FF9F0A", // Orange
-            trailingText: freelanceStatus,
-            destination: .freelance
+            iconName: "laptopcomputer",
+            hexColor: "#FF9F0A",
+            trailingText: studioStatus,
+            destination: .studio
+        )
+
+        let bankTypeLabel = store.autoDetectInvoiceBankAccountType
+            ? "Auto"
+            : (store.invoiceBankAccountTypeOverride?.displayName ?? "Manual")
+        let invoicePaymentRow = SettingsRowDisplay(
+            title: "Invoice Payment & Bank Type",
+            subtitle: "Account fields on generated invoices",
+            iconName: "building.columns.fill",
+            hexColor: "#5AC8FA",
+            trailingText: bankTypeLabel,
+            destination: .invoicePayment
+        )
+
+        let mileageLocationLabel = store.autoLocationForMileage ? "On" : "Off"
+        let mileageRow = SettingsRowDisplay(
+            title: "Mileage Log",
+            subtitle: "Trip log, allowance rate, auto-location",
+            iconName: "car.fill",
+            hexColor: "#64D2FF",
+            trailingText: mileageLocationLabel,
+            destination: .mileage
         )
         
         let rulesSection = SettingsSectionDisplay(
             title: "BUX RULES",
-            rows: [budgetRow, freelanceRow]
+            rows: [budgetRow, studioRow, invoicePaymentRow, mileageRow]
         )
         
         // 3. Security & Access Section

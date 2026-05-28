@@ -48,7 +48,7 @@ struct AdjustGoalSheet: View {
                     
                     Text("Adjust Goal")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
                     Spacer()
                     
@@ -74,7 +74,7 @@ struct AdjustGoalSheet: View {
                                 
                                 Text("\(appSettingsManager.format(goal.currentAmount)) of \(appSettingsManager.format(goal.targetAmount))")
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }
                             
                             Spacer()
@@ -101,7 +101,7 @@ struct AdjustGoalSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("ADJUST TARGET AMOUNT")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                 .kerning(1.2)
                             
                             HStack(spacing: 8) {
@@ -111,7 +111,7 @@ struct AdjustGoalSheet: View {
                                 
                                 TextField("0.00", text: $targetString)
                                     .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     .keyboardType(.decimalPad)
                                     .tint(themeManager.current.accentColor)
                             }
@@ -130,7 +130,7 @@ struct AdjustGoalSheet: View {
                             HStack {
                                 Text("ADJUST TARGET DEADLINE")
                                     .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                     .kerning(1.2)
                                 
                                 Spacer()
@@ -164,7 +164,7 @@ struct AdjustGoalSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("ADJUST PRIORITY LEVEL")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                 .kerning(1.2)
                             
                             HStack(spacing: 8) {

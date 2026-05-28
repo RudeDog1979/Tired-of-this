@@ -187,8 +187,10 @@ final class InsightEntity {
 @Model
 final class MerchantEntity {
     @Attribute(.unique) var id: UUID
-    @Attribute(.unique) var normalizedName: String
+    var normalizedName: String
     var name: String
+    /// Optional user label when multiple merchants share the same normalized key (e.g. "Food").
+    var disambiguator: String = ""
     var logoURL: String?
     var localLogoPath: String?
     var cluster: String?
@@ -200,6 +202,7 @@ final class MerchantEntity {
         id: UUID = UUID(),
         normalizedName: String,
         name: String,
+        disambiguator: String = "",
         logoURL: String? = nil,
         localLogoPath: String? = nil,
         cluster: String? = nil,
@@ -210,6 +213,7 @@ final class MerchantEntity {
         self.id = id
         self.normalizedName = normalizedName
         self.name = name
+        self.disambiguator = disambiguator
         self.logoURL = logoURL
         self.localLogoPath = localLogoPath
         self.cluster = cluster

@@ -1,0 +1,98 @@
+//
+//  BuxMuseBrain+Engagement.swift
+//  BuxMuse
+//
+//  Tips, notifications inbox — all fetch/logic lives in the brain.
+//
+
+import Foundation
+
+extension BuxMuseBrain {
+    // MARK: - Tips
+
+    public func refreshTips(countryCode: String, force: Bool = false) async {
+        await tipsEngine.refreshIfNeeded(force: force)
+        let tip = tipsEngine.dailyTip(for: countryCode)
+        dailyTipDisplay = tip
+
+        let unseen = tipsEngine.isTipUnseen(for: countryCode)
+        tipNeedsAttention = unseen
+        if unseen && !didPulseTipThisSession {
+            tipPulseToken += 1
+            didPulseTipThisSession = true
+        }
+    }
+
+    public func markDailyTipSeen() {
+        guard !dailyTipDisplay.isEmpty else { return }
+        tipsEngine.markTipSeen(dailyTipDisplay.id)
+        tipNeedsAttention = false
+    }
+
+    // MARK: - Notifications inbox
+
+    public func refreshNotificationInbox(
+        settings: SettingsStore,
+        appSettings: AppSettingsManager,
+        studioAlerts: [StudioAlertDisplay] = [],
+        studioInvoices: [StudioInvoice] = [],
+        taxDeadlineDays: Int? = nil
+    ) async {
+        let records = (try? fetchAllExpenseRecords()) ?? []
+        notificationInboxDisplay = inboxEngine.rebuildInbox(
+            settings: settings,
+            dashSnapshot: dashboardSnapshot,
+            expenseRecords: records,
+            studioAlerts: studioAlerts,
+            studioInvoices: studioInvoices,
+            taxDeadlineDays: taxDeadlineDays,
+            currencyFormatter: { appSettings.format($0) }
+        )
+        await inboxEngine.syncLocalNotifications(settings: settings, inbox: notificationInboxDisplay)
+    }
+
+    public func markNotificationRead(_ id: String) {
+        inboxEngine.markRead(id)
+        var items = notificationInboxDisplay.items
+        items = items.map { item in
+            guard item.id == id else { return item }
+            var copy = item
+            copy.isRead = true
+            return copy
+        }
+        notificationInboxDisplay = NotificationInboxDisplay(
+            items: items,
+            unreadCount: items.filter { !$0.isRead }.count
+        )
+    }
+
+    public func markAllNotificationsRead() {
+        let ids = notificationInboxDisplay.items.map(\.id)
+        inboxEngine.markAllRead(ids)
+        let items = notificationInboxDisplay.items.map { item -> AppNotificationItem in
+            var copy = item
+            copy.isRead = true
+            return copy
+        }
+        notificationInboxDisplay = NotificationInboxDisplay(items: items, unreadCount: 0)
+    }
+
+    public func refreshEngagement(
+        countryCode: String,
+        settings: SettingsStore,
+        appSettings: AppSettingsManager,
+        studioAlerts: [StudioAlertDisplay] = [],
+        studioInvoices: [StudioInvoice] = [],
+        taxDeadlineDays: Int? = nil,
+        forceTips: Bool = false
+    ) async {
+        await refreshTips(countryCode: countryCode, force: forceTips)
+        await refreshNotificationInbox(
+            settings: settings,
+            appSettings: appSettings,
+            studioAlerts: studioAlerts,
+            studioInvoices: studioInvoices,
+            taxDeadlineDays: taxDeadlineDays
+        )
+    }
+}

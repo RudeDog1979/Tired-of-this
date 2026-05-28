@@ -57,7 +57,7 @@ struct GoalDetailView: View {
                                 
                                 Image(systemName: "chevron.left")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }
                         }
                         
@@ -65,7 +65,7 @@ struct GoalDetailView: View {
                         
                         Text("Goal Details")
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         
                         Spacer()
                         
@@ -99,7 +99,7 @@ struct GoalDetailView: View {
                             VStack(spacing: 6) {
                                 Text(detail.goal.name)
                                     .font(.system(size: 22, weight: .bold))
-                                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 
                                 if let notes = detail.goal.notes, !notes.isEmpty {
                                     Text(notes)
@@ -115,7 +115,7 @@ struct GoalDetailView: View {
                                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                                     Text(appSettingsManager.format(detail.goal.currentAmount))
                                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     
                                     Text("saved")
                                         .font(.system(size: 14, weight: .bold))
@@ -194,7 +194,7 @@ struct GoalDetailView: View {
                                 Text("Adjust")
                                     .font(.system(size: 12, weight: .bold))
                             }
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(cardColor)
@@ -215,7 +215,7 @@ struct GoalDetailView: View {
                                 Text("Edit Goal")
                                     .font(.system(size: 12, weight: .bold))
                             }
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(cardColor)
@@ -233,7 +233,7 @@ struct GoalDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("SAVINGS VELOCITY SCENARIOS")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                             .kerning(1.2)
                         
                         VStack(spacing: 12) {
@@ -242,7 +242,7 @@ struct GoalDetailView: View {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(scenario.name)
                                             .font(.system(size: 14, weight: .bold))
-                                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         
                                         Text(scenario.description)
                                             .font(.system(size: 11, weight: .medium))
@@ -288,7 +288,7 @@ struct GoalDetailView: View {
                                             .foregroundColor(.red)
                                         Text(risk.description)
                                             .font(.system(size: 12, weight: .bold))
-                                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     }
                                     
                                     Text("Fix: \(risk.suggestedFix)")
@@ -324,7 +324,7 @@ struct GoalDetailView: View {
                                             .foregroundColor(.green)
                                         Text(opportunity.description)
                                             .font(.system(size: 12, weight: .bold))
-                                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     }
                                     
                                     Text(opportunity.benefit)
@@ -349,7 +349,7 @@ struct GoalDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("SAVINGS MOMENTUM")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                             .kerning(1.2)
                         
                         ZStack {
@@ -364,7 +364,7 @@ struct GoalDetailView: View {
                                 HStack {
                                     Text("Status: \(detail.momentum.statusDescription)")
                                         .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     
                                     Spacer()
                                     
@@ -392,7 +392,7 @@ struct GoalDetailView: View {
                                     
                                     Text("Suggested Actions:")
                                         .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     
                                     ForEach(detail.momentum.microActions, id: \.self) { act in
                                         HStack(alignment: .top, spacing: 8) {
@@ -414,7 +414,7 @@ struct GoalDetailView: View {
                                     
                                     Text("Habit Builders:")
                                         .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     
                                     ForEach(detail.momentum.habitActions, id: \.self) { act in
                                         HStack(alignment: .top, spacing: 8) {
@@ -441,7 +441,7 @@ struct GoalDetailView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("SAVINGS LOG")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                 .kerning(1.2)
                             
                             VStack(spacing: 1) {
@@ -450,7 +450,7 @@ struct GoalDetailView: View {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(contrib.notes ?? "Goal contribution")
                                                 .font(.system(size: 13, weight: .semibold))
-                                                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                             
                                             Text(formatDate(contrib.date))
                                                 .font(.system(size: 11, weight: .medium))

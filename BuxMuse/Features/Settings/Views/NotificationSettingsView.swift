@@ -15,18 +15,19 @@ struct NotificationSettingsView: View {
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
     }
-    
+
     var body: some View {
         ZStack {
             bgColor.ignoresSafeArea()
-            
+            BuxHeroMeshBackground()
+
             Form {
                 Section("SWITCHBOARD") {
                     Toggle(isOn: $store.notificationsEnabled) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Enable Notifications")
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("Receive timely financial alerts and insights")
                                 .font(.system(size: 11))
                                 .foregroundColor(.gray)
@@ -39,7 +40,7 @@ struct NotificationSettingsView: View {
                     Section("ALERTS & RADAR") {
                         Toggle("Budget Threshold Warnings", isOn: $store.budgetAlertsEnabled)
                         Toggle("Upcoming Bill Reminders", isOn: $store.billRemindersEnabled)
-                        Toggle("Invoice Status Updates", isOn: $store.freelanceInvoiceRemindersEnabled)
+                        Toggle("Invoice Status Updates", isOn: $store.studioInvoiceRemindersEnabled)
                         Toggle("Estimated Tax Reminders", isOn: $store.taxDeadlineRemindersEnabled)
                     }
                     
@@ -68,7 +69,7 @@ struct NotificationSettingsView: View {
         .onChange(of: store.notificationsEnabled) { _, _ in store.save() }
         .onChange(of: store.budgetAlertsEnabled) { _, _ in store.save() }
         .onChange(of: store.billRemindersEnabled) { _, _ in store.save() }
-        .onChange(of: store.freelanceInvoiceRemindersEnabled) { _, _ in store.save() }
+        .onChange(of: store.studioInvoiceRemindersEnabled) { _, _ in store.save() }
         .onChange(of: store.taxDeadlineRemindersEnabled) { _, _ in store.save() }
         .onChange(of: store.dailySummaryEnabled) { _, _ in store.save() }
     }

@@ -18,7 +18,7 @@ struct CategoryPicker: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("CATEGORY")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                 .kerning(1.2)
             
             ScrollView(.horizontal, showsIndicators: false) {
@@ -52,6 +52,7 @@ struct CategoryPicker: View {
                 }
                 .padding(.horizontal, 4)
             }
+            .buxHorizontalScrollEdgeFade(background: themeManager.screenBackground(for: colorScheme))
         }
     }
 }

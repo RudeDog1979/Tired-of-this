@@ -22,6 +22,7 @@ public final class SettingsStore: ObservableObject {
     @Published public var themeMode: ThemeMode = .system
     @Published public var accentColorId: String = "Purple"
     @Published public var useGlassmorphism: Bool = true
+    @Published public var brandThemesEnabled: Bool = true
     @Published public var reducedMotion: Bool = false
     
     // MARK: - Region Settings
@@ -38,14 +39,14 @@ public final class SettingsStore: ObservableObject {
     @Published public var customBudgetPeriod: DefaultBudgetPeriod = .weekly
     
     // MARK: - Freelance Settings
-    @Published public var freelanceEnabled: Bool = true
-    @Published public var freelanceProfileId: UUID? = nil
+    @Published public var studioEnabled: Bool = true
+    @Published public var studioProfileId: UUID? = nil
     
     // MARK: - Notifications Settings
     @Published public var notificationsEnabled: Bool = true
     @Published public var budgetAlertsEnabled: Bool = true
     @Published public var billRemindersEnabled: Bool = true
-    @Published public var freelanceInvoiceRemindersEnabled: Bool = true
+    @Published public var studioInvoiceRemindersEnabled: Bool = true
     @Published public var taxDeadlineRemindersEnabled: Bool = true
     @Published public var dailySummaryEnabled: Bool = false
     @Published public var quietHoursStartHour: Int = 22
@@ -58,17 +59,30 @@ public final class SettingsStore: ObservableObject {
     @Published public var requireBiometricOnLaunch: Bool = false
     @Published public var lockAfterInactivityMinutes: Int = 1 // 1 minute
     @Published public var privacyBlurInAppSwitching: Bool = true
-    
+    @Published public var cancelledSubscriptionMerchants: [String] = []
+
     // MARK: - Data Settings
     @Published public var allowLocalBackups: Bool = true
     @Published public var autoBackupFrequency: AutoBackupFrequency = .weekly
-    @Published public var includeFreelanceDataInExports: Bool = true
+    @Published public var includeStudioDataInExports: Bool = true
     @Published public var includeAnalyticsInExports: Bool = false
     @Published public var lastExportDate: Date? = nil
     
     // MARK: - Developer Options
     @Published public var enableDebugOverlay: Bool = false
     @Published public var showPerformanceMetrics: Bool = false
+
+    // MARK: - Invoice payment (Settings → Studio invoices)
+    @Published public var autoDetectInvoiceBankAccountType: Bool = true
+    @Published public var invoiceBankAccountTypeOverride: BankAccountType? = nil
+
+    // MARK: - Studio mileage
+    @Published public var autoLocationForMileage: Bool = false
+    @Published public var mileageRatePerUnitValue: Double = 0.45
+
+    public var mileageRatePerUnit: Decimal {
+        Decimal(mileageRatePerUnitValue)
+    }
     
     private let saveQueue = DispatchQueue(label: "com.buxmuse.settings.save", qos: .utility)
     private var isLoaded = false
@@ -92,6 +106,25 @@ public final class SettingsStore: ObservableObject {
         KeychainHelper.shared.deletePasscode()
         objectWillChange.send()
     }
+
+    public func registerCancelledSubscription(normalizedMerchant: String) {
+        guard !normalizedMerchant.isEmpty else { return }
+        if !cancelledSubscriptionMerchants.contains(normalizedMerchant) {
+            cancelledSubscriptionMerchants.append(normalizedMerchant)
+            UserDefaults.standard.set(cancelledSubscriptionMerchants, forKey: Self.cancelledSubscriptionsDefaultsKey)
+            save()
+        }
+    }
+
+    public func isSubscriptionCancelled(normalizedMerchant: String) -> Bool {
+        cancelledSubscriptionMerchants.contains(normalizedMerchant)
+    }
+
+    private static let cancelledSubscriptionsDefaultsKey = "buxmuse.cancelledSubscriptionMerchants"
+    private static let autoDetectInvoiceBankKey = "buxmuse.settings.autoDetectInvoiceBankType"
+    private static let invoiceBankOverrideKey = "buxmuse.settings.invoiceBankTypeOverride"
+    private static let autoLocationMileageKey = "buxmuse.settings.autoLocationForMileage"
+    private static let mileageRateKey = "buxmuse.settings.mileageRatePerUnit"
     
     // MARK: - Local Persistence URLs
     
@@ -116,6 +149,7 @@ public final class SettingsStore: ObservableObject {
         let themeMode: ThemeMode
         let accentColorId: String
         let useGlassmorphism: Bool
+        let brandThemesEnabled: Bool?
         let reducedMotion: Bool
         
         let weekStartDay: WeekStartDay
@@ -129,13 +163,13 @@ public final class SettingsStore: ObservableObject {
         let customBudgetLimit: Decimal?
         let customBudgetPeriod: DefaultBudgetPeriod?
         
-        let freelanceEnabled: Bool
-        let freelanceProfileId: UUID?
+        let studioEnabled: Bool
+        let studioProfileId: UUID?
         
         let notificationsEnabled: Bool
         let budgetAlertsEnabled: Bool
         let billRemindersEnabled: Bool
-        let freelanceInvoiceRemindersEnabled: Bool
+        let studioInvoiceRemindersEnabled: Bool
         let taxDeadlineRemindersEnabled: Bool
         let dailySummaryEnabled: Bool
         let quietHoursStartHour: Int
@@ -147,15 +181,216 @@ public final class SettingsStore: ObservableObject {
         let requireBiometricOnLaunch: Bool
         let lockAfterInactivityMinutes: Int
         let privacyBlurInAppSwitching: Bool
+        let cancelledSubscriptionMerchants: [String]?
         
         let allowLocalBackups: Bool
         let autoBackupFrequency: AutoBackupFrequency
-        let includeFreelanceDataInExports: Bool
+        let includeStudioDataInExports: Bool
         let includeAnalyticsInExports: Bool
         let lastExportDate: Date?
         
         let enableDebugOverlay: Bool
         let showPerformanceMetrics: Bool
+
+        enum CodingKeys: String, CodingKey {
+            case userDisplayName, profileAvatarData, preferredNameStyle
+            case themeMode, accentColorId, useGlassmorphism, brandThemesEnabled, reducedMotion
+            case weekStartDay, budgetingMode, defaultBudgetPeriod
+            case showBudgetWarnings, autoAdjustBudgetsFromHistory, customBudgetProfiles
+            case simpleBudgetLimit, customBudgetLimit, customBudgetPeriod
+            case studioEnabled, freelanceEnabled
+            case studioProfileId, freelanceProfileId
+            case notificationsEnabled, budgetAlertsEnabled, billRemindersEnabled
+            case studioInvoiceRemindersEnabled, freelanceInvoiceRemindersEnabled
+            case taxDeadlineRemindersEnabled, dailySummaryEnabled
+            case quietHoursStartHour, quietHoursStartMinute, quietHoursEndHour, quietHoursEndMinute
+            case biometricLockEnabled, requireBiometricOnLaunch, lockAfterInactivityMinutes
+            case privacyBlurInAppSwitching, cancelledSubscriptionMerchants
+            case allowLocalBackups, autoBackupFrequency
+            case includeStudioDataInExports, includeFreelanceDataInExports
+            case includeAnalyticsInExports, lastExportDate
+            case enableDebugOverlay, showPerformanceMetrics
+        }
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            userDisplayName = try c.decodeIfPresent(String.self, forKey: .userDisplayName)
+            profileAvatarData = try c.decodeIfPresent(Data.self, forKey: .profileAvatarData)
+            preferredNameStyle = try c.decode(PreferredNameStyle.self, forKey: .preferredNameStyle)
+            themeMode = try c.decode(ThemeMode.self, forKey: .themeMode)
+            accentColorId = try c.decode(String.self, forKey: .accentColorId)
+            useGlassmorphism = try c.decode(Bool.self, forKey: .useGlassmorphism)
+            brandThemesEnabled = try c.decodeIfPresent(Bool.self, forKey: .brandThemesEnabled) ?? true
+            reducedMotion = try c.decode(Bool.self, forKey: .reducedMotion)
+            weekStartDay = try c.decode(WeekStartDay.self, forKey: .weekStartDay)
+            budgetingMode = try c.decode(BudgetingMode.self, forKey: .budgetingMode)
+            defaultBudgetPeriod = try c.decode(DefaultBudgetPeriod.self, forKey: .defaultBudgetPeriod)
+            showBudgetWarnings = try c.decode(Bool.self, forKey: .showBudgetWarnings)
+            autoAdjustBudgetsFromHistory = try c.decode(Bool.self, forKey: .autoAdjustBudgetsFromHistory)
+            customBudgetProfiles = try c.decode([CustomBudgetProfile].self, forKey: .customBudgetProfiles)
+            simpleBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .simpleBudgetLimit)
+            customBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .customBudgetLimit)
+            customBudgetPeriod = try c.decodeIfPresent(DefaultBudgetPeriod.self, forKey: .customBudgetPeriod)
+            studioEnabled = try c.decodeIfPresent(Bool.self, forKey: .studioEnabled)
+                ?? c.decodeIfPresent(Bool.self, forKey: .freelanceEnabled) ?? true
+            studioProfileId = try c.decodeIfPresent(UUID.self, forKey: .studioProfileId)
+                ?? c.decodeIfPresent(UUID.self, forKey: .freelanceProfileId)
+            notificationsEnabled = try c.decode(Bool.self, forKey: .notificationsEnabled)
+            budgetAlertsEnabled = try c.decode(Bool.self, forKey: .budgetAlertsEnabled)
+            billRemindersEnabled = try c.decode(Bool.self, forKey: .billRemindersEnabled)
+            studioInvoiceRemindersEnabled = try c.decodeIfPresent(Bool.self, forKey: .studioInvoiceRemindersEnabled)
+                ?? c.decodeIfPresent(Bool.self, forKey: .freelanceInvoiceRemindersEnabled) ?? true
+            taxDeadlineRemindersEnabled = try c.decode(Bool.self, forKey: .taxDeadlineRemindersEnabled)
+            dailySummaryEnabled = try c.decode(Bool.self, forKey: .dailySummaryEnabled)
+            quietHoursStartHour = try c.decode(Int.self, forKey: .quietHoursStartHour)
+            quietHoursStartMinute = try c.decode(Int.self, forKey: .quietHoursStartMinute)
+            quietHoursEndHour = try c.decode(Int.self, forKey: .quietHoursEndHour)
+            quietHoursEndMinute = try c.decode(Int.self, forKey: .quietHoursEndMinute)
+            biometricLockEnabled = try c.decode(Bool.self, forKey: .biometricLockEnabled)
+            requireBiometricOnLaunch = try c.decode(Bool.self, forKey: .requireBiometricOnLaunch)
+            lockAfterInactivityMinutes = try c.decode(Int.self, forKey: .lockAfterInactivityMinutes)
+            privacyBlurInAppSwitching = try c.decode(Bool.self, forKey: .privacyBlurInAppSwitching)
+            cancelledSubscriptionMerchants = try c.decodeIfPresent([String].self, forKey: .cancelledSubscriptionMerchants)
+            allowLocalBackups = try c.decode(Bool.self, forKey: .allowLocalBackups)
+            autoBackupFrequency = try c.decode(AutoBackupFrequency.self, forKey: .autoBackupFrequency)
+            includeStudioDataInExports = try c.decodeIfPresent(Bool.self, forKey: .includeStudioDataInExports)
+                ?? c.decodeIfPresent(Bool.self, forKey: .includeFreelanceDataInExports) ?? true
+            includeAnalyticsInExports = try c.decode(Bool.self, forKey: .includeAnalyticsInExports)
+            lastExportDate = try c.decodeIfPresent(Date.self, forKey: .lastExportDate)
+            enableDebugOverlay = try c.decode(Bool.self, forKey: .enableDebugOverlay)
+            showPerformanceMetrics = try c.decode(Bool.self, forKey: .showPerformanceMetrics)
+        }
+
+        init(
+            userDisplayName: String?,
+            profileAvatarData: Data?,
+            preferredNameStyle: PreferredNameStyle,
+            themeMode: ThemeMode,
+            accentColorId: String,
+            useGlassmorphism: Bool,
+            brandThemesEnabled: Bool,
+            reducedMotion: Bool,
+            weekStartDay: WeekStartDay,
+            budgetingMode: BudgetingMode,
+            defaultBudgetPeriod: DefaultBudgetPeriod,
+            showBudgetWarnings: Bool,
+            autoAdjustBudgetsFromHistory: Bool,
+            customBudgetProfiles: [CustomBudgetProfile],
+            simpleBudgetLimit: Decimal?,
+            customBudgetLimit: Decimal?,
+            customBudgetPeriod: DefaultBudgetPeriod?,
+            studioEnabled: Bool,
+            studioProfileId: UUID?,
+            notificationsEnabled: Bool,
+            budgetAlertsEnabled: Bool,
+            billRemindersEnabled: Bool,
+            studioInvoiceRemindersEnabled: Bool,
+            taxDeadlineRemindersEnabled: Bool,
+            dailySummaryEnabled: Bool,
+            quietHoursStartHour: Int,
+            quietHoursStartMinute: Int,
+            quietHoursEndHour: Int,
+            quietHoursEndMinute: Int,
+            biometricLockEnabled: Bool,
+            requireBiometricOnLaunch: Bool,
+            lockAfterInactivityMinutes: Int,
+            privacyBlurInAppSwitching: Bool,
+            cancelledSubscriptionMerchants: [String]?,
+            allowLocalBackups: Bool,
+            autoBackupFrequency: AutoBackupFrequency,
+            includeStudioDataInExports: Bool,
+            includeAnalyticsInExports: Bool,
+            lastExportDate: Date?,
+            enableDebugOverlay: Bool,
+            showPerformanceMetrics: Bool
+        ) {
+            self.userDisplayName = userDisplayName
+            self.profileAvatarData = profileAvatarData
+            self.preferredNameStyle = preferredNameStyle
+            self.themeMode = themeMode
+            self.accentColorId = accentColorId
+            self.useGlassmorphism = useGlassmorphism
+            self.brandThemesEnabled = brandThemesEnabled
+            self.reducedMotion = reducedMotion
+            self.weekStartDay = weekStartDay
+            self.budgetingMode = budgetingMode
+            self.defaultBudgetPeriod = defaultBudgetPeriod
+            self.showBudgetWarnings = showBudgetWarnings
+            self.autoAdjustBudgetsFromHistory = autoAdjustBudgetsFromHistory
+            self.customBudgetProfiles = customBudgetProfiles
+            self.simpleBudgetLimit = simpleBudgetLimit
+            self.customBudgetLimit = customBudgetLimit
+            self.customBudgetPeriod = customBudgetPeriod
+            self.studioEnabled = studioEnabled
+            self.studioProfileId = studioProfileId
+            self.notificationsEnabled = notificationsEnabled
+            self.budgetAlertsEnabled = budgetAlertsEnabled
+            self.billRemindersEnabled = billRemindersEnabled
+            self.studioInvoiceRemindersEnabled = studioInvoiceRemindersEnabled
+            self.taxDeadlineRemindersEnabled = taxDeadlineRemindersEnabled
+            self.dailySummaryEnabled = dailySummaryEnabled
+            self.quietHoursStartHour = quietHoursStartHour
+            self.quietHoursStartMinute = quietHoursStartMinute
+            self.quietHoursEndHour = quietHoursEndHour
+            self.quietHoursEndMinute = quietHoursEndMinute
+            self.biometricLockEnabled = biometricLockEnabled
+            self.requireBiometricOnLaunch = requireBiometricOnLaunch
+            self.lockAfterInactivityMinutes = lockAfterInactivityMinutes
+            self.privacyBlurInAppSwitching = privacyBlurInAppSwitching
+            self.cancelledSubscriptionMerchants = cancelledSubscriptionMerchants
+            self.allowLocalBackups = allowLocalBackups
+            self.autoBackupFrequency = autoBackupFrequency
+            self.includeStudioDataInExports = includeStudioDataInExports
+            self.includeAnalyticsInExports = includeAnalyticsInExports
+            self.lastExportDate = lastExportDate
+            self.enableDebugOverlay = enableDebugOverlay
+            self.showPerformanceMetrics = showPerformanceMetrics
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encodeIfPresent(userDisplayName, forKey: .userDisplayName)
+            try c.encodeIfPresent(profileAvatarData, forKey: .profileAvatarData)
+            try c.encode(preferredNameStyle, forKey: .preferredNameStyle)
+            try c.encode(themeMode, forKey: .themeMode)
+            try c.encode(accentColorId, forKey: .accentColorId)
+            try c.encode(useGlassmorphism, forKey: .useGlassmorphism)
+            try c.encode(brandThemesEnabled, forKey: .brandThemesEnabled)
+            try c.encode(reducedMotion, forKey: .reducedMotion)
+            try c.encode(weekStartDay, forKey: .weekStartDay)
+            try c.encode(budgetingMode, forKey: .budgetingMode)
+            try c.encode(defaultBudgetPeriod, forKey: .defaultBudgetPeriod)
+            try c.encode(showBudgetWarnings, forKey: .showBudgetWarnings)
+            try c.encode(autoAdjustBudgetsFromHistory, forKey: .autoAdjustBudgetsFromHistory)
+            try c.encode(customBudgetProfiles, forKey: .customBudgetProfiles)
+            try c.encodeIfPresent(simpleBudgetLimit, forKey: .simpleBudgetLimit)
+            try c.encodeIfPresent(customBudgetLimit, forKey: .customBudgetLimit)
+            try c.encodeIfPresent(customBudgetPeriod, forKey: .customBudgetPeriod)
+            try c.encode(studioEnabled, forKey: .studioEnabled)
+            try c.encodeIfPresent(studioProfileId, forKey: .studioProfileId)
+            try c.encode(notificationsEnabled, forKey: .notificationsEnabled)
+            try c.encode(budgetAlertsEnabled, forKey: .budgetAlertsEnabled)
+            try c.encode(billRemindersEnabled, forKey: .billRemindersEnabled)
+            try c.encode(studioInvoiceRemindersEnabled, forKey: .studioInvoiceRemindersEnabled)
+            try c.encode(taxDeadlineRemindersEnabled, forKey: .taxDeadlineRemindersEnabled)
+            try c.encode(dailySummaryEnabled, forKey: .dailySummaryEnabled)
+            try c.encode(quietHoursStartHour, forKey: .quietHoursStartHour)
+            try c.encode(quietHoursStartMinute, forKey: .quietHoursStartMinute)
+            try c.encode(quietHoursEndHour, forKey: .quietHoursEndHour)
+            try c.encode(quietHoursEndMinute, forKey: .quietHoursEndMinute)
+            try c.encode(biometricLockEnabled, forKey: .biometricLockEnabled)
+            try c.encode(requireBiometricOnLaunch, forKey: .requireBiometricOnLaunch)
+            try c.encode(lockAfterInactivityMinutes, forKey: .lockAfterInactivityMinutes)
+            try c.encode(privacyBlurInAppSwitching, forKey: .privacyBlurInAppSwitching)
+            try c.encodeIfPresent(cancelledSubscriptionMerchants, forKey: .cancelledSubscriptionMerchants)
+            try c.encode(allowLocalBackups, forKey: .allowLocalBackups)
+            try c.encode(autoBackupFrequency, forKey: .autoBackupFrequency)
+            try c.encode(includeStudioDataInExports, forKey: .includeStudioDataInExports)
+            try c.encode(includeAnalyticsInExports, forKey: .includeAnalyticsInExports)
+            try c.encodeIfPresent(lastExportDate, forKey: .lastExportDate)
+            try c.encode(enableDebugOverlay, forKey: .enableDebugOverlay)
+            try c.encode(showPerformanceMetrics, forKey: .showPerformanceMetrics)
+        }
     }
     
     public func loadStore() {
@@ -175,6 +410,7 @@ public final class SettingsStore: ObservableObject {
                 self.themeMode = payload.themeMode
                 self.accentColorId = payload.accentColorId
                 self.useGlassmorphism = payload.useGlassmorphism
+                self.brandThemesEnabled = payload.brandThemesEnabled ?? true
                 self.reducedMotion = payload.reducedMotion
                 
                 self.weekStartDay = payload.weekStartDay
@@ -188,13 +424,13 @@ public final class SettingsStore: ObservableObject {
                 self.customBudgetLimit = payload.customBudgetLimit ?? 50
                 self.customBudgetPeriod = payload.customBudgetPeriod ?? .weekly
                 
-                self.freelanceEnabled = payload.freelanceEnabled
-                self.freelanceProfileId = payload.freelanceProfileId
+                self.studioEnabled = payload.studioEnabled
+                self.studioProfileId = payload.studioProfileId
                 
                 self.notificationsEnabled = payload.notificationsEnabled
                 self.budgetAlertsEnabled = payload.budgetAlertsEnabled
                 self.billRemindersEnabled = payload.billRemindersEnabled
-                self.freelanceInvoiceRemindersEnabled = payload.freelanceInvoiceRemindersEnabled
+                self.studioInvoiceRemindersEnabled = payload.studioInvoiceRemindersEnabled
                 self.taxDeadlineRemindersEnabled = payload.taxDeadlineRemindersEnabled
                 self.dailySummaryEnabled = payload.dailySummaryEnabled
                 self.quietHoursStartHour = payload.quietHoursStartHour
@@ -206,15 +442,20 @@ public final class SettingsStore: ObservableObject {
                 self.requireBiometricOnLaunch = payload.requireBiometricOnLaunch
                 self.lockAfterInactivityMinutes = payload.lockAfterInactivityMinutes
                 self.privacyBlurInAppSwitching = payload.privacyBlurInAppSwitching
+                self.cancelledSubscriptionMerchants = payload.cancelledSubscriptionMerchants ?? []
+                UserDefaults.standard.set(self.cancelledSubscriptionMerchants, forKey: Self.cancelledSubscriptionsDefaultsKey)
                 
                 self.allowLocalBackups = payload.allowLocalBackups
                 self.autoBackupFrequency = payload.autoBackupFrequency
-                self.includeFreelanceDataInExports = payload.includeFreelanceDataInExports
+                self.includeStudioDataInExports = payload.includeStudioDataInExports
                 self.includeAnalyticsInExports = payload.includeAnalyticsInExports
                 self.lastExportDate = payload.lastExportDate
                 
                 self.enableDebugOverlay = payload.enableDebugOverlay
                 self.showPerformanceMetrics = payload.showPerformanceMetrics
+
+                loadInvoicePaymentPreferences()
+                loadMileagePreferences()
                 
                 self.isLoaded = true
                 print("SettingsStore: successfully loaded settings.")
@@ -236,17 +477,54 @@ public final class SettingsStore: ObservableObject {
         self.weekStartDay = .monday
         self.budgetingMode = .simple
         self.defaultBudgetPeriod = .monthly
-        self.freelanceEnabled = true
+        self.studioEnabled = true
         self.notificationsEnabled = true
         self.biometricLockEnabled = false
         self.customBudgetProfiles = []
         self.simpleBudgetLimit = 1000
         self.customBudgetLimit = 50
         self.customBudgetPeriod = .weekly
+        loadInvoicePaymentPreferences()
+        loadMileagePreferences()
         save()
+    }
+
+    private func loadMileagePreferences() {
+        if UserDefaults.standard.object(forKey: Self.autoLocationMileageKey) != nil {
+            autoLocationForMileage = UserDefaults.standard.bool(forKey: Self.autoLocationMileageKey)
+        }
+        if UserDefaults.standard.object(forKey: Self.mileageRateKey) != nil {
+            mileageRatePerUnitValue = UserDefaults.standard.double(forKey: Self.mileageRateKey)
+        }
+    }
+
+    private func persistMileagePreferences() {
+        UserDefaults.standard.set(autoLocationForMileage, forKey: Self.autoLocationMileageKey)
+        UserDefaults.standard.set(mileageRatePerUnitValue, forKey: Self.mileageRateKey)
+    }
+
+    private func loadInvoicePaymentPreferences() {
+        if UserDefaults.standard.object(forKey: Self.autoDetectInvoiceBankKey) != nil {
+            autoDetectInvoiceBankAccountType = UserDefaults.standard.bool(forKey: Self.autoDetectInvoiceBankKey)
+        }
+        if let raw = UserDefaults.standard.string(forKey: Self.invoiceBankOverrideKey),
+           let type = BankAccountType(rawValue: raw) {
+            invoiceBankAccountTypeOverride = type
+        }
+    }
+
+    private func persistInvoicePaymentPreferences() {
+        UserDefaults.standard.set(autoDetectInvoiceBankAccountType, forKey: Self.autoDetectInvoiceBankKey)
+        if let override = invoiceBankAccountTypeOverride {
+            UserDefaults.standard.set(override.rawValue, forKey: Self.invoiceBankOverrideKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: Self.invoiceBankOverrideKey)
+        }
     }
     
     public func save() {
+        persistInvoicePaymentPreferences()
+        persistMileagePreferences()
         let payload = StorePayload(
             userDisplayName: userDisplayName,
             profileAvatarData: profileAvatarData,
@@ -254,6 +532,7 @@ public final class SettingsStore: ObservableObject {
             themeMode: themeMode,
             accentColorId: accentColorId,
             useGlassmorphism: useGlassmorphism,
+            brandThemesEnabled: brandThemesEnabled,
             reducedMotion: reducedMotion,
             weekStartDay: weekStartDay,
             budgetingMode: budgetingMode,
@@ -264,12 +543,12 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetLimit: simpleBudgetLimit,
             customBudgetLimit: customBudgetLimit,
             customBudgetPeriod: customBudgetPeriod,
-            freelanceEnabled: freelanceEnabled,
-            freelanceProfileId: freelanceProfileId,
+            studioEnabled: studioEnabled,
+            studioProfileId: studioProfileId,
             notificationsEnabled: notificationsEnabled,
             budgetAlertsEnabled: budgetAlertsEnabled,
             billRemindersEnabled: billRemindersEnabled,
-            freelanceInvoiceRemindersEnabled: freelanceInvoiceRemindersEnabled,
+            studioInvoiceRemindersEnabled: studioInvoiceRemindersEnabled,
             taxDeadlineRemindersEnabled: taxDeadlineRemindersEnabled,
             dailySummaryEnabled: dailySummaryEnabled,
             quietHoursStartHour: quietHoursStartHour,
@@ -280,9 +559,10 @@ public final class SettingsStore: ObservableObject {
             requireBiometricOnLaunch: requireBiometricOnLaunch,
             lockAfterInactivityMinutes: lockAfterInactivityMinutes,
             privacyBlurInAppSwitching: privacyBlurInAppSwitching,
+            cancelledSubscriptionMerchants: cancelledSubscriptionMerchants,
             allowLocalBackups: allowLocalBackups,
             autoBackupFrequency: autoBackupFrequency,
-            includeFreelanceDataInExports: includeFreelanceDataInExports,
+            includeStudioDataInExports: includeStudioDataInExports,
             includeAnalyticsInExports: includeAnalyticsInExports,
             lastExportDate: lastExportDate,
             enableDebugOverlay: enableDebugOverlay,
@@ -311,5 +591,21 @@ public final class SettingsStore: ObservableObject {
         clearPasscode()
         // Re-seed defaults
         seedDefaults()
+    }
+
+    // MARK: - Brand themes
+
+    func resolvedBrandTheme() -> AppTheme {
+        AppTheme.all.first(where: { $0.name == accentColorId })
+            ?? AppTheme.all.first(where: { $0.id == accentColorId })
+            ?? .buxDefault
+    }
+
+    func applyBrandThemesAppearance(to themeManager: ThemeManager) {
+        if brandThemesEnabled {
+            themeManager.applyTheme(resolvedBrandTheme(), persist: true)
+        } else {
+            themeManager.applyTheme(.buxDefault, persist: false)
+        }
     }
 }

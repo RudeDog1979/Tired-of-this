@@ -48,7 +48,7 @@ struct ContributeToGoalSheet: View {
                     
                     Text("Contribute")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
                     Spacer()
                     
@@ -113,7 +113,7 @@ struct ContributeToGoalSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("CONTRIBUTION AMOUNT")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                 .kerning(1.2)
                             
                             HStack(spacing: 8) {
@@ -123,7 +123,7 @@ struct ContributeToGoalSheet: View {
                                 
                                 TextField("0.00", text: $amountString)
                                     .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     .keyboardType(.decimalPad)
                                     .tint(themeManager.current.accentColor)
                             }
@@ -141,12 +141,12 @@ struct ContributeToGoalSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("MEMO / SOURCE")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                 .kerning(1.2)
                             
                             TextField("e.g. Weekly savings, Salary redirection, Gift", text: $notes)
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 .padding(.horizontal, BuxLayout.marginHorizontal)
                                 .padding(.vertical, 16)
                                 .background(cardColor)
@@ -164,7 +164,7 @@ struct ContributeToGoalSheet: View {
                             displayedComponents: .date
                         )
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .padding(.horizontal, BuxLayout.marginHorizontal)
                         .padding(.vertical, 16)
                         .background(cardColor)
@@ -220,7 +220,7 @@ struct ContributeToGoalSheet: View {
         if let opp = details?.opportunities.first {
             self.microSuggestion = "Cancel or optimize: \(opp.description) benefits \(opp.benefit)."
         } else {
-            self.microSuggestion = "Trim £15.00 from active subscription overspends and redirect it to achieve \(goal.name) sooner."
+            self.microSuggestion = "Trim \(appSettingsManager.format(Decimal(15))) from active subscription overspends and redirect it to achieve \(goal.name) sooner."
         }
     }
 }

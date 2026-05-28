@@ -13,7 +13,7 @@ struct DataSettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var persistence: PersistenceController
     @EnvironmentObject private var brain: BuxMuseBrain
-    @EnvironmentObject private var freelanceStore: FreelanceStore
+    @EnvironmentObject private var studioStore: StudioStore
     
     @ObservedObject private var store = SettingsStore.shared
     
@@ -24,11 +24,12 @@ struct DataSettingsView: View {
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
     }
-    
+
     var body: some View {
         ZStack {
             bgColor.ignoresSafeArea()
-            
+            BuxHeroMeshBackground()
+
             Form {
                 Section("SANDBOX BACKUP") {
                     Toggle("Allow Local Backups", isOn: $store.allowLocalBackups)
@@ -43,8 +44,15 @@ struct DataSettingsView: View {
                     }
                 }
                 
+                Section("MERCHANT DATA") {
+                    Text("Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.gray)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 Section("EXPORT COMPLIANCE") {
-                    Toggle("Include Freelance Data", isOn: $store.includeFreelanceDataInExports)
+                    Toggle("Include Studio Data", isOn: $store.includeStudioDataInExports)
                     Toggle("Include Local Performance Metadata", isOn: $store.includeAnalyticsInExports)
                     
                     if let url = exportURL {
@@ -101,11 +109,11 @@ struct DataSettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This action is completely offline and irreversible. It will wipe all expenses, freelance records, secure passcodes, and reset everything.")
+            Text("This action is completely offline and irreversible. It will wipe all expenses, Studio records, secure passcodes, and reset everything.")
         }
         .onChange(of: store.allowLocalBackups) { _, _ in store.save() }
         .onChange(of: store.autoBackupFrequency) { _, _ in store.save() }
-        .onChange(of: store.includeFreelanceDataInExports) { _, _ in store.save() }
+        .onChange(of: store.includeStudioDataInExports) { _, _ in store.save() }
         .onChange(of: store.includeAnalyticsInExports) { _, _ in store.save() }
     }
     
@@ -114,8 +122,8 @@ struct DataSettingsView: View {
     private func generateJSONDump() {
         do {
             // Read expenses, goals, and freelance state
-            let expenses = (try? persistence.context.fetch(FetchDescriptor<ExpenseEntity>())) ?? []
-            let goals = (try? persistence.context.fetch(FetchDescriptor<GoalEntity>())) ?? []
+            let expenses = (try? persistence.fetchAllExpenseEntities()) ?? []
+            let goals = (try? persistence.fetchAllGoalEntities()) ?? []
             
             var payload: [String: Any] = [
                 "buxmuse_app_version": "1.0.0",
@@ -153,8 +161,8 @@ struct DataSettingsView: View {
             payload["goals"] = goalList
             
             // Format freelance profile if requested
-            if store.includeFreelanceDataInExports {
-                let snapshot = freelanceStore.currentSnapshot()
+            if store.includeStudioDataInExports {
+                let snapshot = studioStore.currentSnapshot()
                 if let data = try? JSONEncoder().encode(snapshot),
                    let json = try? JSONSerialization.jsonObject(with: data) {
                     payload["freelance"] = json
@@ -187,16 +195,10 @@ struct DataSettingsView: View {
         
         // 2. Clear SwiftData
         do {
-            let expenses = try persistence.context.fetch(FetchDescriptor<ExpenseEntity>())
-            expenses.forEach { persistence.context.delete($0) }
-            
-            let goals = try persistence.context.fetch(FetchDescriptor<GoalEntity>())
-            goals.forEach { persistence.context.delete($0) }
-            
-            try persistence.context.save()
+            try persistence.purgeExpensesAndGoals()
             
             // 3. Reset Freelance Hub store
-            freelanceStore.resetAllData()
+            studioStore.resetAllData()
             
             // 4. Refresh brain snapshots
             brain.refreshExpenses()

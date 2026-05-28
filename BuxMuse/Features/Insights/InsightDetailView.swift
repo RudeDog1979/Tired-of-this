@@ -70,7 +70,7 @@ struct InsightDetailView: View {
         ZStack {
             Text("Insight Deep Dive")
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             HStack {
                 Button(action: {
@@ -84,7 +84,7 @@ struct InsightDetailView: View {
 
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     }
                 }
                 .buttonStyle(BuxMicroShrinkStyle())
@@ -116,7 +116,7 @@ struct InsightDetailView: View {
             VStack(spacing: 6) {
                 Text(insight.title)
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
 
@@ -155,7 +155,7 @@ struct InsightDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Metric Details")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                     Text(insight.dataBehind)
                         .font(.system(size: 11, weight: .medium))
@@ -230,7 +230,7 @@ struct InsightDetailView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Impact on '\(goalName)'")
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .lineLimit(2)
 
                         Text("Applying this insight accelerates this target timeline significantly.")
@@ -264,7 +264,7 @@ struct InsightDetailView: View {
 
                         Text(action)
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
 

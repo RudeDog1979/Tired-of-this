@@ -47,7 +47,7 @@ struct CardExpansionDetailView: View {
                         
                         Text("\(cardType) Portfolio")
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         
                         Spacer()
                         
@@ -69,7 +69,7 @@ struct CardExpansionDetailView: View {
                             
                             Text(cardType == "BTC" ? "1.1272 BTC" : "0.6948 ETH")
                                 .font(.system(size: 32, weight: .bold, design: .rounded))
-                                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             
                             Text(cardType == "BTC" ? "$67,203.95" : "$1,801.73")
                                 .font(.subheadline)
@@ -121,7 +121,7 @@ struct CardExpansionDetailView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Recent Transfers")
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .padding(.horizontal, 8)
                         
                         VStack(spacing: 0) {

@@ -33,7 +33,7 @@ struct SubscriptionBurnRateView: View {
 
                         Text(appSettingsManager.format(monthly.value))
                             .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     }
@@ -96,6 +96,7 @@ struct SubscriptionBurnRateView: View {
 
 struct BurnRateGridItem: View {
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
     let label: String
     let value: String
 
@@ -106,7 +107,7 @@ struct BurnRateGridItem: View {
                 .foregroundColor(.gray)
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
         }

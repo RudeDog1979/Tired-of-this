@@ -11,8 +11,16 @@ import Foundation
 public final class GoalInsightsEngine {
     public init() {}
     
-    public func generateInsights(goals: [Goal], goalsViewModel: GoalsViewModel) -> [FinancialInsight] {
+    public func generateInsights(
+        goals: [Goal],
+        goalsViewModel: GoalsViewModel,
+        currencyCode: String = AppSettingsManager.preferredCurrencyCode
+    ) -> [FinancialInsight] {
         var insights: [FinancialInsight] = []
+        let redirectAmount = AppSettingsManager.format(
+            amount: Decimal(15),
+            currency: AppSettingsManager.currencySetting(for: currencyCode)
+        )
         
         for goal in goals {
             let detail = goalsViewModel.buildDetailState(for: goal)
@@ -52,7 +60,7 @@ public final class GoalInsightsEngine {
                     accentColorName: "red",
                     suggestedActions: [
                         "Consider minor target date adjustments to reduce baseline pressure.",
-                        "Re-route £15.00 from active media subscription overspends to boost momentum."
+                        "Re-route \(redirectAmount) from active media subscription overspends to boost momentum."
                     ],
                     impactMonthly: detail.projection.recommendedContribution * 0.2,
                     affectedGoalId: goal.id,

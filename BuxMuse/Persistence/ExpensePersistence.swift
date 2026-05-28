@@ -107,13 +107,17 @@ extension PersistenceController {
         return try context.fetch(descriptor).first.map { ExpenseRecord.from($0) }
     }
 
-    func upsertExpenseRecord(_ record: ExpenseRecord) throws -> ExpenseRecord {
+    func upsertExpenseRecord(_ record: ExpenseRecord, merchantSelection: MerchantSelection? = nil) throws -> ExpenseRecord {
         try seedExpenseCatalogIfNeeded()
-        let merchant = try upsertMerchant(forName: record.name)
+        let merchant = try resolveMerchant(for: record, selection: merchantSelection)
         var saved = record
         saved.merchantId = merchant.id
-        saved.merchantName = merchant.name
-        saved.name = merchant.name
+        if saved.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            saved.merchantName = merchant.name
+        }
+        if saved.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            saved.name = saved.merchantName
+        }
 
         if saved.categoryId == nil {
             saved.categoryId = try categoryId(for: saved.transactionCategory)
@@ -146,6 +150,14 @@ extension PersistenceController {
                 trialEndDate: saved.trialEndDate,
                 renewalReminderDays: saved.renewalReminderDays,
                 heatZoneBucket: saved.heatZoneBucket,
+                emotion: saved.emotion,
+                contextTag: saved.contextTag,
+                habitSignatureId: saved.habitSignatureId,
+                subscriptionConfidence: saved.subscriptionConfidence,
+                microCommitmentType: saved.microCommitmentType,
+                microCommitmentValue: saved.microCommitmentValue,
+                futureImpact1Y: saved.futureImpact1Y,
+                futureImpact5Y: saved.futureImpact5Y,
                 createdAt: saved.createdAt,
                 updatedAt: now,
                 categoryRaw: saved.categoryRaw,
@@ -176,6 +188,14 @@ extension PersistenceController {
         entity.trialEndDate = record.trialEndDate
         entity.renewalReminderDays = record.renewalReminderDays
         entity.heatZoneBucket = record.heatZoneBucket
+        entity.emotion = record.emotion
+        entity.contextTag = record.contextTag
+        entity.habitSignatureId = record.habitSignatureId
+        entity.subscriptionConfidence = record.subscriptionConfidence
+        entity.microCommitmentType = record.microCommitmentType
+        entity.microCommitmentValue = record.microCommitmentValue
+        entity.futureImpact1Y = record.futureImpact1Y
+        entity.futureImpact5Y = record.futureImpact5Y
         entity.categoryRaw = record.categoryRaw
         entity.updatedAt = updatedAt
     }
@@ -189,12 +209,16 @@ extension PersistenceController {
         }
     }
 
-    func updateExpenseCategory(id: UUID, category: TransactionCategory) throws {
+    func updateExpenseCategory(id: UUID, category: TransactionCategory, categoryId explicitCategoryId: UUID? = nil) throws {
         var descriptor = FetchDescriptor<ExpenseEntity>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         guard let existing = try context.fetch(descriptor).first else { return }
         existing.categoryRaw = category.rawValue
-        existing.categoryId = try categoryId(for: category)
+        if let explicitCategoryId {
+            existing.categoryId = explicitCategoryId
+        } else {
+            existing.categoryId = try categoryId(for: category)
+        }
         existing.updatedAt = Date()
         try context.save()
     }
@@ -263,25 +287,79 @@ extension PersistenceController {
 
     // MARK: - Merchants
 
-    func upsertMerchant(forName name: String) throws -> ExpenseMerchantRecord {
-        let normalized = MerchantLogoEngine.normalizeMerchantName(name)
-        var descriptor = FetchDescriptor<MerchantEntity>(predicate: #Predicate { $0.normalizedName == normalized })
-        descriptor.fetchLimit = 1
-        if let existing = try context.fetch(descriptor).first {
-            existing.name = name
-            existing.lastSeenAt = Date()
-            if existing.logoURL == nil, let domain = MerchantLogoEngine.resolveDomain(for: name) {
-                existing.logoURL = "https://logo.clearbit.com/\(domain)"
-            }
-            try context.save()
-            return ExpenseMerchantRecord.from(existing)
+    func resolveMerchant(for record: ExpenseRecord, selection: MerchantSelection?) throws -> ExpenseMerchantRecord {
+        if let selection {
+            return try resolveMerchant(selection: selection)
+        }
+        if let merchantId = record.merchantId, let existing = try fetchMerchantRecord(id: merchantId) {
+            return try touchMerchant(existing, displayName: record.merchantName)
+        }
+        return try upsertMerchant(forName: record.merchantName)
+    }
+
+    func resolveMerchant(selection: MerchantSelection) throws -> ExpenseMerchantRecord {
+        let displayName = selection.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let disambiguator = selection.disambiguator?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        if let merchantId = selection.merchantId, var existing = try fetchMerchantRecord(id: merchantId) {
+            existing.name = selection.historyLabel ?? displayName
+            return try touchMerchant(existing, displayName: existing.name)
         }
 
+        let normalized = MerchantLogoEngine.normalizeMerchantName(displayName)
+        if !selection.createNew, var existing = try fetchMerchant(normalized: normalized, disambiguator: disambiguator) {
+            existing.name = selection.historyLabel ?? displayName
+            return try touchMerchant(existing, displayName: existing.name)
+        }
+
+        return try createMerchant(
+            name: selection.historyLabel ?? displayName,
+            normalized: normalized,
+            disambiguator: disambiguator
+        )
+    }
+
+    func upsertMerchant(forName name: String) throws -> ExpenseMerchantRecord {
+        try resolveMerchant(selection: MerchantSelection(displayName: name, createNew: false))
+    }
+
+    private func fetchMerchant(normalized: String, disambiguator: String) throws -> ExpenseMerchantRecord? {
+        let trimmedDisambiguator = disambiguator.trimmingCharacters(in: .whitespacesAndNewlines)
+        let all = try fetchAllMerchantRecords()
+        if let match = all.first(where: { merchant in
+            merchant.normalizedName == normalized
+                && merchant.disambiguator.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedDisambiguator
+        }) {
+            return match
+        }
+        if trimmedDisambiguator.isEmpty,
+           let primary = all.first(where: { $0.normalizedName == normalized && $0.disambiguator.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+            return primary
+        }
+        return nil
+    }
+
+    private func touchMerchant(_ merchant: ExpenseMerchantRecord, displayName: String) throws -> ExpenseMerchantRecord {
+        let targetId = merchant.id
+        var descriptor = FetchDescriptor<MerchantEntity>(predicate: #Predicate { $0.id == targetId })
+        descriptor.fetchLimit = 1
+        guard let entity = try context.fetch(descriptor).first else { return merchant }
+        entity.name = displayName
+        entity.lastSeenAt = Date()
+        if entity.logoURL == nil, let domain = MerchantLogoEngine.resolveDomain(for: displayName) {
+            entity.logoURL = MerchantLogoEngine.googleFaviconURL(for: domain)
+        }
+        try context.save()
+        return ExpenseMerchantRecord.from(entity)
+    }
+
+    private func createMerchant(name: String, normalized: String, disambiguator: String) throws -> ExpenseMerchantRecord {
         let domain = MerchantLogoEngine.resolveDomain(for: name)
         let entity = MerchantEntity(
             normalizedName: normalized,
             name: name,
-            logoURL: domain.map { "https://logo.clearbit.com/\($0)" },
+            disambiguator: disambiguator,
+            logoURL: domain.map { MerchantLogoEngine.googleFaviconURL(for: $0) },
             cluster: MerchantIntelligence.normalize(name)
         )
         context.insert(entity)
@@ -306,6 +384,7 @@ extension PersistenceController {
         descriptor.fetchLimit = 1
         guard let entity = try context.fetch(descriptor).first else { return }
         entity.name = record.name
+        entity.disambiguator = record.disambiguator
         entity.logoURL = record.logoURL
         entity.localLogoPath = record.localLogoPath
         entity.cluster = record.cluster

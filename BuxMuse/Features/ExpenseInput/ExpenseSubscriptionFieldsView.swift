@@ -27,7 +27,7 @@ struct ExpenseSubscriptionFieldsView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("SUBSCRIPTION")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                 .kerning(1.2)
 
             VStack(spacing: 0) {
@@ -37,12 +37,7 @@ struct ExpenseSubscriptionFieldsView: View {
                     toggleRow("This is a trial", isOn: $isTrial)
                 }
             }
-            .background(cardColor)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-            )
+            .expensesThemedCardChrome(cornerRadius: 16)
 
             if isSubscription {
                 VStack(alignment: .leading, spacing: 12) {
@@ -91,12 +86,7 @@ struct ExpenseSubscriptionFieldsView: View {
                     }
                 }
                 .padding(16)
-                .background(cardColor)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-                )
+                .expensesThemedCardChrome(cornerRadius: 16)
                 .transition(.buxScaleReveal)
             }
         }

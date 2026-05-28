@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ExpenseTabView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -16,15 +15,12 @@ struct ExpenseTabView: View {
     @EnvironmentObject var brain: BuxMuseBrain
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
 
-    @Query(sort: \ExpenseEntity.date, order: .reverse) private var expenseEntities: [ExpenseEntity]
-
     @StateObject private var listModel = ExpensesViewModel()
     @State private var activeSheet: ExpenseSheetMode?
     @State private var categorySheetTransaction: Transaction?
     @State private var listAppeared = false
     @State private var removedRowIds: Set<UUID> = []
     @State private var expandedExpenseId: UUID?
-    @Namespace private var animationNamespace
     @State private var selectedRecord: ExpenseRecord?
     @State private var noteRecord: ExpenseRecord?
     @State private var noteDraft = ""
@@ -33,7 +29,7 @@ struct ExpenseTabView: View {
     @State private var showMerchantManager = false
 
     private var allRecords: [ExpenseRecord] {
-        expenseEntities.map { ExpenseRecord.from($0) }
+        brain.expenseRecords
     }
 
     private var filteredRecords: [ExpenseRecord] {
@@ -41,7 +37,7 @@ struct ExpenseTabView: View {
     }
 
     private var expenseDataToken: String {
-        expenseEntities.map { "\($0.id.uuidString)-\($0.updatedAt.timeIntervalSince1970)" }.joined(separator: "|")
+        brain.expenseRecords.map { "\($0.id.uuidString)-\($0.updatedAt.timeIntervalSince1970)" }.joined(separator: "|")
     }
 
     private var expenseListRowInsets: EdgeInsets {
@@ -59,14 +55,18 @@ struct ExpenseTabView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if allRecords.isEmpty {
-                    emptyState
-                } else {
-                    unifiedExpenseList
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+                BuxHeroMeshBackground()
+
+                Group {
+                    if allRecords.isEmpty {
+                        emptyState
+                    } else {
+                        unifiedExpenseList
+                    }
                 }
             }
-            .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
             .navigationTitle("Expenses")
             .navigationBarTitleDisplayMode(.large)
             .toolbar { expenseToolbar }
@@ -76,6 +76,7 @@ struct ExpenseTabView: View {
                 isSearchPresented: $navigationCoordinator.isExpenseSearchPresented
             ))
         }
+        .environment(\.expensesEnhancedTint, true)
         .buxReportsContainerWidth()
         .onAppear {
             listModel.reloadCatalog(brain: brain)
@@ -104,12 +105,15 @@ struct ExpenseTabView: View {
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(brain)
+                .environment(\.expensesEnhancedTint, true)
         }
         .sheet(item: $categorySheetTransaction) { tx in
-            ExpenseCategorySheet(transaction: tx) { category in
-                changeCategory(tx, to: category)
+            ExpenseCategorySheet(transaction: tx) { category, categoryId in
+                changeCategory(tx, to: category, categoryId: categoryId)
             }
             .environmentObject(themeManager)
+            .environmentObject(brain)
+            .environment(\.expensesEnhancedTint, true)
         }
         .sheet(isPresented: $showAdvancedFilters) {
             ExpenseFilterSheet(
@@ -119,16 +123,20 @@ struct ExpenseTabView: View {
                 heatZones: listModel.availableHeatZones
             )
             .environmentObject(themeManager)
+            .environmentObject(brain)
+            .environment(\.expensesEnhancedTint, true)
         }
         .sheet(isPresented: $showCategoryManager) {
             ExpenseCategoryListSheet()
                 .environmentObject(themeManager)
                 .environmentObject(brain)
+                .environment(\.expensesEnhancedTint, true)
         }
         .sheet(isPresented: $showMerchantManager) {
             ExpenseMerchantListSheet()
                 .environmentObject(themeManager)
                 .environmentObject(brain)
+                .environment(\.expensesEnhancedTint, true)
                 .presentationDetents([.large])
                 .presentationCornerRadius(28)
         }
@@ -141,6 +149,7 @@ struct ExpenseTabView: View {
                 }
             )
             .environmentObject(themeManager)
+            .environment(\.expensesEnhancedTint, true)
             .onAppear {
                 noteDraft = record.notes ?? ""
             }
@@ -152,6 +161,8 @@ struct ExpenseTabView: View {
             }
             .environmentObject(themeManager)
             .environmentObject(appSettingsManager)
+            .environment(\.expensesEnhancedTint, true)
+            .buxThemedPresentation()
         }
     }
 
@@ -252,11 +263,14 @@ struct ExpenseTabView: View {
         } description: {
             Text("Your financial details are kept strictly offline and secure inside the BuxMuse Brain.")
         } actions: {
-            Button("Add expense") {
+            BuxButton(
+                title: "Add expense",
+                systemImage: "plus.circle.fill",
+                role: .primary,
+                size: .regular
+            ) {
                 activeSheet = .add
             }
-            .buttonStyle(.borderedProminent)
-            .tint(themeManager.current.accentColor)
         }
         .buxStaggeredReveal(index: 0, isVisible: listAppeared)
     }
@@ -291,7 +305,7 @@ struct ExpenseTabView: View {
                     HStack {
                         Text(section.title.uppercased())
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                             .kerning(1.2)
 
                         if let insight = section.microInsight {
@@ -306,18 +320,21 @@ struct ExpenseTabView: View {
         .scrollContentBackground(.hidden)
         .scrollDismissesKeyboard(.interactively)
         .buxListContentMargins()
+        .buxCustomTabBarScrollClearance()
     }
 
     @ViewBuilder
     private func expenseRowContent(expense: ExpenseRowDisplay, record: ExpenseRecord) -> some View {
-        ExpandableExpenseCard(expense: expense, namespace: animationNamespace, expandedId: $expandedExpenseId)
-            .environmentObject(themeManager)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                withAnimation(.buxSnap) {
-                    selectedRecord = record
-                }
+        Button(action: {
+            withAnimation(.buxSnap) {
+                selectedRecord = record
             }
+        }) {
+            ExpandableExpenseCard(expense: expense, expandedId: $expandedExpenseId)
+                .environmentObject(themeManager)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(BuxMicroShrinkStyle())
             .listRowInsets(expenseListRowInsets)
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -411,9 +428,9 @@ struct ExpenseTabView: View {
         }
     }
 
-    private func changeCategory(_ tx: Transaction, to category: TransactionCategory) {
+    private func changeCategory(_ tx: Transaction, to category: TransactionCategory, categoryId: UUID?) {
         do {
-            try brain.changeExpenseCategory(id: tx.id, category: category)
+            try brain.changeExpenseCategory(id: tx.id, category: category, categoryId: categoryId)
         } catch {
             print("Category change failed: \(error)")
         }
@@ -428,32 +445,16 @@ private struct ExpenseSearchModifier: ViewModifier {
     @Binding var isSearchPresented: Bool
 
     func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content
-                .searchable(
-                    text: $searchText,
-                    placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: "Search merchants, notes…"
-                )
-                .searchToolbarBehavior(.minimize)
-                .searchScopes($searchScope) {
-                    ForEach(ExpenseSearchScope.allCases) { scope in
-                        Text(scope.title).tag(scope)
-                    }
+        content
+            .modifier(BuxDrawerSearchModifier(
+                searchText: $searchText,
+                prompt: "Search merchants, notes…",
+                isPresented: $isSearchPresented
+            ))
+            .searchScopes($searchScope) {
+                ForEach(ExpenseSearchScope.allCases) { scope in
+                    Text(scope.title).tag(scope)
                 }
-        } else {
-            content
-                .searchable(
-                    text: $searchText,
-                    isPresented: $isSearchPresented,
-                    placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: "Search merchants, notes…"
-                )
-                .searchScopes($searchScope) {
-                    ForEach(ExpenseSearchScope.allCases) { scope in
-                        Text(scope.title).tag(scope)
-                    }
-                }
-        }
+            }
     }
 }

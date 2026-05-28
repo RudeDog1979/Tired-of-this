@@ -14,6 +14,7 @@ struct ExpenseMerchantListSheet: View {
     @EnvironmentObject private var brain: BuxMuseBrain
 
     @State private var merchants: [ExpenseMerchantRecord] = []
+    @State private var expenseRecords: [ExpenseRecord] = []
     @State private var expandedMerchantId: UUID?
 
     private var cardColor: Color {
@@ -44,6 +45,7 @@ struct ExpenseMerchantListSheet: View {
         }
         .onAppear {
             merchants = (try? brain.fetchAllMerchantRecords()) ?? []
+            expenseRecords = (try? brain.fetchAllExpenseRecords()) ?? []
         }
     }
 
@@ -51,7 +53,7 @@ struct ExpenseMerchantListSheet: View {
         VStack(spacing: 6) {
             Text("Merchants")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             Text("Tap a merchant to review details. Changes save automatically.")
                 .font(.system(size: 13, weight: .medium))
@@ -85,6 +87,7 @@ struct ExpenseMerchantListSheet: View {
     @ViewBuilder
     private func merchantCard(_ merchant: ExpenseMerchantRecord) -> some View {
         let isOpen = expandedMerchantId == merchant.id
+        let info = brain.merchantBrain.listDisplayInfo(for: merchant, expenseRecords: expenseRecords)
 
         VStack(alignment: .leading, spacing: 0) {
             Button {
@@ -96,15 +99,14 @@ struct ExpenseMerchantListSheet: View {
                     AsyncMerchantLogoView(merchantName: merchant.name, size: 44)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(merchant.name)
+                        Text(merchant.displayTitle)
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                        if let cluster = merchant.cluster, !cluster.isEmpty {
-                            Text(cluster)
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.gray)
-                        }
+                        Text(merchantSummaryLine(info: info, merchant: merchant))
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.gray)
+                            .lineLimit(2)
                     }
 
                     Spacer()
@@ -134,12 +136,21 @@ struct ExpenseMerchantListSheet: View {
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .background(cardColor)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-        )
+        .expensesThemedCardChrome(cornerRadius: 18)
+    }
+
+    private func merchantSummaryLine(info: MerchantListDisplayInfo, merchant: ExpenseMerchantRecord) -> String {
+        var parts: [String] = []
+        if info.expenseCount > 0 {
+            parts.append("\(info.expenseCount) expense\(info.expenseCount == 1 ? "" : "s")")
+        }
+        if info.variantCount > 1 {
+            parts.append("\(info.variantCount) labels")
+        }
+        if let canonical = info.canonicalLabel, !canonical.isEmpty, canonical != merchant.name {
+            parts.append(canonical)
+        }
+        return parts.isEmpty ? (merchant.cluster ?? "Merchant") : parts.joined(separator: " · ")
     }
 }
 
@@ -153,37 +164,86 @@ private struct MerchantInlineEditor: View {
     let merchant: ExpenseMerchantRecord
     let onSaved: (ExpenseMerchantRecord) -> Void
 
-    @State private var isSubscriptionMerchant: Bool
+    @State private var working: ExpenseMerchantRecord
+    @State private var disambiguatorText: String
 
     init(merchant: ExpenseMerchantRecord, onSaved: @escaping (ExpenseMerchantRecord) -> Void) {
         self.merchant = merchant
         self.onSaved = onSaved
-        _isSubscriptionMerchant = State(initialValue: merchant.isSubscriptionMerchant)
+        _working = State(initialValue: merchant)
+        _disambiguatorText = State(initialValue: merchant.disambiguator)
+    }
+
+    private var needsDisambiguatorHint: Bool {
+        brain.merchantBrain.needsDisambiguatorLabel(
+            for: working.name,
+            disambiguator: disambiguatorText.isEmpty ? nil : disambiguatorText
+        )
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Divider().opacity(0.08)
 
-            Toggle("Subscription merchant", isOn: $isSubscriptionMerchant)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Canonical name")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.gray)
+                Text(working.name)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                TextField("Label (e.g. Food, Clothes)", text: $disambiguatorText)
+                    .font(.system(size: 15, weight: .medium))
+                    .textInputAutocapitalization(.words)
+                    .onChange(of: disambiguatorText) { _, _ in
+                        persist()
+                    }
+
+                if needsDisambiguatorHint {
+                    Text("Another merchant shares this name — add a label to tell them apart.")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.orange)
+                } else if !disambiguatorText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Text("Shown as \(working.name) · \(disambiguatorText.trimmingCharacters(in: .whitespacesAndNewlines))")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+            }
+
+            Toggle("Subscription merchant", isOn: subscriptionBinding)
                 .font(.system(size: 15, weight: .semibold))
                 .tint(themeManager.current.accentColor)
-                .onChange(of: isSubscriptionMerchant) { _, _ in
-                    persist()
-                }
 
-            if let risk = merchant.riskScore {
+            if let risk = working.riskScore {
                 Text(String(format: "Risk score: %.0f%%", risk * 100))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.gray)
             }
         }
+        .onChange(of: merchant) { _, updated in
+            working = updated
+            disambiguatorText = updated.disambiguator
+        }
+    }
+
+    private var subscriptionBinding: Binding<Bool> {
+        Binding(
+            get: { working.isSubscriptionMerchant },
+            set: { newValue in
+                working.isSubscriptionMerchant = newValue
+                persist()
+            }
+        )
     }
 
     private func persist() {
-        var updated = merchant
-        updated.isSubscriptionMerchant = isSubscriptionMerchant
-        try? brain.updateMerchant(updated)
+        var updated = working
+        updated.disambiguator = disambiguatorText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard (try? brain.updateMerchant(updated)) != nil else { return }
+        working = updated
         onSaved(updated)
     }
 }

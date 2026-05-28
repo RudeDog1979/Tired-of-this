@@ -27,7 +27,7 @@ struct ExpenseCategoryListSheet: View {
                     Spacer()
                     Text("Categories")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Spacer()
                     Button("Add") { showEditor = true }
                         .foregroundColor(themeManager.current.accentColor)

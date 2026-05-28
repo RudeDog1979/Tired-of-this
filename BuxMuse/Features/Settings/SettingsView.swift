@@ -18,36 +18,25 @@ struct SettingsView: View {
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
     }
-    
-    var cardColor: Color {
-        colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
-    }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 bgColor.ignoresSafeArea()
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 28) {
+                BuxHeroMeshBackground()
 
-                        // Premium Header
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Settings")
-                                .font(.system(size: 32, weight: .bold))
-                                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
-                            
-                            // User display name welcome message
-                            Text(store.userDisplayName != nil ? "Welcome, \(store.userDisplayName!)" : "Personalize your BuxMuse experience")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
-                        }
-                        .padding(.top, 24)
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: BuxTokens.block) {
+
+
 
                         // Generate layout dynamically from SettingsBrain display structs
+                        let appearanceLabel = store.brandThemesEnabled
+                            ? themeManager.current.name
+                            : "Off"
                         let display = SettingsBrain.generateOverview(
                             store: store,
-                            currentThemeName: themeManager.current.name,
+                            currentThemeName: appearanceLabel,
                             activeCurrencyCode: appSettingsManager.selectedCurrency.id,
                             activeCurrencyFlag: appSettingsManager.selectedCurrency.flag
                         )
@@ -56,7 +45,7 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text(section.title)
                                     .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                     .kerning(1.2)
                                     .padding(.leading, 4)
 
@@ -70,19 +59,14 @@ struct SettingsView: View {
                                                 trailingText: row.trailingText
                                             )
                                         }
-                                        .buttonStyle(.plain)
+                                        .buttonStyle(BuxMicroShrinkStyle())
                                         
                                         if index < section.rows.count - 1 {
                                             Divider().opacity(0.08)
                                         }
                                     }
                                 }
-                                .background(cardColor)
-                                .clipShape(RoundedRectangle(cornerRadius: 20))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                                )
+                                .settingsThemedCardChrome(cornerRadius: 20)
                             }
                         }
 
@@ -90,31 +74,43 @@ struct SettingsView: View {
                     }
                     .buxScreenContentMargins()
                 }
+                .buxCustomTabBarScrollClearance()
                 .buxReportsContainerWidth()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
+            .buxStableNavigationBarWithKeyboard()
             .navigationDestination(for: SettingsDestinationType.self) { destination in
-                switch destination {
-                case .profile:
-                    ProfileSettingsView()
-                case .appearance:
-                    AppearanceSettingsView()
-                case .regionCurrency:
-                    RegionCurrencySettingsView()
-                case .budgets:
-                    BudgetSettingsView()
-                case .freelance:
-                    FreelanceSettingsView()
-                case .notifications:
-                    NotificationSettingsView()
-                case .security:
-                    SecuritySettingsView()
-                case .data:
-                    DataSettingsView()
-                case .about:
-                    AboutSettingsView()
+                Group {
+                    switch destination {
+                    case .profile:
+                        ProfileSettingsView()
+                    case .appearance:
+                        AppearanceSettingsView()
+                    case .regionCurrency:
+                        RegionCurrencySettingsView()
+                    case .budgets:
+                        BudgetSettingsView()
+                    case .studio:
+                        StudioSettingsView()
+                    case .invoicePayment:
+                        InvoicePaymentSettingsView()
+                    case .mileage:
+                        MileageSettingsView()
+                    case .notifications:
+                        NotificationSettingsView()
+                    case .security:
+                        SecuritySettingsView()
+                    case .data:
+                        DataSettingsView()
+                    case .about:
+                        AboutSettingsView()
+                    }
                 }
+                .environment(\.settingsEnhancedTint, true)
             }
+            .environment(\.settingsEnhancedTint, true)
         }
     }
 }
@@ -170,7 +166,7 @@ struct SettingsRow: View {
 
             Text(label)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             Spacer()
 
@@ -183,7 +179,7 @@ struct SettingsRow: View {
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.3) : Color(red: 180/255, green: 185/255, blue: 196/255))
+                .foregroundColor(themeManager.chevronMuted(for: colorScheme))
         }
         .padding(.horizontal, BuxLayout.section)
         .padding(.vertical, 14)
@@ -197,10 +193,7 @@ struct AppearanceThemePickerView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) var dismiss
-
-    var sheetBgColor: Color {
-        colorScheme == .dark ? Color(red: 18/255, green: 19/255, blue: 24/255) : Color(red: 245/255, green: 247/255, blue: 250/255)
-    }
+    @ObservedObject private var store = SettingsStore.shared
 
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -213,10 +206,10 @@ struct AppearanceThemePickerView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Appearance")
                         .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Text("Select a creative brand preset")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                 }
                 
                 Spacer()
@@ -224,11 +217,11 @@ struct AppearanceThemePickerView: View {
                 Button(action: { dismiss() }) {
                     ZStack {
                         Circle()
-                            .fill(colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.04))
+                            .fill(themeManager.chipMutedFill(for: colorScheme))
                             .frame(width: 32, height: 32)
                         Image(systemName: "xmark")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     }
                 }
             }
@@ -236,20 +229,40 @@ struct AppearanceThemePickerView: View {
             .padding(.top, 24)
             .padding(.bottom, 20)
             
-            ScrollView(showsIndicators: false) {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(AppTheme.all) { theme in
-                        ThemeSwatchCard(theme: theme, isSelected: themeManager.current.id == theme.id) {
-                            themeManager.select(theme)
+            if store.brandThemesEnabled {
+                ScrollView(showsIndicators: false) {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(AppTheme.all) { theme in
+                            ThemeSwatchCard(theme: theme, isSelected: themeManager.current.id == theme.id) {
+                                themeManager.select(theme)
+                                store.accentColorId = theme.name
+                                store.save()
+                            }
                         }
                     }
+                    .padding(.horizontal, BuxLayout.marginHorizontal)
+                    .padding(.vertical, 8)
                 }
-                .padding(.horizontal, BuxLayout.marginHorizontal)
-                .padding(.vertical, 8)
+            } else {
+                Text("Turn on Brand Themes in Appearance to choose a preset.")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, BuxLayout.marginHorizontal)
+                    .padding(.vertical, 24)
+                Spacer(minLength: 0)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(sheetBgColor.ignoresSafeArea())
+        .background {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
+                BuxThemedBackdrop()
+            }
+            .ignoresSafeArea()
+        }
+        .buxThemedPresentation()
+        .environment(\.settingsEnhancedTint, true)
     }
 }
 
@@ -257,6 +270,7 @@ struct AppearanceThemePickerView: View {
 
 struct ThemeSwatchCard: View {
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
     let theme: AppTheme
     let isSelected: Bool
     let onTap: () -> Void
@@ -294,17 +308,14 @@ struct ThemeSwatchCard: View {
                 Text(theme.name)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(isSelected
-                        ? (colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
-                        : Color(red: 140/255, green: 145/255, blue: 160/255))
+                        ? themeManager.labelPrimary(for: colorScheme)
+                        : themeManager.labelSecondary(for: colorScheme))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
-            .background(
-                colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 22))
+            .settingsThemedCardChrome(cornerRadius: 22)
             .overlay(
-                RoundedRectangle(cornerRadius: 22)
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
                     .stroke(isSelected ? theme.accentColor : Color.clear, lineWidth: 2)
             )
             .shadow(
@@ -323,14 +334,11 @@ struct ThemeSwatchCard: View {
 
 struct CurrencyRegionPickerView: View {
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText = ""
-
-    var sheetBgColor: Color {
-        colorScheme == .dark ? Color(red: 18/255, green: 19/255, blue: 24/255) : Color(red: 245/255, green: 247/255, blue: 250/255)
-    }
     
     var filteredCurrencies: [CurrencySetting] {
         if searchText.isEmpty {
@@ -351,10 +359,10 @@ struct CurrencyRegionPickerView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Currency & Region")
                         .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Text("Choose your preferred regional formatting")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                 }
                 
                 Spacer()
@@ -362,11 +370,11 @@ struct CurrencyRegionPickerView: View {
                 Button(action: { dismiss() }) {
                     ZStack {
                         Circle()
-                            .fill(colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.04))
+                            .fill(themeManager.chipMutedFill(for: colorScheme))
                             .frame(width: 32, height: 32)
                         Image(systemName: "xmark")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     }
                 }
             }
@@ -376,12 +384,12 @@ struct CurrencyRegionPickerView: View {
             
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.4) : .black.opacity(0.4))
+                    .foregroundColor(themeManager.labelTertiary(for: colorScheme))
                     .font(.system(size: 16, weight: .bold))
                 
                 TextField("Search region, code or symbol...", text: $searchText)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
                 
@@ -394,8 +402,7 @@ struct CurrencyRegionPickerView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.03))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .settingsThemedCardChrome(cornerRadius: 14)
             .padding(.horizontal, BuxLayout.marginHorizontal)
             .padding(.bottom, 16)
             
@@ -428,7 +435,15 @@ struct CurrencyRegionPickerView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(sheetBgColor.ignoresSafeArea())
+        .background {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
+                BuxHeroMeshBackground()
+            }
+            .ignoresSafeArea()
+        }
+        .buxThemedPresentation()
+        .environment(\.settingsEnhancedTint, true)
     }
 }
 
@@ -436,6 +451,7 @@ struct CurrencyRegionPickerView: View {
 
 struct CurrencyRowCard: View {
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
     let currency: CurrencySetting
     let isSelected: Bool
     let onTap: () -> Void
@@ -449,10 +465,10 @@ struct CurrencyRowCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(currency.name)
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Text("\(currency.id) (\(currency.symbol))")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.5) : Color(red: 140/255, green: 145/255, blue: 160/255))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                 }
                 
                 Spacer()
@@ -460,7 +476,7 @@ struct CurrencyRowCard: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.purple)
+                        .foregroundColor(themeManager.current.accentColor)
                 } else {
                     Circle()
                         .stroke(colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.1), lineWidth: 1.5)
@@ -469,16 +485,13 @@ struct CurrencyRowCard: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
-            .background(
-                colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .settingsThemedCardChrome(cornerRadius: 18)
             .overlay(
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(isSelected ? Color.purple : Color.clear, lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(isSelected ? themeManager.current.accentColor : Color.clear, lineWidth: 1.5)
             )
             .shadow(
-                color: isSelected ? Color.purple.opacity(0.1) : Color.black.opacity(0.02),
+                color: isSelected ? themeManager.current.accentColor.opacity(0.1) : Color.black.opacity(0.02),
                 radius: 6,
                 x: 0, y: 3
             )

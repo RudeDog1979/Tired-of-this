@@ -22,6 +22,11 @@ struct RootView: View {
     @ObservedObject private var settingsStore = SettingsStore.shared
     @Namespace private var transactionNamespace
 
+    @State private var isAppLocked = false
+    @State private var lastUnlockDate = Date()
+    @State private var hasUnlockedThisSession = false
+    @State private var didEnterBackground = false
+
     var body: some View {
         ZStack {
             themeManager.screenBackground(for: colorScheme)
@@ -31,7 +36,20 @@ struct RootView: View {
 
             overlayStack
         }
+        .overlay(alignment: .bottom) {
+            BuxDockAnchoredTabBar(
+                selectedTab: $navigationCoordinator.selectedTab,
+                studioEnabled: settingsStore.studioEnabled,
+                accentColor: themeManager.current.accentColor
+            )
+        }
+        .overlay(alignment: .top) {
+            ConnectivityToastView()
+                .environmentObject(themeManager)
+                .allowsHitTesting(ConnectivityBrain.shared.activeToast != nil)
+        }
         .animation(.spring(response: 0.45, dampingFraction: 0.85, blendDuration: 0), value: navigationCoordinator.showSubscriptionHub)
+        .buxRootBrandTheme()
         .sheet(item: $goalsSheetCoordinator.activeSheet) { sheet in
             switch sheet {
             case .addGoal:
@@ -41,14 +59,35 @@ struct RootView: View {
                     .environmentObject(goalsViewModel)
                     .environmentObject(goalsSheetCoordinator)
                     .environmentObject(insightsViewModel)
+                    .buxThemedPresentation()
             }
         }
         .onAppear {
             withAnimation(.easeOut(duration: 0.5)) {
                 navigationCoordinator.isScreenLoaded = true
             }
+            evaluateAppLock(forceOnLaunch: true)
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .background:
+                didEnterBackground = true
+                StudioTimerDisplayMonitor.shared.handleSceneEnteredBackground()
+            case .inactive:
+                StudioTimerDisplayMonitor.shared.handleSceneBecameInactive()
+            case .active:
+                StudioTimerDisplayMonitor.shared.handleSceneBecameActive()
+                if didEnterBackground {
+                    evaluateAppLock(forceOnLaunch: false)
+                    didEnterBackground = false
+                }
+            @unknown default:
+                break
+            }
         }
         .onChange(of: navigationCoordinator.selectedTab) { _, newTab in
+            navigationCoordinator.registerTabSelection()
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
             if newTab != .expense {
                 navigationCoordinator.dismissExpenseSearch()
             }
@@ -60,46 +99,58 @@ struct RootView: View {
         .onChange(of: navigationCoordinator.isBalanceVisible) { _, _ in
             brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
         }
-        .onChange(of: settingsStore.freelanceEnabled) { _, enabled in
-            if !enabled && navigationCoordinator.selectedTab == .freelance {
+        .onChange(of: settingsStore.studioEnabled) { _, enabled in
+            if !enabled && navigationCoordinator.selectedTab == .studio {
                 navigationCoordinator.selectedTab = .home
             }
         }
     }
 
-    @ViewBuilder
     private var buxMuseTabView: some View {
-        if #available(iOS 26, *) {
-            coreTabView
-                .tabBarMinimizeBehavior(.onScrollDown)
-        } else {
-            coreTabView
-        }
+        coreTabView
+            .toolbar(.hidden, for: .tabBar)
+            .toolbarBackground(.hidden, for: .tabBar)
+            .background(BuxNativeTabBarSuppressor())
+            .ignoresSafeArea(edges: .bottom)
     }
 
     private var coreTabView: some View {
         TabView(selection: $navigationCoordinator.selectedTab) {
-            Tab("Home", systemImage: "house", value: AppTab.home) {
+            Tab(value: AppTab.home) {
                 DashboardView(transactionNamespace: transactionNamespace)
+            } label: {
+                hiddenTabLabel
             }
 
-            Tab("Expense", systemImage: "creditcard", value: AppTab.expense) {
+            Tab(value: AppTab.expense) {
                 ExpenseTabView()
+            } label: {
+                hiddenTabLabel
             }
 
-            if settingsStore.freelanceEnabled {
-                Tab("Freelance", systemImage: "briefcase", value: AppTab.freelance) {
-                    FreelanceHubView()
+            if settingsStore.studioEnabled {
+                Tab(value: AppTab.studio) {
+                    StudioHubView()
                         .environmentObject(themeManager)
                         .environmentObject(appSettingsManager)
+                        .environmentObject(navigationCoordinator)
+                } label: {
+                    hiddenTabLabel
                 }
             }
 
-            Tab("Settings", systemImage: "gearshape", value: AppTab.settings) {
+            Tab(value: AppTab.settings) {
                 SettingsView()
+            } label: {
+                hiddenTabLabel
             }
         }
-        .tint(themeManager.current.accentColor)
+    }
+
+    private var hiddenTabLabel: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .accessibilityHidden(true)
     }
 
     @ViewBuilder
@@ -179,11 +230,51 @@ struct RootView: View {
                             .foregroundColor(themeManager.current.accentColor)
                         Text("BuxMuse Vault Active")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     }
                 )
                 .transition(.opacity)
                 .zIndex(999)
         }
+
+        if isAppLocked && scenePhase == .active {
+            BuxAppLockOverlay {
+                unlockApp()
+            }
+            .environmentObject(themeManager)
+            .transition(.opacity)
+            .zIndex(1000)
+        }
+    }
+
+    private func evaluateAppLock(forceOnLaunch: Bool) {
+        guard settingsStore.biometricLockEnabled else {
+            isAppLocked = false
+            return
+        }
+        guard settingsStore.requireBiometricOnLaunch || settingsStore.hasAppPasscode else {
+            isAppLocked = false
+            return
+        }
+
+        var shouldLock = false
+        if forceOnLaunch, settingsStore.requireBiometricOnLaunch, !hasUnlockedThisSession {
+            shouldLock = true
+        } else if settingsStore.requireBiometricOnLaunch {
+            shouldLock = true
+        } else if settingsStore.lockAfterInactivityMinutes == 0 {
+            shouldLock = true
+        } else {
+            let threshold = Double(settingsStore.lockAfterInactivityMinutes * 60)
+            shouldLock = Date().timeIntervalSince(lastUnlockDate) >= threshold
+        }
+
+        isAppLocked = shouldLock
+    }
+
+    private func unlockApp() {
+        hasUnlockedThisSession = true
+        lastUnlockDate = Date()
+        isAppLocked = false
     }
 }

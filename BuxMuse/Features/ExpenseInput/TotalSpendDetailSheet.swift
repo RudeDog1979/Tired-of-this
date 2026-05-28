@@ -167,7 +167,7 @@ struct TotalSpendDetailSheet: View {
 
             Text(formatAmount(Decimal(totalSpentInRange)))
                 .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .contentTransition(.numericText())
 
             HStack(spacing: 32) {
@@ -177,7 +177,7 @@ struct TotalSpendDetailSheet: View {
                         .foregroundColor(.gray)
                     Text(formatAmount(Decimal(dailyAverageInRange)))
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 }
 
                 Divider()
@@ -189,7 +189,7 @@ struct TotalSpendDetailSheet: View {
                         .foregroundColor(.gray)
                     Text("\(filteredRecords.count)")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 }
             }
             .padding(.top, 4)
@@ -299,14 +299,7 @@ struct TotalSpendDetailSheet: View {
             }
         }
         .padding(20)
-        .background(
-            themeManager.cardFill(for: colorScheme),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-        )
+        .expensesThemedCardChrome(cornerRadius: 20)
     }
 
     // MARK: - Heat Zone Distribution Section
@@ -358,14 +351,7 @@ struct TotalSpendDetailSheet: View {
             }
         }
         .padding(20)
-        .background(
-            themeManager.cardFill(for: colorScheme),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-        )
+        .expensesThemedCardChrome(cornerRadius: 20)
     }
 
     private func legendItem(title: String, count: Int, color: Color) -> some View {
@@ -379,7 +365,7 @@ struct TotalSpendDetailSheet: View {
                     .foregroundColor(.gray)
                 Text("\(count) items")
                     .font(.caption.bold())
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
         }
     }
@@ -418,7 +404,7 @@ struct TotalSpendDetailSheet: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(record.name)
                                     .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 
                                 Text(record.date.formatted(date: .abbreviated, time: .omitted))
                                     .font(.caption2)
@@ -430,7 +416,7 @@ struct TotalSpendDetailSheet: View {
                             // Amount
                             Text(formatAmount(Decimal(abs(record.amountDouble))))
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                                .foregroundColor(colorScheme == .dark ? .white : Color(red: 26/255, green: 28/255, blue: 32/255))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         }
                         
                         if record != largestPurchases.last {
@@ -441,14 +427,7 @@ struct TotalSpendDetailSheet: View {
             }
         }
         .padding(20)
-        .background(
-            themeManager.cardFill(for: colorScheme),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-        )
+        .expensesThemedCardChrome(cornerRadius: 20)
     }
 }
 

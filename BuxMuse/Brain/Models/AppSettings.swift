@@ -28,7 +28,9 @@ public struct CurrencySetting: Identifiable, Equatable {
 
 public final class AppSettingsManager: ObservableObject {
     @Published public var selectedCurrency: CurrencySetting
+    @Published public var selectedCountry: CountrySetting
     private let currencyKey = "selected_currency_id"
+    private let countryKey = "selected_country_id"
     
     public static let availableCurrencies: [CurrencySetting] = [
         CurrencySetting(id: "AED", name: "UAE Dirham", flag: "🇦🇪", symbol: "د.إ", localeIdentifier: "ar_AE"),
@@ -190,10 +192,24 @@ public final class AppSettingsManager: ObservableObject {
     ]
     
     public init() {
-        // Load stored currency or default to USD
+        let resolvedCountry: CountrySetting
+        if let storedCountryId = UserDefaults.standard.string(forKey: countryKey),
+           let matchedCountry = CountryCatalog.country(for: storedCountryId) {
+            resolvedCountry = matchedCountry
+        } else {
+            let detected = CountryCatalog.detectedFromDevice()
+            resolvedCountry = detected
+            UserDefaults.standard.set(detected.id, forKey: countryKey)
+        }
+        self.selectedCountry = resolvedCountry
+
+        let defaultCurrencyCode = resolvedCountry.defaultCurrencyCode
         if let storedId = UserDefaults.standard.string(forKey: currencyKey),
            let matched = Self.availableCurrencies.first(where: { $0.id == storedId }) {
             self.selectedCurrency = matched
+        } else if let suggested = Self.availableCurrencies.first(where: { $0.id == defaultCurrencyCode }) {
+            self.selectedCurrency = suggested
+            UserDefaults.standard.set(suggested.id, forKey: currencyKey)
         } else {
             self.selectedCurrency = Self.availableCurrencies.first(where: { $0.id == "USD" }) ?? Self.availableCurrencies[0]
         }
@@ -201,6 +217,18 @@ public final class AppSettingsManager: ObservableObject {
     
     public func updateCurrency(_ currency: CurrencySetting) {
         applyCurrency(currency, persist: true)
+    }
+
+    public func updateCountry(_ country: CountrySetting, suggestCurrency: Bool = false) {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+            selectedCountry = country
+        }
+        UserDefaults.standard.set(country.id, forKey: countryKey)
+
+        if suggestCurrency,
+           let suggested = Self.availableCurrencies.first(where: { $0.id == country.defaultCurrencyCode }) {
+            applyCurrency(suggested, persist: true)
+        }
     }
 
     public func applyCurrency(_ currency: CurrencySetting, persist: Bool) {

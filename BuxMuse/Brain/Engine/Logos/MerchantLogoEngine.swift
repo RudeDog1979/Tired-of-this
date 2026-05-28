@@ -72,6 +72,10 @@ public struct MerchantLogoEngine {
         
         return nil
     }
+
+    public static func googleFaviconURL(for domain: String) -> String {
+        "https://www.google.com/s2/favicons?sz=256&domain=\(domain)"
+    }
 }
 
 // MARK: - Local Cache Manager

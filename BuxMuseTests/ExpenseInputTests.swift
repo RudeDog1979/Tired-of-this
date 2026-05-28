@@ -119,4 +119,19 @@ final class ExpenseInputTests: XCTestCase {
         XCTAssertEqual(fetched.count, 1)
         XCTAssertEqual(fetched.first?.merchantName, "Persist Cafe")
     }
+
+    func testEmotionalTagPersistsInSwiftData() throws {
+        viewModel.merchantName = "Treat Yourself"
+        viewModel.amountString = "12.00"
+        viewModel.selectedCategory = .restaurants
+        viewModel.emotionTag = "joy"
+        XCTAssertTrue(viewModel.saveTransaction())
+
+        let records = try brain.fetchAllExpenseRecords()
+        XCTAssertEqual(records.count, 1)
+        XCTAssertEqual(records.first?.emotion, "joy")
+
+        let refetched = try XCTUnwrap(try brain.fetchExpenseRecord(id: records[0].id))
+        XCTAssertEqual(refetched.emotion, "joy")
+    }
 }
