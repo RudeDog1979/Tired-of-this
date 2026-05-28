@@ -52,7 +52,7 @@ struct StudioMileageLogView: View {
         }
         .navigationTitle("Mileage Log")
         .navigationBarTitleDisplayMode(.large)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {

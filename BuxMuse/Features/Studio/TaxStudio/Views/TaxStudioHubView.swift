@@ -74,7 +74,7 @@ struct TaxStudioHubView: View {
         }
         .navigationTitle("Tax Studio")
         .navigationBarTitleDisplayMode(.large)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if selectedTab == .settings {

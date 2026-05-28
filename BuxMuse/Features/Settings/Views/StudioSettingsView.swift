@@ -33,6 +33,15 @@ struct StudioSettingsView: View {
             BuxHeroMeshBackground()
 
             Form {
+                if !store.studioEnabled {
+                    Section {
+                        Text("Studio adds invoices, mileage, receipts, and tax planning tools as an extra tab. Turn it on when you need it — your everyday Home and Expenses tabs stay the same.")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.gray)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
                 Section("STUDIO") {
                     Toggle(isOn: $store.studioEnabled) {
                         VStack(alignment: .leading, spacing: 2) {

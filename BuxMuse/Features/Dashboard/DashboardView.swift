@@ -40,6 +40,12 @@ struct DashboardView: View {
     private var dashSnapshot: DashboardSnapshot { brain.dashboardSnapshot }
 
     var body: some View {
+        NavigationStack {
+            dashboardRoot
+        }
+    }
+
+    private var dashboardRoot: some View {
         ZStack {
             themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
             BuxHeroMeshBackground()
@@ -71,45 +77,6 @@ struct DashboardView: View {
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         .opacity(max(0, 1.0 + (scrollOffset / 140.0)))
                                     
-                                    Spacer()
-                                    
-                                    // Bell Button — real notifications inbox
-                                    Button(action: { activeSheet = .notificationInbox }) {
-                                        ZStack {
-                                            Circle()
-                                                .fill(themeManager.cardFill(for: colorScheme))
-                                                .overlay(
-                                                    Circle()
-                                                        .fill(DashboardThemeTint.dashboardSurfaceWash(themeManager: themeManager, colorScheme: colorScheme))
-                                                )
-                                                .frame(width: collapseValue(start: 44, end: 34), height: collapseValue(start: 44, end: 34))
-                                                .overlay(
-                                                    Circle()
-                                                        .stroke(
-                                                            DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme),
-                                                            lineWidth: 1
-                                                        )
-                                                )
-                                                .shadow(
-                                                    color: colorScheme == .dark ? .clear : DashboardThemeTint.fabAccentShadow(themeManager: themeManager, colorScheme: colorScheme),
-                                                    radius: 8,
-                                                    x: 0,
-                                                    y: 4
-                                                )
-
-                                            Image(systemName: "bell")
-                                                .font(.system(size: collapseValue(start: 18, end: 14), weight: .medium))
-                                                .foregroundColor(themeManager.current.accentColor)
-
-                                            if brain.notificationInboxDisplay.unreadCount > 0 {
-                                                Circle()
-                                                    .fill(Color.red)
-                                                    .frame(width: 5, height: 5)
-                                                    .offset(x: collapseValue(start: 7, end: 5), y: collapseValue(start: -7, end: -5))
-                                            }
-                                        }
-                                    }
-                                    .buttonStyle(BuxmationPressCardStyle())
                                 }
                                 .padding(.top, collapseValue(start: 8, end: 0))
                                 
@@ -426,6 +393,12 @@ struct DashboardView: View {
                                 .environmentObject(navigationCoordinator)
                                 .environmentObject(studioBrain)
                                 .padding(.top, 4)
+                        }
+
+                        if !settingsStore.studioEnabled, !settingsStore.studioDiscoveryOfferDismissed {
+                            StudioDiscoveryCard()
+                                .environmentObject(themeManager)
+                                .environmentObject(navigationCoordinator)
                         }
 
                         CategoryPillBar(
@@ -782,10 +755,11 @@ struct DashboardView: View {
                     .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.24), value: navigationCoordinator.isScreenLoaded)
                     .padding(.bottom, 120)
                 }
+                .buxScreenContentMargins()
+                .padding(.top, BuxLayout.tight)
                 .environment(\.dashboardEnhancedTint, true)
             }
             .scrollClipDisabled()
-            .buxScrollContentMargins()
             .buxCustomTabBarScrollClearance()
             .buxReportsContainerWidth()
             .coordinateSpace(name: "dashboard_scroll")
@@ -861,6 +835,14 @@ struct DashboardView: View {
                 .zIndex(20)
             }
         }
+        .navigationTitle("Home")
+        .navigationBarTitleDisplayMode(.large)
+        .buxRootNavigationChrome()
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                dashboardNotificationsButton
+            }
+        }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .addExpense(let mode):
@@ -908,6 +890,22 @@ struct DashboardView: View {
         let range = start - end
         let factor = min(1.0, max(0.0, -scrollOffset / 100.0))
         return start - (range * factor)
+    }
+
+    private var dashboardNotificationsButton: some View {
+        Button(action: { activeSheet = .notificationInbox }) {
+            ZStack(alignment: .topTrailing) {
+                BuxToolbarIcon(systemName: "bell")
+                if brain.notificationInboxDisplay.unreadCount > 0 {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 7, height: 7)
+                        .offset(x: 4, y: -4)
+                }
+            }
+        }
+        .buttonStyle(BuxPressFeedbackStyle())
+        .accessibilityLabel("Notifications")
     }
 
     private func categoryIndex(for name: String) -> Int {

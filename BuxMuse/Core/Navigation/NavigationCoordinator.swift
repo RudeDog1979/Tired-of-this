@@ -73,4 +73,20 @@ final class NavigationCoordinator: ObservableObject {
         openStudioLogTimeRequest = false
         return true
     }
+
+    /// Set when Home discovery card routes to Studio settings.
+    @Published var openStudioSettingsRequest = false
+
+    func openStudioSettings() {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            selectedTab = .settings
+            openStudioSettingsRequest = true
+        }
+    }
+
+    func consumeStudioSettingsRequest() -> Bool {
+        guard openStudioSettingsRequest else { return false }
+        openStudioSettingsRequest = false
+        return true
+    }
 }

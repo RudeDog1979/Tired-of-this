@@ -41,7 +41,7 @@ struct StudioInvoicesListView: View {
         }
         .navigationTitle("Invoices")
         .navigationBarTitleDisplayMode(.large)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .buxRootNavigationChrome()
         .toolbar { invoiceToolbar }
         .modifier(BuxDrawerSearchModifier(
             searchText: $searchText,

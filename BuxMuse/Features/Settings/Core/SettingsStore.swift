@@ -39,7 +39,9 @@ public final class SettingsStore: ObservableObject {
     @Published public var customBudgetPeriod: DefaultBudgetPeriod = .weekly
     
     // MARK: - Freelance Settings
-    @Published public var studioEnabled: Bool = true
+    @Published public var studioEnabled: Bool = false
+    /// Home banner dismissed; separate from main settings payload.
+    @Published public var studioDiscoveryOfferDismissed: Bool = false
     @Published public var studioProfileId: UUID? = nil
     
     // MARK: - Notifications Settings
@@ -232,7 +234,7 @@ public final class SettingsStore: ObservableObject {
             customBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .customBudgetLimit)
             customBudgetPeriod = try c.decodeIfPresent(DefaultBudgetPeriod.self, forKey: .customBudgetPeriod)
             studioEnabled = try c.decodeIfPresent(Bool.self, forKey: .studioEnabled)
-                ?? c.decodeIfPresent(Bool.self, forKey: .freelanceEnabled) ?? true
+                ?? c.decodeIfPresent(Bool.self, forKey: .freelanceEnabled) ?? false
             studioProfileId = try c.decodeIfPresent(UUID.self, forKey: .studioProfileId)
                 ?? c.decodeIfPresent(UUID.self, forKey: .freelanceProfileId)
             notificationsEnabled = try c.decode(Bool.self, forKey: .notificationsEnabled)
@@ -456,6 +458,7 @@ public final class SettingsStore: ObservableObject {
 
                 loadInvoicePaymentPreferences()
                 loadMileagePreferences()
+                loadStudioDiscoveryPreference()
                 
                 self.isLoaded = true
                 print("SettingsStore: successfully loaded settings.")
@@ -477,7 +480,7 @@ public final class SettingsStore: ObservableObject {
         self.weekStartDay = .monday
         self.budgetingMode = .simple
         self.defaultBudgetPeriod = .monthly
-        self.studioEnabled = true
+        self.studioEnabled = false
         self.notificationsEnabled = true
         self.biometricLockEnabled = false
         self.customBudgetProfiles = []
@@ -486,7 +489,19 @@ public final class SettingsStore: ObservableObject {
         self.customBudgetPeriod = .weekly
         loadInvoicePaymentPreferences()
         loadMileagePreferences()
+        loadStudioDiscoveryPreference()
         save()
+    }
+
+    private static let studioDiscoveryDismissedKey = "studio_discovery_offer_dismissed"
+
+    public func dismissStudioDiscoveryOffer() {
+        studioDiscoveryOfferDismissed = true
+        UserDefaults.standard.set(true, forKey: Self.studioDiscoveryDismissedKey)
+    }
+
+    private func loadStudioDiscoveryPreference() {
+        studioDiscoveryOfferDismissed = UserDefaults.standard.bool(forKey: Self.studioDiscoveryDismissedKey)
     }
 
     private func loadMileagePreferences() {

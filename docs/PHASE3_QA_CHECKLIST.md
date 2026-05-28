@@ -1,6 +1,17 @@
-# Phase 3 QA Checklist (Merchants & Connectivity)
+# Phase 3 QA Checklist
+
+## Pre-ship polish (2026-05-28)
+
+- [ ] Home: large title + side margins match Expenses on iPhone 13 Pro Max and Pro Max
+- [ ] Home: notifications bell in nav bar; unread dot visible
+- [ ] Expenses / Settings / Studio: toolbar icons feel larger; bar has visible material
+- [ ] Fresh install (or cleared settings): Studio tab hidden; discovery card on Home until dismissed
+- [ ] Discovery card → Settings → Studio opens Studio settings screen
+- [ ] Existing user with Studio on: tab still visible; no forced off
 
 Manual pass before release polish. Mark each item **Pass** / **Fail** / **N/A**.
+
+## Merchants & Connectivity
 
 ## Merchant suggestions (add expense)
 

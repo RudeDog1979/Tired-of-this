@@ -29,6 +29,7 @@ struct StudioReceiptsListView: View {
         }
         .navigationTitle("Expenses & Receipts")
         .navigationBarTitleDisplayMode(.large)
+        .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {

@@ -13,14 +13,16 @@ struct SettingsView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @ObservedObject private var store = SettingsStore.shared
+    @State private var settingsPath = NavigationPath()
 
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $settingsPath) {
             ZStack {
                 bgColor.ignoresSafeArea()
                 BuxHeroMeshBackground()
@@ -80,7 +82,12 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-            .buxStableNavigationBarWithKeyboard()
+            .buxRootNavigationChrome()
+            .onChange(of: navigationCoordinator.openStudioSettingsRequest) { _, requested in
+                guard requested else { return }
+                settingsPath.append(SettingsDestinationType.studio)
+                _ = navigationCoordinator.consumeStudioSettingsRequest()
+            }
             .navigationDestination(for: SettingsDestinationType.self) { destination in
                 Group {
                     switch destination {

@@ -25,6 +25,7 @@ struct StudioClientsListView: View {
         }
         .navigationTitle("Clients CRM")
         .navigationBarTitleDisplayMode(.large)
+        .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showAddClient = true }) {

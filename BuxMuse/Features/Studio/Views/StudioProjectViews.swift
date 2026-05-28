@@ -26,6 +26,7 @@ struct StudioProjectsListView: View {
         }
         .navigationTitle("Projects & Tasks")
         .navigationBarTitleDisplayMode(.large)
+        .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showCreateProject = true }) {

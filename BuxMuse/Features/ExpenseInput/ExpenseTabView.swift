@@ -69,6 +69,7 @@ struct ExpenseTabView: View {
             }
             .navigationTitle("Expenses")
             .navigationBarTitleDisplayMode(.large)
+            .buxRootNavigationChrome()
             .toolbar { expenseToolbar }
             .modifier(ExpenseSearchModifier(
                 searchText: $listModel.filters.searchText,
@@ -175,14 +176,14 @@ struct ExpenseTabView: View {
                 Button {
                     showCategoryManager = true
                 } label: {
-                    Image(systemName: "tag")
+                    BuxToolbarIcon(systemName: "tag")
                 }
                 .accessibilityLabel("Manage categories")
 
                 Button {
                     showMerchantManager = true
                 } label: {
-                    Image(systemName: "building.2")
+                    BuxToolbarIcon(systemName: "building.2")
                 }
                 .accessibilityLabel("Manage merchants")
             }
@@ -192,7 +193,7 @@ struct ExpenseTabView: View {
                     activeSheet = .add
                 }
             } label: {
-                Image(systemName: "plus")
+                BuxToolbarIcon(systemName: "plus")
             }
             .accessibilityLabel("Add expense")
         }
@@ -250,9 +251,11 @@ struct ExpenseTabView: View {
                 }
             }
         } label: {
-            Image(systemName: listModel.filters.isActive
-                  ? "line.3.horizontal.decrease.circle.fill"
-                  : "line.3.horizontal.decrease.circle")
+            BuxToolbarIcon(
+                systemName: listModel.filters.isActive
+                    ? "line.3.horizontal.decrease.circle.fill"
+                    : "line.3.horizontal.decrease.circle"
+            )
         }
         .accessibilityLabel("Filter expenses")
     }

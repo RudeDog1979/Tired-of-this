@@ -103,16 +103,15 @@ struct StudioHubView: View {
             }
             .navigationTitle("Studio")
             .navigationBarTitleDisplayMode(.large)
+            .buxRootNavigationChrome()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button("Business Profile") { navigateToProfile = true }
                         Button("Tax Profile") { openTaxHub(.settings) }
                     } label: {
-                        Image(systemName: "person.crop.circle.fill")
-                            .font(.system(size: 20))
+                        BuxToolbarIcon(systemName: "person.crop.circle.fill")
                             .foregroundColor(themeManager.current.accentColor)
-                            .contentShape(Circle())
                     }
                     .buttonStyle(BuxPressFeedbackStyle())
                 }
