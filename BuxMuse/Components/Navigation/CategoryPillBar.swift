@@ -2,8 +2,7 @@
 //  CategoryPillBar.swift
 //  BuxMuse
 //
-//  Elastic category pill — collapsed chip, expanded track, selection blob via
-//  matchedGeometryEffect on the active tab (aligned to label bounds).
+//  Bux segmented category pill — always-visible track with sliding selection chip.
 //
 
 import SwiftUI
@@ -17,7 +16,7 @@ struct CategoryPillBar: View {
     var usesDashboardTint: Bool = false
 
     private let categories = ["Expenses", "Subscriptions", "Goals", "Insights"]
-    private let pillSpring = Animation.buxLiquidSpring
+    private let pillSpring = Animation.buxCategorySpring
 
     @Namespace private var pillNamespace
 
@@ -36,25 +35,19 @@ struct CategoryPillBar: View {
 
                 HStack(spacing: 0) {
                     ForEach(Array(categories.enumerated()), id: \.element) { index, category in
-                        if isExpanded || category == activeCategory {
-                            pillButton(category: category, index: index)
-                            if isExpanded && index < categories.count - 1 {
-                                Spacer(minLength: 0)
-                            }
+                        pillButton(category: category, index: index)
+                        if index < categories.count - 1 {
+                            Spacer(minLength: 0)
                         }
                     }
                 }
-                .padding(.horizontal, isExpanded ? BuxLayout.pillInnerInset : 0)
+                .padding(.horizontal, BuxLayout.pillInnerInset)
                 .padding(.vertical, BuxLayout.pillInnerInset)
             }
-            .frame(maxWidth: isExpanded ? .infinity : nil, alignment: .leading)
-
-            if !isExpanded {
-                Spacer(minLength: 0)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: BuxLayout.pillHeight)
-        .fixedSize(horizontal: !isExpanded, vertical: true)
         .compositingGroup()
         .clipShape(Capsule())
         .overlay {
@@ -66,70 +59,43 @@ struct CategoryPillBar: View {
                     lineWidth: 1
                 )
         }
-        .shadow(
-            color: isExpanded ? .clear : themeManager.pillFloatingShadow(for: colorScheme),
-            radius: isExpanded ? 0 : 10,
-            x: 0,
-            y: isExpanded ? 0 : 4
-        )
     }
 
     @ViewBuilder
     private func pillButton(category: String, index: Int) -> some View {
         Button(action: { handleTap(category: category) }) {
-            HStack(spacing: 6) {
-                Text(category)
-                    .font(.system(size: 14, weight: category == activeCategory ? .semibold : .medium))
-                    .foregroundColor(
-                        category == activeCategory
-                            ? themeManager.current.accentColor
-                            : themeManager.pillInactiveLabelColor(for: colorScheme)
-                    )
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-
-                if !isExpanded && category == activeCategory {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(themeManager.pillInactiveLabelColor(for: colorScheme))
-                        .opacity(0.85)
-                }
-            }
-            .padding(.horizontal, isExpanded ? 12 : 16)
-            .padding(.vertical, 8)
-            .background {
-                if category == activeCategory {
-                    Capsule()
-                        .fill(
-                            isExpanded
-                                ? (usesDashboardTint
+            Text(category)
+                .font(.system(size: 13, weight: category == activeCategory ? .semibold : .medium))
+                .foregroundColor(
+                    category == activeCategory
+                        ? themeManager.current.accentColor
+                        : themeManager.pillInactiveLabelColor(for: colorScheme)
+                )
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background {
+                    if category == activeCategory {
+                        Capsule()
+                            .fill(
+                                usesDashboardTint
                                     ? DashboardThemeTint.pillActiveChipFill(themeManager: themeManager, colorScheme: colorScheme)
-                                    : themeManager.pillActiveChipFill(for: colorScheme))
-                                : Color.clear
-                        )
-                        .matchedGeometryEffect(id: "activePillBg", in: pillNamespace)
+                                    : themeManager.pillActiveChipFill(for: colorScheme)
+                            )
+                            .matchedGeometryEffect(id: "activePillBg", in: pillNamespace)
+                    }
                 }
-            }
         }
         .buttonStyle(MorphingPillButtonStyle())
         .zIndex(category == activeCategory ? 1 : 0)
     }
 
     private func handleTap(category: String) {
-        let spring: Animation = {
-            if isExpanded && category != activeCategory { return .buxCategorySpring }
-            return pillSpring
-        }()
-        withAnimation(spring) {
-            if isExpanded {
-                if category == activeCategory {
-                    isExpanded = false
-                } else {
-                    activeCategory = category
-                }
-            } else {
-                isExpanded = true
-            }
+        guard category != activeCategory else { return }
+        withAnimation(pillSpring) {
+            activeCategory = category
+            isExpanded = true
         }
     }
 }

@@ -43,7 +43,7 @@ struct AboutSettingsView: View {
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("Your Premium Offline Co-pilot")
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                         
                         Text("Version 1.0.0 (Build 26)")
@@ -55,7 +55,7 @@ struct AboutSettingsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("PRIVACY MANIFESTO")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                             .padding(.horizontal, 20)
                             .kerning(1.2)
                         
@@ -87,7 +87,7 @@ struct AboutSettingsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("ADVANCED DIAGNOSTICS")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                             .padding(.horizontal, 20)
                             .kerning(1.2)
                         

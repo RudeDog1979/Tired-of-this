@@ -58,7 +58,7 @@ private struct InvoiceLineItemsTable: View {
                     if showRowNumbers {
                         Text("\(idx + 1)")
                             .frame(width: 20, alignment: .leading)
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                     Text(item.description)
                         .frame(maxWidth: .infinity, alignment: .leading)

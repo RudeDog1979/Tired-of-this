@@ -64,7 +64,7 @@ struct StudioTaxOverviewView: View {
             HStack {
                 Text("YOUR TAX PROFILE")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 Spacer()
                 Text(snapshot.currencyCode)
                     .font(.system(size: 10, weight: .bold))
@@ -82,7 +82,7 @@ struct StudioTaxOverviewView: View {
             if snapshot.primaryRulesPreview.isEmpty {
                 Text("Open Tax Profile to choose a country preset or enter your rules.")
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             } else {
                 Text(snapshot.primaryRulesPreview)
                     .font(.system(size: 13, weight: .medium))
@@ -93,10 +93,10 @@ struct StudioTaxOverviewView: View {
                     Divider()
                     Text(IndirectTaxLabelResolver.indirectTaxFieldLabel(for: store.taxProfile))
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     Text(snapshot.indirectTaxNotes)
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 }
             }
         }
@@ -108,7 +108,7 @@ struct StudioTaxOverviewView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("INCOME & DEDUCTIONS (\(snapshot.currencyCode))")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
 
             HStack {
                 metricColumn(title: "GROSS INCOME", value: snapshot.base.grossIncomeFormatted, color: themeManager.labelPrimary(for: colorScheme))
@@ -130,7 +130,7 @@ struct StudioTaxOverviewView: View {
             HStack {
                 Text("\(snapshot.indirectTaxRegistrationLabel):")
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 Spacer()
                 Text(snapshot.base.indirectTaxFormatted)
                     .font(.system(size: 13, weight: .semibold))
@@ -144,7 +144,7 @@ struct StudioTaxOverviewView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 9, weight: .semibold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             Text(value)
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundColor(color)
@@ -155,7 +155,7 @@ struct StudioTaxOverviewView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("INTERACTIVE TAX SIMULATOR")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
 
             VStack(spacing: 12) {
                 Toggle(snapshot.indirectTaxRegistrationLabel, isOn: Binding(
@@ -221,7 +221,7 @@ struct StudioTaxOverviewView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("PROJECTIONS OUTPUT")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
 
                 projectionRow(title: "Gross Projected Revenue:", value: snapshot.simulated.grossIncomeFormatted)
                 projectionRow(title: "Total Deducted Write-offs:", value: snapshot.simulated.deductionsFormatted, color: .green)
@@ -241,7 +241,7 @@ struct StudioTaxOverviewView: View {
             HStack {
                 Text(title)
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 Spacer()
                 Text(valueLabel)
                     .font(.system(size: 12, weight: .bold))
@@ -285,7 +285,7 @@ struct StudioCashflowView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("CASH RUNWAY TRAJECTORY")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
 
                         Text(forecast.runwayMonthsFormatted)
                             .font(.system(size: 32, weight: .bold, design: .rounded))
@@ -293,7 +293,7 @@ struct StudioCashflowView: View {
 
                         Text("Estimated runway based on your \(forecast.burnRateFormatted) monthly burn rate.")
                             .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                     .padding(BuxLayout.section)
                     .studioThemedCardChrome(cornerRadius: 24)
@@ -301,7 +301,7 @@ struct StudioCashflowView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("SURVIVAL MODE TARGET")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
 
                         Text(forecast.survivalIncomeFormatted)
                             .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -309,7 +309,7 @@ struct StudioCashflowView: View {
 
                         Text("Minimum monthly inflow needed to comfortably clear direct costs, tax obligations, and hit standard savings cushions.")
                             .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                     .padding(BuxLayout.section)
                     .studioThemedCardChrome(cornerRadius: 24)
@@ -346,7 +346,7 @@ struct StudioDeductionsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("TOTAL ACTIVE WRITE-OFF DEDUCTIONS")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
 
                         Text(snapshot.totalFormatted)
                             .font(.system(size: 32, weight: .bold, design: .rounded))
@@ -355,7 +355,7 @@ struct StudioDeductionsView: View {
                         if let mileageLine = snapshot.mileageSummaryFormatted {
                             Text(mileageLine)
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
 
                         NavigationLink {
@@ -376,12 +376,12 @@ struct StudioDeductionsView: View {
 
                     Text("OPTIMIZATION OPPORTUNITIES")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
 
                     if snapshot.opportunities.isEmpty {
                         Text("No deduction opportunities right now.")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                             .padding()
                     } else {
                         ForEach(snapshot.opportunities) { opp in
@@ -397,7 +397,7 @@ struct StudioDeductionsView: View {
                                 }
                                 Text(opp.description)
                                     .font(.system(size: 12))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                             }
                             .padding(BuxLayout.section)
                             .studioThemedCardChrome(cornerRadius: 20)

@@ -13,6 +13,15 @@ import Combine
 public final class SettingsStore: ObservableObject {
     public static let shared = SettingsStore()
     
+    /// Display name shown in UI when profile name is unset.
+    public var resolvedDisplayName: String {
+        guard let trimmed = userDisplayName?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !trimmed.isEmpty else {
+            return "User"
+        }
+        return trimmed
+    }
+
     // MARK: - Profile Settings
     @Published public var userDisplayName: String? = nil
     @Published public var profileAvatarData: Data? = nil

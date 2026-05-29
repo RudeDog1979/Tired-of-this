@@ -38,7 +38,7 @@ struct RecentTransactionsSectionView: View {
             if transactions.isEmpty {
                 Text("No transactions yet. Add an expense to see activity here.")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             } else {
                 LazyVStack(spacing: BuxLayout.tight + 2) {
                     ForEach(transactions) { tx in
@@ -89,7 +89,7 @@ struct RecentTransactionsSectionView: View {
 
                 Text(tx.date, style: .date)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             }
         }
         .padding(.horizontal, 14)

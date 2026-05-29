@@ -15,13 +15,15 @@ struct InvoicePaymentSettingsView: View {
     var body: some View {
         ZStack {
             themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+            BuxHeroMeshBackground()
+
             Form {
                 Section {
                     Toggle("Auto-detect bank account type", isOn: $store.autoDetectInvoiceBankAccountType)
                         .tint(themeManager.current.accentColor)
                     Text("Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 }
 
                 if !store.autoDetectInvoiceBankAccountType {
@@ -34,7 +36,7 @@ struct InvoicePaymentSettingsView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Invoice Payment")
         .navigationBarTitleDisplayMode(.inline)

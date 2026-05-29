@@ -86,6 +86,7 @@ struct StudioMileageLogView: View {
             .environmentObject(store)
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
+            .buxThemedSheetContent()
         }
     }
 
@@ -126,7 +127,7 @@ struct StudioMileageLogView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("BUSINESS TOTAL")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 Text(summary.businessDistanceFormatted)
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
@@ -135,7 +136,7 @@ struct StudioMileageLogView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text("ALLOWANCE")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 Text(summary.deductionFormatted)
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.green)
@@ -153,7 +154,7 @@ struct StudioMileageLogView: View {
                 .font(.system(size: 16, weight: .semibold))
             Text("Add business mileage to include allowances in your deduction estimate.")
                 .font(.system(size: 13))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
             Button("Log trip") {
@@ -195,7 +196,7 @@ struct StudioMileageLogView: View {
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                 Text(entry.date, style: .date)
                     .font(.system(size: 11))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             }
         }
         .studioThemedListRowCard()
@@ -267,7 +268,7 @@ private struct MileageAddressSearchField: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title.uppercased())
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
 
             HStack(spacing: 8) {
                 TextField("Address or postcode", text: $text)
@@ -306,7 +307,7 @@ private struct MileageAddressSearchField: View {
                                     if !completion.subtitle.isEmpty {
                                         Text(completion.subtitle)
                                             .font(.system(size: 11))
-                                            .foregroundColor(.gray)
+                                            .buxLabelSecondary()
                                             .multilineTextAlignment(.leading)
                                     }
                                 }
@@ -482,7 +483,7 @@ struct MileageEntrySheet: View {
                     ProgressView()
                     Text("Calculating driving distance…")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 }
             } else if let routeError {
                 Text(routeError)
@@ -498,7 +499,7 @@ struct MileageEntrySheet: View {
         VStack(spacing: 8) {
             Text("DISTANCE")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 TextField("0.0", text: $distanceText)
                     .keyboardType(.decimalPad)
@@ -511,7 +512,7 @@ struct MileageEntrySheet: View {
                     }
                 Text("mi")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             }
             if purpose == .business, parsedDistance > 0 {
                 Text("Est. allowance: \(estimatedAllowanceFormatted)")
@@ -551,7 +552,7 @@ struct MileageEntrySheet: View {
                 }
                 Text("Same trip home — adds a second log with From ↔ To swapped (\(formattedReturnDistance) mi each way).")
                     .font(.system(size: 11))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 if includeReturnJourney, canShowReturnRoutePreview {
                     Text(returnRoutePreview)
                         .font(.system(size: 11, weight: .medium))
@@ -593,7 +594,7 @@ struct MileageEntrySheet: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("DATE")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 DatePicker("", selection: $date, displayedComponents: .date)
                     .labelsHidden()
             }

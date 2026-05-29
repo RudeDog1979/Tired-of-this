@@ -62,6 +62,7 @@ struct ExpenseCategoryPickerView: View {
                 }
             }
             .environmentObject(themeManager)
+            .buxThemedSheetContent()
         }
     }
 

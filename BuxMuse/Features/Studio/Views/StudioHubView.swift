@@ -97,23 +97,17 @@ struct StudioHubView: View {
                     .padding(.top, BuxTokens.tight)
                     .environment(\.studioEnhancedTint, true)
                 }
-                .buxScrollContentMargins()
-                .buxReportsContainerWidth()
-                .buxCustomTabBarScrollClearance()
+                .buxRootTabScrollChrome()
             }
             .navigationTitle("Studio")
             .navigationBarTitleDisplayMode(.large)
             .buxRootNavigationChrome()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
+                    BuxProfileToolbarMenu {
                         Button("Business Profile") { navigateToProfile = true }
                         Button("Tax Profile") { openTaxHub(.settings) }
-                    } label: {
-                        BuxToolbarIcon(systemName: "person.crop.circle.fill")
-                            .foregroundColor(themeManager.current.accentColor)
                     }
-                    .buttonStyle(BuxPressFeedbackStyle())
                 }
             }
             .onAppear {
@@ -132,22 +126,26 @@ struct StudioHubView: View {
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .buxThemedSheetContent()
             }
             .sheet(isPresented: $showNewClient) {
                 NewClientSheet()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .buxThemedSheetContent()
             }
             .sheet(isPresented: $showScanReceipt) {
                 StudioReceiptScannerView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .buxThemedSheetContent()
             }
             .sheet(isPresented: $showTimeTracker) {
                 ActiveTimeTrackerView()
                     .environmentObject(themeManager)
                     .environmentObject(store)
+                    .buxThemedSheetContent()
             }
             .navigationDestination(isPresented: $navigateToProfile) {
                 StudioProfileView()

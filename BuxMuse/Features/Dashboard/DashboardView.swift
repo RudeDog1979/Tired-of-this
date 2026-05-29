@@ -51,35 +51,22 @@ struct DashboardView: View {
             BuxHeroMeshBackground()
             // Scroll view containing page elements
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: BuxLayout.section) {
-                    
-                    // Track coordinate offset of top card
-                    GeometryReader { geo in
-                        Color.clear.preference(
-                            key: ScrollOffsetPreferenceKey.self,
-                            value: geo.frame(in: .named("dashboard_scroll")).minY
-                        )
-                    }
-                    .frame(height: 0)
-                    
-                    // Group elements above Transactions to apply Buxmation Darken/Blur
-                    VStack(alignment: .leading, spacing: BuxLayout.section) {
-                        // Top Custom Header Card with Buxmation Header Collapse
-                        // Collapsing header details
-                        VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: BuxTokens.block) {
+                    VStack(alignment: .leading, spacing: BuxTokens.block) {
+                        BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.hero, padding: BuxTokens.section) {
+                        VStack(alignment: .leading, spacing: BuxTokens.section) {
                                 
                                 // Header row (Avatar + Username) collapses/fades out slightly on scroll
                                 HStack {
-                                    MitchellSantosAvatarView(size: collapseValue(start: 44, end: 32))
+                                    BuxUserAvatarView(size: collapseValue(start: 44, end: 32))
                                     
-                                    Text(settingsStore.userDisplayName ?? "Mitchell Santos")
+                                    Text(settingsStore.resolvedDisplayName)
                                         .font(.system(size: collapseValue(start: 15, end: 13), weight: .bold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         .opacity(max(0, 1.0 + (scrollOffset / 140.0)))
                                     
                                 }
-                                .padding(.top, collapseValue(start: 8, end: 0))
-                                
+
                                 // Balance Section collapses smoothly
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack(spacing: 6) {
@@ -284,22 +271,11 @@ struct DashboardView: View {
                                 }
                                 .padding(.top, 4)
                                 .offset(y: collapseValue(start: 0, end: -15))
-                            }
-                            .padding(BuxLayout.loose)
-                            .dashboardThemedCardChrome(cornerRadius: 32)
-                        .padding(.top, BuxLayout.section)
-                        // Expanded vertical base height to 315 to completely prevent bottom detail and button clipping!
-                        .frame(height: max(100, 315 + scrollOffset))
-                        .clipShape(RoundedRectangle(cornerRadius: BuxLayout.cornerHero))
-                        .shadow(
-                            color: themeManager.heroCardShadow(for: colorScheme).color,
-                            radius: themeManager.heroCardShadow(for: colorScheme).radius,
-                            x: 0,
-                            y: themeManager.heroCardShadow(for: colorScheme).y
-                        )
+                        }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                        if true {
-                            VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: BuxTokens.tight) {
                                 if let budgetName = dashSnapshot.activeBudgetName {
                                     let limit = dashSnapshot.activeBudgetLimit
                                     let spent = dashSnapshot.activeBudgetSpent
@@ -311,6 +287,7 @@ struct DashboardView: View {
                                             navigationCoordinator.selectedTab = .settings
                                         }
                                     }) {
+                                        BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
                                         VStack(alignment: .leading, spacing: 12) {
                                             HStack {
                                                 VStack(alignment: .leading, spacing: 4) {
@@ -349,10 +326,10 @@ struct DashboardView: View {
                                             }
                                             .frame(height: 8)
                                         }
-                                        .padding(BuxTokens.section)
+                                        }
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
-                                    .dashboardThemedCardChrome(cornerRadius: BuxTokens.Radius.hero)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 } else {
                                     // Empty state: No active budget profile
                                     Button(action: {
@@ -360,6 +337,7 @@ struct DashboardView: View {
                                             navigationCoordinator.selectedTab = .settings
                                         }
                                     }) {
+                                        BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
                                         VStack(alignment: .leading, spacing: 8) {
                                             HStack {
                                                 Image(systemName: "chart.pie.fill")
@@ -378,27 +356,27 @@ struct DashboardView: View {
                                                 .foregroundColor(.gray)
                                                 .multilineTextAlignment(.leading)
                                         }
-                                        .padding(BuxTokens.section)
+                                        }
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
-                                    .dashboardThemedCardChrome(cornerRadius: BuxTokens.Radius.hero)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
                             .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
 
                         if settingsStore.studioEnabled {
                             StudioDashboardWidget()
                                 .environmentObject(themeManager)
                                 .environmentObject(navigationCoordinator)
                                 .environmentObject(studioBrain)
-                                .padding(.top, 4)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
 
                         if !settingsStore.studioEnabled, !settingsStore.studioDiscoveryOfferDismissed {
                             StudioDiscoveryCard()
                                 .environmentObject(themeManager)
                                 .environmentObject(navigationCoordinator)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
 
                         CategoryPillBar(
@@ -407,6 +385,7 @@ struct DashboardView: View {
                             usesDashboardTint: true
                         )
                         .environmentObject(themeManager)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                         // Category content — horizontal slide + bounce (original behavior)
                         ZStack(alignment: .topLeading) {
@@ -419,7 +398,7 @@ struct DashboardView: View {
                                 let changeTrend = changeVsLast >= 0 ? "+\(changeFormatted)" : "-\(changeFormatted)"
                                 let changeColor: Color = changeVsLast >= 0 ? .orange : .green
 
-                                HStack(alignment: .top, spacing: BuxLayout.section) {
+                                HStack(alignment: .top, spacing: BuxTokens.tight) {
                                     Button(action: {
                                         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                                             navigationCoordinator.openExpensesTab()
@@ -479,7 +458,7 @@ struct DashboardView: View {
                                 .transition(.buxCategorySlide(direction: categorySlideDirection))
                             } else if navigationCoordinator.activeCategoryPill == "Subscriptions" {
                                 let activeSubs = financialBridge.activeSubscriptions()
-                                HStack(alignment: .top, spacing: BuxLayout.section) {
+                                HStack(alignment: .top, spacing: BuxTokens.tight) {
                                     if activeSubs.isEmpty {
                                         HStack {
                                             Image(systemName: "sparkles")
@@ -571,7 +550,7 @@ struct DashboardView: View {
                                         )
                                     } else {
                                         ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: BuxLayout.section) {
+                                            HStack(spacing: BuxTokens.tight) {
                                                 ForEach(Array(goalsViewModel.goals.enumerated()), id: \.element.id) { index, goal in
                                                     let progress = min(1.0, max(0.0, Double(NSDecimalNumber(decimal: goal.currentAmount).doubleValue / max(1.0, NSDecimalNumber(decimal: goal.targetAmount).doubleValue))))
                                                     let accentColor = index == 0 ? Color(red: 46/255, green: 204/255, blue: 113/255) : themeManager.current.accentColor
@@ -649,7 +628,7 @@ struct DashboardView: View {
                                 .transition(.buxCategorySlide(direction: categorySlideDirection))
                             } else {
                                 let displayInsights = insightsViewModel.rankedInsights
-                                HStack(alignment: .top, spacing: BuxLayout.section) {
+                                HStack(alignment: .top, spacing: BuxTokens.tight) {
                                     if displayInsights.isEmpty {
                                         InsightCardView(
                                             title: "Monthly Savings",
@@ -740,6 +719,7 @@ struct DashboardView: View {
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     // Buxmation Focus overlays: blurs and dims elements above stack on expansion
                     .blur(radius: goalsSheetCoordinator.showGoalDetail ? 5 : 0)
                     .opacity(goalsSheetCoordinator.showGoalDetail ? 0.45 : 1.0)
@@ -750,18 +730,26 @@ struct DashboardView: View {
                         transactions: dashSnapshot.recentTransactions,
                         onSeeMore: { navigationCoordinator.openExpensesTab() }
                     )
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 30)
                     .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                     .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.24), value: navigationCoordinator.isScreenLoaded)
-                    .padding(.bottom, 120)
+
+                    Spacer().frame(height: BuxTokens.tight)
                 }
-                .buxScreenContentMargins()
-                .padding(.top, BuxLayout.tight)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, BuxTokens.tight)
+                .background {
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: ScrollOffsetPreferenceKey.self,
+                            value: geo.frame(in: .named("dashboard_scroll")).minY
+                        )
+                    }
+                }
                 .environment(\.dashboardEnhancedTint, true)
             }
-            .scrollClipDisabled()
-            .buxCustomTabBarScrollClearance()
-            .buxReportsContainerWidth()
+            .buxRootTabScrollChrome()
             .coordinateSpace(name: "dashboard_scroll")
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
                 if value < 0 {
@@ -839,41 +827,49 @@ struct DashboardView: View {
         .navigationBarTitleDisplayMode(.large)
         .buxRootNavigationChrome()
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                dashboardNotificationsButton
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                BuxNavIconButton(
+                    systemName: "bell",
+                    accessibilityLabel: "Notifications",
+                    useAccent: true,
+                    action: { activeSheet = .notificationInbox }
+                )
             }
         }
         .sheet(item: $activeSheet) { sheet in
-            switch sheet {
-            case .addExpense(let mode):
-                AddExpenseSheet(brain: brain, settingsManager: appSettingsManager, mode: mode)
-                    .environmentObject(brain)
-                    .environmentObject(themeManager)
-                    .environmentObject(appSettingsManager)
-            case .categoryList:
-                ExpenseCategoryListSheet()
-                    .environmentObject(brain)
-                    .environmentObject(themeManager)
-            case .scanReceipt:
-                StudioReceiptScannerView()
-                    .environmentObject(studioStore)
-                    .environmentObject(studioBrain)
-                    .environmentObject(appSettingsManager)
-                    .environmentObject(themeManager)
-            case .newInvoice:
-                StudioInvoiceEditorView(invoiceToEdit: nil)
-                    .environmentObject(studioStore)
-                    .environmentObject(studioBrain)
-                    .environmentObject(appSettingsManager)
-                    .environmentObject(themeManager)
-            case .notificationInbox:
-                NotificationInboxView()
-                    .environmentObject(brain)
-                    .environmentObject(themeManager)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
-                    .presentationCornerRadius(BuxTokens.Radius.hero)
+            Group {
+                switch sheet {
+                case .addExpense(let mode):
+                    AddExpenseSheet(brain: brain, settingsManager: appSettingsManager, mode: mode)
+                        .environmentObject(brain)
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                case .categoryList:
+                    ExpenseCategoryListSheet()
+                        .environmentObject(brain)
+                        .environmentObject(themeManager)
+                case .scanReceipt:
+                    StudioReceiptScannerView()
+                        .environmentObject(studioStore)
+                        .environmentObject(studioBrain)
+                        .environmentObject(appSettingsManager)
+                        .environmentObject(themeManager)
+                case .newInvoice:
+                    StudioInvoiceEditorView(invoiceToEdit: nil)
+                        .environmentObject(studioStore)
+                        .environmentObject(studioBrain)
+                        .environmentObject(appSettingsManager)
+                        .environmentObject(themeManager)
+                case .notificationInbox:
+                    NotificationInboxView()
+                        .environmentObject(brain)
+                        .environmentObject(themeManager)
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
+                        .presentationCornerRadius(BuxTokens.Radius.hero)
+                }
             }
+            .buxThemedSheetContent()
         }
     }
 
@@ -892,22 +888,6 @@ struct DashboardView: View {
         return start - (range * factor)
     }
 
-    private var dashboardNotificationsButton: some View {
-        Button(action: { activeSheet = .notificationInbox }) {
-            ZStack(alignment: .topTrailing) {
-                BuxToolbarIcon(systemName: "bell")
-                if brain.notificationInboxDisplay.unreadCount > 0 {
-                    Circle()
-                        .fill(Color.red)
-                        .frame(width: 7, height: 7)
-                        .offset(x: 4, y: -4)
-                }
-            }
-        }
-        .buttonStyle(BuxPressFeedbackStyle())
-        .accessibilityLabel("Notifications")
-    }
-
     private func categoryIndex(for name: String) -> Int {
         switch name {
         case "Expenses": return 0
@@ -919,12 +899,17 @@ struct DashboardView: View {
 }
 
 
-// MARK: - Mitchell Santos Avatar Drawing Component
-struct MitchellSantosAvatarView: View {
+// MARK: - Default user avatar
+
+struct BuxUserAvatarView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
+
     var size: CGFloat = 44
-    
+
     var body: some View {
-        if let data = SettingsStore.shared.profileAvatarData, let img = UIImage(data: data) {
+        if let data = settings.profileAvatarData, let img = UIImage(data: data) {
             Image(uiImage: img)
                 .resizable()
                 .scaledToFill()
@@ -932,82 +917,21 @@ struct MitchellSantosAvatarView: View {
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+                        .stroke(themeManager.current.accentColor.opacity(0.35), lineWidth: 1.5)
                 )
         } else {
             ZStack {
-                // Circle background
                 Circle()
-                    .fill(LinearGradient(
-                        colors: [Color(red: 224/255, green: 231/255, blue: 255/255), Color(red: 199/255, green: 210/255, blue: 254/255)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
+                    .fill(themeManager.cardFill(for: colorScheme))
                     .frame(width: size, height: size)
-                
-                // Face skin
-                Circle()
-                    .fill(Color(red: 245/255, green: 210/255, blue: 185/255))
-                    .frame(width: size * 0.727, height: size * 0.727)
-                    .offset(y: size * 0.022)
-                
-                // Hair (Purple)
-                Group {
-                    Path { path in
-                        path.addArc(center: CGPoint(x: size * 0.5, y: size * 0.5), radius: size * 0.437, startAngle: .degrees(160), endAngle: .degrees(380), clockwise: false)
-                    }
-                    .fill(Color(red: 104/255, green: 58/255, blue: 180/255))
-                    .frame(width: size * 0.727, height: size * 0.727)
-                    .offset(y: -size * 0.09)
-                    
-                    Circle()
-                        .fill(Color(red: 104/255, green: 58/255, blue: 180/255))
-                        .frame(width: size * 0.318, height: size * 0.318)
-                        .offset(x: -size * 0.18, y: -size * 0.22)
-                }
-                
-                // Glasses (Black round rims)
-                HStack(spacing: size * 0.045) {
-                    Circle()
-                        .stroke(Color.black, lineWidth: size * 0.045)
-                        .frame(width: size * 0.204, height: size * 0.204)
-                    
-                    Rectangle()
-                        .fill(Color.black)
-                        .frame(width: size * 0.068, height: size * 0.045)
-                        .offset(y: -size * 0.022)
-                    
-                    Circle()
-                        .stroke(Color.black, lineWidth: size * 0.045)
-                        .frame(width: size * 0.204, height: size * 0.204)
-                }
-                .offset(y: -size * 0.022)
-                
-                // Eyes inside glasses
-                HStack(spacing: size * 0.18) {
-                    Circle()
-                        .fill(Color.black)
-                        .frame(width: size * 0.056, height: size * 0.056)
-                    
-                    Circle()
-                        .fill(Color.black)
-                        .frame(width: size * 0.056, height: size * 0.056)
-                }
-                .offset(y: -size * 0.022)
-                
-                // Smile/Mouth
-                Path { path in
-                    path.addArc(center: CGPoint(x: size * 0.25, y: size * 0.125), radius: size * 0.187, startAngle: .degrees(10), endAngle: .degrees(170), clockwise: false)
-                }
-                .stroke(Color.black, lineWidth: size * 0.034)
-                .frame(width: size * 0.5, height: size * 0.25)
-                .offset(y: size * 0.136)
+                    .overlay(
+                        Circle()
+                            .stroke(themeManager.current.accentColor.opacity(0.35), lineWidth: 1.5)
+                    )
+                Image(systemName: "person.fill")
+                    .font(.system(size: size * 0.38, weight: .semibold))
+                    .foregroundStyle(themeManager.current.accentColor)
             }
-            .frame(width: size, height: size)
-            .overlay(
-                Circle()
-                    .stroke(Color.white.opacity(0.8), lineWidth: 1.5)
-            )
         }
     }
 }

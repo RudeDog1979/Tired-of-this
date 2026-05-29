@@ -24,7 +24,7 @@ struct SubscriptionRenewalTimelineView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 6) {
-            SubscriptionHubSectionHeader(title: "UPCOMING RENEWALS")
+            SubscriptionHubSectionHeader(title: "Upcoming renewals")
 
             if renewals.isEmpty {
                 emptyState

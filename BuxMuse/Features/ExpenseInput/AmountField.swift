@@ -14,10 +14,6 @@ struct AmountField: View {
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @Binding var amountString: String
     
-    var cardColor: Color {
-        colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("AMOUNT")

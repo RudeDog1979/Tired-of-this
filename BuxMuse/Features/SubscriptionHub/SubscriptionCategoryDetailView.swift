@@ -19,7 +19,7 @@ struct SubscriptionCategoryDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 6) {
-            SubscriptionHubSectionHeader(title: "CATEGORY BREAKDOWN")
+            SubscriptionHubSectionHeader(title: "Category breakdown")
 
             VStack(spacing: BuxLayout.section) {
                 if cachedBreakdown.isEmpty {

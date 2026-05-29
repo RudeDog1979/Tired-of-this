@@ -85,7 +85,7 @@ struct BudgetSettingsView: View {
                                 .font(.system(size: 15, weight: .semibold))
                             Text("BuxMuse Brain will adjust limits based on seasonal spend trends")
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                 }
@@ -94,7 +94,7 @@ struct BudgetSettingsView: View {
                     if store.customBudgetProfiles.isEmpty {
                         Text("No custom profiles configured.")
                             .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                             .padding(.vertical, 4)
                     } else {
                         ForEach(store.customBudgetProfiles) { profile in
@@ -116,7 +116,7 @@ struct BudgetSettingsView: View {
                                     }
                                     Text("\(profile.categories.count) Categories · Target: \(appSettingsManager.format(profile.targetAmount))")
                                         .font(.system(size: 12))
-                                        .foregroundColor(.gray)
+                                        .buxLabelSecondary()
                                 }
                                 
                                 Spacer()
@@ -143,7 +143,7 @@ struct BudgetSettingsView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Budgets")
         .navigationBarTitleDisplayMode(.inline)
@@ -158,6 +158,7 @@ struct BudgetSettingsView: View {
                 }
             }
             .environment(\.settingsEnhancedTint, true)
+            .buxThemedSheetContent()
         }
         .sheet(isPresented: $showCreator) {
             BudgetProfileEditorView(profile: CustomBudgetProfile(name: "", categories: [])) { newProfile in
@@ -172,6 +173,7 @@ struct BudgetSettingsView: View {
                 store.save()
             }
             .environment(\.settingsEnhancedTint, true)
+            .buxThemedSheetContent()
         }
         .onChange(of: store.budgetingMode) { _, _ in store.save() }
         .onChange(of: store.defaultBudgetPeriod) { _, _ in store.save() }
@@ -236,7 +238,7 @@ struct BudgetProfileEditorView: View {
                         if profile.categories.isEmpty {
                             Text("No categories added yet.")
                                 .font(.system(size: 14))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         } else {
                             ForEach(profile.categories) { category in
                                 HStack {
@@ -245,7 +247,7 @@ struct BudgetProfileEditorView: View {
                                     Spacer()
                                     Text(appSettingsManager.format(category.targetAmount))
                                         .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(.gray)
+                                        .buxLabelSecondary()
                                 }
                             }
                             .onDelete(perform: removeCategory)

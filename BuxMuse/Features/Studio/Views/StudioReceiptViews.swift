@@ -46,11 +46,13 @@ struct StudioReceiptsListView: View {
             StudioExpenseEditorView(receiptToEdit: nil)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .buxThemedSheetContent()
         }
         .sheet(isPresented: $showScanner) {
             StudioReceiptScannerView()
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .buxThemedSheetContent()
         }
     }
 
@@ -106,11 +108,11 @@ struct StudioReceiptsListView: View {
         VStack(spacing: BuxLayout.section) {
             Image(systemName: "doc.plaintext.fill")
                 .font(.system(size: 32))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             Text("No receipts scanned yet")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             Button("Scan Receipt") {
                 showScanner = true
@@ -235,7 +237,7 @@ struct StudioReceiptScannerView: View {
                                     
                                     Text("Secure offline text digitization using local Apple Neural Engines.")
                                         .font(.system(size: 12))
-                                        .foregroundColor(.gray)
+                                        .buxLabelSecondary()
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal)
                                 }
@@ -520,7 +522,7 @@ struct StudioReceiptDetailView: View {
                     // Local Storage Sandbox disclaimer
                     Text("This receipt, along with its metadata, is encrypted and securely stored offline inside your local BuxMuse Sandbox. No data leaves your iPhone.")
                         .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
@@ -538,6 +540,7 @@ struct StudioReceiptDetailView: View {
             StudioExpenseEditorView(receiptToEdit: receipt)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .buxThemedSheetContent()
         }
     }
     
@@ -545,7 +548,7 @@ struct StudioReceiptDetailView: View {
         HStack {
             Text(label)
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             Spacer()
             

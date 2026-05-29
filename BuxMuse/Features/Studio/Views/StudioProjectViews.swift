@@ -39,6 +39,7 @@ struct StudioProjectsListView: View {
         .sheet(isPresented: $showCreateProject) {
             NewProjectSheet()
                 .environmentObject(themeManager)
+                .buxThemedSheetContent()
         }
     }
 
@@ -103,11 +104,11 @@ struct StudioProjectsListView: View {
         VStack(spacing: BuxLayout.section) {
             Image(systemName: "folder.fill")
                 .font(.system(size: 32))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             Text("No projects registered yet")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             Button("Add Project") {
                 showCreateProject = true
@@ -180,13 +181,13 @@ struct StudioProjectDetailView: View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
             Text("FINANCIAL MATRIX")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("REVENUE")
                         .font(.system(size: 9, weight: .semibold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     Text(appSettingsManager.format(analysis.projectedRevenue))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundColor(.green)
@@ -195,7 +196,7 @@ struct StudioProjectDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("EXPENSES")
                         .font(.system(size: 9, weight: .semibold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     Text(appSettingsManager.format(analysis.projectedExpenses))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundColor(.red)
@@ -204,7 +205,7 @@ struct StudioProjectDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("PROFIT")
                         .font(.system(size: 9, weight: .semibold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     Text(appSettingsManager.format(analysis.projectedProfit))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.current.accentColor)
@@ -217,7 +218,7 @@ struct StudioProjectDetailView: View {
             HStack {
                 Text("Effective hourly rate:")
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 Spacer()
                 Text("\(appSettingsManager.format(analysis.effectiveHourlyRate))/hr")
                     .font(.system(size: 13, weight: .bold))
@@ -232,12 +233,12 @@ struct StudioProjectDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("TIME ENTRIES LOG")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             if project.timeEntries.isEmpty {
                 Text("No time entries logged yet.")
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             } else {
                 ForEach(project.timeEntries) { entry in
                     HStack {
@@ -247,7 +248,7 @@ struct StudioProjectDetailView: View {
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text(formattedDate(entry.startTime))
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                         Spacer()
                         Text(String(format: "%.1f hrs", entry.duration / 3600))
@@ -274,12 +275,12 @@ struct StudioProjectDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("LINKED EXPENSES")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             HStack {
                 Text("Total project direct cost:")
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 Spacer()
                 Text(appSettingsManager.format(projectExpenses))
                     .font(.system(size: 13, weight: .bold, design: .rounded))

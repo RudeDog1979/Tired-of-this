@@ -59,7 +59,7 @@ struct ProfileSettingsView: View {
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("Saved locally on your device.")
                                 .font(.system(size: 12))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                             if loadFailed {
                                 Text("Couldn't load that photo — try another image.")
                                     .font(.system(size: 10, weight: .medium))
@@ -84,7 +84,7 @@ struct ProfileSettingsView: View {
 
                 Section {
                     Button(action: {
-                        displayName = "Mitchell Santos"
+                        displayName = ""
                         selectedAvatarData = nil
                         preferredNameStyle = .fullName
                         saveProfile()
@@ -96,10 +96,11 @@ struct ProfileSettingsView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
+        .buxThemedSheetContent()
         .onAppear {
             displayName = store.userDisplayName ?? ""
             preferredNameStyle = store.preferredNameStyle
@@ -134,6 +135,7 @@ struct ProfileSettingsView: View {
                     }
                 }
                 .environmentObject(themeManager)
+                .buxThemedSheetContent()
             }
         }
     }

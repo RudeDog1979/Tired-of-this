@@ -12,9 +12,12 @@ enum BuxTokens {
     static let marginCompact: CGFloat = 16
     static let marginRegular: CGFloat = 20
     static let compactWidthThreshold: CGFloat = 360
+    /// Default card / section inset (8pt grid).
     static let section: CGFloat = 16
     static let block: CGFloat = 24
     static let tight: CGFloat = 8
+    /// Detail hub card padding — alias for BuxDetailStyle.cardPadding.
+    static let detailCard: CGFloat = 20
     static let minTap: CGFloat = 44
     static let pillHeight: CGFloat = 48
     static let sheetBottomClearance: CGFloat = 120

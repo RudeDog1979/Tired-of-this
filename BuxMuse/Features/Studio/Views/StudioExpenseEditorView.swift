@@ -134,7 +134,7 @@ struct StudioExpenseEditorView: View {
                                 .clipShape(Capsule())
                             Text(categoryHint.note)
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
 

@@ -36,7 +36,7 @@ struct StudioInvoiceSettingsView: View {
                     TextField("Pattern", text: $pattern)
                     Text("Use {PREFIX}, {YEAR}, {SEQ}")
                         .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     Text("Preview: \(previewNumber)")
                         .font(.system(size: 12, weight: .semibold))
                 }
@@ -76,7 +76,7 @@ struct StudioInvoiceSettingsView: View {
                     Toggle("Show registration footer on PDF", isOn: $showLegalFooter)
                     Text("Displays company address and registration at the bottom of designed invoices.")
                         .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 }
 
                 if let savedBanner {

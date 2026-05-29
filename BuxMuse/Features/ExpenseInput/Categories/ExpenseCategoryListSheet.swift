@@ -70,6 +70,7 @@ struct ExpenseCategoryListSheet: View {
                 reload()
             }
             .environmentObject(themeManager)
+            .buxThemedSheetContent()
         }
         .sheet(item: $mergeSource) { source in
             ExpenseCategoryMergeSheet(source: source, targets: categories.filter { $0.id != source.id }) { target in
@@ -77,6 +78,7 @@ struct ExpenseCategoryListSheet: View {
                 reload()
             }
             .environmentObject(themeManager)
+            .buxThemedSheetContent()
         }
     }
 

@@ -37,6 +37,8 @@ struct SubscriptionHubView: View {
             themeManager.screenBackground(for: colorScheme)
                 .ignoresSafeArea()
 
+            BuxHeroMeshBackground()
+
             VStack(spacing: 0) {
                 hubHeader
 
@@ -72,6 +74,7 @@ struct SubscriptionHubView: View {
                     .buxScreenContentMargins()
                 }
                 .buxReportsContainerWidth()
+                .buxTabBarScrollMinimizeTracking()
             }
 
             if showDetailSheet {
@@ -111,53 +114,18 @@ struct SubscriptionHubView: View {
         .onChange(of: brain.subscriptionHubSnapshot) { _, newSnapshot in
             viewModel.applySnapshot(newSnapshot, settingsManager: appSettingsManager)
         }
+        .buxThemedPresentation()
         .ignoresSafeArea(.keyboard)
     }
 
     // MARK: - Header (true center title)
 
     private var hubHeader: some View {
-        ZStack {
-            Text("Subscription Hub")
-                .font(.system(size: 17, weight: .bold))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-
-            HStack {
-                Button(action: {
-                    withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                        isPresented = false
-                    }
-                }) {
-                    ZStack {
-                        Circle()
-                            .fill(colorScheme == .dark ? Color.white.opacity(0.08) : .white)
-                            .frame(width: 44, height: 44)
-                            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    }
-                }
-                .buttonStyle(BuxMicroShrinkStyle())
-
-                Spacer()
-
-                ZStack {
-                    Circle()
-                        .fill(Color.clear)
-                        .frame(width: 44, height: 44)
-
-                    Image(systemName: "cpu")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
-                }
-                .accessibilityHidden(true)
+        BuxOverlayHeader(title: "Subscription Hub") {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                isPresented = false
             }
         }
-        .padding(.horizontal, BuxLayout.marginHorizontal)
-        .padding(.top, 64)
-        .padding(.bottom, BuxLayout.section)
     }
 
     // MARK: - Overview hero (compact vs old 38pt slab)
@@ -170,7 +138,7 @@ struct SubscriptionHubView: View {
         }) {
             VStack(alignment: .leading, spacing: BuxLayout.section) {
                 HStack {
-                    SubscriptionHubSectionHeader(title: "ACTIVE SUBSCRIPTIONS")
+                    SubscriptionHubSectionHeader(title: "Active subscriptions")
 
                     Spacer(minLength: 8)
 
@@ -193,7 +161,7 @@ struct SubscriptionHubView: View {
 
                     Text("/month")
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.gray)
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
 
                     Spacer(minLength: 0)
                 }

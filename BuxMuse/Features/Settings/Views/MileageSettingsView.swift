@@ -15,13 +15,15 @@ struct MileageSettingsView: View {
     var body: some View {
         ZStack {
             themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+            BuxHeroMeshBackground()
+
             Form {
                 Section {
                     Toggle("Auto-location for mileage", isOn: $store.autoLocationForMileage)
                         .tint(themeManager.current.accentColor)
                     Text("When enabled, trip sheets can capture your current place name for start or end.")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 } header: {
                     Text("AUTO-LOCATION FOR MILEAGE")
                 }
@@ -37,12 +39,12 @@ struct MileageSettingsView: View {
                     }
                     Text("Applied to business-purpose trips in Studio deductions and tax estimates.")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 } header: {
                     Text("MILEAGE RATE")
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Mileage Log")
         .navigationBarTitleDisplayMode(.inline)

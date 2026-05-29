@@ -80,12 +80,14 @@ struct ExpenseDetailView: View {
             }
             .environmentObject(themeManager)
             .environmentObject(brain)
+            .buxThemedSheetContent()
         }
         .sheet(isPresented: $showEditSheet) {
             AddExpenseSheet(brain: brain, settingsManager: appSettingsManager, mode: .edit(viewModel.record.toTransaction()))
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(brain)
+                .buxThemedSheetContent()
                 .onDisappear {
                     viewModel.reloadRecord()
                     onUpdated()

@@ -48,6 +48,22 @@ struct RootView: View {
                 .environmentObject(themeManager)
                 .allowsHitTesting(ConnectivityBrain.shared.activeToast != nil)
         }
+        .overlay {
+            if navigationCoordinator.showStudioUnlockAnimation {
+                StudioUnlockAnimationView(
+                    isPresented: $navigationCoordinator.showStudioUnlockAnimation,
+                    onMidpointReveal: { navigationCoordinator.commitStudioUnlock() }
+                )
+                .transition(.opacity)
+                .zIndex(200)
+            }
+        }
+        .animation(.easeInOut(duration: 0.45), value: navigationCoordinator.showStudioUnlockAnimation)
+        .onChange(of: navigationCoordinator.showStudioUnlockAnimation) { _, isShowing in
+            if !isShowing {
+                navigationCoordinator.finishStudioUnlockPresentation()
+            }
+        }
         .animation(.spring(response: 0.45, dampingFraction: 0.85, blendDuration: 0), value: navigationCoordinator.showSubscriptionHub)
         .buxRootBrandTheme()
         .sheet(item: $goalsSheetCoordinator.activeSheet) { sheet in
@@ -59,7 +75,7 @@ struct RootView: View {
                     .environmentObject(goalsViewModel)
                     .environmentObject(goalsSheetCoordinator)
                     .environmentObject(insightsViewModel)
-                    .buxThemedPresentation()
+                    .buxThemedSheetContent()
             }
         }
         .onAppear {
@@ -79,6 +95,8 @@ struct RootView: View {
                 StudioTimerDisplayMonitor.shared.handleSceneBecameActive()
                 if didEnterBackground {
                     evaluateAppLock(forceOnLaunch: false)
+                    container.scheduleEngagementRefresh()
+                    container.scheduleTipsRefresh()
                     didEnterBackground = false
                 }
             @unknown default:
@@ -87,6 +105,7 @@ struct RootView: View {
         }
         .onChange(of: navigationCoordinator.selectedTab) { _, newTab in
             navigationCoordinator.registerTabSelection()
+            BuxTabBarScrollState.shared.reset()
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             if newTab != .expense {
                 navigationCoordinator.dismissExpenseSearch()
@@ -193,6 +212,9 @@ struct RootView: View {
                     }
                 )
             )
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
+            .environmentObject(goalsViewModel)
             .transition(.asymmetric(
                 insertion: .move(edge: .bottom).combined(with: .opacity),
                 removal: .move(edge: .bottom).combined(with: .opacity)
@@ -212,6 +234,8 @@ struct RootView: View {
                     }
                 )
             )
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
             .transition(.asymmetric(
                 insertion: .move(edge: .bottom).combined(with: .opacity),
                 removal: .move(edge: .bottom).combined(with: .opacity)

@@ -73,7 +73,7 @@ struct StudioMetricsGrid: View {
     }
 
     private func metricCard(title: String, value: String, subtitle: String, color: Color) -> some View {
-        BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: 14) {
+        BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: BuxTokens.tight) {
                 Text(title.uppercased())
                     .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
@@ -524,7 +524,7 @@ private struct StudioSectionShell<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BuxTokens.tight) {
             BuxSectionHeader(title: title)
-            BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: 14) {
+            BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
                 content()
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

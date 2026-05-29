@@ -28,7 +28,7 @@ struct TaxCountryPickerSheet: View {
                 VStack(spacing: 0) {
                     HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                         TextField("Search country, ISO, or region", text: $searchQuery)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
@@ -41,7 +41,7 @@ struct TaxCountryPickerSheet: View {
 
                     Text("\(filteredCountries.count) countries")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, BuxLayout.marginHorizontal)
                         .padding(.bottom, 6)
@@ -52,11 +52,11 @@ struct TaxCountryPickerSheet: View {
                                 ProgressView()
                                 Text("Loading tax presets…")
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                             } else {
                                 Image(systemName: "globe")
                                     .font(.system(size: 28))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                                 Text("No countries available")
                                     .font(.system(size: 15, weight: .semibold))
                                 if let error = taxManager.lastLoadError {
@@ -98,7 +98,7 @@ struct TaxCountryPickerSheet: View {
                                             }
                                         }
                                         .font(.system(size: 11, weight: .medium))
-                                        .foregroundColor(.gray)
+                                        .buxLabelSecondary()
                                     }
                                     .padding(.vertical, 4)
                                 }

@@ -14,8 +14,8 @@ struct BuxSectionHeader: View {
     let title: String
 
     var body: some View {
-        Text(title.uppercased())
-            .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
+        Text(title)
+            .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -213,9 +213,6 @@ struct BuxCard<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.buxBrandSurfaces) private var buxBrandSurfaces
     @ObservedObject private var settings = SettingsStore.shared
-    @Environment(\.studioEnhancedTint) private var studioEnhancedTint
-    @Environment(\.expensesEnhancedTint) private var expensesEnhancedTint
-    @Environment(\.settingsEnhancedTint) private var settingsEnhancedTint
     @EnvironmentObject private var themeManager: ThemeManager
 
     var elevation: BuxElevation = .card
@@ -226,8 +223,7 @@ struct BuxCard<Content: View>: View {
     var body: some View {
         let padded = content().padding(padding)
 
-        let meshChrome = settings.brandThemesEnabled
-            && (buxBrandSurfaces || studioEnhancedTint || expensesEnhancedTint || settingsEnhancedTint)
+        let meshChrome = settings.brandThemesEnabled && buxBrandSurfaces
         if meshChrome {
             padded
                 .buxThemedCardChrome(cornerRadius: cornerRadius)

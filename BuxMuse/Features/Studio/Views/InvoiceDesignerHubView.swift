@@ -120,9 +120,9 @@ struct InvoiceDesignerHubView: View {
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
-            .sheet(isPresented: $showNotesEditor) { notesEditorSheet }
-            .sheet(isPresented: $showAddRateSheet) { addRateSheet }
-            .sheet(isPresented: $showAddItemSheet) { addLineItemSheet }
+            .sheet(isPresented: $showNotesEditor) { notesEditorSheet.buxThemedSheetContent() }
+            .sheet(isPresented: $showAddRateSheet) { addRateSheet.buxThemedSheetContent() }
+            .sheet(isPresented: $showAddItemSheet) { addLineItemSheet.buxThemedSheetContent() }
         }
         .tint(themeManager.current.accentColor)
         .onAppear {
@@ -261,7 +261,7 @@ struct InvoiceDesignerHubView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Auto-number pattern")
                                 .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                             Text(store.invoiceSettings.numberPattern)
                                 .font(.system(size: 11, weight: .medium))
                                 .foregroundColor(Color(UIColor.secondaryLabel))
@@ -282,7 +282,7 @@ struct InvoiceDesignerHubView: View {
 
                     Text("Customize prefix & pattern in Studio → Invoices → Settings. You can always type your own number above.")
                         .font(.system(size: 10))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
 
                     DatePicker("Issue date", selection: $issueDate, displayedComponents: .date)
                     DatePicker("Due date", selection: $dueDate, displayedComponents: .date)
@@ -300,7 +300,7 @@ struct InvoiceDesignerHubView: View {
                     if lineItems.isEmpty {
                         Text("Add at least one line item to save this invoice.")
                             .font(.system(size: 11))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                     ForEach(lineItems) { item in
                         HStack {
@@ -309,7 +309,7 @@ struct InvoiceDesignerHubView: View {
                                     .font(.system(size: 13, weight: .semibold))
                                 Text("Qty \(String(format: "%.1f", item.quantity)) · \(formatCurrency(item.unitPrice))")
                                     .font(.system(size: 10))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                             }
                             Spacer()
                             Text(formatCurrency(item.total))
@@ -499,7 +499,7 @@ struct InvoiceDesignerHubView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         Image(systemName: "pencil")
                             .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                     .padding(10)
                     .background(Color(UIColor.tertiarySystemFill))
@@ -547,7 +547,7 @@ struct InvoiceDesignerHubView: View {
                             HStack {
                                 Text("Preview:")
                                     .font(.system(size: 11))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                                 Image(uiImage: qr)
                                     .interpolation(.none)
                                     .resizable()
@@ -630,7 +630,7 @@ struct InvoiceDesignerHubView: View {
                         .foregroundColor(Color(UIColor.label))
                     Text(mode == .exclusive ? "Tax added on top of line item prices" : "Tax extracted from line item prices")
                         .font(.system(size: 10))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 }
                 Spacer()
             }
@@ -943,7 +943,7 @@ private struct TemplateStyleCard: View {
 
             Text(style.tagline)
                 .font(.system(size: 8))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1070,7 +1070,7 @@ private struct AddTaxRateSheet: View {
                             TextField("Rate %", text: $percentage)
                                 .keyboardType(.decimalPad)
                             Text("%")
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                     Section("Options") {
@@ -1078,7 +1078,7 @@ private struct AddTaxRateSheet: View {
                             .tint(themeManager.current.accentColor)
                         Text("Compounding rates apply to the running total including previous taxes.")
                             .font(.system(size: 11))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                 }
                 .scrollContentBackground(.hidden)

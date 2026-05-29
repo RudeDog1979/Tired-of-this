@@ -39,7 +39,7 @@ enum BuxTypography {
     }
 
     static func sectionLabel(_ text: String) -> Text {
-        Text(text.uppercased())
+        Text(text)
             .font(.system(size: 11, weight: .bold))
             .kerning(1.2)
     }

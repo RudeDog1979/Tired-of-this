@@ -33,7 +33,7 @@ struct AppearanceSettingsView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("BRAND DESIGN PRESETS")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                                 .padding(.horizontal, 20)
                                 .kerning(1.2)
 
@@ -55,7 +55,7 @@ struct AppearanceSettingsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("USER INTERFACE RULES")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                             .padding(.horizontal, 20)
                             .kerning(1.2)
                         
@@ -67,7 +67,7 @@ struct AppearanceSettingsView: View {
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     Text("Colorful mesh presets and accent styling across the app")
                                         .font(.system(size: 11))
-                                        .foregroundColor(.gray)
+                                        .buxLabelSecondary()
                                 }
                             }
                             .padding(.horizontal, BuxLayout.section)
@@ -96,12 +96,12 @@ struct AppearanceSettingsView: View {
                             // Glassmorphism Toggle
                             Toggle(isOn: $store.useGlassmorphism) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Frosted Glassmorphism")
+                                    Text("Glass navigation chrome")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Text("Premium backdrop filters and transparency effects")
+                                    Text("Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)")
                                         .font(.system(size: 11))
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                                 }
                             }
                             .padding(.horizontal, BuxLayout.section)
@@ -117,7 +117,7 @@ struct AppearanceSettingsView: View {
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     Text("Simplify transition animations for comfort")
                                         .font(.system(size: 11))
-                                        .foregroundColor(.gray)
+                                        .buxLabelSecondary()
                                 }
                             }
                             .padding(.horizontal, BuxLayout.section)

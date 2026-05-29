@@ -40,13 +40,13 @@ struct RegionCurrencySettingsView: View {
                                 .foregroundColor(themeManager.current.accentColor)
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.gray.opacity(0.6))
+                                .buxChevronMuted()
                         }
                     }
 
                     Text(appSettingsManager.selectedCountry.name)
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 }
 
                 Section("DISPLAY CURRENCY") {
@@ -61,7 +61,7 @@ struct RegionCurrencySettingsView: View {
                                 .foregroundColor(themeManager.current.accentColor)
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.gray.opacity(0.6))
+                                .buxChevronMuted()
                         }
                     }
 
@@ -71,7 +71,7 @@ struct RegionCurrencySettingsView: View {
                         Spacer()
                         Text(appSettingsManager.format(Decimal(12345.67)))
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                 }
 
@@ -87,11 +87,11 @@ struct RegionCurrencySettingsView: View {
                 Section(header: Text("LOCALE POLICY")) {
                     Text("Country and currency apply across BuxMuse — dashboard, expenses, invoices, and tax tools. Auto-detected from your device on first launch; you can change either independently.")
                         .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                         .lineSpacing(4)
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Currency & Region")
         .navigationBarTitleDisplayMode(.inline)
@@ -108,12 +108,14 @@ struct RegionCurrencySettingsView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
             .environment(\.settingsEnhancedTint, true)
+            .buxThemedSheetContent()
         }
         .sheet(isPresented: $showCurrencySheet) {
             CurrencyRegionPickerView()
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
                 .environment(\.settingsEnhancedTint, true)
+                .buxThemedSheetContent()
         }
         .confirmationDialog(
             "Update currency too?",
@@ -166,7 +168,7 @@ struct CountryPickerView: View {
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Text("Used for tax presets, formatting, and regional defaults")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 }
                 Spacer()
                 Button(action: { dismiss() }) {
@@ -184,13 +186,13 @@ struct CountryPickerView: View {
 
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 TextField("Search country or code...", text: $searchText)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
                 if !searchText.isEmpty {
                     Button { searchText = "" } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundColor(.gray)
+                        Image(systemName: "xmark.circle.fill").buxLabelSecondary()
                     }
                 }
             }
@@ -215,7 +217,7 @@ struct CountryPickerView: View {
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     Text("\(country.id) · typical \(country.defaultCurrencyCode)")
                                         .font(.system(size: 11, weight: .medium))
-                                        .foregroundColor(.gray)
+                                        .buxLabelSecondary()
                                 }
                                 Spacer()
                                 if appSettingsManager.selectedCountry.id == country.id {

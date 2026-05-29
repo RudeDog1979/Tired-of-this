@@ -49,7 +49,7 @@ struct SecuritySettingsView: View {
                                 .font(.system(size: 15, weight: .semibold))
                             Text("Fast, private verification via Apple Secure Enclave")
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                     
@@ -74,7 +74,7 @@ struct SecuritySettingsView: View {
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("Numeric secondary passcode backup")
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                         Spacer()
                         
@@ -103,12 +103,12 @@ struct SecuritySettingsView: View {
                                 .font(.system(size: 15, weight: .semibold))
                             Text("Hides your financial sheets when toggling tasks")
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Security & Privacy")
         .navigationBarTitleDisplayMode(.inline)
@@ -118,6 +118,7 @@ struct SecuritySettingsView: View {
                 store.save()
             }
             .environment(\.settingsEnhancedTint, true)
+            .buxThemedSheetContent()
         }
         .confirmationDialog("Disable PIN Code?", isPresented: $showPasscodeClearConfirmation, titleVisibility: .visible) {
             Button("Remove Passcode", role: .destructive) {
@@ -198,7 +199,7 @@ struct PasscodeSetupSheet: View {
                     
                     Text("This code secures BuxMuse locally on your device.")
                         .font(.system(size: 13))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }

@@ -89,4 +89,39 @@ final class NavigationCoordinator: ObservableObject {
         openStudioSettingsRequest = false
         return true
     }
+
+    /// Full-screen blueprint unlock — fade overlay (not a sheet).
+    @Published var showStudioUnlockAnimation = false
+    /// Toggle is on visually; `studioEnabled` commits around mid-animation so Studio is revealed under the fade-out.
+    @Published private(set) var studioUnlockAwaitingCommit = false
+
+    func beginStudioUnlock() {
+        guard !studioUnlockAwaitingCommit, !SettingsStore.shared.studioEnabled else { return }
+        studioUnlockAwaitingCommit = true
+        withAnimation(.easeInOut(duration: 0.45)) {
+            showStudioUnlockAnimation = true
+        }
+    }
+
+    /// Reveal Studio tab + settings while the blueprint overlay is still playing (~halfway).
+    func commitStudioUnlock() {
+        guard studioUnlockAwaitingCommit else { return }
+        studioUnlockAwaitingCommit = false
+        withAnimation(.easeInOut(duration: 0.55)) {
+            SettingsStore.shared.studioEnabled = true
+        }
+        SettingsStore.shared.save()
+    }
+
+    func finishStudioUnlockPresentation() {
+        if studioUnlockAwaitingCommit {
+            commitStudioUnlock()
+        }
+    }
+
+    func cancelStudioUnlockIfPending() {
+        guard studioUnlockAwaitingCommit else { return }
+        studioUnlockAwaitingCommit = false
+        showStudioUnlockAnimation = false
+    }
 }

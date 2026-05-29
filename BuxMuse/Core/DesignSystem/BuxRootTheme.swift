@@ -89,9 +89,31 @@ extension View {
     func buxThemedPresentation() -> some View {
         buxRootBrandTheme()
     }
+
+    /// Full themed modal stack: tint + mesh backdrop behind content.
+    func buxThemedSheetContent() -> some View {
+        modifier(BuxThemedSheetContentModifier())
+    }
 }
 
-// MARK: - Semantic foreground helpers
+// MARK: - Sheet mesh backdrop
+
+private struct BuxThemedSheetContentModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    func body(content: Content) -> some View {
+        content
+            .buxThemedPresentation()
+            .background {
+                ZStack {
+                    themeManager.screenBackground(for: colorScheme)
+                    BuxHeroMeshBackground()
+                }
+                .ignoresSafeArea()
+            }
+    }
+}
 
 extension View {
     func buxLabelPrimary() -> some View {

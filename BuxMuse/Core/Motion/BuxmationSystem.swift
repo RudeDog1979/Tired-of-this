@@ -494,6 +494,7 @@ private struct BuxActionPressStyle: ButtonStyle {
 
 struct BuxActionButton: View {
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
 
     let title: String
     let systemImage: String
@@ -543,7 +544,11 @@ struct BuxActionButton: View {
         switch role {
         case .primary:
             return isEnabled ? .white : Color.white.opacity(0.65)
-        case .secondary, .tinted:
+        case .secondary:
+            return isEnabled
+                ? themeManager.labelPrimary(for: colorScheme)
+                : themeManager.labelTertiary(for: colorScheme)
+        case .tinted:
             return isEnabled ? tintColor : tintColor.opacity(0.45)
         }
     }
@@ -552,7 +557,11 @@ struct BuxActionButton: View {
         switch role {
         case .primary:
             return isEnabled ? tintColor : Color(UIColor.systemGray3)
-        case .secondary, .tinted:
+        case .secondary:
+            return colorScheme == .dark
+                ? Color.white.opacity(0.08)
+                : Color.black.opacity(0.04)
+        case .tinted:
             let wash = colorScheme == .dark ? 0.24 : 0.14
             return isEnabled ? tintColor.opacity(wash) : tintColor.opacity(wash * 0.45)
         }
@@ -561,12 +570,20 @@ struct BuxActionButton: View {
     private var showsBorder: Bool {
         switch role {
         case .primary: return false
-        case .secondary, .tinted: return isEnabled
+        case .secondary: return isEnabled
+        case .tinted: return isEnabled
         }
     }
 
     private var borderColor: Color {
-        tintColor.opacity(colorScheme == .dark ? 0.45 : 0.32)
+        switch role {
+        case .secondary:
+            return themeManager.subtleCardStroke(for: colorScheme)
+        case .tinted:
+            return tintColor.opacity(colorScheme == .dark ? 0.45 : 0.32)
+        case .primary:
+            return .clear
+        }
     }
 
     private var shadowColor: Color {
@@ -603,16 +620,16 @@ extension View {
             .buttonStyle(BuxActionPressStyle())
     }
 
-    /// Secondary tinted pill — accent wash background, accent label.
+    /// Secondary pill — neutral chrome, primary label (legible on all themes).
     func buxSecondaryPillStyle(accent: Color, controlSize: ControlSize = .regular) -> some View {
         self
             .font(.system(size: controlSize == .small ? 13 : controlSize == .large ? 15 : 14, weight: .semibold))
-            .foregroundStyle(accent)
+            .foregroundStyle(.primary)
             .padding(.horizontal, controlSize == .small ? 12 : controlSize == .large ? 20 : 16)
             .frame(height: controlSize == .small ? 34 : controlSize == .large ? BuxLayout.pillHeight : 44)
-            .background(accent.opacity(0.14))
+            .background(Color.primary.opacity(0.06))
             .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(accent.opacity(0.3), lineWidth: 1))
+            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 1))
             .buttonStyle(BuxActionPressStyle())
     }
 }

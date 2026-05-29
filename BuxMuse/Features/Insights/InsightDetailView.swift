@@ -29,6 +29,11 @@ struct InsightDetailView: View {
 
     var body: some View {
         ZStack {
+            themeManager.screenBackground(for: colorScheme)
+                .ignoresSafeArea()
+
+            BuxHeroMeshBackground()
+
             Color.black.opacity(colorScheme == .dark ? 0.55 : 0.35)
                 .ignoresSafeArea()
                 .onTapGesture {
@@ -36,7 +41,9 @@ struct InsightDetailView: View {
                 }
 
             VStack(spacing: 0) {
-                insightHeader
+                BuxOverlayHeader(title: "Insight Deep Dive") {
+                    withAnimation(.buxBounce) { isPresented = false }
+                }
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: BuxLayout.section) {
@@ -54,49 +61,13 @@ struct InsightDetailView: View {
                         suggestedActionsSection
                     }
                     .padding(.vertical, BuxLayout.section)
-                    .padding(.bottom, 80)
+                    .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
                     .buxScreenContentMargins()
                 }
                 .buxReportsContainerWidth()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
         }
-    }
-
-    // MARK: - Header
-
-    private var insightHeader: some View {
-        ZStack {
-            Text("Insight Deep Dive")
-                .font(.system(size: 17, weight: .bold))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-
-            HStack {
-                Button(action: {
-                    withAnimation(.buxBounce) { isPresented = false }
-                }) {
-                    ZStack {
-                        Circle()
-                            .fill(colorScheme == .dark ? Color.white.opacity(0.08) : .white)
-                            .frame(width: 44, height: 44)
-                            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    }
-                }
-                .buttonStyle(BuxMicroShrinkStyle())
-
-                Spacer()
-
-                Color.clear.frame(width: 44, height: 44)
-            }
-        }
-        .padding(.horizontal, BuxLayout.marginHorizontal)
-        .padding(.top, 60)
-        .padding(.bottom, BuxLayout.section)
+        .buxThemedPresentation()
     }
 
     // MARK: - Main card
@@ -122,7 +93,7 @@ struct InsightDetailView: View {
 
                 Text(insight.description)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
             }
@@ -130,7 +101,7 @@ struct InsightDetailView: View {
             Divider().opacity(0.08)
 
             VStack(alignment: .leading, spacing: BuxLayout.tight + 4) {
-                BuxDetailSectionHeader(title: "EXPLANATION")
+                BuxDetailSectionHeader(title: "Explanation")
 
                 Text(insight.fullExplanation)
                     .font(.system(size: 14, weight: .medium))
@@ -149,7 +120,7 @@ struct InsightDetailView: View {
 
     private var dataMetricsSection: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 4) {
-            BuxDetailSectionHeader(title: "DATA METRICS")
+            BuxDetailSectionHeader(title: "Data metrics")
 
             HStack(alignment: .top, spacing: BuxLayout.section) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -159,7 +130,7 @@ struct InsightDetailView: View {
 
                     Text(insight.dataBehind)
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.gray)
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .lineLimit(3)
                 }
 
@@ -181,7 +152,7 @@ struct InsightDetailView: View {
 
     private var impactSection: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 4) {
-            BuxDetailSectionHeader(title: "PROJECTED FINANCIAL IMPACT")
+            BuxDetailSectionHeader(title: "Projected financial impact")
 
             HStack(alignment: .top, spacing: BuxLayout.section) {
                 impactCard(label: "Monthly", value: appSettingsManager.format(insight.impactMonthly))
@@ -215,7 +186,7 @@ struct InsightDetailView: View {
     private var goalAccelerationSection: some View {
         if let goalName = insight.affectedGoalName {
             VStack(alignment: .leading, spacing: BuxLayout.tight + 4) {
-                BuxDetailSectionHeader(title: "GOAL ACCELERATION EFFECT")
+                BuxDetailSectionHeader(title: "Goal acceleration effect")
 
                 HStack(alignment: .top, spacing: BuxLayout.section) {
                     ZStack {
@@ -235,7 +206,7 @@ struct InsightDetailView: View {
 
                         Text("Applying this insight accelerates this target timeline significantly.")
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                             .lineLimit(3)
                     }
 
@@ -252,7 +223,7 @@ struct InsightDetailView: View {
 
     private var suggestedActionsSection: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 4) {
-            BuxDetailSectionHeader(title: "BUXMUSE SUGGESTED ACTIONS")
+            BuxDetailSectionHeader(title: "BuxMuse suggested actions")
 
             VStack(spacing: BuxLayout.section) {
                 ForEach(insight.suggestedActions, id: \.self) { action in

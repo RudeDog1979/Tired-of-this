@@ -177,7 +177,7 @@ struct TaxStudioOverviewView: View {
                 VStack(alignment: .leading, spacing: BuxTokens.tight) {
                     Text("AUTOPILOT")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     ForEach(display.autopilot) { item in
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: item.icon)
@@ -202,7 +202,7 @@ struct TaxStudioOverviewView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("THRESHOLDS")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     ForEach(display.thresholdWarnings, id: \.self) { w in
                         Text(w)
                             .font(.system(size: 12, weight: .medium))
@@ -235,7 +235,7 @@ struct TaxStudioMetricCard: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(metric.title.uppercased())
                 .font(.system(size: 9, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             Text(metric.value)
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(themeManager.current.accentColor)
@@ -243,7 +243,7 @@ struct TaxStudioMetricCard: View {
                 .minimumScaleFactor(0.7)
             Text(metric.subtitle)
                 .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
@@ -308,7 +308,7 @@ struct TaxStudioForecastView: View {
         taxStudioTabStack(spacing: BuxTokens.tight) {
             Text("12-MONTH PROJECTION")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             ForEach(display.forecastRows) { row in
                 TaxStudioMetricCard(metric: row)
             }
@@ -336,7 +336,7 @@ struct TaxStudioTimelineView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(event.dateLabel)
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                         Text(event.title)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))

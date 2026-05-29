@@ -112,23 +112,26 @@ struct ExpensesTopCarousel: View {
             }
         }
         .sheet(item: $activeDetailSheet) { sheetType in
-            switch sheetType {
-            case .totalSpend:
-                TotalSpendDetailSheet(header: header, formatAmount: formatAmount)
-                    .environmentObject(themeManager)
-                    .environmentObject(brain)
-                    .environmentObject(appSettingsManager)
-                    .environment(\.expensesEnhancedTint, true)
-                    .presentationDetents([.fraction(0.88), .large])
-                    .presentationDragIndicator(.visible)
-            case .monthlySummary:
-                MonthlySummaryDetailSheet(summary: summary, formatAmount: formatAmount)
-                    .environmentObject(themeManager)
-                    .environmentObject(appSettingsManager)
-                    .environment(\.expensesEnhancedTint, true)
-                    .presentationDetents([.fraction(0.88), .large])
-                    .presentationDragIndicator(.visible)
+            Group {
+                switch sheetType {
+                case .totalSpend:
+                    TotalSpendDetailSheet(header: header, formatAmount: formatAmount)
+                        .environmentObject(themeManager)
+                        .environmentObject(brain)
+                        .environmentObject(appSettingsManager)
+                        .environment(\.expensesEnhancedTint, true)
+                        .presentationDetents([.fraction(0.88), .large])
+                        .presentationDragIndicator(.visible)
+                case .monthlySummary:
+                    MonthlySummaryDetailSheet(summary: summary, formatAmount: formatAmount)
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                        .environment(\.expensesEnhancedTint, true)
+                        .presentationDetents([.fraction(0.88), .large])
+                        .presentationDragIndicator(.visible)
+                }
             }
+            .buxThemedSheetContent()
         }
     }
 

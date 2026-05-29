@@ -53,11 +53,11 @@ struct StudioProfileView: View {
                         Text("Region & Currency")
                         Spacer()
                         Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCurrency.id)")
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                     Text("Change in Settings → Currency & Region")
                         .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                 }
 
                 Section {

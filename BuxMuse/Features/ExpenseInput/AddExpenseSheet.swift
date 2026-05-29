@@ -52,6 +52,8 @@ struct AddExpenseSheet: View {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
 
+                BuxHeroMeshBackground()
+
                 EmotionalTagAppearance.background(
                     for: moodBackdropTag,
                     colorScheme: colorScheme
@@ -144,7 +146,7 @@ struct AddExpenseSheet: View {
                         Section {
                             Text(hint)
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
 
@@ -157,11 +159,12 @@ struct AddExpenseSheet: View {
                         }
                     }
                 }
-                .scrollContentBackground(.hidden)
+                .buxThemedFormStyle()
                 .buxScrollDismissesKeyboard()
             }
             .navigationTitle(sheetTitle)
             .navigationBarTitleDisplayMode(.inline)
+            .buxThemedSheetContent()
             .onAppear {
                 syncMoodBackdrop(to: viewModel.emotionTag, animated: false)
             }
@@ -184,6 +187,7 @@ struct AddExpenseSheet: View {
             }
             .sheet(isPresented: $viewModel.showMerchantPickSheet) {
                 merchantPickSheet
+                    .buxThemedSheetContent()
             }
         }
     }
@@ -201,7 +205,7 @@ struct AddExpenseSheet: View {
                                 .font(.system(size: 16, weight: .semibold))
                             Text(candidate.subtitle)
                                 .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                 }

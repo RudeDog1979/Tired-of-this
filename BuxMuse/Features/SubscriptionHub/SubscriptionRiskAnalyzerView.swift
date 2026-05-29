@@ -19,7 +19,7 @@ struct SubscriptionRiskAnalyzerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 6) {
-            SubscriptionHubSectionHeader(title: "SUBSCRIPTION RISK ANALYZER")
+            SubscriptionHubSectionHeader(title: "Subscription risk analyzer")
 
             if cachedRisks.isEmpty {
                 HStack(spacing: BuxLayout.section) {

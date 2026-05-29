@@ -30,7 +30,7 @@ struct NotificationSettingsView: View {
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("Receive timely financial alerts and insights")
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                     .padding(.vertical, 4)
@@ -51,7 +51,7 @@ struct NotificationSettingsView: View {
                                     .font(.system(size: 15, weight: .semibold))
                                 Text("A compact overview of today's spend & active goals")
                                     .font(.system(size: 11))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                             }
                         }
                     }
@@ -62,7 +62,7 @@ struct NotificationSettingsView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)

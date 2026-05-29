@@ -107,6 +107,7 @@ struct ExpenseTabView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(brain)
                 .environment(\.expensesEnhancedTint, true)
+                .buxThemedSheetContent()
         }
         .sheet(item: $categorySheetTransaction) { tx in
             ExpenseCategorySheet(transaction: tx) { category, categoryId in
@@ -115,6 +116,7 @@ struct ExpenseTabView: View {
             .environmentObject(themeManager)
             .environmentObject(brain)
             .environment(\.expensesEnhancedTint, true)
+            .buxThemedSheetContent()
         }
         .sheet(isPresented: $showAdvancedFilters) {
             ExpenseFilterSheet(
@@ -126,12 +128,14 @@ struct ExpenseTabView: View {
             .environmentObject(themeManager)
             .environmentObject(brain)
             .environment(\.expensesEnhancedTint, true)
+            .buxThemedSheetContent()
         }
         .sheet(isPresented: $showCategoryManager) {
             ExpenseCategoryListSheet()
                 .environmentObject(themeManager)
                 .environmentObject(brain)
                 .environment(\.expensesEnhancedTint, true)
+                .buxThemedSheetContent()
         }
         .sheet(isPresented: $showMerchantManager) {
             ExpenseMerchantListSheet()
@@ -140,6 +144,7 @@ struct ExpenseTabView: View {
                 .environment(\.expensesEnhancedTint, true)
                 .presentationDetents([.large])
                 .presentationCornerRadius(28)
+                .buxThemedSheetContent()
         }
         .sheet(item: $noteRecord) { record in
             ExpenseNoteSheet(
@@ -151,6 +156,7 @@ struct ExpenseTabView: View {
             )
             .environmentObject(themeManager)
             .environment(\.expensesEnhancedTint, true)
+            .buxThemedSheetContent()
             .onAppear {
                 noteDraft = record.notes ?? ""
             }
@@ -163,7 +169,7 @@ struct ExpenseTabView: View {
             .environmentObject(themeManager)
             .environmentObject(appSettingsManager)
             .environment(\.expensesEnhancedTint, true)
-            .buxThemedPresentation()
+            .buxThemedSheetContent()
         }
     }
 
@@ -173,29 +179,29 @@ struct ExpenseTabView: View {
             if !allRecords.isEmpty {
                 expenseFilterMenu
 
-                Button {
-                    showCategoryManager = true
-                } label: {
-                    BuxToolbarIcon(systemName: "tag")
-                }
-                .accessibilityLabel("Manage categories")
+                BuxNavIconButton(
+                    systemName: "tag",
+                    accessibilityLabel: "Manage categories",
+                    action: { showCategoryManager = true }
+                )
 
-                Button {
-                    showMerchantManager = true
-                } label: {
-                    BuxToolbarIcon(systemName: "building.2")
-                }
-                .accessibilityLabel("Manage merchants")
+                BuxNavIconButton(
+                    systemName: "building.2",
+                    accessibilityLabel: "Manage merchants",
+                    action: { showMerchantManager = true }
+                )
             }
 
-            Button {
-                withAnimation(.buxSnap) {
-                    activeSheet = .add
+            BuxNavIconButton(
+                systemName: "plus",
+                accessibilityLabel: "Add expense",
+                useAccent: true,
+                action: {
+                    withAnimation(.buxSnap) {
+                        activeSheet = .add
+                    }
                 }
-            } label: {
-                BuxToolbarIcon(systemName: "plus")
-            }
-            .accessibilityLabel("Add expense")
+            )
         }
     }
 

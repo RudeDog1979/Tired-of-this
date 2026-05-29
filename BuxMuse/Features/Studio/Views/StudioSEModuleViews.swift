@@ -45,13 +45,13 @@ struct StudioIncomeTaxCalculatorView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("ESTIMATED ANNUAL TAX")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             Text(snapshot.totalEstimatedTaxFormatted)
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundColor(themeManager.current.accentColor)
             Text("Effective rate \(snapshot.effectiveRatePercent)% on recorded income")
                 .font(.system(size: 12))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)
@@ -71,7 +71,7 @@ struct StudioIncomeTaxCalculatorView: View {
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             }
             .padding(BuxLayout.section)
             .seCard(colorScheme: colorScheme, themeManager: themeManager)
@@ -83,7 +83,7 @@ struct StudioIncomeTaxCalculatorView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("BREAKDOWN")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             seRow("Gross income", snapshot.totalIncomeFormatted)
             seRow("Deductible expenses", snapshot.deductibleExpensesFormatted, color: .green)
             seRow("Taxable income", snapshot.taxableIncomeFormatted)
@@ -100,7 +100,7 @@ struct StudioIncomeTaxCalculatorView: View {
         HStack {
             Text(title)
                 .font(.system(size: 13))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             Spacer()
             Text(value)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
@@ -127,13 +127,13 @@ struct StudioQuarterlyTaxView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(snapshot.quarterLabel.uppercased())
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                         Text(snapshot.totalDueFormatted)
                             .font(.system(size: 34, weight: .bold, design: .rounded))
                             .foregroundColor(.orange)
                         Text(snapshot.periodRangeLabel)
                             .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                         Text(snapshot.nextPaymentLabel)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(themeManager.current.accentColor)
@@ -145,7 +145,7 @@ struct StudioQuarterlyTaxView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("QUARTERLY SPLIT")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                         seMetric("Income tax", snapshot.incomeTaxFormatted)
                         seMetric("Self-employed tax", snapshot.selfEmployedTaxFormatted)
                         seMetric("Indirect tax", snapshot.indirectTaxFormatted)
@@ -200,7 +200,7 @@ struct StudioComplianceAssistantView: View {
                     if !snapshot.warnings.isEmpty {
                         Text("WARNINGS")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                         ForEach(snapshot.warnings) { item in
                             complianceCard(item)
                         }
@@ -208,7 +208,7 @@ struct StudioComplianceAssistantView: View {
 
                     Text("FAQ")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     ForEach(snapshot.faq) { item in
                         complianceCard(item)
                     }
@@ -235,7 +235,7 @@ struct StudioComplianceAssistantView: View {
             }
             Text(item.answer)
                 .font(.system(size: 12))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(BuxLayout.section)
@@ -285,7 +285,7 @@ struct StudioDashboardWidget: View {
                         Spacer()
                         Text("Runway \(display.runwayMonthsFormatted)")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
 
                     HStack(spacing: BuxLayout.section) {
@@ -304,7 +304,7 @@ struct StudioDashboardWidget: View {
             }
             .buttonStyle(BuxDashboardCardButtonStyle())
             .dashboardThemedCardChrome(cornerRadius: 24)
-            .padding(.horizontal, BuxLayout.marginHorizontal)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -312,7 +312,7 @@ struct StudioDashboardWidget: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title.uppercased())
                 .font(.system(size: 9, weight: .semibold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             Text(value)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))

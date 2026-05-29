@@ -47,7 +47,7 @@ struct DataSettingsView: View {
                 Section("MERCHANT DATA") {
                     Text("Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -80,7 +80,7 @@ struct DataSettingsView: View {
                             Text("Last Compiled")
                             Spacer()
                             Text(lastExport, style: .date)
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                 }
@@ -94,7 +94,7 @@ struct DataSettingsView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Data Control")
         .navigationBarTitleDisplayMode(.inline)

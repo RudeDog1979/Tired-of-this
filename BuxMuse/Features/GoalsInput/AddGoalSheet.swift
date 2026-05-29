@@ -25,13 +25,9 @@ struct AddGoalSheet: View {
     // Suggestion defaults cache
     @State private var brainSuggestions: GoalSuggestions? = nil
     
-    var cardColor: Color {
-        colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
-    }
-    
-    var backgroundColor: Color {
-        colorScheme == .dark ? Color(red: 13/255, green: 14/255, blue: 18/255) : Color(red: 242/255, green: 244/255, blue: 247/255)
-    }
+    private var cardColor: Color { themeManager.cardFill(for: colorScheme) }
+
+    private var backgroundColor: Color { themeManager.screenBackground(for: colorScheme) }
     
     var body: some View {
         BuxSheetScaffold(title: "Add Goal") {

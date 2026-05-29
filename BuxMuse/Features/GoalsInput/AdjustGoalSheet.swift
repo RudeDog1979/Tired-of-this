@@ -22,18 +22,16 @@ struct AdjustGoalSheet: View {
     @State private var deadline: Date = Date()
     @State private var priority: Int = 2
     
-    var cardColor: Color {
-        colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
-    }
-    
-    var backgroundColor: Color {
-        colorScheme == .dark ? Color(red: 13/255, green: 14/255, blue: 18/255) : Color(red: 242/255, green: 244/255, blue: 247/255)
-    }
+    private var cardColor: Color { themeManager.cardFill(for: colorScheme) }
+
+    private var backgroundColor: Color { themeManager.screenBackground(for: colorScheme) }
     
     var body: some View {
         ZStack {
-            backgroundColor
+            themeManager.screenBackground(for: colorScheme)
                 .ignoresSafeArea()
+
+            BuxHeroMeshBackground()
             
             VStack(spacing: 0) {
                 // Header

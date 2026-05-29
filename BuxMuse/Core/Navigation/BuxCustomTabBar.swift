@@ -55,6 +55,9 @@ struct BuxDockAnchoredTabBar: View {
     var studioEnabled: Bool
     var accentColor: Color
 
+    @ObservedObject private var scrollState = BuxTabBarScrollState.shared
+    @ObservedObject private var settings = SettingsStore.shared
+
     var body: some View {
         HStack {
             Spacer(minLength: 0)
@@ -67,12 +70,16 @@ struct BuxDockAnchoredTabBar: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: BuxTabBarMetrics.tabBarBandHeight)
-        .offset(y: BuxTabBarMetrics.tabBarDownNudge)
+        .offset(y: BuxTabBarMetrics.tabBarDownNudge + scrollState.minimizeOffset)
+        .opacity(scrollState.minimizeOpacity)
+        .animation(settings.reducedMotion ? .none : .spring(response: 0.38, dampingFraction: 0.86), value: scrollState.isMinimized)
     }
 }
 
 struct BuxCustomTabBar: View {
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
 
     @Binding var selectedTab: AppTab
     var studioEnabled: Bool
@@ -112,28 +119,32 @@ struct BuxCustomTabBar: View {
         .padding(.vertical, BuxTabBarMetrics.innerPadding + BuxTabBarMetrics.itemVerticalPadding)
         .frame(width: BuxTabBarMetrics.pillWidth(tabCount: tabs.count))
         .background {
-            pillShape
-                .fill(.ultraThinMaterial)
+            BuxGlassPillBackground(cornerRadius: BuxTabBarMetrics.cornerRadius)
         }
         .overlay {
-            pillShape
-                .stroke(
-                    colorScheme == .dark
-                        ? Color.clear
-                        : Color.black.opacity(BuxTabBarMetrics.lightModeOutlineOpacity),
-                    lineWidth: 1
-                )
+            if !settings.useGlassmorphism || colorScheme == .light {
+                pillShape
+                    .stroke(
+                        colorScheme == .dark
+                            ? Color.clear
+                            : Color.black.opacity(BuxTabBarMetrics.lightModeOutlineOpacity),
+                        lineWidth: 1
+                    )
+            }
         }
         .clipShape(pillShape)
-        .modifier(BuxTabBarPillShadow(colorScheme: colorScheme))
+        .modifier(BuxTabBarPillShadow(colorScheme: colorScheme, glassEnabled: settings.useGlassmorphism))
     }
 }
 
 private struct BuxTabBarPillShadow: ViewModifier {
     let colorScheme: ColorScheme
+    var glassEnabled: Bool
 
     func body(content: Content) -> some View {
-        if colorScheme == .dark {
+        if glassEnabled {
+            content
+        } else if colorScheme == .dark {
             content.shadow(color: .black.opacity(0.35), radius: 12, y: 4)
         } else {
             content

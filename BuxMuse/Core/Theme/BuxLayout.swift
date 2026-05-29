@@ -35,6 +35,7 @@ enum BuxLayout {
 
     /// Extra list top inset so large title + search drawer sit above scroll content (Studio invoices).
     static let invoicesNavChromeScrollInset: CGFloat = 16
+
     static let sheetBottomClearance: CGFloat = BuxTokens.sheetBottomClearance
 
     static func horizontalMargin(for width: CGFloat) -> CGFloat {
@@ -84,11 +85,20 @@ extension View {
 
     func buxListContentMargins() -> some View {
         modifier(BuxListContentMarginsModifier())
+            .buxTabBarScrollMinimizeTracking()
     }
 
     /// Same horizontal inset as Expenses list — use on Dashboard `ScrollView` and Expenses `List`.
     func buxScrollContentMargins() -> some View {
         buxListContentMargins()
+    }
+
+    /// Root tab scroll chrome — Studio, Home, Settings-style screens.
+    func buxRootTabScrollChrome() -> some View {
+        buxScrollContentMargins()
+            .buxReportsContainerWidth()
+            .buxCustomTabBarScrollClearance()
+            .buxTabBarScrollMinimizeTracking()
     }
 
     /// Adaptive horizontal margins — prefer on all root screens.

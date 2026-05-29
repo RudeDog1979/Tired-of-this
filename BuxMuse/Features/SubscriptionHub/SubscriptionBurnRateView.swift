@@ -22,7 +22,7 @@ struct SubscriptionBurnRateView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 6) {
-            SubscriptionHubSectionHeader(title: "SUBSCRIPTION BURN RATE")
+            SubscriptionHubSectionHeader(title: "Subscription burn rate")
 
             VStack(spacing: BuxLayout.section) {
                 HStack(alignment: .top) {

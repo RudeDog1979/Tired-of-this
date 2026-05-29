@@ -13,6 +13,7 @@ struct StudioSettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var appDataManager: AppDataManager
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @ObservedObject private var store = SettingsStore.shared
     @EnvironmentObject private var studioStore: StudioStore
 
@@ -27,6 +28,10 @@ struct StudioSettingsView: View {
         themeManager.screenBackground(for: colorScheme)
     }
 
+    private var studioToggleOn: Bool {
+        store.studioEnabled || navigationCoordinator.studioUnlockAwaitingCommit
+    }
+
     var body: some View {
         ZStack {
             bgColor.ignoresSafeArea()
@@ -37,20 +42,20 @@ struct StudioSettingsView: View {
                     Section {
                         Text("Studio adds invoices, mileage, receipts, and tax planning tools as an extra tab. Turn it on when you need it — your everyday Home and Expenses tabs stay the same.")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
                 Section("STUDIO") {
-                    Toggle(isOn: $store.studioEnabled) {
+                    Toggle(isOn: studioToggleBinding) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Show Studio Tab")
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("Invoices, expenses, tax tools, and client CRM")
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                     .padding(.vertical, 4)
@@ -91,7 +96,7 @@ struct StudioSettingsView: View {
                                 Spacer()
                                 Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.name) · \(appSettingsManager.selectedCurrency.id)")
                                     .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                                     .lineLimit(1)
                             }
                         }
@@ -110,7 +115,7 @@ struct StudioSettingsView: View {
                                 if studioStore.taxProfile.isTaxProfileConfigured {
                                     Text(studioStore.taxProfile.selectedTaxCountry ?? "Custom")
                                         .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(.gray)
+                                        .buxLabelSecondary()
                                 } else {
                                     Text("Not configured")
                                         .font(.system(size: 12, weight: .semibold))
@@ -134,17 +139,39 @@ struct StudioSettingsView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
+            .buxThemedFormStyle()
         }
         .navigationTitle("Studio")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { loadStudioProfile() }
-        .onChange(of: store.studioEnabled) { _, _ in store.save() }
+        .onChange(of: store.studioEnabled) { _, isEnabled in
+            if isEnabled {
+                loadStudioProfile()
+            } else {
+                store.save()
+            }
+        }
         .onChange(of: displayName) { _, _ in saveStudioProfile() }
         .onChange(of: businessName) { _, _ in saveStudioProfile() }
         .onChange(of: businessType) { _, _ in saveStudioProfile() }
         .onChange(of: paymentTerms) { _, _ in saveStudioProfile() }
         .onChange(of: hourlyRate) { _, _ in saveStudioProfile() }
+    }
+
+    private var studioToggleBinding: Binding<Bool> {
+        Binding(
+            get: { studioToggleOn },
+            set: { enabled in
+                if enabled {
+                    guard !store.studioEnabled else { return }
+                    navigationCoordinator.beginStudioUnlock()
+                } else {
+                    navigationCoordinator.cancelStudioUnlockIfPending()
+                    store.studioEnabled = false
+                    store.save()
+                }
+            }
+        )
     }
 
     private func loadStudioProfile() {

@@ -39,6 +39,7 @@ struct StudioClientsListView: View {
             NewClientSheet()
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .buxThemedSheetContent()
         }
     }
 
@@ -111,11 +112,11 @@ struct StudioClientsListView: View {
         VStack(spacing: BuxLayout.section) {
             Image(systemName: "person.3.fill")
                 .font(.system(size: 32))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             Text("No Clients registered yet")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             BuxButton(
                 title: "Add Client",
@@ -186,7 +187,7 @@ struct StudioClientDetailView: View {
             HStack {
                 Text("CLIENT HEALTH SCORE")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 
                 Spacer()
                 
@@ -204,7 +205,7 @@ struct StudioClientDetailView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Profitability")
                         .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     Text("\(Int(analysis.health.profitabilityScore))%")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -213,7 +214,7 @@ struct StudioClientDetailView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Payment Speed")
                         .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     Text("\(Int(analysis.averagePaymentDelay / 86400)) days")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -222,7 +223,7 @@ struct StudioClientDetailView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Stress Indicator")
                         .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .buxLabelSecondary()
                     Text(analysis.health.stressScore > 50 ? "High Risk" : "Normal")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(analysis.health.stressScore > 50 ? .orange : .green)
@@ -238,7 +239,7 @@ struct StudioClientDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("CONTACT DETAILS")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             VStack(alignment: .leading, spacing: 8) {
                 if !client.email.isEmpty {
@@ -254,7 +255,7 @@ struct StudioClientDetailView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Notes")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                         Text(client.notes)
                             .font(.system(size: 13))
                             .foregroundColor(colorScheme == .dark ? .white.opacity(0.8) : .black.opacity(0.8))
@@ -274,12 +275,12 @@ struct StudioClientDetailView: View {
         return VStack(alignment: .leading, spacing: 10) {
             Text("INVOICES")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             if clientInvoices.isEmpty {
                 Text("No invoices generated yet.")
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             } else {
                 ForEach(clientInvoices) { inv in
                     HStack {
@@ -289,7 +290,7 @@ struct StudioClientDetailView: View {
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text(formattedDate(inv.issueDate))
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                         Spacer()
                         Text(appSettingsManager.format(inv.total))
@@ -319,12 +320,12 @@ struct StudioClientDetailView: View {
         return VStack(alignment: .leading, spacing: 10) {
             Text("PROJECTS")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             if clientProjects.isEmpty {
                 Text("No projects logged yet.")
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             } else {
                 ForEach(clientProjects) { proj in
                     HStack {
@@ -334,13 +335,13 @@ struct StudioClientDetailView: View {
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text("\(proj.timeEntries.count) time entries logged")
                                 .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                         Spacer()
                         if let rate = proj.hourlyRate {
                             Text("\(appSettingsManager.format(rate))/hr")
                                 .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                     .padding(.vertical, 4)

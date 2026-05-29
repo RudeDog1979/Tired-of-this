@@ -123,6 +123,7 @@ struct StudioTaxReferenceView: View {
                 stagingPreset = preset
             }
             .environmentObject(themeManager)
+            .buxThemedSheetContent()
         }
         .sheet(item: $presetToReview) { preset in
             TaxPresetReviewSheet(preset: preset) {
@@ -132,6 +133,7 @@ struct StudioTaxReferenceView: View {
                 presetToReview = nil
             }
             .environmentObject(themeManager)
+            .buxThemedSheetContent()
         }
     }
 
@@ -175,7 +177,7 @@ struct StudioTaxReferenceView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Region & currency")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 Text("\(appSettingsManager.selectedCountry.name) · \(appSettingsManager.selectedCurrency.name) (\(appSettingsManager.selectedCurrency.id))")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -183,7 +185,7 @@ struct StudioTaxReferenceView: View {
             Spacer()
             Text("From Settings")
                 .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
         }
         .padding(BuxLayout.section)
         .referenceCard
@@ -193,7 +195,7 @@ struct StudioTaxReferenceView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("INDIRECT TAX STATUS")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .kerning(0.8)
 
             Toggle(isOn: $indirectTaxRegistered) {
@@ -204,7 +206,7 @@ struct StudioTaxReferenceView: View {
 
             Text("Label updates from your indirect tax rules above (VAT, GST, ITBIS, etc.).")
                 .font(.system(size: 11))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)
@@ -215,7 +217,7 @@ struct StudioTaxReferenceView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("TAX PAYMENT SCHEDULE")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .kerning(0.8)
 
             Picker("Payment schedule", selection: $paymentSchedule) {
@@ -234,7 +236,7 @@ struct StudioTaxReferenceView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("SUGGESTED TAX PRESET")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .kerning(0.8)
 
             Button {
@@ -245,7 +247,7 @@ struct StudioTaxReferenceView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Country preset")
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                         Text(savedCountryLabel)
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -277,7 +279,7 @@ struct StudioTaxReferenceView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("HOW YOU EARN")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .kerning(0.8)
 
             Picker("Income type", selection: $taxIncomeType) {
@@ -289,7 +291,7 @@ struct StudioTaxReferenceView: View {
 
             Text(taxIncomeType.summaryLabel)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)
@@ -301,7 +303,7 @@ struct StudioTaxReferenceView: View {
             ProgressView()
             Text("Loading country presets…")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)
@@ -312,7 +314,7 @@ struct StudioTaxReferenceView: View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
             Text("YOUR TAX RULES")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .kerning(0.8)
 
             editorField(title: "Income Tax", text: $customIncomeTax, minHeight: 100)
@@ -326,13 +328,13 @@ struct StudioTaxReferenceView: View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
             Text("EFFECTIVE TAX RATES (FOR CALCULATOR)")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
                 .kerning(0.8)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("INCOME TAX RATE %")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 TextField("e.g. 22", text: $estimatedIncomeRate)
                     .keyboardType(.decimalPad)
                     .padding(10)
@@ -346,7 +348,7 @@ struct StudioTaxReferenceView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("SELF-EMPLOYED TAX RATE %")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 TextField("e.g. 15.3", text: $estimatedSERate)
                     .keyboardType(.decimalPad)
                     .padding(10)
@@ -354,7 +356,7 @@ struct StudioTaxReferenceView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 Text("These rates power the Income Tax Calculator and quarterly estimates. They are never auto-filled from JSON presets.")
                     .font(.system(size: 11))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BuxLayout.section)
@@ -363,7 +365,7 @@ struct StudioTaxReferenceView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("INDIRECT TAX RATE % (VAT/GST)")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .buxLabelSecondary()
                 TextField("e.g. 20", text: $estimatedIndirectRate)
                     .keyboardType(.decimalPad)
                     .padding(10)
@@ -430,7 +432,7 @@ struct StudioTaxReferenceView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title.uppercased())
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             TextEditor(text: text)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -489,7 +491,7 @@ struct TaxPresetReviewSheet: View {
 
                         Text("This fills your tax rule text fields only — effective rate percentages stay under your control.")
                             .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
 
                         presetBlock("Income tax", preset.income_tax)
                         presetBlock("Self-employed tax", preset.self_employed_tax)
@@ -527,7 +529,7 @@ struct TaxPresetReviewSheet: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title.uppercased())
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             Text(text)
                 .font(.system(size: 13))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))

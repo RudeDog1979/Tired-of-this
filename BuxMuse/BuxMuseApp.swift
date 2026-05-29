@@ -4,7 +4,6 @@
 //
 
 import SwiftUI
-import Combine
 
 @main
 struct BuxMuseApp: App {
@@ -32,10 +31,8 @@ struct BuxMuseApp: App {
                 .environmentObject(container.appDataManager)
                 .task {
                     _ = await ExpenseRenewalReminderScheduler.requestAuthorizationIfNeeded()
-                    container.scheduleEngagementRefresh(forceTips: true)
-                }
-                .onReceive(Timer.publish(every: 12 * 60 * 60, on: .main, in: .common).autoconnect()) { _ in
                     container.scheduleEngagementRefresh()
+                    container.scheduleTipsRefresh()
                 }
                 .onOpenURL { url in
                     guard StudioTimerDeepLink.matches(url) else { return }

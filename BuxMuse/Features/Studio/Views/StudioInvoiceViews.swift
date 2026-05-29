@@ -59,6 +59,7 @@ struct StudioInvoicesListView: View {
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(store)
+                .buxThemedSheetContent()
         }
     }
 
@@ -178,11 +179,11 @@ struct StudioInvoicesListView: View {
         VStack(spacing: BuxLayout.section) {
             Image(systemName: "doc.text.fill")
                 .font(.system(size: 32))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             Text("No Invoices logged yet")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.gray)
+                .buxLabelSecondary()
             
             Button("Create Invoice") {
                 showEditor = true
@@ -406,7 +407,7 @@ struct StudioInvoiceDetailView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("CLIENT")
                                     .font(.system(size: 10, weight: .semibold))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                                 Text(client?.name ?? "Unknown Client")
                                     .font(.system(size: 14, weight: .bold))
                             }
@@ -414,7 +415,7 @@ struct StudioInvoiceDetailView: View {
                             VStack(alignment: .trailing, spacing: 4) {
                                 Text("TOTAL DUE")
                                     .font(.system(size: 10, weight: .semibold))
-                                    .foregroundColor(.gray)
+                                    .buxLabelSecondary()
                                 Text(appSettingsManager.format(invoice.total))
                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                                     .foregroundColor(themeManager.current.accentColor)
@@ -424,7 +425,7 @@ struct StudioInvoiceDetailView: View {
                         if let style = invoice.designerSnapshot?.templateConfig.style.rawValue {
                             Text("Template: \(style)")
                                 .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     }
                     .padding(BuxLayout.section)
@@ -475,6 +476,7 @@ struct StudioInvoiceDetailView: View {
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(store)
+                .buxThemedSheetContent()
         }
     }
 

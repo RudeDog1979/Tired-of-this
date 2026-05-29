@@ -11,12 +11,24 @@ extension BuxMuseBrain {
     // MARK: - Tips
 
     public func refreshTips(countryCode: String, force: Bool = false) async {
-        await tipsEngine.refreshIfNeeded(force: force)
+        let shouldFetch = tipsEngine.shouldFetchRemote(countryCode: countryCode, force: force)
+        if !shouldFetch {
+            let cachedTip = tipsEngine.dailyTip(for: countryCode)
+            guard cachedTip.id != dailyTipDisplay.id else { return }
+        }
+
+        let isNewDay = tipsEngine.isNewTipDaySinceLastFetch(countryCode: countryCode)
+        if shouldFetch {
+            await tipsEngine.refreshIfNeeded(countryCode: countryCode, force: force)
+        }
         let tip = tipsEngine.dailyTip(for: countryCode)
         dailyTipDisplay = tip
 
         let unseen = tipsEngine.isTipUnseen(for: countryCode)
         tipNeedsAttention = unseen
+        if unseen && isNewDay {
+            didPulseTipThisSession = false
+        }
         if unseen && !didPulseTipThisSession {
             tipPulseToken += 1
             didPulseTipThisSession = true
@@ -83,10 +95,8 @@ extension BuxMuseBrain {
         appSettings: AppSettingsManager,
         studioAlerts: [StudioAlertDisplay] = [],
         studioInvoices: [StudioInvoice] = [],
-        taxDeadlineDays: Int? = nil,
-        forceTips: Bool = false
+        taxDeadlineDays: Int? = nil
     ) async {
-        await refreshTips(countryCode: countryCode, force: forceTips)
         await refreshNotificationInbox(
             settings: settings,
             appSettings: appSettings,

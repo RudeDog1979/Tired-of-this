@@ -74,10 +74,9 @@ struct SettingsView: View {
 
                         Spacer(minLength: 80)
                     }
-                    .buxScreenContentMargins()
+                    .padding(.top, BuxTokens.tight)
                 }
-                .buxCustomTabBarScrollClearance()
-                .buxReportsContainerWidth()
+                .buxRootTabScrollChrome()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .navigationTitle("Settings")
@@ -403,7 +402,7 @@ struct CurrencyRegionPickerView: View {
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
+                            .buxLabelSecondary()
                     }
                 }
             }
@@ -423,7 +422,7 @@ struct CurrencyRegionPickerView: View {
                                 .foregroundColor(.gray.opacity(0.6))
                             Text("No currencies found")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .buxLabelSecondary()
                         }
                     } else {
                         ForEach(filteredCurrencies) { currency in

@@ -84,10 +84,10 @@ final class AppContainer: ObservableObject {
         wirePersistenceSideEffects()
         migrateLegacyFreelanceLocale()
         studioBrain.refreshAll()
-        scheduleEngagementRefresh(forceTips: true)
+        scheduleEngagementRefresh()
     }
 
-    func scheduleEngagementRefresh(forceTips: Bool = false) {
+    func scheduleEngagementRefresh() {
         Task { @MainActor in
             await brain.refreshEngagement(
                 countryCode: appSettingsManager.selectedCountry.id,
@@ -95,8 +95,17 @@ final class AppContainer: ObservableObject {
                 appSettings: appSettingsManager,
                 studioAlerts: studioBrain.hubDisplay.alerts,
                 studioInvoices: studioStore.invoices,
-                taxDeadlineDays: studioBrain.hubDisplay.taxSummary.taxDeadlineDays,
-                forceTips: forceTips
+                taxDeadlineDays: studioBrain.hubDisplay.taxSummary.taxDeadlineDays
+            )
+        }
+    }
+
+    /// Checks whether today's 6am tip window has opened and fetches if needed.
+    func scheduleTipsRefresh(force: Bool = false) {
+        Task { @MainActor in
+            await brain.refreshTips(
+                countryCode: appSettingsManager.selectedCountry.id,
+                force: force
             )
         }
     }
@@ -154,7 +163,8 @@ final class AppContainer: ObservableObject {
                     navigation: self.navigationCoordinator,
                     appSettings: self.appSettingsManager
                 )
-                self.scheduleEngagementRefresh(forceTips: true)
+                self.scheduleEngagementRefresh()
+                self.scheduleTipsRefresh()
             }
             .store(in: &cancellables)
 

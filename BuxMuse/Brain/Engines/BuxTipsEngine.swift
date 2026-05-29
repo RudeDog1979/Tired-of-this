@@ -9,12 +9,35 @@ import Foundation
 
 @MainActor
 final class BuxTipsEngine {
-    static let remoteURL = URL(string: "https://gist.githubusercontent.com/RudeDog1979/ed398f2397ca1a86ec6a53a1d72fb86a/raw/0d8f2c6e9d640c940bef37d963e792888ca03659/buxmuse_news.json")!
+    /// Always use `/raw/buxmuse_news.json` — never pin a gist revision SHA or updates never arrive.
+    static let remoteURL = URL(string: "https://gist.githubusercontent.com/RudeDog1979/ed398f2397ca1a86ec6a53a1d72fb86a/raw/buxmuse_news.json")!
 
-    private let cacheKey = "buxmuse.news.cache.v1"
-    private let lastFetchKey = "buxmuse.news.lastFetch"
+    /// Capital / primary zone per country when the device is outside that region.
+    private static let primaryTimeZoneByCountry: [String: String] = [
+        "AE": "Asia/Dubai", "AR": "America/Argentina/Buenos_Aires", "AT": "Europe/Vienna",
+        "AU": "Australia/Sydney", "BE": "Europe/Brussels", "BR": "America/Sao_Paulo",
+        "CA": "America/Toronto", "CH": "Europe/Zurich", "CL": "America/Santiago",
+        "CN": "Asia/Shanghai", "CO": "America/Bogota", "CZ": "Europe/Prague",
+        "DE": "Europe/Berlin", "DK": "Europe/Copenhagen", "DO": "America/Santo_Domingo",
+        "EG": "Africa/Cairo", "ES": "Europe/Madrid", "FI": "Europe/Helsinki",
+        "FR": "Europe/Paris", "GB": "Europe/London", "GR": "Europe/Athens",
+        "HK": "Asia/Hong_Kong", "HU": "Europe/Budapest", "ID": "Asia/Jakarta",
+        "IE": "Europe/Dublin", "IL": "Asia/Jerusalem", "IN": "Asia/Kolkata",
+        "IT": "Europe/Rome", "JP": "Asia/Tokyo", "KE": "Africa/Nairobi",
+        "KR": "Asia/Seoul", "MX": "America/Mexico_City", "MY": "Asia/Kuala_Lumpur",
+        "NG": "Africa/Lagos", "NL": "Europe/Amsterdam", "NO": "Europe/Oslo",
+        "NZ": "Pacific/Auckland", "PH": "Asia/Manila", "PL": "Europe/Warsaw",
+        "PT": "Europe/Lisbon", "RO": "Europe/Bucharest", "RU": "Europe/Moscow",
+        "SA": "Asia/Riyadh", "SE": "Europe/Stockholm", "SG": "Asia/Singapore",
+        "TH": "Asia/Bangkok", "TR": "Europe/Istanbul", "TW": "Asia/Taipei",
+        "UA": "Europe/Kyiv", "US": "America/New_York", "VN": "Asia/Ho_Chi_Minh",
+        "ZA": "Africa/Johannesburg"
+    ]
+
+    private let cacheKey = "buxmuse.news.cache.v2"
+    private let lastFetchTipDayKey = "buxmuse.news.lastFetchTipDay"
     private let seenTipKey = "buxmuse.news.seenTipId"
-    private let refreshInterval: TimeInterval = 12 * 60 * 60
+    private let dailyFetchHour = 6
 
     private var payload: BuxMuseNewsPayload?
     private var isFetching = false
@@ -23,10 +46,26 @@ final class BuxTipsEngine {
         payload = loadCachedPayload() ?? loadBundledPayload()
     }
 
-    func refreshIfNeeded(force: Bool = false) async {
+    /// True when a remote fetch is due for this tip-day (after 6am local, not yet fetched today).
+    func shouldFetchRemote(countryCode: String, force: Bool = false) -> Bool {
+        if force { return true }
+        let timeZone = regionalTimeZone(for: countryCode)
+        let now = Date()
+        let tipDay = currentTipDayKey(for: now, timeZone: timeZone)
+        let lastFetchTipDay = UserDefaults.standard.string(forKey: lastFetchTipDayKey)
+        let neverFetched = lastFetchTipDay == nil
+        let reachedFetchTime = hasReachedDailyFetchTime(for: now, timeZone: timeZone)
+        return (neverFetched && reachedFetchTime)
+            || (lastFetchTipDay != tipDay && reachedFetchTime)
+    }
+
+    /// Fetches remote tips at most once per tip-day, after 6:00 in the user's local timezone.
+    func refreshIfNeeded(countryCode: String, force: Bool = false) async {
         guard !isFetching else { return }
-        let lastFetch = UserDefaults.standard.object(forKey: lastFetchKey) as? Date ?? .distantPast
-        guard force || Date().timeIntervalSince(lastFetch) >= refreshInterval else { return }
+        guard shouldFetchRemote(countryCode: countryCode, force: force) else { return }
+
+        let timeZone = regionalTimeZone(for: countryCode)
+        let tipDay = currentTipDayKey(for: Date(), timeZone: timeZone)
 
         isFetching = true
         defer { isFetching = false }
@@ -36,12 +75,20 @@ final class BuxTipsEngine {
             let decoded = try JSONDecoder().decode(BuxMuseNewsPayload.self, from: data)
             payload = decoded
             UserDefaults.standard.set(data, forKey: cacheKey)
-            UserDefaults.standard.set(Date(), forKey: lastFetchKey)
+            UserDefaults.standard.set(tipDay, forKey: lastFetchTipDayKey)
         } catch {
             if payload == nil {
                 payload = loadBundledPayload()
             }
         }
+    }
+
+    /// True when a new 6am tip-day started since the last successful remote fetch.
+    func isNewTipDaySinceLastFetch(countryCode: String) -> Bool {
+        let timeZone = regionalTimeZone(for: countryCode)
+        let tipDay = currentTipDayKey(for: Date(), timeZone: timeZone)
+        let lastFetchTipDay = UserDefaults.standard.string(forKey: lastFetchTipDayKey)
+        return lastFetchTipDay != tipDay
     }
 
     func dailyTip(for countryCode: String) -> DailyTipDisplay {
@@ -51,13 +98,18 @@ final class BuxTipsEngine {
         let contentRegion = BuxNewsRegionMapper.contentRegion(for: userCountry, availableKeys: availableKeys)
         guard let region = payload.regions[contentRegion] ?? payload.regions["DEFAULT"] else { return .empty }
 
-        let dayKey = dayKeyString(for: Date())
-        let id = "\(userCountry)-\(contentRegion)-\(dayKey)"
+        let timeZone = regionalTimeZone(for: countryCode)
+        let now = Date()
+        let tipDay = currentTipDayKey(for: now, timeZone: timeZone)
+        let contentStamp = payload.updatedAt ?? tipDay
+        let id = "\(userCountry)-\(contentRegion)-\(contentStamp)"
 
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         formatter.locale = Locale(identifier: localeIdentifier(for: contentRegion))
+        formatter.timeZone = timeZone
+        let tipDayStart = tipDayStartDate(for: now, timeZone: timeZone)
 
         let moneyTip = DailyTipSection(
             kind: .moneyTip,
@@ -73,7 +125,7 @@ final class BuxTipsEngine {
             id: id,
             regionCode: userCountry,
             regionFlag: flag(for: userCountry),
-            dateLabel: formatter.string(from: Date()),
+            dateLabel: formatter.string(from: tipDayStart),
             contentRegion: contentRegion,
             watchOutHeader: BuxNewsRegionMapper.watchOutHeader(for: contentRegion),
             moneyTip: moneyTip,
@@ -92,6 +144,52 @@ final class BuxTipsEngine {
     }
 
     // MARK: - Private
+
+    /// Uses the device timezone when it matches the selected country; otherwise the country's primary zone.
+    private func regionalTimeZone(for countryCode: String) -> TimeZone {
+        let code = countryCode.uppercased()
+        if Locale.current.region?.identifier.uppercased() == code {
+            return TimeZone.current
+        }
+        if let id = Self.primaryTimeZoneByCountry[code],
+           let timeZone = TimeZone(identifier: id) {
+            return timeZone
+        }
+        return TimeZone.current
+    }
+
+    private func calendar(for timeZone: TimeZone) -> Calendar {
+        var calendar = Calendar.current
+        calendar.timeZone = timeZone
+        return calendar
+    }
+
+    /// Tip-day rolls at 6:00 local. Before 6am we still show the previous day's tip.
+    private func currentTipDayKey(for date: Date, timeZone: TimeZone) -> String {
+        let calendar = calendar(for: timeZone)
+        let hour = calendar.component(.hour, from: date)
+        let anchor = hour >= dailyFetchHour
+            ? date
+            : (calendar.date(byAdding: .day, value: -1, to: date) ?? date)
+        return dayKeyString(for: anchor, calendar: calendar)
+    }
+
+    private func hasReachedDailyFetchTime(for date: Date, timeZone: TimeZone) -> Bool {
+        calendar(for: timeZone).component(.hour, from: date) >= dailyFetchHour
+    }
+
+    private func tipDayStartDate(for date: Date, timeZone: TimeZone) -> Date {
+        let calendar = calendar(for: timeZone)
+        let tipDay = currentTipDayKey(for: date, timeZone: timeZone)
+        var components = DateComponents()
+        components.year = Int(tipDay.prefix(4))
+        components.month = Int(tipDay.dropFirst(5).prefix(2))
+        components.day = Int(tipDay.suffix(2))
+        components.hour = dailyFetchHour
+        components.minute = 0
+        components.second = 0
+        return calendar.date(from: components) ?? date
+    }
 
     private func flag(for countryCode: String) -> String {
         CountryCatalog.flagEmoji(for: countryCode)
@@ -123,10 +221,11 @@ final class BuxTipsEngine {
         }
     }
 
-    private func dayKeyString(for date: Date) -> String {
+    private func dayKeyString(for date: Date, calendar: Calendar) -> String {
         let f = DateFormatter()
-        f.calendar = Calendar.current
+        f.calendar = calendar
         f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = calendar.timeZone
         f.dateFormat = "yyyy-MM-dd"
         return f.string(from: date)
     }

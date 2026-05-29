@@ -13,9 +13,7 @@ struct NotesField: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Binding var notes: String
     
-    var cardColor: Color {
-        colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
-    }
+    private var cardColor: Color { themeManager.cardFill(for: colorScheme) }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

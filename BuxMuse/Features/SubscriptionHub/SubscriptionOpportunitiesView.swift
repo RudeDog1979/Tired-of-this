@@ -20,7 +20,7 @@ struct SubscriptionOpportunitiesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 6) {
-            SubscriptionHubSectionHeader(title: "SMART CANCELLATION OPPORTUNITIES")
+            SubscriptionHubSectionHeader(title: "Smart cancellation opportunities")
 
             if cachedOpportunities.isEmpty {
                 HStack(spacing: BuxLayout.section) {
