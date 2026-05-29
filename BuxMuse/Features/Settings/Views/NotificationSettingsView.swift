@@ -17,12 +17,8 @@ struct NotificationSettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                Section("SWITCHBOARD") {
+        Form {
+                Section("Switchboard") {
                     Toggle(isOn: $store.notificationsEnabled) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Enable Notifications")
@@ -37,14 +33,14 @@ struct NotificationSettingsView: View {
                 }
                 
                 if store.notificationsEnabled {
-                    Section("ALERTS & RADAR") {
+                    Section("Alerts & radar") {
                         Toggle("Budget Threshold Warnings", isOn: $store.budgetAlertsEnabled)
                         Toggle("Upcoming Bill Reminders", isOn: $store.billRemindersEnabled)
                         Toggle("Invoice Status Updates", isOn: $store.studioInvoiceRemindersEnabled)
                         Toggle("Estimated Tax Reminders", isOn: $store.taxDeadlineRemindersEnabled)
                     }
                     
-                    Section("DAILY DIGEST") {
+                    Section("Daily digest") {
                         Toggle(isOn: $store.dailySummaryEnabled) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Daily Financial Summary")
@@ -56,14 +52,13 @@ struct NotificationSettingsView: View {
                         }
                     }
                     
-                    Section("QUIET HOURS") {
+                    Section("Quiet hours") {
                         DatePicker("Silence Starts", selection: quietHoursStartBinding, displayedComponents: .hourAndMinute)
                         DatePicker("Silence Ends", selection: quietHoursEndBinding, displayedComponents: .hourAndMinute)
                     }
                 }
             }
             .buxThemedFormStyle()
-        }
         .navigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.notificationsEnabled) { _, _ in store.save() }

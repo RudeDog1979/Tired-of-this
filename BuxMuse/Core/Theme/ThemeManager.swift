@@ -496,20 +496,51 @@ public final class ThemeManager: ObservableObject {
         }
     }
     
-    /// Accent stroke for themed cards to retain contrast against the mesh
+    /// Hairline on white cards (light) or dark surfaces — visible on all themes / aurora canvas.
     func themedCardStroke(for colorScheme: ColorScheme) -> Color {
-        if colorScheme == .dark {
-            return .white.opacity(0.1)
-        } else {
-            return current.meshDarkPalette[0].opacity(0.15) // Deep theme color with low opacity for crisp edge
-        }
+        cardOutlineStroke(for: colorScheme, branded: true)
     }
 
-    /// Subtle gray stroke for hero card and category pill — light mode only.
+    /// Neutral card hairline — slightly softer when brand themes are off.
     func subtleCardStroke(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark
-            ? Color.clear
-            : Color.black.opacity(0.08)
+        cardOutlineStroke(for: colorScheme, branded: false)
+    }
+
+    /// Light native: no stroke (white on grouped grey). Light branded: faint hairline. Dark: unchanged.
+    func cardOutlineStroke(for colorScheme: ColorScheme, branded: Bool) -> Color {
+        if colorScheme == .dark {
+            return Color.white.opacity(branded ? 0.11 : 0.10)
+        }
+        guard branded else { return .clear }
+        return Color.black.opacity(0.07)
+    }
+
+    /// Elevation-aware chrome — native light = contrast only; branded light = hairline / hero shadow; dark unchanged.
+    func cardChrome(for elevation: BuxElevation, colorScheme: ColorScheme, branded: Bool) -> BuxCardChromeMetrics {
+        let hairline = cardOutlineStroke(for: colorScheme, branded: branded)
+
+        switch elevation {
+        case .flat:
+            return BuxCardChromeMetrics()
+        case .card:
+            return BuxCardChromeMetrics(
+                stroke: hairline,
+                strokeWidth: hairline == .clear ? 0 : 1,
+                shadowColor: .clear,
+                shadowRadius: 0,
+                shadowY: 0
+            )
+        case .hero:
+            let shadow = heroCardShadow(for: colorScheme)
+            let stroke: Color = colorScheme == .light ? .clear : hairline
+            return BuxCardChromeMetrics(
+                stroke: stroke,
+                strokeWidth: stroke == .clear ? 0 : 1,
+                shadowColor: shadow.color,
+                shadowRadius: shadow.radius,
+                shadowY: shadow.y
+            )
+        }
     }
 
     func pillInactiveLabelColor(for colorScheme: ColorScheme) -> Color {

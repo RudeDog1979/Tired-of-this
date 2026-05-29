@@ -89,3 +89,21 @@ public struct FinancialInsight: Identifiable, Codable, Equatable {
         self.createdAt = createdAt
     }
 }
+
+// MARK: - Display formatting (user currency, 2 decimal places)
+
+public enum InsightMoneyFormat {
+    public static var currencyCode: String { AppSettingsManager.preferredCurrencyCode }
+
+    public static func format(_ amount: Decimal, currencyCode: String? = nil) -> String {
+        let code = currencyCode ?? self.currencyCode
+        return AppSettingsManager.format(
+            amount: amount,
+            currency: AppSettingsManager.currencySetting(for: code)
+        )
+    }
+
+    public static func percentChange(from ratio: Decimal) -> Int {
+        Int((Double(truncating: (ratio - 1) as NSDecimalNumber)) * 100)
+    }
+}

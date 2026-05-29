@@ -291,10 +291,8 @@ struct DashboardView: View {
                                         VStack(alignment: .leading, spacing: 12) {
                                             HStack {
                                                 VStack(alignment: .leading, spacing: 4) {
-                                                    Text("ACTIVE BUDGET: \(budgetName.uppercased())")
-                                                        .font(.system(size: 11, weight: .bold))
-                                                        .foregroundColor(themeManager.current.accentColor)
-                                                        .kerning(1.1)
+                                                    Text("Active budget: \(budgetName)")
+                                                        .buxSectionLabelStyle(color: themeManager.current.accentColor)
                                                     
                                                     Text("\(appSettingsManager.format(remaining)) left of \(appSettingsManager.format(limit))")
                                                         .font(.system(size: 16, weight: .bold))
@@ -346,9 +344,7 @@ struct DashboardView: View {
                                                     .font(.system(size: 13, weight: .bold))
                                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                                 Spacer()
-                                                Image(systemName: "chevron.right")
-                                                    .font(.system(size: 12, weight: .bold))
-                                                    .foregroundColor(.gray)
+                                                BuxChevron()
                                             }
                                             
                                             Text("You have enabled \(settingsStore.budgetingMode.rawValue) budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.")
@@ -414,10 +410,9 @@ struct DashboardView: View {
                                             iconColor: themeManager.current.accentColor,
                                             includesDashboardChrome: false
                                         )
+                                        .dashboardPillCardLabel()
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
-                                    .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                    .dashboardThemedCardChrome(cornerRadius: 24)
                                     .buxDashboardCategoryCard(
                                         index: 0,
                                         direction: categorySlideDirection,
@@ -442,10 +437,9 @@ struct DashboardView: View {
                                             iconColor: themeManager.current.accentColor,
                                             includesDashboardChrome: false
                                         )
+                                        .dashboardPillCardLabel()
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
-                                    .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                    .dashboardThemedCardChrome(cornerRadius: 24)
                                     .buxDashboardCategoryCard(
                                         index: 1,
                                         direction: categorySlideDirection,
@@ -490,10 +484,9 @@ struct DashboardView: View {
                                                     accentColor: index == 0 ? themeManager.current.accentColor : Color.purple,
                                                     includesDashboardChrome: false
                                                 )
+                                                .dashboardPillCardLabel()
                                             }
                                             .buttonStyle(BuxDashboardCardButtonStyle())
-                                            .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                            .dashboardThemedCardChrome(cornerRadius: 24)
                                             .buxDashboardCategoryCard(
                                                 index: index,
                                                 direction: categorySlideDirection,
@@ -506,10 +499,8 @@ struct DashboardView: View {
                             } else if navigationCoordinator.activeCategoryPill == "Goals" {
                                 VStack(alignment: .leading, spacing: 16) {
                                     HStack {
-                                        Text("ACTIVE SAVINGS GOALS")
-                                            .font(.system(size: 11, weight: .bold))
-                                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                            .kerning(1.2)
+                                        Text("Active savings goals")
+                                            .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                                         
                                         Spacer()
                                         
@@ -569,10 +560,9 @@ struct DashboardView: View {
                                                             accentColor: accentColor,
                                                             includesDashboardChrome: false
                                                         )
+                                                        .dashboardPillCardLabel()
                                                     }
                                                     .buttonStyle(BuxDashboardCardButtonStyle())
-                                                    .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                                    .dashboardThemedCardChrome(cornerRadius: 24)
                                                     .buxDashboardCategoryCard(
                                                         index: index,
                                                         direction: categorySlideDirection,
@@ -583,8 +573,9 @@ struct DashboardView: View {
                                                     .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05 + Double(index) * 0.07), value: navigationCoordinator.isScreenLoaded)
                                                 }
                                             }
+                                            .padding(.horizontal, 2)
                                         }
-                                        
+
                                         Button(action: {
                                             if let firstGoal = goalsViewModel.goals.first {
                                                 goalsViewModel.selectGoal(firstGoal)
@@ -610,14 +601,12 @@ struct DashboardView: View {
                                                 
                                                 Spacer()
                                                 
-                                                Image(systemName: "chevron.right")
-                                                    .font(.system(size: 12, weight: .bold))
-                                                    .foregroundColor(.gray)
+                                                BuxChevron()
                                             }
                                             .padding(16)
+                                            .dashboardPillAuxCardLabel(cornerRadius: 16)
                                         }
                                         .buttonStyle(BuxDashboardCardButtonStyle())
-                                        .dashboardThemedCardChrome(cornerRadius: 16)
                                         .buxDashboardCategoryCard(
                                             index: 1,
                                             direction: categorySlideDirection,
@@ -630,13 +619,25 @@ struct DashboardView: View {
                                 let displayInsights = insightsViewModel.rankedInsights
                                 HStack(alignment: .top, spacing: BuxTokens.tight) {
                                     if displayInsights.isEmpty {
-                                        InsightCardView(
-                                            title: "Monthly Savings",
-                                            value: "+24.5%",
-                                            description: "Higher than last month",
-                                            accentColor: Color(red: 243/255, green: 156/255, blue: 18/255)
-                                        )
+                                        HStack {
+                                            Spacer()
+                                            VStack(spacing: 8) {
+                                                Image(systemName: "sparkles")
+                                                    .font(.system(size: 24))
+                                                    .foregroundColor(.gray)
+                                                Text("No insights yet.")
+                                                    .font(.system(size: 13, weight: .medium))
+                                                    .foregroundColor(.gray)
+                                                Text("Add expenses to unlock spending insights.")
+                                                    .font(.system(size: 11, weight: .medium))
+                                                    .foregroundColor(.gray.opacity(0.85))
+                                                    .multilineTextAlignment(.center)
+                                            }
+                                            Spacer()
+                                        }
+                                        .padding(.vertical, 32)
                                         .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
+                                        .dashboardThemedCardChrome(cornerRadius: 24)
                                         .buxDashboardCategoryCard(
                                             index: 0,
                                             direction: categorySlideDirection,
@@ -645,26 +646,6 @@ struct DashboardView: View {
                                         .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
                                         .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                                         .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05), value: navigationCoordinator.isScreenLoaded)
-                                        
-                                        InsightCardView(
-                                            title: "Spend Velocity",
-                                            value: "Low Risk",
-                                            description: "Within optimal limits",
-                                            accentColor: Color(red: 155/255, green: 89/255, blue: 182/255)
-                                        )
-                                        .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                        .buxDashboardCategoryCard(
-                                            index: 1,
-                                            direction: categorySlideDirection,
-                                            motionToken: categoryMotionToken
-                                        )
-                                        .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
-                                        .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                        .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.12), value: navigationCoordinator.isScreenLoaded)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            navigationCoordinator.selectedCryptoCard = "Bitcoin"
-                                        }
                                     } else {
                                         ForEach(Array(displayInsights.prefix(2).enumerated()), id: \.element.id) { index, insight in
                                             let accentColor: Color = {
@@ -688,10 +669,9 @@ struct DashboardView: View {
                                                     accentColor: accentColor,
                                                     includesDashboardChrome: false
                                                 )
+                                                .dashboardPillCardLabel()
                                             }
                                             .buttonStyle(BuxDashboardCardButtonStyle())
-                                            .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                            .dashboardThemedCardChrome(cornerRadius: 24)
                                             .buxDashboardCategoryCard(
                                                 index: index,
                                                 direction: categorySlideDirection,
@@ -707,7 +687,6 @@ struct DashboardView: View {
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .clipped()
                         .id(navigationCoordinator.activeCategoryPill)
                         .animation(.buxCategorySpring, value: navigationCoordinator.activeCategoryPill)
                         .onChange(of: navigationCoordinator.activeCategoryPill) { oldValue, newValue in
@@ -734,6 +713,7 @@ struct DashboardView: View {
                     .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 30)
                     .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                     .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.24), value: navigationCoordinator.isScreenLoaded)
+                    .animation(nil, value: navigationCoordinator.activeCategoryPill)
 
                     Spacer().frame(height: BuxTokens.tight)
                 }
@@ -823,17 +803,12 @@ struct DashboardView: View {
                 .zIndex(20)
             }
         }
-        .navigationTitle("Home")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                BuxNavIconButton(
-                    systemName: "bell",
-                    accessibilityLabel: "Notifications",
-                    useAccent: true,
-                    action: { activeSheet = .notificationInbox }
-                )
+                BuxToolbarBellButton(action: { activeSheet = .notificationInbox })
+                    .badge(brain.notificationInboxDisplay.unreadCount)
             }
         }
         .sheet(item: $activeSheet) { sheet in
@@ -1013,10 +988,8 @@ struct FabSubmenuDivider: View {
     var body: some View {
         HStack(spacing: 12) {
             Spacer()
-            Text(title.uppercased())
-                .font(.system(size: 10, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.45) : .gray)
-                .kerning(1.2)
+            Text(title)
+                .buxSectionLabelStyle(color: colorScheme == .dark ? .white.opacity(0.45) : .gray)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.04))

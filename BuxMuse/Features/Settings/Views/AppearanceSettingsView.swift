@@ -22,20 +22,13 @@ struct AppearanceSettingsView: View {
     ]
     
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxThemedBackdrop()
-
-            ScrollView(showsIndicators: false) {
+        ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
 
                     if store.brandThemesEnabled {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("BRAND DESIGN PRESETS")
-                                .font(.system(size: 11, weight: .bold))
-                                .buxLabelSecondary()
+                            BuxSectionHeader(title: "Brand design presets")
                                 .padding(.horizontal, 20)
-                                .kerning(1.2)
 
                             LazyVGrid(columns: columns, spacing: 16) {
                                 ForEach(AppTheme.all) { theme in
@@ -53,11 +46,8 @@ struct AppearanceSettingsView: View {
 
                     // UI Preference Rules
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("USER INTERFACE RULES")
-                            .font(.system(size: 11, weight: .bold))
-                            .buxLabelSecondary()
+                        BuxSectionHeader(title: "Interface")
                             .padding(.horizontal, 20)
-                            .kerning(1.2)
                         
                         VStack(spacing: 0) {
                             Toggle(isOn: $store.brandThemesEnabled) {
@@ -128,7 +118,8 @@ struct AppearanceSettingsView: View {
                     }
                 }
             }
-        }
+            .buxScrollContentMargins()
+            .buxSoftScrollChrome()
         .navigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

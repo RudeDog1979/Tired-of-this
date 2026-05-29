@@ -326,6 +326,7 @@ struct InvoiceDesignerHubView: View {
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
+                            .tint(BuxSwipeActionTint.delete)
                         }
                     }
 
@@ -801,7 +802,7 @@ struct InvoiceDesignerHubView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { showNotesEditor = false }
+                    BuxToolbarDoneButton { showNotesEditor = false }
                 }
             }
         }
@@ -820,10 +821,13 @@ struct InvoiceDesignerHubView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { showAddItemSheet = false }
+                    BuxToolbarCancelButton { showAddItemSheet = false }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: "Add",
+                        isEnabled: !newItemDesc.isEmpty && !newItemPrice.isEmpty
+                    ) {
                         let qty = Double(newItemQty) ?? 1
                         let price = Decimal(string: newItemPrice) ?? 0
                         lineItems.append(
@@ -834,8 +838,6 @@ struct InvoiceDesignerHubView: View {
                         newItemQty = "1.0"
                         newItemPrice = ""
                     }
-                    .fontWeight(.semibold)
-                    .disabled(newItemDesc.isEmpty || newItemPrice.isEmpty)
                 }
             }
         }
@@ -857,7 +859,7 @@ struct InvoiceDesignerHubView: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
-            Button("Cancel", role: .cancel) { dismiss() }
+            BuxToolbarCancelButton { dismiss() }
         }
         ToolbarItem(placement: .confirmationAction) {
             BuxToolbarSaveButton(isDirty: canSave) {
@@ -1087,15 +1089,16 @@ private struct AddTaxRateSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: "Add",
+                        isEnabled: !label.isEmpty && (Decimal(string: percentage) ?? 0) > 0
+                    ) {
                         guard let pct = Decimal(string: percentage), pct > 0, !label.isEmpty else { return }
                         onAdd(InvoiceTaxRate(label: label, percentage: pct, isCompounding: compounding))
                     }
-                    .fontWeight(.semibold)
-                    .disabled(label.isEmpty || (Decimal(string: percentage) ?? 0) <= 0)
                 }
             }
         }

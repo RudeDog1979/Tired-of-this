@@ -85,33 +85,33 @@ extension View {
         modifier(BuxRootBrandThemeModifier())
     }
 
-    /// Sheets / covers: inherit brand tint + semantics (background unchanged).
+    /// Sheets / covers: accent tint on controls only — system backgrounds (HIG).
     func buxThemedPresentation() -> some View {
         buxRootBrandTheme()
     }
 
-    /// Full themed modal stack: tint + mesh backdrop behind content.
+    /// Task sheets: brand accent on toggles/buttons; no aurora or mesh backdrop.
     func buxThemedSheetContent() -> some View {
-        modifier(BuxThemedSheetContentModifier())
+        buxThemedPresentation()
+    }
+
+    /// Detail / hub sheets — mesh shows through the sheet chrome.
+    func buxMeshSheetPresentation() -> some View {
+        modifier(BuxMeshSheetPresentationModifier())
     }
 }
 
-// MARK: - Sheet mesh backdrop
-
-private struct BuxThemedSheetContentModifier: ViewModifier {
+private struct BuxMeshSheetPresentationModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
 
     func body(content: Content) -> some View {
-        content
-            .buxThemedPresentation()
-            .background {
-                ZStack {
-                    themeManager.screenBackground(for: colorScheme)
-                    BuxHeroMeshBackground()
-                }
-                .ignoresSafeArea()
+        content.presentationBackground {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
+                BuxHeroMeshBackground()
             }
+        }
     }
 }
 
@@ -130,6 +130,20 @@ extension View {
 
     func buxChevronMuted() -> some View {
         modifier(BuxSemanticForegroundModifier(\.chevronMuted))
+    }
+}
+
+// MARK: - Chevron (Settings / navigation rows)
+
+struct BuxChevron: View {
+    enum Direction { case left, right }
+
+    var direction: Direction = .right
+
+    var body: some View {
+        Image(systemName: direction == .left ? "chevron.left" : "chevron.right")
+            .font(.system(size: 12, weight: .semibold))
+            .buxChevronMuted()
     }
 }
 

@@ -358,7 +358,7 @@ struct NewClientSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     BuxToolbarSaveButton(isDirty: !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {

@@ -28,45 +28,23 @@ struct InsightDetailView: View {
     }
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
+        BuxDetailOverlayScaffold(title: "Insight Deep Dive") {
+            withAnimation(.buxBounce) { isPresented = false }
+        } content: {
+            mainInsightCard
+            dataMetricsSection
 
-            BuxHeroMeshBackground()
-
-            Color.black.opacity(colorScheme == .dark ? 0.55 : 0.35)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.buxBounce) { isPresented = false }
-                }
-
-            VStack(spacing: 0) {
-                BuxOverlayHeader(title: "Insight Deep Dive") {
-                    withAnimation(.buxBounce) { isPresented = false }
-                }
-
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: BuxLayout.section) {
-                        mainInsightCard
-                        dataMetricsSection
-
-                        if insight.impactMonthly > 0 || insight.impactYearly > 0 {
-                            impactSection
-                        }
-
-                        if insight.affectedGoalName != nil {
-                            goalAccelerationSection
-                        }
-
-                        suggestedActionsSection
-                    }
-                    .padding(.vertical, BuxLayout.section)
-                    .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
-                    .buxScreenContentMargins()
-                }
-                .buxReportsContainerWidth()
+            if insight.impactMonthly > 0 || insight.impactYearly > 0 {
+                impactSection
             }
+
+            if insight.affectedGoalName != nil {
+                goalAccelerationSection
+            }
+
+            suggestedActionsSection
         }
+        .environment(\.dashboardEnhancedTint, true)
         .buxThemedPresentation()
     }
 
@@ -111,9 +89,8 @@ struct InsightDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(BuxDetailStyle.cardPadding)
         .frame(maxWidth: .infinity)
-        .buxDetailCard()
+        .buxDetailSectionCard()
     }
 
     // MARK: - Data metrics
@@ -142,9 +119,7 @@ struct InsightDetailView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
-            .padding(BuxDetailStyle.cardPadding)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .buxDetailCard(cornerRadius: BuxDetailStyle.rowCardRadius)
+            .buxDetailRowCard()
         }
     }
 
@@ -156,7 +131,7 @@ struct InsightDetailView: View {
 
             HStack(alignment: .top, spacing: BuxLayout.section) {
                 impactCard(label: "Monthly", value: appSettingsManager.format(insight.impactMonthly))
-                impactCard(label: "Yearly", value: appSettingsManager.format(insight.impactMonthly * 12))
+                impactCard(label: "Yearly", value: appSettingsManager.format(insight.impactYearly > 0 ? insight.impactYearly : insight.impactMonthly * 12))
             }
         }
     }
@@ -175,9 +150,8 @@ struct InsightDetailView: View {
 
             Spacer(minLength: 0)
         }
-        .padding(BuxDetailStyle.cardPadding)
-        .frame(maxWidth: .infinity, minHeight: BuxDetailStyle.pairedCardMinHeight, alignment: .topLeading)
-        .buxDetailCard(cornerRadius: BuxDetailStyle.rowCardRadius)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .buxDetailRowCard(minHeight: BuxDetailStyle.pairedCardMinHeight)
     }
 
     // MARK: - Goal acceleration
@@ -212,9 +186,7 @@ struct InsightDetailView: View {
 
                     Spacer(minLength: 0)
                 }
-                .padding(BuxDetailStyle.cardPadding)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .buxDetailCard(cornerRadius: BuxDetailStyle.rowCardRadius)
+                .buxDetailRowCard()
             }
         }
     }
@@ -241,9 +213,7 @@ struct InsightDetailView: View {
 
                         Spacer(minLength: 0)
                     }
-                    .padding(BuxDetailStyle.cardPadding)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .buxDetailCard(cornerRadius: BuxDetailStyle.rowCardRadius)
+                    .buxDetailRowCard()
                 }
             }
         }

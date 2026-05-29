@@ -29,11 +29,11 @@ struct StudioProjectsListView: View {
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showCreateProject = true }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
-                }
+                BuxToolbarButton(
+                    systemName: "plus",
+                    accessibilityLabel: "Create project",
+                    action: { showCreateProject = true }
+                )
             }
         }
         .sheet(isPresented: $showCreateProject) {
@@ -416,7 +416,7 @@ struct ActiveTimeTrackerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
+                    BuxToolbarCancelButton {
                         dismissNotesKeyboard()
                         syncDraftToController()
                         dismiss()
@@ -958,7 +958,7 @@ struct NewProjectSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     BuxToolbarSaveButton(isDirty: !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {

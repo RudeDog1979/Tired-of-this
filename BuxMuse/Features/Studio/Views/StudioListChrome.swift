@@ -40,8 +40,7 @@ struct StudioThemedListBackdrop<Content: View>: View {
             content()
         }
         .environment(\.studioEnhancedTint, true)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .containerBackground(themeManager.screenBackground(for: colorScheme), for: .navigation)
+        .buxDetailNavigationChrome()
     }
 }
 
@@ -53,6 +52,7 @@ extension View {
             .buxListContentMargins()
             .buxCustomTabBarScrollClearance()
             .buxStableNavigationBarWithKeyboard()
+            .buxSoftScrollChrome()
     }
 
     func studioThemedListRowChrome() -> some View {
@@ -89,19 +89,8 @@ private struct StudioHubEmbeddedHorizontalPaddingModifier: ViewModifier {
 // MARK: - Liquid glass section menu (Tax — matches Invoices chrome, no search field)
 
 struct StudioGlassCapsuleBackground: View {
-    @Environment(\.colorScheme) private var colorScheme
-
     var body: some View {
-        Capsule(style: .continuous)
-            .fill(.ultraThinMaterial)
-            .overlay {
-                Capsule(style: .continuous)
-                    .strokeBorder(
-                        Color.white.opacity(colorScheme == .dark ? 0.14 : 0.38),
-                        lineWidth: 0.5
-                    )
-            }
-            .shadow(color: .black.opacity(colorScheme == .dark ? 0.22 : 0.07), radius: 10, y: 4)
+        BuxGlassCapsuleBackground()
     }
 }
 

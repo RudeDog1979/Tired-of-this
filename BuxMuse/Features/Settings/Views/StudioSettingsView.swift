@@ -33,11 +33,7 @@ struct StudioSettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
+        Form {
                 if !store.studioEnabled {
                     Section {
                         Text("Studio adds invoices, mileage, receipts, and tax planning tools as an extra tab. Turn it on when you need it — your everyday Home and Expenses tabs stay the same.")
@@ -47,7 +43,7 @@ struct StudioSettingsView: View {
                     }
                 }
 
-                Section("STUDIO") {
+                Section("Studio") {
                     Toggle(isOn: studioToggleBinding) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Show Studio Tab")
@@ -62,7 +58,7 @@ struct StudioSettingsView: View {
                 }
 
                 if store.studioEnabled {
-                    Section("BUSINESS PROFILE") {
+                    Section("Business profile") {
                         PhotoPickCropRow(
                             title: "Company Logo",
                             subtitle: "Shown on exported invoice PDFs",
@@ -86,7 +82,7 @@ struct StudioSettingsView: View {
                         }
                     }
 
-                    Section("GLOBAL LOCALE") {
+                    Section("Global locale") {
                         NavigationLink {
                             RegionCurrencySettingsView()
                         } label: {
@@ -125,7 +121,7 @@ struct StudioSettingsView: View {
                         }
                     }
 
-                    Section("INVOICING DEFAULTS") {
+                    Section("Invoicing defaults") {
                         Stepper("Payment Terms: \(paymentTerms) Days", value: $paymentTerms, in: 0...120, step: 1)
 
                         HStack {
@@ -140,7 +136,6 @@ struct StudioSettingsView: View {
                 }
             }
             .buxThemedFormStyle()
-        }
         .navigationTitle("Studio")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { loadStudioProfile() }

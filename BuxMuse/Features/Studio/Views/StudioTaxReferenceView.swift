@@ -52,6 +52,16 @@ struct StudioTaxReferenceView: View {
         return selectedPresetCode
     }
 
+    private var savedPresetSummary: String? {
+        guard !selectedPresetCode.isEmpty,
+              let preset = TaxPresetLoader.preset(for: selectedPresetCode) else { return nil }
+        return preset.presetLineSummary
+    }
+
+    private var catalogUpdatedLabel: String? {
+        appDataManager.taxManagerRef.catalogUpdatedAt.map { "Reference updated \($0)" }
+    }
+
     private var currentDraft: TaxProfileDraft {
         TaxProfileDraft(
             selectedPresetCode: selectedPresetCode,
@@ -111,7 +121,7 @@ struct StudioTaxReferenceView: View {
             taxStudioProfileSaveBridge?.setDirty(dirty)
         }
         .task {
-            TaxPresetLoader.ensureCatalogLoaded()
+            await TaxPresetLoader.ensureCatalogLoaded()
             catalogReady = true
         }
         .sheet(isPresented: $showCountryPicker, onDismiss: {
@@ -252,6 +262,18 @@ struct StudioTaxReferenceView: View {
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .multilineTextAlignment(.leading)
+                        if let savedPresetSummary {
+                            Text(savedPresetSummary)
+                                .font(.system(size: 11, weight: .medium))
+                                .buxLabelSecondary()
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(3)
+                        }
+                        if let catalogUpdatedLabel {
+                            Text(catalogUpdatedLabel)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(themeManager.current.accentColor.opacity(0.85))
+                        }
                     }
                     Spacer()
                     Image(systemName: "chevron.down")
@@ -509,17 +531,16 @@ struct TaxPresetReviewSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    BuxToolbarCancelButton {
                         onCancel()
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Apply") {
+                    BuxToolbarConfirmButton(accessibilityLabel: "Apply") {
                         onConfirm()
                         dismiss()
                     }
-                    .fontWeight(.semibold)
                 }
             }
         }

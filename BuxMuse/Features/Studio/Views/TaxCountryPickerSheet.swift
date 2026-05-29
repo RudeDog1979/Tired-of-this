@@ -39,12 +39,19 @@ struct TaxCountryPickerSheet: View {
                     .padding(.horizontal, BuxLayout.marginHorizontal)
                     .padding(.vertical, 10)
 
-                    Text("\(filteredCountries.count) countries")
-                        .font(.system(size: 11, weight: .semibold))
-                        .buxLabelSecondary()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, BuxLayout.marginHorizontal)
-                        .padding(.bottom, 6)
+                    HStack {
+                        Text("\(filteredCountries.count) countries")
+                            .font(.system(size: 11, weight: .semibold))
+                            .buxLabelSecondary()
+                        Spacer()
+                        if let updated = taxManager.catalogUpdatedAt {
+                            Text("Updated \(updated)")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(themeManager.current.accentColor.opacity(0.85))
+                        }
+                    }
+                    .padding(.horizontal, BuxLayout.marginHorizontal)
+                    .padding(.bottom, 6)
 
                     if filteredCountries.isEmpty {
                         VStack(spacing: 12) {
@@ -99,6 +106,11 @@ struct TaxCountryPickerSheet: View {
                                         }
                                         .font(.system(size: 11, weight: .medium))
                                         .buxLabelSecondary()
+                                        Text(country.presetLineSummary)
+                                            .font(.system(size: 11, weight: .medium))
+                                            .buxLabelSecondary()
+                                            .multilineTextAlignment(.leading)
+                                            .lineLimit(2)
                                     }
                                     .padding(.vertical, 4)
                                 }
@@ -114,8 +126,11 @@ struct TaxCountryPickerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
+            }
+            .task {
+                await TaxPresetLoader.ensureCatalogLoaded()
             }
         }
     }

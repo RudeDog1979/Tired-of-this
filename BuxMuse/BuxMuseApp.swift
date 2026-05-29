@@ -33,6 +33,7 @@ struct BuxMuseApp: App {
                     _ = await ExpenseRenewalReminderScheduler.requestAuthorizationIfNeeded()
                     container.scheduleEngagementRefresh()
                     container.scheduleTipsRefresh()
+                    container.scheduleTaxCatalogRefresh()
                 }
                 .onOpenURL { url in
                     guard StudioTimerDeepLink.matches(url) else { return }

@@ -168,7 +168,7 @@ struct StudioExpenseEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     BuxToolbarSaveButton(isDirty: hasUnsavedChanges) {

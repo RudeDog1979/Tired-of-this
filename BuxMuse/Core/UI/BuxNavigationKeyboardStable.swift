@@ -13,10 +13,7 @@ import UIKit
 
 struct BuxNavigationKeyboardStableModifier: ViewModifier {
     func body(content: Content) -> some View {
-        content
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
-            .background(BuxNavigationKeyboardAnchorRepresentable())
+        content.background(BuxNavigationKeyboardAnchorRepresentable())
     }
 }
 

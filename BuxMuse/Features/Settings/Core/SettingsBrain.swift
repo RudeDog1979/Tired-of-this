@@ -102,7 +102,7 @@ public final class SettingsBrain {
         )
         
         let generalSection = SettingsSectionDisplay(
-            title: "GENERAL",
+            title: "General",
             rows: [profileRow, appearanceRow, regionRow]
         )
         
@@ -158,7 +158,7 @@ public final class SettingsBrain {
         )
         
         let rulesSection = SettingsSectionDisplay(
-            title: "BUX RULES",
+            title: "Finance & Studio",
             rows: [budgetRow, studioRow, invoicePaymentRow, mileageRow]
         )
         
@@ -183,7 +183,7 @@ public final class SettingsBrain {
         )
         
         let securitySection = SettingsSectionDisplay(
-            title: "SECURITY & NOTIFICATIONS",
+            title: "Security & Notifications",
             rows: [notifyRow, securityRow]
         )
         
@@ -206,7 +206,7 @@ public final class SettingsBrain {
         )
         
         let dataSection = SettingsSectionDisplay(
-            title: "SYSTEM & PRIVACY",
+            title: "System & Privacy",
             rows: [dataRow, aboutRow]
         )
         

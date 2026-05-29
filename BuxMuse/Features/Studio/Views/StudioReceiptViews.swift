@@ -36,9 +36,7 @@ struct StudioReceiptsListView: View {
                     Button("Log expense") { showExpenseEditor = true }
                     Button("Scan receipt") { showScanner = true }
                 } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                    BuxToolbarIcon(systemName: "plus")
                 }
             }
         }
@@ -339,7 +337,7 @@ struct StudioReceiptScannerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 if showFields {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -348,6 +346,7 @@ struct StudioReceiptScannerView: View {
                             dismiss()
                         }
                         .disabled(merchant.isEmpty || amount.isEmpty)
+                        .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
                     }
                 }
             }
@@ -534,6 +533,7 @@ struct StudioReceiptDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") { showEdit = true }
+                    .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
             }
         }
         .sheet(isPresented: $showEdit) {

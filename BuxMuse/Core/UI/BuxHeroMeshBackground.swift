@@ -2,9 +2,8 @@
 //  BuxHeroMeshBackground.swift
 //  BuxMuse
 //
-//  A high-performance, static MeshGradient background for Hero Cards.
-//  Uses the current theme's 9-color mesh palette to create a lush, painted look.
-//  Static grid points ensure 0 CPU overhead when idle.
+//  Theme-based aurora wash — 2-color diagonal gradient from hero palette.
+//  Card tints (DashboardThemeTint) and brand settings are unchanged.
 //
 
 import SwiftUI
@@ -24,44 +23,37 @@ struct BuxHeroMeshBackground: View {
     @EnvironmentObject var themeManager: ThemeManager
     @ObservedObject private var settings = SettingsStore.shared
 
-    // Static 3x3 grid points for zero-overhead rendering
-    private let meshPoints: [SIMD2<Float>] = [
-        [0.0, 0.0], [0.5, 0.0], [1.0, 0.0],
-        [0.0, 0.5], [0.5, 0.5], [1.0, 0.5],
-        [0.0, 1.0], [0.5, 1.0], [1.0, 1.0]
-    ]
-
     var body: some View {
         if settings.brandThemesEnabled {
-            meshGradient
+            auroraWash
         }
     }
 
     @ViewBuilder
-    private var meshGradient: some View {
-        let palette = colorScheme == .dark
-            ? themeManager.current.meshDarkPalette
-            : themeManager.current.meshLightPalette
+    private var auroraWash: some View {
+        let pair = colorScheme == .dark
+            ? themeManager.current.heroDarkGradient
+            : themeManager.current.heroLightGradient
 
-        Group {
-            if #available(iOS 18.0, *) {
-                MeshGradient(
-                    width: 3,
-                    height: 3,
-                    points: meshPoints,
-                    colors: palette
-                )
-            } else {
-                LinearGradient(
-                    colors: [palette[0], palette[4], palette[8]],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            }
-        }
+        let lead = pair.first ?? themeManager.current.accentColor
+        let trail = pair.dropFirst().first ?? themeManager.current.glowColor
+
+        let leadOpacity = colorScheme == .dark ? 0.40 : 0.26
+        let trailOpacity = colorScheme == .dark ? 0.22 : 0.13
+
+        LinearGradient(
+            colors: [
+                lead.opacity(leadOpacity),
+                trail.opacity(trailOpacity)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .allowsHitTesting(false)
         .mask {
             LinearGradient(
-                colors: [.black, .black.opacity(0.8), .clear],
+                colors: [.black, .black.opacity(0.75), .clear],
                 startPoint: .top,
                 endPoint: .bottom
             )

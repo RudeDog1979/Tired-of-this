@@ -88,6 +88,7 @@ struct TaxStudioHubView: View {
         .onAppear {
             selectedTab = initialTab
             studioBrain.refreshTaxStudio()
+            Task { await TaxManager.shared.ensureCatalogLoaded() }
         }
     }
 

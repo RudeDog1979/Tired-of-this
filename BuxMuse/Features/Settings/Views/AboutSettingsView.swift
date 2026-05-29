@@ -17,11 +17,7 @@ struct AboutSettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            ScrollView(showsIndicators: false) {
+        ScrollView(showsIndicators: false) {
                 VStack(spacing: BuxTokens.block) {
                     
                     // Brand Header
@@ -53,11 +49,8 @@ struct AboutSettingsView: View {
                     
                     // Privacy Manifesto
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("PRIVACY MANIFESTO")
-                            .font(.system(size: 11, weight: .bold))
-                            .buxLabelSecondary()
+                        BuxSectionHeader(title: "Privacy")
                             .padding(.horizontal, 20)
-                            .kerning(1.2)
                         
                         VStack(alignment: .leading, spacing: 10) {
                             HStack(alignment: .top, spacing: 10) {
@@ -85,11 +78,8 @@ struct AboutSettingsView: View {
                     
                     // Advanced Developer Diagnostics
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("ADVANCED DIAGNOSTICS")
-                            .font(.system(size: 11, weight: .bold))
-                            .buxLabelSecondary()
+                        BuxSectionHeader(title: "Advanced diagnostics")
                             .padding(.horizontal, 20)
-                            .kerning(1.2)
                         
                         VStack(spacing: 0) {
                             Toggle("Enable Debug Diagnostics Overlay", isOn: $store.enableDebugOverlay)
@@ -108,7 +98,8 @@ struct AboutSettingsView: View {
                 }
                 .padding(.bottom, 40)
             }
-        }
+            .buxScrollContentMargins()
+            .buxSoftScrollChrome()
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.enableDebugOverlay) { _, _ in store.save() }

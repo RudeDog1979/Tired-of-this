@@ -35,9 +35,7 @@ struct SubscriptionHubSectionHeader: View {
 
     var body: some View {
         Text(title)
-            .font(.system(size: 11, weight: .bold))
-            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-            .kerning(1.2)
+            .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -45,13 +43,11 @@ struct SubscriptionHubSectionHeader: View {
 // MARK: - Card chrome
 
 struct SubscriptionHubCardSurface: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject private var themeManager: ThemeManager
     var cornerRadius: CGFloat = SubscriptionHubStyle.cardRadius
 
     func body(content: Content) -> some View {
         content
-            .buxThemedCardChrome(cornerRadius: cornerRadius)
+            .dashboardThemedCardChrome(cornerRadius: cornerRadius)
     }
 }
 

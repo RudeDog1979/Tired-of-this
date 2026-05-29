@@ -13,11 +13,7 @@ struct InvoicePaymentSettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
+        Form {
                 Section {
                     Toggle("Auto-detect bank account type", isOn: $store.autoDetectInvoiceBankAccountType)
                         .tint(themeManager.current.accentColor)
@@ -37,7 +33,6 @@ struct InvoicePaymentSettingsView: View {
                 }
             }
             .buxThemedFormStyle()
-        }
         .navigationTitle("Invoice Payment")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.autoDetectInvoiceBankAccountType) { _, _ in store.save() }

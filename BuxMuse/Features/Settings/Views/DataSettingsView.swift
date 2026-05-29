@@ -26,12 +26,8 @@ struct DataSettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                Section("SANDBOX BACKUP") {
+        Form {
+                Section("Sandbox backup") {
                     Toggle("Allow Local Backups", isOn: $store.allowLocalBackups)
                     
                     if store.allowLocalBackups {
@@ -44,14 +40,14 @@ struct DataSettingsView: View {
                     }
                 }
                 
-                Section("MERCHANT DATA") {
+                Section("Merchant data") {
                     Text("Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.")
                         .font(.system(size: 13, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Section("EXPORT COMPLIANCE") {
+                Section("Export compliance") {
                     Toggle("Include Studio Data", isOn: $store.includeStudioDataInExports)
                     Toggle("Include Local Performance Metadata", isOn: $store.includeAnalyticsInExports)
                     
@@ -85,17 +81,14 @@ struct DataSettingsView: View {
                     }
                 }
                 
-                Section("DESTRUCTION ZONE") {
-                    Button(action: { showResetDialog = true }) {
-                        Text("Delete All Local App Data")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.red)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                Section("Delete data") {
+                    Button.buxDestructive("Delete All Local App Data") {
+                        showResetDialog = true
                     }
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
             .buxThemedFormStyle()
-        }
         .navigationTitle("Data Control")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Database Reset Complete", isPresented: $showSuccessAlert) {

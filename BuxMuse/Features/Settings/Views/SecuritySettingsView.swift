@@ -22,12 +22,8 @@ struct SecuritySettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                Section("BIOMETRIC ACCESS") {
+        Form {
+                Section("Biometric access") {
                     Toggle(isOn: Binding(
                         get: { store.biometricLockEnabled },
                         set: { enable in
@@ -66,7 +62,7 @@ struct SecuritySettingsView: View {
                     }
                 }
                 
-                Section("PIN PASSCODE") {
+                Section("PIN passcode") {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Secure App Passcode")
@@ -79,11 +75,10 @@ struct SecuritySettingsView: View {
                         Spacer()
                         
                         if store.hasAppPasscode {
-                            Button(action: { showPasscodeClearConfirmation = true }) {
-                                Text("Disable PIN")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.red)
+                            Button("Disable PIN", role: .destructive) {
+                                showPasscodeClearConfirmation = true
                             }
+                            .font(.system(size: 14, weight: .bold))
                             .buttonStyle(.plain)
                         } else {
                             Button(action: { showPasscodeSetup = true }) {
@@ -96,7 +91,7 @@ struct SecuritySettingsView: View {
                     }
                 }
                 
-                Section("PRIVACY SHIELD") {
+                Section("Privacy shield") {
                     Toggle(isOn: $store.privacyBlurInAppSwitching) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Blur in App Switcher")
@@ -109,7 +104,6 @@ struct SecuritySettingsView: View {
                 }
             }
             .buxThemedFormStyle()
-        }
         .navigationTitle("Security & Privacy")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPasscodeSetup) {
@@ -249,15 +243,12 @@ struct PasscodeSetupSheet: View {
                 .padding(.bottom, 48)
             }
             .background {
-                ZStack {
-                    themeManager.screenBackground(for: colorScheme)
-                    BuxHeroMeshBackground()
-                }
-                .ignoresSafeArea()
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
             }
         }

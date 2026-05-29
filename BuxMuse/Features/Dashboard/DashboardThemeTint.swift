@@ -142,11 +142,7 @@ enum DashboardThemeTint {
     }
 
     static func themedCardStroke(themeManager: ThemeManager, colorScheme: ColorScheme) -> Color {
-        let theme = themeManager.current
-        if colorScheme == .dark {
-            return .white.opacity(0.11)
-        }
-        return theme.meshDarkPalette[0].opacity(0.17)
+        themeManager.cardOutlineStroke(for: colorScheme, branded: true)
     }
 
     static func pillActiveChipFill(themeManager: ThemeManager, colorScheme: ColorScheme) -> Color {
@@ -206,28 +202,42 @@ extension View {
         }
     }
 
-    func dashboardThemedCardChrome(cornerRadius: CGFloat) -> some View {
-        modifier(BuxThemedCardChromeModifier(cornerRadius: cornerRadius))
+    func dashboardThemedCardChrome(cornerRadius: CGFloat, elevation: BuxElevation = .card) -> some View {
+        modifier(BuxThemedCardChromeModifier(cornerRadius: cornerRadius, elevation: elevation))
+    }
+
+    /// Dashboard pill-row card label — plate + full-card tap target (use inside `Button`).
+    func dashboardPillCardLabel(cornerRadius: CGFloat = 24) -> some View {
+        frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
+            .dashboardThemedCardChrome(cornerRadius: cornerRadius)
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+
+    /// Shorter auxiliary row under a pill section (e.g. Goals progress CTA).
+    func dashboardPillAuxCardLabel(cornerRadius: CGFloat = 16) -> some View {
+        frame(maxWidth: .infinity, alignment: .leading)
+            .dashboardThemedCardChrome(cornerRadius: cornerRadius)
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 
     /// Studio tab cards — identical chrome to Home dashboard cards.
-    func studioThemedCardChrome(cornerRadius: CGFloat) -> some View {
-        dashboardThemedCardChrome(cornerRadius: cornerRadius)
+    func studioThemedCardChrome(cornerRadius: CGFloat, elevation: BuxElevation = .card) -> some View {
+        dashboardThemedCardChrome(cornerRadius: cornerRadius, elevation: elevation)
     }
 
     /// Expenses tab cards — identical chrome to Home / Studio.
-    func expensesThemedCardChrome(cornerRadius: CGFloat) -> some View {
-        dashboardThemedCardChrome(cornerRadius: cornerRadius)
+    func expensesThemedCardChrome(cornerRadius: CGFloat, elevation: BuxElevation = .card) -> some View {
+        dashboardThemedCardChrome(cornerRadius: cornerRadius, elevation: elevation)
     }
 
     /// Settings tab cards — identical chrome to Home / Studio / Expenses.
-    func settingsThemedCardChrome(cornerRadius: CGFloat) -> some View {
-        dashboardThemedCardChrome(cornerRadius: cornerRadius)
+    func settingsThemedCardChrome(cornerRadius: CGFloat, elevation: BuxElevation = .card) -> some View {
+        dashboardThemedCardChrome(cornerRadius: cornerRadius, elevation: elevation)
     }
 
     /// Shared tab mesh chrome (Home uses `dashboardThemedCardChrome` directly).
-    func buxThemedCardChrome(cornerRadius: CGFloat) -> some View {
-        dashboardThemedCardChrome(cornerRadius: cornerRadius)
+    func buxThemedCardChrome(cornerRadius: CGFloat, elevation: BuxElevation = .card) -> some View {
+        dashboardThemedCardChrome(cornerRadius: cornerRadius, elevation: elevation)
     }
 
     func dashboardAwareCardOutline(
@@ -241,26 +251,16 @@ extension View {
 }
 
 struct BuxThemedCardChromeModifier: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject private var themeManager: ThemeManager
-    @ObservedObject private var settings = SettingsStore.shared
     let cornerRadius: CGFloat
+    var elevation: BuxElevation = .card
 
     func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        let strokeColor = settings.brandThemesEnabled
-            ? DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme)
-            : themeManager.subtleCardStroke(for: colorScheme)
-
-        content
-            .background {
-                BuxThemedCardPlateBackground(cornerRadius: cornerRadius)
-            }
-            .compositingGroup()
-            .clipShape(shape)
-            .overlay(
-                shape.stroke(strokeColor, lineWidth: 1)
-            )
+        switch elevation {
+        case .hero:
+            content.modifier(BuxHeroCardChromeModifier(cornerRadius: cornerRadius))
+        case .card, .flat:
+            content.modifier(BuxListCardChromeModifier(cornerRadius: cornerRadius))
+        }
     }
 }
 

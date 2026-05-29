@@ -13,11 +13,7 @@ struct MileageSettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
+        Form {
                 Section {
                     Toggle("Auto-location for mileage", isOn: $store.autoLocationForMileage)
                         .tint(themeManager.current.accentColor)
@@ -25,7 +21,7 @@ struct MileageSettingsView: View {
                         .font(.system(size: 12))
                         .buxLabelSecondary()
                 } header: {
-                    Text("AUTO-LOCATION FOR MILEAGE")
+                    Text("Auto-location for mileage")
                 }
 
                 Section {
@@ -41,11 +37,10 @@ struct MileageSettingsView: View {
                         .font(.system(size: 12))
                         .buxLabelSecondary()
                 } header: {
-                    Text("MILEAGE RATE")
+                    Text("Mileage rate")
                 }
             }
             .buxThemedFormStyle()
-        }
         .navigationTitle("Mileage Log")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.autoLocationForMileage) { _, _ in store.save() }

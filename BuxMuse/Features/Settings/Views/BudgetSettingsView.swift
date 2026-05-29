@@ -21,12 +21,8 @@ struct BudgetSettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                Section("BUDGET METHOD") {
+        Form {
+                Section("Budget method") {
                     Picker("Budgeting Mode", selection: $store.budgetingMode) {
                         ForEach(BudgetingMode.allCases) { mode in
                             Text(mode.rawValue).tag(mode)
@@ -76,7 +72,7 @@ struct BudgetSettingsView: View {
                     }
                 }
                 
-                Section("INTELLIGENCE RULES") {
+                Section("Intelligence rules") {
                     Toggle("Show Budget Warnings", isOn: $store.showBudgetWarnings)
                     
                     Toggle(isOn: $store.autoAdjustBudgetsFromHistory) {
@@ -90,7 +86,7 @@ struct BudgetSettingsView: View {
                     }
                 }
                 
-                Section("CUSTOM ENVELOPE PROFILES") {
+                Section("Custom envelope profiles") {
                     if store.customBudgetProfiles.isEmpty {
                         Text("No custom profiles configured.")
                             .font(.system(size: 14))
@@ -144,7 +140,6 @@ struct BudgetSettingsView: View {
                 }
             }
             .buxThemedFormStyle()
-        }
         .navigationTitle("Budgets")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $editingProfile) { profile in
@@ -220,13 +215,8 @@ struct BudgetProfileEditorView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme)
-                    .ignoresSafeArea()
-                BuxHeroMeshBackground()
-
-                Form {
-                    Section("PROFILE GENERAL DETAILS") {
+            Form {
+                    Section("Profile details") {
                         TextField("Profile Name (e.g. Summer Travel)", text: $profile.name)
                             .font(.system(size: 15, weight: .semibold))
                         
@@ -234,7 +224,7 @@ struct BudgetProfileEditorView: View {
                         Toggle("Enable Category Rollover", isOn: $profile.rolloverEnabled)
                     }
                     
-                    Section("ENVELOPE CATEGORIES") {
+                    Section("Envelope categories") {
                         if profile.categories.isEmpty {
                             Text("No categories added yet.")
                                 .font(.system(size: 14))
@@ -254,7 +244,7 @@ struct BudgetProfileEditorView: View {
                         }
                     }
                     
-                    Section("ADD NEW CATEGORY") {
+                    Section("Add category") {
                         TextField("Category Name", text: $newCategoryName)
                         HStack {
                             TextField("Target Limit Amount", text: $newCategoryTarget)
@@ -269,7 +259,7 @@ struct BudgetProfileEditorView: View {
                         }
                     }
                     
-                    Section("SUMMARY") {
+                    Section("Summary") {
                         HStack {
                             Text("Total Budget Limit")
                                 .font(.system(size: 15, weight: .bold))
@@ -281,12 +271,11 @@ struct BudgetProfileEditorView: View {
                     }
                 }
                 .scrollContentBackground(.hidden)
-            }
             .navigationTitle(profile.name.isEmpty ? "New Budget Rule" : "Edit Budget Rule")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     BuxToolbarSaveButton(isDirty: !profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {

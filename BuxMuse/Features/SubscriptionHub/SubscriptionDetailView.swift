@@ -202,21 +202,17 @@ struct SubscriptionDetailView: View {
     }
 
     private var cancelButton: some View {
-        Button(action: {
+        BuxButton(
+            title: "Log Subscription as Cancelled",
+            systemImage: "xmark.circle.fill",
+            role: .destructive,
+            expands: true
+        ) {
             onCancelTriggered(detail.info.merchantName)
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
                 isPresented = false
             }
-        }) {
-            Text("Log Subscription as Cancelled")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.red)
-                .clipShape(Capsule())
         }
-        .buttonStyle(BuxMicroShrinkStyle())
     }
 
     private func formatDate(_ date: Date) -> String {

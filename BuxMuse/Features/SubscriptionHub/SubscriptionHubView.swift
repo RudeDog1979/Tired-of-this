@@ -33,14 +33,12 @@ struct SubscriptionHubView: View {
     }
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
 
-            BuxHeroMeshBackground()
-
-            VStack(spacing: 0) {
-                hubHeader
+                BuxHeroMeshBackground()
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: BuxLayout.section) {
@@ -70,42 +68,54 @@ struct SubscriptionHubView: View {
                         SubscriptionCategoryDetailView(subscriptions: viewModel.subscriptions)
                     }
                     .padding(.vertical, BuxLayout.section)
-                    .padding(.bottom, 60)
+                    .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
                     .buxScreenContentMargins()
                 }
-                .buxReportsContainerWidth()
+                .buxDetailScrollChrome()
                 .buxTabBarScrollMinimizeTracking()
-            }
 
-            if showDetailSheet {
-                Color.black.opacity(colorScheme == .dark ? 0.55 : 0.35)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                    .onTapGesture {
-                        withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
-                            showDetailSheet = false
+                if showDetailSheet {
+                    Color.black.opacity(colorScheme == .dark ? 0.55 : 0.35)
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
+                                showDetailSheet = false
+                            }
+                        }
+                        .zIndex(5)
+                }
+
+                if showDetailSheet, let detail = viewModel.selectedDetail {
+                    SubscriptionDetailView(
+                        detail: detail,
+                        onCancelTriggered: { name in
+                            withAnimation {
+                                try? brain.cancelSubscription(merchantName: name)
+                                viewModel.refreshData()
+                            }
+                        },
+                        isPresented: $showDetailSheet
+                    )
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .move(edge: .bottom).combined(with: .opacity)
+                    ))
+                    .zIndex(10)
+                }
+            }
+            .navigationTitle("Subscription Hub")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    BuxToolbarBackButton {
+                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                            isPresented = false
                         }
                     }
-                    .zIndex(5)
+                }
             }
-
-            if showDetailSheet, let detail = viewModel.selectedDetail {
-                SubscriptionDetailView(
-                    detail: detail,
-                    onCancelTriggered: { name in
-                        withAnimation {
-                            try? brain.cancelSubscription(merchantName: name)
-                            viewModel.refreshData()
-                        }
-                    },
-                    isPresented: $showDetailSheet
-                )
-                .transition(.asymmetric(
-                    insertion: .move(edge: .bottom).combined(with: .opacity),
-                    removal: .move(edge: .bottom).combined(with: .opacity)
-                ))
-                .zIndex(10)
-            }
+            .buxDetailNavigationChrome()
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.78), value: showDetailSheet)
         .onAppear {
@@ -116,16 +126,6 @@ struct SubscriptionHubView: View {
         }
         .buxThemedPresentation()
         .ignoresSafeArea(.keyboard)
-    }
-
-    // MARK: - Header (true center title)
-
-    private var hubHeader: some View {
-        BuxOverlayHeader(title: "Subscription Hub") {
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                isPresented = false
-            }
-        }
     }
 
     // MARK: - Overview hero (compact vs old 38pt slab)

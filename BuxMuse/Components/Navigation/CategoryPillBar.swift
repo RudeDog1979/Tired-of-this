@@ -10,6 +10,7 @@ import SwiftUI
 struct CategoryPillBar: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
     @Binding var activeCategory: String
     @Binding var isExpanded: Bool
     /// Home dashboard preview — slightly stronger theme wash on the pill track and selection chip.
@@ -24,9 +25,13 @@ struct CategoryPillBar: View {
         HStack(spacing: 0) {
             ZStack(alignment: .leading) {
                 ZStack {
-                    Capsule()
-                        .fill(themeManager.pillTrackFill(for: colorScheme))
-                    if usesDashboardTint {
+                    if settings.useGlassmorphism {
+                        BuxGlassCapsuleBackground()
+                    } else {
+                        Capsule()
+                            .fill(themeManager.pillTrackFill(for: colorScheme))
+                    }
+                    if usesDashboardTint && !settings.useGlassmorphism {
                         Capsule()
                             .fill(DashboardThemeTint.pillTrackWash(themeManager: themeManager, colorScheme: colorScheme))
                     }
@@ -51,13 +56,15 @@ struct CategoryPillBar: View {
         .compositingGroup()
         .clipShape(Capsule())
         .overlay {
-            Capsule()
-                .stroke(
-                    usesDashboardTint
-                        ? DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme)
-                        : (colorScheme == .dark ? Color.clear : Color.black.opacity(0.10)),
-                    lineWidth: 1
-                )
+            if !settings.useGlassmorphism {
+                Capsule()
+                    .stroke(
+                        usesDashboardTint
+                            ? DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme)
+                            : themeManager.cardOutlineStroke(for: colorScheme, branded: false),
+                        lineWidth: 1
+                    )
+            }
         }
     }
 
@@ -123,16 +130,13 @@ extension ThemeManager {
 
     func heroCardShadow(for colorScheme: ColorScheme) -> (color: Color, radius: CGFloat, y: CGFloat) {
         if colorScheme == .dark {
-            return (Color.black.opacity(0.2), 12, 6)
+            return (Color.black.opacity(0.20), 12, 6)
         }
-        return (Color.black.opacity(0.06), 14, 6)
+        return (Color.black.opacity(BuxTokens.Shadow.heroColorOpacityLight), BuxTokens.Shadow.heroRadius, BuxTokens.Shadow.heroY)
     }
 
-    /// Expense list rows — lighter than hero; keeps cards off the mesh background.
+    /// List / card tier — no shadow (stroke defines edge; avoids scroll clipping).
     func listCardShadow(for colorScheme: ColorScheme) -> (color: Color, radius: CGFloat, y: CGFloat) {
-        if colorScheme == .dark {
-            return (Color.black.opacity(0.28), 10, 5)
-        }
-        return (Color.black.opacity(0.07), 8, 4)
+        (.clear, 0, 0)
     }
 }

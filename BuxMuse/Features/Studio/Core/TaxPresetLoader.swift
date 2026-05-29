@@ -19,9 +19,9 @@ public enum TaxPresetLoader {
         return countryAliases[trimmed] ?? trimmed
     }
 
-    /// Ensures the global catalog is available for the preset picker (bundle / local cache only).
-    public static func ensureCatalogLoaded() {
-        _ = TaxManager.shared.allCountriesSorted
+    /// Loads bundled/cache catalog, then refreshes from remote when the monthly window allows.
+    public static func ensureCatalogLoaded(force: Bool = false) async {
+        await TaxManager.shared.ensureCatalogLoaded(force: force)
     }
 
     public static func preset(for code: String) -> TaxInfo? {

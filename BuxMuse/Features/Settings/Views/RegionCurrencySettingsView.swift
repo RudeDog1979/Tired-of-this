@@ -23,12 +23,8 @@ struct RegionCurrencySettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                Section("YOUR REGION") {
+        Form {
+                Section("Your region") {
                     Button(action: { showCountrySheet = true }) {
                         HStack {
                             Text("Country / Region")
@@ -49,7 +45,7 @@ struct RegionCurrencySettingsView: View {
                         .buxLabelSecondary()
                 }
 
-                Section("DISPLAY CURRENCY") {
+                Section("Display currency") {
                     Button(action: { showCurrencySheet = true }) {
                         HStack {
                             Text("Preferred Currency")
@@ -75,7 +71,7 @@ struct RegionCurrencySettingsView: View {
                     }
                 }
 
-                Section("REGIONAL RULES") {
+                Section("Regional rules") {
                     Picker("Start of Week", selection: $store.weekStartDay) {
                         ForEach(WeekStartDay.allCases) { day in
                             Text(day.rawValue).tag(day)
@@ -84,7 +80,7 @@ struct RegionCurrencySettingsView: View {
                     .pickerStyle(.menu)
                 }
 
-                Section(header: Text("LOCALE POLICY")) {
+                Section(header: Text("Locale policy")) {
                     Text("Country and currency apply across BuxMuse — dashboard, expenses, invoices, and tax tools. Auto-detected from your device on first launch; you can change either independently.")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
@@ -92,7 +88,6 @@ struct RegionCurrencySettingsView: View {
                 }
             }
             .buxThemedFormStyle()
-        }
         .navigationTitle("Currency & Region")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showCountrySheet) {
@@ -171,14 +166,7 @@ struct CountryPickerView: View {
                         .buxLabelSecondary()
                 }
                 Spacer()
-                Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        .frame(width: 32, height: 32)
-                        .background(themeManager.chipMutedFill(for: colorScheme))
-                        .clipShape(Circle())
-                }
+                BuxToolbarCloseButton { dismiss() }
             }
             .padding(.horizontal, BuxLayout.marginHorizontal)
             .padding(.top, 24)
@@ -237,11 +225,8 @@ struct CountryPickerView: View {
             }
         }
         .background {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme)
-                BuxHeroMeshBackground()
-            }
-            .ignoresSafeArea()
+            themeManager.screenBackground(for: colorScheme)
+                .ignoresSafeArea()
         }
         .buxThemedPresentation()
         .environment(\.settingsEnhancedTint, true)

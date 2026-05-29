@@ -15,41 +15,53 @@ struct NotificationInboxView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if inbox.items.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Notifications", systemImage: "bell.slash")
-                    } description: {
-                        Text("Budget alerts, renewals, and Studio reminders will appear here.")
-                    }
-                } else {
-                    List {
-                        ForEach(inbox.items) { item in
-                            Button {
-                                brain.markNotificationRead(item.id)
-                            } label: {
-                                notificationRow(item)
-                            }
-                            .buttonStyle(.plain)
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+                BuxHeroMeshBackground()
+
+                Group {
+                    if inbox.items.isEmpty {
+                        ContentUnavailableView {
+                            Label("No Notifications", systemImage: "bell.slash")
+                        } description: {
+                            Text("Budget alerts, renewals, and Studio reminders will appear here.")
                         }
+                    } else {
+                        List {
+                            ForEach(inbox.items) { item in
+                                Button {
+                                    brain.markNotificationRead(item.id)
+                                } label: {
+                                    notificationRow(item)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .listStyle(.insetGrouped)
+                        .scrollContentBackground(.hidden)
+                        .buxListContentMargins()
+                        .buxSoftScrollChrome()
                     }
-                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    BuxToolbarDoneButton { dismiss() }
                 }
                 ToolbarItem(placement: .primaryAction) {
                     if inbox.unreadCount > 0 {
                         Button("Read All") {
-                            brain.markAllNotificationsRead()
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                brain.markAllNotificationsRead()
+                            }
                         }
+                        .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
                     }
                 }
             }
+            .buxDetailNavigationChrome()
         }
     }
 

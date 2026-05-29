@@ -86,6 +86,7 @@ extension View {
     func buxListContentMargins() -> some View {
         modifier(BuxListContentMarginsModifier())
             .buxTabBarScrollMinimizeTracking()
+            .buxRootScrollEdgeChrome()
     }
 
     /// Same horizontal inset as Expenses list — use on Dashboard `ScrollView` and Expenses `List`.
@@ -99,6 +100,13 @@ extension View {
             .buxReportsContainerWidth()
             .buxCustomTabBarScrollClearance()
             .buxTabBarScrollMinimizeTracking()
+            .buxRootScrollEdgeChrome()
+    }
+
+    /// Detail hubs & pushed drill-ins — content scrolls under inline nav bar.
+    func buxDetailScrollChrome() -> some View {
+        buxReportsContainerWidth()
+            .buxSoftScrollChrome()
     }
 
     /// Adaptive horizontal margins — prefer on all root screens.

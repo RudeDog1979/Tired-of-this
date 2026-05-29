@@ -39,9 +39,7 @@ enum BuxTypography {
     }
 
     static func sectionLabel(_ text: String) -> Text {
-        Text(text)
-            .font(.system(size: 11, weight: .bold))
-            .kerning(1.2)
+        Text(text).font(.footnote.weight(.semibold))
     }
 
     static var buttonFont: Font {
@@ -55,8 +53,7 @@ enum BuxTypography {
 
 extension View {
     func buxSectionLabelStyle(color: Color) -> some View {
-        font(.system(size: 11, weight: .bold))
-            .kerning(1.2)
+        font(.footnote.weight(.semibold))
             .foregroundStyle(color)
     }
 

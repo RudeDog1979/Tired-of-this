@@ -98,10 +98,8 @@ struct TipPopupView: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("DAILY TIPS")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(.secondary)
-                    .kerning(1.1)
+                Text("Daily tips")
+                    .buxSectionLabelStyle(color: .secondary)
                 Text("\(tip.regionFlag) \(tip.regionCode)")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(colorScheme == .dark ? .white : .primary)
@@ -124,9 +122,8 @@ struct TipPopupView: View {
                 .fill(Color.orange.opacity(0.35))
                 .frame(height: 1)
             Text(tip.watchOutHeader)
-                .font(.system(size: 10, weight: .bold))
+                .font(.footnote.weight(.semibold))
                 .foregroundStyle(.orange)
-                .kerning(1.0)
             Rectangle()
                 .fill(Color.orange.opacity(0.35))
                 .frame(height: 1)
@@ -146,10 +143,9 @@ struct TipPopupView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(accent)
 
-                Text(section.kind.badgeLabel.uppercased())
-                    .font(.system(size: 10, weight: .bold))
+                Text(section.kind.badgeLabel)
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(accent)
-                    .kerning(0.8)
 
                 Spacer(minLength: 0)
             }

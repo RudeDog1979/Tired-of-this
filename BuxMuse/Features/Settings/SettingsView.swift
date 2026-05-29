@@ -45,10 +45,7 @@ struct SettingsView: View {
                         
                         ForEach(display.sections) { section in
                             VStack(alignment: .leading, spacing: 12) {
-                                Text(section.title)
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                    .kerning(1.2)
+                                BuxSectionHeader(title: section.title)
                                     .padding(.leading, 4)
 
                                 VStack(spacing: 0) {
@@ -88,36 +85,55 @@ struct SettingsView: View {
                 _ = navigationCoordinator.consumeStudioSettingsRequest()
             }
             .navigationDestination(for: SettingsDestinationType.self) { destination in
-                Group {
-                    switch destination {
-                    case .profile:
-                        ProfileSettingsView()
-                    case .appearance:
-                        AppearanceSettingsView()
-                    case .regionCurrency:
-                        RegionCurrencySettingsView()
-                    case .budgets:
-                        BudgetSettingsView()
-                    case .studio:
-                        StudioSettingsView()
-                    case .invoicePayment:
-                        InvoicePaymentSettingsView()
-                    case .mileage:
-                        MileageSettingsView()
-                    case .notifications:
-                        NotificationSettingsView()
-                    case .security:
-                        SecuritySettingsView()
-                    case .data:
-                        DataSettingsView()
-                    case .about:
-                        AboutSettingsView()
+                SettingsDrillInBackdrop {
+                    Group {
+                        switch destination {
+                        case .profile:
+                            ProfileSettingsView()
+                        case .appearance:
+                            AppearanceSettingsView()
+                        case .regionCurrency:
+                            RegionCurrencySettingsView()
+                        case .budgets:
+                            BudgetSettingsView()
+                        case .studio:
+                            StudioSettingsView()
+                        case .invoicePayment:
+                            InvoicePaymentSettingsView()
+                        case .mileage:
+                            MileageSettingsView()
+                        case .notifications:
+                            NotificationSettingsView()
+                        case .security:
+                            SecuritySettingsView()
+                        case .data:
+                            DataSettingsView()
+                        case .about:
+                            AboutSettingsView()
+                        }
                     }
                 }
                 .environment(\.settingsEnhancedTint, true)
             }
             .environment(\.settingsEnhancedTint, true)
         }
+    }
+}
+
+// MARK: - Settings drill-in backdrop (mesh + soft nav chrome)
+
+private struct SettingsDrillInBackdrop<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack {
+            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+            BuxHeroMeshBackground()
+            content()
+        }
+        .buxDetailNavigationChrome()
     }
 }
 
@@ -220,16 +236,7 @@ struct AppearanceThemePickerView: View {
                 
                 Spacer()
                 
-                Button(action: { dismiss() }) {
-                    ZStack {
-                        Circle()
-                            .fill(themeManager.chipMutedFill(for: colorScheme))
-                            .frame(width: 32, height: 32)
-                        Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    }
-                }
+                BuxToolbarCloseButton { dismiss() }
             }
             .padding(.horizontal, BuxLayout.marginHorizontal)
             .padding(.top, 24)
@@ -261,11 +268,8 @@ struct AppearanceThemePickerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme)
-                BuxThemedBackdrop()
-            }
-            .ignoresSafeArea()
+            themeManager.screenBackground(for: colorScheme)
+                .ignoresSafeArea()
         }
         .buxThemedPresentation()
         .environment(\.settingsEnhancedTint, true)
@@ -373,16 +377,7 @@ struct CurrencyRegionPickerView: View {
                 
                 Spacer()
                 
-                Button(action: { dismiss() }) {
-                    ZStack {
-                        Circle()
-                            .fill(themeManager.chipMutedFill(for: colorScheme))
-                            .frame(width: 32, height: 32)
-                        Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    }
-                }
+                BuxToolbarCloseButton { dismiss() }
             }
             .padding(.horizontal, BuxLayout.marginHorizontal)
             .padding(.top, 24)
@@ -442,11 +437,8 @@ struct CurrencyRegionPickerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme)
-                BuxHeroMeshBackground()
-            }
-            .ignoresSafeArea()
+            themeManager.screenBackground(for: colorScheme)
+                .ignoresSafeArea()
         }
         .buxThemedPresentation()
         .environment(\.settingsEnhancedTint, true)
