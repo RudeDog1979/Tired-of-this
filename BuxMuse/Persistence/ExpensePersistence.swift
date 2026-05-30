@@ -16,22 +16,43 @@ extension PersistenceController {
         let categoryCount = try context.fetchCount(FetchDescriptor<CategoryEntity>())
         if categoryCount == 0 {
             for def in ExpenseCategoryCatalog.systemDefinitions {
-                let entity = CategoryEntity(
-                    id: stableCategoryId(for: def.0),
-                    name: def.0.displayName,
-                    icon: def.1,
-                    color: def.2,
-                    isCustom: false,
-                    isSubscriptionCategory: def.0 == .subscriptions,
-                    subscriptionFrequency: def.0 == .subscriptions ? "monthly" : nil,
-                    systemCategoryRaw: def.0.rawValue
-                )
-                context.insert(entity)
+                context.insert(makeSystemCategoryEntity(for: def))
             }
             try context.save()
         }
 
+        try syncMissingSystemCategoriesIfNeeded()
         try migrateLegacyExpenseRowsIfNeeded()
+    }
+
+    private func makeSystemCategoryEntity(
+        for def: (TransactionCategory, icon: String, color: String)
+    ) -> CategoryEntity {
+        CategoryEntity(
+            id: stableCategoryId(for: def.0),
+            name: def.0.displayName,
+            icon: def.1,
+            color: def.2,
+            isCustom: false,
+            isSubscriptionCategory: def.0 == .subscriptions,
+            subscriptionFrequency: def.0 == .subscriptions ? "monthly" : nil,
+            systemCategoryRaw: def.0.rawValue
+        )
+    }
+
+    /// Inserts newly added built-in categories for installs that seeded an older catalog.
+    private func syncMissingSystemCategoriesIfNeeded() throws {
+        let existing = try context.fetch(FetchDescriptor<CategoryEntity>())
+        let existingRaws = Set(existing.compactMap(\.systemCategoryRaw))
+        var changed = false
+
+        for def in ExpenseCategoryCatalog.systemDefinitions {
+            guard !existingRaws.contains(def.0.rawValue) else { continue }
+            context.insert(makeSystemCategoryEntity(for: def))
+            changed = true
+        }
+
+        if changed { try context.save() }
     }
 
     private func stableCategoryId(for category: TransactionCategory) -> UUID {

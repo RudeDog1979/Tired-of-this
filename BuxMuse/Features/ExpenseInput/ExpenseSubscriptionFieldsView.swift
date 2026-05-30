@@ -2,13 +2,12 @@
 //  ExpenseSubscriptionFieldsView.swift
 //  BuxMuse
 //
-//  Subscription / trial / reminder inputs on add-expense sheet.
+//  Subscription / trial / reminder inputs — native Form rows (no card chrome).
 //
 
 import SwiftUI
 
 struct ExpenseSubscriptionFieldsView: View {
-    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
 
     @Binding var isSubscription: Bool
@@ -19,99 +18,70 @@ struct ExpenseSubscriptionFieldsView: View {
 
     private let reminderPresets = [1, 3, 7, 14]
 
-    private var cardColor: Color {
-        themeManager.cardFill(for: colorScheme)
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("SUBSCRIPTION")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                .kerning(1.2)
-
-            VStack(spacing: 0) {
-                toggleRow("This is a subscription", isOn: $isSubscription)
-                if isSubscription {
-                    Divider().opacity(0.08)
-                    toggleRow("This is a trial", isOn: $isTrial)
-                }
-            }
-            .expensesThemedCardChrome(cornerRadius: 16)
+        Group {
+            Toggle("This is a subscription", isOn: $isSubscription)
 
             if isSubscription {
-                VStack(alignment: .leading, spacing: 12) {
-                    if isTrial {
-                        labeledDate("Trial end date", date: $trialEndDate)
-                    } else {
-                        labeledDate("Subscription start", date: $subscriptionStartDate)
-                    }
+                Toggle("This is a trial", isOn: $isTrial)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("REMIND ME BEFORE")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.gray)
-                            .kerning(1.2)
-
-                        HStack(spacing: 8) {
-                            ForEach(reminderPresets, id: \.self) { days in
-                                Button {
-                                    withAnimation(.buxSnap) {
-                                        renewalReminderDays = days
-                                    }
-                                } label: {
-                                    Text("\(days)d")
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(renewalReminderDays == days ? .white : themeManager.current.accentColor)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 8)
-                                        .background(
-                                            renewalReminderDays == days
-                                                ? themeManager.current.accentColor
-                                                : themeManager.current.accentColor.opacity(0.1)
-                                        )
-                                        .clipShape(Capsule())
-                                }
-                                .buttonStyle(BuxMicroShrinkStyle())
-                            }
-
-                            Stepper("Custom: \(renewalReminderDays)d", value: $renewalReminderDays, in: 1...30)
-                                .font(.system(size: 12, weight: .semibold))
-                                .labelsHidden()
-                        }
-
-                        Text("Local notification \(renewalReminderDays) day\(renewalReminderDays == 1 ? "" : "s") before renewal.")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.gray)
-                    }
+                if isTrial {
+                    DatePicker("Trial end date", selection: $trialEndDate, displayedComponents: .date)
+                } else {
+                    DatePicker("Subscription start", selection: $subscriptionStartDate, displayedComponents: .date)
                 }
-                .padding(16)
-                .expensesThemedCardChrome(cornerRadius: 16)
-                .transition(.buxScaleReveal)
+
+                reminderSection
             }
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.82), value: isSubscription)
-        .animation(.spring(response: 0.35, dampingFraction: 0.82), value: isTrial)
+        .tint(themeManager.current.accentColor)
+        .animation(nil, value: isSubscription)
+        .animation(nil, value: isTrial)
     }
 
-    private func toggleRow(_ title: String, isOn: Binding<Bool>) -> some View {
-        Toggle(title, isOn: isOn)
-            .font(.system(size: 15, weight: .semibold))
-            .tint(themeManager.current.accentColor)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-    }
+    @ViewBuilder
+    private var reminderSection: some View {
+        VStack(spacing: 10) {
+            Text("Remind me before renewal")
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
 
-    private func labeledDate(_ title: String, date: Binding<Date>) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title.uppercased())
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
-                .kerning(1.2)
-            DatePicker("", selection: date, displayedComponents: .date)
-                .datePickerStyle(.compact)
-                .labelsHidden()
-                .tint(themeManager.current.accentColor)
+            HStack(spacing: 8) {
+                ForEach(reminderPresets, id: \.self) { days in
+                    Button {
+                        renewalReminderDays = days
+                    } label: {
+                        Text("\(days)d")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(renewalReminderDays == days ? .white : themeManager.current.accentColor)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(
+                                renewalReminderDays == days
+                                    ? themeManager.current.accentColor
+                                    : themeManager.current.accentColor.opacity(0.1)
+                            )
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(BuxMicroShrinkStyle())
+                }
+
+                Stepper(value: $renewalReminderDays, in: 1...30) {
+                    Text("\(renewalReminderDays)d")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(themeManager.current.accentColor)
+                        .frame(minWidth: 36)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+
+            Text("Local notification \(renewalReminderDays) day\(renewalReminderDays == 1 ? "" : "s") before renewal.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
+        .padding(.vertical, 4)
     }
 }

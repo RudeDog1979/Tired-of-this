@@ -18,80 +18,78 @@ struct RegionCurrencySettingsView: View {
     @State private var pendingCountry: CountrySetting?
     @State private var showCurrencySuggestion = false
 
-    private var bgColor: Color {
-        themeManager.screenBackground(for: colorScheme)
-    }
-
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                Section("YOUR REGION") {
-                    Button(action: { showCountrySheet = true }) {
-                        HStack {
-                            Text("Country / Region")
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Spacer()
-                            Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.id)")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 12, weight: .semibold))
-                                .buxChevronMuted()
-                        }
-                    }
-
-                    Text(appSettingsManager.selectedCountry.name)
-                        .font(.system(size: 12))
-                        .buxLabelSecondary()
-                }
-
-                Section("DISPLAY CURRENCY") {
-                    Button(action: { showCurrencySheet = true }) {
-                        HStack {
-                            Text("Preferred Currency")
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Spacer()
-                            Text("\(appSettingsManager.selectedCurrency.flag) \(appSettingsManager.selectedCurrency.id)")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 12, weight: .semibold))
-                                .buxChevronMuted()
-                        }
-                    }
-
+        BuxThemedCardForm {
+            BuxFormSection(title: "Your region") {
+                Button(action: { showCountrySheet = true }) {
                     HStack {
-                        Text("Formatting Preview")
+                        Text("Country / Region")
                             .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         Spacer()
-                        Text(appSettingsManager.format(Decimal(12345.67)))
-                            .font(.system(size: 14, weight: .medium))
-                            .buxLabelSecondary()
+                        Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.id)")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(themeManager.current.accentColor)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .buxChevronMuted()
                     }
                 }
-
-                Section("REGIONAL RULES") {
-                    Picker("Start of Week", selection: $store.weekStartDay) {
-                        ForEach(WeekStartDay.allCases) { day in
-                            Text(day.rawValue).tag(day)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                }
-
-                Section(header: Text("LOCALE POLICY")) {
-                    Text("Country and currency apply across BuxMuse — dashboard, expenses, invoices, and tax tools. Auto-detected from your device on first launch; you can change either independently.")
-                        .font(.system(size: 11))
-                        .buxLabelSecondary()
-                        .lineSpacing(4)
-                }
+                .buttonStyle(.plain)
+                .buxFormFieldPadding()
+                Text(appSettingsManager.selectedCountry.name)
+                    .font(.system(size: 12))
+                    .buxLabelSecondary()
+                    .buxFormFieldPadding()
             }
-            .buxThemedFormStyle()
+
+            BuxFormSection(title: "Display currency") {
+                Button(action: { showCurrencySheet = true }) {
+                    HStack {
+                        Text("Preferred Currency")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        Spacer()
+                        Text("\(appSettingsManager.selectedCurrency.flag) \(appSettingsManager.selectedCurrency.id)")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(themeManager.current.accentColor)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .buxChevronMuted()
+                    }
+                }
+                .buttonStyle(.plain)
+                .buxFormFieldPadding()
+                BuxFormRowDivider()
+                HStack {
+                    Text("Formatting Preview")
+                        .font(.system(size: 15, weight: .semibold))
+                    Spacer()
+                    Text(appSettingsManager.format(Decimal(12345.67)))
+                        .font(.system(size: 14, weight: .medium))
+                        .buxLabelSecondary()
+                }
+                .buxFormFieldPadding()
+            }
+
+            BuxFormSection(title: "Regional rules") {
+                Picker("Start of Week", selection: $store.weekStartDay) {
+                    ForEach(WeekStartDay.allCases) { day in
+                        Text(day.rawValue).tag(day)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(themeManager.current.accentColor)
+                .buxFormFieldPadding()
+            }
+
+            BuxFormSection(title: "Locale policy") {
+                Text("Country and currency apply across BuxMuse — dashboard, expenses, invoices, and tax tools. Auto-detected from your device on first launch; you can change either independently.")
+                    .font(.system(size: 11))
+                    .buxLabelSecondary()
+                    .lineSpacing(4)
+                    .buxFormFieldPadding()
+            }
         }
         .navigationTitle("Currency & Region")
         .navigationBarTitleDisplayMode(.inline)
@@ -171,14 +169,7 @@ struct CountryPickerView: View {
                         .buxLabelSecondary()
                 }
                 Spacer()
-                Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        .frame(width: 32, height: 32)
-                        .background(themeManager.chipMutedFill(for: colorScheme))
-                        .clipShape(Circle())
-                }
+                BuxToolbarCloseButton { dismiss() }
             }
             .padding(.horizontal, BuxLayout.marginHorizontal)
             .padding(.top, 24)
@@ -237,11 +228,8 @@ struct CountryPickerView: View {
             }
         }
         .background {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme)
-                BuxHeroMeshBackground()
-            }
-            .ignoresSafeArea()
+            themeManager.screenBackground(for: colorScheme)
+                .ignoresSafeArea()
         }
         .buxThemedPresentation()
         .environment(\.settingsEnhancedTint, true)

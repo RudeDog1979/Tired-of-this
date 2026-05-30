@@ -55,13 +55,11 @@ struct StudioMileageLogView: View {
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    mileageSheetMode = .add(openToken: UUID())
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
-                }
+                BuxToolbarButton(
+                    systemName: "plus",
+                    accessibilityLabel: "Add mileage entry",
+                    action: { mileageSheetMode = .add(openToken: UUID()) }
+                )
             }
         }
         .sheet(item: $mileageSheetMode) { mode in
@@ -86,7 +84,7 @@ struct StudioMileageLogView: View {
             .environmentObject(store)
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
-            .buxThemedSheetContent()
+            .buxStudioSheetContent()
         }
     }
 
@@ -385,9 +383,6 @@ struct MileageEntrySheet: View {
                     .ignoresSafeArea()
                     .ignoresSafeArea(.keyboard, edges: .bottom)
 
-                BuxHeroMeshBackground()
-                    .ignoresSafeArea(.keyboard, edges: .bottom)
-
                 ScrollView {
                     VStack(spacing: BuxLayout.section) {
                         routeCard
@@ -396,7 +391,7 @@ struct MileageEntrySheet: View {
                         if !isEditing, canLogReturnLeg {
                             returnJourneyToggle
                         }
-                        dateNotesCard
+                        dateNotesSection
                     }
                     .padding(.horizontal, BuxLayout.marginHorizontal)
                     .padding(.top, BuxLayout.tight)
@@ -408,12 +403,15 @@ struct MileageEntrySheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save(includeReturn: false) }
-                        .fontWeight(.semibold)
-                        .disabled(parsedDistance <= 0)
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: "Save",
+                        isEnabled: parsedDistance > 0
+                    ) {
+                        save(includeReturn: false)
+                    }
                 }
                 if isEditing, canLogReturnLeg {
                     ToolbarItem(placement: .bottomBar) {
@@ -433,6 +431,7 @@ struct MileageEntrySheet: View {
                 }
             }
             .buxStableNavigationBarWithKeyboard()
+            .buxStudioSheetContent()
             .onAppear {
                 startAutocomplete.configure(countryCode: countryCode)
                 endAutocomplete.configure(countryCode: countryCode)
@@ -532,6 +531,8 @@ struct MileageEntrySheet: View {
             }
         }
         .pickerStyle(.segmented)
+        .padding(BuxLayout.section)
+        .buxFormSectionCard(cornerRadius: 16)
     }
 
     private var canLogReturnLeg: Bool {
@@ -562,7 +563,19 @@ struct MileageEntrySheet: View {
         }
         .tint(themeManager.current.accentColor)
         .padding(BuxLayout.section)
-        .studioThemedCardChrome(cornerRadius: 16)
+        .buxFormSectionCard(cornerRadius: 16)
+    }
+
+    private var dateNotesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            DatePicker("Date", selection: $date, displayedComponents: .date)
+                .tint(themeManager.current.accentColor)
+            TextField("Notes (optional)", text: $notes, axis: .vertical)
+                .lineLimit(2...4)
+                .focused($focusedField, equals: .notes)
+        }
+        .padding(BuxLayout.section)
+        .buxFormSectionCard(cornerRadius: 20)
     }
 
     private var canShowReturnRoutePreview: Bool {
@@ -587,24 +600,6 @@ struct MileageEntrySheet: View {
 
     private var formattedReturnDistance: String {
         String(format: "%.1f", parsedDistance)
-    }
-
-    private var dateNotesCard: some View {
-        VStack(alignment: .leading, spacing: BuxLayout.section) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("DATE")
-                    .font(.system(size: 10, weight: .bold))
-                    .buxLabelSecondary()
-                DatePicker("", selection: $date, displayedComponents: .date)
-                    .labelsHidden()
-            }
-
-            TextField("Notes (optional)", text: $notes, axis: .vertical)
-                .lineLimit(2...4)
-                .focused($focusedField, equals: .notes)
-        }
-        .padding(BuxLayout.section)
-        .studioThemedCardChrome(cornerRadius: 20)
     }
 
     private var parsedDistance: Double {

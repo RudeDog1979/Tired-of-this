@@ -43,8 +43,12 @@ public final class InsightsTimingEngine {
     }
     
     private func parseDate(_ string: String) -> Date? {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
         let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.dateFormat = "yyyy-MM-dd"
+        if let date = fmt.date(from: trimmed) { return date }
         fmt.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        return fmt.date(from: string) ?? Date()
+        return fmt.date(from: trimmed)
     }
 }

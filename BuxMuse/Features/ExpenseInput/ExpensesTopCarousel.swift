@@ -63,7 +63,10 @@ struct ExpensesTopCarousel: View {
                                             activeDetailSheet = .totalSpend
                                         }
                                 case .monthlySummary:
-                                    ExpensesSummaryCard(display: summary)
+                                    ExpensesSummaryCard(
+                                        display: summary,
+                                        chromeTier: pages.count > 1 ? .list : .hero
+                                    )
                                         .environmentObject(themeManager)
                                         .contentShape(Rectangle())
                                         .onTapGesture {
@@ -74,9 +77,7 @@ struct ExpensesTopCarousel: View {
                                 }
                             }
                             .frame(maxWidth: .infinity, minHeight: slotHeight, alignment: .top)
-                            .containerRelativeFrame(.horizontal) { width, _ in
-                                width - 40
-                            }
+                            .containerRelativeFrame(.horizontal)
                             .id(index)
                         }
                     }
@@ -85,7 +86,6 @@ struct ExpensesTopCarousel: View {
                 .scrollClipDisabled()
                 .scrollTargetBehavior(.viewAligned)
                 .scrollPosition(id: $pageIndex)
-                .safeAreaPadding(.horizontal, 20)
                 .safeAreaPadding(.vertical, 8)
             }
             .frame(minHeight: slotHeight + 16, alignment: .top)
@@ -132,6 +132,7 @@ struct ExpensesTopCarousel: View {
                 }
             }
             .buxThemedSheetContent()
+            .buxMeshSheetPresentation()
         }
     }
 
@@ -152,11 +153,8 @@ struct ExpensesTopCarousel: View {
                 Spacer(minLength: 8)
 
                 if !summary.categoryBreakdown.isEmpty {
-                    MiniCategoryDonutChart(
-                        breakdown: summary.categoryBreakdown,
-                        accentColor: themeManager.current.accentColor
-                    )
-                    .frame(width: 72, height: 72)
+                    MiniCategoryDonutChart(breakdown: summary.categoryBreakdown)
+                        .frame(width: 72, height: 72)
                 }
             }
             .heroCardReveal(isVisible: cardReveal, delay: 0)
@@ -179,8 +177,16 @@ struct ExpensesTopCarousel: View {
                             Text("Top Merchants")
                                 .font(.caption.bold())
                                 .foregroundColor(.gray)
-                            MerchantBreakdownChart(breakdown: summary.merchantBreakdown)
-                                .frame(height: 72)
+                            MerchantBreakdownChart(
+                                breakdown: summary.merchantBreakdown,
+                                maxItems: 3
+                            )
+                            .frame(height: MerchantBreakdownChart.compactHeight(itemCount: min(3, summary.merchantBreakdown.count)))
+                            if summary.merchantBreakdown.count > 3 {
+                                Text("+\(summary.merchantBreakdown.count - 3) more · tap for details")
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .foregroundColor(.gray.opacity(0.9))
+                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -197,7 +203,7 @@ struct ExpensesTopCarousel: View {
                     HStack(alignment: .center, spacing: 12) {
                         SparklineChart(
                             points: header.sparklinePoints,
-                            color: themeManager.current.accentColor,
+                            color: BuxChartColors.spendTrend(for: colorScheme),
                             showAreaFill: true
                         )
                         .frame(height: 44)
@@ -249,52 +255,30 @@ struct ExpensesTopCarousel: View {
 
 // MARK: - Shared hero card chrome
 
-struct ExpenseHeroCardChrome: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
+struct ExpenseCardChromeModifier: ViewModifier {
+    let tier: BuxCardChromeTier
     @Environment(\.expensesEnhancedTint) private var expensesEnhancedTint
-    @EnvironmentObject private var themeManager: ThemeManager
     @ObservedObject private var settings = SettingsStore.shared
-
-    init() {}
 
     func body(content: Content) -> some View {
         let cornerRadius = BuxLayout.expenseHeroCardCornerRadius
-        let shadow = themeManager.heroCardShadow(for: colorScheme)
+        let useMesh = expensesEnhancedTint && settings.brandThemesEnabled
         let padded = content
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .topLeading)
 
-        Group {
-            if expensesEnhancedTint && settings.brandThemesEnabled {
-                padded
-                    .background {
-                        BuxThemedCardPlateBackground(cornerRadius: cornerRadius)
-                    }
-                    .compositingGroup()
-                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(
-                                DashboardThemeTint.themedCardStroke(
-                                    themeManager: themeManager,
-                                    colorScheme: colorScheme
-                                ),
-                                lineWidth: 1
-                            )
-                    )
-            } else {
-                padded
-                    .background(
-                        themeManager.cardFill(for: colorScheme),
-                        in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(themeManager.subtleCardStroke(for: colorScheme), lineWidth: 1)
-                    )
-            }
+        switch tier {
+        case .hero:
+            padded.buxHeroCardChrome(cornerRadius: cornerRadius, useMeshPlate: useMesh)
+        case .list:
+            padded.buxListCardChrome(cornerRadius: cornerRadius)
         }
-        .shadow(color: shadow.color, radius: shadow.radius, x: 0, y: shadow.y)
+    }
+}
+
+struct ExpenseHeroCardChrome: ViewModifier {
+    func body(content: Content) -> some View {
+        content.modifier(ExpenseCardChromeModifier(tier: .hero))
     }
 }
 
@@ -320,5 +304,9 @@ extension View {
     func expenseHeroCardChrome(themeManager: ThemeManager, colorScheme: ColorScheme) -> some View {
         _ = (themeManager, colorScheme)
         return modifier(ExpenseHeroCardChrome())
+    }
+
+    func expenseCardChrome(tier: BuxCardChromeTier) -> some View {
+        modifier(ExpenseCardChromeModifier(tier: tier))
     }
 }

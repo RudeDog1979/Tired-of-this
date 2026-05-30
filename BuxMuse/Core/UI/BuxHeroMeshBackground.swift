@@ -2,9 +2,8 @@
 //  BuxHeroMeshBackground.swift
 //  BuxMuse
 //
-//  A high-performance, static MeshGradient background for Hero Cards.
-//  Uses the current theme's 9-color mesh palette to create a lush, painted look.
-//  Static grid points ensure 0 CPU overhead when idle.
+//  Theme-based aurora wash — 2-color diagonal gradient from hero palette.
+//  Card tints (DashboardThemeTint) and brand settings are unchanged.
 //
 
 import SwiftUI
@@ -24,44 +23,37 @@ struct BuxHeroMeshBackground: View {
     @EnvironmentObject var themeManager: ThemeManager
     @ObservedObject private var settings = SettingsStore.shared
 
-    // Static 3x3 grid points for zero-overhead rendering
-    private let meshPoints: [SIMD2<Float>] = [
-        [0.0, 0.0], [0.5, 0.0], [1.0, 0.0],
-        [0.0, 0.5], [0.5, 0.5], [1.0, 0.5],
-        [0.0, 1.0], [0.5, 1.0], [1.0, 1.0]
-    ]
-
     var body: some View {
         if settings.brandThemesEnabled {
-            meshGradient
+            auroraWash
         }
     }
 
     @ViewBuilder
-    private var meshGradient: some View {
-        let palette = colorScheme == .dark
-            ? themeManager.current.meshDarkPalette
-            : themeManager.current.meshLightPalette
+    private var auroraWash: some View {
+        // Always use the deep dark theme gradient colors to keep it rich and deep even in light mode
+        let pair = themeManager.current.heroDarkGradient
+        let lead = pair.first ?? themeManager.current.accentColor
+        let trail = pair.dropFirst().first ?? themeManager.current.glowColor
 
-        Group {
-            if #available(iOS 18.0, *) {
-                MeshGradient(
-                    width: 3,
-                    height: 3,
-                    points: meshPoints,
-                    colors: palette
-                )
-            } else {
-                LinearGradient(
-                    colors: [palette[0], palette[4], palette[8]],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            }
-        }
+        // High opacity to give that deep, rich, saturated look
+        let leadOpacity = 0.85
+        let trailOpacity = 0.60
+
+        LinearGradient(
+            colors: [
+                lead.opacity(leadOpacity),
+                trail.opacity(trailOpacity),
+                Color.black.opacity(0.85) // Rich midnight black blend
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .allowsHitTesting(false)
         .mask {
             LinearGradient(
-                colors: [.black, .black.opacity(0.8), .clear],
+                colors: [.black, .black.opacity(0.85), .clear],
                 startPoint: .top,
                 endPoint: .bottom
             )

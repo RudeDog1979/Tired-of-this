@@ -114,17 +114,15 @@ public struct ImageCropView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Apply") {
+                    BuxToolbarConfirmButton(accessibilityLabel: "Apply") {
                         if let cropped = performCrop() {
                             onCrop(cropped)
                         }
                         dismiss()
                     }
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
                 }
             }
         }
@@ -399,20 +397,36 @@ public class GlobalImagePickerCoordinator: NSObject, PHPickerViewControllerDeleg
     public func present(onPicked: @escaping (UIImage?) -> Void) {
         guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
               let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+            onPicked(nil)
             return
         }
-        
+
         self.onImagePicked = onPicked
-        
-        var config = PHPickerConfiguration()
+
+        var config = PHPickerConfiguration(photoLibrary: .shared())
         config.filter = .images
         config.selectionLimit = 1
-        
+
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = self
-        
-        // Present globally to avoid SwiftUI nested .sheet blank view bugs
-        rootVC.present(picker, animated: true)
+
+        // Present from the topmost controller to avoid SwiftUI nested sheet blank bugs.
+        topViewController(from: rootVC).present(picker, animated: true)
+    }
+
+    private func topViewController(from controller: UIViewController) -> UIViewController {
+        if let presented = controller.presentedViewController {
+            return topViewController(from: presented)
+        }
+        if let navigation = controller as? UINavigationController,
+           let visible = navigation.visibleViewController {
+            return topViewController(from: visible)
+        }
+        if let tab = controller as? UITabBarController,
+           let selected = tab.selectedViewController {
+            return topViewController(from: selected)
+        }
+        return controller
     }
     
     public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {

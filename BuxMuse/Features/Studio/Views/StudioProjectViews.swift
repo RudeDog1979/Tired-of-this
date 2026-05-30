@@ -29,17 +29,17 @@ struct StudioProjectsListView: View {
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showCreateProject = true }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
-                }
+                BuxToolbarButton(
+                    systemName: "plus",
+                    accessibilityLabel: "Create project",
+                    action: { showCreateProject = true }
+                )
             }
         }
         .sheet(isPresented: $showCreateProject) {
             NewProjectSheet()
                 .environmentObject(themeManager)
-                .buxThemedSheetContent()
+                .buxStudioSheetContent()
         }
     }
 
@@ -416,7 +416,7 @@ struct ActiveTimeTrackerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
+                    BuxToolbarCancelButton {
                         dismissNotesKeyboard()
                         syncDraftToController()
                         dismiss()
@@ -926,10 +926,12 @@ struct NewProjectSheet: View {
             ZStack {
                 themeManager.screenBackground(for: colorScheme)
                     .ignoresSafeArea()
-                
-                Form {
-                    Section("Project Details") {
+
+                BuxThemedCardForm {
+                    BuxFormSection(title: "Project Details") {
                         TextField("Project Name", text: $name)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         Picker("Client", selection: $clientId) {
                             if store.clients.isEmpty {
                                 Text("Independent Project").tag(UUID())
@@ -939,26 +941,30 @@ struct NewProjectSheet: View {
                                 }
                             }
                         }
+                        .buxFormFieldPadding()
                     }
-                    
-                    Section("Contract details") {
+
+                    BuxFormSection(title: "Contract details") {
                         TextField("Hourly Rate", text: $hourlyRate)
                             .keyboardType(.decimalPad)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         TextField("Fixed Fee Arrangement (optional)", text: $fixedFee)
                             .keyboardType(.decimalPad)
+                            .buxFormFieldPadding()
                     }
-                    
-                    Section("Internal Notes") {
+
+                    BuxFormSection(title: "Internal Notes") {
                         TextField("Notes", text: $notes)
+                            .buxFormFieldPadding()
                     }
                 }
-                .scrollContentBackground(.hidden)
             }
             .navigationTitle("New Project")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     BuxToolbarSaveButton(isDirty: !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
@@ -975,9 +981,7 @@ struct NewProjectSheet: View {
                     }
                 }
             }
-            .onAppear {
-                clientId = store.clients.first?.id ?? UUID()
-            }
+            .buxStudioSheetContent()
         }
     }
 }

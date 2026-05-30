@@ -75,9 +75,8 @@ struct StudioMetricsGrid: View {
     private func metricCard(title: String, value: String, subtitle: String, color: Color) -> some View {
         BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                Text(title.uppercased())
+                Text(title)
                     .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
-                    .font(.system(size: 10, weight: .bold))
                 Text(value)
                     .font(.system(size: 18, weight: .bold, design: .rounded))
                     .foregroundColor(color)
@@ -238,9 +237,8 @@ struct StudioTaxSection: View {
                     row("Gross", display.grossIncomeFormatted)
                     row("After deductions", display.netIncomeFormatted)
                     if !display.primaryRulesPreview.isEmpty {
-                        Text(display.incomeTypeLabel.uppercased())
+                        Text(display.incomeTypeLabel)
                             .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
-                            .font(.system(size: 10, weight: .bold))
                             .padding(.top, 4)
                         Text(display.primaryRulesPreview)
                             .buxCaptionStyle(color: themeManager.labelPrimary(for: colorScheme))
@@ -445,7 +443,7 @@ struct StudioHubPulseCard: View {
 
                     SparklineChart(
                         points: cashflow.inflowSparklinePoints,
-                        color: themeManager.current.accentColor,
+                        color: BuxChartColors.inflowTrend(for: colorScheme),
                         showAreaFill: true
                     )
                     .frame(height: 56)

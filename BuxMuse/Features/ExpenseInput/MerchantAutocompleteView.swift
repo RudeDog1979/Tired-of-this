@@ -34,7 +34,7 @@ struct MerchantAutocompleteView: View {
 
                                     Text(candidate.subtitle)
                                         .font(.system(size: 11, weight: .medium))
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                                         .lineLimit(2)
                                 }
 
@@ -46,7 +46,7 @@ struct MerchantAutocompleteView: View {
                                         .foregroundColor(themeManager.current.accentColor)
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
-                                        .background(themeManager.current.accentColor.opacity(0.12))
+                                        .background(themeManager.pillActiveChipFill(for: colorScheme))
                                         .clipShape(Capsule())
                                 } else if candidate.matchKind == .aliasVariant {
                                     Text("Pick")

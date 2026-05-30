@@ -59,7 +59,6 @@ struct StudioInvoicesListView: View {
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(store)
-                .buxThemedSheetContent()
         }
     }
 
@@ -92,35 +91,30 @@ struct StudioInvoicesListView: View {
 
     @ToolbarContentBuilder
     private var invoiceToolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
-                NavigationLink {
-                    StudioInvoiceSettingsView()
-                        .environmentObject(themeManager)
-                        .environmentObject(appSettingsManager)
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            NavigationLink {
+                StudioInvoiceSettingsView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environment(\.studioEnhancedTint, true)
+            } label: {
+                BuxToolbarIcon(systemName: "gearshape.fill")
+            }
+
+            Menu {
+                Button("All") { statusFilter = nil }
+                ForEach(InvoiceStatus.allCases) { status in
+                    Button(status.rawValue) { statusFilter = status }
                 }
+            } label: {
+                BuxToolbarIcon(systemName: "line.3.horizontal.decrease.circle")
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button("All") { statusFilter = nil }
-                    ForEach(InvoiceStatus.allCases) { status in
-                        Button(status.rawValue) { statusFilter = status }
-                    }
-                } label: {
-                    Image(systemName: "line.3.horizontal.decrease.circle")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
-                }
-            }
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button(action: { showEditor = true }) {
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
-            }
+
+            BuxToolbarButton(
+                systemName: "plus",
+                accessibilityLabel: "Create invoice",
+                action: { showEditor = true }
+            )
         }
     }
     
@@ -469,6 +463,7 @@ struct StudioInvoiceDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") { showEdit = true }
+                    .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
             }
         }
         .fullScreenCover(isPresented: $showEdit) {
@@ -476,7 +471,6 @@ struct StudioInvoiceDetailView: View {
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(store)
-                .buxThemedSheetContent()
         }
     }
 

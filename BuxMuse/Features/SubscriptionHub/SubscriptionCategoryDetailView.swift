@@ -94,6 +94,13 @@ struct SubscriptionCategoryDetailView: View {
         case .transport: return .blue
         case .subscriptions: return themeManager.current.accentColor
         case .housing: return .red
+        case .entertainment: return .pink
+        case .shopping: return .indigo
+        case .health: return .red
+        case .utilities: return .yellow
+        case .travel: return .cyan
+        case .education: return .teal
+        case .personal: return .purple
         case .income: return .mint
         case .other: return .purple
         }
@@ -106,6 +113,13 @@ struct SubscriptionCategoryDetailView: View {
         case .transport: return "car.fill"
         case .subscriptions: return "arrow.triangle.2.circlepath"
         case .housing: return "house.fill"
+        case .entertainment: return "film.fill"
+        case .shopping: return "bag.fill"
+        case .health: return "heart.fill"
+        case .utilities: return "bolt.fill"
+        case .travel: return "airplane"
+        case .education: return "book.fill"
+        case .personal: return "sparkles"
         case .income: return "briefcase.fill"
         case .other: return "ellipsis.circle.fill"
         }

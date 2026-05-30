@@ -70,21 +70,28 @@ struct StudioExpenseEditorView: View {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
 
-                Form {
-                    Section("Expense") {
+                BuxThemedCardForm {
+                    BuxFormSection(title: "Expense") {
                         TextField("Merchant / vendor", text: $merchant)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         TextField("Amount", text: $amount)
                             .keyboardType(.decimalPad)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         DatePicker("Date", selection: $date, displayedComponents: .date)
+                            .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
                     }
 
-                    Section("Business classification") {
+                    BuxFormSection(title: "Business classification") {
                         Picker("Category", selection: $category) {
                             ForEach(BusinessExpenseCategory.allCases) { cat in
                                 Text(cat.rawValue).tag(cat.rawValue)
                             }
                         }
-
+                        .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         Picker("Use", selection: $businessUse) {
                             ForEach(ExpenseBusinessUse.allCases) { use in
                                 Text(use.rawValue).tag(use)
@@ -108,11 +115,15 @@ struct StudioExpenseEditorView: View {
                                 isDeductible = true
                             }
                         }
-
+                        .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         Toggle("Deductible", isOn: $isDeductible)
+                            .tint(themeManager.current.accentColor)
                             .disabled(businessUse == .personal)
+                            .buxFormFieldPadding()
 
                         if isDeductible && businessUse != .personal {
+                            BuxFormRowDivider()
                             VStack(alignment: .leading, spacing: 6) {
                                 HStack {
                                     Text("Deductible %")
@@ -121,9 +132,12 @@ struct StudioExpenseEditorView: View {
                                         .font(.system(size: 13, weight: .bold))
                                 }
                                 Slider(value: $deductiblePercentage, in: 0...100, step: 5)
+                                    .tint(themeManager.current.accentColor)
                             }
+                            .buxFormFieldPadding()
                         }
 
+                        BuxFormRowDivider()
                         HStack {
                             Text(categoryHint.strength.rawValue)
                                 .font(.system(size: 10, weight: .bold))
@@ -136,16 +150,19 @@ struct StudioExpenseEditorView: View {
                                 .font(.system(size: 11))
                                 .buxLabelSecondary()
                         }
+                        .buxFormFieldPadding()
                     }
 
-                    Section("Tax details") {
+                    BuxFormSection(title: "Tax details") {
                         TextField("Indirect tax paid (optional)", text: $vatAmount)
                             .keyboardType(.decimalPad)
+                            .buxFormFieldPadding()
                     }
 
-                    Section("Attachment") {
+                    BuxFormSection(title: "Attachment") {
                         PhotosPicker(selection: $selectedPhoto, matching: .images) {
                             Label(attachedImage == nil ? "Add receipt photo" : "Change photo", systemImage: "camera")
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .onChange(of: selectedPhoto) { _, item in
                             Task {
@@ -155,20 +172,21 @@ struct StudioExpenseEditorView: View {
                                 }
                             }
                         }
+                        .buxFormFieldPadding()
                     }
 
-                    Section("Notes") {
+                    BuxFormSection(title: "Notes") {
                         TextField("Business purpose, project, etc.", text: $notes, axis: .vertical)
                             .lineLimit(3...6)
+                            .buxFormFieldPadding()
                     }
                 }
-                .scrollContentBackground(.hidden)
             }
             .navigationTitle(receiptToEdit == nil ? "Log Expense" : "Edit Expense")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     BuxToolbarSaveButton(isDirty: hasUnsavedChanges) {
@@ -179,6 +197,7 @@ struct StudioExpenseEditorView: View {
                 }
             }
             .onAppear { hydrate() }
+            .buxStudioSheetContent()
         }
     }
 

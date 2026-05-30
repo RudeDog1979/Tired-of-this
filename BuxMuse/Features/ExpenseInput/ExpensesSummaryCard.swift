@@ -7,6 +7,7 @@ import SwiftUI
 
 struct ExpensesSummaryCard: View {
     let display: ExpensesSummaryDisplay
+    var chromeTier: BuxCardChromeTier = .hero
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
 
@@ -33,8 +34,16 @@ struct ExpensesSummaryCard: View {
                     Text("Top Merchants")
                         .font(.caption.bold())
                         .foregroundColor(.gray)
-                    MerchantBreakdownChart(breakdown: display.merchantBreakdown)
-                        .frame(height: 72)
+                    MerchantBreakdownChart(
+                        breakdown: display.merchantBreakdown,
+                        maxItems: 3
+                    )
+                    .frame(height: MerchantBreakdownChart.compactHeight(itemCount: min(3, display.merchantBreakdown.count)))
+                    if display.merchantBreakdown.count > 3 {
+                        Text("+\(display.merchantBreakdown.count - 3) more")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundColor(.gray.opacity(0.9))
+                    }
                 }
                 .heroSummaryReveal(isVisible: isVisible, delay: 0.1)
             }
@@ -48,7 +57,7 @@ struct ExpensesSummaryCard: View {
             }
             .heroSummaryReveal(isVisible: isVisible, delay: 0.14)
         }
-        .expenseHeroCardChrome(themeManager: themeManager, colorScheme: colorScheme)
+        .expenseCardChrome(tier: chromeTier)
         .frame(
             maxWidth: .infinity,
             minHeight: BuxLayout.expenseHeroSummaryHeight,

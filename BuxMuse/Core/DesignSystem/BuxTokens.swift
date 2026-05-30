@@ -23,18 +23,19 @@ enum BuxTokens {
     static let sheetBottomClearance: CGFloat = 120
 
     enum Radius {
-        static let field: CGFloat = 14
-        static let card: CGFloat = 16
-        static let hero: CGFloat = 24
-        static let heroLarge: CGFloat = 32
+        static let field = BuxMaterialShape.small
+        static let card = BuxMaterialShape.medium
+        static let hero = BuxMaterialShape.medium
+        static let heroLarge = BuxMaterialShape.large
+        static let sheet = BuxMaterialShape.extraLarge
     }
 
     /// Apple Music–style soft shadow — hero / floating only. GPU-friendly single layer.
     enum Shadow {
-        static let heroColorOpacityLight: Double = 0.10
+        static let heroColorOpacityLight: Double = 0.055
         static let heroColorOpacityDark: Double = 0.28
-        static let heroRadius: CGFloat = 20
-        static let heroY: CGFloat = 8
+        static let heroRadius: CGFloat = 14
+        static let heroY: CGFloat = 5
         static let ctaRadius: CGFloat = 5
         static let ctaY: CGFloat = 2
     }
@@ -42,13 +43,34 @@ enum BuxTokens {
     static func horizontalMargin(for width: CGFloat) -> CGFloat {
         width < compactWidthThreshold ? marginCompact : marginRegular
     }
+
+    /// System red for destructive actions — never the brand accent.
+    static let destructive = Color.red
+}
+
+/// Swipe action tints — delete is always `BuxTokens.destructive`, never accent.
+enum BuxSwipeActionTint {
+    static var delete: Color { BuxTokens.destructive }
+    static let category = Color.orange
+    static let duplicate = Color(red: 90/255, green: 85/255, blue: 245/255)
+    static let note = Color.teal
+
+    static func edit(accent: Color) -> Color { accent }
 }
 
 enum BuxElevation {
     /// List rows — no shadow, optional separator only.
     case flat
-    /// Section cards — hairline pop in light mode, no shadow.
+    /// Section cards — hairline on light, hairline on dark; never shadow (no clipping).
     case card
-    /// Hero panels — soft diffuse shadow (Apple Music large cards).
+    /// Hero panels — soft shadow in light; hairline + shadow in dark.
     case hero
+}
+
+struct BuxCardChromeMetrics {
+    var stroke: Color = .clear
+    var strokeWidth: CGFloat = 0
+    var shadowColor: Color = .clear
+    var shadowRadius: CGFloat = 0
+    var shadowY: CGFloat = 0
 }

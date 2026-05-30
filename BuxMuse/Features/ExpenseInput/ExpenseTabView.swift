@@ -57,7 +57,6 @@ struct ExpenseTabView: View {
         NavigationStack {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-                BuxHeroMeshBackground()
 
                 Group {
                     if allRecords.isEmpty {
@@ -107,7 +106,6 @@ struct ExpenseTabView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(brain)
                 .environment(\.expensesEnhancedTint, true)
-                .buxThemedSheetContent()
         }
         .sheet(item: $categorySheetTransaction) { tx in
             ExpenseCategorySheet(transaction: tx) { category, categoryId in
@@ -288,124 +286,93 @@ struct ExpenseTabView: View {
         let display = brain.expenseInteractionSnapshot
         let showHero = !display.sections.isEmpty || display.header.totalSpent != 0
 
-        return List {
-            if showHero {
-                Section {
+        return ScrollView(showsIndicators: false) {
+            LazyVStack(spacing: 0) {
+                if showHero {
                     ExpensesTopCarousel(
                         header: display.header,
                         summary: display.summary,
                         formatAmount: { appSettingsManager.format($0) }
                     )
                     .environmentObject(themeManager)
-                    .listRowInsets(expenseHeroRowInsets)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                    .padding(expenseHeroRowInsets)
+                    .padding(.bottom, 16)
                 }
-            }
 
-            ForEach(display.sections) { section in
-                Section {
-                    ForEach(section.expenses) { expense in
-                        if let record = filteredRecords.first(where: { $0.id == expense.id }) {
-                            expenseRowContent(expense: expense, record: record)
+                ForEach(display.sections) { section in
+                    Section {
+                        ForEach(section.expenses) { expense in
+                            if let record = filteredRecords.first(where: { $0.id == expense.id }) {
+                                expenseRowContent(expense: expense, record: record)
+                            }
                         }
-                    }
-                } header: {
-                    HStack {
-                        Text(section.title.uppercased())
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                            .kerning(1.2)
+                    } header: {
+                        HStack {
+                            Text(section.title.uppercased())
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
+                                .kerning(1.2)
 
-                        if let insight = section.microInsight {
                             Spacer()
-                            InlineInsightView(text: insight)
+
+                            if let insight = section.microInsight {
+                                InlineInsightView(text: insight)
+                            }
                         }
+                        .padding(.vertical, 8)
                     }
                 }
             }
+            .padding(.vertical, 8)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
         .scrollDismissesKeyboard(.interactively)
-        .buxListContentMargins()
-        .buxCustomTabBarScrollClearance()
+        .buxScrollContentMargins()
+        .buxRootScrollEdgeChrome()
     }
 
     @ViewBuilder
     private func expenseRowContent(expense: ExpenseRowDisplay, record: ExpenseRecord) -> some View {
-        Button(action: {
+        ExpandableExpenseCard(expense: expense, expandedId: $expandedExpenseId) {
             withAnimation(.buxSnap) {
-                selectedRecord = record
+                activeSheet = .edit(record.toTransaction())
             }
-        }) {
-            ExpandableExpenseCard(expense: expense, expandedId: $expandedExpenseId)
-                .environmentObject(themeManager)
-                .contentShape(Rectangle())
         }
-        .buttonStyle(BuxMicroShrinkStyle())
-            .listRowInsets(expenseListRowInsets)
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                Button {
-                    withAnimation(.buxSnap) {
-                        activeSheet = .edit(record.toTransaction())
-                    }
-                } label: {
-                    Label("Edit", systemImage: "pencil")
-                }
-                .tint(themeManager.current.accentColor)
-
-                Button {
-                    categorySheetTransaction = record.toTransaction()
-                } label: {
-                    Label("Category", systemImage: "tag")
-                }
-                .tint(.orange)
-
-                Button {
-                    duplicateExpense(record)
-                } label: {
-                    Label("Duplicate", systemImage: "plus.square.on.square")
-                }
-                .tint(Color(red: 90/255, green: 85/255, blue: 245/255))
-
-                Button(role: .destructive) {
-                    deleteExpense(record)
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
+        .environmentObject(themeManager)
+        .padding(expenseListRowInsets)
+        .contextMenu {
+            Button {
+                noteDraft = record.notes ?? ""
+                noteRecord = record
+            } label: {
+                Label("Note", systemImage: "note.text")
             }
-            .contextMenu {
-                Button {
+
+            Button {
+                withAnimation(.buxSnap) {
                     activeSheet = .edit(record.toTransaction())
-                } label: {
-                    Label("Edit", systemImage: "pencil")
                 }
-                Button {
-                    noteDraft = record.notes ?? ""
-                    noteRecord = record
-                } label: {
-                    Label("Add note", systemImage: "note.text")
-                }
-                Button {
-                    categorySheetTransaction = record.toTransaction()
-                } label: {
-                    Label("Change category", systemImage: "tag")
-                }
-                Button {
-                    duplicateExpense(record)
-                } label: {
-                    Label("Duplicate", systemImage: "plus.square.on.square")
-                }
-                Divider()
-                Button(role: .destructive) {
-                    deleteExpense(record)
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
+            } label: {
+                Label("Edit", systemImage: "pencil")
             }
+
+            Button {
+                categorySheetTransaction = record.toTransaction()
+            } label: {
+                Label("Category", systemImage: "tag")
+            }
+
+            Button {
+                duplicateExpense(record)
+            } label: {
+                Label("Duplicate", systemImage: "plus.square.on.square")
+            }
+
+            Button(role: .destructive) {
+                deleteExpense(record)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
     }
 
     private func refreshExpenseListDisplay() {

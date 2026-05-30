@@ -7,65 +7,6 @@
 
 import SwiftUI
 
-// MARK: - Icon button (glass / material — labelPrimary glyph)
-
-struct BuxIconButton: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject private var themeManager: ThemeManager
-    @ObservedObject private var settings = SettingsStore.shared
-
-    let systemImage: String
-    var accessibilityLabel: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                BuxGlassCircleBackground(diameter: 44)
-                Image(systemName: systemImage)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-            }
-            .frame(width: 44, height: 44)
-            .contentShape(Circle())
-        }
-        .buttonStyle(BuxMicroShrinkStyle())
-        .accessibilityLabel(accessibilityLabel)
-    }
-}
-
-// MARK: - Overlay header
-
-struct BuxOverlayHeader: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject private var themeManager: ThemeManager
-
-    let title: String
-    let onBack: () -> Void
-    var backAccessibilityLabel: String = "Back"
-
-    var body: some View {
-        ZStack {
-            Text(title)
-                .font(.system(size: 17, weight: .bold))
-                .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-
-            HStack {
-                BuxIconButton(
-                    systemImage: "chevron.left",
-                    accessibilityLabel: backAccessibilityLabel,
-                    action: onBack
-                )
-                Spacer()
-                Color.clear.frame(width: 44, height: 44)
-            }
-        }
-        .padding(.horizontal, BuxLayout.marginHorizontal)
-        .padding(.top, BuxOverlayMetrics.headerTopInset)
-        .padding(.bottom, BuxLayout.section)
-    }
-}
-
 enum BuxOverlayMetrics {
     static let headerTopInset: CGFloat = 60
     static let scrollBottomInset: CGFloat = 80
@@ -83,20 +24,16 @@ struct BuxDetailOverlayScaffold<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
-
-            BuxHeroMeshBackground()
-
-            if showsBackdropDismiss {
-                Color.black.opacity(colorScheme == .dark ? 0.55 : 0.35)
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
                     .ignoresSafeArea()
-                    .onTapGesture { onDismiss() }
-            }
 
-            VStack(spacing: 0) {
-                BuxOverlayHeader(title: title, onBack: onDismiss)
+                if showsBackdropDismiss {
+                    Color.black.opacity(colorScheme == .dark ? 0.55 : 0.35)
+                        .ignoresSafeArea()
+                        .onTapGesture { onDismiss() }
+                }
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: BuxLayout.section) {
@@ -106,8 +43,16 @@ struct BuxDetailOverlayScaffold<Content: View>: View {
                     .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
                     .buxScreenContentMargins()
                 }
-                .buxReportsContainerWidth()
+                .buxDetailScrollChrome()
             }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    BuxToolbarBackButton(action: onDismiss)
+                }
+            }
+            .buxDetailNavigationChrome()
         }
     }
 }

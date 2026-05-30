@@ -424,21 +424,17 @@ struct GoalDetailView: View {
     // MARK: - Delete
 
     private var deleteButton: some View {
-        Button(action: {
+        BuxButton(
+            title: "Delete Goal & Discard savings data",
+            systemImage: "trash.fill",
+            role: .destructive,
+            expands: true
+        ) {
             onDeleteGoal(detail.goal.id)
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
                 isPresented = false
             }
-        }) {
-            Text("Delete Goal & Discard savings data")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.red)
-                .clipShape(Capsule())
         }
-        .buttonStyle(BuxMicroShrinkStyle())
     }
 
     private func formatDate(_ date: Date) -> String {

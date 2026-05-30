@@ -255,4 +255,35 @@ final class BuxTipsEngine {
             version: 1
         )
     }
+
+    // MARK: - Tips History
+
+    private let historyKey = "buxmuse.tips.history"
+
+    func saveTipToHistory(tip: DailyTipDisplay) {
+        guard !tip.isEmpty else { return }
+        var list = loadTipHistory()
+        if !list.contains(where: { $0.id == tip.id }) {
+            list.append(HistoricalTipRecord(
+                id: tip.id,
+                date: Date(),
+                title: tip.moneyTip.title,
+                message: tip.moneyTip.body
+            ))
+            if list.count > 7 {
+                list.removeFirst(list.count - 7)
+            }
+            if let data = try? JSONEncoder().encode(list) {
+                UserDefaults.standard.set(data, forKey: historyKey)
+            }
+        }
+    }
+
+    func loadTipHistory() -> [HistoricalTipRecord] {
+        guard let data = UserDefaults.standard.data(forKey: historyKey),
+              let list = try? JSONDecoder().decode([HistoricalTipRecord].self, from: data) else {
+            return []
+        }
+        return list
+    }
 }

@@ -52,6 +52,16 @@ struct StudioTaxReferenceView: View {
         return selectedPresetCode
     }
 
+    private var savedPresetSummary: String? {
+        guard !selectedPresetCode.isEmpty,
+              let preset = TaxPresetLoader.preset(for: selectedPresetCode) else { return nil }
+        return preset.presetLineSummary
+    }
+
+    private var catalogUpdatedLabel: String? {
+        appDataManager.taxManagerRef.catalogUpdatedAt.map { "Reference updated \($0)" }
+    }
+
     private var currentDraft: TaxProfileDraft {
         TaxProfileDraft(
             selectedPresetCode: selectedPresetCode,
@@ -111,7 +121,7 @@ struct StudioTaxReferenceView: View {
             taxStudioProfileSaveBridge?.setDirty(dirty)
         }
         .task {
-            TaxPresetLoader.ensureCatalogLoaded()
+            await TaxPresetLoader.ensureCatalogLoaded()
             catalogReady = true
         }
         .sheet(isPresented: $showCountryPicker, onDismiss: {
@@ -123,7 +133,7 @@ struct StudioTaxReferenceView: View {
                 stagingPreset = preset
             }
             .environmentObject(themeManager)
-            .buxThemedSheetContent()
+            .buxStudioSheetContent()
         }
         .sheet(item: $presetToReview) { preset in
             TaxPresetReviewSheet(preset: preset) {
@@ -133,7 +143,8 @@ struct StudioTaxReferenceView: View {
                 presetToReview = nil
             }
             .environmentObject(themeManager)
-            .buxThemedSheetContent()
+            .environment(\.studioEnhancedTint, true)
+            .buxStudioSheetContent()
         }
     }
 
@@ -252,6 +263,18 @@ struct StudioTaxReferenceView: View {
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .multilineTextAlignment(.leading)
+                        if let savedPresetSummary {
+                            Text(savedPresetSummary)
+                                .font(.system(size: 11, weight: .medium))
+                                .buxLabelSecondary()
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(3)
+                        }
+                        if let catalogUpdatedLabel {
+                            Text(catalogUpdatedLabel)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(themeManager.current.accentColor.opacity(0.85))
+                        }
                     }
                     Spacer()
                     Image(systemName: "chevron.down")
@@ -259,8 +282,7 @@ struct StudioTaxReferenceView: View {
                         .foregroundColor(themeManager.current.accentColor)
                 }
                 .padding(14)
-                .background(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .buxThemedInputPlate(cornerRadius: 12)
             }
             .buttonStyle(BuxPressFeedbackStyle())
 
@@ -338,8 +360,7 @@ struct StudioTaxReferenceView: View {
                 TextField("e.g. 22", text: $estimatedIncomeRate)
                     .keyboardType(.decimalPad)
                     .padding(10)
-                    .background(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .buxThemedInputPlate(cornerRadius: 12)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BuxLayout.section)
@@ -352,8 +373,7 @@ struct StudioTaxReferenceView: View {
                 TextField("e.g. 15.3", text: $estimatedSERate)
                     .keyboardType(.decimalPad)
                     .padding(10)
-                    .background(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .buxThemedInputPlate(cornerRadius: 12)
                 Text("These rates power the Income Tax Calculator and quarterly estimates. They are never auto-filled from JSON presets.")
                     .font(.system(size: 11))
                     .buxLabelSecondary()
@@ -369,8 +389,7 @@ struct StudioTaxReferenceView: View {
                 TextField("e.g. 20", text: $estimatedIndirectRate)
                     .keyboardType(.decimalPad)
                     .padding(10)
-                    .background(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .buxThemedInputPlate(cornerRadius: 12)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BuxLayout.section)
@@ -439,8 +458,7 @@ struct StudioTaxReferenceView: View {
                 .scrollContentBackground(.hidden)
                 .frame(minHeight: minHeight)
                 .padding(10)
-                .background(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .buxThemedInputPlate(cornerRadius: 12)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)
@@ -509,19 +527,19 @@ struct TaxPresetReviewSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    BuxToolbarCancelButton {
                         onCancel()
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Apply") {
+                    BuxToolbarConfirmButton(accessibilityLabel: "Apply") {
                         onConfirm()
                         dismiss()
                     }
-                    .fontWeight(.semibold)
                 }
             }
+            .environment(\.studioEnhancedTint, true)
         }
     }
 

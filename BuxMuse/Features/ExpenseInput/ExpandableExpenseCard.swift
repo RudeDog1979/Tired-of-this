@@ -9,6 +9,7 @@ struct ExpandableExpenseCard: View {
     let expense: ExpenseRowDisplay
 
     @Binding var expandedId: UUID?
+    var onEdit: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.expensesEnhancedTint) private var expensesEnhancedTint
@@ -24,37 +25,40 @@ struct ExpandableExpenseCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(expense.name)
-                        .font(.system(size: 16, weight: .bold))
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                    expandedId = isExpanded ? nil : expense.id
+                }
+            } label: {
+                HStack(spacing: 14) {
+                    AsyncMerchantLogoView(merchantName: expense.name, size: 44)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(expense.name)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+
+                        if let category = expense.category {
+                            Text(category)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                        }
+                    }
+
+                    Spacer()
+
+                    Text(expense.amountFormatted)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-                    if let category = expense.category {
-                        Text(category)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                    }
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.gray)
                 }
-
-                Spacer()
-
-                Text(expense.amountFormatted)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-
-                Button {
-                    withAnimation(.buxLiquidSpring) {
-                        expandedId = isExpanded ? nil : expense.id
-                    }
-                } label: {
-                    Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
-                        .font(.system(size: 16))
-                        .foregroundColor(themeManager.current.accentColor.opacity(0.8))
-                }
-                .buttonStyle(.plain)
+                .padding(16)
+                .contentShape(Rectangle())
             }
-            .padding()
+            .buttonStyle(BuxMicroShrinkStyle())
 
             if isExpanded {
                 VStack(alignment: .leading, spacing: 12) {
@@ -73,9 +77,27 @@ struct ExpandableExpenseCard: View {
                     if let context = expense.context {
                         insightRow(icon: "tag.fill", title: "Context", value: formatEnum(context), color: .purple)
                     }
+                    
+                    Button {
+                        onEdit()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Label("Edit Transaction", systemImage: "pencil.line")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(themeManager.current.accentColor)
+                            Spacer()
+                        }
+                        .padding(.vertical, 10)
+                        .background(themeManager.current.accentColor.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .buttonStyle(BuxMicroShrinkStyle())
+                    .padding(.top, 4)
                 }
-                .padding(.horizontal)
-                .padding(.bottom)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .modifier(

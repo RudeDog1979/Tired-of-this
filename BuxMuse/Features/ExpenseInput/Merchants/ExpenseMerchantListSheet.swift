@@ -17,17 +17,10 @@ struct ExpenseMerchantListSheet: View {
     @State private var expenseRecords: [ExpenseRecord] = []
     @State private var expandedMerchantId: UUID?
 
-    private var cardColor: Color {
-        themeManager.cardFill(for: colorScheme)
-    }
-
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                header
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 10) {
@@ -35,52 +28,26 @@ struct ExpenseMerchantListSheet: View {
                             merchantCard(merchant)
                         }
                     }
-                    .padding(.horizontal, BuxLayout.marginHorizontal)
-                    .padding(.top, 8)
-                    .padding(.bottom, 100)
+                    .padding(.top, BuxLayout.tight)
+                    .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
+                    .buxScreenContentMargins()
                 }
-
-                doneBar
+                .buxDetailScrollChrome()
             }
+            .navigationTitle("Merchants")
+            .navigationBarTitleDisplayMode(.inline)
+            .modifier(MerchantSheetSubtitleModifier())
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    BuxToolbarDoneButton { dismiss() }
+                }
+            }
+            .buxDetailNavigationChrome()
         }
+        .buxMeshSheetPresentation()
         .onAppear {
             merchants = (try? brain.fetchAllMerchantRecords()) ?? []
             expenseRecords = (try? brain.fetchAllExpenseRecords()) ?? []
-        }
-    }
-
-    private var header: some View {
-        VStack(spacing: 6) {
-            Text("Merchants")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-
-            Text("Tap a merchant to review details. Changes save automatically.")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, BuxLayout.loose)
-        }
-        .padding(.top, 8)
-        .padding(.bottom, 12)
-    }
-
-    private var doneBar: some View {
-        VStack(spacing: 0) {
-            Divider().opacity(0.08)
-            Button(action: { dismiss() }) {
-                Text("Done")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(themeManager.current.accentColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-            }
-            .buttonStyle(BuxMicroShrinkStyle())
-            .padding(.horizontal, BuxLayout.marginHorizontal)
-            .padding(.vertical, 16)
-            .background(themeManager.screenBackground(for: colorScheme))
         }
     }
 
@@ -151,6 +118,23 @@ struct ExpenseMerchantListSheet: View {
             parts.append(canonical)
         }
         return parts.isEmpty ? (merchant.cluster ?? "Merchant") : parts.joined(separator: " · ")
+    }
+}
+
+private struct MerchantSheetSubtitleModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.navigationSubtitle("Tap a merchant to review details. Changes save automatically.")
+        } else {
+            content.safeAreaInset(edge: .top, spacing: 0) {
+                Text("Tap a merchant to review details. Changes save automatically.")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, BuxLayout.loose)
+                    .padding(.bottom, BuxLayout.tight)
+            }
+        }
     }
 }
 

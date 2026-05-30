@@ -2,8 +2,7 @@
 //  BuxRootTheme.swift
 //  BuxMuse
 //
-//  Root semantic brand theme — accent/tint for system UI, shared surfaces for custom UI.
-//  Backgrounds stay on screenBackground + mesh; no feature/logic changes.
+//  Root semantic brand theme — M3 material surfaces + accent for system UI.
 //
 
 import SwiftUI
@@ -21,15 +20,16 @@ struct BuxSemanticTheme: Equatable {
     let chipMutedFill: Color
 
     static func resolve(themeManager: ThemeManager, colorScheme: ColorScheme) -> BuxSemanticTheme {
-        BuxSemanticTheme(
-            accent: themeManager.current.accentColor,
-            labelPrimary: themeManager.labelPrimary(for: colorScheme),
-            labelSecondary: themeManager.labelSecondary(for: colorScheme),
-            labelTertiary: themeManager.labelTertiary(for: colorScheme),
+        let scheme = themeManager.materialScheme(for: colorScheme)
+        return BuxSemanticTheme(
+            accent: scheme.primary,
+            labelPrimary: scheme.onSurface,
+            labelSecondary: scheme.onSurfaceVariant,
+            labelTertiary: scheme.onSurfaceVariant.opacity(0.88),
             chevronMuted: themeManager.chevronMuted(for: colorScheme),
-            cardFill: themeManager.cardFill(for: colorScheme),
-            accentWash: themeManager.accentWash(for: colorScheme),
-            chipMutedFill: themeManager.chipMutedFill(for: colorScheme)
+            cardFill: scheme.surface,
+            accentWash: scheme.primaryContainer.opacity(colorScheme == .dark ? 0.55 : 0.85),
+            chipMutedFill: scheme.surfaceContainerHighest
         )
     }
 }
@@ -55,7 +55,7 @@ private struct BuxBrandSurfacesKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    /// When true, `BuxCard` uses mesh-tinted chrome (app-wide; tab flags still apply for direct modifiers).
+    /// When true, `BuxCard` uses M3-toned chrome (app-wide).
     var buxBrandSurfaces: Bool {
         get { self[BuxBrandSurfacesKey.self] }
         set { self[BuxBrandSurfacesKey.self] = newValue }
@@ -71,10 +71,12 @@ struct BuxRootBrandThemeModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         let semantic = BuxSemanticTheme.resolve(themeManager: themeManager, colorScheme: colorScheme)
+        let material = themeManager.materialScheme(for: colorScheme, branded: settings.brandThemesEnabled)
         content
             .tint(semantic.accent)
             .accentColor(semantic.accent)
             .environment(\.buxSemanticTheme, semantic)
+            .environment(\.buxMaterialScheme, material)
             .environment(\.buxBrandSurfaces, settings.brandThemesEnabled)
     }
 }
@@ -85,33 +87,38 @@ extension View {
         modifier(BuxRootBrandThemeModifier())
     }
 
-    /// Sheets / covers: inherit brand tint + semantics (background unchanged).
+    /// Sheets / covers: accent tint on controls only — system backgrounds (HIG).
     func buxThemedPresentation() -> some View {
         buxRootBrandTheme()
     }
 
-    /// Full themed modal stack: tint + mesh backdrop behind content.
+    /// Sheets / covers: accent tint + M3 canvas + themed navigation bar.
     func buxThemedSheetContent() -> some View {
-        modifier(BuxThemedSheetContentModifier())
+        buxThemedPresentation()
+            .buxMeshSheetPresentation()
+            .buxSheetNavigationChrome()
+    }
+
+    /// Studio sheets / covers — M3 canvas + studio form margins.
+    func buxStudioSheetContent() -> some View {
+        buxThemedSheetContent()
+            .environment(\.studioEnhancedTint, true)
+    }
+
+    /// Detail / hub sheets — flat M3 canvas behind sheet chrome.
+    func buxMeshSheetPresentation() -> some View {
+        modifier(BuxMeshSheetPresentationModifier())
     }
 }
 
-// MARK: - Sheet mesh backdrop
-
-private struct BuxThemedSheetContentModifier: ViewModifier {
+private struct BuxMeshSheetPresentationModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
 
     func body(content: Content) -> some View {
-        content
-            .buxThemedPresentation()
-            .background {
-                ZStack {
-                    themeManager.screenBackground(for: colorScheme)
-                    BuxHeroMeshBackground()
-                }
-                .ignoresSafeArea()
-            }
+        content.presentationBackground {
+            themeManager.screenBackground(for: colorScheme)
+        }
     }
 }
 
@@ -133,6 +140,20 @@ extension View {
     }
 }
 
+// MARK: - Chevron (Settings / navigation rows)
+
+struct BuxChevron: View {
+    enum Direction { case left, right }
+
+    var direction: Direction = .right
+
+    var body: some View {
+        Image(systemName: direction == .left ? "chevron.left" : "chevron.right")
+            .font(.system(size: 12, weight: .semibold))
+            .buxChevronMuted()
+    }
+}
+
 private struct BuxSemanticForegroundModifier: ViewModifier {
     @Environment(\.buxSemanticTheme) private var semantic
     let keyPath: KeyPath<BuxSemanticTheme, Color>
@@ -149,7 +170,7 @@ private struct BuxSemanticForegroundModifier: ViewModifier {
 // MARK: - Native Form / List (material shows screen behind)
 
 extension View {
-    /// Hides default Form/List chrome so screen + mesh background reads through native sheet material.
+    /// Hides default Form/List chrome so M3 screen background reads through native sheet material.
     func buxNativeFormAppearance() -> some View {
         scrollContentBackground(.hidden)
     }

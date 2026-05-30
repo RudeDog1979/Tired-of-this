@@ -11,6 +11,7 @@ import UserNotifications
 @MainActor
 final class BuxNotificationInboxEngine {
     private let readIdsKey = "buxmuse.notifications.readIds"
+    private let dismissedIdsKey = "buxmuse.notifications.dismissedIds"
 
     func rebuildInbox(
         settings: SettingsStore,
@@ -19,6 +20,7 @@ final class BuxNotificationInboxEngine {
         studioAlerts: [StudioAlertDisplay],
         studioInvoices: [StudioInvoice],
         taxDeadlineDays: Int?,
+        tipsHistory: [HistoricalTipRecord],
         currencyFormatter: (Decimal) -> String
     ) -> NotificationInboxDisplay {
         guard settings.notificationsEnabled else {
@@ -27,6 +29,18 @@ final class BuxNotificationInboxEngine {
 
         var items: [AppNotificationItem] = []
         let now = Date()
+
+        for tip in tipsHistory {
+            items.append(AppNotificationItem(
+                id: "tip-\(tip.id)",
+                title: tip.title,
+                message: tip.message,
+                date: tip.date,
+                category: .digest,
+                isRead: true,
+                severity: "low"
+            ))
+        }
 
         if settings.budgetAlertsEnabled, let budgetName = dashSnapshot.activeBudgetName {
             let limit = dashSnapshot.activeBudgetLimit
@@ -145,11 +159,13 @@ final class BuxNotificationInboxEngine {
         }
 
         let readIds = Set(UserDefaults.standard.stringArray(forKey: readIdsKey) ?? [])
+        let dismissedIds = Set(UserDefaults.standard.stringArray(forKey: dismissedIdsKey) ?? [])
         items = items.map { item in
             var copy = item
             copy.isRead = readIds.contains(item.id)
             return copy
         }
+        .filter { !dismissedIds.contains($0.id) }
         .sorted { $0.date > $1.date }
 
         let unread = items.filter { !$0.isRead }.count
@@ -166,6 +182,20 @@ final class BuxNotificationInboxEngine {
         var stored = Set(UserDefaults.standard.stringArray(forKey: readIdsKey) ?? [])
         ids.forEach { stored.insert($0) }
         UserDefaults.standard.set(Array(stored), forKey: readIdsKey)
+    }
+
+    func dismiss(_ id: String) {
+        var ids = Set(UserDefaults.standard.stringArray(forKey: dismissedIdsKey) ?? [])
+        ids.insert(id)
+        UserDefaults.standard.set(Array(ids), forKey: dismissedIdsKey)
+        markRead(id)
+    }
+
+    func dismissAll(_ ids: [String]) {
+        var stored = Set(UserDefaults.standard.stringArray(forKey: dismissedIdsKey) ?? [])
+        ids.forEach { stored.insert($0) }
+        UserDefaults.standard.set(Array(stored), forKey: dismissedIdsKey)
+        markAllRead(ids)
     }
 
     func syncLocalNotifications(

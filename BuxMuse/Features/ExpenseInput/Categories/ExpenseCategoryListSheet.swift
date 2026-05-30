@@ -16,33 +16,21 @@ struct ExpenseCategoryListSheet: View {
     @State private var mergeSource: ExpenseCategoryRecord?
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
-
-            VStack(spacing: 16) {
-                HStack {
-                    Button("Done") { dismiss() }
-                        .foregroundColor(.gray)
-                    Spacer()
-                    Text("Categories")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Spacer()
-                    Button("Add") { showEditor = true }
-                        .foregroundColor(themeManager.current.accentColor)
-                }
-                .padding(.horizontal, BuxLayout.marginHorizontal)
-                .padding(.top, 20)
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
 
                 List {
                     ForEach(categories) { category in
-                        HStack {
-                            Image(systemName: category.icon)
-                                .foregroundColor(themeManager.current.accentColor)
+                        HStack(spacing: 14) {
+                            BuxContentGlassIcon(systemName: category.icon, diameter: 34, pointSize: 15)
+
                             Text(category.name)
                                 .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+
                             Spacer()
+
                             if category.isCustom {
                                 Menu {
                                     Button("Merge…") { mergeSource = category }
@@ -52,17 +40,37 @@ struct ExpenseCategoryListSheet: View {
                                     }
                                 } label: {
                                     Image(systemName: "ellipsis.circle")
-                                        .foregroundColor(.gray)
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                 }
                             }
                         }
+                        .padding(.vertical, 4)
                         .listRowBackground(Color.clear)
                     }
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
+                .buxListContentMargins()
+                .buxSoftScrollChrome()
             }
+            .navigationTitle("Categories")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    BuxToolbarDoneButton { dismiss() }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    BuxNavIconButton(
+                        systemName: "plus",
+                        accessibilityLabel: "Add category",
+                        action: { showEditor = true }
+                    )
+                }
+            }
+            .buxDetailNavigationChrome()
         }
+        .buxMeshSheetPresentation()
         .onAppear(perform: reload)
         .sheet(isPresented: $showEditor) {
             ExpenseCategoryEditorSheet { name, icon, color in
@@ -83,7 +91,23 @@ struct ExpenseCategoryListSheet: View {
     }
 
     private func reload() {
-        categories = (try? brain.fetchAllCategoryRecords()) ?? []
+        let all = (try? brain.fetchAllCategoryRecords()) ?? []
+        let systemOrder = ExpenseCategoryCatalog.systemDefinitions.map(\.0.rawValue)
+
+        let system = all
+            .filter { !$0.isCustom }
+            .sorted { lhs, rhs in
+                let left = systemOrder.firstIndex(of: lhs.systemCategoryRaw ?? "") ?? Int.max
+                let right = systemOrder.firstIndex(of: rhs.systemCategoryRaw ?? "") ?? Int.max
+                if left != right { return left < right }
+                return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+            }
+
+        let custom = all
+            .filter(\.isCustom)
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+
+        categories = system + custom
     }
 }
 

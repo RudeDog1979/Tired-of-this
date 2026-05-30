@@ -23,6 +23,7 @@ struct BuxSectionHeader: View {
 // MARK: - BuxButton (canonical CTA — wraps BuxActionButton)
 
 struct BuxButton: View {
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
 
     let title: String
@@ -40,7 +41,7 @@ struct BuxButton: View {
             title: title,
             systemImage: systemImage,
             role: role,
-            accent: themeManager.current.accentColor,
+            accent: themeManager.materialScheme(for: colorScheme).primary,
             expands: expands,
             size: size,
             isEnabled: isEnabled,
@@ -88,14 +89,9 @@ struct BuxSheetScaffold<Content: View, Footer: View>: View {
     private var header: some View {
         HStack {
             if showsCancel {
-                Button(action: { dismiss() }) {
-                    Text(cancelTitle)
-                        .font(BuxTypography.buttonFontCompact)
-                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                }
-                .buttonStyle(BuxPressFeedbackStyle())
+                BuxToolbarCancelButton { dismiss() }
             } else {
-                Color.clear.frame(width: 60, height: 1)
+                Color.clear.frame(width: BuxToolbarMetrics.navButtonSize, height: 1)
             }
 
             Spacer()
@@ -168,7 +164,7 @@ struct BuxQuickActionButton: View {
 
     private var foregroundColor: Color {
         switch role {
-        case .primary: return .white
+        case .primary, .destructive: return .white
         case .secondary, .tinted: return tintColor
         }
     }
@@ -176,13 +172,16 @@ struct BuxQuickActionButton: View {
     private var backgroundColor: Color {
         switch role {
         case .primary: return tintColor
+        case .destructive: return BuxTokens.destructive
         case .secondary, .tinted: return themeManager.accentWash(for: colorScheme)
         }
     }
 
     private var showsBorder: Bool {
-        if case .primary = role { return false }
-        return true
+        switch role {
+        case .primary, .destructive: return false
+        case .secondary, .tinted: return true
+        }
     }
 
     private var borderColor: Color {
@@ -210,55 +209,15 @@ struct BuxQuickActionButton: View {
 // MARK: - Card container
 
 struct BuxCard<Content: View>: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.buxBrandSurfaces) private var buxBrandSurfaces
-    @ObservedObject private var settings = SettingsStore.shared
-    @EnvironmentObject private var themeManager: ThemeManager
-
     var elevation: BuxElevation = .card
     var cornerRadius: CGFloat = BuxTokens.Radius.card
     var padding: CGFloat = BuxTokens.section
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        let padded = content().padding(padding)
-
-        let meshChrome = settings.brandThemesEnabled && buxBrandSurfaces
-        if meshChrome {
-            padded
-                .buxThemedCardChrome(cornerRadius: cornerRadius)
-                .modifier(BuxCardHeroShadowModifier(elevation: elevation, colorScheme: colorScheme))
-        } else {
-            padded
-                .buxSurface(
-                    elevation: elevation,
-                    themeManager: themeManager,
-                    colorScheme: colorScheme,
-                    cornerRadius: cornerRadius
-                )
-        }
-    }
-}
-
-private struct BuxCardHeroShadowModifier: ViewModifier {
-    let elevation: BuxElevation
-    let colorScheme: ColorScheme
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if elevation == .hero {
-            let opacity = colorScheme == .dark
-                ? BuxTokens.Shadow.heroColorOpacityDark
-                : BuxTokens.Shadow.heroColorOpacityLight
-            content.shadow(
-                color: Color.black.opacity(opacity),
-                radius: BuxTokens.Shadow.heroRadius,
-                x: 0,
-                y: BuxTokens.Shadow.heroY
-            )
-        } else {
-            content
-        }
+        content()
+            .padding(padding)
+            .buxThemedCardChrome(cornerRadius: cornerRadius, elevation: elevation)
     }
 }
 

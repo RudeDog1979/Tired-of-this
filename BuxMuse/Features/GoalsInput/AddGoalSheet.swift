@@ -3,7 +3,7 @@
 //  BuxMuse
 //  Features/GoalsInput/
 //
-//  Premium bottom sheet for entering savings goals with predictive smart defaults.
+//  Native Form sheet for entering savings goals.
 //
 
 import SwiftUI
@@ -14,224 +14,100 @@ struct AddGoalSheet: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var goalsViewModel: GoalsViewModel
-    
+
     @State private var name: String = ""
     @State private var targetString: String = ""
     @State private var selectDeadline = false
     @State private var deadline: Date = Date().addingTimeInterval(180 * 86400)
-    @State private var priority: Int = 2 // 1=High, 2=Medium, 3=Low
+    @State private var priority: Int = 2
     @State private var notes: String = ""
-    
-    // Suggestion defaults cache
-    @State private var brainSuggestions: GoalSuggestions? = nil
-    
-    private var cardColor: Color { themeManager.cardFill(for: colorScheme) }
+    @State private var brainSuggestions: GoalSuggestions?
 
-    private var backgroundColor: Color { themeManager.screenBackground(for: colorScheme) }
-    
     var body: some View {
-        BuxSheetScaffold(title: "Add Goal") {
-            VStack(spacing: BuxTokens.block) {
-                        
-                        // BRAIN DYNAMIC DEFAULT CHIPS
-                        if let suggestions = brainSuggestions {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("BRAIN RECOMMENDATIONS")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(themeManager.current.accentColor)
-                                    .kerning(1.2)
-                                
-                                HStack(spacing: 10) {
-                                    Image(systemName: "sparkles")
-                                        .foregroundColor(themeManager.current.accentColor)
-                                        .font(.system(size: 14, weight: .bold))
-                                    
-                                    Text("6-Month Emergency target: \(appSettingsManager.format(suggestions.suggestedTargetAmount))")
-                                        .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.8) : Color(red: 70/255, green: 80/255, blue: 95/255))
-                                    
-                                    Spacer()
-                                    
-                                    Button(action: {
-                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                                            self.targetString = String(format: "%.0f", NSDecimalNumber(decimal: suggestions.suggestedTargetAmount).doubleValue)
-                                            self.deadline = suggestions.suggestedDeadline
-                                            self.selectDeadline = true
-                                            self.priority = suggestions.suggestedPriority
-                                        }
-                                    }) {
-                                        Text("Apply")
-                                            .font(.system(size: 11, weight: .bold))
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 6)
-                                            .background(themeManager.current.accentColor)
-                                            .clipShape(Capsule())
-                                    }
-                                    .buttonStyle(BuxPressFeedbackStyle())
-                                }
-                                .padding(12)
-                                .background(themeManager.current.accentColor.opacity(0.06))
-                                .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(themeManager.current.accentColor.opacity(0.12), lineWidth: 1)
-                                )
-                            }
-                        }
-                        
-                        // 1. Goal Name
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("GOAL NAME")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                .kerning(1.2)
-                            
-                            TextField("e.g. New Car, Laptop, Emergency Fund", text: $name)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                .padding(.horizontal, BuxLayout.marginHorizontal)
-                                .padding(.vertical, 16)
-                                .background(cardColor)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                                )
-                        }
-                        
-                        // 2. Target Amount
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("TARGET AMOUNT")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                .kerning(1.2)
-                            
-                            HStack(spacing: 8) {
-                                Text(appSettingsManager.selectedCurrency.symbol)
-                                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                                    .foregroundColor(themeManager.current.accentColor)
-                                
-                                TextField("0.00", text: $targetString)
-                                    .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    .keyboardType(.decimalPad)
-                                    .tint(themeManager.current.accentColor)
-                            }
-                            .padding(.horizontal, BuxLayout.marginHorizontal)
-                            .padding(.vertical, 16)
-                            .background(cardColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                            )
-                        }
-                        
-                        // 3. Optional Deadline Date Picker
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("DEADLINE (OPTIONAL)")
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                    .kerning(1.2)
-                                
-                                Spacer()
-                                
-                                Toggle("", isOn: $selectDeadline)
-                                    .labelsHidden()
-                                    .toggleStyle(SwitchToggleStyle(tint: themeManager.current.accentColor))
-                            }
-                            
-                            if selectDeadline {
-                                DatePicker(
-                                    "",
-                                    selection: $deadline,
-                                    in: Date()...,
-                                    displayedComponents: .date
-                                )
-                                .datePickerStyle(.graphical)
-                                .padding(12)
-                                .background(cardColor)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                                )
-                                .tint(themeManager.current.accentColor)
-                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                            }
-                        }
-                        
-                        // 4. Priority Pill Segment
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("PRIORITY LEVEL")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                .kerning(1.2)
-                            
-                            HStack(spacing: 8) {
-                                ForEach([1, 2, 3], id: \.self) { prio in
-                                    let isSelected = priority == prio
-                                    let prioLabel = prio == 1 ? "High" : (prio == 2 ? "Medium" : "Low")
-                                    let activeColor = prio == 1 ? Color.red : (prio == 2 ? themeManager.current.accentColor : Color.gray)
-                                    
-                                    Button(action: {
-                                        withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
-                                            priority = prio
-                                        }
-                                    }) {
-                                        Text(prioLabel)
-                                            .font(.system(size: 13, weight: .bold))
-                                            .foregroundColor(isSelected ? .white : Color(red: 120/255, green: 125/255, blue: 135/255))
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 12)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 10)
-                                                    .fill(isSelected ? activeColor : cardColor)
-                                            )
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 10)
-                                                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                                            )
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // 5. Notes
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("NOTES")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                .kerning(1.2)
-                            
-                            TextField("Add a memo or specific details...", text: $notes)
-                                .font(.system(size: 14, weight: .medium))
-                                .padding(.horizontal, BuxLayout.marginHorizontal)
-                                .padding(.vertical, 16)
-                                .background(cardColor)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                                )
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
+
+                BuxThemedCardForm {
+                    if let suggestions = brainSuggestions {
+                        BuxFormSection {
+                            brainRecommendationRow(suggestions)
                         }
                     }
-        } footer: {
-            BuxButton(
-                title: "Save Goal",
-                systemImage: "checkmark.circle.fill",
-                role: .primary,
-                expands: true,
-                isEnabled: canSave
-            ) {
-                saveGoal()
+
+                    BuxFormSection(title: "Goal") {
+                        TextField("Goal name", text: $name, prompt: Text("e.g. New Car, Emergency Fund"))
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        HStack(spacing: 8) {
+                            Text(appSettingsManager.selectedCurrency.symbol)
+                                .font(.title2.bold())
+                                .foregroundStyle(themeManager.current.accentColor)
+                            TextField("Target amount", text: $targetString)
+                                .keyboardType(.decimalPad)
+                        }
+                        .buxFormFieldPadding()
+                    }
+
+                    BuxFormSection {
+                        GoalOptionalDeadlineSection(isEnabled: $selectDeadline, date: $deadline)
+                            .buxFormFieldPadding()
+                    }
+
+                    BuxFormSection(title: "Priority") {
+                        GoalPriorityPicker(priority: $priority)
+                            .buxFormFieldPadding()
+                    }
+
+                    BuxFormSection(title: "Notes") {
+                        TextField("Notes", text: $notes, axis: .vertical)
+                            .lineLimit(3...6)
+                            .buxFormFieldPadding()
+                    }
+                }
+            }
+            .navigationTitle("Add Goal")
+            .navigationBarTitleDisplayMode(.inline)
+            .buxThemedSheetContent()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    BuxToolbarCancelButton { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    BuxToolbarConfirmButton(accessibilityLabel: "Save", isEnabled: canSave) {
+                        saveGoal()
+                    }
+                }
+            }
+            .onAppear {
+                brainSuggestions = goalsViewModel.getBrainSuggestions()
             }
         }
-        .onAppear {
-            self.brainSuggestions = goalsViewModel.getBrainSuggestions()
+        .tint(themeManager.current.accentColor)
+    }
+
+    @ViewBuilder
+    private func brainRecommendationRow(_ suggestions: GoalSuggestions) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Brain recommendation", systemImage: "sparkles")
+                .font(.caption.bold())
+                .foregroundStyle(themeManager.current.accentColor)
+
+            Text("6-Month Emergency target: \(appSettingsManager.format(suggestions.suggestedTargetAmount))")
+                .font(.subheadline.weight(.semibold))
+
+            Button("Apply suggestion") {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                    targetString = String(format: "%.0f", NSDecimalNumber(decimal: suggestions.suggestedTargetAmount).doubleValue)
+                    deadline = suggestions.suggestedDeadline
+                    selectDeadline = true
+                    priority = suggestions.suggestedPriority
+                }
+            }
+            .font(.subheadline.weight(.semibold))
         }
+        .padding(.vertical, 4)
     }
 
     private var canSave: Bool {

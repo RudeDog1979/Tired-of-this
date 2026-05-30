@@ -50,8 +50,6 @@ struct StudioHubView: View {
                 themeManager.screenBackground(for: colorScheme)
                     .ignoresSafeArea()
 
-                BuxHeroMeshBackground()
-
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
                         StudioHeroCard(display: display.hero)
@@ -126,55 +124,59 @@ struct StudioHubView: View {
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
-                    .buxThemedSheetContent()
             }
             .sheet(isPresented: $showNewClient) {
                 NewClientSheet()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
-                    .buxThemedSheetContent()
+                    .buxStudioSheetContent()
             }
             .sheet(isPresented: $showScanReceipt) {
                 StudioReceiptScannerView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
-                    .buxThemedSheetContent()
+                    .buxStudioSheetContent()
             }
             .sheet(isPresented: $showTimeTracker) {
                 ActiveTimeTrackerView()
                     .environmentObject(themeManager)
                     .environmentObject(store)
-                    .buxThemedSheetContent()
+                    .buxStudioSheetContent()
             }
             .navigationDestination(isPresented: $navigateToProfile) {
                 StudioProfileView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToInvoices) {
                 StudioInvoicesListView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToClients) {
                 StudioClientsListView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToProjects) {
                 StudioProjectsListView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToReceipts) {
                 StudioReceiptsListView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToTax) {
                 TaxStudioHubView(initialTab: taxHubInitialTab)
@@ -183,11 +185,13 @@ struct StudioHubView: View {
                     .environmentObject(appDataManager)
                     .environmentObject(store)
                     .environmentObject(studioBrain)
+                    .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToCashflow) {
                 StudioCashflowView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToDeductions) {
                 StudioDeductionsView()
@@ -195,6 +199,7 @@ struct StudioHubView: View {
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
                     .environmentObject(studioBrain)
+                    .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToMileage) {
                 StudioMileageLogView()
@@ -202,6 +207,7 @@ struct StudioHubView: View {
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
                     .environmentObject(studioBrain)
+                    .environment(\.studioEnhancedTint, true)
             }
             .environment(\.studioEnhancedTint, true)
     }
@@ -323,25 +329,35 @@ struct NewClientSheet: View {
         NavigationStack {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-                Form {
-                    Section("Client Info") {
+
+                BuxThemedCardForm {
+                    BuxFormSection(title: "Client Info") {
                         TextField("Display name", text: $name)
-                        TextField("Email", text: $email).keyboardType(.emailAddress)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        TextField("Email", text: $email)
+                            .keyboardType(.emailAddress)
                             .onChange(of: email) { _, v in party.email = v }
-                        TextField("Phone", text: $phone).keyboardType(.phonePad)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        TextField("Phone", text: $phone)
+                            .keyboardType(.phonePad)
                             .onChange(of: phone) { _, v in party.phone = v }
+                            .buxFormFieldPadding()
                     }
-                    Section {
-                        InvoicePartyEditorForm(
+
+                    BuxFormSection(title: "Invoice Bill-To Details") {
+                        InvoicePartyEditorFields(
                             party: $party,
-                            defaultCountryCode: appSettingsManager.selectedCountry.id,
                             showRegistrationFields: true
                         )
-                    } header: {
-                        Text("INVOICE BILL-TO DETAILS")
                     }
-                    Section("Contract settings") {
-                        TextField("Default Hourly Rate", text: $rate).keyboardType(.decimalPad)
+
+                    BuxFormSection(title: "Contract settings") {
+                        TextField("Default Hourly Rate", text: $rate)
+                            .keyboardType(.decimalPad)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         Picker("Payment Terms (Days)", selection: $terms) {
                             Text("Due on Receipt").tag("0")
                             Text("7 Days").tag("7")
@@ -349,16 +365,15 @@ struct NewClientSheet: View {
                             Text("30 Days").tag("30")
                             Text("60 Days").tag("60")
                         }
+                        .buxFormFieldPadding()
                     }
                 }
-                .scrollContentBackground(.hidden)
-                .buxScrollDismissesKeyboard()
             }
             .navigationTitle("New Client")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     BuxToolbarSaveButton(isDirty: !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
@@ -379,6 +394,7 @@ struct NewClientSheet: View {
                     }
                 }
             }
+            .buxStudioSheetContent()
         }
     }
 }

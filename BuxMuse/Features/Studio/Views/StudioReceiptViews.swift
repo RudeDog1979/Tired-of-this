@@ -36,9 +36,7 @@ struct StudioReceiptsListView: View {
                     Button("Log expense") { showExpenseEditor = true }
                     Button("Scan receipt") { showScanner = true }
                 } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                    BuxToolbarIcon(systemName: "plus")
                 }
             }
         }
@@ -46,13 +44,13 @@ struct StudioReceiptsListView: View {
             StudioExpenseEditorView(receiptToEdit: nil)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
-                .buxThemedSheetContent()
+                .buxStudioSheetContent()
         }
         .sheet(isPresented: $showScanner) {
             StudioReceiptScannerView()
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
-                .buxThemedSheetContent()
+                .buxStudioSheetContent()
         }
     }
 
@@ -219,11 +217,11 @@ struct StudioReceiptScannerView: View {
                         VStack(spacing: 24) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 24)
-                                    .fill(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : Color.white)
+                                    .fill(themeManager.cardFill(for: colorScheme))
                                     .frame(height: 250)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 24)
-                                            .stroke(themeManager.current.accentColor.opacity(0.15), lineWidth: 1)
+                                            .stroke(themeManager.themedCardStroke(for: colorScheme), lineWidth: 0.5)
                                     )
                                 
                                 VStack(spacing: 16) {
@@ -293,43 +291,55 @@ struct StudioReceiptScannerView: View {
                     }
                     
                     if showFields {
-                        Form {
+                        BuxThemedCardForm {
                             if let img = scannedImage {
-                                Section("Captured Scan Preview") {
+                                BuxFormSection(title: "Captured scan preview") {
                                     Image(uiImage: img)
                                         .resizable()
                                         .scaledToFit()
                                         .frame(maxHeight: 180)
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .padding(.vertical, 4)
                                         .frame(maxWidth: .infinity, alignment: .center)
+                                        .buxFormFieldPadding()
                                 }
                             }
-                            
-                            Section("Extracted Document Information") {
+
+                            BuxFormSection(title: "Extracted document information") {
                                 TextField("Merchant", text: $merchant)
+                                    .buxFormFieldPadding()
+                                BuxFormRowDivider()
                                 TextField("Amount", text: $amount)
                                     .keyboardType(.decimalPad)
+                                    .buxFormFieldPadding()
+                                BuxFormRowDivider()
                                 DatePicker("Date", selection: $date, displayedComponents: .date)
+                                    .tint(themeManager.current.accentColor)
+                                    .buxFormFieldPadding()
                             }
-                            
-                            Section("Tax Sandbox settings") {
+
+                            BuxFormSection(title: "Tax sandbox settings") {
                                 Picker("Deduction Category", selection: $category) {
                                     Text("Office Expenses").tag("Office Expenses")
                                     Text("Software Subscriptions").tag("Software Subscriptions")
                                     Text("Hardware Assets").tag("Hardware Assets")
                                     Text("Travel & Lodging").tag("Travel & Lodging")
                                 }
-                                
+                                .tint(themeManager.current.accentColor)
+                                .buxFormFieldPadding()
+                                BuxFormRowDivider()
                                 Toggle("Eligible for Write-off", isOn: $isDeductible)
+                                    .tint(themeManager.current.accentColor)
+                                    .buxFormFieldPadding()
+                                BuxFormRowDivider()
                                 Picker("Deduction Strength", selection: $strength) {
                                     ForEach(DeductionStrength.allCases) { st in
                                         Text(st.rawValue).tag(st)
                                     }
                                 }
+                                .tint(themeManager.current.accentColor)
+                                .buxFormFieldPadding()
                             }
                         }
-                        .scrollContentBackground(.hidden)
                     }
                     
                     Spacer()
@@ -339,7 +349,7 @@ struct StudioReceiptScannerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 if showFields {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -348,6 +358,7 @@ struct StudioReceiptScannerView: View {
                             dismiss()
                         }
                         .disabled(merchant.isEmpty || amount.isEmpty)
+                        .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
                     }
                 }
             }
@@ -534,13 +545,14 @@ struct StudioReceiptDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") { showEdit = true }
+                    .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
             }
         }
         .sheet(isPresented: $showEdit) {
             StudioExpenseEditorView(receiptToEdit: receipt)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
-                .buxThemedSheetContent()
+                .buxStudioSheetContent()
         }
     }
     

@@ -3,40 +3,17 @@
 //  BuxMuse
 //  Features/ExpenseInput/
 //
-//  Transaction date selector with solid card row styling conforming to the design guidelines.
+//  Native transaction date row — use inside Form Section.
 //
 
 import SwiftUI
 
 struct DateFieldPicker: View {
-    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
     @Binding var date: Date
-    
-    private var cardColor: Color { themeManager.cardFill(for: colorScheme) }
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("DATE")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                .kerning(1.2)
-            
-            HStack {
-                Image(systemName: "calendar")
-                    .foregroundColor(themeManager.current.accentColor)
-                    .font(.system(size: 16, weight: .semibold))
-                
-                DatePicker("Transaction Date", selection: $date, displayedComponents: .date)
-                    .labelsHidden()
-                    .datePickerStyle(.compact)
-                    .tint(themeManager.current.accentColor)
-                
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .expensesThemedCardChrome(cornerRadius: 16)
-        }
+        DatePicker("Transaction Date", selection: $date, displayedComponents: .date)
+            .tint(themeManager.current.accentColor)
     }
 }

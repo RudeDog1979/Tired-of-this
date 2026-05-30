@@ -85,6 +85,7 @@ final class AppContainer: ObservableObject {
         migrateLegacyFreelanceLocale()
         studioBrain.refreshAll()
         scheduleEngagementRefresh()
+        scheduleTaxCatalogRefresh()
     }
 
     func scheduleEngagementRefresh() {
@@ -97,6 +98,12 @@ final class AppContainer: ObservableObject {
                 studioInvoices: studioStore.invoices,
                 taxDeadlineDays: studioBrain.hubDisplay.taxSummary.taxDeadlineDays
             )
+        }
+    }
+
+    func scheduleTaxCatalogRefresh(force: Bool = false) {
+        Task { @MainActor in
+            await TaxManager.shared.ensureCatalogLoaded(force: force)
         }
     }
 

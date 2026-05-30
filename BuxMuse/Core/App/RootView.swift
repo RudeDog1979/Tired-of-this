@@ -28,109 +28,96 @@ struct RootView: View {
     @State private var didEnterBackground = false
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
-
-            buxMuseTabView
-
-            overlayStack
-        }
-        .overlay(alignment: .bottom) {
-            BuxDockAnchoredTabBar(
-                selectedTab: $navigationCoordinator.selectedTab,
-                studioEnabled: settingsStore.studioEnabled,
-                accentColor: themeManager.current.accentColor
-            )
-        }
-        .overlay(alignment: .top) {
-            ConnectivityToastView()
-                .environmentObject(themeManager)
-                .allowsHitTesting(ConnectivityBrain.shared.activeToast != nil)
-        }
-        .overlay {
-            if navigationCoordinator.showStudioUnlockAnimation {
-                StudioUnlockAnimationView(
-                    isPresented: $navigationCoordinator.showStudioUnlockAnimation,
-                    onMidpointReveal: { navigationCoordinator.commitStudioUnlock() }
-                )
-                .transition(.opacity)
-                .zIndex(200)
-            }
-        }
-        .animation(.easeInOut(duration: 0.45), value: navigationCoordinator.showStudioUnlockAnimation)
-        .onChange(of: navigationCoordinator.showStudioUnlockAnimation) { _, isShowing in
-            if !isShowing {
-                navigationCoordinator.finishStudioUnlockPresentation()
-            }
-        }
-        .animation(.spring(response: 0.45, dampingFraction: 0.85, blendDuration: 0), value: navigationCoordinator.showSubscriptionHub)
-        .buxRootBrandTheme()
-        .sheet(item: $goalsSheetCoordinator.activeSheet) { sheet in
-            switch sheet {
-            case .addGoal:
-                AddGoalSheet()
-                    .environmentObject(themeManager)
-                    .environmentObject(appSettingsManager)
-                    .environmentObject(goalsViewModel)
-                    .environmentObject(goalsSheetCoordinator)
-                    .environmentObject(insightsViewModel)
-                    .buxThemedSheetContent()
-            }
-        }
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.5)) {
-                navigationCoordinator.isScreenLoaded = true
-            }
-            evaluateAppLock(forceOnLaunch: true)
-        }
-        .onChange(of: scenePhase) { _, newPhase in
-            switch newPhase {
-            case .background:
-                didEnterBackground = true
-                StudioTimerDisplayMonitor.shared.handleSceneEnteredBackground()
-            case .inactive:
-                StudioTimerDisplayMonitor.shared.handleSceneBecameInactive()
-            case .active:
-                StudioTimerDisplayMonitor.shared.handleSceneBecameActive()
-                if didEnterBackground {
-                    evaluateAppLock(forceOnLaunch: false)
-                    container.scheduleEngagementRefresh()
-                    container.scheduleTipsRefresh()
-                    didEnterBackground = false
-                }
-            @unknown default:
-                break
-            }
-        }
-        .onChange(of: navigationCoordinator.selectedTab) { _, newTab in
-            navigationCoordinator.registerTabSelection()
-            BuxTabBarScrollState.shared.reset()
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            if newTab != .expense {
-                navigationCoordinator.dismissExpenseSearch()
-            }
-            brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
-        }
-        .onChange(of: navigationCoordinator.activeCategoryPill) { _, _ in
-            brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
-        }
-        .onChange(of: navigationCoordinator.isBalanceVisible) { _, _ in
-            brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
-        }
-        .onChange(of: settingsStore.studioEnabled) { _, enabled in
-            if !enabled && navigationCoordinator.selectedTab == .studio {
-                navigationCoordinator.selectedTab = .home
-            }
-        }
-    }
-
-    private var buxMuseTabView: some View {
         coreTabView
-            .toolbar(.hidden, for: .tabBar)
-            .toolbarBackground(.hidden, for: .tabBar)
-            .background(BuxNativeTabBarSuppressor())
-            .ignoresSafeArea(edges: .bottom)
+            .background(themeManager.screenBackground(for: colorScheme))
+            .overlay(alignment: .top) {
+                ConnectivityToastView()
+                    .environmentObject(themeManager)
+                    .allowsHitTesting(ConnectivityBrain.shared.activeToast != nil)
+            }
+            .overlay {
+                ExpenseUndoToastView()
+                    .environmentObject(themeManager)
+                    .environmentObject(brain)
+                    .allowsHitTesting(brain.expenseUndoOffer != nil)
+            }
+            .overlay {
+                overlayStack
+            }
+            .overlay {
+                if navigationCoordinator.showStudioUnlockAnimation {
+                    StudioUnlockAnimationView(
+                        isPresented: $navigationCoordinator.showStudioUnlockAnimation,
+                        onMidpointReveal: { navigationCoordinator.commitStudioUnlock() }
+                    )
+                    .transition(.opacity)
+                    .zIndex(200)
+                }
+            }
+            .animation(.easeInOut(duration: 0.45), value: navigationCoordinator.showStudioUnlockAnimation)
+            .onChange(of: navigationCoordinator.showStudioUnlockAnimation) { _, isShowing in
+                if !isShowing {
+                    navigationCoordinator.finishStudioUnlockPresentation()
+                }
+            }
+            .animation(.spring(response: 0.45, dampingFraction: 0.85, blendDuration: 0), value: navigationCoordinator.showSubscriptionHub)
+            .buxRootBrandTheme()
+            .sheet(item: $goalsSheetCoordinator.activeSheet) { sheet in
+                switch sheet {
+                case .addGoal:
+                    AddGoalSheet()
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                        .environmentObject(goalsViewModel)
+                        .environmentObject(goalsSheetCoordinator)
+                        .environmentObject(insightsViewModel)
+                        .buxThemedSheetContent()
+                }
+            }
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.5)) {
+                    navigationCoordinator.isScreenLoaded = true
+                }
+                evaluateAppLock(forceOnLaunch: true)
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                switch newPhase {
+                case .background:
+                    didEnterBackground = true
+                    settingsStore.save()
+                    StudioTimerDisplayMonitor.shared.handleSceneEnteredBackground()
+                case .inactive:
+                    StudioTimerDisplayMonitor.shared.handleSceneBecameInactive()
+                case .active:
+                    StudioTimerDisplayMonitor.shared.handleSceneBecameActive()
+                    if didEnterBackground {
+                        evaluateAppLock(forceOnLaunch: false)
+                        container.scheduleEngagementRefresh()
+                        container.scheduleTipsRefresh()
+                        didEnterBackground = false
+                    }
+                @unknown default:
+                    break
+                }
+            }
+            .onChange(of: navigationCoordinator.selectedTab) { _, newTab in
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                if newTab != .expense {
+                    navigationCoordinator.dismissExpenseSearch()
+                }
+                brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
+            }
+            .onChange(of: navigationCoordinator.activeCategoryPill) { _, _ in
+                brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
+            }
+            .onChange(of: navigationCoordinator.isBalanceVisible) { _, _ in
+                brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
+            }
+            .onChange(of: settingsStore.studioEnabled) { _, enabled in
+                if !enabled && navigationCoordinator.selectedTab == .studio {
+                    navigationCoordinator.selectedTab = .home
+                }
+            }
     }
 
     private var coreTabView: some View {
@@ -138,13 +125,13 @@ struct RootView: View {
             Tab(value: AppTab.home) {
                 DashboardView(transactionNamespace: transactionNamespace)
             } label: {
-                hiddenTabLabel
+                Label(AppTab.home.nativeTabTitle, systemImage: AppTab.home.nativeTabSymbol)
             }
 
             Tab(value: AppTab.expense) {
                 ExpenseTabView()
             } label: {
-                hiddenTabLabel
+                Label(AppTab.expense.nativeTabTitle, systemImage: AppTab.expense.nativeTabSymbol)
             }
 
             if settingsStore.studioEnabled {
@@ -154,22 +141,17 @@ struct RootView: View {
                         .environmentObject(appSettingsManager)
                         .environmentObject(navigationCoordinator)
                 } label: {
-                    hiddenTabLabel
+                    Label(AppTab.studio.nativeTabTitle, systemImage: AppTab.studio.nativeTabSymbol)
                 }
             }
 
             Tab(value: AppTab.settings) {
                 SettingsView()
             } label: {
-                hiddenTabLabel
+                Label(AppTab.settings.nativeTabTitle, systemImage: AppTab.settings.nativeTabSymbol)
             }
         }
-    }
-
-    private var hiddenTabLabel: some View {
-        Color.clear
-            .frame(width: 0, height: 0)
-            .accessibilityHidden(true)
+        .buxNativeTabBarMinimizeOnScroll()
     }
 
     @ViewBuilder
@@ -300,5 +282,17 @@ struct RootView: View {
         hasUnlockedThisSession = true
         lastUnlockDate = Date()
         isAppLocked = false
+    }
+}
+
+extension View {
+    /// Native tab bar — collapses when scrolling down (iOS 18+).
+    @ViewBuilder
+    func buxNativeTabBarMinimizeOnScroll() -> some View {
+        if #available(iOS 26.0, *) {
+            tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            self
+        }
     }
 }

@@ -14,87 +14,93 @@ struct DataSettingsView: View {
     @EnvironmentObject private var persistence: PersistenceController
     @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var studioStore: StudioStore
-    
+
     @ObservedObject private var store = SettingsStore.shared
-    
+
     @State private var showResetDialog = false
     @State private var showSuccessAlert = false
     @State private var exportURL: URL? = nil
-    
-    private var bgColor: Color {
-        themeManager.screenBackground(for: colorScheme)
-    }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
+        BuxThemedCardForm {
+            BuxFormSection(title: "Sandbox backup") {
+                Toggle("Allow Local Backups", isOn: $store.allowLocalBackups)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
 
-            Form {
-                Section("SANDBOX BACKUP") {
-                    Toggle("Allow Local Backups", isOn: $store.allowLocalBackups)
-                    
-                    if store.allowLocalBackups {
-                        Picker("Backup Frequency", selection: $store.autoBackupFrequency) {
-                            ForEach(AutoBackupFrequency.allCases) { freq in
-                                Text(freq.rawValue).tag(freq)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                    }
-                }
-                
-                Section("MERCHANT DATA") {
-                    Text("Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.")
-                        .font(.system(size: 13, weight: .medium))
-                        .buxLabelSecondary()
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Section("EXPORT COMPLIANCE") {
-                    Toggle("Include Studio Data", isOn: $store.includeStudioDataInExports)
-                    Toggle("Include Local Performance Metadata", isOn: $store.includeAnalyticsInExports)
-                    
-                    if let url = exportURL {
-                        ShareLink(item: url) {
-                            HStack {
-                                Image(systemName: "square.and.arrow.up.fill")
-                                Text("Save JSON Backup Archive")
-                            }
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
-                        }
-                    } else {
-                        Button(action: generateJSONDump) {
-                            HStack {
-                                Image(systemName: "doc.text.magnifyingglass")
-                                Text("Compile JSON Data Export")
-                            }
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                if store.allowLocalBackups {
+                    BuxFormRowDivider()
+                    Picker("Backup Frequency", selection: $store.autoBackupFrequency) {
+                        ForEach(AutoBackupFrequency.allCases) { freq in
+                            Text(freq.rawValue).tag(freq)
                         }
                     }
-                    
-                    if let lastExport = store.lastExportDate {
-                        HStack {
-                            Text("Last Compiled")
-                            Spacer()
-                            Text(lastExport, style: .date)
-                                .buxLabelSecondary()
-                        }
-                    }
-                }
-                
-                Section("DESTRUCTION ZONE") {
-                    Button(action: { showResetDialog = true }) {
-                        Text("Delete All Local App Data")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.red)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
+                    .pickerStyle(.menu)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
                 }
             }
-            .buxThemedFormStyle()
+
+            BuxFormSection(title: "Merchant data") {
+                Text("Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.")
+                    .font(.system(size: 13, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .buxFormFieldPadding()
+            }
+
+            BuxFormSection(title: "Export compliance") {
+                Toggle("Include Studio Data", isOn: $store.includeStudioDataInExports)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+                BuxFormRowDivider()
+                Toggle("Include Local Performance Metadata", isOn: $store.includeAnalyticsInExports)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+
+                if let url = exportURL {
+                    BuxFormRowDivider()
+                    ShareLink(item: url) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up.fill")
+                            Text("Save JSON Backup Archive")
+                        }
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(themeManager.current.accentColor)
+                    }
+                    .buxFormFieldPadding()
+                } else {
+                    BuxFormRowDivider()
+                    Button(action: generateJSONDump) {
+                        HStack {
+                            Image(systemName: "doc.text.magnifyingglass")
+                            Text("Compile JSON Data Export")
+                        }
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(themeManager.current.accentColor)
+                    }
+                    .buxFormFieldPadding()
+                }
+
+                if let lastExport = store.lastExportDate {
+                    BuxFormRowDivider()
+                    HStack {
+                        Text("Last Compiled")
+                        Spacer()
+                        Text(lastExport, style: .date)
+                            .buxLabelSecondary()
+                    }
+                    .buxFormFieldPadding()
+                }
+            }
+
+            BuxFormSection(title: "Delete data") {
+                Button.buxDestructive("Delete All Local App Data") {
+                    showResetDialog = true
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .buxFormFieldPadding()
+            }
         }
         .navigationTitle("Data Control")
         .navigationBarTitleDisplayMode(.inline)
@@ -116,23 +122,21 @@ struct DataSettingsView: View {
         .onChange(of: store.includeStudioDataInExports) { _, _ in store.save() }
         .onChange(of: store.includeAnalyticsInExports) { _, _ in store.save() }
     }
-    
+
     // MARK: - Export Logic
-    
+
     private func generateJSONDump() {
         do {
-            // Read expenses, goals, and freelance state
             let expenses = (try? persistence.fetchAllExpenseEntities()) ?? []
             let goals = (try? persistence.fetchAllGoalEntities()) ?? []
-            
+
             var payload: [String: Any] = [
                 "buxmuse_app_version": "1.0.0",
                 "export_timestamp": Date().timeIntervalSince1970,
                 "expenses_count": expenses.count,
                 "goals_count": goals.count
             ]
-            
-            // Format expenses simply
+
             var expenseList = [[String: Any]]()
             for exp in expenses {
                 expenseList.append([
@@ -146,8 +150,7 @@ struct DataSettingsView: View {
                 ])
             }
             payload["expenses"] = expenseList
-            
-            // Format goals
+
             var goalList = [[String: Any]]()
             for goal in goals {
                 goalList.append([
@@ -159,8 +162,7 @@ struct DataSettingsView: View {
                 ])
             }
             payload["goals"] = goalList
-            
-            // Format freelance profile if requested
+
             if store.includeStudioDataInExports {
                 let snapshot = studioStore.currentSnapshot()
                 if let data = try? JSONEncoder().encode(snapshot),
@@ -168,17 +170,13 @@ struct DataSettingsView: View {
                     payload["freelance"] = json
                 }
             }
-            
-            // Serialize
+
             let data = try JSONSerialization.data(withJSONObject: payload, options: .prettyPrinted)
-            
-            // Write to a temporary file
             let fm = FileManager.default
             let tempDir = fm.temporaryDirectory
             let fileURL = tempDir.appendingPathComponent("buxmuse_data_backup.json")
-            
             try data.write(to: fileURL, options: .atomic)
-            
+
             self.exportURL = fileURL
             self.store.lastExportDate = Date()
             self.store.save()
@@ -186,23 +184,16 @@ struct DataSettingsView: View {
             print("Failed to generate JSON dump: \(error)")
         }
     }
-    
+
     // MARK: - Destruction Logic
-    
+
     private func performFullPurge() {
-        // 1. Reset settings store
         store.resetAllData()
-        
-        // 2. Clear SwiftData
+
         do {
             try persistence.purgeExpensesAndGoals()
-            
-            // 3. Reset Freelance Hub store
             studioStore.resetAllData()
-            
-            // 4. Refresh brain snapshots
             brain.refreshExpenses()
-            
             self.showSuccessAlert = true
         } catch {
             print("Database purge failed: \(error)")

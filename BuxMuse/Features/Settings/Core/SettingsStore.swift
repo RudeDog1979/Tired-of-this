@@ -13,23 +13,37 @@ import Combine
 public final class SettingsStore: ObservableObject {
     public static let shared = SettingsStore()
     
-    /// Display name shown in UI when profile name is unset.
+    /// Display name shown in UI when profile name is unset, respecting preferred name style.
     public var resolvedDisplayName: String {
-        guard let trimmed = userDisplayName?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !trimmed.isEmpty else {
-            return "User"
+        let f = firstName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let l = lastName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
+        if preferredNameStyle == .firstName {
+            return f.isEmpty ? (l.isEmpty ? "User" : l) : f
+        } else {
+            let combined = "\(f) \(l)".trimmingCharacters(in: .whitespacesAndNewlines)
+            return combined.isEmpty ? "User" : combined
         }
-        return trimmed
     }
 
     // MARK: - Profile Settings
-    @Published public var userDisplayName: String? = nil
+    @Published public var firstName: String? = nil
+    @Published public var lastName: String? = nil
+    
+    public var userDisplayName: String? {
+        let f = firstName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let l = lastName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let combined = "\(f) \(l)".trimmingCharacters(in: .whitespacesAndNewlines)
+        return combined.isEmpty ? nil : combined
+    }
+    
     @Published public var profileAvatarData: Data? = nil
     @Published public var preferredNameStyle: PreferredNameStyle = .fullName
     
     // MARK: - Appearance Settings
     @Published public var themeMode: ThemeMode = .system
-    @Published public var accentColorId: String = "Purple"
+    @Published public var accentColorId: String = AppTheme.buxDefault.name
+    @Published public var neutralAccentId: String = BuxSystemAccent.systemBlue.rawValue
     @Published public var useGlassmorphism: Bool = true
     @Published public var brandThemesEnabled: Bool = true
     @Published public var reducedMotion: Bool = false
@@ -131,6 +145,15 @@ public final class SettingsStore: ObservableObject {
         cancelledSubscriptionMerchants.contains(normalizedMerchant)
     }
 
+    public func clearCancelledSubscription(normalizedMerchant: String) {
+        guard !normalizedMerchant.isEmpty else { return }
+        let updated = cancelledSubscriptionMerchants.filter { $0 != normalizedMerchant }
+        guard updated.count != cancelledSubscriptionMerchants.count else { return }
+        cancelledSubscriptionMerchants = updated
+        UserDefaults.standard.set(cancelledSubscriptionMerchants, forKey: Self.cancelledSubscriptionsDefaultsKey)
+        save()
+    }
+
     private static let cancelledSubscriptionsDefaultsKey = "buxmuse.cancelledSubscriptionMerchants"
     private static let autoDetectInvoiceBankKey = "buxmuse.settings.autoDetectInvoiceBankType"
     private static let invoiceBankOverrideKey = "buxmuse.settings.invoiceBankTypeOverride"
@@ -153,12 +176,15 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Saving & Loading Schema
     
     private struct StorePayload: Codable {
+        let firstName: String?
+        let lastName: String?
         let userDisplayName: String?
         let profileAvatarData: Data?
         let preferredNameStyle: PreferredNameStyle
         
         let themeMode: ThemeMode
         let accentColorId: String
+        let neutralAccentId: String?
         let useGlassmorphism: Bool
         let brandThemesEnabled: Bool?
         let reducedMotion: Bool
@@ -204,8 +230,8 @@ public final class SettingsStore: ObservableObject {
         let showPerformanceMetrics: Bool
 
         enum CodingKeys: String, CodingKey {
-            case userDisplayName, profileAvatarData, preferredNameStyle
-            case themeMode, accentColorId, useGlassmorphism, brandThemesEnabled, reducedMotion
+            case firstName, lastName, userDisplayName, profileAvatarData, preferredNameStyle
+            case themeMode, accentColorId, neutralAccentId, useGlassmorphism, brandThemesEnabled, reducedMotion
             case weekStartDay, budgetingMode, defaultBudgetPeriod
             case showBudgetWarnings, autoAdjustBudgetsFromHistory, customBudgetProfiles
             case simpleBudgetLimit, customBudgetLimit, customBudgetPeriod
@@ -225,11 +251,36 @@ public final class SettingsStore: ObservableObject {
 
         init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
-            userDisplayName = try c.decodeIfPresent(String.self, forKey: .userDisplayName)
+            
+            let decodedFirstName = try c.decodeIfPresent(String.self, forKey: .firstName)
+            let decodedLastName = try c.decodeIfPresent(String.self, forKey: .lastName)
+            let rawUserDisplayName = try c.decodeIfPresent(String.self, forKey: .userDisplayName)
+            
+            if decodedFirstName != nil || decodedLastName != nil {
+                self.firstName = decodedFirstName
+                self.lastName = decodedLastName
+                self.userDisplayName = rawUserDisplayName ?? "\(decodedFirstName ?? "") \(decodedLastName ?? "")".trimmingCharacters(in: .whitespacesAndNewlines)
+            } else if let rawUserDisplayName = rawUserDisplayName?.trimmingCharacters(in: .whitespacesAndNewlines), !rawUserDisplayName.isEmpty {
+                let components = rawUserDisplayName.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+                if components.count > 1 {
+                    self.firstName = components.first
+                    self.lastName = components.dropFirst().joined(separator: " ")
+                } else {
+                    self.firstName = components.first
+                    self.lastName = nil
+                }
+                self.userDisplayName = rawUserDisplayName
+            } else {
+                self.firstName = nil
+                self.lastName = nil
+                self.userDisplayName = nil
+            }
+            
             profileAvatarData = try c.decodeIfPresent(Data.self, forKey: .profileAvatarData)
             preferredNameStyle = try c.decode(PreferredNameStyle.self, forKey: .preferredNameStyle)
             themeMode = try c.decode(ThemeMode.self, forKey: .themeMode)
             accentColorId = try c.decode(String.self, forKey: .accentColorId)
+            neutralAccentId = try c.decodeIfPresent(String.self, forKey: .neutralAccentId) ?? BuxSystemAccent.systemBlue.rawValue
             useGlassmorphism = try c.decode(Bool.self, forKey: .useGlassmorphism)
             brandThemesEnabled = try c.decodeIfPresent(Bool.self, forKey: .brandThemesEnabled) ?? true
             reducedMotion = try c.decode(Bool.self, forKey: .reducedMotion)
@@ -273,11 +324,14 @@ public final class SettingsStore: ObservableObject {
         }
 
         init(
+            firstName: String?,
+            lastName: String?,
             userDisplayName: String?,
             profileAvatarData: Data?,
             preferredNameStyle: PreferredNameStyle,
             themeMode: ThemeMode,
             accentColorId: String,
+            neutralAccentId: String,
             useGlassmorphism: Bool,
             brandThemesEnabled: Bool,
             reducedMotion: Bool,
@@ -315,11 +369,14 @@ public final class SettingsStore: ObservableObject {
             enableDebugOverlay: Bool,
             showPerformanceMetrics: Bool
         ) {
+            self.firstName = firstName
+            self.lastName = lastName
             self.userDisplayName = userDisplayName
             self.profileAvatarData = profileAvatarData
             self.preferredNameStyle = preferredNameStyle
             self.themeMode = themeMode
             self.accentColorId = accentColorId
+            self.neutralAccentId = neutralAccentId
             self.useGlassmorphism = useGlassmorphism
             self.brandThemesEnabled = brandThemesEnabled
             self.reducedMotion = reducedMotion
@@ -360,11 +417,14 @@ public final class SettingsStore: ObservableObject {
 
         func encode(to encoder: Encoder) throws {
             var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encodeIfPresent(firstName, forKey: .firstName)
+            try c.encodeIfPresent(lastName, forKey: .lastName)
             try c.encodeIfPresent(userDisplayName, forKey: .userDisplayName)
             try c.encodeIfPresent(profileAvatarData, forKey: .profileAvatarData)
             try c.encode(preferredNameStyle, forKey: .preferredNameStyle)
             try c.encode(themeMode, forKey: .themeMode)
             try c.encode(accentColorId, forKey: .accentColorId)
+            try c.encode(neutralAccentId, forKey: .neutralAccentId)
             try c.encode(useGlassmorphism, forKey: .useGlassmorphism)
             try c.encode(brandThemesEnabled, forKey: .brandThemesEnabled)
             try c.encode(reducedMotion, forKey: .reducedMotion)
@@ -404,6 +464,19 @@ public final class SettingsStore: ObservableObject {
         }
     }
     
+    /// Legacy accent keys → current theme names.
+    private static func normalizeAccentColorId(_ raw: String) -> String {
+        switch raw {
+        case "Bux Default", "buxDefault":
+            return AppTheme.buxDefault.name
+        default:
+            if AppTheme.all.contains(where: { $0.name == raw || $0.id == raw }) {
+                return AppTheme.all.first(where: { $0.name == raw || $0.id == raw })?.name ?? raw
+            }
+            return raw
+        }
+    }
+
     public func loadStore() {
         guard !isLoaded else { return }
         let fm = FileManager.default
@@ -414,12 +487,14 @@ public final class SettingsStore: ObservableObject {
                 let data = try Data(contentsOf: storeURL)
                 let payload = try JSONDecoder().decode(StorePayload.self, from: data)
                 
-                self.userDisplayName = payload.userDisplayName
+                self.firstName = payload.firstName
+                self.lastName = payload.lastName
                 self.profileAvatarData = payload.profileAvatarData
                 self.preferredNameStyle = payload.preferredNameStyle
                 
                 self.themeMode = payload.themeMode
-                self.accentColorId = payload.accentColorId
+                self.accentColorId = Self.normalizeAccentColorId(payload.accentColorId)
+                self.neutralAccentId = payload.neutralAccentId ?? BuxSystemAccent.systemBlue.rawValue
                 self.useGlassmorphism = payload.useGlassmorphism
                 self.brandThemesEnabled = payload.brandThemesEnabled ?? true
                 self.reducedMotion = payload.reducedMotion
@@ -483,9 +558,11 @@ public final class SettingsStore: ObservableObject {
     }
     
     private func seedDefaults() {
-        self.userDisplayName = nil
+        self.firstName = nil
+        self.lastName = nil
         self.themeMode = .system
-        self.accentColorId = "Purple"
+        self.accentColorId = AppTheme.buxDefault.name
+        self.neutralAccentId = BuxSystemAccent.systemBlue.rawValue
         self.weekStartDay = .monday
         self.budgetingMode = .simple
         self.defaultBudgetPeriod = .monthly
@@ -550,11 +627,14 @@ public final class SettingsStore: ObservableObject {
         persistInvoicePaymentPreferences()
         persistMileagePreferences()
         let payload = StorePayload(
+            firstName: firstName,
+            lastName: lastName,
             userDisplayName: userDisplayName,
             profileAvatarData: profileAvatarData,
             preferredNameStyle: preferredNameStyle,
             themeMode: themeMode,
             accentColorId: accentColorId,
+            neutralAccentId: neutralAccentId,
             useGlassmorphism: useGlassmorphism,
             brandThemesEnabled: brandThemesEnabled,
             reducedMotion: reducedMotion,
@@ -595,16 +675,9 @@ public final class SettingsStore: ObservableObject {
         
         do {
             let data = try JSONEncoder().encode(payload)
-            let url = storeURL
-            saveQueue.async {
-                do {
-                    try data.write(to: url, options: .atomic)
-                } catch {
-                    print("SettingsStore: failed to write JSON payload: \(error)")
-                }
-            }
+            try data.write(to: storeURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
         } catch {
-            print("SettingsStore: failed to encode JSON payload: \(error)")
+            print("SettingsStore: failed to save JSON payload: \(error)")
         }
     }
     
@@ -625,11 +698,33 @@ public final class SettingsStore: ObservableObject {
             ?? .buxDefault
     }
 
+    func resolvedSystemAccent() -> BuxSystemAccent {
+        BuxSystemAccent.resolve(id: neutralAccentId)
+    }
+
+    func resolvedSystemAccentColor(for colorScheme: ColorScheme) -> Color {
+        resolvedSystemAccent().color(for: colorScheme)
+    }
+
+    func resolvedAppearanceSummary(themeManager: ThemeManager) -> String {
+        if brandThemesEnabled {
+            return themeManager.current.name
+        }
+        return resolvedSystemAccent().displayName
+    }
+
     func applyBrandThemesAppearance(to themeManager: ThemeManager) {
         if brandThemesEnabled {
-            themeManager.applyTheme(resolvedBrandTheme(), persist: true)
+            themeManager.applyTheme(resolvedBrandTheme())
         } else {
-            themeManager.applyTheme(.buxDefault, persist: false)
+            themeManager.applyTheme(AppTheme.standardNeutral(accent: resolvedSystemAccent()))
         }
+    }
+
+    /// Persist appearance + sync ThemeManager (call from theme picker).
+    func persistThemeSelection(_ theme: AppTheme, themeManager: ThemeManager) {
+        accentColorId = theme.name
+        themeManager.applyTheme(theme)
+        save()
     }
 }

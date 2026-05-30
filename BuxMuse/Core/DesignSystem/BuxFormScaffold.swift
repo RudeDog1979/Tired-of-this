@@ -2,80 +2,195 @@
 //  BuxFormScaffold.swift
 //  BuxMuse
 //
-//  Themed Form/List chrome — mesh backdrop + row plates (visual only).
+//  Themed grouped Form chrome — M3 card rows when brand themes are on.
 //
 
 import SwiftUI
 
-// MARK: - Form row plate (listRowBackground)
-
-struct BuxFormRowPlate: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject private var themeManager: ThemeManager
-    @ObservedObject private var settings = SettingsStore.shared
-
-    var body: some View {
-        let shape = RoundedRectangle(cornerRadius: BuxTokens.Radius.field, style: .continuous)
-        Group {
-            if settings.brandThemesEnabled {
-                shape
-                    .fill(themeManager.cardFill(for: colorScheme))
-                    .overlay(
-                        shape.stroke(
-                            DashboardThemeTint.themedCardStroke(
-                                themeManager: themeManager,
-                                colorScheme: colorScheme
-                            ),
-                            lineWidth: 1
-                        )
-                    )
-            } else {
-                shape
-                    .fill(themeManager.cardFill(for: colorScheme))
-                    .overlay(
-                        shape.stroke(
-                            themeManager.subtleCardStroke(for: colorScheme),
-                            lineWidth: 1
-                        )
-                    )
-            }
-        }
-    }
-}
-
 // MARK: - Form scaffold backdrop
 
 struct BuxFormScaffold<Content: View>: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject private var themeManager: ThemeManager
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
-
-            BuxHeroMeshBackground()
-
-            content()
-        }
-        .buxThemedPresentation()
+        content()
+            .buxThemedPresentation()
     }
 }
 
 extension View {
-    /// Themed row background for Form / List sections.
-    func buxFormRowPlate() -> some View {
-        listRowBackground(BuxFormRowPlate())
+    /// Grouped Form — themed card rows when brand themes are on; Apple neutral when off.
+    func buxThemedFormStyle() -> some View {
+        modifier(BuxThemedFormStyleModifier())
     }
 
-    /// Standard Form styling: hidden system background + themed rows + inset grouped spacing.
-    func buxThemedFormStyle() -> some View {
-        self
-            .scrollContentBackground(.hidden)
-            .listRowSeparator(.hidden)
-            .listRowSpacing(BuxTokens.tight)
-            .listSectionSpacing(BuxTokens.section)
-            .buxFormRowPlate()
+    /// Alias for settings / sheet forms.
+    func buxSystemFormStyle() -> some View {
+        buxThemedFormStyle()
+    }
+
+    /// Themed fill + outline for TextField / TextEditor plates outside Form rows.
+    func buxThemedInputPlate(cornerRadius: CGFloat = BuxMaterialShape.small) -> some View {
+        modifier(BuxThemedInputPlateModifier(cornerRadius: cornerRadius))
+    }
+}
+
+private struct BuxThemedInputPlateModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
+
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        content
+            .background {
+                shape
+                    .fill(themeManager.inputFieldFill(for: colorScheme))
+                    .overlay {
+                        if settings.brandThemesEnabled {
+                            shape.strokeBorder(
+                                themeManager.themedCardStroke(for: colorScheme),
+                                lineWidth: 0.5
+                            )
+                        }
+                    }
+            }
+    }
+}
+
+private struct BuxThemedFormStyleModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @Environment(\.settingsEnhancedTint) private var settingsEnhancedTint
+    @Environment(\.expensesEnhancedTint) private var expensesEnhancedTint
+    @Environment(\.studioEnhancedTint) private var studioEnhancedTint
+    @ObservedObject private var settings = SettingsStore.shared
+
+    private var usesEnhancedLayout: Bool {
+        settingsEnhancedTint || expensesEnhancedTint || studioEnhancedTint
+    }
+
+    private var usesThemedGroupedRows: Bool {
+        settings.brandThemesEnabled
+    }
+
+    func body(content: Content) -> some View {
+        if usesThemedGroupedRows {
+            content
+                .scrollContentBackground(.hidden)
+                .buxScrollDismissesKeyboard()
+                .listSectionSpacing(BuxLayout.section)
+                .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
+                .listRowBackground(themedFormRowBackground)
+                .listRowSeparatorTint(themeManager.themedCardStroke(for: colorScheme))
+                .modifier(BuxFormListMarginsModifier(enabled: usesEnhancedLayout))
+        } else if usesEnhancedLayout {
+            content
+                .scrollContentBackground(.hidden)
+                .buxScrollDismissesKeyboard()
+                .buxListContentMargins()
+        } else {
+            content
+                .scrollContentBackground(.hidden)
+                .buxScrollDismissesKeyboard()
+        }
+    }
+
+    private var themedFormRowBackground: some View {
+        RoundedRectangle(cornerRadius: BuxLayout.cornerGrouped, style: .continuous)
+            .fill(themeManager.cardFill(for: colorScheme))
+            .overlay(
+                RoundedRectangle(cornerRadius: BuxLayout.cornerGrouped, style: .continuous)
+                    .strokeBorder(themeManager.themedCardStroke(for: colorScheme), lineWidth: 0.5)
+            )
+    }
+}
+
+private struct BuxFormListMarginsModifier: ViewModifier {
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.buxListContentMargins()
+        } else {
+            content
+        }
+    }
+}
+
+// MARK: - Card sheet form (Add Expense pattern — replaces grouped Form white slabs)
+
+struct BuxFormSectionLabel: View {
+    let title: String
+
+    var body: some View {
+        Text(title.uppercased())
+            .font(.system(size: 11, weight: .bold))
+            .buxLabelSecondary()
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct BuxFormRowDivider: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    var body: some View {
+        Divider()
+            .overlay(themeManager.themedCardStroke(for: colorScheme).opacity(0.55))
+            .padding(.leading, BuxLayout.section)
+    }
+}
+
+struct BuxThemedCardForm<Content: View>: View {
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: BuxLayout.section) {
+                content()
+            }
+            .padding(.horizontal, BuxLayout.marginHorizontal)
+            .padding(.top, BuxLayout.tight)
+            .padding(.bottom, 32)
+        }
+        .scrollDismissesKeyboard(.interactively)
+    }
+}
+
+struct BuxFormSection<Content: View>: View {
+    let title: String?
+    @ViewBuilder var content: () -> Content
+
+    init(title: String? = nil, @ViewBuilder content: @escaping () -> Content) {
+        self.title = title
+        self.content = content
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            if let title {
+                BuxFormSectionLabel(title: title)
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                content()
+            }
+            .buxFormSectionCard()
+        }
+    }
+}
+
+extension View {
+    /// Inset for a row inside a themed form card.
+    func buxFormFieldPadding() -> some View {
+        padding(.horizontal, BuxLayout.section)
+            .padding(.vertical, 12)
+    }
+
+    /// M3 outlined card — use instead of grouped Form sections.
+    func buxFormSectionCard(cornerRadius: CGFloat = 20) -> some View {
+        buxThemedCardChrome(cornerRadius: cornerRadius)
     }
 }

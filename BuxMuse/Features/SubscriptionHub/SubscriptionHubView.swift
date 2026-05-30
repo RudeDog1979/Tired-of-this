@@ -34,47 +34,56 @@ struct SubscriptionHubView: View {
 
     var body: some View {
         ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
+            NavigationStack {
+                ZStack {
+                    themeManager.screenBackground(for: colorScheme)
+                        .ignoresSafeArea()
 
-            BuxHeroMeshBackground()
+                    ScrollView(showsIndicators: false) {
+                        LazyVStack(spacing: BuxLayout.section) {
+                            overviewCard
 
-            VStack(spacing: 0) {
-                hubHeader
+                            SubscriptionRenewalTimelineView(renewals: viewModel.upcomingRenewals) { name in
+                                triggerDetail(for: name)
+                            }
 
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: BuxLayout.section) {
-                        overviewCard
+                            SubscriptionBurnRateView(
+                                daily: viewModel.dailyBurnRate,
+                                weekly: viewModel.weeklyBurnRate,
+                                monthly: viewModel.monthlyBurnRate,
+                                yearly: viewModel.yearlyBurnRate,
+                                projectionText: viewModel.burnRateCancellationProjection,
+                                quarterlyIncrease: viewModel.burnRateQuarterlyIncrease
+                            )
 
-                        SubscriptionRenewalTimelineView(renewals: viewModel.upcomingRenewals) { name in
-                            triggerDetail(for: name)
+                            SubscriptionRiskAnalyzerView(subscriptions: viewModel.subscriptions) { name in
+                                triggerDetail(for: name)
+                            }
+
+                            SubscriptionOpportunitiesView(subscriptions: viewModel.subscriptions) { name in
+                                triggerDetail(for: name)
+                            }
+
+                            SubscriptionCategoryDetailView(subscriptions: viewModel.subscriptions)
                         }
-
-                        SubscriptionBurnRateView(
-                            daily: viewModel.dailyBurnRate,
-                            weekly: viewModel.weeklyBurnRate,
-                            monthly: viewModel.monthlyBurnRate,
-                            yearly: viewModel.yearlyBurnRate,
-                            projectionText: viewModel.burnRateCancellationProjection,
-                            quarterlyIncrease: viewModel.burnRateQuarterlyIncrease
-                        )
-
-                        SubscriptionRiskAnalyzerView(subscriptions: viewModel.subscriptions) { name in
-                            triggerDetail(for: name)
-                        }
-
-                        SubscriptionOpportunitiesView(subscriptions: viewModel.subscriptions) { name in
-                            triggerDetail(for: name)
-                        }
-
-                        SubscriptionCategoryDetailView(subscriptions: viewModel.subscriptions)
+                        .padding(.vertical, BuxLayout.section)
+                        .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
+                        .buxScreenContentMargins()
                     }
-                    .padding(.vertical, BuxLayout.section)
-                    .padding(.bottom, 60)
-                    .buxScreenContentMargins()
+                    .buxDetailScrollChrome()
                 }
-                .buxReportsContainerWidth()
-                .buxTabBarScrollMinimizeTracking()
+                .navigationTitle("Subscription Hub")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        BuxToolbarBackButton {
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                isPresented = false
+                            }
+                        }
+                    }
+                }
+                .buxDetailNavigationChrome()
             }
 
             if showDetailSheet {
@@ -100,6 +109,7 @@ struct SubscriptionHubView: View {
                     },
                     isPresented: $showDetailSheet
                 )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .transition(.asymmetric(
                     insertion: .move(edge: .bottom).combined(with: .opacity),
                     removal: .move(edge: .bottom).combined(with: .opacity)
@@ -116,16 +126,6 @@ struct SubscriptionHubView: View {
         }
         .buxThemedPresentation()
         .ignoresSafeArea(.keyboard)
-    }
-
-    // MARK: - Header (true center title)
-
-    private var hubHeader: some View {
-        BuxOverlayHeader(title: "Subscription Hub") {
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                isPresented = false
-            }
-        }
     }
 
     // MARK: - Overview hero (compact vs old 38pt slab)

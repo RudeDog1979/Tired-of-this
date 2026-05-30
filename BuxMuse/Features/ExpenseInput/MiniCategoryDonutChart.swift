@@ -10,7 +10,6 @@ import Charts
 
 struct MiniCategoryDonutChart: View {
     let breakdown: [(String, Double)]
-    let accentColor: Color
 
     @State private var isVisible = false
 
@@ -30,7 +29,7 @@ struct MiniCategoryDonutChart: View {
                     innerRadius: .ratio(0.62),
                     angularInset: 1.5
                 )
-                .foregroundStyle(segmentColor(index))
+                .foregroundStyle(segmentColor(for: item.name, index: index))
             }
         }
         .chartLegend(.hidden)
@@ -45,9 +44,7 @@ struct MiniCategoryDonutChart: View {
         )
     }
 
-    private func segmentColor(_ index: Int) -> Color {
-        let steps: [Double] = [1.0, 0.72, 0.48, 0.32]
-        let step = steps[min(index, steps.count - 1)]
-        return accentColor.opacity(step)
+    private func segmentColor(for name: String, index: Int) -> Color {
+        BuxChartColors.color(forCategoryName: name, fallbackIndex: index)
     }
 }

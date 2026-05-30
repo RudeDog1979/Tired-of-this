@@ -25,7 +25,6 @@ struct SettingsView: View {
         NavigationStack(path: $settingsPath) {
             ZStack {
                 bgColor.ignoresSafeArea()
-                BuxHeroMeshBackground()
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {
@@ -33,9 +32,7 @@ struct SettingsView: View {
 
 
                         // Generate layout dynamically from SettingsBrain display structs
-                        let appearanceLabel = store.brandThemesEnabled
-                            ? themeManager.current.name
-                            : "Off"
+                        let appearanceLabel = store.resolvedAppearanceSummary(themeManager: themeManager)
                         let display = SettingsBrain.generateOverview(
                             store: store,
                             currentThemeName: appearanceLabel,
@@ -45,10 +42,7 @@ struct SettingsView: View {
                         
                         ForEach(display.sections) { section in
                             VStack(alignment: .leading, spacing: 12) {
-                                Text(section.title)
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                    .kerning(1.2)
+                                BuxSectionHeader(title: section.title)
                                     .padding(.leading, 4)
 
                                 VStack(spacing: 0) {
@@ -72,7 +66,7 @@ struct SettingsView: View {
                             }
                         }
 
-                        Spacer(minLength: 80)
+                        Spacer(minLength: BuxTokens.tight)
                     }
                     .padding(.top, BuxTokens.tight)
                 }
@@ -87,37 +81,60 @@ struct SettingsView: View {
                 settingsPath.append(SettingsDestinationType.studio)
                 _ = navigationCoordinator.consumeStudioSettingsRequest()
             }
+            .onChange(of: navigationCoordinator.openProfileSettingsRequest) { _, requested in
+                guard requested else { return }
+                settingsPath.append(SettingsDestinationType.profile)
+                _ = navigationCoordinator.consumeProfileSettingsRequest()
+            }
             .navigationDestination(for: SettingsDestinationType.self) { destination in
-                Group {
-                    switch destination {
-                    case .profile:
-                        ProfileSettingsView()
-                    case .appearance:
-                        AppearanceSettingsView()
-                    case .regionCurrency:
-                        RegionCurrencySettingsView()
-                    case .budgets:
-                        BudgetSettingsView()
-                    case .studio:
-                        StudioSettingsView()
-                    case .invoicePayment:
-                        InvoicePaymentSettingsView()
-                    case .mileage:
-                        MileageSettingsView()
-                    case .notifications:
-                        NotificationSettingsView()
-                    case .security:
-                        SecuritySettingsView()
-                    case .data:
-                        DataSettingsView()
-                    case .about:
-                        AboutSettingsView()
+                SettingsDrillInBackdrop {
+                    Group {
+                        switch destination {
+                        case .profile:
+                            ProfileSettingsView()
+                        case .appearance:
+                            AppearanceSettingsView()
+                        case .regionCurrency:
+                            RegionCurrencySettingsView()
+                        case .budgets:
+                            BudgetSettingsView()
+                        case .studio:
+                            StudioSettingsView()
+                        case .invoicePayment:
+                            InvoicePaymentSettingsView()
+                        case .mileage:
+                            MileageSettingsView()
+                        case .notifications:
+                            NotificationSettingsView()
+                        case .security:
+                            SecuritySettingsView()
+                        case .data:
+                            DataSettingsView()
+                        case .about:
+                            AboutSettingsView()
+                        }
                     }
                 }
                 .environment(\.settingsEnhancedTint, true)
             }
             .environment(\.settingsEnhancedTint, true)
         }
+    }
+}
+
+// MARK: - Settings drill-in backdrop (mesh + soft nav chrome)
+
+private struct SettingsDrillInBackdrop<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack {
+            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+            content()
+        }
+        .buxPushedNavigationChrome()
     }
 }
 
@@ -220,16 +237,7 @@ struct AppearanceThemePickerView: View {
                 
                 Spacer()
                 
-                Button(action: { dismiss() }) {
-                    ZStack {
-                        Circle()
-                            .fill(themeManager.chipMutedFill(for: colorScheme))
-                            .frame(width: 32, height: 32)
-                        Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    }
-                }
+                BuxToolbarCloseButton { dismiss() }
             }
             .padding(.horizontal, BuxLayout.marginHorizontal)
             .padding(.top, 24)
@@ -240,9 +248,7 @@ struct AppearanceThemePickerView: View {
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(AppTheme.all) { theme in
                             ThemeSwatchCard(theme: theme, isSelected: themeManager.current.id == theme.id) {
-                                themeManager.select(theme)
-                                store.accentColorId = theme.name
-                                store.save()
+                                store.persistThemeSelection(theme, themeManager: themeManager)
                             }
                         }
                     }
@@ -261,11 +267,8 @@ struct AppearanceThemePickerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme)
-                BuxThemedBackdrop()
-            }
-            .ignoresSafeArea()
+            themeManager.screenBackground(for: colorScheme)
+                .ignoresSafeArea()
         }
         .buxThemedPresentation()
         .environment(\.settingsEnhancedTint, true)
@@ -373,16 +376,7 @@ struct CurrencyRegionPickerView: View {
                 
                 Spacer()
                 
-                Button(action: { dismiss() }) {
-                    ZStack {
-                        Circle()
-                            .fill(themeManager.chipMutedFill(for: colorScheme))
-                            .frame(width: 32, height: 32)
-                        Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    }
-                }
+                BuxToolbarCloseButton { dismiss() }
             }
             .padding(.horizontal, BuxLayout.marginHorizontal)
             .padding(.top, 24)
@@ -442,11 +436,8 @@ struct CurrencyRegionPickerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme)
-                BuxHeroMeshBackground()
-            }
-            .ignoresSafeArea()
+            themeManager.screenBackground(for: colorScheme)
+                .ignoresSafeArea()
         }
         .buxThemedPresentation()
         .environment(\.settingsEnhancedTint, true)

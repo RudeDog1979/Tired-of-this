@@ -16,10 +16,8 @@ struct AmountField: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("AMOUNT")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                .kerning(1.2)
+            Text("Amount")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
             
             HStack(spacing: 8) {
                 Text(appSettingsManager.selectedCurrency.symbol)

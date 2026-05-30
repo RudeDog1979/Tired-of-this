@@ -45,21 +45,33 @@ struct ExpenseFilterSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Type") {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+                BuxThemedCardForm {
+                BuxFormSection(title: "Type") {
                     Toggle("Recurring only", isOn: $filters.recurringOnly)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     Toggle("Subscription-like", isOn: $filters.subscriptionLikeOnly)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     Toggle("Refunds only", isOn: $filters.refundsOnly)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
                 }
 
                 if !categories.isEmpty {
-                    Section("Category") {
+                    BuxFormSection(title: "Category") {
                         Picker("Category", selection: categorySelection) {
                             Text("Any").tag(UUID?.none)
                             ForEach(categories) { category in
                                 Text(category.name).tag(UUID?.some(category.id))
                             }
                         }
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
                     }
                 }
 
@@ -68,7 +80,7 @@ struct ExpenseFilterSheet: View {
                 }
 
                 if !heatZones.isEmpty {
-                    Section("Heat zone") {
+                    BuxFormSection(title: "Heat zone") {
                         Picker("Heat zone", selection: heatZoneSelection) {
                             Text("Any").tag(String?.none)
                             ForEach(heatZones, id: \.self) { zone in
@@ -76,24 +88,29 @@ struct ExpenseFilterSheet: View {
                                     .tag(String?.some(zone))
                             }
                         }
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
                     }
                 }
 
                 if filters.isActive {
-                    Section {
+                    BuxFormSection {
                         Button("Clear all filters", role: .destructive) {
                             filters = ExpenseFilterState()
                             merchantSearchQuery = ""
                         }
+                        .buxFormFieldPadding()
                     }
                 }
+            }
             }
             .buxScrollDismissesKeyboard()
             .navigationTitle("Filters")
             .navigationBarTitleDisplayMode(.inline)
+            .buxThemedSheetContent()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    BuxToolbarDoneButton { dismiss() }
                 }
             }
         }
@@ -103,7 +120,7 @@ struct ExpenseFilterSheet: View {
 
     @ViewBuilder
     private var merchantFilterSection: some View {
-        Section("Merchant") {
+        BuxFormSection(title: "Merchant") {
             if let selected = selectedMerchant {
                 HStack(spacing: 10) {
                     AsyncMerchantLogoView(merchantName: selected.name, size: 28)
@@ -120,17 +137,22 @@ struct ExpenseFilterSheet: View {
                     }
                     .font(.system(size: 13, weight: .semibold))
                 }
+                .buxFormFieldPadding()
+                BuxFormRowDivider()
             }
 
             TextField("Search merchants", text: $merchantSearchQuery)
                 .textInputAutocapitalization(.words)
                 .autocorrectionDisabled()
+                .buxFormFieldPadding()
 
             if filters.merchantId == nil {
+                BuxFormRowDivider()
                 filterMerchantRow(label: "Any merchant", subtitle: nil, merchantId: nil)
             }
 
             ForEach(filteredMerchants.prefix(32)) { merchant in
+                BuxFormRowDivider()
                 filterMerchantRow(
                     label: merchant.displayTitle,
                     subtitle: merchant.cluster,
@@ -139,9 +161,11 @@ struct ExpenseFilterSheet: View {
             }
 
             if filteredMerchants.isEmpty, !merchantSearchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                BuxFormRowDivider()
                 Text("No merchants match your search.")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.gray)
+                    .buxFormFieldPadding()
             }
         }
     }
@@ -181,6 +205,7 @@ struct ExpenseFilterSheet: View {
             }
         }
         .buttonStyle(.plain)
+        .buxFormFieldPadding()
     }
 
     private var categorySelection: Binding<UUID?> {

@@ -29,36 +29,38 @@ struct MonthlySummaryDetailSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    
-                    // High-level prediction header
-                    forecastingHeader
-                    
-                    // Category Breakdown with premium progress bars
-                    categoryBreakdownSection
-                    
-                    // Merchant Leaderboard with visual size bars
-                    merchantLeaderboardSection
-                    
-                    // Budget Risk & Intelligence Advice
-                    financialAdviceSection
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        
+                        // High-level prediction header
+                        forecastingHeader
+                        
+                        // Category Breakdown with premium progress bars
+                        categoryBreakdownSection
+                        
+                        // Merchant Leaderboard with visual size bars
+                        merchantLeaderboardSection
+                        
+                        // Budget Risk & Intelligence Advice
+                        financialAdviceSection
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, BuxLayout.section)
+                    .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .buxDetailScrollChrome()
             }
-            .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
             .navigationTitle("Monthly Summary")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
-                    .tint(themeManager.current.accentColor)
+                    BuxToolbarDoneButton { dismiss() }
                 }
             }
+            .buxDetailNavigationChrome()
             .onAppear {
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     animateRows = true
@@ -71,10 +73,8 @@ struct MonthlySummaryDetailSheet: View {
 
     private var forecastingHeader: some View {
         VStack(spacing: 16) {
-            Text("MONTHLY SUMMARY")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
-                .kerning(1.2)
+            Text("Monthly summary")
+                .buxSectionLabelStyle(color: .gray)
 
             Text(formatAmount(Decimal(summary.totalSpent)))
                 .font(.system(size: 40, weight: .bold, design: .rounded))
@@ -154,7 +154,7 @@ struct MonthlySummaryDetailSheet: View {
                         let catName = item.0
                         let catVal = abs(item.1)
                         let percentage = summary.totalSpent > 0 ? (catVal / summary.totalSpent) * 100 : 0
-                        categoryRow(name: catName, value: catVal, percentage: percentage)
+                        categoryRow(name: catName, value: catVal, percentage: percentage, index: index)
                     }
                 }
             }
@@ -163,11 +163,12 @@ struct MonthlySummaryDetailSheet: View {
         .expensesThemedCardChrome(cornerRadius: 20)
     }
 
-    private func categoryRow(name: String, value: Double, percentage: Double) -> some View {
+    private func categoryRow(name: String, value: Double, percentage: Double, index: Int) -> some View {
+        let categoryTint = BuxChartColors.color(forCategoryName: name, fallbackIndex: index)
         let progressGradient = LinearGradient(
             colors: [
-                themeManager.current.accentColor,
-                themeManager.current.accentColor.opacity(0.6)
+                categoryTint,
+                categoryTint.opacity(0.6)
             ],
             startPoint: .leading,
             endPoint: .trailing
@@ -178,12 +179,12 @@ struct MonthlySummaryDetailSheet: View {
                 // Category Icon
                 ZStack {
                     Circle()
-                        .fill(themeManager.current.accentColor.opacity(0.08))
+                        .fill(categoryTint.opacity(0.08))
                         .frame(width: 32, height: 32)
                     
                     Image(systemName: iconName(for: name))
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(categoryTint)
                 }
 
                 // Category Name
@@ -256,7 +257,8 @@ struct MonthlySummaryDetailSheet: View {
     }
 
     private func merchantRow(index: Int, name: String, value: Double, ratio: Double) -> some View {
-        let merchantGradient = Color.orange.opacity(0.85).gradient
+        let merchantTint = BuxChartColors.merchantColor(fallbackIndex: index)
+        let merchantGradient = merchantTint.opacity(0.85).gradient
         let rankString = "\(index + 1)"
 
         return HStack(spacing: 12) {

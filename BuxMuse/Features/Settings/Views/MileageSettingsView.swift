@@ -13,38 +13,32 @@ struct MileageSettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                Section {
-                    Toggle("Auto-location for mileage", isOn: $store.autoLocationForMileage)
-                        .tint(themeManager.current.accentColor)
-                    Text("When enabled, trip sheets can capture your current place name for start or end.")
-                        .font(.system(size: 12))
-                        .buxLabelSecondary()
-                } header: {
-                    Text("AUTO-LOCATION FOR MILEAGE")
-                }
-
-                Section {
-                    HStack {
-                        Text("Allowance per mile")
-                        Spacer()
-                        TextField("0.45", value: $store.mileageRatePerUnitValue, format: .number.precision(.fractionLength(2)))
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(maxWidth: 88)
-                    }
-                    Text("Applied to business-purpose trips in Studio deductions and tax estimates.")
-                        .font(.system(size: 12))
-                        .buxLabelSecondary()
-                } header: {
-                    Text("MILEAGE RATE")
-                }
+        BuxThemedCardForm {
+            BuxFormSection(title: "Auto-location for mileage") {
+                Toggle("Auto-location for mileage", isOn: $store.autoLocationForMileage)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+                Text("When enabled, trip sheets can capture your current place name for start or end.")
+                    .font(.system(size: 12))
+                    .buxLabelSecondary()
+                    .buxFormFieldPadding()
             }
-            .buxThemedFormStyle()
+
+            BuxFormSection(title: "Mileage rate") {
+                HStack {
+                    Text("Allowance per mile")
+                    Spacer()
+                    TextField("0.45", value: $store.mileageRatePerUnitValue, format: .number.precision(.fractionLength(2)))
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: 88)
+                }
+                .buxFormFieldPadding()
+                Text("Applied to business-purpose trips in Studio deductions and tax estimates.")
+                    .font(.system(size: 12))
+                    .buxLabelSecondary()
+                    .buxFormFieldPadding()
+            }
         }
         .navigationTitle("Mileage Log")
         .navigationBarTitleDisplayMode(.inline)

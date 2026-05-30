@@ -34,10 +34,40 @@ struct DashboardView: View {
     @State private var categorySlideDirection: Int = 1
     @State private var categoryMotionToken = UUID()
     @State private var activeSheet: DashboardActiveSheet?
+    @State private var showQuickNewInvoice = false
     @State private var showTipPopup = false
     @State private var tipGlowPhase = false
 
     private var dashSnapshot: DashboardSnapshot { brain.dashboardSnapshot }
+
+    /// Keeps hero sizing proportional on narrow phones (fixed 82×4 slots were overflowing the card).
+    private var heroLayoutScale: CGFloat {
+        min(1, UIScreen.main.bounds.width / 430)
+    }
+
+    private var heroCardPadding: CGFloat {
+        heroLayoutScale < 0.92 ? BuxTokens.section : BuxTokens.block
+    }
+
+    private var heroAvatarSize: CGFloat {
+        collapseValue(start: 66 * heroLayoutScale, end: 52 * heroLayoutScale)
+    }
+
+    private var heroBellSize: CGFloat {
+        collapseValue(start: 50 * heroLayoutScale, end: 44 * heroLayoutScale)
+    }
+
+    private var heroBellIconSize: CGFloat {
+        max(16, 18 * heroLayoutScale)
+    }
+
+    private var heroActionDiameter: CGFloat {
+        58 * heroLayoutScale
+    }
+
+    private var heroActionIconSize: CGFloat {
+        max(18, 22 * heroLayoutScale)
+    }
 
     var body: some View {
         NavigationStack {
@@ -47,28 +77,40 @@ struct DashboardView: View {
 
     private var dashboardRoot: some View {
         ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+            themeManager.screenBackground(for: colorScheme)
+                .ignoresSafeArea()
             BuxHeroMeshBackground()
             // Scroll view containing page elements
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxTokens.block) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {
-                        BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.hero, padding: BuxTokens.section) {
-                        VStack(alignment: .leading, spacing: BuxTokens.section) {
-                                
-                                // Header row (Avatar + Username) collapses/fades out slightly on scroll
-                                HStack {
-                                    BuxUserAvatarView(size: collapseValue(start: 44, end: 32))
-                                    
-                                    Text(settingsStore.resolvedDisplayName)
-                                        .font(.system(size: collapseValue(start: 15, end: 13), weight: .bold))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                        .opacity(max(0, 1.0 + (scrollOffset / 140.0)))
-                                    
+                        BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.sheet, padding: heroCardPadding) {
+                        VStack(alignment: .leading, spacing: 0) {
+
+                                // Header — avatar + name left, liquid-glass bell right
+                                HStack(alignment: .center, spacing: 0) {
+                                    HStack(spacing: 12) {
+                                        Button(action: { navigationCoordinator.openProfileSettings() }) {
+                                            BuxUserAvatarView(size: heroAvatarSize)
+                                        }
+                                        .buttonStyle(BuxmationPressCardStyle())
+                                        .accessibilityLabel("Profile settings")
+
+                                        Text(settingsStore.resolvedDisplayName)
+                                            .font(.system(size: collapseValue(start: 16, end: 14), weight: .bold))
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                            .lineLimit(1)
+                                    }
+
+                                    Spacer(minLength: 12)
+
+                                    heroNotificationBell
                                 }
+                                .padding(.top, collapseValue(start: 8, end: 0))
+                                .opacity(max(0, 1.0 + (scrollOffset / 140.0)))
 
                                 // Balance Section collapses smoothly
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: 6) {
                                     HStack(spacing: 6) {
                                         let balanceTitle: String = {
                                             switch settingsStore.budgetingMode {
@@ -85,7 +127,7 @@ struct DashboardView: View {
                                         
                                         Text(balanceTitle)
                                             .font(.system(size: 13, weight: .medium))
-                                            .foregroundColor(colorScheme == .dark ? .white.opacity(0.6) : Color(red: 100/255, green: 110/255, blue: 130/255))
+                                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                             .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
                                         
                                         Button(action: {
@@ -93,7 +135,7 @@ struct DashboardView: View {
                                         }) {
                                             Image(systemName: navigationCoordinator.isBalanceVisible ? "eye" : "eye.slash")
                                                 .font(.system(size: 12))
-                                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.6) : Color(red: 100/255, green: 110/255, blue: 130/255))
+                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                         }
                                         .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
                                     }
@@ -116,7 +158,8 @@ struct DashboardView: View {
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         .offset(y: collapseValue(start: 0, end: -10))
                                 }
-                                
+                                .padding(.top, BuxTokens.section + BuxTokens.tight)
+
                                 // 4 Circular Quick Action Buttons (Updated with custom staggers, Subscriptions, & arrow-down)
                                 HStack(spacing: 0) {
                                     // 1. FAB ADD EXPENSE BUTTON
@@ -126,98 +169,70 @@ struct DashboardView: View {
                                         }
                                     }) {
                                         VStack(spacing: 8) {
-                                            ZStack {
-                                                Circle()
-                                                    .fill(themeManager.cardFill(for: colorScheme))
-                                                    .overlay(Circle().fill(DashboardThemeTint.dashboardSurfaceWash(themeManager: themeManager, colorScheme: colorScheme)))
-                                                    .frame(width: 52, height: 52)
-                                                    .overlay(
-                                                        Circle()
-                                                            .stroke(DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme), lineWidth: 1)
-                                                    )
-                                                    .shadow(color: colorScheme == .dark ? .clear : DashboardThemeTint.fabAccentShadow(themeManager: themeManager, colorScheme: colorScheme), radius: 8, x: 0, y: 4)
-                                                
+                                            heroGlassActionCircle(diameter: heroActionDiameter) {
                                                 Image(systemName: "plus")
-                                                    .font(.system(size: 20, weight: .semibold))
-                                                    .foregroundColor(themeManager.current.accentColor)
+                                                    .font(.system(size: heroActionIconSize, weight: .semibold))
+                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                                     .rotationEffect(.degrees(isFabMenuExpanded ? 45 : 0))
                                             }
-                                            
+
                                             Text("Add expense")
-                                                .font(.system(size: 11, weight: .medium))
-                                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : Color(red: 70/255, green: 80/255, blue: 95/255))
+                                                .font(.system(size: max(11, 12 * heroLayoutScale), weight: .medium))
+                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.85)
                                         }
-                                        .frame(width: 76)
+                                        .frame(maxWidth: .infinity)
                                     }
                                     .buttonStyle(BuxmationPressCardStyle())
                                     .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 8)
                                     .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                                     .animation(.spring(response: 0.4, dampingFraction: 0.75).delay(0.0), value: navigationCoordinator.isScreenLoaded)
-                                    
-                                    Spacer()
-                                    
+
                                     // 2. Log Income
                                     Button(action: {
                                         activeSheet = .addExpense(.addIncome)
                                     }) {
                                         VStack(spacing: 8) {
-                                            ZStack {
-                                                Circle()
-                                                    .fill(themeManager.cardFill(for: colorScheme))
-                                                    .overlay(Circle().fill(DashboardThemeTint.dashboardSurfaceWash(themeManager: themeManager, colorScheme: colorScheme)))
-                                                    .frame(width: 52, height: 52)
-                                                    .overlay(
-                                                        Circle()
-                                                            .stroke(DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme), lineWidth: 1)
-                                                    )
-                                                    .shadow(color: colorScheme == .dark ? .clear : DashboardThemeTint.fabAccentShadow(themeManager: themeManager, colorScheme: colorScheme), radius: 8, x: 0, y: 4)
-                                                
+                                            heroGlassActionCircle(diameter: heroActionDiameter) {
                                                 Image(systemName: "arrow.down.circle.fill")
-                                                    .font(.system(size: 22))
-                                                    .foregroundColor(themeManager.current.accentColor)
+                                                    .font(.system(size: heroActionIconSize + 2))
+                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                             }
-                                            
+
                                             Text("Log income")
-                                                .font(.system(size: 11, weight: .medium))
-                                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : Color(red: 70/255, green: 80/255, blue: 95/255))
+                                                .font(.system(size: max(11, 12 * heroLayoutScale), weight: .medium))
+                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.85)
                                         }
-                                        .frame(width: 76)
+                                        .frame(maxWidth: .infinity)
                                     }
                                     .buttonStyle(BuxmationPressCardStyle())
                                     .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 8)
                                     .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                                     .animation(.spring(response: 0.4, dampingFraction: 0.75).delay(0.06), value: navigationCoordinator.isScreenLoaded)
-                                    
-                                    Spacer()
-                                    
+
                                     // 3. Tips (daily regional tip)
                                     Button(action: {
                                         showTipPopup = true
                                         brain.markDailyTipSeen()
                                     }) {
                                         VStack(spacing: 8) {
-                                            ZStack {
-                                                Circle()
-                                                    .fill(themeManager.cardFill(for: colorScheme))
-                                                    .overlay(Circle().fill(DashboardThemeTint.dashboardSurfaceWash(themeManager: themeManager, colorScheme: colorScheme)))
-                                                    .frame(width: 52, height: 52)
-                                                    .overlay(
-                                                        Circle()
-                                                            .stroke(DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme), lineWidth: 1)
-                                                    )
-                                                    .shadow(color: colorScheme == .dark ? .clear : DashboardThemeTint.fabAccentShadow(themeManager: themeManager, colorScheme: colorScheme), radius: 8, x: 0, y: 4)
-                                                    .shadow(color: brain.tipNeedsAttention && tipGlowPhase ? Color.yellow.opacity(0.55) : .clear, radius: 12)
-
+                                            heroGlassActionCircle(diameter: heroActionDiameter) {
                                                 Image(systemName: "lightbulb.fill")
-                                                    .font(.system(size: 20))
-                                                    .foregroundColor(brain.tipNeedsAttention ? .yellow : themeManager.current.accentColor)
+                                                    .font(.system(size: heroActionIconSize))
+                                                    .foregroundColor(brain.tipNeedsAttention ? .yellow : themeManager.contrastAccentColor(for: colorScheme))
                                             }
+                                            .shadow(color: brain.tipNeedsAttention && tipGlowPhase ? Color.yellow.opacity(0.55) : .clear, radius: 12)
 
                                             Text("Tips")
-                                                .font(.system(size: 11, weight: .medium))
-                                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : Color(red: 70/255, green: 80/255, blue: 95/255))
+                                                .font(.system(size: max(11, 12 * heroLayoutScale), weight: .medium))
+                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.85)
                                         }
-                                        .frame(width: 76)
+                                        .frame(maxWidth: .infinity)
                                     }
                                     .buttonStyle(BuxmationPressCardStyle())
                                     .onChange(of: brain.tipPulseToken) { _, _ in
@@ -232,9 +247,7 @@ struct DashboardView: View {
                                     .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 8)
                                     .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                                     .animation(.spring(response: 0.4, dampingFraction: 0.75).delay(0.12), value: navigationCoordinator.isScreenLoaded)
-                                    
-                                    Spacer()
-                                    
+
                                     // 4. Subscriptions (Replaces Scan with subscription stacked cards logo)
                                     Button(action: {
                                         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
@@ -242,34 +255,27 @@ struct DashboardView: View {
                                         }
                                     }) {
                                         VStack(spacing: 8) {
-                                            ZStack {
-                                                Circle()
-                                                    .fill(themeManager.cardFill(for: colorScheme))
-                                                    .overlay(Circle().fill(DashboardThemeTint.dashboardSurfaceWash(themeManager: themeManager, colorScheme: colorScheme)))
-                                                    .frame(width: 52, height: 52)
-                                                    .overlay(
-                                                        Circle()
-                                                            .stroke(DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme), lineWidth: 1)
-                                                    )
-                                                    .shadow(color: colorScheme == .dark ? .clear : DashboardThemeTint.fabAccentShadow(themeManager: themeManager, colorScheme: colorScheme), radius: 8, x: 0, y: 4)
-                                                
+                                            heroGlassActionCircle(diameter: heroActionDiameter) {
                                                 Image(systemName: "arrow.triangle.2.circlepath")
-                                                    .font(.system(size: 20, weight: .semibold))
-                                                    .foregroundColor(themeManager.current.accentColor)
+                                                    .font(.system(size: heroActionIconSize, weight: .semibold))
+                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                             }
-                                            
+
                                             Text("Subscriptions")
-                                                .font(.system(size: 11, weight: .medium))
-                                                .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : Color(red: 70/255, green: 80/255, blue: 95/255))
+                                                .font(.system(size: max(11, 12 * heroLayoutScale), weight: .medium))
+                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.85)
                                         }
-                                        .frame(width: 76)
+                                        .frame(maxWidth: .infinity)
                                     }
                                     .buttonStyle(BuxmationPressCardStyle())
                                     .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 8)
                                     .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                                     .animation(.spring(response: 0.4, dampingFraction: 0.75).delay(0.18), value: navigationCoordinator.isScreenLoaded)
                                 }
-                                .padding(.top, 4)
+                                .padding(.top, BuxTokens.block + BuxTokens.tight)
+                                .padding(.bottom, BuxTokens.section)
                                 .offset(y: collapseValue(start: 0, end: -15))
                         }
                         }
@@ -287,14 +293,11 @@ struct DashboardView: View {
                                             navigationCoordinator.selectedTab = .settings
                                         }
                                     }) {
-                                        BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
                                         VStack(alignment: .leading, spacing: 12) {
                                             HStack {
                                                 VStack(alignment: .leading, spacing: 4) {
-                                                    Text("ACTIVE BUDGET: \(budgetName.uppercased())")
-                                                        .font(.system(size: 11, weight: .bold))
-                                                        .foregroundColor(themeManager.current.accentColor)
-                                                        .kerning(1.1)
+                                                    Text("Active budget: \(budgetName)")
+                                                        .buxSectionLabelStyle(color: themeManager.current.accentColor)
                                                     
                                                     Text("\(appSettingsManager.format(remaining)) left of \(appSettingsManager.format(limit))")
                                                         .font(.system(size: 16, weight: .bold))
@@ -305,14 +308,14 @@ struct DashboardView: View {
                                                 
                                                 Text("\(Int(progress * 100))% spent")
                                                     .font(.system(size: 12, weight: .bold))
-                                                    .foregroundColor(progress > 0.9 ? .red : .gray)
+                                                    .foregroundColor(progress > 0.9 ? .red : themeManager.labelSecondary(for: colorScheme))
                                             }
                                             
                                             // Progress Bar
                                             GeometryReader { geometry in
                                                 ZStack(alignment: .leading) {
                                                     RoundedRectangle(cornerRadius: 4)
-                                                        .fill(colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.05))
+                                                        .fill(Color(.systemGray5).opacity(colorScheme == .dark ? 0.35 : 0.55))
                                                         .frame(height: 8)
                                                     
                                                     RoundedRectangle(cornerRadius: 4)
@@ -326,7 +329,8 @@ struct DashboardView: View {
                                             }
                                             .frame(height: 8)
                                         }
-                                        }
+                                        .padding(BuxTokens.section)
+                                        .dashboardMaterialCardChrome(.outlined)
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -337,7 +341,6 @@ struct DashboardView: View {
                                             navigationCoordinator.selectedTab = .settings
                                         }
                                     }) {
-                                        BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
                                         VStack(alignment: .leading, spacing: 8) {
                                             HStack {
                                                 Image(systemName: "chart.pie.fill")
@@ -346,17 +349,16 @@ struct DashboardView: View {
                                                     .font(.system(size: 13, weight: .bold))
                                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                                 Spacer()
-                                                Image(systemName: "chevron.right")
-                                                    .font(.system(size: 12, weight: .bold))
-                                                    .foregroundColor(.gray)
+                                                BuxChevron()
                                             }
                                             
                                             Text("You have enabled \(settingsStore.budgetingMode.rawValue) budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.")
                                                 .font(.system(size: 11, weight: .medium))
-                                                .foregroundColor(.gray)
+                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                                 .multilineTextAlignment(.leading)
                                         }
-                                        }
+                                        .padding(BuxTokens.section)
+                                        .dashboardMaterialCardChrome(.outlined)
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -414,10 +416,9 @@ struct DashboardView: View {
                                             iconColor: themeManager.current.accentColor,
                                             includesDashboardChrome: false
                                         )
+                                        .dashboardMaterialPillCardLabel()
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
-                                    .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                    .dashboardThemedCardChrome(cornerRadius: 24)
                                     .buxDashboardCategoryCard(
                                         index: 0,
                                         direction: categorySlideDirection,
@@ -442,10 +443,9 @@ struct DashboardView: View {
                                             iconColor: themeManager.current.accentColor,
                                             includesDashboardChrome: false
                                         )
+                                        .dashboardMaterialPillCardLabel()
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
-                                    .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                    .dashboardThemedCardChrome(cornerRadius: 24)
                                     .buxDashboardCategoryCard(
                                         index: 1,
                                         direction: categorySlideDirection,
@@ -463,14 +463,14 @@ struct DashboardView: View {
                                         HStack {
                                             Image(systemName: "sparkles")
                                                 .foregroundColor(themeManager.current.accentColor)
-                                            Text("No active subscriptions. Tapping quick action opens Subscription Hub.")
+                                                Text("No active subscriptions. Tapping quick action opens Subscription Hub.")
                                                 .font(.system(size: 11, weight: .bold))
-                                                .foregroundColor(.gray)
+                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                                 .multilineTextAlignment(.center)
                                         }
                                         .frame(maxWidth: .infinity)
                                         .padding(.vertical, 32)
-                                        .dashboardThemedCardChrome(cornerRadius: 24)
+                                        .dashboardMaterialCardChrome(.outlined)
                                         .buxDashboardCategoryCard(
                                             index: 0,
                                             direction: categorySlideDirection,
@@ -490,10 +490,9 @@ struct DashboardView: View {
                                                     accentColor: index == 0 ? themeManager.current.accentColor : Color.purple,
                                                     includesDashboardChrome: false
                                                 )
+                                                .dashboardMaterialPillCardLabel()
                                             }
                                             .buttonStyle(BuxDashboardCardButtonStyle())
-                                            .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                            .dashboardThemedCardChrome(cornerRadius: 24)
                                             .buxDashboardCategoryCard(
                                                 index: index,
                                                 direction: categorySlideDirection,
@@ -506,10 +505,8 @@ struct DashboardView: View {
                             } else if navigationCoordinator.activeCategoryPill == "Goals" {
                                 VStack(alignment: .leading, spacing: 16) {
                                     HStack {
-                                        Text("ACTIVE SAVINGS GOALS")
-                                            .font(.system(size: 11, weight: .bold))
-                                            .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                            .kerning(1.2)
+                                        Text("Active savings goals")
+                                            .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                                         
                                         Spacer()
                                         
@@ -534,15 +531,15 @@ struct DashboardView: View {
                                             VStack(spacing: 8) {
                                                 Image(systemName: "target")
                                                     .font(.system(size: 24))
-                                                    .foregroundColor(.gray)
+                                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                                                 Text("No active savings goals yet.")
                                                     .font(.system(size: 13, weight: .medium))
-                                                    .foregroundColor(.gray)
+                                                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                             }
                                             Spacer()
                                         }
                                         .padding(.vertical, 32)
-                                        .dashboardThemedCardChrome(cornerRadius: 24)
+                                        .dashboardMaterialCardChrome(.outlined)
                                         .buxDashboardCategoryCard(
                                             index: 0,
                                             direction: categorySlideDirection,
@@ -569,10 +566,9 @@ struct DashboardView: View {
                                                             accentColor: accentColor,
                                                             includesDashboardChrome: false
                                                         )
+                                                        .dashboardMaterialPillCardLabel()
                                                     }
                                                     .buttonStyle(BuxDashboardCardButtonStyle())
-                                                    .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                                    .dashboardThemedCardChrome(cornerRadius: 24)
                                                     .buxDashboardCategoryCard(
                                                         index: index,
                                                         direction: categorySlideDirection,
@@ -583,8 +579,9 @@ struct DashboardView: View {
                                                     .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05 + Double(index) * 0.07), value: navigationCoordinator.isScreenLoaded)
                                                 }
                                             }
+                                            .padding(.horizontal, 2)
                                         }
-                                        
+
                                         Button(action: {
                                             if let firstGoal = goalsViewModel.goals.first {
                                                 goalsViewModel.selectGoal(firstGoal)
@@ -604,20 +601,18 @@ struct DashboardView: View {
                                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                                     Text("Get structural forecast and potential acceleration timeline AI insights.")
                                                         .font(.system(size: 11, weight: .medium))
-                                                        .foregroundColor(.gray)
+                                                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                                 }
                                                 .multilineTextAlignment(.leading)
                                                 
                                                 Spacer()
                                                 
-                                                Image(systemName: "chevron.right")
-                                                    .font(.system(size: 12, weight: .bold))
-                                                    .foregroundColor(.gray)
+                                                BuxChevron()
                                             }
                                             .padding(16)
+                                            .dashboardMaterialPillAuxCardLabel()
                                         }
                                         .buttonStyle(BuxDashboardCardButtonStyle())
-                                        .dashboardThemedCardChrome(cornerRadius: 16)
                                         .buxDashboardCategoryCard(
                                             index: 1,
                                             direction: categorySlideDirection,
@@ -630,13 +625,25 @@ struct DashboardView: View {
                                 let displayInsights = insightsViewModel.rankedInsights
                                 HStack(alignment: .top, spacing: BuxTokens.tight) {
                                     if displayInsights.isEmpty {
-                                        InsightCardView(
-                                            title: "Monthly Savings",
-                                            value: "+24.5%",
-                                            description: "Higher than last month",
-                                            accentColor: Color(red: 243/255, green: 156/255, blue: 18/255)
-                                        )
+                                        HStack {
+                                            Spacer()
+                                            VStack(spacing: 8) {
+                                                Image(systemName: "sparkles")
+                                                    .font(.system(size: 24))
+                                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                                Text("No insights yet.")
+                                                    .font(.system(size: 13, weight: .medium))
+                                                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                                Text("Add expenses to unlock spending insights.")
+                                                    .font(.system(size: 11, weight: .medium))
+                                                    .foregroundStyle(.tertiary)
+                                                    .multilineTextAlignment(.center)
+                                            }
+                                            Spacer()
+                                        }
+                                        .padding(.vertical, 32)
                                         .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
+                                        .dashboardMaterialCardChrome(.outlined)
                                         .buxDashboardCategoryCard(
                                             index: 0,
                                             direction: categorySlideDirection,
@@ -645,26 +652,6 @@ struct DashboardView: View {
                                         .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
                                         .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                                         .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05), value: navigationCoordinator.isScreenLoaded)
-                                        
-                                        InsightCardView(
-                                            title: "Spend Velocity",
-                                            value: "Low Risk",
-                                            description: "Within optimal limits",
-                                            accentColor: Color(red: 155/255, green: 89/255, blue: 182/255)
-                                        )
-                                        .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                        .buxDashboardCategoryCard(
-                                            index: 1,
-                                            direction: categorySlideDirection,
-                                            motionToken: categoryMotionToken
-                                        )
-                                        .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
-                                        .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                        .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.12), value: navigationCoordinator.isScreenLoaded)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            navigationCoordinator.selectedCryptoCard = "Bitcoin"
-                                        }
                                     } else {
                                         ForEach(Array(displayInsights.prefix(2).enumerated()), id: \.element.id) { index, insight in
                                             let accentColor: Color = {
@@ -688,10 +675,9 @@ struct DashboardView: View {
                                                     accentColor: accentColor,
                                                     includesDashboardChrome: false
                                                 )
+                                                .dashboardMaterialPillCardLabel()
                                             }
                                             .buttonStyle(BuxDashboardCardButtonStyle())
-                                            .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                            .dashboardThemedCardChrome(cornerRadius: 24)
                                             .buxDashboardCategoryCard(
                                                 index: index,
                                                 direction: categorySlideDirection,
@@ -707,7 +693,6 @@ struct DashboardView: View {
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .clipped()
                         .id(navigationCoordinator.activeCategoryPill)
                         .animation(.buxCategorySpring, value: navigationCoordinator.activeCategoryPill)
                         .onChange(of: navigationCoordinator.activeCategoryPill) { oldValue, newValue in
@@ -734,11 +719,12 @@ struct DashboardView: View {
                     .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 30)
                     .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
                     .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.24), value: navigationCoordinator.isScreenLoaded)
+                    .animation(nil, value: navigationCoordinator.activeCategoryPill)
 
                     Spacer().frame(height: BuxTokens.tight)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, BuxTokens.tight)
+                .padding(.top, BuxTokens.section)
                 .background {
                     GeometryReader { geo in
                         Color.clear.preference(
@@ -804,11 +790,10 @@ struct DashboardView: View {
                                 closeFabAnd { activeSheet = .scanReceipt }
                             }
                             FabSubmenuItem(title: "New Invoice", icon: "plus.rectangle.fill.on.folder.fill", delay: 0.16) {
-                                closeFabAnd { activeSheet = .newInvoice }
+                                closeFabAnd { showQuickNewInvoice = true }
                             }
                         }
                     }
-                    .padding(.bottom, 120)
                 }
                 .padding(.horizontal, BuxLayout.marginHorizontal)
                 .zIndex(6)
@@ -823,54 +808,82 @@ struct DashboardView: View {
                 .zIndex(20)
             }
         }
-        .navigationTitle("Home")
-        .navigationBarTitleDisplayMode(.large)
+        .toolbar(.hidden, for: .navigationBar)
         .buxRootNavigationChrome()
-        .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                BuxNavIconButton(
-                    systemName: "bell",
-                    accessibilityLabel: "Notifications",
-                    useAccent: true,
-                    action: { activeSheet = .notificationInbox }
-                )
-            }
-        }
         .sheet(item: $activeSheet) { sheet in
-            Group {
-                switch sheet {
-                case .addExpense(let mode):
-                    AddExpenseSheet(brain: brain, settingsManager: appSettingsManager, mode: mode)
-                        .environmentObject(brain)
-                        .environmentObject(themeManager)
-                        .environmentObject(appSettingsManager)
-                case .categoryList:
-                    ExpenseCategoryListSheet()
-                        .environmentObject(brain)
-                        .environmentObject(themeManager)
-                case .scanReceipt:
-                    StudioReceiptScannerView()
-                        .environmentObject(studioStore)
-                        .environmentObject(studioBrain)
-                        .environmentObject(appSettingsManager)
-                        .environmentObject(themeManager)
-                case .newInvoice:
-                    StudioInvoiceEditorView(invoiceToEdit: nil)
-                        .environmentObject(studioStore)
-                        .environmentObject(studioBrain)
-                        .environmentObject(appSettingsManager)
-                        .environmentObject(themeManager)
-                case .notificationInbox:
-                    NotificationInboxView()
-                        .environmentObject(brain)
-                        .environmentObject(themeManager)
-                        .presentationDetents([.medium, .large])
-                        .presentationDragIndicator(.visible)
-                        .presentationCornerRadius(BuxTokens.Radius.hero)
-                }
+            switch sheet {
+            case .addExpense(let mode):
+                AddExpenseSheet(brain: brain, settingsManager: appSettingsManager, mode: mode)
+                    .environmentObject(brain)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environment(\.expensesEnhancedTint, true)
+            case .categoryList:
+                ExpenseCategoryListSheet()
+                    .environmentObject(brain)
+                    .environmentObject(themeManager)
+                    .buxThemedSheetContent()
+            case .scanReceipt:
+                StudioReceiptScannerView()
+                    .environmentObject(studioStore)
+                    .environmentObject(studioBrain)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(themeManager)
+                    .buxThemedSheetContent()
+            case .notificationInbox:
+                NotificationInboxView()
+                    .environmentObject(brain)
+                    .environmentObject(themeManager)
+                    .environmentObject(navigationCoordinator)
+                    .buxThemedSheetContent()
             }
-            .buxThemedSheetContent()
         }
+        .onChange(of: navigationCoordinator.openTipPopupRequest) { _, request in
+            guard request else { return }
+            navigationCoordinator.openTipPopupRequest = false
+            showTipPopup = true
+        }
+        .fullScreenCover(isPresented: $showQuickNewInvoice) {
+            StudioInvoiceEditorView(invoiceToEdit: nil)
+                .environmentObject(studioStore)
+                .environmentObject(studioBrain)
+                .environmentObject(appSettingsManager)
+                .environmentObject(themeManager)
+        }
+    }
+
+    @ViewBuilder
+    private func heroGlassActionCircle<Content: View>(
+        diameter: CGFloat,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        ZStack {
+            BuxGlassCircleBackground(diameter: diameter)
+            content()
+        }
+        .frame(width: diameter, height: diameter)
+    }
+
+    @ViewBuilder
+    private var heroNotificationBell: some View {
+        let diameter = heroBellSize
+
+        Button(action: { activeSheet = .notificationInbox }) {
+            Image(systemName: "bell")
+                .font(.system(size: heroBellIconSize, weight: .semibold))
+                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
+                .frame(width: diameter, height: diameter)
+        }
+        .overlay(alignment: .topTrailing) {
+            if brain.notificationInboxDisplay.unreadCount > 0 {
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 8, height: 8)
+                    .offset(x: 4, y: -4)
+            }
+        }
+        .buxHeroGlassCircleButtonStyle(diameter: diameter)
+        .accessibilityLabel("Notifications")
     }
 
     private func closeFabAnd(_ action: @escaping () -> Void) {
@@ -917,7 +930,7 @@ struct BuxUserAvatarView: View {
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .stroke(themeManager.current.accentColor.opacity(0.35), lineWidth: 1.5)
+                        .stroke(themeManager.contrastAccentColor(for: colorScheme).opacity(0.35), lineWidth: 1.5)
                 )
         } else {
             ZStack {
@@ -926,11 +939,11 @@ struct BuxUserAvatarView: View {
                     .frame(width: size, height: size)
                     .overlay(
                         Circle()
-                            .stroke(themeManager.current.accentColor.opacity(0.35), lineWidth: 1.5)
+                            .stroke(themeManager.contrastAccentColor(for: colorScheme).opacity(0.35), lineWidth: 1.5)
                     )
                 Image(systemName: "person.fill")
                     .font(.system(size: size * 0.38, weight: .semibold))
-                    .foregroundStyle(themeManager.current.accentColor)
+                    .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
             }
         }
     }
@@ -942,7 +955,6 @@ private enum DashboardActiveSheet: Identifiable {
     case addExpense(ExpenseSheetMode)
     case categoryList
     case scanReceipt
-    case newInvoice
     case notificationInbox
 
     var id: String {
@@ -950,7 +962,6 @@ private enum DashboardActiveSheet: Identifiable {
         case .addExpense(let mode): return "expense-\(mode.id)"
         case .categoryList: return "categoryList"
         case .scanReceipt: return "scanReceipt"
-        case .newInvoice: return "newInvoice"
         case .notificationInbox: return "notificationInbox"
         }
     }
@@ -1013,10 +1024,8 @@ struct FabSubmenuDivider: View {
     var body: some View {
         HStack(spacing: 12) {
             Spacer()
-            Text(title.uppercased())
-                .font(.system(size: 10, weight: .bold))
-                .foregroundColor(colorScheme == .dark ? .white.opacity(0.45) : .gray)
-                .kerning(1.2)
+            Text(title)
+                .buxSectionLabelStyle(color: colorScheme == .dark ? .white.opacity(0.45) : .gray)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.04))

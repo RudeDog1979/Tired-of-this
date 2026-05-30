@@ -16,6 +16,9 @@ public final class BuxMuseBrain: ObservableObject {
     /// Expenses tab list source — always loaded on the main actor (never via background `@Query`).
     @Published private(set) var expenseRecords: [ExpenseRecord] = []
     @Published public private(set) var isHydrated: Bool = false
+    @Published var expenseUndoOffer: ExpenseRecord?
+
+    private var expenseUndoTask: Task<Void, Never>?
 
     @Published public var dailyTipDisplay: DailyTipDisplay = .empty
     @Published public var notificationInboxDisplay: NotificationInboxDisplay = .empty
@@ -92,10 +95,7 @@ public final class BuxMuseBrain: ObservableObject {
                 appSettings.applyCurrency(currency, persist: false)
             }
 
-            let themeId = try persistence.loadThemeId()
-            if let theme = AppTheme.all.first(where: { $0.id == themeId }) {
-                themeManager.applyTheme(theme, persist: false)
-            }
+            SettingsStore.shared.applyBrandThemesAppearance(to: themeManager)
 
             _ = try? persistence.fetchInsightMetadata()
         } catch {
@@ -182,9 +182,11 @@ public final class BuxMuseBrain: ObservableObject {
     func saveExpenseRecord(_ record: ExpenseRecord, merchantSelection: MerchantSelection? = nil) throws -> ExpenseRecord {
         var working = record
         let userDeclaredSubscription = working.isSubscriptionLike || working.isTrial
+        let userMarkedRecurring = working.isRecurring && (working.recurrenceConfidence ?? 0) >= 0.85
         let all = (try? persistence.fetchAllExpenseRecords()) ?? []
         let normalizedMerchant = MerchantLogoEngine.normalizeMerchantName(working.merchantName)
-        if SettingsStore.shared.isSubscriptionCancelled(normalizedMerchant: normalizedMerchant) {
+        if !userDeclaredSubscription,
+           SettingsStore.shared.isSubscriptionCancelled(normalizedMerchant: normalizedMerchant) {
             working.isSubscriptionLike = false
             working.isTrial = false
             working.nextExpectedDate = nil
@@ -194,11 +196,18 @@ public final class BuxMuseBrain: ObservableObject {
         }
         let subs = financialEngine.activeSubscriptions()
         let analysis = ExpenseIntelligenceEngine.analyze(record: working, allRecords: all, activeSubscriptions: subs)
-        working.isRecurring = analysis.isRecurring
-        working.recurrenceType = analysis.recurrenceType
-        working.recurrenceConfidence = analysis.recurrenceConfidence
+        if !userMarkedRecurring {
+            working.isRecurring = analysis.isRecurring
+            working.recurrenceType = analysis.recurrenceType
+            working.recurrenceConfidence = analysis.recurrenceConfidence
+        }
         if !userDeclaredSubscription {
-            working.isSubscriptionLike = analysis.isSubscriptionLike
+            if SettingsStore.shared.isSubscriptionCancelled(normalizedMerchant: normalizedMerchant) {
+                working.isSubscriptionLike = false
+                working.isTrial = false
+            } else {
+                working.isSubscriptionLike = analysis.isSubscriptionLike
+            }
         }
         if working.nextExpectedDate == nil {
             working.nextExpectedDate = analysis.nextExpectedDate
@@ -247,9 +256,74 @@ public final class BuxMuseBrain: ObservableObject {
 
     func convertExpenseToSubscription(id: UUID) throws {
         guard var record = try persistence.fetchExpenseRecord(id: id) else { return }
+        let normalized = MerchantLogoEngine.normalizeMerchantName(record.merchantName)
+        SettingsStore.shared.clearCancelledSubscription(normalizedMerchant: normalized)
         record.categoryRaw = TransactionCategory.subscriptions.rawValue
         record.isSubscriptionLike = true
         record.categoryId = try persistence.categoryId(for: .subscriptions)
+        if record.subscriptionStartDate == nil {
+            record.subscriptionStartDate = record.date
+        }
+        if record.nextExpectedDate == nil {
+            record.nextExpectedDate = Calendar.current.date(byAdding: .month, value: 1, to: record.subscriptionStartDate ?? record.date)
+        }
+        _ = try saveExpenseRecord(record)
+    }
+
+    func unmarkExpenseRecurring(id: UUID) throws {
+        guard var record = try persistence.fetchExpenseRecord(id: id) else { return }
+        record.isRecurring = false
+        record.recurrenceType = nil
+        record.recurrenceConfidence = nil
+        _ = try saveExpenseRecord(record)
+    }
+
+    func clearExpenseSubscription(
+        id: UUID,
+        restoreCategory: TransactionCategory,
+        categoryId: UUID?
+    ) throws {
+        guard var record = try persistence.fetchExpenseRecord(id: id) else { return }
+        let normalized = MerchantLogoEngine.normalizeMerchantName(record.merchantName)
+        SettingsStore.shared.registerCancelledSubscription(normalizedMerchant: normalized)
+        record.isSubscriptionLike = false
+        record.isTrial = false
+        record.subscriptionStartDate = nil
+        record.trialEndDate = nil
+        record.nextExpectedDate = nil
+        record.renewalReminderDays = nil
+        record.categoryRaw = restoreCategory.rawValue
+        record.categoryId = categoryId ?? (try? persistence.categoryId(for: restoreCategory))
+        _ = try saveExpenseRecord(record)
+    }
+
+    func offerExpenseUndo(_ record: ExpenseRecord) {
+        expenseUndoTask?.cancel()
+        expenseUndoOffer = record
+        expenseUndoTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(5))
+            guard !Task.isCancelled else { return }
+            expenseUndoOffer = nil
+        }
+    }
+
+    func dismissExpenseUndo() {
+        expenseUndoTask?.cancel()
+        expenseUndoTask = nil
+        expenseUndoOffer = nil
+    }
+
+    func performExpenseUndo() throws {
+        guard let record = expenseUndoOffer else { return }
+        let normalized = MerchantLogoEngine.normalizeMerchantName(record.merchantName)
+        if record.isSubscriptionLike || record.isTrial {
+            SettingsStore.shared.clearCancelledSubscription(normalizedMerchant: normalized)
+        }
+        try restoreExpenseRecord(record)
+        dismissExpenseUndo()
+    }
+
+    func restoreExpenseRecord(_ record: ExpenseRecord) throws {
         _ = try saveExpenseRecord(record)
     }
 

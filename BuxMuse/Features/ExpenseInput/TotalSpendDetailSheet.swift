@@ -102,39 +102,41 @@ struct TotalSpendDetailSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    
-                    // Glassmorphic Premium Header Card
-                    glassHeaderSection
-                    
-                    // Picker for time ranges
-                    pickerSection
-                    
-                    // Expanded Swift Charts Trend view
-                    chartSection
-                    
-                    // Spending Heat Zones Analysis
-                    heatZoneSection
-                    
-                    // Top / Largest Purchases
-                    largestPurchasesSection
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        
+                        // Glassmorphic Premium Header Card
+                        glassHeaderSection
+                        
+                        // Picker for time ranges
+                        pickerSection
+                        
+                        // Expanded Swift Charts Trend view
+                        chartSection
+                        
+                        // Spending Heat Zones Analysis
+                        heatZoneSection
+                        
+                        // Top / Largest Purchases
+                        largestPurchasesSection
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, BuxLayout.section)
+                    .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .buxDetailScrollChrome()
             }
-            .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
             .navigationTitle("Spending Analysis")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
-                    .tint(themeManager.current.accentColor)
+                    BuxToolbarDoneButton { dismiss() }
                 }
             }
+            .buxDetailNavigationChrome()
             .onAppear {
                 loadRecords()
                 withAnimation(.easeOut(duration: 0.6)) {
@@ -160,10 +162,8 @@ struct TotalSpendDetailSheet: View {
 
     private var glassHeaderSection: some View {
         VStack(alignment: .center, spacing: 16) {
-            Text("TOTAL SPENT (\(selectedRange.rawValue.uppercased()))")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
-                .kerning(1.2)
+            Text("Total spent (\(selectedRange.rawValue))")
+                .buxSectionLabelStyle(color: .gray)
 
             Text(formatAmount(Decimal(totalSpentInRange)))
                 .font(.system(size: 40, weight: .bold, design: .rounded))
@@ -260,8 +260,8 @@ struct TotalSpendDetailSheet: View {
                     .foregroundStyle(
                         LinearGradient(
                             colors: [
-                                themeManager.current.accentColor.opacity(0.24),
-                                themeManager.current.accentColor.opacity(0.01)
+                                BuxChartColors.spendTrend(for: colorScheme).opacity(0.24),
+                                BuxChartColors.spendTrend(for: colorScheme).opacity(0.01)
                             ],
                             startPoint: .top,
                             endPoint: .bottom
@@ -273,7 +273,7 @@ struct TotalSpendDetailSheet: View {
                         y: .value("Amount", animateCharts ? point.1 : 0)
                     )
                     .interpolationMethod(.catmullRom)
-                    .foregroundStyle(themeManager.current.accentColor.gradient)
+                    .foregroundStyle(BuxChartColors.spendTrend(for: colorScheme).gradient)
                     .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
                 }
             }
@@ -388,16 +388,17 @@ struct TotalSpendDetailSheet: View {
             } else {
                 VStack(spacing: 12) {
                     ForEach(largestPurchases) { record in
+                        let categoryTint = BuxChartColors.color(for: record.transactionCategory)
                         HStack(spacing: 16) {
                             // Category Icon
                             ZStack {
                                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(themeManager.current.accentColor.opacity(0.12))
+                                    .fill(categoryTint.opacity(0.12))
                                     .frame(width: 44, height: 44)
                                 
                                 Image(systemName: record.transactionCategory.iconName)
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(categoryTint)
                             }
 
                             // Merchant Details

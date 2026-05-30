@@ -62,6 +62,6 @@ struct StudioDiscoveryCard: View {
             .foregroundColor(themeManager.current.accentColor)
         }
         .padding(14)
-        .dashboardThemedCardChrome(cornerRadius: BuxTokens.Radius.card)
+        .dashboardMaterialCardChrome(.outlined)
     }
 }

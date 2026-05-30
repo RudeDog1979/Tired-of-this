@@ -16,9 +16,11 @@ struct AddExpenseSheet: View {
     @EnvironmentObject var brain: BuxMuseBrain
 
     @StateObject private var viewModel: AddExpenseViewModel
-    /// Holds last mood id while the sheet background fades out.
+    /// Holds mood id for overlay color (kept briefly while fading out).
     @State private var moodBackdropTag: String = ""
     @State private var moodBackdropOpacity: Double = 0
+    @State private var moodCrossfadeTask: Task<Void, Never>?
+    @State private var actionNoticeDismissTask: Task<Void, Never>?
 
     let mode: ExpenseSheetMode
 
@@ -51,144 +53,301 @@ struct AddExpenseSheet: View {
         NavigationStack {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-
                 BuxHeroMeshBackground()
 
-                EmotionalTagAppearance.background(
-                    for: moodBackdropTag,
-                    colorScheme: colorScheme
-                )
-                .ignoresSafeArea()
-                .opacity(moodBackdropOpacity)
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: BuxLayout.section) {
+                        amountCard
+                        merchantCard
+                        categoryCard
 
-                Form {
-                    Section("Amount & Merchant") {
-                        HStack {
-                            Text(appSettingsManager.selectedCurrency.symbol)
-                                .foregroundColor(themeManager.current.accentColor)
-                                .font(.headline)
-                            TextField("Amount", text: $viewModel.amountString)
-                                .keyboardType(.decimalPad)
-                                .font(.headline)
-                        }
-                        
-                        HStack(spacing: 10) {
-                            if !viewModel.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                AsyncMerchantLogoView(merchantName: viewModel.merchantName, size: 28)
-                            }
-                            TextField("Merchant name", text: $viewModel.merchantName)
-                                .autocapitalization(.words)
-                                .disableAutocorrection(true)
+                        if viewModel.isEditing {
+                            editActionsSection
                         }
 
-                        if let hint = viewModel.mergeHintCandidate,
-                           viewModel.selectedCandidateId == nil,
-                           viewModel.candidates.filter({ $0.matchKind != .newMerchant && $0.matchKind != .aliasVariant }).count <= 1 {
-                            Button(action: { viewModel.applyMergeHint() }) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "sparkles")
-                                        .font(.system(size: 12, weight: .semibold))
-                                    Text("Use \(hint.displayName)?")
-                                        .font(.system(size: 13, weight: .semibold))
-                                }
-                                .foregroundColor(themeManager.current.accentColor)
-                            }
-                            .buttonStyle(.plain)
-                        }
+                        subscriptionCard
+                        dateCard
+                        notesCard
+                        emotionalCard
 
-                        if viewModel.needsDisambiguatorLabel {
-                            TextField("Label (e.g. Food, Clothes)", text: $viewModel.merchantDisambiguator)
-                                .font(.system(size: 14, weight: .medium))
-                        }
-
-                        if !viewModel.candidates.isEmpty {
-                            MerchantAutocompleteView(candidates: viewModel.candidates) { candidate in
-                                viewModel.selectCandidate(candidate)
-                            }
-                            .environmentObject(themeManager)
-                        }
-                    }
-
-                    Section("Category") {
-                        ExpenseCategoryPickerView(
-                            selectedCategoryId: $viewModel.selectedCategoryId,
-                            selectedCategory: $viewModel.selectedCategory,
-                            emphasizeOnAppear: mode == .addWithCategoryFocus
-                        )
-                        .environmentObject(brain)
-                    }
-
-                    Section("Subscription") {
-                        ExpenseSubscriptionFieldsView(
-                            isSubscription: $viewModel.isSubscription,
-                            isTrial: $viewModel.isTrial,
-                            subscriptionStartDate: $viewModel.subscriptionStartDate,
-                            trialEndDate: $viewModel.trialEndDate,
-                            renewalReminderDays: $viewModel.renewalReminderDays
-                        )
-                    }
-
-                    Section("Date") {
-                        DatePicker("Date", selection: $viewModel.date, displayedComponents: .date)
-                            .datePickerStyle(.compact)
-                    }
-
-                    Section("Notes") {
-                        TextField("Notes (optional)", text: $viewModel.notes)
-                    }
-
-                    Section("How did this feel?") {
-                        EmotionalTagPickerView(selection: $viewModel.emotionTag)
-                            .environmentObject(themeManager)
-                    }
-
-                    if let hint = viewModel.smartHint {
-                        Section {
+                        if let hint = viewModel.smartHint {
                             Text(hint)
                                 .font(.system(size: 13, weight: .medium))
                                 .buxLabelSecondary()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(BuxLayout.section)
+                                .expensesThemedCardChrome(cornerRadius: 20)
                         }
-                    }
 
-                    if let error = viewModel.saveError {
-                        Section {
+                        if let error = viewModel.saveError {
                             Text(error)
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.red)
-                                .transition(.opacity)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(BuxLayout.section)
+                                .expensesThemedCardChrome(cornerRadius: 20)
                         }
                     }
+                    .buxScreenContentMargins()
+                    .padding(.top, BuxLayout.tight)
+                    .padding(.bottom, 48)
                 }
-                .buxThemedFormStyle()
-                .buxScrollDismissesKeyboard()
+                .buxDetailScrollChrome()
+                .scrollDismissesKeyboard(.interactively)
+            }
+            .overlay(alignment: .top) {
+                if !moodBackdropTag.isEmpty || moodBackdropOpacity > 0.01 {
+                    EmotionalTagAppearance.background(
+                        for: moodBackdropTag,
+                        colorScheme: colorScheme
+                    )
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 260)
+                    .mask {
+                        LinearGradient(
+                            colors: [.black, .black.opacity(0.35), .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
+                    .opacity(moodBackdropOpacity)
+                    .animation(BuxMotion.emotionFadeIn, value: moodBackdropTag)
+                    .animation(BuxMotion.emotionFadeIn, value: moodBackdropOpacity)
+                    .allowsHitTesting(false)
+                    .ignoresSafeArea(edges: .top)
+                }
             }
             .navigationTitle(sheetTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .buxThemedSheetContent()
+            .buxThemedPresentation()
+            .buxDetailNavigationChrome()
             .onAppear {
                 syncMoodBackdrop(to: viewModel.emotionTag, animated: false)
             }
             .onChange(of: viewModel.emotionTag) { _, newTag in
                 syncMoodBackdrop(to: newTag, animated: true)
             }
+            .onDisappear {
+                moodCrossfadeTask?.cancel()
+                actionNoticeDismissTask?.cancel()
+            }
+            .onChange(of: viewModel.actionNotice) { _, notice in
+                guard notice != nil else { return }
+                actionNoticeDismissTask?.cancel()
+                actionNoticeDismissTask = Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(3))
+                    guard !Task.isCancelled else { return }
+                    viewModel.actionNotice = nil
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(viewModel.isEditing ? "Update" : "Save") {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: viewModel.isEditing ? "Update" : "Save",
+                        isEnabled: !viewModel.amountString.isEmpty
+                            && !viewModel.merchantName.trimmingCharacters(in: .whitespaces).isEmpty
+                    ) {
                         if viewModel.saveTransaction() {
                             dismiss()
                         }
                     }
-                    .fontWeight(.semibold)
-                    .disabled(viewModel.amountString.isEmpty || viewModel.merchantName.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
             .sheet(isPresented: $viewModel.showMerchantPickSheet) {
                 merchantPickSheet
                     .buxThemedSheetContent()
             }
+            .overlay(alignment: .bottom) {
+                if let notice = viewModel.actionNotice {
+                    Text(notice)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(themeManager.cardFill(for: colorScheme))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .shadow(color: .black.opacity(colorScheme == .dark ? 0.35 : 0.12), radius: 10, y: 3)
+                        .padding(.horizontal, BuxLayout.marginHorizontal)
+                        .padding(.bottom, 16)
+                        .allowsHitTesting(false)
+                }
+            }
+        }
+    }
+
+    private func deleteWithUndo() {
+        guard let snapshot = viewModel.expenseSnapshotForUndo() else { return }
+        do {
+            try viewModel.deleteExpense()
+            brain.offerExpenseUndo(snapshot)
+            dismiss()
+        } catch {
+            viewModel.saveError = "Could not delete expense."
+        }
+    }
+
+    private var editActionsSection: some View {
+        VStack(spacing: 12) {
+            editPrimaryAction(
+                viewModel.isSubscription ? "Remove subscription" : "Convert to subscription",
+                icon: viewModel.isSubscription ? "xmark.circle" : "arrow.triangle.2.circlepath"
+            ) {
+                viewModel.convertToSubscription()
+            }
+            editPrimaryAction(
+                viewModel.isRecurring ? "Remove recurring" : "Mark as recurring",
+                icon: viewModel.isRecurring ? "xmark.circle" : "calendar.badge.clock"
+            ) {
+                viewModel.markRecurring()
+            }
+
+            BuxButton(
+                title: "Delete expense",
+                systemImage: "trash.fill",
+                role: .destructive,
+                expands: true
+            ) {
+                deleteWithUndo()
+            }
+        }
+        .transaction { $0.animation = nil }
+    }
+
+    private func editPrimaryAction(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                Text(title)
+                    .font(.system(size: 15, weight: .bold))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.gray)
+            }
+            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            .padding(16)
+            .expensesThemedCardChrome(cornerRadius: 18)
+        }
+        .buttonStyle(BuxMicroShrinkStyle())
+    }
+
+    // MARK: - Form sections
+
+    private var amountCard: some View {
+        AmountField(amountString: $viewModel.amountString)
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
+    }
+
+    private var merchantCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Text("Merchant")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            VStack(alignment: .leading, spacing: BuxLayout.tight) {
+                HStack(spacing: 10) {
+                    if !viewModel.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        AsyncMerchantLogoView(merchantName: viewModel.merchantName, size: 28)
+                    }
+                    TextField("Merchant name", text: $viewModel.merchantName)
+                        .autocapitalization(.words)
+                        .disableAutocorrection(true)
+                }
+
+                if let hint = viewModel.mergeHintCandidate,
+                   viewModel.selectedCandidateId == nil,
+                   viewModel.candidates.filter({ $0.matchKind != .newMerchant && $0.matchKind != .aliasVariant }).count <= 1 {
+                    Button(action: { viewModel.applyMergeHint() }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 12, weight: .semibold))
+                            Text("Use \(hint.displayName)?")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .foregroundColor(themeManager.current.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if viewModel.needsDisambiguatorLabel {
+                    TextField("Label (e.g. Food, Clothes)", text: $viewModel.merchantDisambiguator)
+                        .font(.system(size: 14, weight: .medium))
+                }
+
+                if !viewModel.candidates.isEmpty {
+                    MerchantAutocompleteView(candidates: viewModel.candidates) { candidate in
+                        viewModel.selectCandidate(candidate)
+                    }
+                    .environmentObject(themeManager)
+                }
+            }
+            .padding(BuxLayout.section)
+            .expensesThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var categoryCard: some View {
+        ExpenseCategoryPickerView(
+            selectedCategoryId: $viewModel.selectedCategoryId,
+            selectedCategory: $viewModel.selectedCategory,
+            emphasizeOnAppear: mode == .addWithCategoryFocus,
+            includesIncome: mode == .addIncome
+        )
+        .environmentObject(brain)
+    }
+
+    private var subscriptionCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Text("Subscription")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            ExpenseSubscriptionFieldsView(
+                isSubscription: $viewModel.isSubscription,
+                isTrial: $viewModel.isTrial,
+                subscriptionStartDate: $viewModel.subscriptionStartDate,
+                trialEndDate: $viewModel.trialEndDate,
+                renewalReminderDays: $viewModel.renewalReminderDays
+            )
+            .padding(BuxLayout.section)
+            .expensesThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var dateCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Text("Date")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            DatePicker("", selection: $viewModel.date, displayedComponents: .date)
+                .labelsHidden()
+                .tint(themeManager.current.accentColor)
+                .padding(BuxLayout.section)
+                .expensesThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var notesCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            TextField("Notes (optional)", text: $viewModel.notes, axis: .vertical)
+                .lineLimit(2...5)
+        }
+        .padding(BuxLayout.section)
+        .expensesThemedCardChrome(cornerRadius: 20)
+    }
+
+    private var emotionalCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Text("How did this feel?")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            EmotionalTagPickerView(selection: $viewModel.emotionTag)
+                .environmentObject(themeManager)
+                .padding(BuxLayout.section)
+                .expensesThemedCardChrome(cornerRadius: 20)
         }
     }
 
@@ -214,9 +373,7 @@ struct AddExpenseSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        viewModel.showMerchantPickSheet = false
-                    }
+                    BuxToolbarCancelButton { viewModel.showMerchantPickSheet = false }
                 }
             }
         }
@@ -224,10 +381,21 @@ struct AddExpenseSheet: View {
     }
 
     private func syncMoodBackdrop(to tag: String, animated: Bool) {
-        let trimmed = tag.trimmingCharacters(in: .whitespacesAndNewlines)
-        let isActive = !trimmed.isEmpty
+        moodCrossfadeTask?.cancel()
+        moodCrossfadeTask = nil
 
-        if isActive {
+        let trimmed = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if !trimmed.isEmpty {
+            let switchingMood = moodBackdropOpacity > 0.01
+                && !moodBackdropTag.isEmpty
+                && moodBackdropTag != trimmed
+
+            if animated && switchingMood {
+                performMoodCrossfade(to: trimmed)
+                return
+            }
+
             moodBackdropTag = trimmed
             if animated {
                 withAnimation(BuxMotion.emotionFadeIn) {
@@ -245,14 +413,35 @@ struct AddExpenseSheet: View {
             withAnimation(BuxMotion.emotionFadeOut) {
                 moodBackdropOpacity = 0
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + BuxMotion.emotionFadeOutDuration) {
+            moodCrossfadeTask = Task { @MainActor in
+                try? await Task.sleep(for: .seconds(BuxMotion.emotionFadeOutDuration))
+                guard !Task.isCancelled else { return }
                 if viewModel.emotionTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     moodBackdropTag = ""
                 }
+                moodCrossfadeTask = nil
             }
         } else {
             moodBackdropOpacity = 0
             moodBackdropTag = ""
+        }
+    }
+
+    private func performMoodCrossfade(to newTag: String) {
+        withAnimation(BuxMotion.emotionFadeOut) {
+            moodBackdropOpacity = 0
+        }
+
+        moodCrossfadeTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(BuxMotion.emotionCrossfadeSwapDelay))
+            guard !Task.isCancelled else { return }
+            guard viewModel.emotionTag.trimmingCharacters(in: .whitespacesAndNewlines) == newTag else { return }
+
+            moodBackdropTag = newTag
+            withAnimation(BuxMotion.emotionFadeIn) {
+                moodBackdropOpacity = 1
+            }
+            moodCrossfadeTask = nil
         }
     }
 }

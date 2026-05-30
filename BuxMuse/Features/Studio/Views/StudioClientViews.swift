@@ -28,18 +28,18 @@ struct StudioClientsListView: View {
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showAddClient = true }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
-                }
+                BuxToolbarButton(
+                    systemName: "plus",
+                    accessibilityLabel: "Add client",
+                    action: { showAddClient = true }
+                )
             }
         }
         .sheet(isPresented: $showAddClient) {
             NewClientSheet()
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
-                .buxThemedSheetContent()
+                .buxStudioSheetContent()
         }
     }
 

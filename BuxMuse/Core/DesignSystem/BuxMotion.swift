@@ -56,6 +56,11 @@ enum BuxMotion {
         reducedMotion ? 0.28 : 0.88
     }
 
+    /// Gap before swapping mood color during A → B crossfade.
+    static var emotionCrossfadeSwapDelay: TimeInterval {
+        reducedMotion ? 0.18 : 0.32
+    }
+
     static func categoryCardDelay(index: Int) -> Animation {
         slide.delay(reducedMotion ? 0 : Double(index) * 0.055)
     }

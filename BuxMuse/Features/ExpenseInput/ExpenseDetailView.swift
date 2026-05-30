@@ -24,6 +24,8 @@ struct ExpenseDetailView: View {
     let brain: BuxMuseBrain
     let onUpdated: () -> Void
 
+    @ObservedObject private var settings = SettingsStore.shared
+
     init(record: ExpenseRecord, brain: BuxMuseBrain, settingsManager: AppSettingsManager, onUpdated: @escaping () -> Void) {
         self.brain = brain
         self.onUpdated = onUpdated
@@ -38,7 +40,6 @@ struct ExpenseDetailView: View {
         NavigationStack {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-                BuxHeroMeshBackground()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
@@ -48,29 +49,22 @@ struct ExpenseDetailView: View {
                         actionsSection
                     }
                     .padding(.bottom, 48)
+                    .buxScreenContentMargins()
                 }
+                .buxDetailScrollChrome()
             }
             .navigationTitle(viewModel.record.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
-                        ZStack {
-                            Circle()
-                                .fill(colorScheme == .dark ? Color.white.opacity(0.08) : .white)
-                                .frame(width: 44, height: 44)
-                                .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        }
-                    }
-                    .buttonStyle(BuxMicroShrinkStyle())
+                    BuxToolbarBackButton { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Edit") { showEditSheet = true }
+                        .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
                 }
             }
+            .buxDetailNavigationChrome()
             .environment(\.expensesEnhancedTint, true)
         }
         .sheet(isPresented: $showCategorySheet) {
@@ -87,7 +81,7 @@ struct ExpenseDetailView: View {
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(brain)
-                .buxThemedSheetContent()
+                .environment(\.expensesEnhancedTint, true)
                 .onDisappear {
                     viewModel.reloadRecord()
                     onUpdated()
@@ -150,7 +144,7 @@ struct ExpenseDetailView: View {
         let brandAccent = themeManager.current.accentColor
         let cornerRadius: CGFloat = 28
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        let shadow = themeManager.heroCardShadow(for: colorScheme)
+        let chrome = themeManager.cardChrome(for: .hero, colorScheme: colorScheme, branded: settings.brandThemesEnabled)
 
         return ZStack {
             BuxThemedCardPlateBackground(cornerRadius: cornerRadius)
@@ -220,15 +214,11 @@ struct ExpenseDetailView: View {
         }
         .compositingGroup()
         .clipShape(shape)
-        .overlay(
+        .overlay {
             ZStack {
-                shape.stroke(
-                    DashboardThemeTint.themedCardStroke(
-                        themeManager: themeManager,
-                        colorScheme: colorScheme
-                    ),
-                    lineWidth: 1
-                )
+                if chrome.strokeWidth > 0 {
+                    shape.stroke(chrome.stroke, lineWidth: chrome.strokeWidth)
+                }
                 if emotion != nil {
                     shape.stroke(
                         EmotionalTagAppearance.cardStroke(
@@ -244,9 +234,9 @@ struct ExpenseDetailView: View {
                     .opacity(emotionTintOpacity)
                 }
             }
-        )
+        }
         .animation(BuxMotion.emotionFadeOut, value: emotionTintOpacity)
-        .shadow(color: shadow.color, radius: shadow.radius, x: 0, y: shadow.y)
+        .shadow(color: chrome.shadowColor, radius: chrome.shadowRadius, x: 0, y: chrome.shadowY)
         .padding(.horizontal, BuxLayout.marginHorizontal)
     }
 
@@ -257,10 +247,8 @@ struct ExpenseDetailView: View {
 
         if !warnings.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("DETECTED PATTERN WARNINGS")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.red.opacity(0.8))
-                    .kerning(1.2)
+                Text("Detected pattern warnings")
+                    .buxSectionLabelStyle(color: .red.opacity(0.8))
 
                 ForEach(warnings, id: \.title) { item in
                     HStack(spacing: 12) {
@@ -286,10 +274,8 @@ struct ExpenseDetailView: View {
 
         if !standard.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("INTELLIGENCE INSIGHTS")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                    .kerning(1.2)
+                Text("Intelligence insights")
+                    .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
                 VStack(alignment: .leading, spacing: 14) {
                     ForEach(standard, id: \.title) { item in
@@ -323,10 +309,8 @@ struct ExpenseDetailView: View {
 
     private var notesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("NOTES")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                .kerning(1.2)
+            Text("Notes")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             VStack(alignment: .leading, spacing: 12) {
                 TextField("Add a note", text: $viewModel.notesDraft, axis: .vertical)
@@ -360,21 +344,16 @@ struct ExpenseDetailView: View {
                 onUpdated()
             }
 
-            Button {
+            BuxButton(
+                title: "Delete expense",
+                systemImage: "trash.fill",
+                role: .destructive,
+                expands: true
+            ) {
                 try? viewModel.delete()
                 onUpdated()
                 dismiss()
-            } label: {
-                Text("Delete expense")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.red)
-                    .clipShape(Capsule())
-                    .shadow(color: Color.red.opacity(0.2), radius: 8, x: 0, y: 4)
             }
-            .buttonStyle(BuxMicroShrinkStyle())
         }
         .padding(.horizontal, BuxLayout.marginHorizontal)
     }

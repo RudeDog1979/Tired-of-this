@@ -13,30 +13,28 @@ struct InvoicePaymentSettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-            BuxHeroMeshBackground()
+        BuxThemedCardForm {
+            BuxFormSection {
+                Toggle("Auto-detect bank account type", isOn: $store.autoDetectInvoiceBankAccountType)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+                Text("Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.")
+                    .font(.system(size: 12))
+                    .buxLabelSecondary()
+                    .buxFormFieldPadding()
+            }
 
-            Form {
-                Section {
-                    Toggle("Auto-detect bank account type", isOn: $store.autoDetectInvoiceBankAccountType)
-                        .tint(themeManager.current.accentColor)
-                    Text("Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.")
-                        .font(.system(size: 12))
-                        .buxLabelSecondary()
-                }
-
-                if !store.autoDetectInvoiceBankAccountType {
-                    Section("Manual account type") {
-                        Picker("Type", selection: bankTypeBinding) {
-                            ForEach(BankAccountType.allCases) { type in
-                                Text(type.displayName).tag(type)
-                            }
+            if !store.autoDetectInvoiceBankAccountType {
+                BuxFormSection(title: "Manual account type") {
+                    Picker("Type", selection: bankTypeBinding) {
+                        ForEach(BankAccountType.allCases) { type in
+                            Text(type.displayName).tag(type)
                         }
                     }
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
                 }
             }
-            .buxThemedFormStyle()
         }
         .navigationTitle("Invoice Payment")
         .navigationBarTitleDisplayMode(.inline)

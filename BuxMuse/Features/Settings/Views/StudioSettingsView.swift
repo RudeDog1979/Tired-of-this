@@ -24,122 +24,127 @@ struct StudioSettingsView: View {
     @State private var hourlyRate = ""
     @State private var logoData: Data?
 
-    private var bgColor: Color {
-        themeManager.screenBackground(for: colorScheme)
-    }
-
     private var studioToggleOn: Bool {
         store.studioEnabled || navigationCoordinator.studioUnlockAwaitingCommit
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                if !store.studioEnabled {
-                    Section {
-                        Text("Studio adds invoices, mileage, receipts, and tax planning tools as an extra tab. Turn it on when you need it — your everyday Home and Expenses tabs stay the same.")
-                            .font(.system(size: 12, weight: .medium))
-                            .buxLabelSecondary()
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-
-                Section("STUDIO") {
-                    Toggle(isOn: studioToggleBinding) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Show Studio Tab")
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Text("Invoices, expenses, tax tools, and client CRM")
-                                .font(.system(size: 11))
-                                .buxLabelSecondary()
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-
-                if store.studioEnabled {
-                    Section("BUSINESS PROFILE") {
-                        PhotoPickCropRow(
-                            title: "Company Logo",
-                            subtitle: "Shown on exported invoice PDFs",
-                            imageData: logoData,
-                            cropShape: .roundedRectangle(cornerRadius: 12),
-                            cropTitle: "Crop Logo",
-                            previewSize: 64,
-                            previewCornerRadius: 12
-                        ) { data in
-                            logoData = data
-                            saveStudioProfile()
-                        }
-
-                        TextField("Full Name", text: $displayName)
-                        TextField("Business Name", text: $businessName)
-
-                        Picker("Business Type", selection: $businessType) {
-                            ForEach(BusinessType.allCases) { type in
-                                Text(type.rawValue).tag(type)
-                            }
-                        }
-                    }
-
-                    Section("GLOBAL LOCALE") {
-                        NavigationLink {
-                            RegionCurrencySettingsView()
-                        } label: {
-                            HStack {
-                                Text("Region & Currency")
-                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                Spacer()
-                                Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.name) · \(appSettingsManager.selectedCurrency.id)")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .buxLabelSecondary()
-                                    .lineLimit(1)
-                            }
-                        }
-
-                        NavigationLink {
-                            StudioTaxReferenceView()
-                                .environmentObject(themeManager)
-                                .environmentObject(appSettingsManager)
-                                .environmentObject(appDataManager)
-                                .environmentObject(studioStore)
-                        } label: {
-                            HStack {
-                                Text("Tax Profile")
-                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                Spacer()
-                                if studioStore.taxProfile.isTaxProfileConfigured {
-                                    Text(studioStore.taxProfile.selectedTaxCountry ?? "Custom")
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .buxLabelSecondary()
-                                } else {
-                                    Text("Not configured")
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(.orange)
-                                }
-                            }
-                        }
-                    }
-
-                    Section("INVOICING DEFAULTS") {
-                        Stepper("Payment Terms: \(paymentTerms) Days", value: $paymentTerms, in: 0...120, step: 1)
-
-                        HStack {
-                            Text("Default Hourly Rate")
-                            Spacer()
-                            TextField("Rate", text: $hourlyRate)
-                                .keyboardType(.decimalPad)
-                                .multilineTextAlignment(.trailing)
-                                .frame(width: 100)
-                        }
-                    }
+        BuxThemedCardForm {
+            if !store.studioEnabled {
+                BuxFormSection {
+                    Text("Studio adds invoices, mileage, receipts, and tax planning tools as an extra tab. Turn it on when you need it — your everyday Home and Expenses tabs stay the same.")
+                        .font(.system(size: 12, weight: .medium))
+                        .buxLabelSecondary()
+                        .fixedSize(horizontal: false, vertical: true)
+                        .buxFormFieldPadding()
                 }
             }
-            .buxThemedFormStyle()
+
+            BuxFormSection(title: "Studio") {
+                Toggle(isOn: studioToggleBinding) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Show Studio Tab")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        Text("Invoices, expenses, tax tools, and client CRM")
+                            .font(.system(size: 11))
+                            .buxLabelSecondary()
+                    }
+                }
+                .tint(themeManager.current.accentColor)
+                .buxFormFieldPadding()
+            }
+
+            if store.studioEnabled {
+                BuxFormSection(title: "Business profile") {
+                    PhotoPickCropRow(
+                        title: "Company Logo",
+                        subtitle: "Shown on exported invoice PDFs",
+                        imageData: logoData,
+                        cropShape: .roundedRectangle(cornerRadius: 12),
+                        cropTitle: "Crop Logo",
+                        previewSize: 64,
+                        previewCornerRadius: 12
+                    ) { data in
+                        logoData = data
+                        saveStudioProfile()
+                    }
+                    .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    TextField("Full Name", text: $displayName)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    TextField("Business Name", text: $businessName)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    Picker("Business Type", selection: $businessType) {
+                        ForEach(BusinessType.allCases) { type in
+                            Text(type.rawValue).tag(type)
+                        }
+                    }
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+                }
+
+                BuxFormSection(title: "Global locale") {
+                    NavigationLink {
+                        RegionCurrencySettingsView()
+                    } label: {
+                        HStack {
+                            Text("Region & Currency")
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                            Spacer()
+                            Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.name) · \(appSettingsManager.selectedCurrency.id)")
+                                .font(.system(size: 12, weight: .semibold))
+                                .buxLabelSecondary()
+                                .lineLimit(1)
+                            BuxChevron()
+                        }
+                    }
+                    .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    NavigationLink {
+                        StudioTaxReferenceView()
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                            .environmentObject(appDataManager)
+                            .environmentObject(studioStore)
+                    } label: {
+                        HStack {
+                            Text("Tax Profile")
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                            Spacer()
+                            if studioStore.taxProfile.isTaxProfileConfigured {
+                                Text(studioStore.taxProfile.selectedTaxCountry ?? "Custom")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .buxLabelSecondary()
+                            } else {
+                                Text("Not configured")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.orange)
+                            }
+                            BuxChevron()
+                        }
+                    }
+                    .buxFormFieldPadding()
+                }
+
+                BuxFormSection(title: "Invoicing defaults") {
+                    Stepper("Payment Terms: \(paymentTerms) Days", value: $paymentTerms, in: 0...120, step: 1)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    HStack {
+                        Text("Default Hourly Rate")
+                        Spacer()
+                        TextField("Rate", text: $hourlyRate)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 100)
+                    }
+                    .buxFormFieldPadding()
+                }
+            }
         }
         .navigationTitle("Studio")
         .navigationBarTitleDisplayMode(.inline)

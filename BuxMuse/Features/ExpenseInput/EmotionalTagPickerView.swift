@@ -22,7 +22,7 @@ struct EmotionalTagPickerView: View {
             }
             .padding(.vertical, 4)
         }
-        .buxHorizontalScrollEdgeFade(background: Color(uiColor: .secondarySystemGroupedBackground))
+        .buxHorizontalScrollEdgeFade(background: themeManager.cardFill(for: colorScheme))
     }
 
     private func chip(for tag: EmotionalTag) -> some View {
@@ -49,7 +49,7 @@ struct EmotionalTagPickerView: View {
                     .fill(
                         isSelected
                             ? accent.opacity(colorScheme == .dark ? 0.28 : 0.16)
-                            : (colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.04))
+                            : themeManager.pillTrackFill(for: colorScheme)
                     )
             }
             .overlay {

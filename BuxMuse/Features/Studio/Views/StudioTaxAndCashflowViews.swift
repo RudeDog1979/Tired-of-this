@@ -25,7 +25,6 @@ struct StudioTaxOverviewView: View {
                 ZStack {
                     themeManager.screenBackground(for: colorScheme)
                         .ignoresSafeArea()
-                    BuxHeroMeshBackground()
 
                     ScrollView(showsIndicators: false) {
                         taxOverviewContent(snapshot)
@@ -229,8 +228,10 @@ struct StudioTaxOverviewView: View {
                 projectionRow(title: "Projected Net Profit:", value: snapshot.simulated.netIncomeFormatted, color: .green, bold: true)
             }
             .padding(12)
-            .background(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.02))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(themeManager.themedCardFill(for: colorScheme))
+            )
         }
         .padding(BuxLayout.section)
         .studioThemedCardChrome(cornerRadius: 24)
@@ -277,8 +278,6 @@ struct StudioCashflowView: View {
         ZStack {
             themeManager.screenBackground(for: colorScheme)
                 .ignoresSafeArea()
-
-            BuxHeroMeshBackground()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
@@ -338,8 +337,6 @@ struct StudioDeductionsView: View {
         ZStack {
             themeManager.screenBackground(for: colorScheme)
                 .ignoresSafeArea()
-
-            BuxHeroMeshBackground()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {

@@ -24,6 +24,21 @@ public struct TaxInfo: Codable, Equatable, Identifiable, Hashable {
         "\(income_tax)\n\n\(self_employed_tax)\n\n\(notes)"
     }
 
+    /// One-line preset summary for pickers and dropdowns.
+    public var presetLineSummary: String {
+        let seRule = self_employed_tax.isEmpty ? income_tax : self_employed_tax
+        let se = Self.truncate(seRule, maxLength: 72)
+        let indirect = Self.truncate(vat, maxLength: 48)
+        return "SE: \(se) · Indirect: \(indirect)"
+    }
+
+    private static func truncate(_ text: String, maxLength: Int) -> String {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count > maxLength else { return trimmed }
+        let end = trimmed.index(trimmed.startIndex, offsetBy: maxLength)
+        return String(trimmed[..<end]).trimmingCharacters(in: .whitespacesAndNewlines) + "…"
+    }
+
     public init(
         name: String,
         isoCode: String,

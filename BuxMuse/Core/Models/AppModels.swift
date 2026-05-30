@@ -16,6 +16,26 @@ enum AppTab {
     case settings
 }
 
+extension AppTab {
+    var nativeTabTitle: String {
+        switch self {
+        case .home: return "Home"
+        case .expense: return "Expenses"
+        case .studio: return "Studio"
+        case .settings: return "Settings"
+        }
+    }
+
+    var nativeTabSymbol: String {
+        switch self {
+        case .home: return "house.fill"
+        case .expense: return "wallet.pass.fill"
+        case .studio: return "laptopcomputer"
+        case .settings: return "gearshape.fill"
+        }
+    }
+}
+
 // MARK: - Preference Keys
 
 struct ScrollOffsetPreferenceKey: PreferenceKey {

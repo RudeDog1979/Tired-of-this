@@ -20,14 +20,7 @@ final class NavigationCoordinator: ObservableObject {
     /// Driven by bottom search accessory (iOS 26) or toolbar search button (iOS 18).
     @Published var isExpenseSearchPresented: Bool = false
 
-    /// Increments when user selects a tab — drives tab-bar icon animations.
-    @Published private(set) var tabSelectionTick: Int = 0
-
     init() {}
-
-    func registerTabSelection() {
-        tabSelectionTick += 1
-    }
 
     func restore(tab: AppTab, activeCategory: String, isBalanceVisible: Bool) {
         selectedTab = tab
@@ -77,6 +70,9 @@ final class NavigationCoordinator: ObservableObject {
     /// Set when Home discovery card routes to Studio settings.
     @Published var openStudioSettingsRequest = false
 
+    /// Set when Home hero avatar opens Profile settings.
+    @Published var openProfileSettingsRequest = false
+
     func openStudioSettings() {
         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
             selectedTab = .settings
@@ -89,6 +85,21 @@ final class NavigationCoordinator: ObservableObject {
         openStudioSettingsRequest = false
         return true
     }
+
+    func openProfileSettings() {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            selectedTab = .settings
+            openProfileSettingsRequest = true
+        }
+    }
+
+    func consumeProfileSettingsRequest() -> Bool {
+        guard openProfileSettingsRequest else { return false }
+        openProfileSettingsRequest = false
+        return true
+    }
+
+    @Published var openTipPopupRequest = false
 
     /// Full-screen blueprint unlock — fade overlay (not a sheet).
     @Published var showStudioUnlockAnimation = false

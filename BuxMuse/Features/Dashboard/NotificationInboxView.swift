@@ -10,46 +10,73 @@ struct NotificationInboxView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
 
     private var inbox: NotificationInboxDisplay { brain.notificationInboxDisplay }
 
     var body: some View {
         NavigationStack {
-            Group {
-                if inbox.items.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Notifications", systemImage: "bell.slash")
-                    } description: {
-                        Text("Budget alerts, renewals, and Studio reminders will appear here.")
-                    }
-                } else {
-                    List {
-                        ForEach(inbox.items) { item in
-                            Button {
-                                brain.markNotificationRead(item.id)
-                            } label: {
-                                notificationRow(item)
-                            }
-                            .buttonStyle(.plain)
+            ZStack {
+                (colorScheme == .dark
+                    ? Color(red: 13/255, green: 14/255, blue: 18/255)
+                    : Color(red: 242/255, green: 244/255, blue: 247/255))
+                    .ignoresSafeArea()
+
+                Group {
+                    if inbox.items.isEmpty {
+                        ContentUnavailableView {
+                            Label("No Notifications", systemImage: "bell.slash")
+                        } description: {
+                            Text("Budget alerts, renewals, and Studio reminders will appear here.")
                         }
+                    } else {
+                        List {
+                            ForEach(inbox.items) { item in
+                                Button {
+                                    handleNotificationTap(item)
+                                } label: {
+                                    notificationRow(item)
+                                }
+                                .buttonStyle(.plain)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                            brain.dismissNotification(item.id)
+                                        }
+                                    } label: {
+                                        Label("Dismiss", systemImage: "xmark")
+                                    }
+                                }
+                            }
+                        }
+                        .listStyle(.insetGrouped)
+                        .scrollContentBackground(.hidden)
+                        .buxListContentMargins()
+                        .buxSoftScrollChrome()
                     }
-                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    if inbox.unreadCount > 0 {
-                        Button("Read All") {
-                            brain.markAllNotificationsRead()
+                    if !inbox.items.isEmpty {
+                        Button("Dismiss All") {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                brain.dismissAllNotifications()
+                            }
                         }
+                        .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
                     }
                 }
             }
+            .buxPolishedNavigationBar()
         }
     }
 
@@ -108,5 +135,32 @@ struct NotificationInboxView: View {
         let f = RelativeDateTimeFormatter()
         f.unitsStyle = .abbreviated
         return f.localizedString(for: date, relativeTo: Date())
+    }
+
+    private func handleNotificationTap(_ item: AppNotificationItem) {
+        brain.markNotificationRead(item.id)
+        dismiss()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                switch item.category {
+                case .subscription:
+                    navigationCoordinator.openSubscriptionHub()
+                case .bill:
+                    navigationCoordinator.selectedTab = .expense
+                case .budget:
+                    navigationCoordinator.selectedTab = .settings
+                case .invoice:
+                    navigationCoordinator.selectedTab = .studio
+                case .tax:
+                    navigationCoordinator.selectedTab = .studio
+                case .studio:
+                    navigationCoordinator.selectedTab = .studio
+                case .digest:
+                    navigationCoordinator.selectedTab = .home
+                    navigationCoordinator.openTipPopupRequest = true
+                }
+            }
+        }
     }
 }

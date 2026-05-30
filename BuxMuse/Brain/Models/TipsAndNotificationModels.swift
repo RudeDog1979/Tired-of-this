@@ -109,3 +109,17 @@ public struct NotificationInboxDisplay: Equatable {
 
     public static let empty = NotificationInboxDisplay(items: [], unreadCount: 0)
 }
+
+public struct HistoricalTipRecord: Codable, Equatable {
+    public let id: String
+    public let date: Date
+    public let title: String
+    public let message: String
+
+    public init(id: String, date: Date, title: String, message: String) {
+        self.id = id
+        self.date = date
+        self.title = title
+        self.message = message
+    }
+}

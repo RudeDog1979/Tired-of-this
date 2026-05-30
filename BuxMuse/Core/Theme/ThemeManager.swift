@@ -37,6 +37,31 @@ struct AppTheme: Identifiable, Equatable {
 // MARK: - Built-in Themes
 
 extension AppTheme {
+    /// Standard iOS appearance — neutral surfaces, user-selected system accent.
+    static func standardNeutral(accent: BuxSystemAccent) -> AppTheme {
+        let accentColor = Color(uiColor: accent.uiColor)
+        #if canImport(UIKit)
+        let lightHero = [Color(uiColor: .secondarySystemGroupedBackground), Color(uiColor: .systemGroupedBackground)]
+        let darkHero = [Color(red: 28/255, green: 28/255, blue: 30/255), Color(red: 18/255, green: 18/255, blue: 18/255)]
+        let lightMesh = [Color(uiColor: .systemGroupedBackground)]
+        #else
+        let lightHero = [Color.white, Color(red: 242/255, green: 242/255, blue: 247/255)]
+        let darkHero = [Color(red: 28/255, green: 28/255, blue: 30/255), Color(red: 18/255, green: 18/255, blue: 18/255)]
+        let lightMesh = [Color(red: 242/255, green: 242/255, blue: 247/255)]
+        #endif
+        return AppTheme(
+            id: "standardNeutral",
+            name: "Standard",
+            icon: "circle.lefthalf.filled",
+            heroDarkGradient: darkHero,
+            heroLightGradient: lightHero,
+            meshDarkPalette: [Color(red: 18/255, green: 18/255, blue: 18/255)],
+            meshLightPalette: lightMesh,
+            accentColor: accentColor,
+            glowColor: accentColor
+        )
+    }
+
     /// Bux Theme
     static let buxDefault = AppTheme(
         id: "buxDefault",
@@ -75,8 +100,8 @@ extension AppTheme {
         id: "midnightOcean",
         name: "Ocean",
         icon: "drop.fill",
-        heroDarkGradient: [Color(red: 0/255, green: 180/255, blue: 216/255), Color(red: 0/255, green: 125/255, blue: 151/255)],
-        heroLightGradient: [Color(red: 0/255, green: 216/255, blue: 255/255), Color(red: 0/255, green: 180/255, blue: 216/255)],
+        heroDarkGradient: [Color(red: 0/255, green: 72/255, blue: 192/255), Color(red: 0/255, green: 160/255, blue: 255/255)],
+        heroLightGradient: [Color(red: 0/255, green: 90/255, blue: 220/255), Color(red: 0/255, green: 180/255, blue: 255/255)],
         meshDarkPalette: [
             Color(red: 5/255, green: 142/255, blue: 42/255),
             Color(red: 0/255, green: 107/255, blue: 129/255),
@@ -141,8 +166,8 @@ extension AppTheme {
         id: "emeraldCyber",
         name: "Emerald",
         icon: "leaf.fill",
-        heroDarkGradient: [Color(red: 0/255, green: 245/255, blue: 160/255), Color(red: 0/255, green: 171/255, blue: 112/255)],
-        heroLightGradient: [Color(red: 0/255, green: 255/255, blue: 192/255), Color(red: 0/255, green: 245/255, blue: 160/255)],
+        heroDarkGradient: [Color(red: 0/255, green: 125/255, blue: 52/255), Color(red: 0/255, green: 195/255, blue: 90/255)],
+        heroLightGradient: [Color(red: 0/255, green: 140/255, blue: 60/255), Color(red: 0/255, green: 215/255, blue: 100/255)],
         meshDarkPalette: [
             Color(red: 44/255, green: 161/255, blue: 6/255),
             Color(red: 0/255, green: 147/255, blue: 95/255),
@@ -446,70 +471,118 @@ extension AppTheme {
 
 public final class ThemeManager: ObservableObject {
     @Published var current: AppTheme = .buxDefault
-    private let themeKey = "selected_theme_id"
     var onThemeChanged: ((AppTheme) -> Void)?
 
     public init() {
-        if let storedId = UserDefaults.standard.string(forKey: themeKey),
-           let matchedTheme = AppTheme.all.first(where: { $0.id == storedId }) {
-            current = matchedTheme
+        let store = SettingsStore.shared
+        if store.brandThemesEnabled {
+            current = store.resolvedBrandTheme()
         } else {
-            current = .buxDefault
+            current = AppTheme.standardNeutral(accent: store.resolvedSystemAccent())
         }
     }
 
     /// Select a theme with a smooth animated transition
+    @MainActor
     func select(_ theme: AppTheme) {
-        applyTheme(theme, persist: true)
+        SettingsStore.shared.persistThemeSelection(theme, themeManager: self)
     }
 
-    func applyTheme(_ theme: AppTheme, persist: Bool) {
+    func applyTheme(_ theme: AppTheme) {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.72)) {
             current = theme
-        }
-        if persist {
-            UserDefaults.standard.set(theme.id, forKey: themeKey)
         }
         onThemeChanged?(theme)
     }
 
-    // MARK: - Unified surfaces (light/dark)
+    // MARK: - Unified surfaces (M3 material roles)
 
     func screenBackground(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark
-            ? Color(red: 13/255, green: 14/255, blue: 18/255)
-            : Color(red: 242/255, green: 244/255, blue: 247/255)
+        materialScheme(for: colorScheme).surfaceContainerLow
     }
 
     func cardFill(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white
+        materialScheme(for: colorScheme).surface
     }
 
-    /// Dynamic subtle theme tint for Hero Cards and elevated surfaces
+    /// Text fields, chips, and inline inputs — M3 surface-container-highest.
+    func inputFieldFill(for colorScheme: ColorScheme) -> Color {
+        materialScheme(for: colorScheme).surfaceContainerHighest
+    }
+
+    /// Segmented bar / sticky panel track — M3 surface-container.
+    func panelBarFill(for colorScheme: ColorScheme) -> Color {
+        materialScheme(for: colorScheme).surfaceContainer
+    }
+
+    /// Nested / emphasis blocks — M3 surface-container-highest.
     func themedCardFill(for colorScheme: ColorScheme) -> Color {
-        if colorScheme == .dark {
-            // Mix dark gray with a subtle hint of the darkest mesh color
-            return current.meshDarkPalette[1].opacity(0.15)
-        } else {
-            // Light cyan/mesh color mixed with white
-            return current.meshLightPalette[0].opacity(0.12)
-        }
+        materialScheme(for: colorScheme).surfaceContainerHighest
     }
     
-    /// Accent stroke for themed cards to retain contrast against the mesh
-    func themedCardStroke(for colorScheme: ColorScheme) -> Color {
-        if colorScheme == .dark {
-            return .white.opacity(0.1)
-        } else {
-            return current.meshDarkPalette[0].opacity(0.15) // Deep theme color with low opacity for crisp edge
+    /// Returns a deeper, high-contrast version of the accent color for bright/neon themes in Light mode.
+    /// This ensures critical interactive icons, toolbars, outlines, and buttons remain highly visible.
+    func contrastAccentColor(for colorScheme: ColorScheme) -> Color {
+        guard SettingsStore.shared.brandThemesEnabled else {
+            return SettingsStore.shared.resolvedSystemAccentColor(for: colorScheme)
+        }
+        guard colorScheme == .light else { return current.accentColor }
+        
+        switch current.id {
+        case "abyssalGlow":
+            return Color(red: 0/255, green: 140/255, blue: 60/255) // Rich forest green (#008C3C)
+        case "galacticPlasma":
+            return Color(red: 0/255, green: 120/255, blue: 170/255) // Rich ocean teal (#0078AA)
+        case "sakuraDream":
+            return Color(red: 215/255, green: 75/255, blue: 105/255) // Rich dark rose (#D74B69)
+        case "goldPrestige":
+            return Color(red: 185/255, green: 130/255, blue: 0/255) // Rich dark gold/amber (#B98200)
+        case "emeraldCyber":
+            return Color(red: 0/255, green: 135/255, blue: 70/255) // Deeper green (#008746)
+        default:
+            return current.accentColor
         }
     }
 
-    /// Subtle gray stroke for hero card and category pill — light mode only.
+    /// M3 outline-variant — decorative card boundary.
+    func themedCardStroke(for colorScheme: ColorScheme) -> Color {
+        materialScheme(for: colorScheme).outlineVariant
+    }
+
+    /// Neutral card hairline — same M3 outline-variant.
     func subtleCardStroke(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark
-            ? Color.clear
-            : Color.black.opacity(0.08)
+        materialScheme(for: colorScheme, branded: false).outlineVariant
+    }
+
+    func cardOutlineStroke(for colorScheme: ColorScheme, branded: Bool) -> Color {
+        materialScheme(for: colorScheme, branded: branded).outlineVariant
+    }
+
+    /// Elevation-aware chrome — M3 Outlined (card) vs Elevated (hero).
+    func cardChrome(for elevation: BuxElevation, colorScheme: ColorScheme, branded: Bool) -> BuxCardChromeMetrics {
+        let outline = materialScheme(for: colorScheme, branded: branded).outlineVariant
+
+        switch elevation {
+        case .flat:
+            return BuxCardChromeMetrics()
+        case .card:
+            return BuxCardChromeMetrics(
+                stroke: outline,
+                strokeWidth: 0.5,
+                shadowColor: .clear,
+                shadowRadius: 0,
+                shadowY: 0
+            )
+        case .hero:
+            let shadow = heroCardShadow(for: colorScheme)
+            return BuxCardChromeMetrics(
+                stroke: outline,
+                strokeWidth: 0.5,
+                shadowColor: shadow.color,
+                shadowRadius: shadow.radius,
+                shadowY: shadow.y
+            )
+        }
     }
 
     func pillInactiveLabelColor(for colorScheme: ColorScheme) -> Color {
@@ -517,22 +590,20 @@ public final class ThemeManager: ObservableObject {
     }
 
     func labelTertiary(for colorScheme: ColorScheme) -> Color {
-        BuxColors.labelTertiary(colorScheme)
+        materialScheme(for: colorScheme).onSurfaceVariant.opacity(0.88)
     }
 
     func chevronMuted(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark
-            ? Color.white.opacity(0.3)
-            : Color(red: 180/255, green: 185/255, blue: 196/255)
+        materialScheme(for: colorScheme).onSurfaceVariant.opacity(0.72)
     }
 
     /// Dismiss / icon chip on custom sheets (not card faces).
     func chipMutedFill(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.04)
+        materialScheme(for: colorScheme).surfaceContainerHighest
     }
 
     func sectionHeaderColor(for colorScheme: ColorScheme) -> Color {
-        labelTertiary(for: colorScheme)
+        materialScheme(for: colorScheme).onSurfaceVariant
     }
 
     /// Hero gradient for the current color scheme

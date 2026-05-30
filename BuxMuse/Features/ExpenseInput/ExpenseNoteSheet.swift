@@ -17,41 +17,41 @@ struct ExpenseNoteSheet: View {
     let onSave: () throws -> Void
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                Text("Add note")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    .padding(.top, 24)
+                BuxThemedCardForm {
+                    BuxFormSection {
+                        Text(merchantName)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .buxFormFieldPadding()
+                    }
 
-                Text(merchantName)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
-
-                NotesField(notes: $notes)
-
-                Button(action: {
-                    try? onSave()
-                    dismiss()
-                }) {
-                    Text("Save")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(themeManager.current.accentColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    BuxFormSection(title: "Note") {
+                        NotesField(notes: $notes)
+                            .buxFormFieldPadding()
+                    }
                 }
-                .buttonStyle(BuxMicroShrinkStyle())
-                .padding(.horizontal, BuxLayout.marginHorizontal)
-
-                Spacer()
             }
-            .padding(.horizontal, BuxLayout.marginHorizontal)
+            .navigationTitle("Add note")
+            .navigationBarTitleDisplayMode(.inline)
+            .buxThemedSheetContent()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    BuxToolbarCancelButton { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    BuxToolbarConfirmButton(accessibilityLabel: "Save") {
+                        try? onSave()
+                        dismiss()
+                    }
+                }
+            }
         }
         .presentationDetents([.medium])
+        .tint(themeManager.current.accentColor)
     }
 }

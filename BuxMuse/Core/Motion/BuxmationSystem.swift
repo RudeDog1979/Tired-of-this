@@ -435,6 +435,8 @@ enum BuxActionButtonRole {
     case secondary
     /// Status actions — green paid, blue sent, etc.
     case tinted(Color)
+    /// Destructive capsule — always red, never brand accent.
+    case destructive
 }
 
 enum BuxActionButtonSize {
@@ -537,12 +539,13 @@ struct BuxActionButton: View {
         switch role {
         case .primary, .secondary: accent
         case .tinted(let color): color
+        case .destructive: BuxTokens.destructive
         }
     }
 
     private var foregroundColor: Color {
         switch role {
-        case .primary:
+        case .primary, .destructive:
             return isEnabled ? .white : Color.white.opacity(0.65)
         case .secondary:
             return isEnabled
@@ -557,6 +560,8 @@ struct BuxActionButton: View {
         switch role {
         case .primary:
             return isEnabled ? tintColor : Color(UIColor.systemGray3)
+        case .destructive:
+            return isEnabled ? BuxTokens.destructive : BuxTokens.destructive.opacity(0.45)
         case .secondary:
             return colorScheme == .dark
                 ? Color.white.opacity(0.08)
@@ -569,7 +574,7 @@ struct BuxActionButton: View {
 
     private var showsBorder: Bool {
         switch role {
-        case .primary: return false
+        case .primary, .destructive: return false
         case .secondary: return isEnabled
         case .tinted: return isEnabled
         }
@@ -581,28 +586,52 @@ struct BuxActionButton: View {
             return themeManager.subtleCardStroke(for: colorScheme)
         case .tinted:
             return tintColor.opacity(colorScheme == .dark ? 0.45 : 0.32)
-        case .primary:
+        case .primary, .destructive:
             return .clear
         }
     }
 
     private var shadowColor: Color {
-        guard isEnabled, case .primary = role else { return .clear }
-        return tintColor.opacity(colorScheme == .dark ? 0.18 : 0.14)
+        guard isEnabled else { return .clear }
+        switch role {
+        case .primary:
+            return tintColor.opacity(colorScheme == .dark ? 0.18 : 0.14)
+        case .destructive:
+            return BuxTokens.destructive.opacity(colorScheme == .dark ? 0.18 : 0.14)
+        default:
+            return .clear
+        }
     }
 
     private var shadowRadius: CGFloat {
-        role.isPrimary && isEnabled ? BuxTokens.Shadow.ctaRadius : 0
+        guard isEnabled else { return 0 }
+        switch role {
+        case .primary, .destructive:
+            return BuxTokens.Shadow.ctaRadius
+        default:
+            return 0
+        }
     }
 
     private var shadowY: CGFloat {
-        role.isPrimary && isEnabled ? BuxTokens.Shadow.ctaY : 0
+        guard isEnabled else { return 0 }
+        switch role {
+        case .primary, .destructive:
+            return BuxTokens.Shadow.ctaY
+        default:
+            return 0
+        }
     }
 }
 
 private extension BuxActionButtonRole {
     var isPrimary: Bool {
         if case .primary = self { return true }
+        return false
+    }
+
+    var isDestructive: Bool {
+        if case .destructive = self { return true }
         return false
     }
 }

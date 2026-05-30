@@ -3,7 +3,7 @@
 //  BuxMuse
 //
 //  Prevents NavigationStack large/inline bars from shifting up when the keyboard appears.
-//  Apply on pushed Studio lists, settings forms, and modal trip sheets.
+//  Apply on pushed Studio lists and settings forms — never on root tabs or sheets.
 //
 
 import SwiftUI
@@ -13,10 +13,7 @@ import UIKit
 
 struct BuxNavigationKeyboardStableModifier: ViewModifier {
     func body(content: Content) -> some View {
-        content
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
-            .background(BuxNavigationKeyboardAnchorRepresentable())
+        content.background(BuxNavigationKeyboardAnchorRepresentable())
     }
 }
 
@@ -27,7 +24,7 @@ extension View {
     }
 }
 
-// MARK: - UIKit anchor (keyboard layout guide should not compress the nav chrome)
+// MARK: - UIKit anchor (local nav controller only — no window-root walks)
 
 private struct BuxNavigationKeyboardAnchorRepresentable: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> AnchorViewController {
@@ -39,53 +36,35 @@ private struct BuxNavigationKeyboardAnchorRepresentable: UIViewControllerReprese
     }
 
     final class AnchorViewController: UIViewController {
+        private var didApply = false
+
         override func viewDidLoad() {
             super.viewDidLoad()
             view.isUserInteractionEnabled = false
             view.backgroundColor = .clear
         }
 
-        override func viewDidLayoutSubviews() {
-            super.viewDidLayoutSubviews()
-            applyFix()
-        }
-
         override func didMove(toParent parent: UIViewController?) {
             super.didMove(toParent: parent)
+            didApply = false
             applyFix()
         }
 
         func applyFix() {
-            guard let navigationController = findNavigationController() else { return }
+            guard !didApply else { return }
+            guard let navigationController = findLocalNavigationController() else { return }
+            didApply = true
             if #available(iOS 17.0, *) {
                 navigationController.view.keyboardLayoutGuide.followsUndockedKeyboard = true
             }
             navigationController.navigationBar.isTranslucent = true
         }
 
-        private func findNavigationController() -> UINavigationController? {
+        /// Only the enclosing NavigationStack — never the tab root underneath a sheet.
+        private func findLocalNavigationController() -> UINavigationController? {
             sequence(first: parent, next: { $0?.parent })
                 .compactMap { $0 as? UINavigationController }
                 .first
-                ?? view.window?.buxNearestNavigationController()
         }
-    }
-}
-
-private extension UIWindow {
-    func buxNearestNavigationController() -> UINavigationController? {
-        guard let root = rootViewController else { return nil }
-        return Self.buxFindNavigationController(in: root)
-    }
-
-    private static func buxFindNavigationController(in controller: UIViewController) -> UINavigationController? {
-        if let nav = controller as? UINavigationController { return nav }
-        for child in controller.children {
-            if let found = buxFindNavigationController(in: child) { return found }
-        }
-        if let presented = controller.presentedViewController {
-            return buxFindNavigationController(in: presented)
-        }
-        return nil
     }
 }

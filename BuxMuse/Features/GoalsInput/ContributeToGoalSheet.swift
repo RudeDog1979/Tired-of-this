@@ -3,7 +3,7 @@
 //  BuxMuse
 //  Features/GoalsInput/
 //
-//  Premium bottom sheet for logging goal savings contributions with predictive micro-advice.
+//  Native Form sheet for logging goal contributions.
 //
 
 import SwiftUI
@@ -14,211 +14,104 @@ struct ContributeToGoalSheet: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var goalsViewModel: GoalsViewModel
-    
+
     let goal: Goal
-    
+
     @State private var amountString: String = ""
     @State private var notes: String = ""
     @State private var date: Date = Date()
-    @State private var microSuggestion: String? = nil
-    
-    private var cardColor: Color { themeManager.cardFill(for: colorScheme) }
+    @State private var microSuggestion: String?
 
-    private var backgroundColor: Color { themeManager.screenBackground(for: colorScheme) }
-    
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
 
-            BuxHeroMeshBackground()
-            
-            VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Text("Cancel")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.gray)
-                    }
-                    
-                    Spacer()
-                    
-                    Text("Contribute")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    
-                    Spacer()
-                    
-                    Text("Cancel")
-                        .font(.system(size: 16, weight: .medium))
-                        .opacity(0)
-                }
-                .padding(.horizontal, BuxLayout.marginHorizontal)
-                .padding(.vertical, 16)
-                
-                Divider().opacity(0.08)
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
-                        
-                        // BRAIN REDIRECTION CARD
-                        if let suggestion = microSuggestion {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("BRAIN SAVINGS TIP")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.green)
-                                    .kerning(1.2)
-                                
-                                HStack(alignment: .top, spacing: 10) {
-                                    Image(systemName: "lightbulb.fill")
-                                        .foregroundColor(.green)
-                                        .font(.system(size: 15))
-                                        .padding(.top, 2)
-                                    
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(suggestion)
-                                            .font(.system(size: 12, weight: .bold))
-                                            .foregroundColor(colorScheme == .dark ? .white.opacity(0.9) : Color(red: 40/255, green: 40/255, blue: 40/255))
-                                            .multilineTextAlignment(.leading)
-                                        
-                                        Button(action: {
-                                            // Extract numeric suggestion value
-                                            withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                                                self.amountString = "15"
-                                                self.notes = "Brain micro-savings redirection"
-                                            }
-                                        }) {
-                                            Text("Redirect suggested amount")
-                                                .font(.system(size: 11, weight: .bold))
-                                                .foregroundColor(themeManager.current.accentColor)
-                                                .padding(.top, 2)
-                                        }
+                BuxThemedCardForm {
+                    if let suggestion = microSuggestion {
+                        BuxFormSection {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Label("Brain savings tip", systemImage: "lightbulb.fill")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(.green)
+                                Text(suggestion)
+                                    .font(.subheadline.weight(.semibold))
+                                Button("Redirect suggested amount") {
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                                        amountString = "15"
+                                        notes = "Brain micro-savings redirection"
                                     }
                                 }
-                                .padding(14)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color.green.opacity(0.08))
-                                .cornerRadius(16)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(Color.green.opacity(0.12), lineWidth: 1)
-                                )
+                                .font(.subheadline.weight(.semibold))
                             }
+                            .buxFormFieldPadding()
                         }
-                        
-                        // 1. Amount
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("CONTRIBUTION AMOUNT")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                .kerning(1.2)
-                            
-                            HStack(spacing: 8) {
-                                Text(appSettingsManager.selectedCurrency.symbol)
-                                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                                    .foregroundColor(themeManager.current.accentColor)
-                                
-                                TextField("0.00", text: $amountString)
-                                    .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    .keyboardType(.decimalPad)
-                                    .tint(themeManager.current.accentColor)
-                            }
-                            .padding(.horizontal, BuxLayout.marginHorizontal)
-                            .padding(.vertical, 16)
-                            .background(cardColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                            )
-                        }
-                        
-                        // 2. Note
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("MEMO / SOURCE")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                .kerning(1.2)
-                            
-                            TextField("e.g. Weekly savings, Salary redirection, Gift", text: $notes)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                .padding(.horizontal, BuxLayout.marginHorizontal)
-                                .padding(.vertical, 16)
-                                .background(cardColor)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                                )
-                        }
-                        
-                        // 3. Date
-                        DatePicker(
-                            "Contribution Date",
-                            selection: $date,
-                            displayedComponents: .date
-                        )
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        .padding(.horizontal, BuxLayout.marginHorizontal)
-                        .padding(.vertical, 16)
-                        .background(cardColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03), lineWidth: 1)
-                        )
-                        .tint(themeManager.current.accentColor)
                     }
-                    .padding(.horizontal, BuxLayout.marginHorizontal)
-                    .padding(.top, 16)
-                    .padding(.bottom, 120)
+
+                    BuxFormSection(title: "Amount") {
+                        HStack(spacing: 8) {
+                            Text(appSettingsManager.selectedCurrency.symbol)
+                                .font(.title2.bold())
+                                .foregroundStyle(themeManager.current.accentColor)
+                            TextField("Contribution amount", text: $amountString)
+                                .keyboardType(.decimalPad)
+                        }
+                        .buxFormFieldPadding()
+                    }
+
+                    BuxFormSection(title: "Details") {
+                        TextField("Memo / source", text: $notes, prompt: Text("e.g. Weekly savings"))
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        DatePicker("Contribution date", selection: $date, displayedComponents: .date)
+                            .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
+                    }
                 }
             }
-            
-            // Sticky Log Contribution Button
-            VStack {
-                Spacer()
-                
-                Button(action: {
-                    if let amount = Decimal(string: amountString), amount > 0 {
-                        goalsViewModel.addContribution(
-                            toGoalId: goal.id,
-                            amount: amount,
-                            notes: notes.isEmpty ? "Direct contribution" : notes
-                        )
-                        UINotificationFeedbackGenerator().notificationOccurred(.success)
-                        dismiss()
-                    }
-                }) {
-                    Text("Confirm Contribution")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(themeManager.current.accentColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: themeManager.current.accentColor.opacity(0.3), radius: 10, x: 0, y: 5)
+            .navigationTitle("Contribute")
+            .navigationBarTitleDisplayMode(.inline)
+            .buxThemedSheetContent()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    BuxToolbarCancelButton { dismiss() }
                 }
-                .buttonStyle(BuxMicroShrinkStyle())
-                .padding(.horizontal, BuxLayout.marginHorizontal)
-                .padding(.bottom, 24)
+                ToolbarItem(placement: .confirmationAction) {
+                    BuxToolbarConfirmButton(accessibilityLabel: "Confirm", isEnabled: canSave) {
+                        confirmContribution()
+                    }
+                }
+            }
+            .onAppear {
+                setupMicroSuggestions()
             }
         }
-        .onAppear {
-            setupMicroSuggestions()
-        }
+        .tint(themeManager.current.accentColor)
     }
-    
+
     private func setupMicroSuggestions() {
         let details = goalsViewModel.selectedGoalDetail
         if let opp = details?.opportunities.first {
-            self.microSuggestion = "Cancel or optimize: \(opp.description) benefits \(opp.benefit)."
+            microSuggestion = "Cancel or optimize: \(opp.description) benefits \(opp.benefit)."
         } else {
-            self.microSuggestion = "Trim \(appSettingsManager.format(Decimal(15))) from active subscription overspends and redirect it to achieve \(goal.name) sooner."
+            microSuggestion = "Trim \(appSettingsManager.format(Decimal(15))) from active subscription overspends and redirect it to achieve \(goal.name) sooner."
         }
+    }
+
+    private var canSave: Bool {
+        guard let amount = Decimal(string: amountString), amount > 0 else { return false }
+        return true
+    }
+
+    private func confirmContribution() {
+        guard let amount = Decimal(string: amountString), amount > 0 else { return }
+        goalsViewModel.addContribution(
+            toGoalId: goal.id,
+            amount: amount,
+            notes: notes.isEmpty ? "Direct contribution" : notes
+        )
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        dismiss()
     }
 }

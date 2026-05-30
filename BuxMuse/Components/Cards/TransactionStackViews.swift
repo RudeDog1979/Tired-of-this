@@ -24,9 +24,7 @@ struct RecentTransactionsSectionView: View {
     }
 
     private var cardStroke: Color {
-        dashboardEnhancedTint
-            ? DashboardThemeTint.themedCardStroke(themeManager: themeManager, colorScheme: colorScheme)
-            : themeManager.subtleCardStroke(for: colorScheme)
+        themeManager.subtleCardStroke(for: colorScheme)
     }
 
     var body: some View {
@@ -114,11 +112,11 @@ private struct RecentTransactionRowChromeModifier: ViewModifier {
     func body(content: Content) -> some View {
         if dashboardEnhancedTint,
            transaction.emotion == nil {
-            content.dashboardThemedCardChrome(cornerRadius: 18)
+            content.buxMaterialCardChrome(.outlined, cornerRadius: BuxMaterialChrome.cardCornerRadius)
         } else if let emotion = transaction.emotion, let symbol = transaction.emotionSymbol {
             content.background {
                 EmotionalListCardChrome(
-                    cornerRadius: 18,
+                    cornerRadius: BuxMaterialChrome.cardCornerRadius,
                     isDark: colorScheme == .dark,
                     base: cardColor,
                     fallbackStroke: cardStroke,
@@ -130,7 +128,7 @@ private struct RecentTransactionRowChromeModifier: ViewModifier {
         } else {
             content.background {
                 PlainExpenseListCardChrome(
-                    cornerRadius: 18,
+                    cornerRadius: BuxMaterialChrome.cardCornerRadius,
                     base: cardColor,
                     stroke: cardStroke
                 )

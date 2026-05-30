@@ -23,6 +23,7 @@ extension BuxMuseBrain {
         }
         let tip = tipsEngine.dailyTip(for: countryCode)
         dailyTipDisplay = tip
+        tipsEngine.saveTipToHistory(tip: tip)
 
         let unseen = tipsEngine.isTipUnseen(for: countryCode)
         tipNeedsAttention = unseen
@@ -58,6 +59,7 @@ extension BuxMuseBrain {
             studioAlerts: studioAlerts,
             studioInvoices: studioInvoices,
             taxDeadlineDays: taxDeadlineDays,
+            tipsHistory: tipsEngine.loadTipHistory(),
             currencyFormatter: { appSettings.format($0) }
         )
         await inboxEngine.syncLocalNotifications(settings: settings, inbox: notificationInboxDisplay)
@@ -87,6 +89,21 @@ extension BuxMuseBrain {
             return copy
         }
         notificationInboxDisplay = NotificationInboxDisplay(items: items, unreadCount: 0)
+    }
+
+    public func dismissNotification(_ id: String) {
+        inboxEngine.dismiss(id)
+        let items = notificationInboxDisplay.items.filter { $0.id != id }
+        notificationInboxDisplay = NotificationInboxDisplay(
+            items: items,
+            unreadCount: items.filter { !$0.isRead }.count
+        )
+    }
+
+    public func dismissAllNotifications() {
+        let ids = notificationInboxDisplay.items.map(\.id)
+        inboxEngine.dismissAll(ids)
+        notificationInboxDisplay = NotificationInboxDisplay(items: [], unreadCount: 0)
     }
 
     public func refreshEngagement(

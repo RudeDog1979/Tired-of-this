@@ -11,18 +11,13 @@ struct NotificationSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @ObservedObject private var store = SettingsStore.shared
-    
-    private var bgColor: Color {
-        themeManager.screenBackground(for: colorScheme)
-    }
 
     var body: some View {
         ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
+            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
 
-            Form {
-                Section("SWITCHBOARD") {
+            BuxThemedCardForm {
+                BuxFormSection(title: "Switchboard") {
                     Toggle(isOn: $store.notificationsEnabled) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Enable Notifications")
@@ -33,18 +28,30 @@ struct NotificationSettingsView: View {
                                 .buxLabelSecondary()
                         }
                     }
-                    .padding(.vertical, 4)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
                 }
-                
+
                 if store.notificationsEnabled {
-                    Section("ALERTS & RADAR") {
+                    BuxFormSection(title: "Alerts & radar") {
                         Toggle("Budget Threshold Warnings", isOn: $store.budgetAlertsEnabled)
+                            .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         Toggle("Upcoming Bill Reminders", isOn: $store.billRemindersEnabled)
+                            .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         Toggle("Invoice Status Updates", isOn: $store.studioInvoiceRemindersEnabled)
+                            .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         Toggle("Estimated Tax Reminders", isOn: $store.taxDeadlineRemindersEnabled)
+                            .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
                     }
-                    
-                    Section("DAILY DIGEST") {
+
+                    BuxFormSection(title: "Daily digest") {
                         Toggle(isOn: $store.dailySummaryEnabled) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Daily Financial Summary")
@@ -54,18 +61,25 @@ struct NotificationSettingsView: View {
                                     .buxLabelSecondary()
                             }
                         }
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
                     }
-                    
-                    Section("QUIET HOURS") {
+
+                    BuxFormSection(title: "Quiet hours") {
                         DatePicker("Silence Starts", selection: quietHoursStartBinding, displayedComponents: .hourAndMinute)
+                            .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         DatePicker("Silence Ends", selection: quietHoursEndBinding, displayedComponents: .hourAndMinute)
+                            .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
                     }
                 }
             }
-            .buxThemedFormStyle()
         }
         .navigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.settingsEnhancedTint, true)
         .onChange(of: store.notificationsEnabled) { _, _ in store.save() }
         .onChange(of: store.budgetAlertsEnabled) { _, _ in store.save() }
         .onChange(of: store.billRemindersEnabled) { _, _ in store.save() }
@@ -73,9 +87,7 @@ struct NotificationSettingsView: View {
         .onChange(of: store.taxDeadlineRemindersEnabled) { _, _ in store.save() }
         .onChange(of: store.dailySummaryEnabled) { _, _ in store.save() }
     }
-    
-    // MARK: - Date Bindings
-    
+
     private var quietHoursStartBinding: Binding<Date> {
         Binding<Date>(
             get: {
@@ -94,7 +106,7 @@ struct NotificationSettingsView: View {
             }
         )
     }
-    
+
     private var quietHoursEndBinding: Binding<Date> {
         Binding<Date>(
             get: {

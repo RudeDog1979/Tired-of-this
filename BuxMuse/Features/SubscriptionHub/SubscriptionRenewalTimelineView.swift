@@ -53,6 +53,7 @@ struct SubscriptionRenewalTimelineView: View {
                 .safeAreaPadding(.horizontal, 20)
                 .safeAreaPadding(.vertical, 8)
                 .padding(.horizontal, -BuxLayout.marginHorizontal)
+                .buxSoftHorizontalScrollChrome()
             }
         }
     }

@@ -23,8 +23,8 @@ struct StudioProfileView: View {
 
     var body: some View {
         StudioThemedListBackdrop {
-            Form {
-                Section("BUSINESS DETAILS") {
+            BuxThemedCardForm {
+                BuxFormSection(title: "Business details") {
                     PhotoPickCropRow(
                         title: "Company Logo",
                         subtitle: "Shown on exported invoice PDFs",
@@ -37,44 +37,53 @@ struct StudioProfileView: View {
                         logoData = data
                         saveProfile()
                     }
-
+                    .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     TextField("Full Name", text: $displayName)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     TextField("Business Name", text: $businessName)
-
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     Picker("Business Type", selection: $businessType) {
                         ForEach(BusinessType.allCases) { type in
                             Text(type.rawValue).tag(type)
                         }
                     }
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
                 }
 
-                Section("GLOBAL LOCALE") {
+                BuxFormSection(title: "Global locale") {
                     HStack {
                         Text("Region & Currency")
                         Spacer()
                         Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCurrency.id)")
                             .buxLabelSecondary()
                     }
+                    .buxFormFieldPadding()
                     Text("Change in Settings → Currency & Region")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
+                        .buxFormFieldPadding()
                 }
 
-                Section {
-                    InvoicePartyEditorForm(
+                BuxFormSection(title: "Invoice identity & address") {
+                    InvoicePartyEditorFields(
                         party: $party,
-                        defaultCountryCode: appSettingsManager.selectedCountry.id,
                         showRegistrationFields: true
                     )
-                } header: {
-                    Text("INVOICE IDENTITY & ADDRESS")
-                } footer: {
                     Text("Shown on invoice FROM block and legal footer.")
                         .font(.system(size: 11))
+                        .buxLabelSecondary()
+                        .buxFormFieldPadding()
                 }
 
-                Section("INVOICING DEFAULTS") {
+                BuxFormSection(title: "Invoicing defaults") {
                     Stepper("Payment Terms: \(paymentTerms) Days", value: $paymentTerms, in: 0...120, step: 1)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     HStack {
                         Text("Default Hourly Rate")
                         Spacer()
@@ -83,10 +92,9 @@ struct StudioProfileView: View {
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
                     }
+                    .buxFormFieldPadding()
                 }
             }
-            .scrollContentBackground(.hidden)
-            .buxScrollDismissesKeyboard()
         }
         .navigationTitle("Business Profile")
         .navigationBarTitleDisplayMode(.inline)

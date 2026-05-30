@@ -14,6 +14,7 @@ struct TipPopupView: View {
 
     @State private var cardScale: CGFloat = 0.92
     @State private var cardOpacity: Double = 0
+    @State private var lightbulbScale: CGFloat = 1.0
 
     var body: some View {
         ZStack {
@@ -25,11 +26,49 @@ struct TipPopupView: View {
             VStack(spacing: 0) {
                 Spacer(minLength: 32)
 
-                VStack(alignment: .leading, spacing: 0) {
-                    headerRow
+                VStack(alignment: .center, spacing: 0) {
+                    
+                    // 1. Centered Pulsating Lightbulb Hero
+                    ZStack {
+                        Circle()
+                            .fill(Color.yellow.opacity(0.14))
+                            .frame(width: 72, height: 72)
+                        
+                        Circle()
+                            .stroke(Color.yellow.opacity(0.28), lineWidth: 1.5)
+                            .frame(width: 86, height: 86)
+                            .scaleEffect(lightbulbScale)
+                        
+                        Image(systemName: "lightbulb.fill")
+                            .font(.system(size: 34, weight: .semibold))
+                            .foregroundStyle(.yellow)
+                            .scaleEffect(lightbulbScale)
+                            .shadow(color: .yellow.opacity(0.4), radius: 10)
+                    }
+                    .padding(.top, 24)
+                    .padding(.bottom, 16)
+                    
+                    // 2. Centered Typography
+                    VStack(spacing: 4) {
+                        Text("Daily tips")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(.secondary)
+                            .kerning(1.2)
+                            .textCase(.uppercase)
+                        
+                        Text("\(tip.regionFlag) \(tip.regionCode)")
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .foregroundStyle(colorScheme == .dark ? .white : .primary)
+                        
+                        Text(tip.dateLabel)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.bottom, 18)
 
                     Divider().opacity(0.12)
 
+                    // 3. Scrollable Tips Content
                     ScrollView(showsIndicators: true) {
                         VStack(alignment: .leading, spacing: 16) {
                             tipSectionCard(tip.moneyTip, isPrimary: true)
@@ -45,8 +84,21 @@ struct TipPopupView: View {
                         .padding(.horizontal, BuxTokens.marginRegular)
                         .padding(.vertical, 18)
                     }
-                    .frame(maxHeight: 360)
+                    .frame(maxHeight: 320)
+                    .mask(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .clear, location: 0.0),
+                                .init(color: .black, location: 0.08),
+                                .init(color: .black, location: 0.92),
+                                .init(color: .clear, location: 1.0)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
 
+                    // 4. CTA Button
                     BuxButton(
                         title: "Got it",
                         systemImage: "checkmark",
@@ -79,43 +131,17 @@ struct TipPopupView: View {
             }
         }
         .onAppear {
+            // Main card entrance
             withAnimation(BuxMotion.bounce) {
                 cardScale = 1
                 cardOpacity = 1
             }
-        }
-    }
-
-    private var headerRow: some View {
-        HStack(spacing: 10) {
-            ZStack {
-                Circle()
-                    .fill(Color.yellow.opacity(0.18))
-                    .frame(width: 44, height: 44)
-                Image(systemName: "lightbulb.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(.yellow)
+            
+            // Soft pulsating lightbulb (Exactly 3 full pulses, ends perfectly back at 1.0)
+            withAnimation(.easeInOut(duration: 0.45).repeatCount(6, autoreverses: true).delay(0.2)) {
+                lightbulbScale = 1.14
             }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("DAILY TIPS")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(.secondary)
-                    .kerning(1.1)
-                Text("\(tip.regionFlag) \(tip.regionCode)")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(colorScheme == .dark ? .white : .primary)
-            }
-
-            Spacer()
-
-            Text(tip.dateLabel)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
-        .padding(.bottom, 14)
     }
 
     private var watchOutHeader: some View {
@@ -127,6 +153,8 @@ struct TipPopupView: View {
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(.orange)
                 .kerning(1.0)
+                .multilineTextAlignment(.center)
+                .layoutPriority(1)
             Rectangle()
                 .fill(Color.orange.opacity(0.35))
                 .frame(height: 1)

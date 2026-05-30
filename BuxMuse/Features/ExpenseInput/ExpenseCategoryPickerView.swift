@@ -15,6 +15,8 @@ struct ExpenseCategoryPickerView: View {
     @Binding var selectedCategoryId: UUID?
     @Binding var selectedCategory: TransactionCategory
     var emphasizeOnAppear: Bool = false
+    /// When false, Income is hidden from the expense picker (still available when logging income).
+    var includesIncome: Bool = false
 
     @State private var categories: [ExpenseCategoryRecord] = []
     @State private var showCreateCategory = false
@@ -23,10 +25,8 @@ struct ExpenseCategoryPickerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("CATEGORY")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                .kerning(1.2)
+            Text("Category")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -37,7 +37,7 @@ struct ExpenseCategoryPickerView: View {
                 }
                 .padding(.horizontal, 4)
             }
-            .buxHorizontalScrollEdgeFade(background: Color(uiColor: .secondarySystemGroupedBackground))
+            .buxHorizontalScrollEdgeFade(background: themeManager.cardFill(for: colorScheme))
         }
         .padding(.vertical, emphasizeOnAppear && emphasisPulse ? 4 : 0)
         .background(
@@ -53,6 +53,9 @@ struct ExpenseCategoryPickerView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                 withAnimation { emphasisPulse = false }
             }
+        }
+        .onChange(of: showCreateCategory) { _, isPresented in
+            if !isPresented { reload() }
         }
         .sheet(isPresented: $showCreateCategory) {
             ExpenseCategoryEditorSheet { name, icon, color in
@@ -79,18 +82,18 @@ struct ExpenseCategoryPickerView: View {
                 Text(cat.name)
                     .font(.system(size: 13, weight: .semibold))
             }
-            .foregroundColor(isSelected ? themeManager.current.accentColor : .gray)
+            .foregroundColor(isSelected ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .background(
                 ZStack {
                     if isSelected {
                         Capsule()
-                            .fill(themeManager.current.accentColor.opacity(0.12))
+                            .fill(themeManager.pillActiveChipFill(for: colorScheme))
                             .matchedGeometryEffect(id: "expense_cat_pill", in: pillNamespace)
                     } else {
                         Capsule()
-                            .fill(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.02))
+                            .fill(themeManager.pillTrackFill(for: colorScheme))
                     }
                 }
             )
@@ -129,9 +132,35 @@ struct ExpenseCategoryPickerView: View {
     }
 
     private func reload() {
-        categories = (try? brain.fetchAllCategoryRecords()) ?? []
-        if selectedCategoryId == nil, let match = categories.first(where: { $0.systemCategoryRaw == selectedCategory.rawValue }) {
+        let all = (try? brain.fetchAllCategoryRecords()) ?? []
+        let systemOrder = ExpenseCategoryCatalog.systemDefinitions.map(\.0.rawValue)
+
+        let system = all
+            .filter { !$0.isCustom }
+            .sorted { lhs, rhs in
+                let left = systemOrder.firstIndex(of: lhs.systemCategoryRaw ?? "") ?? Int.max
+                let right = systemOrder.firstIndex(of: rhs.systemCategoryRaw ?? "") ?? Int.max
+                if left != right { return left < right }
+                return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+            }
+
+        let custom = all
+            .filter(\.isCustom)
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+
+        var merged = system + custom
+        if !includesIncome {
+            merged.removeAll { $0.systemCategoryRaw == TransactionCategory.income.rawValue }
+        }
+        categories = merged
+
+        if selectedCategoryId == nil,
+           let match = categories.first(where: { $0.systemCategoryRaw == selectedCategory.rawValue }) {
             selectedCategoryId = match.id
+        } else if let selectedCategoryId,
+                  !categories.contains(where: { $0.id == selectedCategoryId }),
+                  let fallback = categories.first(where: { $0.systemCategoryRaw == TransactionCategory.other.rawValue }) {
+            select(fallback)
         }
     }
 }

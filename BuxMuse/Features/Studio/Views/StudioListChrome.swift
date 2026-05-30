@@ -23,7 +23,7 @@ enum StudioListMetrics {
     static let rowInsets = EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0)
 }
 
-/// Mesh + screen fill behind Studio pushed screens.
+/// M3 canvas behind Studio pushed screens.
 struct StudioThemedListBackdrop<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
@@ -34,14 +34,10 @@ struct StudioThemedListBackdrop<Content: View>: View {
             themeManager.screenBackground(for: colorScheme)
                 .ignoresSafeArea()
 
-            BuxHeroMeshBackground()
-                .ignoresSafeArea(.keyboard, edges: .bottom)
-
             content()
         }
         .environment(\.studioEnhancedTint, true)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .containerBackground(themeManager.screenBackground(for: colorScheme), for: .navigation)
+        .buxDetailNavigationChrome()
     }
 }
 
@@ -51,8 +47,8 @@ extension View {
             .scrollContentBackground(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .buxListContentMargins()
-            .buxCustomTabBarScrollClearance()
             .buxStableNavigationBarWithKeyboard()
+            .buxSoftScrollChrome()
     }
 
     func studioThemedListRowChrome() -> some View {
@@ -89,65 +85,73 @@ private struct StudioHubEmbeddedHorizontalPaddingModifier: ViewModifier {
 // MARK: - Liquid glass section menu (Tax — matches Invoices chrome, no search field)
 
 struct StudioGlassCapsuleBackground: View {
-    @Environment(\.colorScheme) private var colorScheme
-
     var body: some View {
-        Capsule(style: .continuous)
-            .fill(.ultraThinMaterial)
-            .overlay {
-                Capsule(style: .continuous)
-                    .strokeBorder(
-                        Color.white.opacity(colorScheme == .dark ? 0.14 : 0.38),
-                        lineWidth: 0.5
-                    )
-            }
-            .shadow(color: .black.opacity(colorScheme == .dark ? 0.22 : 0.07), radius: 10, y: 4)
+        BuxGlassCapsuleBackground()
     }
 }
 
 extension View {
     /// Frosted capsule behind horizontal section chips (Invoices-style floating bar).
     func studioGlassFloatingBar() -> some View {
-        padding(.horizontal, 10)
+        modifier(StudioGlassFloatingBarModifier())
+    }
+}
+
+private struct StudioGlassFloatingBarModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
+
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, 10)
             .padding(.vertical, 7)
             .background {
-                StudioGlassCapsuleBackground()
+                if settings.useGlassmorphism {
+                    StudioGlassCapsuleBackground()
+                } else {
+                    ZStack {
+                        Capsule(style: .continuous)
+                            .fill(themeManager.pillTrackFill(for: colorScheme))
+                        if settings.brandThemesEnabled {
+                            Capsule(style: .continuous)
+                                .fill(DashboardThemeTint.pillTrackWash(
+                                    themeManager: themeManager,
+                                    colorScheme: colorScheme
+                                ))
+                        }
+                    }
+                }
             }
             .clipShape(Capsule(style: .continuous))
+            .overlay {
+                if !settings.useGlassmorphism {
+                    Capsule(style: .continuous)
+                        .stroke(
+                            settings.brandThemesEnabled
+                                ? DashboardThemeTint.themedCardStroke(
+                                    themeManager: themeManager,
+                                    colorScheme: colorScheme
+                                )
+                                : themeManager.cardOutlineStroke(for: colorScheme, branded: false),
+                            lineWidth: 1
+                        )
+                }
+            }
     }
 }
 
-// MARK: - Glass horizontal section menu (overflow hint + auto-scroll to selection)
+// MARK: - Glass horizontal section menu (scrollable chips in liquid glass capsule)
 
-private struct StudioScrollContentWidthKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
-    }
-}
-
-private struct StudioScrollViewportWidthKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
-/// Scrollable section chips inside the liquid glass capsule; shows a trailing cue when more tabs sit off-screen.
+/// Scrollable section chips inside the liquid glass capsule (Tax Studio, Home categories, Invoice tabs).
 struct StudioGlassHorizontalSectionMenu<Tab: Hashable & Identifiable>: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
 
     @Binding var selection: Tab
     let tabs: [Tab]
     let label: (Tab) -> String
-
-    @State private var contentWidth: CGFloat = 0
-    @State private var viewportWidth: CGFloat = 0
-
-    private var showsTrailingOverflowCue: Bool {
-        contentWidth > viewportWidth + 6
-    }
 
     var body: some View {
         ScrollViewReader { scrollProxy in
@@ -158,25 +162,7 @@ struct StudioGlassHorizontalSectionMenu<Tab: Hashable & Identifiable>: View {
                             .id(tab.id)
                     }
                 }
-                .padding(.trailing, showsTrailingOverflowCue ? 18 : 4)
-                .background {
-                    GeometryReader { geometry in
-                        Color.clear
-                            .preference(
-                                key: StudioScrollContentWidthKey.self,
-                                value: geometry.size.width
-                            )
-                    }
-                }
-            }
-            .overlay(alignment: .trailing) {
-                if showsTrailingOverflowCue {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(themeManager.current.accentColor.opacity(0.85))
-                        .padding(.trailing, 12)
-                        .allowsHitTesting(false)
-                }
+                .padding(.trailing, 4)
             }
             .onAppear {
                 scrollToSelection(scrollProxy, animated: false)
@@ -186,17 +172,6 @@ struct StudioGlassHorizontalSectionMenu<Tab: Hashable & Identifiable>: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .background {
-            GeometryReader { geometry in
-                Color.clear
-                    .preference(
-                        key: StudioScrollViewportWidthKey.self,
-                        value: geometry.size.width
-                    )
-            }
-        }
-        .onPreferenceChange(StudioScrollContentWidthKey.self) { contentWidth = $0 }
-        .onPreferenceChange(StudioScrollViewportWidthKey.self) { viewportWidth = $0 }
         .studioGlassFloatingBar()
     }
 
@@ -210,8 +185,8 @@ struct StudioGlassHorizontalSectionMenu<Tab: Hashable & Identifiable>: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(
                     selection.id == tab.id
-                        ? themeManager.current.accentColor
-                        : themeManager.labelSecondary(for: colorScheme)
+                        ? themeManager.contrastAccentColor(for: colorScheme)
+                        : themeManager.pillInactiveLabelColor(for: colorScheme)
                 )
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
@@ -219,9 +194,12 @@ struct StudioGlassHorizontalSectionMenu<Tab: Hashable & Identifiable>: View {
                     if selection.id == tab.id {
                         Capsule(style: .continuous)
                             .fill(
-                                themeManager.current.accentColor.opacity(
-                                    colorScheme == .dark ? 0.24 : 0.16
-                                )
+                                settings.brandThemesEnabled
+                                    ? DashboardThemeTint.pillActiveChipFill(
+                                        themeManager: themeManager,
+                                        colorScheme: colorScheme
+                                    )
+                                    : themeManager.pillActiveChipFill(for: colorScheme)
                             )
                     }
                 }

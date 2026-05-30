@@ -16,32 +16,51 @@ struct AppearanceSettingsView: View {
         themeManager.screenBackground(for: colorScheme)
     }
 
-    let columns = [
+    let themeColumns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
+
+    let accentColumns = [
+        GridItem(.adaptive(minimum: 56), spacing: 12)
+    ]
     
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxThemedBackdrop()
-
-            ScrollView(showsIndicators: false) {
+        ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
 
                     if store.brandThemesEnabled {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("BRAND DESIGN PRESETS")
-                                .font(.system(size: 11, weight: .bold))
-                                .buxLabelSecondary()
+                            BuxSectionHeader(title: "Brand design presets")
                                 .padding(.horizontal, 20)
-                                .kerning(1.2)
 
-                            LazyVGrid(columns: columns, spacing: 16) {
+                            LazyVGrid(columns: themeColumns, spacing: 16) {
                                 ForEach(AppTheme.all) { theme in
                                     ThemeSwatchCard(theme: theme, isSelected: themeManager.current.id == theme.id) {
-                                        themeManager.select(theme)
-                                        store.accentColorId = theme.name
+                                        store.persistThemeSelection(theme, themeManager: themeManager)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+                        .padding(.top, 16)
+                    } else {
+                        VStack(alignment: .leading, spacing: 12) {
+                            BuxSectionHeader(title: "Accent color")
+                                .padding(.horizontal, 20)
+
+                            Text("Neutral Apple surfaces with your chosen accent on buttons and controls.")
+                                .font(.system(size: 12))
+                                .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                .padding(.horizontal, 20)
+
+                            LazyVGrid(columns: accentColumns, spacing: 12) {
+                                ForEach(BuxSystemAccent.allCases) { accent in
+                                    AccentSwatchButton(
+                                        accent: accent,
+                                        isSelected: store.neutralAccentId == accent.rawValue
+                                    ) {
+                                        store.neutralAccentId = accent.rawValue
                                         store.save()
                                     }
                                 }
@@ -53,11 +72,8 @@ struct AppearanceSettingsView: View {
 
                     // UI Preference Rules
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("USER INTERFACE RULES")
-                            .font(.system(size: 11, weight: .bold))
-                            .buxLabelSecondary()
+                        BuxSectionHeader(title: "Interface")
                             .padding(.horizontal, 20)
-                            .kerning(1.2)
                         
                         VStack(spacing: 0) {
                             Toggle(isOn: $store.brandThemesEnabled) {
@@ -65,7 +81,7 @@ struct AppearanceSettingsView: View {
                                     Text("Brand Themes")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Text("Colorful mesh presets and accent styling across the app")
+                                    Text("Full themed surfaces and presets — off uses standard iOS light/dark")
                                         .font(.system(size: 11))
                                         .buxLabelSecondary()
                                 }
@@ -99,7 +115,9 @@ struct AppearanceSettingsView: View {
                                     Text("Glass navigation chrome")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Text("Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)")
+                                    Text(store.brandThemesEnabled
+                                         ? "Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)"
+                                         : "Liquid Glass tab bar and icon buttons (cards stay neutral)")
                                         .font(.system(size: 11))
                                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                                 }
@@ -128,7 +146,8 @@ struct AppearanceSettingsView: View {
                     }
                 }
             }
-        }
+            .buxScrollContentMargins()
+            .buxSoftScrollChrome()
         .navigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -137,9 +156,54 @@ struct AppearanceSettingsView: View {
         .onChange(of: store.themeMode) { _, _ in store.save() }
         .onChange(of: store.useGlassmorphism) { _, _ in store.save() }
         .onChange(of: store.reducedMotion) { _, _ in store.save() }
+        .onChange(of: store.neutralAccentId) { _, _ in
+            store.applyBrandThemesAppearance(to: themeManager)
+            store.save()
+        }
         .onChange(of: store.brandThemesEnabled) { _, enabled in
             store.applyBrandThemesAppearance(to: themeManager)
             store.save()
         }
+    }
+}
+
+// MARK: - Accent swatch (neutral mode)
+
+private struct AccentSwatchButton: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    let accent: BuxSystemAccent
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 6) {
+                ZStack {
+                    Circle()
+                        .fill(accent.color(for: colorScheme))
+                        .frame(width: 44, height: 44)
+
+                    if isSelected {
+                        Circle()
+                            .strokeBorder(Color.white, lineWidth: 2.5)
+                            .frame(width: 44, height: 44)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+                }
+
+                Text(accent.displayName)
+                    .font(.system(size: 10, weight: isSelected ? .semibold : .medium))
+                    .foregroundColor(isSelected
+                        ? themeManager.labelPrimary(for: colorScheme)
+                        : themeManager.labelSecondary(for: colorScheme))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+        .buttonStyle(.plain)
     }
 }

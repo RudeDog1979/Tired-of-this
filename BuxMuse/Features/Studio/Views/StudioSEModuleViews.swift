@@ -303,7 +303,7 @@ struct StudioDashboardWidget: View {
                 .padding(BuxLayout.section)
             }
             .buttonStyle(BuxDashboardCardButtonStyle())
-            .dashboardThemedCardChrome(cornerRadius: 24)
+            .buxMaterialCardChrome(.outlined)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -327,6 +327,6 @@ struct StudioDashboardWidget: View {
 
 private extension View {
     func seCard(colorScheme: ColorScheme, themeManager: ThemeManager) -> some View {
-        studioThemedCardChrome(cornerRadius: 24)
+        studioThemedCardChrome(cornerRadius: BuxMaterialChrome.cardCornerRadius)
     }
 }

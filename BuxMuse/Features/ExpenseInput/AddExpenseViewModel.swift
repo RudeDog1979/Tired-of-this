@@ -35,14 +35,19 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published public var merchantDisambiguator = ""
     @Published public var showMerchantPickSheet = false
     @Published public var saveError: String?
+    @Published public var actionNotice: String?
     @Published public var smartHint: String?
 
     @Published public var isSubscription = false
+    @Published public var isRecurring = false
     @Published public var isTrial = false
     @Published public var subscriptionStartDate = Date()
     @Published public var trialEndDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
     @Published public var renewalReminderDays = 3
     @Published public var emotionTag = ""
+
+    private var categoryBeforeSubscription: TransactionCategory?
+    private var categoryIdBeforeSubscription: UUID?
 
     public var isEditing: Bool { editingId != nil }
 
@@ -69,6 +74,7 @@ public final class AddExpenseViewModel: ObservableObject {
                 selectedCategoryId = record.categoryId
                 selectedMerchantId = record.merchantId
                 isSubscription = record.isSubscriptionLike
+                isRecurring = record.isRecurring && (record.recurrenceConfidence ?? 0) >= 0.85
                 isTrial = record.isTrial
                 if let start = record.subscriptionStartDate { subscriptionStartDate = start }
                 if let end = record.trialEndDate { trialEndDate = end }
@@ -139,6 +145,73 @@ public final class AddExpenseViewModel: ObservableObject {
     public func applyMergeHint() {
         guard let hint = mergeHintCandidate else { return }
         selectCandidate(hint)
+    }
+
+    public func convertToSubscription() {
+        guard let editingId else { return }
+        saveError = nil
+        actionNotice = nil
+        do {
+            if isSubscription {
+                let restoreCategory = categoryBeforeSubscription ?? (selectedCategory == .subscriptions ? .other : selectedCategory)
+                let restoreCategoryId = categoryIdBeforeSubscription ?? (try? brain.categoryId(for: restoreCategory))
+                try brain.clearExpenseSubscription(
+                    id: editingId,
+                    restoreCategory: restoreCategory,
+                    categoryId: restoreCategoryId
+                )
+                categoryBeforeSubscription = nil
+                categoryIdBeforeSubscription = nil
+                reloadEditingRecord()
+                actionNotice = "Subscription removed."
+            } else {
+                categoryBeforeSubscription = selectedCategory
+                categoryIdBeforeSubscription = selectedCategoryId
+                try brain.convertExpenseToSubscription(id: editingId)
+                reloadEditingRecord()
+                actionNotice = "Converted to subscription. Start date uses the expense date."
+            }
+        } catch {
+            saveError = isSubscription ? "Could not remove subscription." : "Could not convert to subscription."
+        }
+    }
+
+    public func markRecurring(type: String = "monthly") {
+        guard let editingId else { return }
+        saveError = nil
+        actionNotice = nil
+        do {
+            if isRecurring {
+                try brain.unmarkExpenseRecurring(id: editingId)
+                reloadEditingRecord()
+                actionNotice = "Recurring removed."
+            } else {
+                try brain.markExpenseRecurring(id: editingId, type: type)
+                reloadEditingRecord()
+                actionNotice = "Marked as recurring monthly. Expense date stays the same."
+            }
+        } catch {
+            saveError = isRecurring ? "Could not remove recurring." : "Could not mark as recurring."
+        }
+    }
+
+    func expenseSnapshotForUndo() -> ExpenseRecord? {
+        guard let editingId else { return nil }
+        return try? brain.fetchExpenseRecord(id: editingId)
+    }
+
+    func restoreDeletedExpense(_ record: ExpenseRecord) {
+        saveError = nil
+        do {
+            try brain.restoreExpenseRecord(record)
+        } catch {
+            saveError = "Could not restore expense."
+        }
+    }
+
+    public func deleteExpense() throws {
+        guard let editingId else { return }
+        try brain.deleteExpense(id: editingId)
     }
 
     public func saveTransaction() -> Bool {
@@ -233,6 +306,25 @@ public final class AddExpenseViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func reloadEditingRecord() {
+        guard let editingId, let record = try? brain.fetchExpenseRecord(id: editingId) else { return }
+        merchantName = record.name
+        selectedCategory = record.transactionCategory
+        selectedCategoryId = record.categoryId
+        selectedMerchantId = record.merchantId
+        date = record.date
+        notes = record.notes ?? ""
+        let absAmount = abs(record.amountValue)
+        amountString = String(format: "%.2f", NSDecimalNumber(decimal: absAmount).doubleValue)
+        isSubscription = record.isSubscriptionLike
+        isRecurring = record.isRecurring && (record.recurrenceConfidence ?? 0) >= 0.85
+        isTrial = record.isTrial
+        if let start = record.subscriptionStartDate { subscriptionStartDate = start }
+        if let end = record.trialEndDate { trialEndDate = end }
+        renewalReminderDays = record.renewalReminderDays ?? 3
+        emotionTag = record.emotion ?? ""
+    }
 
     private func buildMerchantSelection(for cleanName: String) -> MerchantSelection? {
         if var selection = pendingMerchantSelection {

@@ -120,20 +120,20 @@ public final class SubscriptionInsightsEngine {
                 title: "Subscription redirection",
                 value: "Goal Opportunity",
                 description: "Reach your \(highPriorityGoal.name) goal sooner.",
-                fullExplanation: "Canceling your \(mostExpensiveSub.merchantName) subscription (£\(monthlySubCost)/mo) and redirecting that cash flow to \(highPriorityGoal.name) allows you to achieve the goal \(String(format: "%.1f", finalMonths)) months sooner.",
+                fullExplanation: "Canceling your \(mostExpensiveSub.merchantName) subscription (\(InsightMoneyFormat.format(monthlySubCost))/mo) and redirecting that cash flow to \(highPriorityGoal.name) allows you to achieve the goal \(String(format: "%.1f", finalMonths)) months sooner.",
                 severity: .low,
                 category: .subscription,
                 systemIcon: "arrow.left.arrow.right.circle.fill",
                 accentColorName: "green",
                 suggestedActions: [
                     "Cancel \(mostExpensiveSub.merchantName) inside BuxMuse.",
-                    "Set up an automated monthly £\(monthlySubCost) transfer to '\(highPriorityGoal.name)'."
+                    "Set up an automated monthly \(InsightMoneyFormat.format(monthlySubCost)) transfer to '\(highPriorityGoal.name)'."
                 ],
                 impactMonthly: monthlySubCost,
                 impactYearly: monthlySubCost * 12,
                 affectedGoalId: highPriorityGoal.id,
                 affectedGoalName: highPriorityGoal.name,
-                dataBehind: "Sub: \(mostExpensiveSub.merchantName). Cost: £\(monthlySubCost). Goal: \(highPriorityGoal.name). Pacing: -\(finalMonths) months."
+                dataBehind: "Sub: \(mostExpensiveSub.merchantName). Cost: \(InsightMoneyFormat.format(monthlySubCost)). Goal: \(highPriorityGoal.name). Pacing: -\(String(format: "%.1f", finalMonths)) months."
             ))
         }
         

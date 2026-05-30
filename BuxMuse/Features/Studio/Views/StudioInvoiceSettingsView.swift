@@ -30,67 +30,91 @@ struct StudioInvoiceSettingsView: View {
         ZStack {
             themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
 
-            Form {
-                Section("Numbering") {
+            BuxThemedCardForm {
+                BuxFormSection(title: "Numbering") {
                     TextField("Prefix", text: $prefix)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     TextField("Pattern", text: $pattern)
+                        .buxFormFieldPadding()
                     Text("Use {PREFIX}, {YEAR}, {SEQ}")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
+                        .buxFormFieldPadding()
                     Text("Preview: \(previewNumber)")
                         .font(.system(size: 12, weight: .semibold))
+                        .buxFormFieldPadding()
                 }
 
-                Section("Design") {
+                BuxFormSection(title: "Design") {
                     Picker("Template", selection: $template) {
                         ForEach(InvoiceTemplate.allCases) { t in
                             Text(t.rawValue).tag(t)
                         }
                     }
+                    .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     Picker("Logo position", selection: $logoPosition) {
                         ForEach(InvoiceLogoPosition.allCases) { p in
                             Text(p.rawValue).tag(p)
                         }
                     }
+                    .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     TextField("Document label", text: $documentLabel)
+                        .buxFormFieldPadding()
                 }
 
-                Section("Tax on invoices") {
+                BuxFormSection(title: "Tax on invoices") {
                     Picker("Tax behavior", selection: $taxBehavior) {
                         ForEach(InvoiceTaxBehavior.allCases) { b in
                             Text(b.rawValue).tag(b)
                         }
                     }
+                    .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     TextField("Default tax rate %", text: $defaultTaxRate)
                         .keyboardType(.decimalPad)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     Toggle("Show tax ID on PDF", isOn: $showTaxID)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
                 }
 
-                Section("Payment") {
+                BuxFormSection(title: "Payment") {
                     Toggle("Show bank details", isOn: $showBankDetails)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
                     TextField("Bank / payment details", text: $bankDetails, axis: .vertical)
                         .lineLimit(3...8)
+                        .buxFormFieldPadding()
                 }
 
-                Section("Legal footer") {
+                BuxFormSection(title: "Legal footer") {
                     Toggle("Show registration footer on PDF", isOn: $showLegalFooter)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
                     Text("Displays company address and registration at the bottom of designed invoices.")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
+                        .buxFormFieldPadding()
                 }
 
                 if let savedBanner {
-                    Section {
+                    BuxFormSection {
                         Text(savedBanner)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.green)
+                            .buxFormFieldPadding()
                     }
                 }
             }
-            .scrollContentBackground(.hidden)
         }
         .navigationTitle("Invoice Settings")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.studioEnhancedTint, true)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 BuxToolbarSaveButton(isDirty: hasUnsavedChanges) {

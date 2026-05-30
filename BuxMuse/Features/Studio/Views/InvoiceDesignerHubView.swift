@@ -12,11 +12,13 @@ import SwiftUI
 
 // MARK: - Designer Tab
 
-enum DesignerTab: String, CaseIterable {
+enum DesignerTab: String, CaseIterable, Identifiable {
     case invoice  = "Invoice"
     case branding = "Branding"
     case tax      = "Tax & Rates"
     case payment  = "Payment"
+
+    var id: String { rawValue }
 }
 
 // MARK: - Main Designer Hub View
@@ -110,21 +112,28 @@ struct InvoiceDesignerHubView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if sizeClass == .regular {
-                    ipadLayout
-                } else {
-                    iphoneLayout
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
+
+                Group {
+                    if sizeClass == .regular {
+                        ipadLayout
+                    } else {
+                        iphoneLayout
+                    }
                 }
             }
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
+            .buxStableNavigationBarWithKeyboard()
             .toolbar { toolbarContent }
-            .sheet(isPresented: $showNotesEditor) { notesEditorSheet.buxThemedSheetContent() }
-            .sheet(isPresented: $showAddRateSheet) { addRateSheet.buxThemedSheetContent() }
-            .sheet(isPresented: $showAddItemSheet) { addLineItemSheet.buxThemedSheetContent() }
+            .sheet(isPresented: $showNotesEditor) { notesEditorSheet }
+            .sheet(isPresented: $showAddRateSheet) { addRateSheet }
+            .sheet(isPresented: $showAddItemSheet) { addLineItemSheet }
         }
-        .tint(themeManager.current.accentColor)
+        .environment(\.studioEnhancedTint, true)
+        .buxStudioSheetContent()
         .onAppear {
             selectedTab = initialTab
             engine.totalsDisplay = InvoiceDesignerEngine.computeTotals(
@@ -135,6 +144,14 @@ struct InvoiceDesignerHubView: View {
         }
         .onChange(of: lineItems) { _, items in
             engine.updateLineItems(items)
+        }
+    }
+
+    /// Themed backdrop behind the live A4 preview (replaces neutral gray slab).
+    private var previewCanvasBackdrop: some View {
+        ZStack {
+            themeManager.screenBackground(for: colorScheme)
+            themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.06 : 0.08)
         }
     }
 
@@ -149,15 +166,13 @@ struct InvoiceDesignerHubView: View {
                     .padding(.bottom, 24)
             }
             .frame(width: 320)
-            .background(.ultraThinMaterial)
+            .background(controlPanelBarBackground)
 
             Divider()
 
             // Right: Live Preview Canvas
             ZStack {
-                (colorScheme == .dark
-                    ? Color(red: 18/255, green: 20/255, blue: 26/255)
-                    : Color(red: 240/255, green: 241/255, blue: 244/255))
+                previewCanvasBackdrop
                     .ignoresSafeArea()
 
                 VStack(spacing: 16) {
@@ -178,9 +193,7 @@ struct InvoiceDesignerHubView: View {
         VStack(spacing: 0) {
             // Preview Canvas (top ~43% of screen)
             ZStack {
-                (colorScheme == .dark
-                    ? Color(red: 18/255, green: 20/255, blue: 26/255)
-                    : Color(red: 240/255, green: 241/255, blue: 244/255))
+                previewCanvasBackdrop
 
                 VStack(spacing: 8) {
                     previewLabel
@@ -192,21 +205,21 @@ struct InvoiceDesignerHubView: View {
             .frame(height: 280)
 
             // Tab selector
-            Picker("Section", selection: $selectedTab) {
-                ForEach(DesignerTab.allCases, id: \.self) { tab in
-                    Text(tab.rawValue).tag(tab)
-                }
-            }
-            .pickerStyle(.segmented)
+            StudioGlassHorizontalSectionMenu(
+                selection: $selectedTab,
+                tabs: DesignerTab.allCases,
+                label: { $0.rawValue }
+            )
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(.ultraThinMaterial)
+            .background(controlPanelBarBackground)
 
             // Scrollable control panel
             ScrollView(showsIndicators: false) {
                 controlPanel
                     .padding(.bottom, 100)
             }
+            .background(themeManager.screenBackground(for: colorScheme))
 
             // Sticky action bar
             actionBar
@@ -254,8 +267,7 @@ struct InvoiceDesignerHubView: View {
                 VStack(spacing: 10) {
                     TextField("Invoice number", text: $invoiceNumber)
                         .padding(10)
-                        .background(Color(UIColor.tertiarySystemFill))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .buxThemedInputPlate(cornerRadius: 10)
 
                     HStack(spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -277,8 +289,7 @@ struct InvoiceDesignerHubView: View {
                         )
                     }
                     .padding(10)
-                    .background(Color(UIColor.tertiarySystemFill))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .buxThemedInputPlate(cornerRadius: 10)
 
                     Text("Customize prefix & pattern in Studio → Invoices → Settings. You can always type your own number above.")
                         .font(.system(size: 10))
@@ -316,8 +327,7 @@ struct InvoiceDesignerHubView: View {
                                 .font(.system(size: 12, weight: .bold, design: .rounded))
                         }
                         .padding(10)
-                        .background(Color(UIColor.tertiarySystemFill))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .buxThemedInputPlate(cornerRadius: 10)
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
                                 if let idx = lineItems.firstIndex(where: { $0.id == item.id }) {
@@ -326,6 +336,7 @@ struct InvoiceDesignerHubView: View {
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
+                            .tint(BuxSwipeActionTint.delete)
                         }
                     }
 
@@ -502,8 +513,7 @@ struct InvoiceDesignerHubView: View {
                             .buxLabelSecondary()
                     }
                     .padding(10)
-                    .background(Color(UIColor.tertiarySystemFill))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .buxThemedInputPlate(cornerRadius: 10)
                 }
                 .buttonStyle(BuxPressFeedbackStyle())
             }
@@ -585,6 +595,18 @@ struct InvoiceDesignerHubView: View {
                 .foregroundColor(themeManager.current.accentColor)
                 .tracking(0.8)
             content()
+                .padding(BuxLayout.section)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .studioThemedCardChrome(cornerRadius: 16)
+        }
+    }
+
+    @ViewBuilder
+    private var controlPanelBarBackground: some View {
+        if settingsStore.brandThemesEnabled {
+            themeManager.panelBarFill(for: colorScheme)
+        } else {
+            Rectangle().fill(.ultraThinMaterial)
         }
     }
 
@@ -605,7 +627,7 @@ struct InvoiceDesignerHubView: View {
                         .padding(.horizontal, 10)
                         .padding(.vertical, 7)
                         .frame(maxWidth: .infinity)
-                        .background(isSelected ? themeManager.current.accentColor : Color(UIColor.tertiarySystemFill))
+                        .background(isSelected ? themeManager.current.accentColor : themeManager.inputFieldFill(for: colorScheme))
                         .clipShape(Capsule())
                 }
                 .buttonStyle(BuxChipButtonStyle())
@@ -635,7 +657,7 @@ struct InvoiceDesignerHubView: View {
                 Spacer()
             }
             .padding(10)
-            .background(isSelected ? themeManager.current.accentColor.opacity(0.08) : Color(UIColor.tertiarySystemFill))
+            .background(isSelected ? themeManager.current.accentColor.opacity(0.08) : themeManager.inputFieldFill(for: colorScheme))
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(BuxPressFeedbackStyle())
@@ -666,8 +688,7 @@ struct InvoiceDesignerHubView: View {
             }
         }
         .padding(10)
-        .background(Color(UIColor.tertiarySystemFill))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .buxThemedInputPlate(cornerRadius: 10)
     }
 
     private var bankTypeBinding: Binding<BankAccountType> {
@@ -712,8 +733,7 @@ struct InvoiceDesignerHubView: View {
         TextField(placeholder, text: text)
             .font(.system(size: 12))
             .padding(10)
-            .background(Color(UIColor.tertiarySystemFill))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .buxThemedInputPlate(cornerRadius: 10)
     }
 
     // MARK: - Preview Label
@@ -778,8 +798,8 @@ struct InvoiceDesignerHubView: View {
         .padding(.bottom, 28)
         .background {
             ZStack {
+                themeManager.panelBarFill(for: colorScheme)
                 themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.07 : 0.05)
-                Rectangle().fill(.ultraThinMaterial)
             }
         }
     }
@@ -793,37 +813,50 @@ struct InvoiceDesignerHubView: View {
                 TextEditor(text: $notes)
                     .font(.system(size: 14))
                     .padding()
-                    .background(Color(UIColor.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .buxThemedInputPlate(cornerRadius: 16)
                     .padding()
             }
             .navigationTitle("Notes & Terms")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { showNotesEditor = false }
+                    BuxToolbarDoneButton { showNotesEditor = false }
                 }
             }
+            .buxStudioSheetContent()
         }
     }
 
     private var addLineItemSheet: some View {
         NavigationStack {
-            Form {
-                TextField("Description", text: $newItemDesc)
-                TextField("Quantity", text: $newItemQty)
-                    .keyboardType(.decimalPad)
-                TextField("Unit price", text: $newItemPrice)
-                    .keyboardType(.decimalPad)
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+                BuxThemedCardForm {
+                    BuxFormSection(title: "Line item") {
+                        TextField("Description", text: $newItemDesc)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        TextField("Quantity", text: $newItemQty)
+                            .keyboardType(.decimalPad)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        TextField("Unit price", text: $newItemPrice)
+                            .keyboardType(.decimalPad)
+                            .buxFormFieldPadding()
+                    }
+                }
             }
             .navigationTitle("Add Line Item")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { showAddItemSheet = false }
+                    BuxToolbarCancelButton { showAddItemSheet = false }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: "Add",
+                        isEnabled: !newItemDesc.isEmpty && !newItemPrice.isEmpty
+                    ) {
                         let qty = Double(newItemQty) ?? 1
                         let price = Decimal(string: newItemPrice) ?? 0
                         lineItems.append(
@@ -834,10 +867,9 @@ struct InvoiceDesignerHubView: View {
                         newItemQty = "1.0"
                         newItemPrice = ""
                     }
-                    .fontWeight(.semibold)
-                    .disabled(newItemDesc.isEmpty || newItemPrice.isEmpty)
                 }
             }
+            .buxStudioSheetContent()
         }
     }
 
@@ -857,7 +889,7 @@ struct InvoiceDesignerHubView: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
-            Button("Cancel", role: .cancel) { dismiss() }
+            BuxToolbarCancelButton { dismiss() }
         }
         ToolbarItem(placement: .confirmationAction) {
             BuxToolbarSaveButton(isDirty: canSave) {
@@ -917,6 +949,9 @@ struct InvoicePreviewCanvas: View {
 // MARK: - Template Style Card
 
 private struct TemplateStyleCard: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
     let style: InvoiceTemplateStyle
     let isSelected: Bool
     let accentColor: Color
@@ -928,7 +963,11 @@ private struct TemplateStyleCard: View {
             // Abstract mini-thumbnail
             ZStack {
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? accentColor.opacity(0.10) : Color(UIColor.tertiarySystemFill))
+                    .fill(
+                        isSelected
+                            ? accentColor.opacity(0.10)
+                            : themeManager.inputFieldFill(for: colorScheme)
+                    )
                     .frame(height: 60)
                 templateThumbnail
             }
@@ -1063,41 +1102,47 @@ private struct AddTaxRateSheet: View {
         NavigationStack {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-                Form {
-                    Section("Rate Details") {
+                BuxThemedCardForm {
+                    BuxFormSection(title: "Rate Details") {
                         TextField("Label (e.g. VAT, GST, ITBIS)", text: $label)
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         HStack {
                             TextField("Rate %", text: $percentage)
                                 .keyboardType(.decimalPad)
                             Text("%")
                                 .buxLabelSecondary()
                         }
+                        .buxFormFieldPadding()
                     }
-                    Section("Options") {
+                    BuxFormSection(title: "Options") {
                         Toggle("Compounding (stacks on previous rate)", isOn: $compounding)
                             .tint(themeManager.current.accentColor)
+                            .buxFormFieldPadding()
                         Text("Compounding rates apply to the running total including previous taxes.")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
+                            .buxFormFieldPadding()
                     }
                 }
-                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Add Tax Rate")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: "Add",
+                        isEnabled: !label.isEmpty && (Decimal(string: percentage) ?? 0) > 0
+                    ) {
                         guard let pct = Decimal(string: percentage), pct > 0, !label.isEmpty else { return }
                         onAdd(InvoiceTaxRate(label: label, percentage: pct, isCompounding: compounding))
                     }
-                    .fontWeight(.semibold)
-                    .disabled(label.isEmpty || (Decimal(string: percentage) ?? 0) <= 0)
                 }
             }
+            .buxStudioSheetContent()
         }
     }
 }

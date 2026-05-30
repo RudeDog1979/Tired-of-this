@@ -2,7 +2,7 @@
 //  EmotionalListCardChrome.swift
 //  BuxMuse
 //
-//  Lightweight list-row emotion styling — single gradient, icon watermark, Equatable.
+//  Lightweight list-row emotion styling — M3 flat tint wash, Equatable.
 //
 
 import SwiftUI
@@ -25,15 +25,7 @@ struct EmotionalListCardChrome: View, Equatable {
         shape
             .fill(base)
             .overlay {
-                LinearGradient(
-                    colors: [
-                        tint.opacity(isDark ? 0.20 : 0.16),
-                        tint.opacity(isDark ? 0.06 : 0.04),
-                        .clear
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                shape.fill(tint.opacity(isDark ? 0.14 : 0.10))
             }
             .overlay(alignment: .bottomTrailing) {
                 Image(systemName: symbol)
@@ -42,7 +34,7 @@ struct EmotionalListCardChrome: View, Equatable {
                     .padding(8)
             }
             .clipShape(shape)
-            .overlay(shape.stroke(stroke, lineWidth: 1.5))
+            .overlay(shape.stroke(stroke, lineWidth: 0.5))
     }
 }
 
@@ -50,23 +42,17 @@ struct PlainExpenseListCardChrome: View, Equatable {
     let cornerRadius: CGFloat
     let base: Color
     let stroke: Color
-    /// Light mesh wash when Expenses tab enhanced tint is active.
     var themeWash: Color? = nil
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         shape
             .fill(base)
-            .overlay {
-                if let themeWash {
-                    shape.fill(themeWash)
-                }
-            }
-            .overlay(shape.stroke(stroke, lineWidth: 1))
+            .overlay(shape.stroke(stroke, lineWidth: 0.5))
     }
 }
 
-/// No-mood list rows — theme accent + mesh wash (same layout language as `EmotionalListCardChrome`).
+/// No-mood list rows — M3 flat accent wash.
 struct ThemedPlainListCardChrome: View, Equatable {
     let cornerRadius: CGFloat
     let isDark: Bool
@@ -81,25 +67,14 @@ struct ThemedPlainListCardChrome: View, Equatable {
         shape
             .fill(base)
             .overlay {
-                shape.fill(meshWash.opacity(isDark ? 0.88 : 0.52))
-            }
-            .overlay {
-                LinearGradient(
-                    colors: [
-                        accent.opacity(isDark ? 0.22 : 0.16),
-                        accent.opacity(isDark ? 0.08 : 0.05),
-                        .clear
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                shape.fill(accent.opacity(isDark ? 0.12 : 0.08))
             }
             .clipShape(shape)
-            .overlay(shape.stroke(stroke, lineWidth: 1))
+            .overlay(shape.stroke(stroke, lineWidth: 0.5))
     }
 }
 
-// MARK: - List row chrome (solid card on mesh screen — Expenses, Studio, Home)
+// MARK: - List row chrome (M3 surfaces — Expenses, Studio, Home)
 
 struct BuxThemedListRowChromeModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
@@ -107,23 +82,14 @@ struct BuxThemedListRowChromeModifier: ViewModifier {
     @Environment(\.studioEnhancedTint) private var studioEnhancedTint
     @Environment(\.dashboardEnhancedTint) private var dashboardEnhancedTint
     @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
 
     let cornerRadius: CGFloat
     var emotionId: String?
     var emotionSymbol: String?
 
     private var usesThemedListChrome: Bool {
-        expensesEnhancedTint || studioEnhancedTint || dashboardEnhancedTint
-    }
-
-    private var activeMeshWash: Color {
-        if expensesEnhancedTint {
-            return DashboardThemeTint.expensesSurfaceWash(themeManager: themeManager, colorScheme: colorScheme)
-        }
-        if studioEnhancedTint {
-            return DashboardThemeTint.studioSurfaceWash(themeManager: themeManager, colorScheme: colorScheme)
-        }
-        return DashboardThemeTint.dashboardSurfaceWash(themeManager: themeManager, colorScheme: colorScheme)
+        settings.brandThemesEnabled || expensesEnhancedTint || studioEnhancedTint || dashboardEnhancedTint
     }
 
     private var hasActiveEmotion: Bool {
@@ -135,7 +101,6 @@ struct BuxThemedListRowChromeModifier: ViewModifier {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         let base = themeManager.cardFill(for: colorScheme)
         let fallbackStroke = themeManager.subtleCardStroke(for: colorScheme)
-        let shadow = themeManager.listCardShadow(for: colorScheme)
         let isDark = colorScheme == .dark
 
         if hasActiveEmotion, let emotionId, let emotionSymbol {
@@ -152,26 +117,9 @@ struct BuxThemedListRowChromeModifier: ViewModifier {
                     .equatable()
                 }
                 .clipShape(shape)
-                .shadow(color: shadow.color, radius: shadow.radius, x: 0, y: shadow.y)
         } else if usesThemedListChrome {
-            let stroke = DashboardThemeTint.themedCardStroke(
-                themeManager: themeManager,
-                colorScheme: colorScheme
-            )
             content
-                .background {
-                    ThemedPlainListCardChrome(
-                        cornerRadius: cornerRadius,
-                        isDark: isDark,
-                        base: base,
-                        stroke: stroke,
-                        accent: themeManager.current.accentColor,
-                        meshWash: activeMeshWash
-                    )
-                    .equatable()
-                }
-                .clipShape(shape)
-                .shadow(color: shadow.color, radius: shadow.radius, x: 0, y: shadow.y)
+                .buxMaterialCardChrome(.outlined, cornerRadius: cornerRadius)
         } else {
             content
                 .background {

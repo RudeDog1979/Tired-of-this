@@ -383,6 +383,13 @@ enum ExpenseCategoryCatalog {
         (.transport, "car.fill", "blue"),
         (.subscriptions, "arrow.triangle.2.circlepath", "purple"),
         (.housing, "house.fill", "brown"),
+        (.entertainment, "film.fill", "pink"),
+        (.shopping, "bag.fill", "indigo"),
+        (.health, "heart.fill", "red"),
+        (.utilities, "bolt.fill", "yellow"),
+        (.travel, "airplane", "cyan"),
+        (.education, "book.fill", "teal"),
+        (.personal, "sparkles", "purple"),
         (.income, "banknote.fill", "mint"),
         (.other, "square.grid.2x2.fill", "gray")
     ]

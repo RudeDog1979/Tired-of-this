@@ -22,93 +22,96 @@ struct SecuritySettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            bgColor.ignoresSafeArea()
-            BuxHeroMeshBackground()
-
-            Form {
-                Section("BIOMETRIC ACCESS") {
-                    Toggle(isOn: Binding(
-                        get: { store.biometricLockEnabled },
-                        set: { enable in
-                            if enable {
-                                requestBiometricAuth { success in
-                                    if success {
-                                        store.biometricLockEnabled = true
-                                        store.save()
-                                    }
+        BuxThemedCardForm {
+            BuxFormSection(title: "Biometric access") {
+                Toggle(isOn: Binding(
+                    get: { store.biometricLockEnabled },
+                    set: { enable in
+                        if enable {
+                            requestBiometricAuth { success in
+                                if success {
+                                    store.biometricLockEnabled = true
+                                    store.save()
                                 }
-                            } else {
-                                store.biometricLockEnabled = false
-                                store.save()
                             }
-                        }
-                    )) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Face ID / Touch ID")
-                                .font(.system(size: 15, weight: .semibold))
-                            Text("Fast, private verification via Apple Secure Enclave")
-                                .font(.system(size: 11))
-                                .buxLabelSecondary()
-                        }
-                    }
-                    
-                    if store.biometricLockEnabled {
-                        Toggle("Require Lock on App Launch", isOn: $store.requireBiometricOnLaunch)
-                        
-                        Picker("Lock After Inactivity", selection: $store.lockAfterInactivityMinutes) {
-                            Text("Immediately").tag(0)
-                            Text("1 Minute").tag(1)
-                            Text("5 Minutes").tag(5)
-                            Text("15 Minutes").tag(15)
-                        }
-                        .pickerStyle(.menu)
-                    }
-                }
-                
-                Section("PIN PASSCODE") {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Secure App Passcode")
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Text("Numeric secondary passcode backup")
-                                .font(.system(size: 11))
-                                .buxLabelSecondary()
-                        }
-                        Spacer()
-                        
-                        if store.hasAppPasscode {
-                            Button(action: { showPasscodeClearConfirmation = true }) {
-                                Text("Disable PIN")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.red)
-                            }
-                            .buttonStyle(.plain)
                         } else {
-                            Button(action: { showPasscodeSetup = true }) {
-                                Text("Enable PIN")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(themeManager.current.accentColor)
-                            }
-                            .buttonStyle(.plain)
+                            store.biometricLockEnabled = false
+                            store.save()
                         }
+                    }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Face ID / Touch ID")
+                            .font(.system(size: 15, weight: .semibold))
+                        Text("Fast, private verification via Apple Secure Enclave")
+                            .font(.system(size: 11))
+                            .buxLabelSecondary()
                     }
                 }
-                
-                Section("PRIVACY SHIELD") {
-                    Toggle(isOn: $store.privacyBlurInAppSwitching) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Blur in App Switcher")
-                                .font(.system(size: 15, weight: .semibold))
-                            Text("Hides your financial sheets when toggling tasks")
-                                .font(.system(size: 11))
-                                .buxLabelSecondary()
-                        }
+                .tint(themeManager.current.accentColor)
+                .buxFormFieldPadding()
+
+                if store.biometricLockEnabled {
+                    BuxFormRowDivider()
+                    Toggle("Require Lock on App Launch", isOn: $store.requireBiometricOnLaunch)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    Picker("Lock After Inactivity", selection: $store.lockAfterInactivityMinutes) {
+                        Text("Immediately").tag(0)
+                        Text("1 Minute").tag(1)
+                        Text("5 Minutes").tag(5)
+                        Text("15 Minutes").tag(15)
                     }
+                    .pickerStyle(.menu)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
                 }
             }
-            .buxThemedFormStyle()
+
+            BuxFormSection(title: "PIN passcode") {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Secure App Passcode")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        Text("Numeric secondary passcode backup")
+                            .font(.system(size: 11))
+                            .buxLabelSecondary()
+                    }
+                    Spacer()
+
+                    if store.hasAppPasscode {
+                        Button("Disable PIN", role: .destructive) {
+                            showPasscodeClearConfirmation = true
+                        }
+                        .font(.system(size: 14, weight: .bold))
+                        .buttonStyle(.plain)
+                    } else {
+                        Button(action: { showPasscodeSetup = true }) {
+                            Text("Enable PIN")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(themeManager.current.accentColor)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .buxFormFieldPadding()
+            }
+
+            BuxFormSection(title: "Privacy shield") {
+                Toggle(isOn: $store.privacyBlurInAppSwitching) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Blur in App Switcher")
+                            .font(.system(size: 15, weight: .semibold))
+                        Text("Hides your financial sheets when toggling tasks")
+                            .font(.system(size: 11))
+                            .buxLabelSecondary()
+                    }
+                }
+                .tint(themeManager.current.accentColor)
+                .buxFormFieldPadding()
+            }
         }
         .navigationTitle("Security & Privacy")
         .navigationBarTitleDisplayMode(.inline)
@@ -249,15 +252,12 @@ struct PasscodeSetupSheet: View {
                 .padding(.bottom, 48)
             }
             .background {
-                ZStack {
-                    themeManager.screenBackground(for: colorScheme)
-                    BuxHeroMeshBackground()
-                }
-                .ignoresSafeArea()
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    BuxToolbarCancelButton { dismiss() }
                 }
             }
         }
