@@ -166,11 +166,14 @@ struct StudioMileageLogView: View {
                 .buxLabelSecondary()
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
-            Button("Log trip") {
+            BuxButton(
+                title: "Log trip",
+                systemImage: "car.fill",
+                role: .primary,
+                size: .regular
+            ) {
                 mileageSheetMode = .add(openToken: UUID())
             }
-            .buttonStyle(.borderedProminent)
-            .tint(themeManager.current.accentColor)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .studioHubEmbeddedHorizontalPadding()

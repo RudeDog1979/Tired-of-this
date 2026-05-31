@@ -143,18 +143,12 @@ struct SimpleStudioScanView: View {
                     }
 
                     PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "photo.on.rectangle.angled")
-                            Text("Choose from photos")
-                                .font(.system(size: 15, weight: .bold))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(themeManager.accentWash(for: colorScheme))
-                        .foregroundColor(themeManager.current.accentColor)
-                        .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
+                        Label("Choose from photos", systemImage: "photo.on.rectangle.angled")
+                            .font(.system(size: 15, weight: .semibold))
+                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.plain)
+                    .buxNativeButtonStyle(.secondary, controlSize: .regular)
+                    .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .padding(.horizontal, BuxTokens.marginRegular)
             }

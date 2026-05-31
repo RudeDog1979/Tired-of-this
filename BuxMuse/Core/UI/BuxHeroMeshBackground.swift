@@ -16,15 +16,9 @@ struct BuxLandingTintBackground: View {
     var body: some View {
         ZStack {
             themeManager.screenBackground(for: colorScheme)
-            LinearGradient(
-                colors: [
-                    themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.12 : 0.08),
-                    Color.clear
-                ],
-                startPoint: .topLeading,
-                endPoint: .center
-            )
+            BuxThemeAccentWash(theme: themeManager.current, colorScheme: colorScheme)
         }
+        .animation(BuxMotion.themeCrossfade, value: themeManager.current.id)
     }
 }
 

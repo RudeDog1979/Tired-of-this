@@ -16,10 +16,6 @@ struct AddExpenseSheet: View {
     @EnvironmentObject var brain: BuxMuseBrain
 
     @StateObject private var viewModel: AddExpenseViewModel
-    /// Holds mood id for overlay color (kept briefly while fading out).
-    @State private var moodBackdropTag: String = ""
-    @State private var moodBackdropOpacity: Double = 0
-    @State private var moodCrossfadeTask: Task<Void, Never>?
     @State private var actionNoticeDismissTask: Task<Void, Never>?
 
     let mode: ExpenseSheetMode
@@ -53,7 +49,6 @@ struct AddExpenseSheet: View {
         NavigationStack {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-                BuxHeroMeshBackground()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: BuxLayout.section) {
@@ -95,40 +90,10 @@ struct AddExpenseSheet: View {
                 .buxDetailScrollChrome()
                 .scrollDismissesKeyboard(.interactively)
             }
-            .overlay(alignment: .top) {
-                if !moodBackdropTag.isEmpty || moodBackdropOpacity > 0.01 {
-                    EmotionalTagAppearance.background(
-                        for: moodBackdropTag,
-                        colorScheme: colorScheme
-                    )
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 260)
-                    .mask {
-                        LinearGradient(
-                            colors: [.black, .black.opacity(0.35), .clear],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    }
-                    .opacity(moodBackdropOpacity)
-                    .animation(BuxMotion.emotionFadeIn, value: moodBackdropTag)
-                    .animation(BuxMotion.emotionFadeIn, value: moodBackdropOpacity)
-                    .allowsHitTesting(false)
-                    .ignoresSafeArea(edges: .top)
-                }
-            }
             .navigationTitle(sheetTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .buxThemedPresentation()
-            .buxDetailNavigationChrome()
-            .onAppear {
-                syncMoodBackdrop(to: viewModel.emotionTag, animated: false)
-            }
-            .onChange(of: viewModel.emotionTag) { _, newTag in
-                syncMoodBackdrop(to: newTag, animated: true)
-            }
+            .buxThemedSheetContent()
             .onDisappear {
-                moodCrossfadeTask?.cancel()
                 actionNoticeDismissTask?.cancel()
             }
             .onChange(of: viewModel.actionNotice) { _, notice in
@@ -378,70 +343,5 @@ struct AddExpenseSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
-    }
-
-    private func syncMoodBackdrop(to tag: String, animated: Bool) {
-        moodCrossfadeTask?.cancel()
-        moodCrossfadeTask = nil
-
-        let trimmed = tag.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        if !trimmed.isEmpty {
-            let switchingMood = moodBackdropOpacity > 0.01
-                && !moodBackdropTag.isEmpty
-                && moodBackdropTag != trimmed
-
-            if animated && switchingMood {
-                performMoodCrossfade(to: trimmed)
-                return
-            }
-
-            moodBackdropTag = trimmed
-            if animated {
-                withAnimation(BuxMotion.emotionFadeIn) {
-                    moodBackdropOpacity = 1
-                }
-            } else {
-                moodBackdropOpacity = 1
-            }
-            return
-        }
-
-        guard !moodBackdropTag.isEmpty || moodBackdropOpacity > 0.01 else { return }
-
-        if animated {
-            withAnimation(BuxMotion.emotionFadeOut) {
-                moodBackdropOpacity = 0
-            }
-            moodCrossfadeTask = Task { @MainActor in
-                try? await Task.sleep(for: .seconds(BuxMotion.emotionFadeOutDuration))
-                guard !Task.isCancelled else { return }
-                if viewModel.emotionTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    moodBackdropTag = ""
-                }
-                moodCrossfadeTask = nil
-            }
-        } else {
-            moodBackdropOpacity = 0
-            moodBackdropTag = ""
-        }
-    }
-
-    private func performMoodCrossfade(to newTag: String) {
-        withAnimation(BuxMotion.emotionFadeOut) {
-            moodBackdropOpacity = 0
-        }
-
-        moodCrossfadeTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(BuxMotion.emotionCrossfadeSwapDelay))
-            guard !Task.isCancelled else { return }
-            guard viewModel.emotionTag.trimmingCharacters(in: .whitespacesAndNewlines) == newTag else { return }
-
-            moodBackdropTag = newTag
-            withAnimation(BuxMotion.emotionFadeIn) {
-                moodBackdropOpacity = 1
-            }
-            moodCrossfadeTask = nil
-        }
     }
 }

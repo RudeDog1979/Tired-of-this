@@ -128,35 +128,61 @@ extension BuxSheetScaffold where Footer == EmptyView {
 struct BuxQuickActionButton: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
 
     let title: String
     let systemImage: String
     var role: BuxActionButtonRole = .secondary
     let action: () -> Void
 
+    private var accent: Color { themeManager.contrastAccentColor(for: colorScheme) }
+
     var body: some View {
+        Group {
+            if settings.useGlassmorphism, BuxPlatform.supportsLiquidGlass, #available(iOS 26, *) {
+                nativeGlassBody
+            } else {
+                legacyCapsuleBody
+            }
+        }
+    }
+
+    private var quickActionLabel: some View {
+        VStack(spacing: 6) {
+            Image(systemName: systemImage)
+                .font(.system(size: 16, weight: .semibold))
+            Text(title)
+                .font(.system(size: 10, weight: .bold))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var nativeGlassBody: some View {
+        Button(action: action) {
+            quickActionLabel
+                .padding(.vertical, 12)
+        }
+        .buxNativeButtonStyle(role.nativeButtonRole, controlSize: .regular)
+        .buxActionButtonChrome(role: role, accent: accent)
+    }
+
+    private var legacyCapsuleBody: some View {
         BuxCardButton(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 16, weight: .semibold))
-                Text(title)
-                    .font(.system(size: 10, weight: .bold))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
-            }
-            .foregroundStyle(foregroundColor)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(backgroundColor)
-            .clipShape(Capsule())
-            .overlay {
-                if showsBorder {
-                    Capsule().strokeBorder(borderColor, lineWidth: 1)
+            quickActionLabel
+                .foregroundStyle(foregroundColor)
+                .padding(.vertical, 12)
+                .background(backgroundColor)
+                .clipShape(Capsule())
+                .overlay {
+                    if showsBorder {
+                        Capsule().strokeBorder(borderColor, lineWidth: 1)
+                    }
                 }
-            }
-            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
-            .contentShape(Capsule())
+                .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
+                .contentShape(Capsule())
         }
     }
 

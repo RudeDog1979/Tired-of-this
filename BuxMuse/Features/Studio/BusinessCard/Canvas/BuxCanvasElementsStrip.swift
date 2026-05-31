@@ -8,11 +8,16 @@ import SwiftUI
 struct BuxCanvasElementsStrip: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
 
     let layers: [CardCanvasLayer]
     @Binding var selectedID: UUID?
     @Binding var backgroundSelected: Bool
     var onSelect: (UUID?) -> Void
+
+    private var controlTint: Color {
+        themeManager.contrastAccentColor(for: colorScheme)
+    }
 
     private var reversedLayers: [CardCanvasLayer] {
         layers.filter { !$0.isHidden }.reversed()
@@ -44,6 +49,8 @@ struct BuxCanvasElementsStrip: View {
                         }
                     }
                 }
+                .buxNativeGlassButtonRowContainer()
+                .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
             }
         }
     }
@@ -53,27 +60,12 @@ struct BuxCanvasElementsStrip: View {
             HStack(spacing: 4) {
                 Image(systemName: icon).font(.system(size: 10, weight: .semibold))
                 Text(title)
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 10, weight: isSelected ? .bold : .semibold))
                     .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
-            .foregroundStyle(isSelected ? Color.white : themeManager.labelPrimary(for: colorScheme))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(
-                isSelected
-                    ? themeManager.current.accentColor
-                    : themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.14 : 0.07),
-                in: Capsule()
-            )
-            .overlay {
-                if !isSelected {
-                    Capsule()
-                        .strokeBorder(themeManager.current.accentColor.opacity(0.12), lineWidth: 0.5)
-                }
-            }
-            .clipShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .buxNativeButtonStyle(.secondary)
     }
 
     private func icon(for layer: CardCanvasLayer) -> String {

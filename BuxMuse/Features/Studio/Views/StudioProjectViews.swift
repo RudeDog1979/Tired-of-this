@@ -110,10 +110,14 @@ struct StudioProjectsListView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .buxLabelSecondary()
             
-            Button("Add Project") {
+            BuxButton(
+                title: "Add Project",
+                systemImage: "plus.folder.fill",
+                role: .primary,
+                size: .regular
+            ) {
                 showCreateProject = true
             }
-            .buttonStyle(BuxPressFeedbackStyle())
         }
     }
     

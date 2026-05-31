@@ -17,9 +17,7 @@ struct NotificationInboxView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                (colorScheme == .dark
-                    ? Color(red: 13/255, green: 14/255, blue: 18/255)
-                    : Color(red: 242/255, green: 244/255, blue: 247/255))
+                themeManager.screenBackground(for: colorScheme)
                     .ignoresSafeArea()
 
                 Group {
@@ -58,12 +56,10 @@ struct NotificationInboxView: View {
             }
             .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.inline)
+            .buxThemedSheetContent()
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
-                    }
+                ToolbarItem(placement: .confirmationAction) {
+                    BuxToolbarDoneButton { dismiss() }
                 }
                 ToolbarItem(placement: .primaryAction) {
                     if !inbox.items.isEmpty {
@@ -76,7 +72,6 @@ struct NotificationInboxView: View {
                     }
                 }
             }
-            .buxPolishedNavigationBar()
         }
     }
 

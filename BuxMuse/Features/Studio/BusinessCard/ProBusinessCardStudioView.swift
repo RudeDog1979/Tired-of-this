@@ -107,6 +107,7 @@ struct ProBusinessCardStudioView: View {
                         openEditor(designID: design.id)
                     }
                 }
+                .buxNativeGlassButtonRowContainer(spacing: 10)
             }
         }
     }

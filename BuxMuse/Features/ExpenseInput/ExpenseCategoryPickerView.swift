@@ -11,6 +11,7 @@ struct ExpenseCategoryPickerView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var brain: BuxMuseBrain
+    @ObservedObject private var settings = SettingsStore.shared
 
     @Binding var selectedCategoryId: UUID?
     @Binding var selectedCategory: TransactionCategory
@@ -23,19 +24,22 @@ struct ExpenseCategoryPickerView: View {
     @State private var emphasisPulse = false
     @Namespace private var pillNamespace
 
+    private var accent: Color {
+        themeManager.contrastAccentColor(for: colorScheme)
+    }
+
+    private var usesNativeGlass: Bool {
+        settings.useGlassmorphism && BuxPlatform.supportsLiquidGlass
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Category")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(categories) { cat in
-                        categoryChip(cat)
-                    }
-                    newCategoryChip
-                }
-                .padding(.horizontal, 4)
+                categoryChipRow
+                    .padding(.horizontal, 4)
             }
             .buxHorizontalScrollEdgeFade(background: themeManager.cardFill(for: colorScheme))
         }
@@ -69,7 +73,59 @@ struct ExpenseCategoryPickerView: View {
         }
     }
 
-    private func categoryChip(_ cat: ExpenseCategoryRecord) -> some View {
+    @ViewBuilder
+    private var categoryChipRow: some View {
+        if usesNativeGlass, #available(iOS 26, *) {
+            HStack(spacing: 8) {
+                ForEach(categories) { cat in
+                    glassCategoryChip(cat)
+                }
+                glassNewCategoryChip
+            }
+            .buxNativeGlassButtonRowContainer(spacing: 8)
+            .buxNativeButtonRowChrome(accent: accent, role: .secondary)
+        } else {
+            HStack(spacing: 8) {
+                ForEach(categories) { cat in
+                    legacyCategoryChip(cat)
+                }
+                legacyNewCategoryChip
+            }
+        }
+    }
+
+    private func glassCategoryChip(_ cat: ExpenseCategoryRecord) -> some View {
+        let isSelected = selectedCategoryId == cat.id
+        return Button {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
+                select(cat)
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: cat.icon)
+                    .font(.system(size: 12, weight: .semibold))
+                Text(cat.name)
+                    .font(.system(size: 13, weight: isSelected ? .bold : .semibold))
+            }
+        }
+        .buxNativeButtonStyle(.secondary)
+    }
+
+    private var glassNewCategoryChip: some View {
+        Button {
+            showCreateCategory = true
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "plus")
+                    .font(.system(size: 12, weight: .bold))
+                Text("New")
+                    .font(.system(size: 13, weight: .semibold))
+            }
+        }
+        .buxNativeButtonStyle(.secondary)
+    }
+
+    private func legacyCategoryChip(_ cat: ExpenseCategoryRecord) -> some View {
         let isSelected = selectedCategoryId == cat.id
         return Button {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
@@ -101,7 +157,7 @@ struct ExpenseCategoryPickerView: View {
         .buttonStyle(MorphingPillButtonStyle())
     }
 
-    private var newCategoryChip: some View {
+    private var legacyNewCategoryChip: some View {
         Button {
             showCreateCategory = true
         } label: {

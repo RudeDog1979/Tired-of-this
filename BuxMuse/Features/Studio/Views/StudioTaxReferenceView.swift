@@ -286,11 +286,14 @@ struct StudioTaxReferenceView: View {
             }
             .buttonStyle(BuxPressFeedbackStyle())
 
-            Button("Clear preset (custom only)") {
+            BuxButton(
+                title: "Clear preset (custom only)",
+                systemImage: "xmark.circle",
+                role: .secondary,
+                size: .compact
+            ) {
                 selectedPresetCode = ""
             }
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(themeManager.current.accentColor)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)
@@ -310,6 +313,7 @@ struct StudioTaxReferenceView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .buxThemedSegmentedPicker()
 
             Text(taxIncomeType.summaryLabel)
                 .font(.system(size: 11, weight: .medium))

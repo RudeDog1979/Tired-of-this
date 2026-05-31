@@ -41,22 +41,35 @@ private final class BuxSegmentedTintAnchorView: UIView {
     }
 
     func applyAccent() {
+        if let segmented = findHostedSegmentedControl() {
+            Self.styleSegmentedControl(segmented, accent: accent)
+        }
+    }
+
+    private func findHostedSegmentedControl() -> UISegmentedControl? {
         var current: UIView? = self
         while let view = current {
             if let superview = view.superview {
                 for child in superview.subviews where child !== view {
-                    if let segmented = Self.findSegmentedControl(in: child) {
-                        segmented.selectedSegmentTintColor = accent
-                        return
-                    }
+                    if let segmented = Self.findSegmentedControl(in: child) { return segmented }
                 }
             }
-            if let segmented = Self.findSegmentedControl(in: view) {
-                segmented.selectedSegmentTintColor = accent
-                return
-            }
+            if let segmented = Self.findSegmentedControl(in: view) { return segmented }
             current = view.superview
         }
+        return nil
+    }
+
+    static func styleSegmentedControl(_ segmented: UISegmentedControl, accent: UIColor) {
+        segmented.selectedSegmentTintColor = accent
+        segmented.setTitleTextAttributes(
+            [.foregroundColor: UIColor.label],
+            for: .normal
+        )
+        segmented.setTitleTextAttributes(
+            [.foregroundColor: UIColor.white],
+            for: .selected
+        )
     }
 
     private static func findSegmentedControl(in view: UIView) -> UISegmentedControl? {
@@ -92,9 +105,11 @@ struct BuxSemanticTheme: Equatable {
     let chipMutedFill: Color
 
     static func resolve(themeManager: ThemeManager, colorScheme: ColorScheme) -> BuxSemanticTheme {
-        let scheme = themeManager.materialScheme(for: colorScheme)
+        let settings = SettingsStore.shared
+        let scheme = themeManager.materialScheme(for: colorScheme, branded: settings.brandThemesEnabled)
+        let accent = themeManager.contrastAccentColor(for: colorScheme)
         return BuxSemanticTheme(
-            accent: scheme.primary,
+            accent: accent,
             labelPrimary: scheme.onSurface,
             labelSecondary: scheme.onSurfaceVariant,
             labelTertiary: scheme.onSurfaceVariant.opacity(0.88),
@@ -137,11 +152,13 @@ extension EnvironmentValues {
 // MARK: - Root modifier (apply once at app root)
 
 struct BuxRootBrandThemeModifier: ViewModifier {
-    @Environment(\.themeManager) private var themeManager
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.colorScheme) private var colorScheme
     @ObservedObject private var settings = SettingsStore.shared
 
     func body(content: Content) -> some View {
+        // Observe theme id so semantic + material environments refresh on every pick.
+        let _ = themeManager.current.id
         let semantic = BuxSemanticTheme.resolve(themeManager: themeManager, colorScheme: colorScheme)
         let material = themeManager.materialScheme(for: colorScheme, branded: settings.brandThemesEnabled)
         content
@@ -150,6 +167,116 @@ struct BuxRootBrandThemeModifier: ViewModifier {
             .environment(\.buxSemanticTheme, semantic)
             .environment(\.buxMaterialScheme, material)
             .environment(\.buxBrandSurfaces, settings.brandThemesEnabled)
+            .animation(BuxMotion.themeCrossfade, value: themeManager.current.id)
+    }
+}
+
+// MARK: - Native Liquid Glass buttons (parent tint → see-through chrome)
+
+enum BuxNativeGlassGate {
+    static var isActive: Bool {
+        SettingsStore.shared.useGlassmorphism && BuxPlatform.supportsLiquidGlass
+    }
+}
+
+enum BuxNativeButtonRole {
+    case secondary
+    case primary
+}
+
+private struct BuxNativeButtonStyleModifier: ViewModifier {
+    let role: BuxNativeButtonRole
+    var controlSize: ControlSize = .small
+
+    func body(content: Content) -> some View {
+        if SettingsStore.shared.useGlassmorphism, BuxPlatform.supportsLiquidGlass, #available(iOS 26, *) {
+            switch role {
+            case .secondary:
+                content
+                    .buttonStyle(.glass)
+                    .controlSize(controlSize)
+            case .primary:
+                content
+                    .buttonStyle(.glassProminent)
+                    .controlSize(controlSize)
+            }
+        } else {
+            switch role {
+            case .secondary:
+                content
+                    .buttonStyle(.bordered)
+                    .controlSize(controlSize)
+            case .primary:
+                content
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(controlSize)
+            }
+        }
+    }
+}
+
+enum BuxNativeButtonRowRole {
+    /// Clear glass — accent on label/icon only.
+    case secondary
+    /// Tinted glassProminent — white label via parent tint.
+    case primary
+}
+
+private struct BuxNativeButtonRowChromeModifier: ViewModifier {
+    let accent: Color
+    let role: BuxNativeButtonRowRole
+
+    func body(content: Content) -> some View {
+        switch role {
+        case .secondary:
+            content.foregroundStyle(accent)
+        case .primary:
+            content.tint(accent)
+        }
+    }
+}
+
+extension View {
+    /// Native button chrome — pair with `buxNativeButtonRowChrome` on the parent HStack.
+    func buxNativeButtonStyle(
+        _ role: BuxNativeButtonRole = .secondary,
+        controlSize: ControlSize = .small
+    ) -> some View {
+        modifier(BuxNativeButtonStyleModifier(role: role, controlSize: controlSize))
+    }
+
+    /// Single-button tint — secondary: accent label; primary/destructive: white via tint.
+    @ViewBuilder
+    func buxActionButtonChrome(
+        role: BuxActionButtonRole,
+        accent: Color,
+        isEnabled: Bool = true
+    ) -> some View {
+        let tint = role.actionTint(defaultAccent: accent)
+        let applied = isEnabled ? tint : tint.opacity(0.45)
+        switch role {
+        case .primary, .destructive:
+            self.tint(applied)
+        case .secondary, .tinted:
+            self.foregroundStyle(applied)
+        }
+    }
+
+    /// Parent row tint — secondary: tinted labels; primary: white labels on prominent glass.
+    func buxNativeButtonRowChrome(accent: Color, role: BuxNativeButtonRowRole = .secondary) -> some View {
+        modifier(BuxNativeButtonRowChromeModifier(accent: accent, role: role))
+    }
+
+    /// Shared glass sampling for adjacent `.glass` buttons — prevents seam shadows between pills.
+    @ViewBuilder
+    func buxNativeGlassButtonRowContainer(spacing: CGFloat = 8) -> some View {
+        if SettingsStore.shared.useGlassmorphism, BuxPlatform.supportsLiquidGlass, #available(iOS 26, *) {
+            GlassEffectContainer(spacing: spacing) {
+                self
+            }
+        } else {
+            self
+        }
     }
 }
 

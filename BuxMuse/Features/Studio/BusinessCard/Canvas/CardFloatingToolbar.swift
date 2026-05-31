@@ -8,6 +8,7 @@ import SwiftUI
 struct CardFloatingToolbar: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
 
     let layer: CardCanvasLayer?
     var backgroundSelected: Bool
@@ -15,54 +16,86 @@ struct CardFloatingToolbar: View {
     var actions: BuxCanvasToolbarActionSet
     var onChange: () -> Void
 
+    private var controlTint: Color {
+        themeManager.contrastAccentColor(for: colorScheme)
+    }
+
+    private func glassMenu<Content: View, Label: View>(
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder label: () -> Label
+    ) -> some View {
+        Menu(content: content, label: label)
+            .menuStyle(.button)
+            .buxNativeButtonStyle(.secondary)
+    }
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                if backgroundSelected {
-                    backgroundTools
-                } else if let layer {
-                    layerTools(layer)
-                    toolButton("Duplicate", icon: "plus.square.on.square") {
-                        if let newID = document.duplicateLayer(id: layer.id) {
-                            document.markCustomized()
-                            actions.onLayerDuplicated?(newID)
-                            onChange()
-                        }
-                    }
-                    if !layer.isLocked {
-                        toolButton("Delete", icon: "trash", destructive: true) {
-                            document.removeLayer(id: layer.id)
-                            document.markCustomized()
-                            actions.onLayerDeleted?()
-                            onChange()
-                        }
-                    }
-                } else {
-                    toolButton("Add text", icon: "textformat") { addText() }
-                    shapeInsertMenu
-                    toolButton("Background", icon: "photo.fill.on.rectangle.fill") {
-                        actions.onOpenBackgroundEditor?()
+        ViewThatFits(in: .horizontal) {
+            centeredToolbarRow
+            scrollableToolbarRow
+        }
+        .frame(height: 44)
+        .padding(.horizontal, 12)
+    }
+
+    private var toolbarContent: some View {
+        Group {
+            if backgroundSelected {
+                backgroundTools
+            } else if let layer {
+                layerTools(layer)
+                toolButton("Duplicate", icon: "plus.square.on.square") {
+                    if let newID = document.duplicateLayer(id: layer.id) {
+                        document.markCustomized()
+                        actions.onLayerDuplicated?(newID)
+                        onChange()
                     }
                 }
+                if !layer.isLocked {
+                    toolButton("Delete", icon: "trash", destructive: true) {
+                        document.removeLayer(id: layer.id)
+                        document.markCustomized()
+                        actions.onLayerDeleted?()
+                        onChange()
+                    }
+                }
+            } else {
+                toolButton("Add text", icon: "textformat") { addText() }
+                shapeInsertMenu
+                toolButton("Background", icon: "photo.fill.on.rectangle.fill") {
+                    actions.onOpenBackgroundEditor?()
+                }
             }
-            .padding(.horizontal, 12)
         }
-        .frame(height: 48)
-        .background(
-            themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.14 : 0.07),
-            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(themeManager.current.accentColor.opacity(0.12), lineWidth: 0.5)
+    }
+
+    private var glassToolbarRow: some View {
+        HStack(spacing: 8) {
+            toolbarContent
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 12)
+        .buxNativeGlassButtonRowContainer(spacing: 8)
+        .foregroundStyle(controlTint)
+    }
+
+    private var centeredToolbarRow: some View {
+        HStack(spacing: 0) {
+            Spacer(minLength: 0)
+            glassToolbarRow
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var scrollableToolbarRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            glassToolbarRow
+                .padding(.horizontal, 2)
+        }
+        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
     }
 
     private var backgroundTools: some View {
         Group {
-            Menu {
+            glassMenu {
                 ForEach(ProBusinessCardBackgroundStyle.allCases) { style in
                     Button(style.title) {
                         document.background.style = style
@@ -114,7 +147,7 @@ struct CardFloatingToolbar: View {
             })
 
         case .image(let payload):
-            Menu {
+            glassMenu {
                 Button("Bux Photo Lab") { actions.onOpenPhotoLab?(layer.id) }
                 Button("Bux Focal Crop") { actions.onOpenFocalEditor?(.imageLayer(layer.id)) }
                 Divider()
@@ -140,7 +173,7 @@ struct CardFloatingToolbar: View {
             opacityMenu(layer: layer)
 
         case .shape(let payload):
-            Menu {
+            glassMenu {
                 Menu("Geometric") {
                     ForEach(CardShapeType.geometricShapes) { shape in
                         Button(shape.title) {
@@ -191,7 +224,7 @@ struct CardFloatingToolbar: View {
     }
 
     private func rotateMenu(_ layer: CardCanvasLayer) -> some View {
-        Menu {
+        glassMenu {
             ForEach([-90, -45, -15, 15, 45, 90], id: \.self) { delta in
                 Button("\(delta > 0 ? "+" : "")\(delta)°") { nudgeRotation(layerID: layer.id, by: Double(delta)) }
             }
@@ -201,7 +234,7 @@ struct CardFloatingToolbar: View {
     }
 
     private func layerOrderMenu(_ layer: CardCanvasLayer) -> some View {
-        Menu {
+        glassMenu {
             Button("Bring to front") { document.bringToFront(id: layer.id); document.markCustomized(); onChange() }
             Button("Forward") { document.bringForward(id: layer.id); document.markCustomized(); onChange() }
             Button("Backward") { document.sendBackward(id: layer.id); document.markCustomized(); onChange() }
@@ -226,7 +259,7 @@ struct CardFloatingToolbar: View {
     }
 
     private func fontMenu(payload: CardTextPayload, layerID: UUID) -> some View {
-        Menu {
+        glassMenu {
             ForEach(ProBusinessCardFontID.allCases) { font in
                 Button(font.title) {
                     var p = payload
@@ -238,14 +271,14 @@ struct CardFloatingToolbar: View {
     }
 
     private func alignMenu(payload: CardTextPayload, layerID: UUID) -> some View {
-        Menu {
+        glassMenu {
             Button("Left") { updateTextAlign(layerID: layerID, payload: payload, align: "leading") }
             Button("Center") { updateTextAlign(layerID: layerID, payload: payload, align: "center") }
         } label: { toolLabel("Align", icon: "text.alignleft") }
     }
 
     private func effectMenu(payload: CardTextPayload, layerID: UUID) -> some View {
-        Menu {
+        glassMenu {
             ForEach(CardTextEffectPreset.allCases) { preset in
                 Button(preset.title) {
                     var p = payload
@@ -257,7 +290,7 @@ struct CardFloatingToolbar: View {
     }
 
     private func opacityMenu(layer: CardCanvasLayer) -> some View {
-        Menu {
+        glassMenu {
             ForEach([1.0, 0.85, 0.7, 0.5, 0.35, 0.2], id: \.self) { value in
                 Button("\(Int(value * 100))%") {
                     guard var l = document.layer(id: layer.id) else { return }
@@ -271,7 +304,7 @@ struct CardFloatingToolbar: View {
     }
 
     private func colorMenu(current: String, onPick: @escaping (String) -> Void) -> some View {
-        Menu {
+        glassMenu {
             ForEach(BuxCanvasColorPresets.all, id: \.self) { color in
                 Button(color) { onPick(color) }
             }
@@ -280,44 +313,36 @@ struct CardFloatingToolbar: View {
 
     private func sizeButtons(layerID: UUID, increase: @escaping () -> Void, decrease: @escaping () -> Void) -> some View {
         HStack(spacing: 4) {
-            Button(action: decrease) { Image(systemName: "minus") }
-            Button(action: increase) { Image(systemName: "plus") }
+            Button(action: decrease) {
+                Image(systemName: "minus")
+                    .font(.system(size: 12, weight: .bold))
+            }
+            .buxNativeButtonStyle(.secondary)
+            Button(action: increase) {
+                Image(systemName: "plus")
+                    .font(.system(size: 12, weight: .bold))
+            }
+            .buxNativeButtonStyle(.secondary)
         }
-        .font(.system(size: 12, weight: .bold))
-        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(
-            themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.14 : 0.07),
-            in: Capsule()
-        )
-        .overlay {
-            Capsule()
-                .strokeBorder(themeManager.current.accentColor.opacity(0.12), lineWidth: 0.5)
-        }
-        .clipShape(Capsule())
+        .foregroundStyle(controlTint)
     }
 
     private func toolButton(_ title: String, icon: String, destructive: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) { toolLabel(title, icon: icon, destructive: destructive) }
-            .buttonStyle(.plain)
+            .buxNativeButtonStyle(.secondary)
     }
 
     private func toolLabel(_ title: String, icon: String, destructive: Bool = false) -> some View {
-        Label(title, systemImage: icon)
-            .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(destructive ? Color.red : themeManager.labelPrimary(for: colorScheme))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .background(
-                themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.14 : 0.07),
-                in: Capsule()
-            )
-            .overlay {
-                Capsule()
-                    .strokeBorder(themeManager.current.accentColor.opacity(0.12), lineWidth: 0.5)
-            }
-            .clipShape(Capsule())
+        Label {
+            Text(title)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        } icon: {
+            Image(systemName: icon)
+        }
+        .font(.system(size: 11, weight: .bold))
+        .labelStyle(.titleAndIcon)
+        .foregroundStyle(destructive ? Color.red : controlTint)
     }
 
     private func updatePayload(_ id: UUID, _ payload: CardLayerPayload) {
@@ -355,7 +380,7 @@ struct CardFloatingToolbar: View {
     }
 
     private var shapeInsertMenu: some View {
-        Menu {
+        glassMenu {
             ForEach(CardShapeType.geometricShapes + CardShapeType.basicShapes) { shape in
                 Button(shape.title) { addShape(type: shape) }
             }

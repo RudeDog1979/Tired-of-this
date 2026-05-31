@@ -866,23 +866,17 @@ struct DashboardView: View {
     @ViewBuilder
     private var heroNotificationBell: some View {
         let diameter = heroBellSize
+        let hasUnread = brain.notificationInboxDisplay.unreadCount > 0
 
         Button(action: { activeSheet = .notificationInbox }) {
-            Image(systemName: "bell")
+            Image(systemName: hasUnread ? "bell.fill" : "bell")
                 .font(.system(size: heroBellIconSize, weight: .semibold))
                 .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                 .frame(width: diameter, height: diameter)
         }
-        .overlay(alignment: .topTrailing) {
-            if brain.notificationInboxDisplay.unreadCount > 0 {
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: 8, height: 8)
-                    .offset(x: 4, y: -4)
-            }
-        }
         .buxHeroGlassCircleButtonStyle(diameter: diameter)
-        .accessibilityLabel("Notifications")
+        .frame(width: diameter, height: diameter)
+        .accessibilityLabel(hasUnread ? "Notifications, unread" : "Notifications")
     }
 
     private func closeFabAnd(_ action: @escaping () -> Void) {

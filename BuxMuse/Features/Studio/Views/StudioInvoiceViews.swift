@@ -179,10 +179,14 @@ struct StudioInvoicesListView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .buxLabelSecondary()
             
-            Button("Create Invoice") {
+            BuxButton(
+                title: "Create Invoice",
+                systemImage: "plus.rectangle.fill.on.folder.fill",
+                role: .primary,
+                size: .regular
+            ) {
                 showEditor = true
             }
-            .buttonStyle(BuxPressFeedbackStyle())
         }
     }
     

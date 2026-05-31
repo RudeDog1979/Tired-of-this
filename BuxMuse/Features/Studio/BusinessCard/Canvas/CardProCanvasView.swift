@@ -36,6 +36,11 @@ struct CardProCanvasView: View {
     @State private var lastWorkspacePan: CGSize = .zero
     @State private var lastWorkspaceScale: CGFloat = 1
     @State private var showShapePicker = false
+    @ObservedObject private var settings = SettingsStore.shared
+
+    private var controlTint: Color {
+        themeManager.contrastAccentColor(for: colorScheme)
+    }
 
     private var document: CardCanvasDocument {
         design.canvasDocument ?? CardCanvasMigrator.migrate(from: design)
@@ -248,29 +253,28 @@ struct CardProCanvasView: View {
                 railButton("Add text", icon: "text.badge.plus") { addTextLayer() }
                 railButton("Shapes", icon: "triangle.fill") { showShapePicker = true }
             }
-            .tint(themeManager.contrastAccentColor(for: colorScheme))
+            .buxNativeGlassButtonRowContainer()
+            .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
 
-            HStack(spacing: 10) {
-                railButton("Reset zoom", icon: "arrow.counterclockwise") {
-                    resetWorkspaceZoom()
-                }
-                Button(action: { commitAndDismiss() }) {
-                    Label("Save to Studio", systemImage: "square.and.arrow.down")
-                        .font(.system(size: 12, weight: .bold))
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
+            HStack(spacing: 8) {
+                Spacer(minLength: 0)
+                Button("Reset zoom") { resetWorkspaceZoom() }
+                    .font(.system(size: 13, weight: .semibold))
+                    .buxNativeButtonStyle(.secondary)
+                    .foregroundStyle(controlTint)
+                Button("Save to Studio") { commitAndDismiss() }
+                    .font(.system(size: 13, weight: .semibold))
+                    .buxNativeButtonStyle(.primary)
+                    .tint(controlTint)
             }
-            .tint(themeManager.contrastAccentColor(for: colorScheme))
 
-            HStack(spacing: 0) {
+            HStack(spacing: 16) {
                 Toggle("Safe zone", isOn: $showSafeZone)
                     .frame(maxWidth: .infinity, alignment: .center)
                 Toggle("Snap", isOn: $showSnapGuides)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
-            .tint(themeManager.contrastAccentColor(for: colorScheme))
+            .tint(controlTint)
             .font(.system(size: 12, weight: .medium))
             .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
@@ -284,20 +288,33 @@ struct CardProCanvasView: View {
 
     private var topBar: some View {
         BuxCenteredTopBar(title: "Bux Canvas") {
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
                 Button("Cancel") { dismiss() }
-                    .font(.system(size: 15, weight: .medium))
-                Button { undo() } label: { Image(systemName: "arrow.uturn.backward") }
-                    .disabled(!undoManager.canUndo)
-                Button { redo() } label: { Image(systemName: "arrow.uturn.forward") }
-                    .disabled(!undoManager.canRedo)
+                    .font(.system(size: 13, weight: .semibold))
+                    .buxNativeButtonStyle(.secondary)
+                Button { undo() } label: {
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .buxNativeButtonStyle(.secondary)
+                .disabled(!undoManager.canUndo)
+                Button { redo() } label: {
+                    Image(systemName: "arrow.uturn.forward")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .buxNativeButtonStyle(.secondary)
+                .disabled(!undoManager.canRedo)
             }
+            .buxNativeGlassButtonRowContainer()
+            .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
         } trailing: {
-            Button("Save") { commitAndDismiss() }
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(themeManager.current.accentColor)
+            HStack(spacing: 8) {
+                Button("Save") { commitAndDismiss() }
+                    .font(.system(size: 13, weight: .semibold))
+                    .buxNativeButtonStyle(.primary)
+                    .tint(controlTint)
+            }
         }
-        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
         .background(themeManager.screenBackground(for: colorScheme))
     }
 
@@ -466,8 +483,7 @@ struct CardProCanvasView: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.bordered)
-        .controlSize(.small)
+        .buxNativeButtonStyle(.secondary)
     }
 
     private func inlineTextOverlay(layerID: UUID) -> some View {

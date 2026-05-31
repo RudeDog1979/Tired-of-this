@@ -623,16 +623,18 @@ struct InvoiceDesignerHubView: View {
                 Button(action: { withAnimation(.spring(response: 0.25)) { onSelect(option) } }) {
                     Text(option[keyPath: label])
                         .font(.system(size: 11, weight: isSelected ? .bold : .medium))
-                        .foregroundColor(isSelected ? .white : Color(UIColor.label))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 7)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                         .frame(maxWidth: .infinity)
-                        .background(isSelected ? themeManager.current.accentColor : themeManager.inputFieldFill(for: colorScheme))
-                        .clipShape(Capsule())
                 }
-                .buttonStyle(BuxChipButtonStyle())
+                .buxNativeButtonStyle(.secondary)
             }
         }
+        .buxNativeGlassButtonRowContainer(spacing: 6)
+        .buxNativeButtonRowChrome(
+            accent: themeManager.contrastAccentColor(for: colorScheme),
+            role: .secondary
+        )
     }
 
     private func taxModeRow(_ mode: InvoiceTaxMode) -> some View {
@@ -771,6 +773,7 @@ struct InvoiceDesignerHubView: View {
                 action: saveInvoice
             )
         }
+        .buxNativeGlassButtonRowContainer(spacing: 12)
     }
 
     private var actionBar: some View {
@@ -793,6 +796,7 @@ struct InvoiceDesignerHubView: View {
                 action: saveInvoice
             )
         }
+        .buxNativeGlassButtonRowContainer(spacing: 12)
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 28)

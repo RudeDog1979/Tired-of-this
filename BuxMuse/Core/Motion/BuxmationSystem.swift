@@ -473,6 +473,31 @@ enum BuxActionButtonSize {
         case .large: return 20
         }
     }
+
+    var swiftUIControlSize: ControlSize {
+        switch self {
+        case .compact: return .small
+        case .regular: return .regular
+        case .large: return .large
+        }
+    }
+}
+
+extension BuxActionButtonRole {
+    var nativeButtonRole: BuxNativeButtonRole {
+        switch self {
+        case .primary, .destructive: return .primary
+        case .secondary, .tinted: return .secondary
+        }
+    }
+
+    func actionTint(defaultAccent: Color) -> Color {
+        switch self {
+        case .primary, .secondary: return defaultAccent
+        case .tinted(let color): return color
+        case .destructive: return BuxTokens.destructive
+        }
+    }
 }
 
 private struct BuxActionPressStyle: ButtonStyle {
@@ -497,6 +522,7 @@ private struct BuxActionPressStyle: ButtonStyle {
 struct BuxActionButton: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var settings = SettingsStore.shared
 
     let title: String
     let systemImage: String
@@ -508,28 +534,52 @@ struct BuxActionButton: View {
     let action: () -> Void
 
     var body: some View {
+        Group {
+            if settings.useGlassmorphism, BuxPlatform.supportsLiquidGlass, #available(iOS 26, *) {
+                nativeGlassBody
+            } else {
+                legacyCapsuleBody
+            }
+        }
+    }
+
+    private var actionLabel: some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .font(.system(size: size.iconSize, weight: .semibold))
+            Text(title)
+                .font(.system(size: size.fontSize, weight: .semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+        }
+    }
+
+    private var nativeGlassBody: some View {
         Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: systemImage)
-                    .font(.system(size: size.iconSize, weight: .semibold))
-                Text(title)
-                    .font(.system(size: size.fontSize, weight: .semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-            }
-            .padding(.horizontal, size.horizontalPadding)
-            .frame(maxWidth: expands ? .infinity : nil)
-            .frame(height: size.height)
-            .foregroundStyle(foregroundColor)
-            .background(backgroundColor)
-            .clipShape(Capsule())
-            .overlay {
-                if showsBorder {
-                    Capsule()
-                        .strokeBorder(borderColor, lineWidth: 1)
+            actionLabel
+                .frame(maxWidth: expands ? .infinity : nil)
+        }
+        .buxNativeButtonStyle(role.nativeButtonRole, controlSize: size.swiftUIControlSize)
+        .buxActionButtonChrome(role: role, accent: accent, isEnabled: isEnabled)
+        .disabled(!isEnabled)
+    }
+
+    private var legacyCapsuleBody: some View {
+        Button(action: action) {
+            actionLabel
+                .padding(.horizontal, size.horizontalPadding)
+                .frame(maxWidth: expands ? .infinity : nil)
+                .frame(height: size.height)
+                .foregroundStyle(foregroundColor)
+                .background(backgroundColor)
+                .clipShape(Capsule())
+                .overlay {
+                    if showsBorder {
+                        Capsule()
+                            .strokeBorder(borderColor, lineWidth: 1)
+                    }
                 }
-            }
-            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
+                .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
         }
         .buttonStyle(BuxActionPressStyle(isEnabled: isEnabled))
         .disabled(!isEnabled)
@@ -638,27 +688,43 @@ private extension BuxActionButtonRole {
 
 extension View {
     /// Primary filled pill — solid accent, white label.
+    @ViewBuilder
     func buxPrimaryPillStyle(accent: Color, controlSize: ControlSize = .regular) -> some View {
-        self
+        let sized = self
             .font(.system(size: controlSize == .large ? 15 : 14, weight: .semibold))
             .foregroundStyle(.white)
-            .padding(.horizontal, controlSize == .large ? 20 : 16)
-            .frame(height: controlSize == .large ? BuxLayout.pillHeight : 44)
-            .background(accent)
-            .clipShape(Capsule())
-            .buttonStyle(BuxActionPressStyle())
+        if SettingsStore.shared.useGlassmorphism, BuxPlatform.supportsLiquidGlass, #available(iOS 26, *) {
+            sized
+                .buxNativeButtonStyle(.primary, controlSize: controlSize)
+                .tint(accent)
+        } else {
+            sized
+                .padding(.horizontal, controlSize == .large ? 20 : 16)
+                .frame(height: controlSize == .large ? BuxLayout.pillHeight : 44)
+                .background(accent)
+                .clipShape(Capsule())
+                .buttonStyle(BuxActionPressStyle())
+        }
     }
 
     /// Secondary pill — neutral chrome, primary label (legible on all themes).
+    @ViewBuilder
     func buxSecondaryPillStyle(accent: Color, controlSize: ControlSize = .regular) -> some View {
-        self
+        let sized = self
             .font(.system(size: controlSize == .small ? 13 : controlSize == .large ? 15 : 14, weight: .semibold))
-            .foregroundStyle(.primary)
-            .padding(.horizontal, controlSize == .small ? 12 : controlSize == .large ? 20 : 16)
-            .frame(height: controlSize == .small ? 34 : controlSize == .large ? BuxLayout.pillHeight : 44)
-            .background(Color.primary.opacity(0.06))
-            .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 1))
-            .buttonStyle(BuxActionPressStyle())
+        if SettingsStore.shared.useGlassmorphism, BuxPlatform.supportsLiquidGlass, #available(iOS 26, *) {
+            sized
+                .buxNativeButtonStyle(.secondary, controlSize: controlSize)
+                .foregroundStyle(accent)
+        } else {
+            sized
+                .foregroundStyle(.primary)
+                .padding(.horizontal, controlSize == .small ? 12 : controlSize == .large ? 20 : 16)
+                .frame(height: controlSize == .small ? 34 : controlSize == .large ? BuxLayout.pillHeight : 44)
+                .background(Color.primary.opacity(0.06))
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 1))
+                .buttonStyle(BuxActionPressStyle())
+        }
     }
 }

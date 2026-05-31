@@ -61,6 +61,11 @@ enum BuxMotion {
         reducedMotion ? 0.18 : 0.32
     }
 
+    /// Brand theme crossfade — smooth, ~1s ease.
+    static var themeCrossfade: Animation {
+        reducedMotion ? .easeInOut(duration: 0.2) : .easeInOut(duration: 1.0)
+    }
+
     static func categoryCardDelay(index: Int) -> Animation {
         slide.delay(reducedMotion ? 0 : Double(index) * 0.055)
     }

@@ -112,10 +112,14 @@ struct StudioReceiptsListView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .buxLabelSecondary()
             
-            Button("Scan Receipt") {
+            BuxButton(
+                title: "Scan Receipt",
+                systemImage: "doc.text.viewfinder",
+                role: .primary,
+                size: .regular
+            ) {
                 showScanner = true
             }
-            .buttonStyle(BuxPressFeedbackStyle())
         }
     }
     
@@ -248,42 +252,30 @@ struct StudioReceiptScannerView: View {
                                     .tint(themeManager.current.accentColor)
                             } else {
                                 VStack(spacing: 12) {
-                                    // 1. Native Document Camera Scanner
-                                    Button(action: {
+                                    BuxButton(
+                                        title: VNDocumentCameraViewController.isSupported
+                                            ? "Open Document Camera Scanner"
+                                            : "Simulate Apple Neural Scan (Simulator)",
+                                        systemImage: "camera.fill",
+                                        role: .primary,
+                                        expands: true,
+                                        size: .regular
+                                    ) {
                                         if VNDocumentCameraViewController.isSupported {
                                             showCameraSheet = true
                                         } else {
-                                            // Fallback simulator scan
                                             simulateOcrScan()
                                         }
-                                    }) {
-                                        HStack {
-                                            Image(systemName: "camera.fill")
-                                            Text(VNDocumentCameraViewController.isSupported ? "Open Document Camera Scanner" : "Simulate Apple Neural Scan (Simulator)")
-                                                .fontWeight(.bold)
-                                        }
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(themeManager.current.accentColor)
-                                        .clipShape(RoundedRectangle(cornerRadius: 16))
                                     }
-                                    .buttonStyle(BuxPressFeedbackStyle())
                                     .padding(.horizontal)
-                                    
-                                    // 2. Photos library selection
+
                                     PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                                        HStack {
-                                            Image(systemName: "photo.on.rectangle.angled")
-                                            Text("Import from Photo Library")
-                                                .fontWeight(.bold)
-                                        }
-                                        .foregroundColor(themeManager.current.accentColor)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(themeManager.current.accentColor.opacity(0.12))
-                                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                                        Label("Import from Photo Library", systemImage: "photo.on.rectangle.angled")
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .frame(maxWidth: .infinity)
                                     }
+                                    .buxNativeButtonStyle(.secondary, controlSize: .regular)
+                                    .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                                     .padding(.horizontal)
                                 }
                             }

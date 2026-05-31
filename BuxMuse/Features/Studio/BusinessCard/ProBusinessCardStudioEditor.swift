@@ -14,6 +14,7 @@ struct ProBusinessCardEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var studioStore: StudioStore
+    @ObservedObject private var settings = SettingsStore.shared
 
     let designID: UUID
 
@@ -87,6 +88,10 @@ struct ProBusinessCardEditorView: View {
         themeManager.contrastAccentColor(for: colorScheme)
     }
 
+    private var brandThemesEnabled: Bool {
+        settings.brandThemesEnabled
+    }
+
     var body: some View {
         GeometryReader { geo in
             let landscape = geo.size.width > geo.size.height
@@ -128,23 +133,18 @@ struct ProBusinessCardEditorView: View {
         .toolbar {
             if !isLandscapeEditing {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        attemptLeave()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                    .accessibilityLabel("Back")
+                    BuxToolbarBackButton { attemptLeave() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save Draft") {
                         saveDraftToLibrary()
                     }
-                    .fontWeight(.semibold)
+                    .buxToolbarTextActionStyle(accent: controlTint)
                     .disabled(!canSaveDraft)
                 }
             }
         }
+        .tint(controlTint)
         .alert("Discard changes?", isPresented: $showDiscardAlert) {
             Button("Keep editing", role: .cancel) { }
             Button("Discard", role: .destructive) {
@@ -246,63 +246,78 @@ struct ProBusinessCardEditorView: View {
 
     private var landscapeEditorTopBar: some View {
         BuxCenteredTopBar(title: draft?.title ?? "Card Studio", titleFont: .system(size: 17, weight: .semibold)) {
-            Button {
-                attemptLeave()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 17, weight: .semibold))
-            }
-            .accessibilityLabel("Back")
+            BuxToolbarBackButton { attemptLeave() }
         } trailing: {
             Button("Save Draft") {
                 saveDraftToLibrary()
             }
-            .font(.system(size: 15, weight: .semibold))
-            .foregroundStyle(canSaveDraft ? themeManager.current.accentColor : .secondary)
+            .buxToolbarTextActionStyle(accent: controlTint)
             .disabled(!canSaveDraft)
         }
-        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-        .background(Color(uiColor: .secondarySystemGroupedBackground).opacity(0.95))
+        .background(themeManager.screenBackground(for: colorScheme).opacity(0.95))
     }
 
     private var cardSidePicker: some View {
-        cardSideSegmentedControl
+        cardSideButtonRow
             .padding(.horizontal, BuxTokens.marginRegular)
     }
 
-    private var cardSideSegmentedControl: some View {
-        HStack {
-            Picker("Side", selection: $editingSide) {
-                ForEach(ProBusinessCardSide.allCases) { side in
-                    Text(side.title).tag(side)
+    private var cardSideButtonRow: some View {
+        HStack(spacing: 8) {
+            ForEach(ProBusinessCardSide.allCases) { side in
+                glassChoiceButton(title: side.title, isSelected: editingSide == side) {
+                    editingSide = side
                 }
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
         }
-        .tint(controlTint)
-        .buxSegmentedControlAccent(controlTint)
+        .buxNativeGlassButtonRowContainer()
+        .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
     }
 
     private func landscapeCardControls(width: CGFloat) -> some View {
-        cardSideSegmentedControl
+        cardSideButtonRow
             .frame(maxWidth: min(width - BuxTokens.marginRegular * 2, 320))
             .padding(.horizontal, BuxTokens.marginRegular)
     }
 
-    private var orientationPicker: some View {
-        Picker("Orientation", selection: aspectBinding) {
-            Text("Landscape").tag(ProBusinessCardAspect.standardUS)
-            Text("Portrait").tag(ProBusinessCardAspect.portraitVertical)
-            Text("Square").tag(ProBusinessCardAspect.squareSocial)
+    private func cardOrientationBar(_ design: ProBusinessCardDesign) -> some View {
+        HStack(spacing: 8) {
+            glassChoiceButton(title: "Landscape", isSelected: design.aspect == .standardUS) {
+                mutateDraft { $0.applyAspectChange(.standardUS) }
+                syncDraftChanges()
+            }
+            glassChoiceButton(title: "Portrait", isSelected: design.aspect == .portraitVertical) {
+                mutateDraft { $0.applyAspectChange(.portraitVertical) }
+                syncDraftChanges()
+            }
+            glassChoiceButton(title: "Square", isSelected: design.aspect == .squareSocial) {
+                mutateDraft { $0.applyAspectChange(.squareSocial) }
+                syncDraftChanges()
+            }
         }
-        .buxThemedSegmentedPicker()
+        .buxNativeGlassButtonRowContainer()
+        .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
+        .padding(.horizontal, BuxTokens.marginRegular)
+    }
+
+    private func glassChoiceButton(
+        title: String,
+        isSelected: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 11, weight: isSelected ? .bold : .semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(maxWidth: .infinity)
+        }
+        .buxNativeButtonStyle(.secondary)
     }
 
     private func landscapeOrientationBar(_ design: ProBusinessCardDesign, width: CGFloat) -> some View {
-        orientationPicker
+        cardOrientationBar(design)
             .frame(maxWidth: min(width - BuxTokens.marginRegular * 2, 320))
-            .padding(.horizontal, BuxTokens.marginRegular)
     }
 
     private func landscapePreviewColumn(_ design: ProBusinessCardDesign, geo: GeometryProxy) -> some View {
@@ -311,7 +326,6 @@ struct ProBusinessCardEditorView: View {
         return VStack(spacing: 8) {
             landscapeCardControls(width: columnWidth)
             landscapeOrientationBar(design, width: columnWidth)
-                .tint(controlTint)
 
             BusinessCardPreviewVisor {
                 GeometryReader { visorGeo in
@@ -353,7 +367,6 @@ struct ProBusinessCardEditorView: View {
         VStack(spacing: 10) {
             cardSidePicker
             cardOrientationBar(design)
-                .tint(controlTint)
 
             BusinessCardPreviewVisor {
                 GeometryReader { visorGeo in
@@ -391,7 +404,6 @@ struct ProBusinessCardEditorView: View {
         VStack(spacing: 8) {
             cardSidePicker
             cardOrientationBar(design)
-                .tint(controlTint)
 
             BusinessCardPreviewVisor {
                 GeometryReader { visorGeo in
@@ -447,23 +459,25 @@ struct ProBusinessCardEditorView: View {
     }
 
     private func splitPreviewActions(_ design: ProBusinessCardDesign) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             previewActionButton(title: "See the look", icon: "rotate.3d.fill") { show3DLook = true }
             previewActionButton(title: "Bux Canvas", icon: "square.3.layers.3d") { openBuxCanvas() }
             photoEditMenu(design)
         }
-        .tint(controlTint)
+        .buxNativeGlassButtonRowContainer(spacing: 6)
+        .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
         .padding(.horizontal, BuxTokens.marginRegular)
     }
 
     private func compactPreviewActions(_ design: ProBusinessCardDesign) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             previewActionButton(title: "See the look", icon: "rotate.3d.fill") { show3DLook = true }
             previewActionButton(title: "Fullscreen", icon: "arrow.up.left.and.arrow.down.right") { showImmersivePreview = true }
             previewActionButton(title: "Bux Canvas", icon: "square.3.layers.3d") { openBuxCanvas() }
             photoEditMenu(design)
         }
-        .tint(controlTint)
+        .buxNativeGlassButtonRowContainer(spacing: 6)
+        .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
         .padding(.horizontal, BuxTokens.marginRegular)
     }
 
@@ -498,16 +512,27 @@ struct ProBusinessCardEditorView: View {
     }
 
     private func previewActionButtonLabel(title: String, icon: String) -> some View {
-        Label(title, systemImage: icon)
-            .font(.system(size: 11, weight: .bold))
-            .frame(maxWidth: .infinity)
+        Label {
+            Text(title)
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+        } icon: {
+            Image(systemName: icon)
+        }
+        .font(.system(size: 11, weight: .bold))
+        .frame(maxWidth: .infinity)
     }
 
-    private func previewActionButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func previewActionButton(
+        title: String,
+        icon: String,
+        role: BuxNativeButtonRole = .secondary,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
             previewActionButtonLabel(title: title, icon: icon)
         }
-        .businessCardPreviewActionButtonStyle()
+        .businessCardPreviewActionButtonStyle(role: role)
     }
 
     private func interactivePreview(_ design: ProBusinessCardDesign, maxWidth: CGFloat, maxHeight: CGFloat) -> some View {
@@ -548,11 +573,6 @@ struct ProBusinessCardEditorView: View {
                 onLogoPlaceholderTap: { pickTarget = .logo }
             )
         )
-    }
-
-    private func cardOrientationBar(_ design: ProBusinessCardDesign) -> some View {
-        orientationPicker
-            .padding(.horizontal, BuxTokens.marginRegular)
     }
 
     // MARK: Inspector
@@ -737,17 +757,54 @@ struct ProBusinessCardEditorView: View {
                         .foregroundStyle(.secondary)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Picker("Logo size", selection: logoScaleBinding) {
-                        Text("S").tag(ProBusinessCardLogoScale.small)
-                        Text("M").tag(ProBusinessCardLogoScale.medium)
-                        Text("L").tag(ProBusinessCardLogoScale.large)
-                        Text("Hero").tag(ProBusinessCardLogoScale.hero)
-                    }
-                    .buxThemedSegmentedPicker()
-                    .buxFormFieldPadding()
+                    logoScaleGlassBar(design)
+                        .buxFormFieldPadding()
                 }
                 .tint(controlTint)
             }
+        }
+    }
+
+    private func logoScaleGlassBar(_ design: ProBusinessCardDesign) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Logo size")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+            HStack(spacing: 8) {
+                ForEach(ProBusinessCardLogoScale.allCases) { scale in
+                    logoScaleGlassButton(
+                        title: logoScaleShortTitle(scale),
+                        scale: scale,
+                        isSelected: design.style.logoScale == scale
+                    )
+                }
+            }
+            .buxNativeGlassButtonRowContainer()
+            .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
+        }
+    }
+
+    private func logoScaleGlassButton(
+        title: String,
+        scale: ProBusinessCardLogoScale,
+        isSelected: Bool
+    ) -> some View {
+        Button {
+            logoScaleBinding.wrappedValue = scale
+        } label: {
+            Text(title)
+                .font(.system(size: 11, weight: isSelected ? .bold : .semibold))
+                .frame(maxWidth: .infinity)
+        }
+        .buxNativeButtonStyle(.secondary)
+    }
+
+    private func logoScaleShortTitle(_ scale: ProBusinessCardLogoScale) -> String {
+        switch scale {
+        case .small: return "S"
+        case .medium: return "M"
+        case .large: return "L"
+        case .hero: return "Hero"
         }
     }
 

@@ -52,11 +52,9 @@ struct BusinessCardPreviewVisor<Content: View>: View {
 }
 
 extension View {
-    /// Style only — apply `.tint(accent)` on the parent HStack (Explore SwiftUI Button Tint pattern).
-    func businessCardPreviewActionButtonStyle() -> some View {
-        self
-            .buttonStyle(.bordered)
-            .controlSize(.small)
+    /// Card Studio preview actions — native glass; parent HStack uses `buxNativeButtonRowChrome`.
+    func businessCardPreviewActionButtonStyle(role: BuxNativeButtonRole = .secondary) -> some View {
+        buxNativeButtonStyle(role)
     }
 
     func businessCardThemedPill(

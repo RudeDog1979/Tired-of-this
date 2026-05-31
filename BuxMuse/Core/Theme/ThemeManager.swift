@@ -489,8 +489,12 @@ public final class ThemeManager: ObservableObject {
     }
 
     func applyTheme(_ theme: AppTheme) {
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.72)) {
+        if SettingsStore.shared.reducedMotion {
             current = theme
+        } else {
+            withAnimation(BuxMotion.themeCrossfade) {
+                current = theme
+            }
         }
         onThemeChanged?(theme)
     }
