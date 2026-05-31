@@ -217,116 +217,127 @@ enum ProBusinessCardTemplatePresets {
 
     static func shapeLayers(for design: ProBusinessCardDesign, canvasSize: CGSize) -> [CardCanvasLayer] {
         let t = design.template.renderTemplate
-        let accent = design.palette.accentHex
-        let fg = design.palette.foregroundHex
         var result: [CardCanvasLayer] = []
 
         func add(
             _ name: String, _ type: CardShapeType,
-            fill: String, cx: Double, cy: Double, w: Double, h: Double,
-            stroke: String? = nil, strokeWidth: Double = 0,
-            useGradient: Bool = false, rotation: Double = 0, opacity: Double = 1
+            fillRole: CardShapePaletteRole = .accent,
+            cx: Double, cy: Double, w: Double, h: Double,
+            strokeRole: CardShapePaletteRole? = nil,
+            strokeWidth: Double = 0,
+            useGradient: Bool = false, rotation: Double = 0, opacity: Double = 1,
+            hollow: Bool = false
         ) {
-            var layer = shape(name: name, type: type, fill: fill, centerX: cx, centerY: cy, width: w, height: h,
-                              stroke: stroke, strokeWidth: strokeWidth, useGradient: useGradient, rotation: rotation)
+            let fill = hollow ? "#00000000" : CardCanvasSync.paletteHex(for: fillRole, palette: design.palette)
+            let stroke = strokeRole.map { CardCanvasSync.paletteHex(for: $0, palette: design.palette) }
+            var layer = shape(
+                name: name, type: type, fill: fill, fillRole: fillRole,
+                centerX: cx, centerY: cy, width: w, height: h,
+                stroke: stroke, strokeRole: strokeRole,
+                strokeWidth: strokeWidth, useGradient: useGradient, rotation: rotation
+            )
             layer.opacity = opacity
             result.append(layer)
         }
 
         switch t {
         case .classic:
-            add("Accent column", .rectangle, fill: accent, cx: 0.035, cy: 0.5, w: 0.07, h: 1.02)
-            add("Corner arc", .quarterCircle, fill: accent, cx: 0.96, cy: 0.06, w: 0.28, h: 0.28, opacity: 0.22)
-            add("Corner dot", .circle, fill: accent, cx: 0.88, cy: 0.14, w: 0.05, h: 0.05, opacity: 0.55)
+            add("Accent column", .rectangle, cx: 0.035, cy: 0.5, w: 0.07, h: 1.02)
+            add("Corner arc", .quarterCircle, cx: 0.96, cy: 0.06, w: 0.28, h: 0.28, opacity: 0.22)
+            add("Corner dot", .circle, cx: 0.88, cy: 0.14, w: 0.05, h: 0.05, opacity: 0.55)
         case .boldTrade:
-            add("Corner wedge", .triangleHalf, fill: accent, cx: 0.96, cy: 0.96, w: 0.52, h: 0.52, rotation: 90, opacity: 0.55)
-            add("Top slab", .rectangle, fill: accent, cx: 0.5, cy: 0.035, w: 0.92, h: 0.045, useGradient: true)
-            add("Side bar", .accentBar, fill: accent, cx: 0.04, cy: 0.5, w: 0.018, h: 0.72, opacity: 0.85)
+            add("Corner wedge", .triangleHalf, cx: 0.96, cy: 0.96, w: 0.52, h: 0.52, rotation: 90, opacity: 0.55)
+            add("Top slab", .rectangle, cx: 0.5, cy: 0.035, w: 0.92, h: 0.045, useGradient: true)
+            add("Side bar", .accentBar, cx: 0.04, cy: 0.5, w: 0.018, h: 0.72, opacity: 0.85)
         case .editorial:
-            add("Top rule", .accentBar, fill: fg, cx: 0.5, cy: 0.085, w: 0.28, h: 0.01, opacity: 0.35)
-            add("Diamond", .diamond, fill: accent, cx: 0.5, cy: 0.085, w: 0.055, h: 0.055, opacity: 0.65)
-            add("Bottom rule", .accentBar, fill: fg, cx: 0.5, cy: 0.915, w: 0.42, h: 0.006, opacity: 0.18)
+            add("Top rule", .accentBar, fillRole: .foreground, cx: 0.5, cy: 0.085, w: 0.28, h: 0.01, opacity: 0.35)
+            add("Diamond", .diamond, cx: 0.5, cy: 0.085, w: 0.055, h: 0.055, opacity: 0.65)
+            add("Bottom rule", .accentBar, fillRole: .foreground, cx: 0.5, cy: 0.915, w: 0.42, h: 0.006, opacity: 0.18)
         case .swissGrid:
-            add("Left column", .rectangle, fill: accent, cx: 0.075, cy: 0.5, w: 0.15, h: 1.02)
-            add("Grid chevron", .chevron, fill: fg, cx: 0.075, cy: 0.5, w: 0.08, h: 0.32, opacity: 0.95)
-            add("Cross H", .accentBar, fill: fg, cx: 0.58, cy: 0.36, w: 0.72, h: 0.004, opacity: 0.14)
-            add("Cross V", .accentBar, fill: fg, cx: 0.58, cy: 0.62, w: 0.004, h: 0.55, opacity: 0.14)
-            add("Accent square", .rectangle, fill: accent, cx: 0.94, cy: 0.12, w: 0.1, h: 0.1, opacity: 0.35)
+            add("Left column", .rectangle, cx: 0.075, cy: 0.5, w: 0.15, h: 1.02)
+            add("Grid chevron", .chevron, fillRole: .foreground, cx: 0.075, cy: 0.5, w: 0.08, h: 0.32, opacity: 0.95)
+            add("Cross H", .accentBar, fillRole: .foreground, cx: 0.58, cy: 0.36, w: 0.72, h: 0.004, opacity: 0.14)
+            add("Cross V", .accentBar, fillRole: .foreground, cx: 0.58, cy: 0.62, w: 0.004, h: 0.55, opacity: 0.14)
+            add("Accent square", .rectangle, cx: 0.94, cy: 0.12, w: 0.1, h: 0.1, opacity: 0.35)
         case .gradientPro:
-            add("Gradient band", .rectangle, fill: accent, cx: 0.5, cy: design.aspect.isPortrait ? 0.1 : 0.11,
+            add("Gradient band", .rectangle, cx: 0.5, cy: design.aspect.isPortrait ? 0.1 : 0.11,
                 w: 0.98, h: design.aspect.isPortrait ? 0.18 : 0.22, useGradient: true)
-            add("Band accent", .circle, fill: accent, cx: 0.92, cy: 0.2, w: 0.14, h: 0.14, opacity: 0.2)
+            add("Band accent", .circle, cx: 0.92, cy: 0.2, w: 0.14, h: 0.14, opacity: 0.2)
         case .twoToneSplit:
-            add("Split panel", .triangleHalf, fill: accent, cx: 0.9, cy: 0.82, w: 0.48, h: 0.48, useGradient: true, opacity: 0.32)
-            add("Split line", .accentBar, fill: accent, cx: 0.72, cy: 0.5, w: 0.006, h: 0.88, opacity: 0.35)
+            add("Split panel", .triangleHalf, cx: 0.9, cy: 0.82, w: 0.48, h: 0.48, useGradient: true, opacity: 0.32)
+            add("Split line", .accentBar, cx: 0.72, cy: 0.5, w: 0.006, h: 0.88, opacity: 0.35)
         case .neonEdge:
-            add("Neon corner", .triangleHalf, fill: accent, cx: 0.98, cy: 0.04, w: 0.22, h: 0.22, rotation: 180, opacity: 0.75)
-            add("Neon bar", .accentBar, fill: accent, cx: 0.5, cy: 0.96, w: 0.78, h: 0.014, opacity: 0.55)
-            add("Glow dot", .circle, fill: accent, cx: 0.08, cy: 0.12, w: 0.08, h: 0.08, opacity: 0.45)
+            add("Neon corner", .triangleHalf, cx: 0.98, cy: 0.04, w: 0.22, h: 0.22, rotation: 180, opacity: 0.75)
+            add("Neon bar", .accentBar, cx: 0.5, cy: 0.96, w: 0.78, h: 0.014, opacity: 0.55)
+            add("Glow dot", .circle, cx: 0.08, cy: 0.12, w: 0.08, h: 0.08, opacity: 0.45)
         case .stampBadge:
-            add("Badge ring", .circle, fill: "#00000000", cx: 0.78, cy: 0.34, w: 0.34, h: 0.34, stroke: accent, strokeWidth: 3)
-            add("Badge fill", .circle, fill: accent, cx: 0.78, cy: 0.34, w: 0.22, h: 0.22, opacity: 0.12)
+            add("Badge ring", .circle, cx: 0.78, cy: 0.34, w: 0.34, h: 0.34,
+                strokeRole: .accent, strokeWidth: 3, hollow: true)
+            add("Badge fill", .circle, cx: 0.78, cy: 0.34, w: 0.22, h: 0.22, opacity: 0.12)
         case .glassFrost:
-            add("Frost panel", .rectangle, fill: "#FFFFFF", cx: 0.5, cy: 0.52, w: 0.9, h: 0.8, opacity: 0.62)
-            add("Frost corner", .quarterCircle, fill: accent, cx: 0.04, cy: 0.96, w: 0.24, h: 0.24, opacity: 0.15)
+            add("Frost panel", .rectangle, fillRole: .surface, cx: 0.5, cy: 0.52, w: 0.9, h: 0.8, opacity: 0.62)
+            add("Frost corner", .quarterCircle, cx: 0.04, cy: 0.96, w: 0.24, h: 0.24, opacity: 0.15)
         case .letterpress:
-            add("Top rule", .accentBar, fill: fg, cx: 0.5, cy: 0.1, w: 0.32, h: 0.008, opacity: 0.25)
-            add("Bottom rule", .accentBar, fill: fg, cx: 0.5, cy: 0.9, w: 0.55, h: 0.006, opacity: 0.2)
+            add("Top rule", .accentBar, fillRole: .foreground, cx: 0.5, cy: 0.1, w: 0.32, h: 0.008, opacity: 0.25)
+            add("Bottom rule", .accentBar, fillRole: .foreground, cx: 0.5, cy: 0.9, w: 0.55, h: 0.006, opacity: 0.2)
         case .logoMark:
-            add("Logo halo", .circle, fill: accent, cx: 0.5, cy: 0.34, w: 0.56, h: 0.56, opacity: 0.14)
-            add("Logo diamond", .diamond, fill: accent, cx: 0.5, cy: 0.34, w: 0.12, h: 0.12, opacity: 0.22)
-            add("Bottom accent", .accentBar, fill: accent, cx: 0.5, cy: 0.92, w: 0.4, h: 0.008, opacity: 0.35)
+            add("Logo halo", .circle, cx: 0.5, cy: 0.34, w: 0.56, h: 0.56, opacity: 0.14)
+            add("Logo diamond", .diamond, cx: 0.5, cy: 0.34, w: 0.12, h: 0.12, opacity: 0.22)
+            add("Bottom accent", .accentBar, cx: 0.5, cy: 0.92, w: 0.4, h: 0.008, opacity: 0.35)
         case .monogram:
-            add("Seal ring", .circle, fill: "#00000000", cx: 0.14, cy: 0.28, w: 0.26, h: 0.26, stroke: accent, strokeWidth: 2)
-            add("Seal fill", .circle, fill: accent, cx: 0.14, cy: 0.28, w: 0.16, h: 0.16, opacity: 0.1)
+            add("Seal ring", .circle, cx: 0.14, cy: 0.28, w: 0.26, h: 0.26,
+                strokeRole: .accent, strokeWidth: 2, hollow: true)
+            add("Seal fill", .circle, cx: 0.14, cy: 0.28, w: 0.16, h: 0.16, opacity: 0.1)
         case .minimalMono:
-            add("Center rule", .accentBar, fill: fg, cx: 0.5, cy: 0.5, w: 0.42, h: 0.008, opacity: 0.3)
-            add("Side ticks", .accentBar, fill: fg, cx: 0.28, cy: 0.5, w: 0.006, h: 0.12, opacity: 0.2)
-            add("Side ticks R", .accentBar, fill: fg, cx: 0.72, cy: 0.5, w: 0.006, h: 0.12, opacity: 0.2)
+            add("Center rule", .accentBar, fillRole: .foreground, cx: 0.5, cy: 0.5, w: 0.42, h: 0.008, opacity: 0.3)
+            add("Side ticks", .accentBar, fillRole: .foreground, cx: 0.28, cy: 0.5, w: 0.006, h: 0.12, opacity: 0.2)
+            add("Side ticks R", .accentBar, fillRole: .foreground, cx: 0.72, cy: 0.5, w: 0.006, h: 0.12, opacity: 0.2)
         case .qrFirst:
-            add("QR panel", .rectangle, fill: accent, cx: 0.82, cy: 0.5, w: 0.32, h: 0.78, opacity: 0.12)
-            add("QR stripe", .accentBar, fill: accent, cx: 0.66, cy: 0.5, w: 0.012, h: 0.72, opacity: 0.35)
+            add("QR panel", .rectangle, cx: 0.82, cy: 0.5, w: 0.32, h: 0.78, opacity: 0.12)
+            add("QR stripe", .accentBar, cx: 0.66, cy: 0.5, w: 0.012, h: 0.72, opacity: 0.35)
         case .geometricGrid:
-            add("Block TL", .rectangle, fill: accent, cx: 0.1, cy: 0.12, w: 0.2, h: 0.2, opacity: 0.28)
-            add("Block TR", .circle, fill: accent, cx: 0.92, cy: 0.14, w: 0.18, h: 0.18, opacity: 0.2)
-            add("Block BR", .rectangle, fill: accent, cx: 0.9, cy: 0.88, w: 0.22, h: 0.22, opacity: 0.24)
-            add("Block BL", .hexagon, fill: accent, cx: 0.1, cy: 0.88, w: 0.16, h: 0.16, opacity: 0.18)
-            add("Grid V", .accentBar, fill: fg, cx: 0.68, cy: 0.5, w: 0.005, h: 0.9, opacity: 0.12)
-            add("Grid H", .accentBar, fill: fg, cx: 0.5, cy: 0.58, w: 0.88, h: 0.005, opacity: 0.12)
+            add("Block TL", .rectangle, cx: 0.1, cy: 0.12, w: 0.2, h: 0.2, opacity: 0.28)
+            add("Block TR", .circle, cx: 0.92, cy: 0.14, w: 0.18, h: 0.18, opacity: 0.2)
+            add("Block BR", .rectangle, cx: 0.9, cy: 0.88, w: 0.22, h: 0.22, opacity: 0.24)
+            add("Block BL", .hexagon, cx: 0.1, cy: 0.88, w: 0.16, h: 0.16, opacity: 0.18)
+            add("Grid V", .accentBar, fillRole: .foreground, cx: 0.68, cy: 0.5, w: 0.005, h: 0.9, opacity: 0.12)
+            add("Grid H", .accentBar, fillRole: .foreground, cx: 0.5, cy: 0.58, w: 0.88, h: 0.005, opacity: 0.12)
         case .diagonalBands:
-            add("Band 1", .parallelogram, fill: accent, cx: 0.86, cy: 0.18, w: 0.42, h: 0.1, rotation: -38, opacity: 0.48)
-            add("Band 2", .parallelogram, fill: accent, cx: 0.9, cy: 0.36, w: 0.48, h: 0.08, rotation: -38, opacity: 0.32)
-            add("Band 3", .parallelogram, fill: accent, cx: 0.88, cy: 0.52, w: 0.38, h: 0.06, rotation: -38, opacity: 0.2)
-            add("Band dot", .circle, fill: accent, cx: 0.12, cy: 0.88, w: 0.08, h: 0.08, opacity: 0.35)
+            add("Band 1", .parallelogram, cx: 0.86, cy: 0.18, w: 0.42, h: 0.1, rotation: -38, opacity: 0.48)
+            add("Band 2", .parallelogram, cx: 0.9, cy: 0.36, w: 0.48, h: 0.08, rotation: -38, opacity: 0.32)
+            add("Band 3", .parallelogram, cx: 0.88, cy: 0.52, w: 0.38, h: 0.06, rotation: -38, opacity: 0.2)
+            add("Band dot", .circle, cx: 0.12, cy: 0.88, w: 0.08, h: 0.08, opacity: 0.35)
         case .circleFrame:
-            add("Outer ring", .circle, fill: "#00000000", cx: 0.5, cy: 0.32, w: 0.54, h: 0.54, stroke: accent, strokeWidth: 2.5)
-            add("Mid ring", .circle, fill: "#00000000", cx: 0.5, cy: 0.32, w: 0.38, h: 0.38, stroke: accent, strokeWidth: 1, opacity: 0.35)
-            add("Inner dot", .circle, fill: accent, cx: 0.5, cy: 0.32, w: 0.1, h: 0.1, opacity: 0.45)
+            add("Outer ring", .circle, cx: 0.5, cy: 0.32, w: 0.54, h: 0.54,
+                strokeRole: .accent, strokeWidth: 2.5, hollow: true)
+            add("Mid ring", .circle, cx: 0.5, cy: 0.32, w: 0.38, h: 0.38,
+                strokeRole: .accent, strokeWidth: 1, opacity: 0.35, hollow: true)
+            add("Inner dot", .circle, cx: 0.5, cy: 0.32, w: 0.1, h: 0.1, opacity: 0.45)
         case .hexAccent:
-            add("Hex large", .hexagon, fill: accent, cx: 0.9, cy: 0.16, w: 0.28, h: 0.28, opacity: 0.28)
-            add("Hex mid", .hexagon, fill: accent, cx: 0.78, cy: 0.28, w: 0.14, h: 0.14, opacity: 0.18)
-            add("Hex small", .hexagon, fill: accent, cx: 0.08, cy: 0.88, w: 0.12, h: 0.12, opacity: 0.22)
-            add("Hex line", .accentBar, fill: accent, cx: 0.5, cy: 0.92, w: 0.55, h: 0.008, opacity: 0.3)
+            add("Hex large", .hexagon, cx: 0.9, cy: 0.16, w: 0.28, h: 0.28, opacity: 0.28)
+            add("Hex mid", .hexagon, cx: 0.78, cy: 0.28, w: 0.14, h: 0.14, opacity: 0.18)
+            add("Hex small", .hexagon, cx: 0.08, cy: 0.88, w: 0.12, h: 0.12, opacity: 0.22)
+            add("Hex line", .accentBar, cx: 0.5, cy: 0.92, w: 0.55, h: 0.008, opacity: 0.3)
         case .cornerBlocks:
-            add("Block A", .rectangle, fill: accent, cx: 0.07, cy: 0.09, w: 0.14, h: 0.14, opacity: 0.45)
-            add("Block B", .rectangle, fill: accent, cx: 0.16, cy: 0.09, w: 0.14, h: 0.14, opacity: 0.28)
-            add("Block C", .rectangle, fill: accent, cx: 0.07, cy: 0.18, w: 0.14, h: 0.14, opacity: 0.18)
-            add("Corner triangle", .triangle, fill: accent, cx: 0.94, cy: 0.92, w: 0.22, h: 0.22, rotation: 180, opacity: 0.35)
-            add("Corner circle", .circle, fill: accent, cx: 0.92, cy: 0.12, w: 0.1, h: 0.1, opacity: 0.25)
+            add("Block A", .rectangle, cx: 0.07, cy: 0.09, w: 0.14, h: 0.14, opacity: 0.45)
+            add("Block B", .rectangle, cx: 0.16, cy: 0.09, w: 0.14, h: 0.14, opacity: 0.28)
+            add("Block C", .rectangle, cx: 0.07, cy: 0.18, w: 0.14, h: 0.14, opacity: 0.18)
+            add("Corner triangle", .triangle, cx: 0.94, cy: 0.92, w: 0.22, h: 0.22, rotation: 180, opacity: 0.35)
+            add("Corner circle", .circle, cx: 0.92, cy: 0.12, w: 0.1, h: 0.1, opacity: 0.25)
         case .splitVertical:
-            add("Left panel", .rectangle, fill: accent, cx: 0.24, cy: 0.5, w: 0.42, h: 0.98, useGradient: true, opacity: 0.22)
-            add("Left slab", .rectangle, fill: accent, cx: 0.08, cy: 0.5, w: 0.12, h: 0.98, opacity: 0.55)
-            add("Divider", .accentBar, fill: accent, cx: 0.46, cy: 0.5, w: 0.008, h: 0.9, opacity: 0.5)
+            add("Left panel", .rectangle, cx: 0.24, cy: 0.5, w: 0.42, h: 0.98, useGradient: true, opacity: 0.22)
+            add("Left slab", .rectangle, cx: 0.08, cy: 0.5, w: 0.12, h: 0.98, opacity: 0.55)
+            add("Divider", .accentBar, cx: 0.46, cy: 0.5, w: 0.008, h: 0.9, opacity: 0.5)
         case .lineMinimal:
-            add("Line 1", .accentBar, fill: accent, cx: 0.065, cy: 0.5, w: 0.012, h: 0.72)
-            add("Line 2", .accentBar, fill: fg, cx: 0.095, cy: 0.42, w: 0.006, h: 0.52, opacity: 0.35)
-            add("Line 3", .accentBar, fill: fg, cx: 0.12, cy: 0.36, w: 0.006, h: 0.38, opacity: 0.2)
-            add("Accent square", .rectangle, fill: accent, cx: 0.92, cy: 0.1, w: 0.08, h: 0.08, opacity: 0.4)
+            add("Line 1", .accentBar, cx: 0.065, cy: 0.5, w: 0.012, h: 0.72)
+            add("Line 2", .accentBar, fillRole: .foreground, cx: 0.095, cy: 0.42, w: 0.006, h: 0.52, opacity: 0.35)
+            add("Line 3", .accentBar, fillRole: .foreground, cx: 0.12, cy: 0.36, w: 0.006, h: 0.38, opacity: 0.2)
+            add("Accent square", .rectangle, cx: 0.92, cy: 0.1, w: 0.08, h: 0.08, opacity: 0.4)
         case .arcSweep:
-            add("Arc sweep", .quarterCircle, fill: accent, cx: 0.02, cy: 0.98, w: 0.55, h: 0.55, opacity: 0.28)
-            add("Arc inner", .quarterCircle, fill: accent, cx: 0.06, cy: 0.94, w: 0.32, h: 0.32, opacity: 0.15)
-            add("Accent dot", .circle, fill: accent, cx: 0.92, cy: 0.1, w: 0.08, h: 0.08, opacity: 0.5)
-            add("Accent bar", .accentBar, fill: accent, cx: 0.88, cy: 0.22, w: 0.18, h: 0.008, opacity: 0.35)
+            add("Arc sweep", .quarterCircle, cx: 0.02, cy: 0.98, w: 0.55, h: 0.55, opacity: 0.28)
+            add("Arc inner", .quarterCircle, cx: 0.06, cy: 0.94, w: 0.32, h: 0.32, opacity: 0.15)
+            add("Accent dot", .circle, cx: 0.92, cy: 0.1, w: 0.08, h: 0.08, opacity: 0.5)
+            add("Accent bar", .accentBar, cx: 0.88, cy: 0.22, w: 0.18, h: 0.008, opacity: 0.35)
         case .watermark, .photoForward:
             break
         }
@@ -373,23 +384,34 @@ enum ProBusinessCardTemplatePresets {
 
     private static func shape(
         name: String, type: CardShapeType, fill: String,
+        fillRole: CardShapePaletteRole,
         centerX: Double, centerY: Double, width: Double, height: Double,
-        stroke: String? = nil, strokeWidth: Double = 0,
+        stroke: String? = nil, strokeRole: CardShapePaletteRole? = nil,
+        strokeWidth: Double = 0,
         useGradient: Bool = false, rotation: Double = 0
     ) -> CardCanvasLayer {
         CardCanvasLayer(
             name: name, kind: .shape,
             transform: CardLayerTransform(centerX: centerX, centerY: centerY, width: width, height: height, rotation: rotation),
             isLocked: true,
-            payload: .shape(CardShapePayload(shapeType: type, fillHex: fill, strokeHex: stroke, strokeWidth: strokeWidth, useGradient: useGradient))
+            payload: .shape(CardShapePayload(
+                shapeType: type,
+                fillHex: fill,
+                strokeHex: stroke,
+                strokeWidth: strokeWidth,
+                useGradient: useGradient,
+                paletteRole: fillRole,
+                strokePaletteRole: strokeRole
+            ))
         )
     }
 
     private static func borderShape(from design: ProBusinessCardDesign) -> CardCanvasLayer {
-        shape(
-            name: "Border", type: .rectangle, fill: "#00000000",
+        let stroke = CardCanvasSync.paletteHex(for: .foreground, palette: design.palette)
+        return shape(
+            name: "Border", type: .rectangle, fill: "#00000000", fillRole: .foreground,
             centerX: 0.5, centerY: 0.5, width: 0.96, height: 0.94,
-            stroke: design.palette.foregroundHex,
+            stroke: stroke, strokeRole: .foreground,
             strokeWidth: design.style.borderStyle == .accent ? 2 : 1
         )
     }

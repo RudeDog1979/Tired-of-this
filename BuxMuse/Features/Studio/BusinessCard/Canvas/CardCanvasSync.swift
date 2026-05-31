@@ -48,13 +48,7 @@ enum CardCanvasSync {
                 doc.layers[idx].payload = .text(payload)
 
             case .shape(var payload) where doc.layers[idx].isLocked:
-                if payload.useGradient
-                    || doc.layers[idx].name.contains("Accent")
-                    || doc.layers[idx].name.contains("Gradient")
-                    || doc.layers[idx].name.contains("Split")
-                    || doc.layers[idx].name.contains("Bar") {
-                    payload.fillHex = palette.accentHex
-                }
+                CardCanvasSync.applyPalette(to: &payload, layerName: doc.layers[idx].name, palette: palette)
                 doc.layers[idx].payload = .shape(payload)
 
             case .watermark(var wp):
@@ -246,5 +240,73 @@ enum CardCanvasSync {
     static func applyTemplateReseed(to design: inout ProBusinessCardDesign) {
         design.canvasDocument = CardCanvasMigrator.migrate(from: design)
         design.canvasDocument?.isCustomized = false
+    }
+
+    /// Recompute logo/photo/text layout after identity mode changes without wiping template shapes.
+    static func applyIdentityLayout(to design: inout ProBusinessCardDesign) {
+        ensureDocument(on: &design)
+        reconcileStructure(to: &design)
+
+        let fresh = CardCanvasMigrator.migrate(from: design)
+        guard var doc = design.canvasDocument else { return }
+
+        func syncTransform(named name: String, kind: CardLayerKind) {
+            guard let freshLayer = fresh.layers.first(where: { $0.name == name && $0.kind == kind }),
+                  let idx = doc.layers.firstIndex(where: { $0.name == name && $0.kind == kind }) else { return }
+            doc.layers[idx].transform = freshLayer.transform
+            if kind == .image {
+                doc.layers[idx].payload = freshLayer.payload
+            }
+        }
+
+        syncTransform(named: "Logo", kind: .image)
+        syncTransform(named: "Photo", kind: .image)
+
+        for label in ["Name", "Tagline", "Contact", "Website", "Skills"] {
+            guard let freshLayer = fresh.layers.first(where: { $0.name == label }),
+                  let idx = doc.layers.firstIndex(where: { $0.name == label }) else { continue }
+            doc.layers[idx].transform = freshLayer.transform
+        }
+
+        design.canvasDocument = doc
+        pushQuickStudioVisuals(to: &design)
+    }
+
+    /// Maps template shape fills/strokes to the three editable palette slots.
+    static func applyPalette(to payload: inout CardShapePayload, layerName: String, palette: ProBusinessCardPalette) {
+        let fillRole = payload.paletteRole ?? inferFillRole(layerName: layerName, fillHex: payload.fillHex, palette: palette)
+        if payload.fillHex.uppercased() != "#00000000" {
+            payload.fillHex = paletteHex(for: fillRole, palette: palette)
+        }
+        if payload.strokeHex != nil {
+            let strokeRole = payload.strokePaletteRole ?? .accent
+            payload.strokeHex = paletteHex(for: strokeRole, palette: palette)
+        }
+    }
+
+    static func paletteHex(for role: CardShapePaletteRole, palette: ProBusinessCardPalette) -> String {
+        switch role {
+        case .accent: return palette.accentHex
+        case .foreground: return palette.foregroundHex
+        case .background: return palette.backgroundHex
+        case .surface: return "#FFFFFF"
+        }
+    }
+
+    private static func inferFillRole(
+        layerName: String,
+        fillHex: String,
+        palette: ProBusinessCardPalette
+    ) -> CardShapePaletteRole {
+        let name = layerName.lowercased()
+        if fillHex.uppercased() == "#FFFFFF" || name.contains("frost") { return .surface }
+        if fillHex.caseInsensitiveCompare(palette.foregroundHex) == .orderedSame { return .foreground }
+        if fillHex.caseInsensitiveCompare(palette.backgroundHex) == .orderedSame { return .background }
+        if name.contains("grid") || name.contains("rule") || name.contains("tick")
+            || name.contains("chevron") || name.contains("cross") || name.contains("line 2")
+            || name.contains("line 3") {
+            return .foreground
+        }
+        return .accent
     }
 }

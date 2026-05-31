@@ -6,6 +6,9 @@
 import SwiftUI
 
 struct CardFloatingToolbar: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
     let layer: CardCanvasLayer?
     var backgroundSelected: Bool
     @Binding var document: CardCanvasDocument
@@ -45,7 +48,14 @@ struct CardFloatingToolbar: View {
             .padding(.horizontal, 12)
         }
         .frame(height: 48)
-        .background(.ultraThinMaterial)
+        .background(
+            themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.14 : 0.07),
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(themeManager.current.accentColor.opacity(0.12), lineWidth: 0.5)
+        }
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal, 12)
     }
@@ -274,10 +284,17 @@ struct CardFloatingToolbar: View {
             Button(action: increase) { Image(systemName: "plus") }
         }
         .font(.system(size: 12, weight: .bold))
-        .foregroundStyle(.white)
+        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(Color.white.opacity(0.12))
+        .background(
+            themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.14 : 0.07),
+            in: Capsule()
+        )
+        .overlay {
+            Capsule()
+                .strokeBorder(themeManager.current.accentColor.opacity(0.12), lineWidth: 0.5)
+        }
         .clipShape(Capsule())
     }
 
@@ -289,10 +306,17 @@ struct CardFloatingToolbar: View {
     private func toolLabel(_ title: String, icon: String, destructive: Bool = false) -> some View {
         Label(title, systemImage: icon)
             .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(destructive ? Color.red : .white)
+            .foregroundStyle(destructive ? Color.red : themeManager.labelPrimary(for: colorScheme))
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
-            .background(Color.white.opacity(0.12))
+            .background(
+                themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.14 : 0.07),
+                in: Capsule()
+            )
+            .overlay {
+                Capsule()
+                    .strokeBorder(themeManager.current.accentColor.opacity(0.12), lineWidth: 0.5)
+            }
             .clipShape(Capsule())
     }
 

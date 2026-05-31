@@ -6,6 +6,9 @@
 import SwiftUI
 
 struct BuxCanvasElementsStrip: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
     let layers: [CardCanvasLayer]
     @Binding var selectedID: UUID?
     @Binding var backgroundSelected: Bool
@@ -18,8 +21,8 @@ struct BuxCanvasElementsStrip: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Elements")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(.white.opacity(0.55))
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(.secondary)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -53,10 +56,21 @@ struct BuxCanvasElementsStrip: View {
                     .font(.system(size: 10, weight: .bold))
                     .lineLimit(1)
             }
-            .foregroundStyle(isSelected ? .white : .white.opacity(0.75))
+            .foregroundStyle(isSelected ? Color.white : themeManager.labelPrimary(for: colorScheme))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(isSelected ? Color.white.opacity(0.22) : Color.white.opacity(0.08))
+            .background(
+                isSelected
+                    ? themeManager.current.accentColor
+                    : themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.14 : 0.07),
+                in: Capsule()
+            )
+            .overlay {
+                if !isSelected {
+                    Capsule()
+                        .strokeBorder(themeManager.current.accentColor.opacity(0.12), lineWidth: 0.5)
+                }
+            }
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)

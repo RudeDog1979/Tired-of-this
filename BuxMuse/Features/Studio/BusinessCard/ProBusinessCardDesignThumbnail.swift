@@ -44,6 +44,7 @@ struct ProBusinessCardDesignThumbnail: View {
             }
         }
         .shadow(color: showShadow ? .black.opacity(0.14) : .clear, radius: showShadow ? 8 : 0, y: showShadow ? 4 : 0)
+        .modifier(GalleryThumbnailRasterizer(enabled: galleryPreview))
         .id(thumbnailIdentity)
     }
 
@@ -52,5 +53,17 @@ struct ProBusinessCardDesignThumbnail: View {
             return "gallery-\(design.template.rawValue)-\(design.aspect.rawValue)"
         }
         return "\(design.id)-\(design.template.rawValue)-\(Int(design.updatedAt.timeIntervalSince1970))"
+    }
+}
+
+private struct GalleryThumbnailRasterizer: ViewModifier {
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.drawingGroup(opaque: false)
+        } else {
+            content
+        }
     }
 }

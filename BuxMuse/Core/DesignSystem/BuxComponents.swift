@@ -229,22 +229,25 @@ private struct BuxHorizontalScrollEdgeFadeModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .overlay(alignment: .leading) {
-                LinearGradient(
-                    colors: [backgroundColor, backgroundColor.opacity(0)],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-                .frame(width: fadeWidth)
-                .allowsHitTesting(false)
-            }
-            .overlay(alignment: .trailing) {
-                LinearGradient(
-                    colors: [backgroundColor.opacity(0), backgroundColor],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-                .frame(width: fadeWidth)
+            .clipShape(Rectangle())
+            .overlay {
+                HStack(spacing: 0) {
+                    LinearGradient(
+                        colors: [backgroundColor, backgroundColor.opacity(0)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(width: fadeWidth)
+
+                    Spacer(minLength: 0)
+
+                    LinearGradient(
+                        colors: [backgroundColor.opacity(0), backgroundColor],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(width: fadeWidth)
+                }
                 .allowsHitTesting(false)
             }
     }
@@ -254,9 +257,48 @@ extension View {
     func buxHorizontalScrollEdgeFade(background: Color, width: CGFloat = 16) -> some View {
         modifier(BuxHorizontalScrollEdgeFadeModifier(fadeWidth: width, backgroundColor: background))
     }
+
+    func buxThemedHorizontalScrollEdgeFade(
+        themeManager: ThemeManager,
+        colorScheme: ColorScheme,
+        width: CGFloat = 16
+    ) -> some View {
+        buxHorizontalScrollEdgeFade(
+            background: themeManager.screenBackground(for: colorScheme),
+            width: width
+        )
+    }
 }
 
 // MARK: - Navigation drawer search (visible by default; scroll up to minimize)
+
+// MARK: - Centered top bar (true screen-center title)
+
+struct BuxCenteredTopBar<Leading: View, Trailing: View>: View {
+    let title: String
+    var titleFont: Font = .system(size: 15, weight: .bold)
+    @ViewBuilder var leading: () -> Leading
+    @ViewBuilder var trailing: () -> Trailing
+
+    var body: some View {
+        ZStack {
+            Text(title)
+                .font(titleFont)
+                .multilineTextAlignment(.center)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .allowsHitTesting(false)
+
+            HStack(alignment: .center, spacing: 0) {
+                leading()
+                Spacer(minLength: 0)
+                trailing()
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+}
 
 struct BuxDrawerSearchModifier: ViewModifier {
     @Binding var searchText: String

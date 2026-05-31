@@ -6,6 +6,78 @@
 //
 
 import SwiftUI
+import UIKit
+
+// MARK: - Segmented control accent (SwiftUI Picker → UISegmentedControl tint bridge)
+
+/// Applies `selectedSegmentTintColor` to the native UISegmentedControl backing a SwiftUI segmented Picker.
+private struct BuxSegmentedControlAccentBridge: UIViewRepresentable {
+    let accent: Color
+
+    func makeUIView(context: Context) -> BuxSegmentedTintAnchorView {
+        let view = BuxSegmentedTintAnchorView()
+        view.isUserInteractionEnabled = false
+        view.backgroundColor = .clear
+        return view
+    }
+
+    func updateUIView(_ uiView: BuxSegmentedTintAnchorView, context: Context) {
+        uiView.accent = UIColor(accent)
+        uiView.applyAccent()
+    }
+}
+
+private final class BuxSegmentedTintAnchorView: UIView {
+    var accent: UIColor = .systemBlue
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        applyAccent()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        applyAccent()
+    }
+
+    func applyAccent() {
+        var current: UIView? = self
+        while let view = current {
+            if let superview = view.superview {
+                for child in superview.subviews where child !== view {
+                    if let segmented = Self.findSegmentedControl(in: child) {
+                        segmented.selectedSegmentTintColor = accent
+                        return
+                    }
+                }
+            }
+            if let segmented = Self.findSegmentedControl(in: view) {
+                segmented.selectedSegmentTintColor = accent
+                return
+            }
+            current = view.superview
+        }
+    }
+
+    private static func findSegmentedControl(in view: UIView) -> UISegmentedControl? {
+        if let control = view as? UISegmentedControl { return control }
+        for subview in view.subviews {
+            if let control = findSegmentedControl(in: subview) { return control }
+        }
+        return nil
+    }
+}
+
+extension View {
+    /// Forces brand accent on the native UISegmentedControl behind a segmented Picker.
+    func buxSegmentedControlAccent(_ accent: Color) -> some View {
+        overlay {
+            BuxSegmentedControlAccentBridge(accent: accent)
+                .frame(width: 0, height: 0)
+                .allowsHitTesting(false)
+        }
+    }
+}
 
 // MARK: - Semantic palette (resolved per theme + color scheme)
 
@@ -81,7 +153,33 @@ struct BuxRootBrandThemeModifier: ViewModifier {
     }
 }
 
+// MARK: - Segmented picker (liquid glass + brand accent)
+
+private struct BuxThemedSegmentedPickerModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    private var accent: Color {
+        themeManager.contrastAccentColor(for: colorScheme)
+    }
+
+    func body(content: Content) -> some View {
+        HStack {
+            content
+                .pickerStyle(.segmented)
+                .labelsHidden()
+        }
+        .tint(accent)
+        .buxSegmentedControlAccent(accent)
+    }
+}
+
 extension View {
+    /// Native segmented control with liquid-glass chrome and brand accent on the selected segment.
+    func buxThemedSegmentedPicker() -> some View {
+        modifier(BuxThemedSegmentedPickerModifier())
+    }
+
     /// Apple-native tint + semantic labels + branded surfaces for custom components.
     func buxRootBrandTheme() -> some View {
         modifier(BuxRootBrandThemeModifier())

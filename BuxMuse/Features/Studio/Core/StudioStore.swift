@@ -315,7 +315,8 @@ public final class StudioStore: ObservableObject {
             template: template,
             options: .businessDefault,
             style: ProBusinessCardStyle.businessDefault(businessName: businessName),
-            content: content
+            content: content,
+            isDraft: true
         )
         design.applyTemplateDefaults()
         businessCardLibrary.designs.append(design)
@@ -342,9 +343,27 @@ public final class StudioStore: ObservableObject {
     }
 
     public func deleteBusinessCardDesign(id: UUID) {
-        businessCardLibrary.designs.removeAll { $0.id == id }
-        if businessCardLibrary.selectedDesignID == id {
-            businessCardLibrary.selectedDesignID = businessCardLibrary.designs.first?.id
+        deleteBusinessCardDesigns(ids: [id])
+    }
+
+    public func deleteBusinessCardDesigns<S: Sequence>(ids: S) where S.Element == UUID {
+        let idSet = Set(ids)
+        guard !idSet.isEmpty else { return }
+        businessCardLibrary.designs.removeAll { idSet.contains($0.id) }
+        if let selectedID = businessCardLibrary.selectedDesignID, idSet.contains(selectedID) {
+            businessCardLibrary.selectedDesignID = businessCardLibrary.savedDesigns.first?.id
+        }
+        save()
+    }
+
+    /// Removes abandoned editor sessions that were never saved to Your designs.
+    public func purgeEphemeralBusinessCardDesigns() {
+        let before = businessCardLibrary.designs.count
+        businessCardLibrary.designs.removeAll { $0.isDraft }
+        guard businessCardLibrary.designs.count != before else { return }
+        if let selectedID = businessCardLibrary.selectedDesignID,
+           !businessCardLibrary.designs.contains(where: { $0.id == selectedID }) {
+            businessCardLibrary.selectedDesignID = businessCardLibrary.savedDesigns.first?.id
         }
         save()
     }

@@ -394,6 +394,13 @@ public enum CardShapeType: String, Codable, CaseIterable, Identifiable, Sendable
     }
 }
 
+public enum CardShapePaletteRole: String, Codable, Equatable, Sendable {
+    case accent
+    case foreground
+    case background
+    case surface
+}
+
 public struct CardShapePayload: Codable, Equatable, Sendable {
     public var shapeType: CardShapeType
     public var fillHex: String
@@ -402,6 +409,10 @@ public struct CardShapePayload: Codable, Equatable, Sendable {
     public var cornerRadius: Double
     public var symbolName: String?
     public var useGradient: Bool
+    /// Which palette slot drives fill when Quick Studio colors change.
+    public var paletteRole: CardShapePaletteRole?
+    /// Which palette slot drives stroke when present.
+    public var strokePaletteRole: CardShapePaletteRole?
 
     public init(
         shapeType: CardShapeType,
@@ -410,7 +421,9 @@ public struct CardShapePayload: Codable, Equatable, Sendable {
         strokeWidth: Double = 0,
         cornerRadius: Double = 8,
         symbolName: String? = nil,
-        useGradient: Bool = false
+        useGradient: Bool = false,
+        paletteRole: CardShapePaletteRole? = nil,
+        strokePaletteRole: CardShapePaletteRole? = nil
     ) {
         self.shapeType = shapeType
         self.fillHex = fillHex
@@ -419,6 +432,8 @@ public struct CardShapePayload: Codable, Equatable, Sendable {
         self.cornerRadius = cornerRadius
         self.symbolName = symbolName
         self.useGradient = useGradient
+        self.paletteRole = paletteRole
+        self.strokePaletteRole = strokePaletteRole
     }
 }
 

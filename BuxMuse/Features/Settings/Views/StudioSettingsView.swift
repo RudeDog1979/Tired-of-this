@@ -123,7 +123,7 @@ struct StudioSettingsView: View {
                                 Text("Business Card Studio")
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 Spacer()
-                                Text("\(studioStore.businessCardLibrary.designs.count) designs")
+                                Text("\(studioStore.businessCardLibrary.savedDesigns.count) designs")
                                     .font(.system(size: 12, weight: .semibold))
                                     .buxLabelSecondary()
                                 BuxChevron()

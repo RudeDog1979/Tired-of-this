@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CardProCanvasView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
 
@@ -78,27 +79,25 @@ struct CardProCanvasView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color(red: 0.07, green: 0.07, blue: 0.08).ignoresSafeArea()
+        GeometryReader { geo in
+            let landscape = geo.size.width > geo.size.height
 
-            VStack(spacing: 0) {
-                topBar
-                CardFloatingToolbar(
-                    layer: selectedLayer,
-                    backgroundSelected: backgroundSelected,
-                    document: canvasBinding,
-                    actions: toolbarActions,
-                    onChange: { canvasToolbarDidChange() }
-                )
-                .padding(.top, 8)
-                canvasWorkspace
-                bottomRail
-            }
+            ZStack {
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
 
-            if let editID = inlineEditLayerID {
-                inlineTextOverlay(layerID: editID)
+                if landscape {
+                    landscapeLayout(in: geo)
+                } else {
+                    portraitLayout(in: geo)
+                }
+
+                if let editID = inlineEditLayerID {
+                    inlineTextOverlay(layerID: editID)
+                }
             }
         }
+        .buxRootBrandTheme()
         .onAppear {
             design.ensureCanvasDocument()
             CardCanvasSync.syncLogoFromStudio(to: &design, logoData: logoData)
@@ -171,75 +170,195 @@ struct CardProCanvasView: View {
         }
     }
 
+    // MARK: - Layout
+
+    private func portraitLayout(in geo: GeometryProxy) -> some View {
+        VStack(spacing: 0) {
+            topBar
+            contextToolbar
+                .padding(.top, 8)
+            canvasWorkspace
+                .frame(height: max(220, geo.size.height * 0.44))
+            toolsPanel
+        }
+    }
+
+    private func landscapeLayout(in geo: GeometryProxy) -> some View {
+        VStack(spacing: 0) {
+            topBar
+            HStack(alignment: .top, spacing: 0) {
+                canvasWorkspace
+                    .frame(width: geo.size.width * 0.52)
+                    .frame(maxHeight: .infinity)
+                    .background(themeManager.screenBackground(for: colorScheme).opacity(0.5))
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: BuxTokens.section) {
+                        contextToolbar
+                        toolsPanelContent
+                    }
+                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .padding(.vertical, BuxTokens.section)
+                }
+                .frame(width: geo.size.width * 0.48)
+                .frame(maxHeight: .infinity)
+                .background(themeManager.screenBackground(for: colorScheme))
+            }
+            .frame(maxHeight: .infinity)
+        }
+    }
+
+    private var contextToolbar: some View {
+        CardFloatingToolbar(
+            layer: selectedLayer,
+            backgroundSelected: backgroundSelected,
+            document: canvasBinding,
+            actions: toolbarActions,
+            onChange: { canvasToolbarDidChange() }
+        )
+        .environmentObject(themeManager)
+    }
+
+    private var toolsPanel: some View {
+        ScrollView(showsIndicators: false) {
+            toolsPanelContent
+                .padding(.horizontal, BuxTokens.marginRegular)
+                .padding(.vertical, BuxTokens.section)
+        }
+        .background(themeManager.screenBackground(for: colorScheme))
+    }
+
+    private var toolsPanelContent: some View {
+        VStack(alignment: .leading, spacing: BuxTokens.section) {
+            if let doc = design.canvasDocument {
+                BuxCanvasElementsStrip(
+                    layers: doc.layers,
+                    selectedID: $selectedID,
+                    backgroundSelected: $backgroundSelected,
+                    onSelect: { _ in dragOrigin = nil }
+                )
+                .environmentObject(themeManager)
+            }
+
+            HStack(spacing: 8) {
+                railButton("Layers", icon: "square.3.layers.3d") { showLayerPanel = true }
+                railButton("Background", icon: "photo.fill.on.rectangle.fill") {
+                    backgroundSelected = true
+                    selectedID = nil
+                }
+                railButton("Add text", icon: "text.badge.plus") { addTextLayer() }
+                railButton("Shapes", icon: "triangle.fill") { showShapePicker = true }
+            }
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
+
+            HStack(spacing: 10) {
+                railButton("Reset zoom", icon: "arrow.counterclockwise") {
+                    resetWorkspaceZoom()
+                }
+                Button(action: { commitAndDismiss() }) {
+                    Label("Save to Studio", systemImage: "square.and.arrow.down")
+                        .font(.system(size: 12, weight: .bold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+            }
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
+
+            HStack(spacing: 0) {
+                Toggle("Safe zone", isOn: $showSafeZone)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Toggle("Snap", isOn: $showSnapGuides)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+
+            Text("Tap element below · drag to move · top handle to rotate · Save when done")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
+
     private var topBar: some View {
-        HStack {
-            Button("Cancel") { dismiss() }
-            Button { undo() } label: { Image(systemName: "arrow.uturn.backward") }
-                .disabled(!undoManager.canUndo)
-            Button { redo() } label: { Image(systemName: "arrow.uturn.forward") }
-                .disabled(!undoManager.canRedo)
-            Spacer()
-            Text("Bux Canvas")
-                .font(.system(size: 15, weight: .bold))
-            Spacer()
+        BuxCenteredTopBar(title: "Bux Canvas") {
+            HStack(spacing: 12) {
+                Button("Cancel") { dismiss() }
+                    .font(.system(size: 15, weight: .medium))
+                Button { undo() } label: { Image(systemName: "arrow.uturn.backward") }
+                    .disabled(!undoManager.canUndo)
+                Button { redo() } label: { Image(systemName: "arrow.uturn.forward") }
+                    .disabled(!undoManager.canRedo)
+            }
+        } trailing: {
             Button("Save") { commitAndDismiss() }
-                .fontWeight(.semibold)
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(themeManager.current.accentColor)
         }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.black.opacity(0.35))
+        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+        .background(themeManager.screenBackground(for: colorScheme))
     }
 
     private var canvasWorkspace: some View {
         GeometryReader { geo in
             let cardSize = design.aspect.previewSize
-            let baseFit = min((geo.size.width - 32) / cardSize.width, (geo.size.height - 32) / cardSize.height, 1.4)
+            let inset: CGFloat = 28
+            let baseFit = min(
+                (geo.size.width - inset * 2) / cardSize.width,
+                (geo.size.height - inset * 2) / cardSize.height,
+                1.4
+            )
             let fittedW = cardSize.width * baseFit * workspaceScale
             let fittedH = cardSize.height * baseFit * workspaceScale
             let canPanWorkspace = selectedID == nil && !backgroundSelected
 
-            ZStack {
-                if canPanWorkspace {
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .gesture(workspacePanGesture)
-                        .simultaneousGesture(workspacePinchGesture)
-                }
-
-                if showSnapGuides {
-                    snapGuides(width: fittedW, height: fittedH)
-                        .offset(workspacePan)
-                        .allowsHitTesting(false)
-                }
-
+            BusinessCardPreviewVisor {
                 ZStack {
-                    if backgroundSelected {
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(themeManager.current.accentColor, lineWidth: 2.5)
-                            .frame(width: cardSize.width, height: cardSize.height)
+                    if canPanWorkspace {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .gesture(workspacePanGesture)
+                            .simultaneousGesture(workspacePinchGesture)
+                    }
+
+                    if showSnapGuides {
+                        snapGuides(width: fittedW, height: fittedH)
+                            .offset(workspacePan)
                             .allowsHitTesting(false)
                     }
 
-                    if let ctx = CardCanvasRenderContext.make(design: design, logoData: logoData) {
-                        CardCanvasRenderer(
-                            context: ctx,
-                            selectedLayerID: backgroundSelected ? nil : selectedID,
-                            showSafeZone: showSafeZone,
-                            interactive: false
-                        )
-                        .allowsHitTesting(false)
-                    }
+                    ZStack {
+                        if backgroundSelected {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(themeManager.current.accentColor, lineWidth: 2.5)
+                                .frame(width: cardSize.width, height: cardSize.height)
+                                .allowsHitTesting(false)
+                        }
 
-                    canvasInteractionOverlay(cardSize: cardSize)
+                        if let ctx = CardCanvasRenderContext.make(design: design, logoData: logoData) {
+                            CardCanvasRenderer(
+                                context: ctx,
+                                selectedLayerID: backgroundSelected ? nil : selectedID,
+                                showSafeZone: showSafeZone,
+                                interactive: false
+                            )
+                            .allowsHitTesting(false)
+                        }
+
+                        canvasInteractionOverlay(cardSize: cardSize)
+                    }
+                    .frame(width: cardSize.width, height: cardSize.height)
+                    .scaleEffect(baseFit * workspaceScale)
+                    .offset(workspacePan)
+                    .frame(width: fittedW, height: fittedH)
+                    .shadow(color: .black.opacity(0.22), radius: 16, y: 8)
                 }
-                .frame(width: cardSize.width, height: cardSize.height)
-                .scaleEffect(baseFit * workspaceScale)
-                .offset(workspacePan)
-                .frame(width: fittedW, height: fittedH)
-                .shadow(color: .black.opacity(0.45), radius: 24, y: 12)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .environmentObject(themeManager)
+            .padding(BuxTokens.tight)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
@@ -332,93 +451,44 @@ struct CardProCanvasView: View {
         snapshotForUndo()
     }
 
-    private var bottomRail: some View {
-        VStack(spacing: 8) {
-            if let doc = design.canvasDocument {
-                BuxCanvasElementsStrip(
-                    layers: doc.layers,
-                    selectedID: $selectedID,
-                    backgroundSelected: $backgroundSelected,
-                    onSelect: { _ in dragOrigin = nil }
-                )
-            }
-
-            HStack(spacing: 12) {
-                railButton("Layers", icon: "square.3.layers.3d") { showLayerPanel = true }
-                railButton("Background", icon: "photo.fill.on.rectangle.fill") {
-                    backgroundSelected = true
-                    selectedID = nil
-                }
-                railButton("Add text", icon: "text.badge.plus") { addTextLayer() }
-                railButton("Shapes", icon: "triangle.fill") { showShapePicker = true }
-            }
-
-            HStack(spacing: 12) {
-                railButton("Reset zoom", icon: "arrow.counterclockwise") {
-                    workspaceScale = 1
-                    lastWorkspaceScale = 1
-                    workspacePan = .zero
-                    lastWorkspacePan = .zero
-                }
-                Button(action: { commitAndDismiss() }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "square.and.arrow.down")
-                        Text("Save to Studio")
-                            .font(.system(size: 11, weight: .bold))
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(themeManager.current.accentColor)
-                    .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-            }
-
-            HStack {
-                Toggle("Safe zone", isOn: $showSafeZone).tint(themeManager.current.accentColor)
-                Toggle("Snap", isOn: $showSnapGuides).tint(themeManager.current.accentColor)
-            }
-            .font(.system(size: 11, weight: .medium))
-            .foregroundStyle(.white.opacity(0.85))
-
-            Text("Tap element below · drag to move · top handle to rotate · Save when done")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(.white.opacity(0.45))
-                .multilineTextAlignment(.center)
-        }
-        .padding(14)
-        .background(.black.opacity(0.45))
+    private func resetWorkspaceZoom() {
+        workspaceScale = 1
+        lastWorkspaceScale = 1
+        workspacePan = .zero
+        lastWorkspacePan = .zero
     }
 
     private func railButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 2) {
+            VStack(spacing: 3) {
                 Image(systemName: icon).font(.system(size: 14, weight: .semibold))
-                Text(title).font(.system(size: 9, weight: .bold))
+                Text(title).font(.system(size: 10, weight: .bold))
             }
-            .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.bordered)
+        .controlSize(.small)
     }
 
     private func inlineTextOverlay(layerID: UUID) -> some View {
         ZStack {
-            Color.black.opacity(0.55).ignoresSafeArea().onTapGesture { inlineEditLayerID = nil }
+            Color.black.opacity(colorScheme == .dark ? 0.55 : 0.35)
+                .ignoresSafeArea()
+                .onTapGesture { inlineEditLayerID = nil }
             VStack(spacing: 12) {
                 TextField("Edit text", text: $inlineEditText, axis: .vertical)
                     .lineLimit(1...4)
                     .padding()
-                    .background(.regularMaterial)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 HStack {
                     Button("Cancel") { inlineEditLayerID = nil }
                     Spacer()
                     Button("Apply") { applyInlineEdit(layerID: layerID) }
                         .fontWeight(.semibold)
+                        .foregroundStyle(themeManager.current.accentColor)
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
             }
             .padding(24)
         }
@@ -680,8 +750,12 @@ struct CardProCanvasView: View {
 
     private func snapGuides(width: CGFloat, height: CGFloat) -> some View {
         ZStack {
-            Rectangle().fill(Color.white.opacity(0.12)).frame(width: 1, height: height)
-            Rectangle().fill(Color.white.opacity(0.12)).frame(width: width, height: 1)
+            Rectangle()
+                .fill(themeManager.current.accentColor.opacity(0.18))
+                .frame(width: 1, height: height)
+            Rectangle()
+                .fill(themeManager.current.accentColor.opacity(0.18))
+                .frame(width: width, height: 1)
         }
     }
 

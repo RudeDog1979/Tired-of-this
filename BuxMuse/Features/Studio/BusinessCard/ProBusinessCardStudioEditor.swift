@@ -10,6 +10,8 @@ import UIKit
 
 struct ProBusinessCardEditorView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var studioStore: StudioStore
 
@@ -18,6 +20,7 @@ struct ProBusinessCardEditorView: View {
     @State private var draft: ProBusinessCardDesign?
     @State private var designBaseline: ProBusinessCardDesign?
     @State private var templatePreviewActive = false
+    @State private var showDiscardAlert = false
     @State private var activeTab: StudioTab = .design
     @State private var pickedImage: UIImage?
     @State private var backgroundPick: UIImage?
@@ -30,6 +33,8 @@ struct ProBusinessCardEditorView: View {
     @State private var showSafeZone = false
     @State private var showFullscreenCanvas = false
     @State private var showImmersivePreview = false
+    @State private var show3DLook = false
+    @State private var editingSide: ProBusinessCardSide = .front
 
     private enum PhotoPickTarget { case portrait, background, logo }
     private enum StudioTab: String, CaseIterable, Identifiable {
@@ -57,18 +62,55 @@ struct ProBusinessCardEditorView: View {
         draft ?? studioStore.businessCardLibrary.designs.first(where: { $0.id == designID })
     }
 
+    private var isEphemeralDraft: Bool {
+        draft?.isDraft ?? true
+    }
+
+    private var hasUnsavedChanges: Bool {
+        guard let draft, let designBaseline else { return isEphemeralDraft }
+        return draft != designBaseline
+    }
+
+    private var needsLeaveConfirmation: Bool {
+        isEphemeralDraft || hasUnsavedChanges
+    }
+
+    private var canSaveDraft: Bool {
+        needsLeaveConfirmation
+    }
+
+    private var isLandscapeEditing: Bool {
+        verticalSizeClass == .compact
+    }
+
+    private var controlTint: Color {
+        themeManager.contrastAccentColor(for: colorScheme)
+    }
+
     var body: some View {
         GeometryReader { geo in
-            let wide = geo.size.width > max(geo.size.height, 560)
+            let landscape = geo.size.width > geo.size.height
+            let split = landscape || geo.size.width > 720
             if let design {
-                if wide {
-                    HStack(spacing: 0) {
-                        previewPane(design, width: geo.size.width * 0.44, height: geo.size.height)
-                        inspectorPane(design)
+                if split {
+                    VStack(spacing: 0) {
+                        if isLandscapeEditing {
+                            landscapeEditorTopBar
+                        }
+                        HStack(alignment: .top, spacing: 0) {
+                            landscapePreviewColumn(design, geo: geo)
+                                .frame(width: geo.size.width * 0.52)
+                                .frame(maxHeight: .infinity, alignment: .top)
+                            inspectorPane(design)
+                                .frame(width: geo.size.width * 0.48)
+                                .frame(maxHeight: .infinity, alignment: .top)
+                        }
+                        .frame(maxHeight: .infinity)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 } else {
                     VStack(spacing: 0) {
-                        previewPane(design, width: geo.size.width, height: min(geo.size.height * 0.38, 280))
+                        compactPreviewColumn(design, width: geo.size.width, height: geo.size.height * 0.58)
                         tabBar
                         tabScroll(design)
                     }
@@ -78,8 +120,43 @@ struct ProBusinessCardEditorView: View {
             }
         }
         .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
-        .navigationTitle(draft?.title ?? "Card Studio")
+        .buxRootBrandTheme()
+        .navigationTitle(isLandscapeEditing ? "" : (draft?.title ?? "Card Studio"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(isLandscapeEditing ? .hidden : .visible, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            if !isLandscapeEditing {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        attemptLeave()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
+                    .accessibilityLabel("Back")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save Draft") {
+                        saveDraftToLibrary()
+                    }
+                    .fontWeight(.semibold)
+                    .disabled(!canSaveDraft)
+                }
+            }
+        }
+        .alert("Discard changes?", isPresented: $showDiscardAlert) {
+            Button("Keep editing", role: .cancel) { }
+            Button("Discard", role: .destructive) {
+                discardAndLeave()
+            }
+        } message: {
+            if isEphemeralDraft {
+                Text("This card hasn't been saved to Your designs yet. Discarding will delete it.")
+            } else {
+                Text("Your edits since opening this card will be lost.")
+            }
+        }
         .onAppear {
             let stored = studioStore.businessCardLibrary.designs.first(where: { $0.id == designID })
             draft = stored
@@ -88,7 +165,6 @@ struct ProBusinessCardEditorView: View {
         }
         .onDisappear {
             revertTemplatePreviewIfNeeded()
-            persistDraft()
         }
         .onChange(of: pickTarget) { _, target in
             guard let target else { return }
@@ -117,7 +193,7 @@ struct ProBusinessCardEditorView: View {
                     if let path = SimpleStudioScanImageStore.save(cropped, id: UUID()) {
                         mutateDraft { $0.style.backgroundPhotoPath = path; $0.style.backgroundStyle = .photo }
                     }
-                    backgroundPick = nil; persistDraft()
+                    backgroundPick = nil; syncDraftChanges()
                 }
                 .environmentObject(themeManager)
             }
@@ -130,7 +206,7 @@ struct ProBusinessCardEditorView: View {
                     session: session
                 ) { result in
                     applyPhotoStudioResult(result)
-                    persistDraft()
+                    syncDraftChanges()
                 }
                 .environmentObject(themeManager)
             }
@@ -143,7 +219,7 @@ struct ProBusinessCardEditorView: View {
                     set: { draft = $0 }
                 ),
                 logoData: studioStore.profile.logoData,
-                onSave: { persistDraft() },
+                onSave: { syncDraftChanges() },
                 onPickBackgroundPhoto: { pickTarget = .background }
             )
             .environmentObject(themeManager)
@@ -158,79 +234,280 @@ struct ProBusinessCardEditorView: View {
                 .environmentObject(themeManager)
             }
         }
+        .fullScreenCover(isPresented: $show3DLook) {
+            if let design {
+                BusinessCard3DLookView(design: design, logoData: studioStore.profile.logoData)
+                    .environmentObject(themeManager)
+            }
+        }
     }
 
     // MARK: Preview
 
-    @ViewBuilder
-    private func previewPane(_ design: ProBusinessCardDesign, width: CGFloat, height: CGFloat) -> some View {
-        let previewHeight = max(160, height - 88)
-        VStack(spacing: 10) {
-            cardOrientationBar(design)
-            interactivePreview(design, maxWidth: width, maxHeight: previewHeight)
-                .id("\(design.id)-\(design.aspect.rawValue)-\(design.template.rawValue)-\(Int(design.updatedAt.timeIntervalSince1970))")
-            HStack(spacing: 8) {
-                previewActionButton(title: "Fullscreen", icon: "arrow.up.left.and.arrow.down.right") {
-                    showImmersivePreview = true
-                }
-                previewActionButton(title: "Bux Canvas", icon: "square.3.layers.3d") {
-                    mutateDraft {
-                        $0.ensureCanvasDocument()
-                        CardCanvasSync.syncLogoFromStudio(to: &$0, logoData: studioStore.profile.logoData)
-                    }
-                    persistDraft()
-                    showFullscreenCanvas = true
-                }
-                Menu {
-                    if design.options.showsPhoto && design.style.photoScale != .off {
-                        Button("Your photo") { beginPhotoStudio(for: .profilePhoto, design: design) }
-                    }
-                    if design.options.showsLogo {
-                        Button("Business logo") { beginPhotoStudio(for: .logo, design: design) }
-                    }
-                    if design.style.hasBackgroundPhoto {
-                        Button("Background photo") { beginPhotoStudio(for: .backgroundPhoto, design: design) }
-                    }
-                    if availablePhotoTargets(for: design).isEmpty {
-                        Button("Add your photo") { pickTarget = .portrait }
-                    }
-                } label: {
-                    previewActionButtonLabel(title: "Edit photo", icon: "camera.filters")
+    private var landscapeEditorTopBar: some View {
+        BuxCenteredTopBar(title: draft?.title ?? "Card Studio", titleFont: .system(size: 17, weight: .semibold)) {
+            Button {
+                attemptLeave()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 17, weight: .semibold))
+            }
+            .accessibilityLabel("Back")
+        } trailing: {
+            Button("Save Draft") {
+                saveDraftToLibrary()
+            }
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(canSaveDraft ? themeManager.current.accentColor : .secondary)
+            .disabled(!canSaveDraft)
+        }
+        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+        .background(Color(uiColor: .secondarySystemGroupedBackground).opacity(0.95))
+    }
+
+    private var cardSidePicker: some View {
+        cardSideSegmentedControl
+            .padding(.horizontal, BuxTokens.marginRegular)
+    }
+
+    private var cardSideSegmentedControl: some View {
+        HStack {
+            Picker("Side", selection: $editingSide) {
+                ForEach(ProBusinessCardSide.allCases) { side in
+                    Text(side.title).tag(side)
                 }
             }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+        }
+        .tint(controlTint)
+        .buxSegmentedControlAccent(controlTint)
+    }
+
+    private func landscapeCardControls(width: CGFloat) -> some View {
+        cardSideSegmentedControl
+            .frame(maxWidth: min(width - BuxTokens.marginRegular * 2, 320))
             .padding(.horizontal, BuxTokens.marginRegular)
+    }
+
+    private var orientationPicker: some View {
+        Picker("Orientation", selection: aspectBinding) {
+            Text("Landscape").tag(ProBusinessCardAspect.standardUS)
+            Text("Portrait").tag(ProBusinessCardAspect.portraitVertical)
+            Text("Square").tag(ProBusinessCardAspect.squareSocial)
+        }
+        .buxThemedSegmentedPicker()
+    }
+
+    private func landscapeOrientationBar(_ design: ProBusinessCardDesign, width: CGFloat) -> some View {
+        orientationPicker
+            .frame(maxWidth: min(width - BuxTokens.marginRegular * 2, 320))
+            .padding(.horizontal, BuxTokens.marginRegular)
+    }
+
+    private func landscapePreviewColumn(_ design: ProBusinessCardDesign, geo: GeometryProxy) -> some View {
+        let columnWidth = geo.size.width * 0.52
+
+        return VStack(spacing: 8) {
+            landscapeCardControls(width: columnWidth)
+            landscapeOrientationBar(design, width: columnWidth)
+                .tint(controlTint)
+
+            BusinessCardPreviewVisor {
+                GeometryReader { visorGeo in
+                    sidePreview(
+                        design,
+                        maxWidth: visorGeo.size.width,
+                        maxHeight: visorGeo.size.height
+                    )
+                    .id("\(editingSide.rawValue)-\(design.template.rawValue)-\(design.aspect.rawValue)")
+                    .frame(width: visorGeo.size.width, height: visorGeo.size.height)
+                }
+            }
+            .environmentObject(themeManager)
+            .padding(.horizontal, BuxTokens.tight)
+            .layoutPriority(1)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(minHeight: max(200, geo.size.height * 0.52))
+
+            splitPreviewActions(design)
             HStack {
-                Toggle("Safe zone", isOn: $showSafeZone).font(.system(size: 11, weight: .medium))
+                Toggle("Safe zone", isOn: $showSafeZone)
+                    .font(.system(size: 11, weight: .medium))
                 Spacer()
                 Text(design.aspect.title + " · " + design.template.title)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.tertiary)
             }
             .padding(.horizontal, BuxTokens.marginRegular)
+            .tint(controlTint)
         }
-        .padding(.vertical, BuxTokens.section)
-        .background(Color(uiColor: .secondarySystemGroupedBackground).opacity(0.35))
+        .padding(.top, BuxTokens.tight)
+        .padding(.bottom, BuxTokens.tight)
+        .frame(width: columnWidth)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(themeManager.screenBackground(for: colorScheme).opacity(0.5))
+    }
+
+    private func splitPreviewColumn(_ design: ProBusinessCardDesign, geo: GeometryProxy) -> some View {
+        VStack(spacing: 10) {
+            cardSidePicker
+            cardOrientationBar(design)
+                .tint(controlTint)
+
+            BusinessCardPreviewVisor {
+                GeometryReader { visorGeo in
+                    sidePreview(
+                        design,
+                        maxWidth: visorGeo.size.width,
+                        maxHeight: visorGeo.size.height
+                    )
+                    .id("\(editingSide.rawValue)-\(design.template.rawValue)-\(design.aspect.rawValue)")
+                    .frame(width: visorGeo.size.width, height: visorGeo.size.height)
+                }
+            }
+            .environmentObject(themeManager)
+            .padding(.horizontal, BuxTokens.tight)
+            .layoutPriority(1)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            splitPreviewActions(design)
+            HStack {
+                Toggle("Safe zone", isOn: $showSafeZone)
+                    .font(.system(size: 11, weight: .medium))
+                Spacer()
+                Text(design.aspect.title + " · " + design.template.title)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, BuxTokens.marginRegular)
+            .tint(controlTint)
+        }
+        .padding(.vertical, BuxTokens.tight)
+        .background(themeManager.screenBackground(for: colorScheme).opacity(0.5))
+    }
+
+    private func compactPreviewColumn(_ design: ProBusinessCardDesign, width: CGFloat, height: CGFloat) -> some View {
+        VStack(spacing: 8) {
+            cardSidePicker
+            cardOrientationBar(design)
+                .tint(controlTint)
+
+            BusinessCardPreviewVisor {
+                GeometryReader { visorGeo in
+                    sidePreview(
+                        design,
+                        maxWidth: visorGeo.size.width,
+                        maxHeight: visorGeo.size.height
+                    )
+                    .id("\(editingSide.rawValue)-\(design.template.rawValue)-\(design.aspect.rawValue)")
+                    .frame(width: visorGeo.size.width, height: visorGeo.size.height)
+                }
+            }
+            .environmentObject(themeManager)
+            .padding(.horizontal, BuxTokens.tight)
+            .layoutPriority(1)
+            .frame(maxWidth: .infinity, maxHeight: max(height - 72, 260))
+
+            compactPreviewActions(design)
+            HStack {
+                Toggle("Safe zone", isOn: $showSafeZone)
+                    .font(.system(size: 11, weight: .medium))
+                Spacer()
+                Text(design.aspect.title + " · " + design.template.title)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, BuxTokens.marginRegular)
+            .tint(controlTint)
+        }
+        .padding(.vertical, BuxTokens.tight)
+        .background(themeManager.screenBackground(for: colorScheme).opacity(0.5))
+    }
+
+    @ViewBuilder
+    private func sidePreview(_ design: ProBusinessCardDesign, maxWidth: CGFloat, maxHeight: CGFloat) -> some View {
+        if editingSide == .back {
+            backFitPreview(design, maxWidth: maxWidth, maxHeight: maxHeight)
+        } else {
+            interactivePreview(design, maxWidth: maxWidth, maxHeight: maxHeight)
+        }
+    }
+
+    private func backFitPreview(_ design: ProBusinessCardDesign, maxWidth: CGFloat, maxHeight: CGFloat) -> some View {
+        let size = design.aspect.previewSize
+        let wScale = (maxWidth - 24) / size.width
+        let hScale = (maxHeight - 16) / size.height
+        let fit = max(0.08, min(wScale, hScale, 1.2))
+        return ProBusinessCardBackRenderer(design: design, logoData: studioStore.profile.logoData)
+            .scaleEffect(fit)
+            .frame(width: size.width * fit, height: size.height * fit)
+            .shadow(color: .black.opacity(0.16), radius: 14, y: 6)
+            .frame(width: maxWidth, height: max(size.height * fit + 20, min(maxHeight, size.height * fit + 20)))
+    }
+
+    private func splitPreviewActions(_ design: ProBusinessCardDesign) -> some View {
+        HStack(spacing: 8) {
+            previewActionButton(title: "See the look", icon: "rotate.3d.fill") { show3DLook = true }
+            previewActionButton(title: "Bux Canvas", icon: "square.3.layers.3d") { openBuxCanvas() }
+            photoEditMenu(design)
+        }
+        .tint(controlTint)
+        .padding(.horizontal, BuxTokens.marginRegular)
+    }
+
+    private func compactPreviewActions(_ design: ProBusinessCardDesign) -> some View {
+        HStack(spacing: 8) {
+            previewActionButton(title: "See the look", icon: "rotate.3d.fill") { show3DLook = true }
+            previewActionButton(title: "Fullscreen", icon: "arrow.up.left.and.arrow.down.right") { showImmersivePreview = true }
+            previewActionButton(title: "Bux Canvas", icon: "square.3.layers.3d") { openBuxCanvas() }
+            photoEditMenu(design)
+        }
+        .tint(controlTint)
+        .padding(.horizontal, BuxTokens.marginRegular)
+    }
+
+    private func openBuxCanvas() {
+        mutateDraft {
+            $0.ensureCanvasDocument()
+            CardCanvasSync.syncLogoFromStudio(to: &$0, logoData: studioStore.profile.logoData)
+        }
+        syncDraftChanges()
+        showFullscreenCanvas = true
+    }
+
+    private func photoEditMenu(_ design: ProBusinessCardDesign) -> some View {
+        Menu {
+            if design.options.showsPhoto && design.style.photoScale != .off {
+                Button("Your photo") { beginPhotoStudio(for: .profilePhoto, design: design) }
+            }
+            if design.options.showsLogo {
+                Button("Business logo") { beginPhotoStudio(for: .logo, design: design) }
+            }
+            if design.style.hasBackgroundPhoto {
+                Button("Background photo") { beginPhotoStudio(for: .backgroundPhoto, design: design) }
+            }
+            if availablePhotoTargets(for: design).isEmpty {
+                Button("Add your photo") { pickTarget = .portrait }
+            }
+        } label: {
+            previewActionButtonLabel(title: "Edit photo", icon: "camera.filters")
+        }
+        .menuStyle(.button)
+        .businessCardPreviewActionButtonStyle()
     }
 
     private func previewActionButtonLabel(title: String, icon: String) -> some View {
         Label(title, systemImage: icon)
             .font(.system(size: 11, weight: .bold))
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color(uiColor: .tertiarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
     private func previewActionButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Label(title, systemImage: icon)
-                .font(.system(size: 11, weight: .bold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(Color(uiColor: .tertiarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+            previewActionButtonLabel(title: title, icon: icon)
         }
-        .buttonStyle(.plain)
+        .businessCardPreviewActionButtonStyle()
     }
 
     private func interactivePreview(_ design: ProBusinessCardDesign, maxWidth: CGFloat, maxHeight: CGFloat) -> some View {
@@ -274,28 +551,8 @@ struct ProBusinessCardEditorView: View {
     }
 
     private func cardOrientationBar(_ design: ProBusinessCardDesign) -> some View {
-        HStack(spacing: 8) {
-            orientationChip(title: "Landscape", aspect: .standardUS, current: design.aspect)
-            orientationChip(title: "Portrait", aspect: .portraitVertical, current: design.aspect)
-            orientationChip(title: "Square", aspect: .squareSocial, current: design.aspect)
-        }
-        .padding(.horizontal, BuxTokens.marginRegular)
-    }
-
-    private func orientationChip(title: String, aspect: ProBusinessCardAspect, current: ProBusinessCardAspect) -> some View {
-        Button {
-            mutateDraft { $0.applyAspectChange(aspect) }
-            persistDraft()
-        } label: {
-            Text(title)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(current == aspect ? .white : themeManager.labelPrimary(for: colorScheme))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(current == aspect ? themeManager.current.accentColor : Color(uiColor: .tertiarySystemGroupedBackground))
-                .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
+        orientationPicker
+            .padding(.horizontal, BuxTokens.marginRegular)
     }
 
     // MARK: Inspector
@@ -315,7 +572,7 @@ struct ProBusinessCardEditorView: View {
                 .buttonStyle(.plain)
             }
         }
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background(themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.08 : 0.04))
     }
 
     private func inspectorPane(_ design: ProBusinessCardDesign) -> some View {
@@ -327,7 +584,7 @@ struct ProBusinessCardEditorView: View {
 
     private func tabScroll(_ design: ProBusinessCardDesign) -> some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BuxTokens.block) {
+            LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
                 BusinessCardPhotoAccessBanner().environmentObject(themeManager)
                 switch activeTab {
                 case .design: designTab(design)
@@ -347,10 +604,18 @@ struct ProBusinessCardEditorView: View {
         Group {
             templateSection(design)
             identitySection(design)
+            ProBusinessCardPalettePicker(design: design) { palette in
+                mutateDraft {
+                    $0.palette = palette
+                    CardCanvasSync.pushQuickStudioVisuals(to: &$0)
+                }
+                syncDraftChanges()
+            }
+            .environmentObject(themeManager)
+            lookSection(design)
             fontGallerySection(design)
             typographySection(design)
-            lookSection(design)
-            paletteSection(design)
+            backSideSection(design)
             aspectExtras(design)
         }
     }
@@ -366,7 +631,7 @@ struct ProBusinessCardEditorView: View {
                                 $0.style.typography.fontID = font.rawValue
                                 CardCanvasSync.pushQuickStudioVisuals(to: &$0)
                             }
-                            persistDraft()
+                            syncDraftChanges()
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Aa")
@@ -378,11 +643,34 @@ struct ProBusinessCardEditorView: View {
                             .foregroundColor(design.style.typography.fontID == font.rawValue ? .white : themeManager.labelPrimary(for: colorScheme))
                             .padding(10)
                             .frame(width: 100, alignment: .leading)
-                            .background(design.style.typography.fontID == font.rawValue ? themeManager.current.accentColor : Color(uiColor: .secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .businessCardThemedChip(
+                                isSelected: design.style.typography.fontID == font.rawValue,
+                                themeManager: themeManager,
+                                colorScheme: colorScheme
+                            )
                         }
                         .buttonStyle(.plain)
                     }
+                }
+                .padding(.horizontal, 2)
+            }
+            .buxThemedHorizontalScrollEdgeFade(themeManager: themeManager, colorScheme: colorScheme, width: 20)
+        }
+    }
+
+    private func backSideSection(_ design: ProBusinessCardDesign) -> some View {
+        BuxThemedCardForm {
+            BuxFormSection(title: "Back of card") {
+                toggle("Print back side", binding(\.backSide.isEnabled))
+                if design.backSide.isEnabled {
+                    BuxFormRowDivider()
+                    TextField("Back note (optional)", text: binding(\.backSide.note), axis: .vertical)
+                        .lineLimit(2...4)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    toggle("Show logo on back", binding(\.backSide.showsLogo))
+                    BuxFormRowDivider()
+                    toggle("Show contact on back", binding(\.backSide.showsContact))
                 }
             }
         }
@@ -416,13 +704,19 @@ struct ProBusinessCardEditorView: View {
                                 .foregroundColor(design.template == t ? .white : themeManager.labelPrimary(for: colorScheme))
                                 .padding(10)
                                 .frame(width: 88)
-                                .background(design.template == t ? themeManager.current.accentColor : Color(uiColor: .secondarySystemGroupedBackground))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .businessCardThemedChip(
+                                    isSelected: design.template == t,
+                                    themeManager: themeManager,
+                                    colorScheme: colorScheme
+                                )
                             }
                             .buttonStyle(.plain)
                         }
                     }
+                    .padding(.horizontal, BuxTokens.marginRegular)
                 }
+                .buxThemedHorizontalScrollEdgeFade(themeManager: themeManager, colorScheme: colorScheme, width: 20)
+                .padding(.horizontal, -BuxTokens.marginRegular)
             }
         }
     }
@@ -430,26 +724,29 @@ struct ProBusinessCardEditorView: View {
     private func identitySection(_ design: ProBusinessCardDesign) -> some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Brand identity") {
-                Picker("Mode", selection: identityBinding) {
-                    ForEach(ProBusinessCardIdentityMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
+                Group {
+                    Picker("Mode", selection: identityBinding) {
+                        ForEach(ProBusinessCardIdentityMode.allCases) { mode in
+                            Text(mode.title).tag(mode)
+                        }
                     }
-                }
-                .pickerStyle(.segmented)
-                .buxFormFieldPadding()
-                Text(design.style.identityMode.subtitle)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
+                    .buxThemedSegmentedPicker()
                     .buxFormFieldPadding()
-                BuxFormRowDivider()
-                Picker("Logo size", selection: logoScaleBinding) {
-                    Text("S").tag(ProBusinessCardLogoScale.small)
-                    Text("M").tag(ProBusinessCardLogoScale.medium)
-                    Text("L").tag(ProBusinessCardLogoScale.large)
-                    Text("Hero").tag(ProBusinessCardLogoScale.hero)
+                    Text(design.style.identityMode.subtitle)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    Picker("Logo size", selection: logoScaleBinding) {
+                        Text("S").tag(ProBusinessCardLogoScale.small)
+                        Text("M").tag(ProBusinessCardLogoScale.medium)
+                        Text("L").tag(ProBusinessCardLogoScale.large)
+                        Text("Hero").tag(ProBusinessCardLogoScale.hero)
+                    }
+                    .buxThemedSegmentedPicker()
+                    .buxFormFieldPadding()
                 }
-                .pickerStyle(.segmented)
-                .buxFormFieldPadding()
+                .tint(controlTint)
             }
         }
     }
@@ -488,28 +785,6 @@ struct ProBusinessCardEditorView: View {
                     Text("Accent").tag(ProBusinessCardBorderStyle.accent)
                 }
                 .buxFormFieldPadding()
-            }
-        }
-    }
-
-    private func paletteSection(_ design: ProBusinessCardDesign) -> some View {
-        VStack(alignment: .leading, spacing: BuxTokens.tight) {
-            BuxSectionHeader(title: "Colors")
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(BuxBrandStyleEngine.suggestedPalettes(for: design), id: \.name) { preset in
-                        Button {
-                            mutateDraft { $0.palette = preset.palette; CardCanvasSync.pushQuickStudioVisuals(to: &$0) }
-                            persistDraft()
-                        } label: {
-                            Circle()
-                                .fill(Color(hex: preset.palette.accentHex))
-                                .frame(width: 34, height: 34)
-                                .overlay(Circle().stroke(design.palette == preset.palette ? Color.primary : .clear, lineWidth: 2.5))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
             }
         }
     }
@@ -662,7 +937,7 @@ struct ProBusinessCardEditorView: View {
                 $0.options.showsPhoto = true
                 if $0.style.photoScale == .off { $0.style.photoScale = pos.isStrip ? .hero : .medium }
             }
-            persistDraft()
+            syncDraftChanges()
         } label: {
             Image(systemName: pos.gridIcon)
                 .font(.system(size: compact ? 12 : 14, weight: .semibold))
@@ -781,9 +1056,14 @@ struct ProBusinessCardEditorView: View {
             set: { mode in
                 mutateDraft {
                     $0.style.applyIdentityMode(mode)
+                    $0.options.showsLogo = true
                     $0.options.showsPhoto = $0.style.photoScale != .off
+                    $0.style.nameCanvas = nil
+                    $0.updatedAt = Date()
+                    CardCanvasSync.applyIdentityLayout(to: &$0)
                 }
-                persistDraft()
+                templatePreviewActive = false
+                syncDraftChanges()
             }
         )
     }
@@ -795,8 +1075,10 @@ struct ProBusinessCardEditorView: View {
                 mutateDraft {
                     $0.style.logoScale = scale
                     $0.style.logoCanvas = nil
+                    $0.updatedAt = Date()
+                    CardCanvasSync.applyIdentityLayout(to: &$0)
                 }
-                persistDraft()
+                syncDraftChanges()
             }
         )
     }
@@ -806,7 +1088,7 @@ struct ProBusinessCardEditorView: View {
             get: { draft?.aspect ?? .standardUS },
             set: { aspect in
                 mutateDraft { $0.applyAspectChange(aspect) }
-                persistDraft()
+                syncDraftChanges()
             }
         )
     }
@@ -816,7 +1098,7 @@ struct ProBusinessCardEditorView: View {
             get: { draft?.style.backgroundStyle ?? .solid },
             set: { style in
                 mutateDraft { $0.style.backgroundStyle = style }
-                persistDraft()
+                syncDraftChanges()
                 if style == .photo, draft?.style.hasBackgroundPhoto != true {
                     pickTarget = .background
                 }
@@ -833,7 +1115,7 @@ struct ProBusinessCardEditorView: View {
                     $0.options.showsPhoto = scale != .off
                     if scale == .off { $0.style.photoCanvas = nil }
                 }
-                persistDraft()
+                syncDraftChanges()
             }
         )
     }
@@ -846,7 +1128,7 @@ struct ProBusinessCardEditorView: View {
                     $0.content.name = v
                     if $0.style.watermark.text.isEmpty { $0.style.watermark.text = v }
                 }
-                persistDraft()
+                syncDraftChanges()
             }
         )
     }
@@ -858,7 +1140,7 @@ struct ProBusinessCardEditorView: View {
                     ?? studioStore.businessCardLibrary.designs.first(where: { $0.id == designID })?[keyPath: keyPath]
                     ?? ProBusinessCardDesign(title: "Card")[keyPath: keyPath]
             },
-            set: { v in mutateDraft { $0[keyPath: keyPath] = v; $0.updatedAt = Date() }; persistDraft() }
+            set: { v in mutateDraft { $0[keyPath: keyPath] = v; $0.updatedAt = Date() }; syncDraftChanges() }
         )
     }
 
@@ -866,7 +1148,7 @@ struct ProBusinessCardEditorView: View {
         Toggle(title, isOn: b)
             .tint(themeManager.current.accentColor)
             .buxFormFieldPadding()
-            .onChange(of: b.wrappedValue) { _, v in onChange?(v); persistDraft() }
+            .onChange(of: b.wrappedValue) { _, v in onChange?(v); syncDraftChanges() }
     }
 
     private func slider(_ title: String, _ b: Binding<Double>, range: ClosedRange<Double>) -> some View {
@@ -901,18 +1183,43 @@ struct ProBusinessCardEditorView: View {
         }
     }
 
-    private func persistDraft() {
+    private func syncDraftChanges() {
         templatePreviewActive = false
-        if var d = draft {
-            CardCanvasSync.ensureDocument(on: &d)
-            CardCanvasSync.pushQuickStudioVisuals(to: &d)
-            d.updatedAt = Date()
-            draft = d
-            studioStore.updateBusinessCardDesign(d)
+        guard var d = draft else { return }
+        CardCanvasSync.ensureDocument(on: &d)
+        CardCanvasSync.pushQuickStudioVisuals(to: &d)
+        d.updatedAt = Date()
+        draft = d
+    }
+
+    private func saveDraftToLibrary() {
+        guard var d = draft else { return }
+        CardCanvasSync.ensureDocument(on: &d)
+        CardCanvasSync.pushQuickStudioVisuals(to: &d)
+        d.updatedAt = Date()
+        d.isDraft = false
+        draft = d
+        studioStore.updateBusinessCardDesign(d)
+        designBaseline = d
+        dismiss()
+    }
+
+    private func attemptLeave() {
+        if needsLeaveConfirmation {
+            showDiscardAlert = true
+        } else {
+            dismiss()
         }
     }
 
-    private func clearBackgroundPhoto() { mutateDraft { $0.style.clearBackgroundPhoto() }; persistDraft() }
+    private func discardAndLeave() {
+        if isEphemeralDraft {
+            studioStore.deleteBusinessCardDesign(id: designID)
+        }
+        dismiss()
+    }
+
+    private func clearBackgroundPhoto() { mutateDraft { $0.style.clearBackgroundPhoto() }; syncDraftChanges() }
 
     private func exportPDF(_ design: ProBusinessCardDesign) {
         ProBusinessCardShareActions.sharePDF(design: design, logoData: studioStore.profile.logoData)

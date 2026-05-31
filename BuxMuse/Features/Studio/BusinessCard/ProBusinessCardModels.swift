@@ -10,7 +10,7 @@ import CoreGraphics
 
 // MARK: - Template (15 launch templates)
 
-public enum ProBusinessCardTemplate: String, Codable, CaseIterable, Identifiable, Sendable {
+public enum ProBusinessCardTemplate: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
     case classic
     case boldTrade
     case watermark
@@ -755,6 +755,27 @@ public struct ProBusinessCardContent: Codable, Equatable, Sendable {
     }
 }
 
+public struct ProBusinessCardBackSide: Codable, Equatable, Sendable {
+    public var isEnabled: Bool
+    public var note: String
+    public var showsLogo: Bool
+    public var showsContact: Bool
+
+    public init(
+        isEnabled: Bool = true,
+        note: String = "",
+        showsLogo: Bool = true,
+        showsContact: Bool = true
+    ) {
+        self.isEnabled = isEnabled
+        self.note = note
+        self.showsLogo = showsLogo
+        self.showsContact = showsContact
+    }
+
+    public static var standard: ProBusinessCardBackSide { ProBusinessCardBackSide() }
+}
+
 public struct ProBusinessCardOptions: Codable, Equatable, Sendable {
     public var showsPhoto: Bool
     public var showsLogo: Bool
@@ -790,9 +811,12 @@ public struct ProBusinessCardDesign: Identifiable, Codable, Equatable, Sendable 
     public var options: ProBusinessCardOptions
     public var style: ProBusinessCardStyle
     public var content: ProBusinessCardContent
+    public var backSide: ProBusinessCardBackSide
     public var updatedAt: Date
     public var canvasDocument: CardCanvasDocument?
     public var editorPreferences: CardEditorPreferences?
+    /// Ephemeral session designs stay hidden from Your designs until Save Draft.
+    public var isDraft: Bool
 
     public init(
         id: UUID = UUID(),
@@ -803,9 +827,11 @@ public struct ProBusinessCardDesign: Identifiable, Codable, Equatable, Sendable 
         options: ProBusinessCardOptions = .businessDefault,
         style: ProBusinessCardStyle = ProBusinessCardStyle(),
         content: ProBusinessCardContent = ProBusinessCardContent(),
+        backSide: ProBusinessCardBackSide = .standard,
         updatedAt: Date = Date(),
         canvasDocument: CardCanvasDocument? = nil,
-        editorPreferences: CardEditorPreferences? = nil
+        editorPreferences: CardEditorPreferences? = nil,
+        isDraft: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -815,14 +841,16 @@ public struct ProBusinessCardDesign: Identifiable, Codable, Equatable, Sendable 
         self.options = options
         self.style = style
         self.content = content
+        self.backSide = backSide
         self.updatedAt = updatedAt
         self.canvasDocument = canvasDocument
         self.editorPreferences = editorPreferences
+        self.isDraft = isDraft
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, title, template, aspect, palette, options, style, content, updatedAt
-        case canvasDocument, editorPreferences
+        case id, title, template, aspect, palette, options, style, content, backSide, updatedAt
+        case canvasDocument, editorPreferences, isDraft
     }
 
     public init(from decoder: Decoder) throws {
@@ -834,11 +862,13 @@ public struct ProBusinessCardDesign: Identifiable, Codable, Equatable, Sendable 
         palette = try c.decode(ProBusinessCardPalette.self, forKey: .palette)
         options = try c.decode(ProBusinessCardOptions.self, forKey: .options)
         content = try c.decode(ProBusinessCardContent.self, forKey: .content)
+        backSide = try c.decodeIfPresent(ProBusinessCardBackSide.self, forKey: .backSide) ?? .standard
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
         style = try c.decodeIfPresent(ProBusinessCardStyle.self, forKey: .style)
             ?? ProBusinessCardStyle.businessDefault(businessName: content.name)
         canvasDocument = try c.decodeIfPresent(CardCanvasDocument.self, forKey: .canvasDocument)
         editorPreferences = try c.decodeIfPresent(CardEditorPreferences.self, forKey: .editorPreferences)
+        isDraft = try c.decodeIfPresent(Bool.self, forKey: .isDraft) ?? false
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -851,9 +881,11 @@ public struct ProBusinessCardDesign: Identifiable, Codable, Equatable, Sendable 
         try c.encode(options, forKey: .options)
         try c.encode(style, forKey: .style)
         try c.encode(content, forKey: .content)
+        try c.encode(backSide, forKey: .backSide)
         try c.encode(updatedAt, forKey: .updatedAt)
         try c.encodeIfPresent(canvasDocument, forKey: .canvasDocument)
         try c.encodeIfPresent(editorPreferences, forKey: .editorPreferences)
+        try c.encode(isDraft, forKey: .isDraft)
     }
 
     public mutating func ensureCanvasDocument() {
@@ -884,9 +916,13 @@ public struct ProBusinessCardLibrary: Codable, Equatable, Sendable {
         self.selectedDesignID = selectedDesignID
     }
 
+    public var savedDesigns: [ProBusinessCardDesign] {
+        designs.filter { !$0.isDraft }
+    }
+
     public var selectedDesign: ProBusinessCardDesign? {
-        guard let id = selectedDesignID else { return designs.first }
-        return designs.first(where: { $0.id == id }) ?? designs.first
+        guard let id = selectedDesignID else { return savedDesigns.first ?? designs.first }
+        return designs.first(where: { $0.id == id }) ?? savedDesigns.first ?? designs.first
     }
 
     public static func starterDesigns(

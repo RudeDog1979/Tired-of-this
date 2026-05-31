@@ -711,7 +711,7 @@ struct ProBusinessCardFitPreview: View {
         let wScale = (safeMaxWidth - 24) / card.width
         let hScale = (safeMaxHeight - 16) / card.height
         guard wScale.isFinite, hScale.isFinite, wScale > 0, hScale > 0 else { return 0.5 }
-        return max(0.08, min(wScale, hScale, 1.2))
+        return max(0.08, min(wScale, hScale, 1.45))
     }
 
     private var fittedCardSize: CGSize {
