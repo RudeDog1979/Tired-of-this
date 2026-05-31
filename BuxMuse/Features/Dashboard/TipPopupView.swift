@@ -12,14 +12,22 @@ struct TipPopupView: View {
     let tip: DailyTipDisplay
     let onDismiss: () -> Void
 
-    @State private var cardScale: CGFloat = 0.92
+    @State private var backdropOpacity: Double = 0
+    @State private var cardScale: CGFloat = 0.84
     @State private var cardOpacity: Double = 0
-    @State private var lightbulbScale: CGFloat = 1.0
+    @State private var cardOffsetY: CGFloat = 36
+    @State private var heroScale: CGFloat = 0.55
+    @State private var heroRotation: Double = -14
+    @State private var glowPulse: CGFloat = 1.0
+    @State private var contentOpacity: Double = 0
+    @State private var contentOffsetY: CGFloat = 12
+    @State private var isDismissing = false
 
     var body: some View {
         ZStack {
             Rectangle()
                 .fill(.ultraThinMaterial)
+                .opacity(backdropOpacity)
                 .ignoresSafeArea()
                 .onTapGesture { dismissWithAnimation() }
 
@@ -27,89 +35,92 @@ struct TipPopupView: View {
                 Spacer(minLength: 32)
 
                 VStack(alignment: .center, spacing: 0) {
-                    
+
                     // 1. Centered Pulsating Lightbulb Hero
                     ZStack {
                         Circle()
                             .fill(Color.yellow.opacity(0.14))
                             .frame(width: 72, height: 72)
-                        
+
                         Circle()
                             .stroke(Color.yellow.opacity(0.28), lineWidth: 1.5)
                             .frame(width: 86, height: 86)
-                            .scaleEffect(lightbulbScale)
-                        
+                            .scaleEffect(glowPulse)
+
                         Image(systemName: "lightbulb.fill")
                             .font(.system(size: 34, weight: .semibold))
                             .foregroundStyle(.yellow)
-                            .scaleEffect(lightbulbScale)
+                            .scaleEffect(heroScale)
+                            .rotationEffect(.degrees(heroRotation))
                             .shadow(color: .yellow.opacity(0.4), radius: 10)
                     }
                     .padding(.top, 24)
                     .padding(.bottom, 16)
-                    
-                    // 2. Centered Typography
-                    VStack(spacing: 4) {
-                        Text("Daily tips")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(.secondary)
-                            .kerning(1.2)
-                            .textCase(.uppercase)
-                        
-                        Text("\(tip.regionFlag) \(tip.regionCode)")
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundStyle(colorScheme == .dark ? .white : .primary)
-                        
-                        Text(tip.dateLabel)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.bottom, 18)
 
-                    Divider().opacity(0.12)
+                    // 2. Centered Typography + scroll + CTA — staggered after card lands
+                    VStack(spacing: 0) {
+                        VStack(spacing: 4) {
+                            Text("Daily tips")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(.secondary)
+                                .kerning(1.2)
+                                .textCase(.uppercase)
 
-                    // 3. Scrollable Tips Content
-                    ScrollView(showsIndicators: true) {
-                        VStack(alignment: .leading, spacing: 16) {
-                            tipSectionCard(tip.moneyTip, isPrimary: true)
+                            Text("\(tip.regionFlag) \(tip.regionCode)")
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundStyle(colorScheme == .dark ? .white : .primary)
 
-                            if !tip.watchOut.isEmpty {
-                                watchOutHeader
+                            Text(tip.dateLabel)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.bottom, 18)
 
-                                ForEach(tip.watchOut) { section in
-                                    tipSectionCard(section, isPrimary: false)
+                        Divider().opacity(0.12)
+
+                        ScrollView(showsIndicators: true) {
+                            VStack(alignment: .leading, spacing: 16) {
+                                tipSectionCard(tip.moneyTip, isPrimary: true)
+
+                                if !tip.watchOut.isEmpty {
+                                    watchOutHeader
+
+                                    ForEach(tip.watchOut) { section in
+                                        tipSectionCard(section, isPrimary: false)
+                                    }
                                 }
                             }
+                            .padding(.horizontal, BuxTokens.marginRegular)
+                            .padding(.vertical, 18)
+                        }
+                        .frame(maxHeight: 320)
+                        .mask(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .clear, location: 0.0),
+                                    .init(color: .black, location: 0.08),
+                                    .init(color: .black, location: 0.92),
+                                    .init(color: .clear, location: 1.0)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+
+                        BuxButton(
+                            title: "Got it",
+                            systemImage: "checkmark",
+                            role: .primary,
+                            expands: true
+                        ) {
+                            dismissWithAnimation()
                         }
                         .padding(.horizontal, BuxTokens.marginRegular)
-                        .padding(.vertical, 18)
+                        .padding(.top, BuxTokens.tight)
+                        .padding(.bottom, BuxTokens.section)
                     }
-                    .frame(maxHeight: 320)
-                    .mask(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .clear, location: 0.0),
-                                .init(color: .black, location: 0.08),
-                                .init(color: .black, location: 0.92),
-                                .init(color: .clear, location: 1.0)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-
-                    // 4. CTA Button
-                    BuxButton(
-                        title: "Got it",
-                        systemImage: "checkmark",
-                        role: .primary,
-                        expands: true
-                    ) {
-                        dismissWithAnimation()
-                    }
-                    .padding(.horizontal, BuxTokens.marginRegular)
-                    .padding(.top, BuxTokens.tight)
-                    .padding(.bottom, BuxTokens.section)
+                    .opacity(contentOpacity)
+                    .offset(y: contentOffsetY)
                 }
                 .background {
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
@@ -126,21 +137,31 @@ struct TipPopupView: View {
                 .padding(.horizontal, BuxTokens.marginRegular)
                 .scaleEffect(cardScale)
                 .opacity(cardOpacity)
+                .offset(y: cardOffsetY)
 
                 Spacer(minLength: 48)
             }
         }
-        .onAppear {
-            // Main card entrance
-            withAnimation(BuxMotion.bounce) {
-                cardScale = 1
-                cardOpacity = 1
-            }
-            
-            // Soft pulsating lightbulb (Exactly 3 full pulses, ends perfectly back at 1.0)
-            withAnimation(.easeInOut(duration: 0.45).repeatCount(6, autoreverses: true).delay(0.2)) {
-                lightbulbScale = 1.14
-            }
+        .onAppear(perform: playEntrance)
+    }
+
+    private func playEntrance() {
+        withAnimation(BuxMotion.tipPopupPresent) {
+            backdropOpacity = 1
+            cardScale = 1
+            cardOpacity = 1
+            cardOffsetY = 0
+            heroScale = 1
+            heroRotation = 0
+        }
+
+        withAnimation(BuxMotion.tipPopupPresent.delay(0.12)) {
+            contentOpacity = 1
+            contentOffsetY = 0
+        }
+
+        withAnimation(.easeInOut(duration: 0.42).repeatCount(3, autoreverses: true).delay(0.38)) {
+            glowPulse = 1.14
         }
     }
 
@@ -213,11 +234,21 @@ struct TipPopupView: View {
     }
 
     private func dismissWithAnimation() {
-        withAnimation(.easeOut(duration: 0.22)) {
-            cardScale = 0.94
+        guard !isDismissing else { return }
+        isDismissing = true
+
+        withAnimation(BuxMotion.tipPopupDismiss) {
+            backdropOpacity = 0
+            cardScale = 0.9
+            cardOffsetY = 18
             cardOpacity = 0
+            heroScale = 0.85
+            contentOpacity = 0
+            contentOffsetY = 8
+            glowPulse = 1.0
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.34) {
             onDismiss()
         }
     }

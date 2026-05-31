@@ -92,6 +92,7 @@ struct BuxGlassCapsuleBackground: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @ObservedObject private var settings = SettingsStore.shared
+    var castsShadow: Bool = true
 
     var body: some View {
         let shape = Capsule(style: .continuous)
@@ -113,7 +114,7 @@ struct BuxGlassCapsuleBackground: View {
         .buxGlassRimShimmer(
             shape: shape,
             colorScheme: colorScheme,
-            enabled: settings.useGlassmorphism
+            enabled: settings.useGlassmorphism && castsShadow
         )
     }
 }

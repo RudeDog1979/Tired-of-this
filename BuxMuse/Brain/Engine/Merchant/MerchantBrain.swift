@@ -12,6 +12,8 @@ import Foundation
 enum MerchantCandidateKind: Equatable, Sendable {
     case existingEntity
     case historyGroup
+    /// Well-known retailer from offline catalog (Argos, Biedronka, Currys, …).
+    case knownRetailer
     /// Well-known alternate spelling (e.g. M&S ↔ Marks & Spencer) — not necessarily in history yet.
     case aliasVariant
     case newMerchant
@@ -222,6 +224,24 @@ final class MerchantBrain {
             )
         }
 
+        for entry in MerchantCatalog.matchingEntries(for: trimmed, limit: 12) {
+            let key = labelKey(entry.displayName)
+            guard !usedLabelKeys.contains(key) else { continue }
+            appendCandidate(
+                MerchantCandidate(
+                    id: "catalog:\(key)",
+                    merchantId: nil,
+                    displayName: entry.displayName,
+                    subtitle: "Known retailer · \(entry.domain)",
+                    matchKind: .knownRetailer,
+                    confidence: .high,
+                    historyLabel: entry.displayName
+                ),
+                to: &results,
+                usedLabelKeys: &usedLabelKeys
+            )
+        }
+
         for aliasLabel in aliasLabels(matchingQuery: trimmed, normalizedQuery: normalizedQuery) {
             let key = labelKey(aliasLabel)
             guard !usedLabelKeys.contains(key) else { continue }
@@ -241,7 +261,7 @@ final class MerchantBrain {
         }
 
         results.sort { lhs, rhs in
-            let order: [MerchantCandidateKind] = [.existingEntity, .historyGroup, .aliasVariant, .newMerchant]
+            let order: [MerchantCandidateKind] = [.existingEntity, .historyGroup, .knownRetailer, .aliasVariant, .newMerchant]
             let li = order.firstIndex(of: lhs.matchKind) ?? 99
             let ri = order.firstIndex(of: rhs.matchKind) ?? 99
             if li != ri { return li < ri }
@@ -266,7 +286,9 @@ final class MerchantBrain {
     }
 
     func mergeHintCandidate(from candidates: [MerchantCandidate]) -> MerchantCandidate? {
-        let choosable = candidates.filter { $0.matchKind != .newMerchant && $0.matchKind != .aliasVariant }
+        let choosable = candidates.filter {
+            $0.matchKind != .newMerchant && $0.matchKind != .aliasVariant
+        }
         guard choosable.count == 1, choosable[0].confidence == .high else { return nil }
         return choosable[0]
     }
@@ -349,18 +371,8 @@ final class MerchantBrain {
         var lastDate: Date?
     }
 
-    /// Alternate spellings users expect when typing a short form (e.g. M&S).
-    private static let retailAliasGroups: [[String]] = [
-        ["M&S", "Marks & Spencer", "Marks and Spencer", "Marks & Spencer Simply Food", "M&S Simply Food"],
-        ["Tesco", "Tesco Express", "Tesco Metro"],
-        ["Sainsbury's", "Sainsburys", "Sainsbury"],
-        ["Boots", "Boots Pharmacy"],
-        ["Primark", "Primark Stores"],
-        ["Argos", "Argos Ltd"],
-        ["ASDA", "Asda"],
-        ["Lidl", "Lidl GB"],
-        ["Aldi", "Aldi Stores"],
-    ]
+    /// Legacy alias groups — catalog covers these; kept as empty fallback hook.
+    private static let retailAliasGroups: [[String]] = []
 
     private static func collectKnownLabels(
         merchants: [ExpenseMerchantRecord],
@@ -401,6 +413,10 @@ final class MerchantBrain {
     }
 
     private func aliasLabels(matchingQuery rawQuery: String, normalizedQuery: String) -> [String] {
+        let catalogAlternates = MerchantCatalog.alternateLabels(for: rawQuery)
+        if !catalogAlternates.isEmpty {
+            return catalogAlternates
+        }
         for group in Self.retailAliasGroups {
             let groupMatches = group.contains { label in
                 matchesQuery(
@@ -485,6 +501,12 @@ final class MerchantBrain {
 
         if normalizedQuery.count >= 2, normalizedName.contains(normalizedQuery) { return true }
         if normalizedName.hasPrefix(normalizedQuery) { return true }
+
+        if normalizedQuery.count >= 3 {
+            let distance = MerchantIntelligence.levenshteinDistance(between: normalizedQuery, and: normalizedName)
+            if distance <= 2 { return true }
+        }
+
         return false
     }
 

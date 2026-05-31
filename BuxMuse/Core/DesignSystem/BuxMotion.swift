@@ -38,6 +38,20 @@ enum BuxMotion {
         reducedMotion ? .easeInOut(duration: 0.28) : .spring(response: 0.45, dampingFraction: 0.55)
     }
 
+    /// Hero quick-action squash — Rory Bain-style spring (0.4 / 0.5).
+    static var heroPress: Animation {
+        reducedMotion ? .easeInOut(duration: 0.15) : .spring(response: 0.4, dampingFraction: 0.5)
+    }
+
+    /// Daily tip popup — bouncy present, soft dismiss.
+    static var tipPopupPresent: Animation {
+        reducedMotion ? .easeInOut(duration: 0.28) : .spring(response: 0.52, dampingFraction: 0.68)
+    }
+
+    static var tipPopupDismiss: Animation {
+        reducedMotion ? .easeInOut(duration: 0.22) : .spring(response: 0.40, dampingFraction: 0.82)
+    }
+
     static func stagger(index: Int, base: Double = 0.055) -> Animation {
         let anim = bounce
         return reducedMotion ? anim : anim.delay(Double(index) * base)

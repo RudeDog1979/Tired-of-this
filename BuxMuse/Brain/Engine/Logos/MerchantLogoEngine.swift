@@ -6,8 +6,12 @@
 //  Privacy-first Merchant Logo Caching and Resolution Engine.
 //
 
-import SwiftUI
+import Foundation
 import Combine
+import ImageIO
+#if canImport(UIKit)
+import UIKit
+#endif
 
 public struct MerchantLogoEngine {
     
@@ -37,17 +41,21 @@ public struct MerchantLogoEngine {
     
     // MARK: - Domain Resolver
     public static func resolveDomain(for merchantName: String) -> String? {
+        if let catalogDomain = MerchantCatalog.domain(for: merchantName) {
+            return catalogDomain
+        }
+
         let normalized = normalizeMerchantName(merchantName)
         guard !normalized.isEmpty else { return nil }
         
-        // Known merchant map
+        // Legacy inline map (kept for merchants not yet in catalog)
         let knownMerchants: [String: String] = [
             "starbucks": "starbucks.com",
             "apple": "apple.com",
             "netflix": "netflix.com",
             "spotify": "spotify.com",
             "uber": "uber.com",
-            "amazon": "amazon.com",
+            "amazon": "amazon.co.uk",
             "mcdonalds": "mcdonalds.com",
             "nike": "nike.com",
             "google": "google.com",
@@ -73,8 +81,176 @@ public struct MerchantLogoEngine {
         return nil
     }
 
-    public static func googleFaviconURL(for domain: String) -> String {
-        "https://www.google.com/s2/favicons?sz=256&domain=\(domain)"
+    public static func googleFaviconURL(for domain: String, size: Int = 256) -> String {
+        "https://www.google.com/s2/favicons?sz=\(size)&domain=\(domain)"
+    }
+
+    // MARK: - Remote logo fetch
+
+    public struct FetchPlan: Sendable {
+        public let cacheKey: String
+        public let urls: [URL]
+    }
+
+    /// Domain-first cache key so "Biedronka" and typos share the same logo.
+    public static func fetchPlan(for merchantName: String) -> FetchPlan? {
+        let normalized = normalizeMerchantName(merchantName)
+        guard !normalized.isEmpty else { return nil }
+
+        let domain = resolveDomain(for: merchantName)
+        let cacheKey = domain ?? normalized
+        let host = domain ?? "\(normalized.replacingOccurrences(of: " ", with: "")).com"
+        let urls = remoteLogoURLs(forHost: host).compactMap(URL.init(string:))
+        guard !urls.isEmpty else { return nil }
+        return FetchPlan(cacheKey: cacheKey, urls: urls)
+    }
+
+    /// Google first, DuckDuckGo fallback only.
+    static func remoteLogoURLs(forHost host: String) -> [String] {
+        let cleanHost = host
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "https://", with: "")
+            .replacingOccurrences(of: "http://", with: "")
+            .replacingOccurrences(of: "www.", with: "")
+        guard !cleanHost.isEmpty else { return [] }
+
+        return [
+            googleFaviconURL(for: cleanHost, size: 256),
+            googleFaviconURL(for: cleanHost, size: 128),
+            "https://icons.duckduckgo.com/ip3/\(cleanHost).ico",
+        ]
+    }
+
+    public static func fetchRemoteLogo(plan: FetchPlan) async -> UIImage? {
+        var bestPayload: LogoPayload?
+        var bestScore: CGFloat = 0
+
+        await withTaskGroup(of: LogoPayload?.self) { group in
+            for url in plan.urls {
+                group.addTask { await fetchLogoPayload(from: url) }
+            }
+
+            for await payload in group {
+                guard let payload, isUsableLogo(payload) else { continue }
+                let score = logoQualityScore(payload)
+                if score > bestScore {
+                    bestScore = score
+                    bestPayload = payload
+                }
+            }
+        }
+
+        guard let bestPayload else { return nil }
+        let normalized = normalizeForDisplay(bestPayload.image)
+        LightweightLogoCache.shared.saveImage(normalized, forKey: plan.cacheKey)
+        return normalized
+    }
+
+    private struct LogoPayload {
+        let data: Data
+        let image: UIImage
+        let source: LogoSourceKind
+    }
+
+    private enum LogoSourceKind {
+        case duckDuckGo
+        case google
+
+        init(url: URL) {
+            let host = url.host?.lowercased() ?? ""
+            if host.contains("duckduckgo.com") {
+                self = .duckDuckGo
+            } else {
+                self = .google
+            }
+        }
+    }
+
+    private static func fetchLogoPayload(from url: URL) async -> LogoPayload? {
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 8)
+        request.httpShouldHandleCookies = false
+        request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", forHTTPHeaderField: "User-Agent")
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200 ... 299).contains(http.statusCode) else {
+                return nil
+            }
+            guard let image = decodeLogoImage(from: data) else { return nil }
+            return LogoPayload(data: data, image: image, source: LogoSourceKind(url: url))
+        } catch {
+            return nil
+        }
+    }
+
+    /// UIImage often fails on `.ico` — ImageIO handles DuckDuckGo responses.
+    static func decodeLogoImage(from data: Data) -> UIImage? {
+        guard !data.isEmpty else { return nil }
+        if let image = UIImage(data: data) { return image }
+
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+        let count = CGImageSourceGetCount(source)
+        guard count > 0 else { return nil }
+
+        var bestImage: UIImage?
+        var bestPixels: CGFloat = 0
+
+        for index in 0 ..< count {
+            guard let cgImage = CGImageSourceCreateImageAtIndex(source, index, nil) else { continue }
+            let image = UIImage(cgImage: cgImage)
+            let px = max(image.size.width, image.size.height) * image.scale
+            if px > bestPixels {
+                bestPixels = px
+                bestImage = image
+            }
+        }
+
+        return bestImage
+    }
+
+    private static func isUsableLogo(_ payload: LogoPayload) -> Bool {
+        let px = pixelSize(of: payload.image)
+        guard px >= 16, payload.data.count >= 48 else { return false }
+        return true
+    }
+
+    /// Rank candidates — largest crisp source wins (penalize tiny API globes).
+    private static func logoQualityScore(_ payload: LogoPayload) -> CGFloat {
+        var score = pixelSize(of: payload.image)
+
+        switch payload.source {
+        case .google:
+            if score <= 40 { score *= 0.35 }
+        case .duckDuckGo:
+            if score <= 40 { score *= 0.45 }
+        }
+
+        return score
+    }
+
+    /// Downscale very large assets for cache; never upscale (upscaling blurs tiny favicons).
+    private static func normalizeForDisplay(_ image: UIImage) -> UIImage {
+        let px = pixelSize(of: image)
+        guard px > 320 else { return image }
+
+        let target: CGFloat = 256
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = false
+
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: target, height: target), format: format)
+        return renderer.image { _ in
+            let aspect = min(target / image.size.width, target / image.size.height)
+            let w = image.size.width * aspect
+            let h = image.size.height * aspect
+            let rect = CGRect(x: (target - w) / 2, y: (target - h) / 2, width: w, height: h)
+            image.draw(in: rect)
+        }
+    }
+
+    private static func pixelSize(of image: UIImage) -> CGFloat {
+        max(image.size.width, image.size.height) * image.scale
     }
 }
 
@@ -93,7 +269,7 @@ public final class LightweightLogoCache: ObservableObject {
     
     private var diskCacheDirectory: URL {
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
-        let dir = paths[0].appendingPathComponent("BuxMuseMerchantLogos")
+        let dir = paths[0].appendingPathComponent("BuxMuseMerchantLogosV4")
         if !FileManager.default.fileExists(atPath: dir.path) {
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
         }

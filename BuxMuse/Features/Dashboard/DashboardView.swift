@@ -161,79 +161,56 @@ struct DashboardView: View {
 
                                 // 4 Circular Quick Action Buttons (Updated with custom staggers, Subscriptions, & arrow-down)
                                 HStack(spacing: 0) {
-                                    // 1. FAB ADD EXPENSE BUTTON
-                                    Button(action: {
-                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                                            isFabMenuExpanded.toggle()
-                                        }
-                                    }) {
-                                        VStack(spacing: 8) {
-                                            heroGlassActionCircle(diameter: heroActionDiameter) {
-                                                Image(systemName: "plus")
-                                                    .font(.system(size: heroActionIconSize, weight: .semibold))
-                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                                                    .rotationEffect(.degrees(isFabMenuExpanded ? 45 : 0))
+                                    BuxHeroQuickActionButton(
+                                        action: {
+                                            withAnimation(.spring(response: 0.35, dampingFraction: 0.62)) {
+                                                isFabMenuExpanded.toggle()
                                             }
-
-                                            Text("Add expense")
-                                                .font(.system(size: max(11, 12 * heroLayoutScale), weight: .medium))
-                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                                .lineLimit(1)
-                                                .minimumScaleFactor(0.85)
-                                        }
-                                        .frame(maxWidth: .infinity)
+                                        },
+                                        diameter: heroActionDiameter,
+                                        title: "Add expense",
+                                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                                    ) { isPressed in
+                                        Image(systemName: "plus")
+                                            .font(.system(size: heroActionIconSize, weight: .semibold))
+                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                            .buxHeroActionIcon(.plus(isExpanded: isFabMenuExpanded), isPressed: isPressed)
                                     }
-                                    .buttonStyle(BuxmationPressCardStyle())
-                                    .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 8)
-                                    .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                    .animation(.spring(response: 0.4, dampingFraction: 0.75).delay(0.0), value: navigationCoordinator.isScreenLoaded)
+                                    .buxScreenEntrance(index: 0, isVisible: navigationCoordinator.isScreenLoaded)
 
-                                    // 2. Log Income
-                                    Button(action: {
-                                        activeSheet = .addExpense(.addIncome)
-                                    }) {
-                                        VStack(spacing: 8) {
-                                            heroGlassActionCircle(diameter: heroActionDiameter) {
-                                                Image(systemName: "arrow.down.circle.fill")
-                                                    .font(.system(size: heroActionIconSize + 2))
-                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                    BuxHeroQuickActionButton(
+                                        action: { activeSheet = .addExpense(.addIncome) },
+                                        diameter: heroActionDiameter,
+                                        title: "Log income",
+                                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                                    ) { isPressed in
+                                        Image(systemName: "arrow.down.circle.fill")
+                                            .font(.system(size: heroActionIconSize + 2))
+                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                            .buxHeroActionIcon(.income, isPressed: isPressed)
+                                    }
+                                    .buxScreenEntrance(index: 1, isVisible: navigationCoordinator.isScreenLoaded)
+
+                                    BuxHeroQuickActionButton(
+                                        action: {
+                                            withAnimation(BuxMotion.tipPopupPresent) {
+                                                showTipPopup = true
                                             }
-
-                                            Text("Log income")
-                                                .font(.system(size: max(11, 12 * heroLayoutScale), weight: .medium))
-                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                                .lineLimit(1)
-                                                .minimumScaleFactor(0.85)
-                                        }
-                                        .frame(maxWidth: .infinity)
+                                        },
+                                        diameter: heroActionDiameter,
+                                        title: "Tips",
+                                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                                        titleColor: themeManager.labelSecondary(for: colorScheme),
+                                        circleShadowColor: brain.tipNeedsAttention && tipGlowPhase ? Color.yellow.opacity(0.55) : .clear,
+                                        circleShadowRadius: 12
+                                    ) { isPressed in
+                                        Image(systemName: "lightbulb.fill")
+                                            .font(.system(size: heroActionIconSize))
+                                            .foregroundColor(brain.tipNeedsAttention ? .yellow : themeManager.contrastAccentColor(for: colorScheme))
+                                            .buxHeroActionIcon(.tips, isPressed: isPressed)
                                     }
-                                    .buttonStyle(BuxmationPressCardStyle())
-                                    .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 8)
-                                    .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                    .animation(.spring(response: 0.4, dampingFraction: 0.75).delay(0.06), value: navigationCoordinator.isScreenLoaded)
-
-                                    // 3. Tips (daily regional tip)
-                                    Button(action: {
-                                        showTipPopup = true
-                                        brain.markDailyTipSeen()
-                                    }) {
-                                        VStack(spacing: 8) {
-                                            heroGlassActionCircle(diameter: heroActionDiameter) {
-                                                Image(systemName: "lightbulb.fill")
-                                                    .font(.system(size: heroActionIconSize))
-                                                    .foregroundColor(brain.tipNeedsAttention ? .yellow : themeManager.contrastAccentColor(for: colorScheme))
-                                            }
-                                            .shadow(color: brain.tipNeedsAttention && tipGlowPhase ? Color.yellow.opacity(0.55) : .clear, radius: 12)
-
-                                            Text("Tips")
-                                                .font(.system(size: max(11, 12 * heroLayoutScale), weight: .medium))
-                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                                .lineLimit(1)
-                                                .minimumScaleFactor(0.85)
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                    }
-                                    .buttonStyle(BuxmationPressCardStyle())
                                     .onChange(of: brain.tipPulseToken) { _, _ in
                                         guard brain.tipNeedsAttention else { return }
                                         withAnimation(.easeInOut(duration: 0.45).repeatCount(2, autoreverses: true)) {
@@ -243,35 +220,25 @@ struct DashboardView: View {
                                             tipGlowPhase = false
                                         }
                                     }
-                                    .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 8)
-                                    .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                    .animation(.spring(response: 0.4, dampingFraction: 0.75).delay(0.12), value: navigationCoordinator.isScreenLoaded)
+                                    .buxScreenEntrance(index: 2, isVisible: navigationCoordinator.isScreenLoaded)
 
-                                    // 4. Subscriptions (Replaces Scan with subscription stacked cards logo)
-                                    Button(action: {
-                                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                                            navigationCoordinator.openSubscriptionHub()
-                                        }
-                                    }) {
-                                        VStack(spacing: 8) {
-                                            heroGlassActionCircle(diameter: heroActionDiameter) {
-                                                Image(systemName: "arrow.triangle.2.circlepath")
-                                                    .font(.system(size: heroActionIconSize, weight: .semibold))
-                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                    BuxHeroQuickActionButton(
+                                        action: {
+                                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                                navigationCoordinator.openSubscriptionHub()
                                             }
-
-                                            Text("Subscriptions")
-                                                .font(.system(size: max(11, 12 * heroLayoutScale), weight: .medium))
-                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                                .lineLimit(1)
-                                                .minimumScaleFactor(0.85)
-                                        }
-                                        .frame(maxWidth: .infinity)
+                                        },
+                                        diameter: heroActionDiameter,
+                                        title: "Subscriptions",
+                                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                                    ) { isPressed in
+                                        Image(systemName: "arrow.triangle.2.circlepath")
+                                            .font(.system(size: heroActionIconSize, weight: .semibold))
+                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                            .buxHeroActionIcon(.subscriptions, isPressed: isPressed)
                                     }
-                                    .buttonStyle(BuxmationPressCardStyle())
-                                    .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 8)
-                                    .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                    .animation(.spring(response: 0.4, dampingFraction: 0.75).delay(0.18), value: navigationCoordinator.isScreenLoaded)
+                                    .buxScreenEntrance(index: 3, isVisible: navigationCoordinator.isScreenLoaded)
                                 }
                                 .padding(.top, BuxTokens.block + BuxTokens.tight)
                                 .padding(.bottom, BuxTokens.section)
@@ -386,7 +353,7 @@ struct DashboardView: View {
                             usesDashboardTint: true
                         )
                         .environmentObject(themeManager)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .center)
 
                         // Category content — horizontal slide + bounce (original behavior)
                         ZStack(alignment: .topLeading) {
@@ -803,7 +770,6 @@ struct DashboardView: View {
                     showTipPopup = false
                     brain.markDailyTipSeen()
                 }
-                .transition(.opacity)
                 .zIndex(20)
             }
         }
@@ -840,7 +806,9 @@ struct DashboardView: View {
         .onChange(of: navigationCoordinator.openTipPopupRequest) { _, request in
             guard request else { return }
             navigationCoordinator.openTipPopupRequest = false
-            showTipPopup = true
+            withAnimation(BuxMotion.tipPopupPresent) {
+                showTipPopup = true
+            }
         }
         .fullScreenCover(isPresented: $showQuickNewInvoice) {
             StudioInvoiceEditorView(invoiceToEdit: nil)
@@ -849,18 +817,6 @@ struct DashboardView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(themeManager)
         }
-    }
-
-    @ViewBuilder
-    private func heroGlassActionCircle<Content: View>(
-        diameter: CGFloat,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        ZStack {
-            BuxGlassCircleBackground(diameter: diameter)
-            content()
-        }
-        .frame(width: diameter, height: diameter)
     }
 
     @ViewBuilder

@@ -85,15 +85,17 @@ private struct StudioHubEmbeddedHorizontalPaddingModifier: ViewModifier {
 // MARK: - Liquid glass section menu (Tax — matches Invoices chrome, no search field)
 
 struct StudioGlassCapsuleBackground: View {
+    var castsShadow: Bool = true
+
     var body: some View {
-        BuxGlassCapsuleBackground()
+        BuxGlassCapsuleBackground(castsShadow: castsShadow)
     }
 }
 
 extension View {
     /// Frosted capsule behind horizontal section chips (Invoices-style floating bar).
-    func studioGlassFloatingBar() -> some View {
-        modifier(StudioGlassFloatingBarModifier())
+    func studioGlassFloatingBar(suppressShadow: Bool = false) -> some View {
+        modifier(StudioGlassFloatingBarModifier(suppressShadow: suppressShadow))
     }
 }
 
@@ -101,6 +103,8 @@ private struct StudioGlassFloatingBarModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @ObservedObject private var settings = SettingsStore.shared
+    /// Section menus — flat glass track, no drop shadow stack under each chip.
+    var suppressShadow: Bool = false
 
     func body(content: Content) -> some View {
         content
@@ -108,7 +112,7 @@ private struct StudioGlassFloatingBarModifier: ViewModifier {
             .padding(.vertical, 7)
             .background {
                 if settings.useGlassmorphism {
-                    StudioGlassCapsuleBackground()
+                    StudioGlassCapsuleBackground(castsShadow: !suppressShadow)
                 } else {
                     ZStack {
                         Capsule(style: .continuous)
@@ -119,7 +123,7 @@ private struct StudioGlassFloatingBarModifier: ViewModifier {
                                     themeManager: themeManager,
                                     colorScheme: colorScheme
                                 ))
-                        }
+                            }
                     }
                 }
             }
@@ -148,21 +152,46 @@ struct StudioGlassHorizontalSectionMenu<Tab: Hashable & Identifiable>: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @ObservedObject private var settings = SettingsStore.shared
+    @Namespace private var selectionNamespace
 
     @Binding var selection: Tab
     let tabs: [Tab]
     let label: (Tab) -> String
 
+    private let chipSpacing: CGFloat = 10
+
+    private var accent: Color {
+        themeManager.contrastAccentColor(for: colorScheme)
+    }
+
     var body: some View {
+        ViewThatFits(in: .horizontal) {
+            centeredChipRow
+            scrollableChipRow
+        }
+        .frame(maxWidth: .infinity)
+        .studioGlassFloatingBar(suppressShadow: true)
+    }
+
+    private var centeredChipRow: some View {
+        HStack(spacing: chipSpacing) {
+            ForEach(tabs) { tab in
+                sectionButton(for: tab)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private var scrollableChipRow: some View {
         ScrollViewReader { scrollProxy in
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
+                HStack(spacing: chipSpacing) {
                     ForEach(tabs) { tab in
                         sectionButton(for: tab)
                             .id(tab.id)
                     }
                 }
-                .padding(.trailing, 4)
+                .padding(.horizontal, 4)
             }
             .onAppear {
                 scrollToSelection(scrollProxy, animated: false)
@@ -171,40 +200,45 @@ struct StudioGlassHorizontalSectionMenu<Tab: Hashable & Identifiable>: View {
                 scrollToSelection(scrollProxy, animated: true)
             }
         }
-        .frame(maxWidth: .infinity)
-        .studioGlassFloatingBar()
     }
 
     private func sectionButton(for tab: Tab) -> some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.32)) {
+        let isSelected = selection.id == tab.id
+        return Button {
+            withAnimation(.buxCategorySpring) {
                 selection = tab
             }
         } label: {
             Text(label(tab))
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(size: 13, weight: isSelected ? .bold : .semibold))
                 .foregroundStyle(
-                    selection.id == tab.id
-                        ? themeManager.contrastAccentColor(for: colorScheme)
+                    isSelected
+                        ? accent
                         : themeManager.pillInactiveLabelColor(for: colorScheme)
                 )
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
                 .background {
-                    if selection.id == tab.id {
-                        Capsule(style: .continuous)
-                            .fill(
-                                settings.brandThemesEnabled
-                                    ? DashboardThemeTint.pillActiveChipFill(
-                                        themeManager: themeManager,
-                                        colorScheme: colorScheme
-                                    )
-                                    : themeManager.pillActiveChipFill(for: colorScheme)
-                            )
+                    if isSelected {
+                        selectionBlob
+                            .matchedGeometryEffect(id: "studioSectionSelectionBlob", in: selectionNamespace)
                     }
                 }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(MorphingPillButtonStyle())
+    }
+
+    private var selectionBlob: some View {
+        Capsule(style: .continuous)
+            .fill(selectionBlobFill)
+    }
+
+    private var selectionBlobFill: Color {
+        if settings.useGlassmorphism {
+            accent.opacity(colorScheme == .dark ? 0.22 : 0.14)
+        } else {
+            themeManager.pillActiveChipFill(for: colorScheme)
+        }
     }
 
     private func scrollToSelection(_ proxy: ScrollViewProxy, animated: Bool) {

@@ -248,6 +248,7 @@ struct AddExpenseSheet: View {
                         viewModel.selectCandidate(candidate)
                     }
                     .environmentObject(themeManager)
+                    .transition(.buxScaleReveal)
                 }
             }
             .padding(BuxLayout.section)

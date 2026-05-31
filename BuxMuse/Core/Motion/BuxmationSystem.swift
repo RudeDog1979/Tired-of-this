@@ -7,6 +7,9 @@
 //
 
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // MARK: - Global Spring Physics (delegates to BuxMotion design tokens)
 
@@ -29,6 +32,7 @@ extension Animation {
 
     static var buxLiquidSpring: Animation { BuxMotion.liquid }
     static var buxCategorySpring: Animation { BuxMotion.slide }
+    static var buxHeroPress: Animation { BuxMotion.heroPress }
 
     static func buxCategoryCardDelay(index: Int) -> Animation {
         BuxMotion.categoryCardDelay(index: index)
@@ -301,6 +305,149 @@ struct BuxDimOverlay: View {
 // MARK: - Primitive 19 & 20: Floating Elevation + Blur Reveal
 // Handled structurally via .background(.thickMaterial) and .shadow()
 // in CustomTabBar and FAB — no separate modifier needed.
+
+// MARK: - Hero quick actions (dashboard glass circles)
+
+enum BuxHeroActionIconMotion {
+    case plus(isExpanded: Bool)
+    case income
+    case tips
+    case subscriptions
+}
+
+private enum BuxHeroActionHaptic {
+    static func fireOnPressDown() {
+        guard !BuxMotion.reducedMotion else { return }
+        #if canImport(UIKit)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred(intensity: 0.9)
+        #endif
+    }
+}
+
+/// Glass circle chrome for hero quick actions.
+struct BuxHeroActionCircle<Content: View>: View {
+    let diameter: CGFloat
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack {
+            BuxGlassCircleBackground(diameter: diameter)
+            content()
+        }
+        .frame(width: diameter, height: diameter)
+    }
+}
+
+private struct BuxHeroActionIconModifier: ViewModifier {
+    let motion: BuxHeroActionIconMotion
+    let isPressed: Bool
+
+    func body(content: Content) -> some View {
+        switch motion {
+        case .plus(let expanded):
+            content
+                .rotationEffect(.degrees(expanded ? 45 : 0))
+                .scaleEffect(isPressed ? 0.88 : 1.0)
+                .animation(.spring(response: 0.38, dampingFraction: 0.62), value: expanded)
+                .animation(BuxMotion.heroPress, value: isPressed)
+        case .income:
+            content
+                .offset(y: isPressed ? 4 : 0)
+                .scaleEffect(isPressed ? 0.88 : 1.0)
+                .animation(BuxMotion.heroPress, value: isPressed)
+        case .tips:
+            content
+                .scaleEffect(isPressed ? 0.82 : 1.0)
+                .animation(.spring(response: 0.28, dampingFraction: 0.45), value: isPressed)
+        case .subscriptions:
+            content
+                .rotationEffect(.degrees(isPressed ? 40 : 0))
+                .scaleEffect(isPressed ? 0.88 : 1.0)
+                .animation(BuxMotion.heroPress, value: isPressed)
+        }
+    }
+}
+
+extension View {
+    func buxHeroActionIcon(_ motion: BuxHeroActionIconMotion, isPressed: Bool) -> some View {
+        modifier(BuxHeroActionIconModifier(motion: motion, isPressed: isPressed))
+    }
+}
+
+/// Dashboard hero quick action — instant press squash + spring bounce (ScrollView-safe).
+///
+/// Uses zero-duration long-press for immediate visual feedback per SwiftUI interactive-button patterns.
+struct BuxHeroQuickActionButton<Icon: View>: View {
+    let action: () -> Void
+    let diameter: CGFloat
+    let title: String
+    let titleFont: Font
+    let titleColor: Color
+    var circleShadowColor: Color = .clear
+    var circleShadowRadius: CGFloat = 0
+    @ViewBuilder var icon: (_ isPressed: Bool) -> Icon
+
+    @State private var isPressed = false
+    @State private var dragExceeded = false
+
+    var body: some View {
+        VStack(spacing: 8) {
+            BuxHeroActionCircle(diameter: diameter) {
+                icon(isPressed)
+            }
+            .shadow(color: circleShadowColor, radius: circleShadowRadius)
+
+            Text(title)
+                .font(titleFont)
+                .foregroundStyle(titleColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+        .scaleEffect(isPressed ? 0.93 : 1.0)
+        .animation(BuxMotion.heroPress, value: isPressed)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 12)
+                .onChanged { _ in dragExceeded = true }
+        )
+        .onLongPressGesture(
+            minimumDuration: 0,
+            maximumDistance: 24,
+            pressing: { pressing in
+                if pressing {
+                    dragExceeded = false
+                }
+                withAnimation(BuxMotion.heroPress) {
+                    isPressed = pressing
+                }
+                if pressing {
+                    BuxHeroActionHaptic.fireOnPressDown()
+                }
+            },
+            perform: {
+                guard !dragExceeded else { return }
+                action()
+            }
+        )
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// Legacy ButtonStyle — prefer `BuxHeroQuickActionButton` for hero row.
+struct BuxHeroQuickActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.93 : 1.0)
+            .animation(BuxMotion.heroPress, value: configuration.isPressed)
+            .onChange(of: configuration.isPressed) { _, pressed in
+                guard pressed else { return }
+                BuxHeroActionHaptic.fireOnPressDown()
+            }
+    }
+}
 
 // MARK: - Legacy: BuxmationPressCardStyle (kept for compatibility)
 // Scale-only press — no shadow animation (shadow animating inside ScrollView causes lag).

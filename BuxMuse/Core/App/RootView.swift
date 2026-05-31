@@ -108,7 +108,6 @@ struct RootView: View {
                 }
             }
             .onChange(of: navigationCoordinator.selectedTab) { _, newTab in
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 if newTab != .expense {
                     navigationCoordinator.dismissExpenseSearch()
                 }

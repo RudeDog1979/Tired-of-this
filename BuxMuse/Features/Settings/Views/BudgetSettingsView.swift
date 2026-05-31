@@ -24,8 +24,7 @@ struct BudgetSettingsView: View {
                         Text(mode.rawValue).tag(mode)
                     }
                 }
-                .pickerStyle(.segmented)
-                .tint(themeManager.current.accentColor)
+                .buxThemedSegmentedPicker()
                 .buxFormFieldPadding()
 
                 if store.budgetingMode == .simple {

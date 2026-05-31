@@ -48,6 +48,14 @@ struct MerchantAutocompleteView: View {
                                         .padding(.vertical, 4)
                                         .background(themeManager.pillActiveChipFill(for: colorScheme))
                                         .clipShape(Capsule())
+                                } else if candidate.matchKind == .knownRetailer {
+                                    Text("Popular")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(themeManager.current.accentColor)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(themeManager.pillActiveChipFill(for: colorScheme).opacity(0.65))
+                                        .clipShape(Capsule())
                                 } else if candidate.matchKind == .aliasVariant {
                                     Text("Pick")
                                         .font(.system(size: 10, weight: .bold))
@@ -72,7 +80,7 @@ struct MerchantAutocompleteView: View {
                 }
             }
         }
-        .frame(maxHeight: 280)
+        .frame(maxHeight: 340)
         .expensesThemedCardChrome(cornerRadius: 16)
         .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.2 : 0.04), radius: 10, x: 0, y: 5)
     }

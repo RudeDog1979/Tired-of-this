@@ -92,8 +92,10 @@ public final class AddExpenseViewModel: ObservableObject {
     }
 
     public func refreshMerchantSuggestions(resetSelection: Bool) {
+        let records = (try? brain.fetchAllExpenseRecords()) ?? []
         let cleanName = merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleanName.isEmpty else {
+
+        if cleanName.isEmpty {
             candidates = []
             mergeHintCandidate = nil
             if resetSelection {
@@ -102,7 +104,6 @@ public final class AddExpenseViewModel: ObservableObject {
             return
         }
 
-        let records = (try? brain.fetchAllExpenseRecords()) ?? []
         let next = brain.merchantBrain.candidates(for: cleanName, expenseRecords: records)
         candidates = next
         let choosable = next.filter { $0.matchKind != .newMerchant }

@@ -62,7 +62,7 @@ struct StudioSettingsView: View {
                         Text("Simple Studio").tag(StudioMode.simple)
                         Text("Pro Studio").tag(StudioMode.pro)
                     }
-                    .pickerStyle(.segmented)
+                    .buxThemedSegmentedPicker()
                     .buxFormFieldPadding()
                     .onChange(of: store.studioMode) { _, newMode in
                         if newMode == .pro {
