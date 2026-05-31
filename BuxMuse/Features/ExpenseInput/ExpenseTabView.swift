@@ -56,7 +56,8 @@ struct ExpenseTabView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
 
                 Group {
                     if allRecords.isEmpty {

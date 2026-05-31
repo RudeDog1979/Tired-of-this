@@ -737,6 +737,7 @@ public struct StudioSnapshot: Codable, Equatable {
     public var taxProfile: StudioTaxProfile
     public var invoiceSettings: StudioInvoiceSettings
     public var mileageEntries: [MileageEntry]
+    public var businessCardLibrary: ProBusinessCardLibrary
 
     public init(
         profile: StudioProfile,
@@ -746,7 +747,8 @@ public struct StudioSnapshot: Codable, Equatable {
         receipts: [StudioReceipt],
         taxProfile: StudioTaxProfile,
         invoiceSettings: StudioInvoiceSettings = StudioInvoiceSettings(),
-        mileageEntries: [MileageEntry] = []
+        mileageEntries: [MileageEntry] = [],
+        businessCardLibrary: ProBusinessCardLibrary = ProBusinessCardLibrary()
     ) {
         self.profile = profile
         self.clients = clients
@@ -756,10 +758,11 @@ public struct StudioSnapshot: Codable, Equatable {
         self.taxProfile = taxProfile
         self.invoiceSettings = invoiceSettings
         self.mileageEntries = mileageEntries
+        self.businessCardLibrary = businessCardLibrary
     }
 
     private enum CodingKeys: String, CodingKey {
-        case profile, clients, invoices, projects, receipts, taxProfile, invoiceSettings, mileageEntries
+        case profile, clients, invoices, projects, receipts, taxProfile, invoiceSettings, mileageEntries, businessCardLibrary
     }
 
     public init(from decoder: Decoder) throws {
@@ -772,6 +775,7 @@ public struct StudioSnapshot: Codable, Equatable {
         taxProfile = try c.decode(StudioTaxProfile.self, forKey: .taxProfile)
         invoiceSettings = try c.decodeIfPresent(StudioInvoiceSettings.self, forKey: .invoiceSettings) ?? StudioInvoiceSettings()
         mileageEntries = try c.decodeIfPresent([MileageEntry].self, forKey: .mileageEntries) ?? []
+        businessCardLibrary = try c.decodeIfPresent(ProBusinessCardLibrary.self, forKey: .businessCardLibrary) ?? ProBusinessCardLibrary()
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -784,5 +788,6 @@ public struct StudioSnapshot: Codable, Equatable {
         try c.encode(taxProfile, forKey: .taxProfile)
         try c.encode(invoiceSettings, forKey: .invoiceSettings)
         try c.encode(mileageEntries, forKey: .mileageEntries)
+        try c.encode(businessCardLibrary, forKey: .businessCardLibrary)
     }
 }

@@ -36,7 +36,10 @@ struct StudioMileageLogView: View {
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var studioBrain: StudioBrain
 
+    var highlightEntryID: UUID? = nil
+
     @State private var mileageSheetMode: MileageSheetMode?
+    @State private var didOpenHighlight = false
 
     private var summary: MileageSummaryDisplay {
         studioBrain.mileageSummaryDisplay()
@@ -86,6 +89,14 @@ struct StudioMileageLogView: View {
             .presentationDragIndicator(.visible)
             .buxStudioSheetContent()
         }
+        .onAppear(perform: openHighlightedEntryIfNeeded)
+    }
+
+    private func openHighlightedEntryIfNeeded() {
+        guard !didOpenHighlight, let highlightEntryID else { return }
+        guard store.mileageEntries.contains(where: { $0.id == highlightEntryID }) else { return }
+        didOpenHighlight = true
+        mileageSheetMode = .edit(highlightEntryID)
     }
 
     private var mileageList: some View {

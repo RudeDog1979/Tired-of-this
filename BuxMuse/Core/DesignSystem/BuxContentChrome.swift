@@ -7,6 +7,114 @@
 
 import SwiftUI
 
+// MARK: - Landing light rim (accent shine from tinted backdrop)
+
+enum BuxLandingLightRimIntensity {
+    case hero
+    case card
+
+    func leadOpacity(isDark: Bool) -> Double {
+        switch self {
+        case .hero: return isDark ? 0.40 : 0.26
+        case .card: return isDark ? 0.22 : 0.14
+        }
+    }
+
+    func midOpacity(isDark: Bool) -> Double {
+        switch self {
+        case .hero: return isDark ? 0.16 : 0.11
+        case .card: return isDark ? 0.09 : 0.06
+        }
+    }
+
+    func trailOpacity(isDark: Bool) -> Double {
+        switch self {
+        case .hero: return isDark ? 0.05 : 0.03
+        case .card: return isDark ? 0.03 : 0.02
+        }
+    }
+
+    var lineWidth: CGFloat {
+        switch self {
+        case .hero: return 1
+        case .card: return 0.75
+        }
+    }
+
+    func glowOpacity(isDark: Bool) -> Double {
+        switch self {
+        case .hero: return isDark ? 0.18 : 0.11
+        case .card: return isDark ? 0.10 : 0.06
+        }
+    }
+
+    var glowRadius: CGFloat {
+        switch self {
+        case .hero: return 18
+        case .card: return 10
+        }
+    }
+
+    var glowY: CGFloat {
+        switch self {
+        case .hero: return 7
+        case .card: return 4
+        }
+    }
+}
+
+struct BuxLandingLightRimModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    let cornerRadius: CGFloat
+    var intensity: BuxLandingLightRimIntensity = .hero
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        let accent = themeManager.current.accentColor
+        let isDark = colorScheme == .dark
+
+        let rimmed = content.overlay {
+            shape.strokeBorder(
+                LinearGradient(
+                    colors: [
+                        accent.opacity(intensity.leadOpacity(isDark: isDark)),
+                        accent.opacity(intensity.midOpacity(isDark: isDark)),
+                        accent.opacity(intensity.trailOpacity(isDark: isDark)),
+                        Color.clear
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: intensity.lineWidth
+            )
+        }
+
+        // Accent glow shadow — hero cards only (Apple: one shadow layer, no scroll stack).
+        if intensity == .hero {
+            rimmed.shadow(
+                color: accent.opacity(intensity.glowOpacity(isDark: isDark)),
+                radius: intensity.glowRadius,
+                x: 0,
+                y: intensity.glowY
+            )
+        } else {
+            rimmed
+        }
+    }
+}
+
+extension View {
+    /// Accent rim + soft glow — mimics tinted landing backdrop lighting the card edge.
+    func buxLandingLightRim(
+        cornerRadius: CGFloat,
+        intensity: BuxLandingLightRimIntensity = .hero
+    ) -> some View {
+        modifier(BuxLandingLightRimModifier(cornerRadius: cornerRadius, intensity: intensity))
+    }
+}
+
 // MARK: - Hero plate (opaque M3 surface)
 
 struct BuxHeroCardPlateBackground: View {
@@ -26,15 +134,36 @@ struct BuxHeroCardChromeModifier: ViewModifier {
     var useMeshPlate: Bool = true
 
     func body(content: Content) -> some View {
-        content.buxMaterialCardChrome(.elevated, cornerRadius: cornerRadius)
+        content
+            .buxMaterialCardChrome(.elevated, cornerRadius: cornerRadius, castsShadow: false)
+            .buxLandingLightRim(cornerRadius: cornerRadius, intensity: .hero)
     }
 }
 
 struct BuxListCardChromeModifier: ViewModifier {
     let cornerRadius: CGFloat
+    @ObservedObject private var settings = SettingsStore.shared
 
     func body(content: Content) -> some View {
-        content.buxMaterialCardChrome(.outlined, cornerRadius: cornerRadius)
+        content
+            .buxMaterialCardChrome(.outlined, cornerRadius: cornerRadius)
+            .modifier(BuxLandingLightRimWhenEnabled(
+                cornerRadius: cornerRadius,
+                enabled: settings.brandThemesEnabled
+            ))
+    }
+}
+
+private struct BuxLandingLightRimWhenEnabled: ViewModifier {
+    let cornerRadius: CGFloat
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.buxLandingLightRim(cornerRadius: cornerRadius, intensity: .card)
+        } else {
+            content
+        }
     }
 }
 

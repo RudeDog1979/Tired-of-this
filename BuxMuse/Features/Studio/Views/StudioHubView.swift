@@ -15,6 +15,7 @@ struct StudioHubView: View {
     @EnvironmentObject private var studioBrain: StudioBrain
     @EnvironmentObject private var appDataManager: AppDataManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var studioTimer = StudioTimerController.shared
 
@@ -33,6 +34,8 @@ struct StudioHubView: View {
     @State private var showNewClient = false
     @State private var showScanReceipt = false
     @State private var showTimeTracker = false
+    @State private var showProSearch = false
+    @State private var showBusinessCardStudio = false
     @State private var hubAppeared = false
 
     private var display: StudioHubDisplay {
@@ -40,6 +43,19 @@ struct StudioHubView: View {
     }
 
     var body: some View {
+        Group {
+            if settingsStore.studioMode == .pro {
+                proStudioHub
+            } else {
+                SimpleStudioHubView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(store)
+            }
+        }
+    }
+
+    private var proStudioHub: some View {
         NavigationStack {
             studioHubLayer
         }
@@ -47,48 +63,52 @@ struct StudioHubView: View {
 
     private var studioHubLayer: some View {
         ZStack {
-                themeManager.screenBackground(for: colorScheme)
+                BuxLandingTintBackground()
                     .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
-                        StudioHeroCard(display: display.hero)
+                        StudioTierWordmark(style: .hero)
+                            .padding(.horizontal, BuxTokens.marginRegular)
                             .buxScreenEntrance(index: 0, isVisible: hubAppeared)
+
+                        StudioHeroCard(display: display.hero)
+                            .buxScreenEntrance(index: 1, isVisible: hubAppeared)
 
                         if display.isEmpty {
                             StudioHubEmptyState()
-                                .buxScreenEntrance(index: 1, isVisible: hubAppeared)
+                                .buxScreenEntrance(index: 2, isVisible: hubAppeared)
                         }
 
                         StudioMetricsGrid(display: display.hero)
-                            .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+                            .buxScreenEntrance(index: 3, isVisible: hubAppeared)
 
                         StudioHubPulseCard(cashflow: display.cashflow)
                             .environmentObject(themeManager)
-                            .buxScreenEntrance(index: 3, isVisible: hubAppeared)
-
-                        quickActionsSection
                             .buxScreenEntrance(index: 4, isVisible: hubAppeared)
 
-                        StudioInvoicesSection(display: display.invoicesSummary) { navigateToInvoices = true }
+                        quickActionsSection
                             .buxScreenEntrance(index: 5, isVisible: hubAppeared)
-                        StudioClientsSection(clients: display.topClients) { navigateToClients = true }
+
+                        StudioInvoicesSection(display: display.invoicesSummary) { navigateToInvoices = true }
                             .buxScreenEntrance(index: 6, isVisible: hubAppeared)
-                        StudioTaxSection(display: display.taxSummary) { openTaxHub(.overview) }
+                        StudioClientsSection(clients: display.topClients) { navigateToClients = true }
                             .buxScreenEntrance(index: 7, isVisible: hubAppeared)
-                        StudioCashflowSection(display: display.cashflow) { navigateToCashflow = true }
+                        StudioTaxSection(display: display.taxSummary) { openTaxHub(.overview) }
                             .buxScreenEntrance(index: 8, isVisible: hubAppeared)
-                        StudioProjectsSection(display: display.projectsSummary) { navigateToProjects = true }
+                        StudioCashflowSection(display: display.cashflow) { navigateToCashflow = true }
                             .buxScreenEntrance(index: 9, isVisible: hubAppeared)
-                        StudioReceiptsSection(display: display.receiptsSummary) { navigateToReceipts = true }
+                        StudioProjectsSection(display: display.projectsSummary) { navigateToProjects = true }
                             .buxScreenEntrance(index: 10, isVisible: hubAppeared)
-                        StudioDeductionsSection(items: display.deductionOpportunities) { navigateToDeductions = true }
+                        StudioReceiptsSection(display: display.receiptsSummary) { navigateToReceipts = true }
                             .buxScreenEntrance(index: 11, isVisible: hubAppeared)
-                        StudioAlertsSection(alerts: display.alerts)
+                        StudioDeductionsSection(items: display.deductionOpportunities) { navigateToDeductions = true }
                             .buxScreenEntrance(index: 12, isVisible: hubAppeared)
+                        StudioAlertsSection(alerts: display.alerts)
+                            .buxScreenEntrance(index: 13, isVisible: hubAppeared)
 
                         toolsSection
-                            .buxScreenEntrance(index: 13, isVisible: hubAppeared)
+                            .buxScreenEntrance(index: 14, isVisible: hubAppeared)
 
                         Spacer().frame(height: BuxTokens.tight)
                     }
@@ -97,16 +117,36 @@ struct StudioHubView: View {
                 }
                 .buxRootTabScrollChrome()
             }
-            .navigationTitle("Studio")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .buxRootNavigationChrome()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    BuxProfileToolbarMenu {
-                        Button("Business Profile") { navigateToProfile = true }
-                        Button("Tax Profile") { openTaxHub(.settings) }
+                    HStack(spacing: 16) {
+                        StudioTierWordmark(style: .badge)
+
+                        Button {
+                            showProSearch = true
+                        } label: {
+                            Image(systemName: "sparkle.magnifyingglass")
+                                .foregroundColor(themeManager.current.accentColor)
+                        }
+                        .accessibilityLabel("Pro Search")
+
+                        BuxProfileToolbarMenu {
+                            Button("Business Profile") { navigateToProfile = true }
+                            Button("Tax Profile") { openTaxHub(.settings) }
+                        }
                     }
                 }
+            }
+            .navigationDestination(isPresented: $showProSearch) {
+                ProStudioSearchView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(store)
+                    .environmentObject(simpleStudioStore)
+                    .environmentObject(studioBrain)
             }
             .onAppear {
                 studioTimer.attach(store: store)
@@ -209,6 +249,13 @@ struct StudioHubView: View {
                     .environmentObject(studioBrain)
                     .environment(\.studioEnhancedTint, true)
             }
+            .navigationDestination(isPresented: $showBusinessCardStudio) {
+                ProBusinessCardStudioView()
+                    .environmentObject(themeManager)
+                    .environmentObject(store)
+                    .environmentObject(simpleStudioStore)
+                    .environment(\.studioEnhancedTint, true)
+            }
             .environment(\.studioEnhancedTint, true)
     }
 
@@ -260,21 +307,25 @@ struct StudioHubView: View {
 
             BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: 0) {
                 VStack(spacing: 0) {
-                    navRow(title: "Clients", icon: "person.2.fill", color: .blue) { navigateToClients = true }
-                    studioRowDivider
                     navRow(title: "Invoices", icon: "doc.text.fill", color: .green) { navigateToInvoices = true }
                     studioRowDivider
-                    navRow(title: "Projects", icon: "folder.fill", color: .purple) { navigateToProjects = true }
+                    navRow(title: "Clients", icon: "person.2.fill", color: .blue) { navigateToClients = true }
                     studioRowDivider
                     navRow(title: "Expenses", icon: "doc.plaintext.fill", color: .teal) { navigateToReceipts = true }
+                    studioRowDivider
+                    navRow(title: "Projects", icon: "folder.fill", color: .purple) { navigateToProjects = true }
                     studioRowDivider
                     navRow(title: "Tax Studio", icon: "percent", color: .red) { openTaxHub(.overview) }
                     studioRowDivider
                     navRow(title: "Cashflow", icon: "chart.line.uptrend.xyaxis", color: .orange) { navigateToCashflow = true }
                     studioRowDivider
-                    navRow(title: "Deductions", icon: "lightbulb.fill", color: .yellow) { navigateToDeductions = true }
+                    navRow(title: "Business Card Studio", icon: "person.crop.rectangle.fill", color: .pink) {
+                        showBusinessCardStudio = true
+                    }
                     studioRowDivider
                     navRow(title: "Mileage Log", icon: "car.fill", color: .cyan) { navigateToMileage = true }
+                    studioRowDivider
+                    navRow(title: "Deductions", icon: "lightbulb.fill", color: .yellow) { navigateToDeductions = true }
                 }
             }
         }

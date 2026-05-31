@@ -21,6 +21,7 @@ public final class StudioStore: ObservableObject {
     @Published public var taxProfile: StudioTaxProfile = StudioTaxProfile()
     @Published public var invoiceSettings: StudioInvoiceSettings = StudioInvoiceSettings()
     @Published public var mileageEntries: [MileageEntry] = []
+    @Published public var businessCardLibrary: ProBusinessCardLibrary = ProBusinessCardLibrary()
 
     private let saveQueue = DispatchQueue(label: "com.buxmuse.freelance.save", qos: .utility)
     private var isLoaded = false
@@ -120,7 +121,8 @@ public final class StudioStore: ObservableObject {
             receipts: receipts,
             taxProfile: taxProfile,
             invoiceSettings: invoiceSettings,
-            mileageEntries: mileageEntries
+            mileageEntries: mileageEntries,
+            businessCardLibrary: businessCardLibrary
         )
     }
 
@@ -133,6 +135,7 @@ public final class StudioStore: ObservableObject {
         taxProfile = snapshot.taxProfile
         invoiceSettings = snapshot.invoiceSettings
         mileageEntries = snapshot.mileageEntries
+        businessCardLibrary = snapshot.businessCardLibrary
     }
 
     // MARK: - CRUD: Mileage
@@ -267,6 +270,85 @@ public final class StudioStore: ObservableObject {
         save()
     }
 
+    // MARK: - Business Card Studio
+
+    public func ensureBusinessCardLibrary(simpleCard: SimpleBusinessCard?) {
+        guard businessCardLibrary.designs.isEmpty else { return }
+
+        var designs: [ProBusinessCardDesign] = []
+        if let simpleCard, !simpleCard.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            designs.append(ProBusinessCardLibrary.importFromSimpleCard(simpleCard))
+        }
+
+        let starters = ProBusinessCardLibrary.starterDesigns(
+            profileName: profile.displayName,
+            businessName: profile.businessName,
+            tagline: profile.businessType.rawValue,
+            accentHex: profile.logoData == nil
+                ? ProBusinessCardPalette.defaultPreset.accentHex
+                : ProBusinessCardPalette.defaultPreset.accentHex
+        )
+        for starter in starters where !designs.contains(where: { $0.title == starter.title }) {
+            designs.append(starter)
+        }
+
+        businessCardLibrary = ProBusinessCardLibrary(
+            designs: designs,
+            selectedDesignID: designs.first?.id
+        )
+        save()
+    }
+
+    @discardableResult
+    public func addBusinessCardDesign(
+        title: String,
+        template: ProBusinessCardTemplate
+    ) -> ProBusinessCardDesign {
+        let base = businessCardLibrary.selectedDesign
+        let businessName = profile.businessName.isEmpty ? profile.displayName : profile.businessName
+        let content = base?.content ?? ProBusinessCardContent(
+            name: businessName,
+            tagline: profile.businessType.rawValue
+        )
+        var design = ProBusinessCardDesign(
+            title: title,
+            template: template,
+            options: .businessDefault,
+            style: ProBusinessCardStyle.businessDefault(businessName: businessName),
+            content: content
+        )
+        design.applyTemplateDefaults()
+        businessCardLibrary.designs.append(design)
+        businessCardLibrary.selectedDesignID = design.id
+        save()
+        return design
+    }
+
+    public func updateBusinessCardDesign(_ design: ProBusinessCardDesign) {
+        guard let index = businessCardLibrary.designs.firstIndex(where: { $0.id == design.id }) else { return }
+        businessCardLibrary.designs[index] = design
+        businessCardLibrary.selectedDesignID = design.id
+        save()
+    }
+
+    public func duplicateBusinessCardDesign(id: UUID) {
+        guard let source = businessCardLibrary.designs.first(where: { $0.id == id }) else { return }
+        var copy = source
+        copy.id = UUID()
+        copy.title = "\(source.title) copy"
+        copy.updatedAt = Date()
+        businessCardLibrary.designs.append(copy)
+        save()
+    }
+
+    public func deleteBusinessCardDesign(id: UUID) {
+        businessCardLibrary.designs.removeAll { $0.id == id }
+        if businessCardLibrary.selectedDesignID == id {
+            businessCardLibrary.selectedDesignID = businessCardLibrary.designs.first?.id
+        }
+        save()
+    }
+
     public func syncOverdueInvoicesIfNeeded() {
         let synced = StudioInvoiceMaintenance.syncOverdueStatuses(invoices: invoices)
         if synced != invoices {
@@ -302,6 +384,7 @@ public final class StudioStore: ObservableObject {
             paymentSchedule: "annually"
         )
         invoiceSettings = StudioInvoiceSettings()
+        businessCardLibrary = ProBusinessCardLibrary()
     }
 
     public func resetAllData() {

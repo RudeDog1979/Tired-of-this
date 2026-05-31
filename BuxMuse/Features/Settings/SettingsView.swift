@@ -17,14 +17,11 @@ struct SettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
     @State private var settingsPath = NavigationPath()
 
-    private var bgColor: Color {
-        themeManager.screenBackground(for: colorScheme)
-    }
-
     var body: some View {
         NavigationStack(path: $settingsPath) {
             ZStack {
-                bgColor.ignoresSafeArea()
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {

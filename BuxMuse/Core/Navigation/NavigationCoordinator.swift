@@ -103,6 +103,7 @@ final class NavigationCoordinator: ObservableObject {
 
     /// Full-screen blueprint unlock — fade overlay (not a sheet).
     @Published var showStudioUnlockAnimation = false
+    @Published var showStudioPersonaPicker = false
     /// Toggle is on visually; `studioEnabled` commits around mid-animation so Studio is revealed under the fade-out.
     @Published private(set) var studioUnlockAwaitingCommit = false
 
@@ -120,6 +121,7 @@ final class NavigationCoordinator: ObservableObject {
         studioUnlockAwaitingCommit = false
         withAnimation(.easeInOut(duration: 0.55)) {
             SettingsStore.shared.studioEnabled = true
+            SettingsStore.shared.studioMode = .simple
         }
         SettingsStore.shared.save()
     }
@@ -127,6 +129,9 @@ final class NavigationCoordinator: ObservableObject {
     func finishStudioUnlockPresentation() {
         if studioUnlockAwaitingCommit {
             commitStudioUnlock()
+        }
+        if SettingsStore.shared.studioEnabled, !SettingsStore.shared.studioPersonaConfigured {
+            showStudioPersonaPicker = true
         }
     }
 

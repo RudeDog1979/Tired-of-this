@@ -77,9 +77,8 @@ struct DashboardView: View {
 
     private var dashboardRoot: some View {
         ZStack {
-            themeManager.screenBackground(for: colorScheme)
+            BuxLandingTintBackground()
                 .ignoresSafeArea()
-            BuxHeroMeshBackground()
             // Scroll view containing page elements
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxTokens.block) {

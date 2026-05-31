@@ -66,6 +66,10 @@ public final class SettingsStore: ObservableObject {
     /// Home banner dismissed; separate from main settings payload.
     @Published public var studioDiscoveryOfferDismissed: Bool = false
     @Published public var studioProfileId: UUID? = nil
+    /// Simple (default) vs Pro Studio presentation.
+    @Published public var studioMode: StudioMode = .simple
+    @Published public var studioPersona: StudioPersona = .other
+    @Published public var studioPersonaConfigured: Bool = false
     
     // MARK: - Notifications Settings
     @Published public var notificationsEnabled: Bool = true
@@ -202,6 +206,9 @@ public final class SettingsStore: ObservableObject {
         
         let studioEnabled: Bool
         let studioProfileId: UUID?
+        let studioMode: StudioMode?
+        let studioPersona: StudioPersona?
+        let studioPersonaConfigured: Bool?
         
         let notificationsEnabled: Bool
         let budgetAlertsEnabled: Bool
@@ -237,6 +244,7 @@ public final class SettingsStore: ObservableObject {
             case simpleBudgetLimit, customBudgetLimit, customBudgetPeriod
             case studioEnabled, freelanceEnabled
             case studioProfileId, freelanceProfileId
+            case studioMode, studioPersona, studioPersonaConfigured
             case notificationsEnabled, budgetAlertsEnabled, billRemindersEnabled
             case studioInvoiceRemindersEnabled, freelanceInvoiceRemindersEnabled
             case taxDeadlineRemindersEnabled, dailySummaryEnabled
@@ -297,6 +305,9 @@ public final class SettingsStore: ObservableObject {
                 ?? c.decodeIfPresent(Bool.self, forKey: .freelanceEnabled) ?? false
             studioProfileId = try c.decodeIfPresent(UUID.self, forKey: .studioProfileId)
                 ?? c.decodeIfPresent(UUID.self, forKey: .freelanceProfileId)
+            self.studioMode = try c.decodeIfPresent(StudioMode.self, forKey: .studioMode) ?? .simple
+            self.studioPersona = try c.decodeIfPresent(StudioPersona.self, forKey: .studioPersona) ?? .other
+            self.studioPersonaConfigured = try c.decodeIfPresent(Bool.self, forKey: .studioPersonaConfigured) ?? false
             notificationsEnabled = try c.decode(Bool.self, forKey: .notificationsEnabled)
             budgetAlertsEnabled = try c.decode(Bool.self, forKey: .budgetAlertsEnabled)
             billRemindersEnabled = try c.decode(Bool.self, forKey: .billRemindersEnabled)
@@ -346,6 +357,9 @@ public final class SettingsStore: ObservableObject {
             customBudgetPeriod: DefaultBudgetPeriod?,
             studioEnabled: Bool,
             studioProfileId: UUID?,
+            studioMode: StudioMode?,
+            studioPersona: StudioPersona?,
+            studioPersonaConfigured: Bool?,
             notificationsEnabled: Bool,
             budgetAlertsEnabled: Bool,
             billRemindersEnabled: Bool,
@@ -391,6 +405,9 @@ public final class SettingsStore: ObservableObject {
             self.customBudgetPeriod = customBudgetPeriod
             self.studioEnabled = studioEnabled
             self.studioProfileId = studioProfileId
+            self.studioMode = studioMode
+            self.studioPersona = studioPersona
+            self.studioPersonaConfigured = studioPersonaConfigured
             self.notificationsEnabled = notificationsEnabled
             self.budgetAlertsEnabled = budgetAlertsEnabled
             self.billRemindersEnabled = billRemindersEnabled
@@ -439,6 +456,9 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(customBudgetPeriod, forKey: .customBudgetPeriod)
             try c.encode(studioEnabled, forKey: .studioEnabled)
             try c.encodeIfPresent(studioProfileId, forKey: .studioProfileId)
+            try c.encodeIfPresent(studioMode, forKey: .studioMode)
+            try c.encodeIfPresent(studioPersona, forKey: .studioPersona)
+            try c.encodeIfPresent(studioPersonaConfigured, forKey: .studioPersonaConfigured)
             try c.encode(notificationsEnabled, forKey: .notificationsEnabled)
             try c.encode(budgetAlertsEnabled, forKey: .budgetAlertsEnabled)
             try c.encode(billRemindersEnabled, forKey: .billRemindersEnabled)
@@ -512,6 +532,9 @@ public final class SettingsStore: ObservableObject {
                 
                 self.studioEnabled = payload.studioEnabled
                 self.studioProfileId = payload.studioProfileId
+                self.studioMode = payload.studioMode ?? .simple
+                self.studioPersona = payload.studioPersona ?? .other
+                self.studioPersonaConfigured = payload.studioPersonaConfigured ?? false
                 
                 self.notificationsEnabled = payload.notificationsEnabled
                 self.budgetAlertsEnabled = payload.budgetAlertsEnabled
@@ -649,6 +672,9 @@ public final class SettingsStore: ObservableObject {
             customBudgetPeriod: customBudgetPeriod,
             studioEnabled: studioEnabled,
             studioProfileId: studioProfileId,
+            studioMode: studioMode,
+            studioPersona: studioPersona,
+            studioPersonaConfigured: studioPersonaConfigured,
             notificationsEnabled: notificationsEnabled,
             budgetAlertsEnabled: budgetAlertsEnabled,
             billRemindersEnabled: billRemindersEnabled,

@@ -28,6 +28,8 @@ struct BuxMuseApp: App {
                 .environmentObject(container.insightsViewModel)
                 .environmentObject(container.studioStore)
                 .environmentObject(container.studioBrain)
+                .environmentObject(container.simpleStudioStore)
+                .environmentObject(container.simpleStudioBrain)
                 .environmentObject(container.appDataManager)
                 .task {
                     _ = await ExpenseRenewalReminderScheduler.requestAuthorizationIfNeeded()

@@ -25,11 +25,14 @@ final class AppContainer: ObservableObject {
     public let insightsViewModel: InsightsViewModel
     public let studioStore: StudioStore
     public let studioBrain: StudioBrain
+    public let simpleStudioStore: SimpleStudioStore
+    public let simpleStudioBrain: SimpleStudioBrain
     public let appDataManager: AppDataManager
 
     init() {
         persistence = PersistenceController.shared
         studioStore = StudioStore.shared
+        simpleStudioStore = SimpleStudioStore.shared
         themeManager = ThemeManager()
         appSettingsManager = AppSettingsManager()
         navigationCoordinator = NavigationCoordinator()
@@ -42,6 +45,12 @@ final class AppContainer: ObservableObject {
         studioBrain = StudioBrain(
             store: studioStore,
             settings: settingsStore,
+            appSettings: appSettingsManager
+        )
+        simpleStudioBrain = SimpleStudioBrain(
+            store: simpleStudioStore,
+            settings: settingsStore,
+            studioStore: studioStore,
             appSettings: appSettingsManager
         )
         appDataManager = AppDataManager(

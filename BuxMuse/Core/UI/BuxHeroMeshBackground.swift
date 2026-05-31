@@ -8,6 +8,33 @@
 
 import SwiftUI
 
+/// Subtle accent wash for tab landing pages — light and dark only; theme accent unchanged.
+struct BuxLandingTintBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    var body: some View {
+        ZStack {
+            themeManager.screenBackground(for: colorScheme)
+            LinearGradient(
+                colors: [
+                    themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.12 : 0.08),
+                    Color.clear
+                ],
+                startPoint: .topLeading,
+                endPoint: .center
+            )
+        }
+    }
+}
+
+extension View {
+    /// Premium landing backdrop — M3 surface + subtle accent gradient (Home, Studio, Expenses, Settings).
+    func buxLandingScreenBackground() -> some View {
+        background(BuxLandingTintBackground().ignoresSafeArea())
+    }
+}
+
 /// Hero mesh backdrop — hidden when brand themes are off in Settings.
 struct BuxThemedBackdrop: View {
     var opacity: Double = 1

@@ -16,6 +16,7 @@ struct StudioSettingsView: View {
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @ObservedObject private var store = SettingsStore.shared
     @EnvironmentObject private var studioStore: StudioStore
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
     @State private var displayName = ""
     @State private var businessName = ""
@@ -32,7 +33,7 @@ struct StudioSettingsView: View {
         BuxThemedCardForm {
             if !store.studioEnabled {
                 BuxFormSection {
-                    Text("Studio adds invoices, mileage, receipts, and tax planning tools as an extra tab. Turn it on when you need it — your everyday Home and Expenses tabs stay the same.")
+                    Text("Studio adds work tracking, simple invoices, and job pockets. Turn it on when you need it — Home and Expenses stay the same.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
@@ -46,7 +47,7 @@ struct StudioSettingsView: View {
                         Text("Show Studio Tab")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Text("Invoices, expenses, tax tools, and client CRM")
+                        Text("Simple work ledger or full Pro tools")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
                     }
@@ -56,6 +57,82 @@ struct StudioSettingsView: View {
             }
 
             if store.studioEnabled {
+                BuxFormSection(title: "Studio mode") {
+                    Picker("Mode", selection: $store.studioMode) {
+                        Text("Simple Studio").tag(StudioMode.simple)
+                        Text("Pro Studio").tag(StudioMode.pro)
+                    }
+                    .pickerStyle(.segmented)
+                    .buxFormFieldPadding()
+                    .onChange(of: store.studioMode) { _, newMode in
+                        if newMode == .pro {
+                            _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
+                                simpleStore: simpleStudioStore,
+                                studioStore: studioStore,
+                                settings: store,
+                                currencyCode: appSettingsManager.selectedCurrency.id
+                            )
+                        } else {
+                            store.save()
+                        }
+                    }
+
+                    HStack(spacing: 10) {
+                        if store.studioMode == .pro {
+                            StudioTierWordmark(style: .badge)
+                        } else {
+                            Text("Simple")
+                                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(themeManager.labelSecondary(for: colorScheme).opacity(0.12))
+                                .clipShape(Capsule())
+                        }
+                        Text(store.studioMode.subtitle)
+                            .font(.system(size: 11, weight: .medium))
+                            .buxLabelSecondary()
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .buxFormFieldPadding()
+                }
+
+                BuxFormSection(title: "Work type") {
+                    Picker("Persona", selection: $store.studioPersona) {
+                        ForEach(StudioPersona.allCases) { persona in
+                            Text(persona.title).tag(persona)
+                        }
+                    }
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+                    .onChange(of: store.studioPersona) { _, _ in
+                        store.studioPersonaConfigured = true
+                        store.save()
+                    }
+                }
+
+                if store.studioMode == .pro {
+                    BuxFormSection(title: "Brand") {
+                        NavigationLink {
+                            ProBusinessCardStudioView()
+                                .environmentObject(themeManager)
+                                .environmentObject(studioStore)
+                                .environmentObject(simpleStudioStore)
+                        } label: {
+                            HStack {
+                                Text("Business Card Studio")
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                Spacer()
+                                Text("\(studioStore.businessCardLibrary.designs.count) designs")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .buxLabelSecondary()
+                                BuxChevron()
+                            }
+                        }
+                        .buxFormFieldPadding()
+                    }
+                }
+
                 BuxFormSection(title: "Business profile") {
                     PhotoPickCropRow(
                         title: "Company Logo",

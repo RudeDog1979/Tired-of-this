@@ -55,6 +55,13 @@ struct RootView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.45), value: navigationCoordinator.showStudioUnlockAnimation)
+            .fullScreenCover(isPresented: $navigationCoordinator.showStudioPersonaPicker) {
+                SimpleStudioPersonaPickerView {
+                    navigationCoordinator.showStudioPersonaPicker = false
+                    navigationCoordinator.selectedTab = .studio
+                }
+                .environmentObject(themeManager)
+            }
             .onChange(of: navigationCoordinator.showStudioUnlockAnimation) { _, isShowing in
                 if !isShowing {
                     navigationCoordinator.finishStudioUnlockPresentation()
@@ -140,6 +147,8 @@ struct RootView: View {
                         .environmentObject(themeManager)
                         .environmentObject(appSettingsManager)
                         .environmentObject(navigationCoordinator)
+                        .environmentObject(container.simpleStudioStore)
+                        .environmentObject(container.simpleStudioBrain)
                 } label: {
                     Label(AppTab.studio.nativeTabTitle, systemImage: AppTab.studio.nativeTabSymbol)
                 }

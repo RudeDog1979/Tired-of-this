@@ -53,6 +53,7 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
 
     let variant: BuxMaterialCardVariant
     let cornerRadius: CGFloat
+    var castsShadow: Bool = true
 
     private var scheme: BuxMaterialScheme {
         themeManager.materialScheme(for: colorScheme, branded: settings.brandThemesEnabled)
@@ -80,7 +81,7 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
             .background {
                 shape.fill(fillColor)
             }
-            .compositingGroup()
+            .modifier(BuxMaterialClipGroupModifier(useGroup: variant == .elevated))
             .clipShape(shape)
             .overlay {
                 if showsBorder {
@@ -88,13 +89,26 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
                 }
             }
             .shadow(
-                color: variant == .elevated
+                color: variant == .elevated && castsShadow
                     ? BuxMaterialChrome.elevatedShadowColor(for: colorScheme)
                     : .clear,
-                radius: variant == .elevated ? BuxMaterialChrome.elevatedShadowRadius : 0,
+                radius: variant == .elevated && castsShadow ? BuxMaterialChrome.elevatedShadowRadius : 0,
                 x: 0,
-                y: variant == .elevated ? BuxMaterialChrome.elevatedShadowY : 0
+                y: variant == .elevated && castsShadow ? BuxMaterialChrome.elevatedShadowY : 0
             )
+    }
+}
+
+/// Offscreen group only where elevation shadow needs it — keeps list scroll cheap.
+private struct BuxMaterialClipGroupModifier: ViewModifier {
+    let useGroup: Bool
+
+    func body(content: Content) -> some View {
+        if useGroup {
+            content.compositingGroup()
+        } else {
+            content
+        }
     }
 }
 
@@ -103,9 +117,10 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
 extension View {
     func buxMaterialCardChrome(
         _ variant: BuxMaterialCardVariant = .outlined,
-        cornerRadius: CGFloat = BuxMaterialChrome.cardCornerRadius
+        cornerRadius: CGFloat = BuxMaterialChrome.cardCornerRadius,
+        castsShadow: Bool = true
     ) -> some View {
-        modifier(BuxMaterialCardChromeModifier(variant: variant, cornerRadius: cornerRadius))
+        modifier(BuxMaterialCardChromeModifier(variant: variant, cornerRadius: cornerRadius, castsShadow: castsShadow))
     }
 
     func buxMaterialPillCardLabel(
