@@ -910,10 +910,17 @@ public struct ProBusinessCardDesign: Identifiable, Codable, Equatable, Sendable 
 public struct ProBusinessCardLibrary: Codable, Equatable, Sendable {
     public var designs: [ProBusinessCardDesign]
     public var selectedDesignID: UUID?
+    /// Saved design whose palette and typography seed Pro invoice defaults.
+    public var primaryBrandDesignID: UUID?
 
-    public init(designs: [ProBusinessCardDesign] = [], selectedDesignID: UUID? = nil) {
+    public init(
+        designs: [ProBusinessCardDesign] = [],
+        selectedDesignID: UUID? = nil,
+        primaryBrandDesignID: UUID? = nil
+    ) {
         self.designs = designs
         self.selectedDesignID = selectedDesignID
+        self.primaryBrandDesignID = primaryBrandDesignID
     }
 
     public var savedDesigns: [ProBusinessCardDesign] {
@@ -923,6 +930,15 @@ public struct ProBusinessCardLibrary: Codable, Equatable, Sendable {
     public var selectedDesign: ProBusinessCardDesign? {
         guard let id = selectedDesignID else { return savedDesigns.first ?? designs.first }
         return designs.first(where: { $0.id == id }) ?? savedDesigns.first ?? designs.first
+    }
+
+    /// Primary card for invoice brand sync — falls back to first saved design.
+    public var primaryBrandDesign: ProBusinessCardDesign? {
+        if let id = primaryBrandDesignID,
+           let match = savedDesigns.first(where: { $0.id == id }) {
+            return match
+        }
+        return savedDesigns.first
     }
 
     public static func starterDesigns(

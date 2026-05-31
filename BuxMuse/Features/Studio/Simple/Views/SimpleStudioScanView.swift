@@ -25,6 +25,7 @@ struct SimpleStudioScanView: View {
     @State private var showCameraSheet = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var showReview = false
+    @State private var scanErrorMessage: String?
 
     @State private var scannedImage: UIImage?
     @State private var draft = SimpleScanDraft()
@@ -48,6 +49,14 @@ struct SimpleStudioScanView: View {
                 }
             }
             .navigationTitle(existingEntry == nil ? "Scan" : "Edit entry")
+            .alert("Scan failed", isPresented: Binding(
+                get: { scanErrorMessage != nil },
+                set: { if !$0 { scanErrorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) { scanErrorMessage = nil }
+            } message: {
+                Text(scanErrorMessage ?? "Could not read this image. Try a clearer photo or enter details manually.")
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -295,12 +304,12 @@ struct SimpleStudioScanView: View {
         SimpleStudioScanEngine.parseImage(image, persona: settings.studioPersona) { result in
             DispatchQueue.main.async {
                 isScanning = false
-                showReview = true
                 switch result {
                 case .success(let parsed):
                     draft = parsed
+                    showReview = true
                 case .failure:
-                    draft = SimpleStudioScanEngine.simulatorDraft(persona: settings.studioPersona)
+                    scanErrorMessage = "We couldn't read text from that image. Try better lighting, a sharper photo, or use Simulate scan to practice."
                 }
             }
         }

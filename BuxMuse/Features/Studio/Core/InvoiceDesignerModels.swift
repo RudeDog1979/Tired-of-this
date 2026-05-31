@@ -133,6 +133,47 @@ public enum InvoiceTaxMode: String, Codable, CaseIterable, Identifiable {
     public var id: String { rawValue }
 }
 
+// MARK: - Brand tokens (synced from Pro Business Card)
+
+public enum InvoiceBrandBackgroundStyle: String, Codable, CaseIterable, Identifiable, Sendable {
+    case solid = "Solid"
+    case gradient = "Gradient"
+    case patternDots = "Dots"
+    case patternLines = "Lines"
+    case photo = "Photo"
+
+    public var id: String { rawValue }
+}
+
+public enum InvoiceBrandMotif: String, Codable, CaseIterable, Identifiable, Sendable {
+    case none = "None"
+    case sideAccentBar = "Side Accent"
+    case twoToneSplit = "Two-Tone Split"
+    case topGradientBand = "Gradient Band"
+    case diagonalBands = "Diagonal Bands"
+    case cornerBlocks = "Corner Blocks"
+    case hexAccent = "Hex Accent"
+    case circleBadge = "Circle Badge"
+    case neonFrame = "Neon Frame"
+    case minimalRule = "Minimal Rule"
+    case geometricGrid = "Geometric Grid"
+    case splitVertical = "Split Vertical"
+    case arcSweep = "Arc Sweep"
+    case monogramBand = "Monogram"
+    case editorialLine = "Editorial Line"
+
+    public var id: String { rawValue }
+}
+
+public enum InvoiceBrandBorderStyle: String, Codable, CaseIterable, Identifiable, Sendable {
+    case none = "None"
+    case thin = "Thin"
+    case double = "Double"
+    case accent = "Accent"
+
+    public var id: String { rawValue }
+}
+
 // MARK: - Core Config Structs
 
 public struct InvoiceTaxRate: Codable, Identifiable, Equatable, Hashable {
@@ -156,42 +197,106 @@ public struct InvoiceTaxRate: Codable, Identifiable, Equatable, Hashable {
 
 public struct InvoiceTemplateConfig: Codable, Equatable {
     public var style: InvoiceTemplateStyle
+    /// Brand accent — maps from card `palette.accentHex`.
     public var primaryColorHex: String
+    /// Foreground / text accent — maps from card `palette.foregroundHex`.
     public var secondaryColorHex: String
+    /// Page tint — maps from card `palette.backgroundHex`.
+    public var backgroundColorHex: String
     public var typography: InvoiceTypographyStyle
     public var cornerStyle: InvoiceCornerStyle
     public var density: InvoiceDensity
-    public var logoPosition: InvoiceLogoPosition   // reuses existing enum
+    public var logoPosition: InvoiceLogoPosition
+    public var backgroundStyle: InvoiceBrandBackgroundStyle
+    /// Decorative header shape language from the source card template.
+    public var headerMotif: InvoiceBrandMotif
+    public var borderStyle: InvoiceBrandBorderStyle
+    /// Raw `ProBusinessCardTemplate` id when synced from a card.
+    public var sourceCardTemplate: String?
 
     public var primaryColor: Color   { Color(hex: primaryColorHex) }
     public var secondaryColor: Color { Color(hex: secondaryColorHex) }
+    public var backgroundColor: Color { Color(hex: backgroundColorHex) }
 
     public static let `default` = InvoiceTemplateConfig(
         style: .modern,
         primaryColorHex: "#5A55F5",
-        secondaryColorHex: "#3C37B4",
+        secondaryColorHex: "#111827",
+        backgroundColorHex: "#FFFFFF",
         typography: .systemSans,
         cornerStyle: .soft,
         density: .comfortable,
-        logoPosition: .topLeft
+        logoPosition: .topLeft,
+        backgroundStyle: .solid,
+        headerMotif: .none,
+        borderStyle: .none,
+        sourceCardTemplate: nil
     )
 
     public init(
         style: InvoiceTemplateStyle,
         primaryColorHex: String,
         secondaryColorHex: String,
+        backgroundColorHex: String = "#FFFFFF",
         typography: InvoiceTypographyStyle,
         cornerStyle: InvoiceCornerStyle,
         density: InvoiceDensity,
-        logoPosition: InvoiceLogoPosition
+        logoPosition: InvoiceLogoPosition,
+        backgroundStyle: InvoiceBrandBackgroundStyle = .solid,
+        headerMotif: InvoiceBrandMotif = .none,
+        borderStyle: InvoiceBrandBorderStyle = .none,
+        sourceCardTemplate: String? = nil
     ) {
         self.style = style
         self.primaryColorHex = primaryColorHex
         self.secondaryColorHex = secondaryColorHex
+        self.backgroundColorHex = backgroundColorHex
         self.typography = typography
         self.cornerStyle = cornerStyle
         self.density = density
         self.logoPosition = logoPosition
+        self.backgroundStyle = backgroundStyle
+        self.headerMotif = headerMotif
+        self.borderStyle = borderStyle
+        self.sourceCardTemplate = sourceCardTemplate
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case style, primaryColorHex, secondaryColorHex, backgroundColorHex
+        case typography, cornerStyle, density, logoPosition
+        case backgroundStyle, headerMotif, borderStyle, sourceCardTemplate
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        style = try c.decode(InvoiceTemplateStyle.self, forKey: .style)
+        primaryColorHex = try c.decode(String.self, forKey: .primaryColorHex)
+        secondaryColorHex = try c.decode(String.self, forKey: .secondaryColorHex)
+        backgroundColorHex = try c.decodeIfPresent(String.self, forKey: .backgroundColorHex) ?? "#FFFFFF"
+        typography = try c.decode(InvoiceTypographyStyle.self, forKey: .typography)
+        cornerStyle = try c.decode(InvoiceCornerStyle.self, forKey: .cornerStyle)
+        density = try c.decode(InvoiceDensity.self, forKey: .density)
+        logoPosition = try c.decode(InvoiceLogoPosition.self, forKey: .logoPosition)
+        backgroundStyle = try c.decodeIfPresent(InvoiceBrandBackgroundStyle.self, forKey: .backgroundStyle) ?? .solid
+        headerMotif = try c.decodeIfPresent(InvoiceBrandMotif.self, forKey: .headerMotif) ?? .none
+        borderStyle = try c.decodeIfPresent(InvoiceBrandBorderStyle.self, forKey: .borderStyle) ?? .none
+        sourceCardTemplate = try c.decodeIfPresent(String.self, forKey: .sourceCardTemplate)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(style, forKey: .style)
+        try c.encode(primaryColorHex, forKey: .primaryColorHex)
+        try c.encode(secondaryColorHex, forKey: .secondaryColorHex)
+        try c.encode(backgroundColorHex, forKey: .backgroundColorHex)
+        try c.encode(typography, forKey: .typography)
+        try c.encode(cornerStyle, forKey: .cornerStyle)
+        try c.encode(density, forKey: .density)
+        try c.encode(logoPosition, forKey: .logoPosition)
+        try c.encode(backgroundStyle, forKey: .backgroundStyle)
+        try c.encode(headerMotif, forKey: .headerMotif)
+        try c.encode(borderStyle, forKey: .borderStyle)
+        try c.encodeIfPresent(sourceCardTemplate, forKey: .sourceCardTemplate)
     }
 }
 

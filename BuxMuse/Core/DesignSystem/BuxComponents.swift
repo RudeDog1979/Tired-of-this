@@ -294,6 +294,16 @@ extension View {
             width: width
         )
     }
+
+    /// Soft drop shadow on chrome bars (tab bar, save bar) — not on scroll content.
+    func buxChromeScrollEdgeShadow(_ edge: Edge, colorScheme: ColorScheme) -> some View {
+        shadow(
+            color: Color.black.opacity(colorScheme == .dark ? 0.35 : 0.08),
+            radius: 8,
+            x: 0,
+            y: edge == .top ? 4 : -4
+        )
+    }
 }
 
 // MARK: - Navigation drawer search (visible by default; scroll up to minimize)
@@ -370,5 +380,30 @@ struct BuxDrawerScopeModifier<Scope: Hashable, ScopeContent: View>: ViewModifier
             .searchScopes($selection) {
                 scopes()
             }
+    }
+}
+
+// MARK: - Debug overlay
+
+struct BuxDebugOverlay: View {
+    let showMetrics: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("BuxMuse Debug")
+                .font(.system(size: 10, weight: .bold, design: .monospaced))
+            Text("Pipeline: Brain → UI")
+                .font(.system(size: 9, design: .monospaced))
+            if showMetrics {
+                Text("Perf metrics: on")
+                    .font(.system(size: 9, design: .monospaced))
+                Text(Date(), style: .time)
+                    .font(.system(size: 9, design: .monospaced))
+            }
+        }
+        .padding(8)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .padding(8)
     }
 }

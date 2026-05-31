@@ -417,6 +417,12 @@ public struct StudioInvoiceSettings: Codable, Equatable {
     public var defaultTemplateConfig: InvoiceTemplateConfig?
     /// Persisted designer payment config. Loaded as default on every new invoice.
     public var defaultPaymentConfig: InvoicePaymentConfig?
+    /// When true, new invoices and defaults follow the primary business card brand.
+    public var brandSyncFromPrimaryCard: Bool
+    /// Last card design ID applied to invoice defaults.
+    public var brandSyncSourceDesignID: UUID?
+    /// `updatedAt` of the card when invoice defaults were last synced.
+    public var brandSyncSourceUpdatedAt: Date?
 
     public init(
         numberPrefix: String = "INV",
@@ -431,7 +437,10 @@ public struct StudioInvoiceSettings: Codable, Equatable {
         showLegalFooter: Bool = true,
         defaultTaxRatePercent: Decimal? = nil,
         defaultTemplateConfig: InvoiceTemplateConfig? = nil,
-        defaultPaymentConfig: InvoicePaymentConfig? = nil
+        defaultPaymentConfig: InvoicePaymentConfig? = nil,
+        brandSyncFromPrimaryCard: Bool = true,
+        brandSyncSourceDesignID: UUID? = nil,
+        brandSyncSourceUpdatedAt: Date? = nil
     ) {
         self.numberPrefix          = numberPrefix
         self.numberPattern         = numberPattern
@@ -446,6 +455,9 @@ public struct StudioInvoiceSettings: Codable, Equatable {
         self.defaultTaxRatePercent = defaultTaxRatePercent
         self.defaultTemplateConfig = defaultTemplateConfig
         self.defaultPaymentConfig  = defaultPaymentConfig
+        self.brandSyncFromPrimaryCard = brandSyncFromPrimaryCard
+        self.brandSyncSourceDesignID = brandSyncSourceDesignID
+        self.brandSyncSourceUpdatedAt = brandSyncSourceUpdatedAt
     }
 
     public func formatInvoiceNumber(sequence: Int, year: Int) -> String {
@@ -472,6 +484,9 @@ extension StudioInvoiceSettings {
         defaultTaxRatePercent = try c.decodeIfPresent(Decimal.self, forKey: .defaultTaxRatePercent)
         defaultTemplateConfig = try c.decodeIfPresent(InvoiceTemplateConfig.self, forKey: .defaultTemplateConfig)
         defaultPaymentConfig = try c.decodeIfPresent(InvoicePaymentConfig.self, forKey: .defaultPaymentConfig)
+        brandSyncFromPrimaryCard = try c.decodeIfPresent(Bool.self, forKey: .brandSyncFromPrimaryCard) ?? true
+        brandSyncSourceDesignID = try c.decodeIfPresent(UUID.self, forKey: .brandSyncSourceDesignID)
+        brandSyncSourceUpdatedAt = try c.decodeIfPresent(Date.self, forKey: .brandSyncSourceUpdatedAt)
     }
 }
 

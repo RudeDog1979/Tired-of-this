@@ -189,7 +189,10 @@ struct BudgetSettingsView: View {
             .environment(\.settingsEnhancedTint, true)
         }
         .onChange(of: store.budgetingMode) { _, _ in store.save() }
-        .onChange(of: store.defaultBudgetPeriod) { _, _ in store.save() }
+        .onChange(of: store.defaultBudgetPeriod) { _, newValue in
+            store.customBudgetPeriod = newValue
+            store.save()
+        }
         .onChange(of: store.showBudgetWarnings) { _, _ in store.save() }
         .onChange(of: store.autoAdjustBudgetsFromHistory) { _, _ in store.save() }
         .onChange(of: store.simpleBudgetLimit) { _, _ in store.save() }

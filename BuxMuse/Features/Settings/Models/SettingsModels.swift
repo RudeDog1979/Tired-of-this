@@ -47,6 +47,16 @@ public enum AutoBackupFrequency: String, Codable, CaseIterable, Identifiable {
     case monthly = "Monthly"
     
     public var id: String { rawValue }
+
+    /// Seconds between automatic local backup writes.
+    public var backupInterval: TimeInterval {
+        switch self {
+        case .off: return 0
+        case .daily: return 86_400
+        case .weekly: return 604_800
+        case .monthly: return 2_592_000
+        }
+    }
 }
 
 public enum WeekStartDay: String, Codable, CaseIterable, Identifiable {
@@ -59,6 +69,19 @@ public enum WeekStartDay: String, Codable, CaseIterable, Identifiable {
     case saturday = "Saturday"
     
     public var id: String { rawValue }
+
+    /// `Calendar.firstWeekday` value (1 = Sunday … 7 = Saturday).
+    public var calendarWeekday: Int {
+        switch self {
+        case .sunday: return 1
+        case .monday: return 2
+        case .tuesday: return 3
+        case .wednesday: return 4
+        case .thursday: return 5
+        case .friday: return 6
+        case .saturday: return 7
+        }
+    }
 }
 
 // MARK: - Custom Budget Sub-models

@@ -428,7 +428,7 @@ public final class BuxMuseBrain: ObservableObject {
 
         let totalBalance = txs.reduce(Decimal(0)) { $0 + $1.amount.value }
         
-        let calendar = Calendar.current
+        let calendar = Self.budgetCalendar()
         let now = Date()
         let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
         let thisMonthTxs = txs.filter { $0.date >= startOfMonth }
@@ -441,7 +441,11 @@ public final class BuxMuseBrain: ObservableObject {
         switch budgetingMode {
         case .simple:
             activeBudgetName = "Simple Monthly Budget"
-            activeBudgetLimit = SettingsStore.shared.simpleBudgetLimit
+            if SettingsStore.shared.autoAdjustBudgetsFromHistory {
+                activeBudgetLimit = Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
+            } else {
+                activeBudgetLimit = SettingsStore.shared.simpleBudgetLimit
+            }
             activeBudgetSpent = thisMonthTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
             
         case .envelope:
@@ -736,5 +740,33 @@ public final class BuxMuseBrain: ObservableObject {
         }
 
         return false
+    }
+
+    private static func budgetCalendar() -> Calendar {
+        var calendar = Calendar.current
+        calendar.firstWeekday = SettingsStore.shared.weekStartDay.calendarWeekday
+        return calendar
+    }
+
+    /// Trailing 3-month average spend, rounded up 10% — used when auto-adjust is enabled.
+    private static func trailingAverageMonthlySpend(from transactions: [Transaction], calendar: Calendar) -> Decimal {
+        let expenses = transactions.filter { $0.amount.value < 0 }
+        guard !expenses.isEmpty else { return SettingsStore.shared.simpleBudgetLimit }
+
+        let now = Date()
+        var monthlyTotals: [Decimal] = []
+        for monthOffset in 0..<3 {
+            guard let monthStart = calendar.date(byAdding: .month, value: -monthOffset, to: now),
+                  let interval = calendar.dateInterval(of: .month, for: monthStart) else { continue }
+            let spent = expenses
+                .filter { interval.contains($0.date) }
+                .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+            monthlyTotals.append(spent)
+        }
+
+        guard !monthlyTotals.isEmpty else { return SettingsStore.shared.simpleBudgetLimit }
+        let average = monthlyTotals.reduce(0, +) / Decimal(monthlyTotals.count)
+        let adjusted = average * Decimal(string: "1.1")!
+        return max(SettingsStore.shared.simpleBudgetLimit, adjusted)
     }
 }

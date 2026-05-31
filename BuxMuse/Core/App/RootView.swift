@@ -44,6 +44,11 @@ struct RootView: View {
             .overlay {
                 overlayStack
             }
+            .overlay(alignment: .topTrailing) {
+                if settingsStore.enableDebugOverlay {
+                    BuxDebugOverlay(showMetrics: settingsStore.showPerformanceMetrics)
+                }
+            }
             .overlay {
                 if navigationCoordinator.showStudioUnlockAnimation {
                     StudioUnlockAnimationView(

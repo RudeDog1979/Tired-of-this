@@ -243,6 +243,8 @@ struct ProBusinessCardStudioView: View {
         BusinessCardDesignGridTile(
             design: design,
             logoData: studioStore.profile.logoData,
+            isPrimaryBrand: studioStore.businessCardLibrary.primaryBrandDesignID == design.id,
+            onSetPrimaryBrand: { studioStore.setPrimaryBrandDesign(id: design.id) },
             onEdit: { openEditor(designID: design.id) },
             onShare: {
                 ProBusinessCardShareActions.shareCard(design: design, logoData: studioStore.profile.logoData)
@@ -306,7 +308,9 @@ struct BusinessCardYourDesignsLibraryView: View {
                         logoData: studioStore.profile.logoData,
                         selectionMode: isSelecting,
                         isSelected: selectedIDs.contains(design.id),
+                        isPrimaryBrand: studioStore.businessCardLibrary.primaryBrandDesignID == design.id,
                         onToggleSelect: { toggleSelection(design.id) },
+                        onSetPrimaryBrand: { studioStore.setPrimaryBrandDesign(id: design.id) },
                         onEdit: { openDesign(design.id) },
                         onShare: {
                             ProBusinessCardShareActions.shareCard(design: design, logoData: studioStore.profile.logoData)
@@ -399,7 +403,9 @@ struct BusinessCardDesignGridTile: View {
     let logoData: Data?
     var selectionMode: Bool = false
     var isSelected: Bool = false
+    var isPrimaryBrand: Bool = false
     var onToggleSelect: (() -> Void)? = nil
+    var onSetPrimaryBrand: (() -> Void)? = nil
     var onEdit: () -> Void
     var onShare: () -> Void
     var onDuplicate: () -> Void
@@ -431,6 +437,18 @@ struct BusinessCardDesignGridTile: View {
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(isSelected ? themeManager.current.accentColor : .white, Color.black.opacity(0.35))
                             .padding(8)
+                    } else if let onSetPrimaryBrand {
+                        Button(action: onSetPrimaryBrand) {
+                            Image(systemName: isPrimaryBrand ? "star.fill" : "star")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(isPrimaryBrand ? Color.yellow : .white)
+                                .padding(8)
+                                .background(Color.black.opacity(0.28))
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(isPrimaryBrand ? "Primary for invoices" : "Set as primary for invoices")
+                        .padding(8)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -454,6 +472,11 @@ struct BusinessCardDesignGridTile: View {
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                    if isPrimaryBrand {
+                        Text("Invoice brand")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(themeManager.current.accentColor)
+                    }
                 }
                 Spacer(minLength: 0)
                 if !selectionMode {

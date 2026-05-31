@@ -353,6 +353,33 @@ public final class StudioStore: ObservableObject {
         if let selectedID = businessCardLibrary.selectedDesignID, idSet.contains(selectedID) {
             businessCardLibrary.selectedDesignID = businessCardLibrary.savedDesigns.first?.id
         }
+        if let primaryID = businessCardLibrary.primaryBrandDesignID, idSet.contains(primaryID) {
+            businessCardLibrary.primaryBrandDesignID = businessCardLibrary.savedDesigns.first?.id
+            syncInvoiceBrandFromPrimaryCard(force: false)
+        }
+        save()
+    }
+
+    public func setPrimaryBrandDesign(id: UUID) {
+        guard businessCardLibrary.savedDesigns.contains(where: { $0.id == id }) else { return }
+        businessCardLibrary.primaryBrandDesignID = id
+        syncInvoiceBrandFromPrimaryCard(force: false)
+        save()
+    }
+
+    public func syncInvoiceBrandFromPrimaryCard(force: Bool = true) {
+        _ = ProBrandSyncEngine.syncInvoiceDefaults(
+            invoiceSettings: &invoiceSettings,
+            library: businessCardLibrary,
+            logoPosition: invoiceSettings.logoPosition,
+            force: force
+        )
+        save()
+    }
+
+    public func unlinkInvoiceBrandFromCard() {
+        guard invoiceSettings.brandSyncFromPrimaryCard else { return }
+        invoiceSettings.brandSyncFromPrimaryCard = false
         save()
     }
 

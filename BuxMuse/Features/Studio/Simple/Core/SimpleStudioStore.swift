@@ -265,6 +265,17 @@ public final class SimpleStudioStore: ObservableObject {
         save()
     }
 
+    public func resetAllData() {
+        entries = []
+        customers = []
+        invoices = []
+        hourlyRateHint = nil
+        businessCard = nil
+        if FileManager.default.fileExists(atPath: storeURL.path) {
+            try? FileManager.default.removeItem(at: storeURL)
+        }
+    }
+
     private func upsertCustomer(from entry: SimpleStudioEntry) {
         let name = entry.customerName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return }

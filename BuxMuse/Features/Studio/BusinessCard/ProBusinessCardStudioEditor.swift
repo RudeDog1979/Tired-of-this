@@ -33,6 +33,8 @@ struct ProBusinessCardEditorView: View {
     @State private var shareItems: [Any] = []
     @State private var showSafeZone = false
     @State private var showFullscreenCanvas = false
+    @State private var showSetPrimaryBrandAlert = false
+    @State private var dismissEditorAfterBrandPrompt = false
     @State private var showImmersivePreview = false
     @State private var show3DLook = false
     @State private var editingSide: ProBusinessCardSide = .front
@@ -76,7 +78,7 @@ struct ProBusinessCardEditorView: View {
         isEphemeralDraft || hasUnsavedChanges
     }
 
-    private var canSaveDraft: Bool {
+    private var canSaveCard: Bool {
         needsLeaveConfirmation
     }
 
@@ -117,6 +119,7 @@ struct ProBusinessCardEditorView: View {
                     VStack(spacing: 0) {
                         compactPreviewColumn(design, width: geo.size.width, height: geo.size.height * 0.58)
                         tabBar
+                            .zIndex(1)
                         tabScroll(design)
                     }
                 }
@@ -125,6 +128,9 @@ struct ProBusinessCardEditorView: View {
             }
         }
         .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            editorSaveBar
+        }
         .buxRootBrandTheme()
         .navigationTitle(isLandscapeEditing ? "" : (draft?.title ?? "Card Studio"))
         .navigationBarTitleDisplayMode(.inline)
@@ -134,13 +140,6 @@ struct ProBusinessCardEditorView: View {
             if !isLandscapeEditing {
                 ToolbarItem(placement: .topBarLeading) {
                     BuxToolbarBackButton { attemptLeave() }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Save Draft") {
-                        saveDraftToLibrary()
-                    }
-                    .buxToolbarTextActionStyle(accent: controlTint)
-                    .disabled(!canSaveDraft)
                 }
             }
         }
@@ -152,9 +151,24 @@ struct ProBusinessCardEditorView: View {
             }
         } message: {
             if isEphemeralDraft {
-                Text("This card hasn't been saved to Your designs yet. Discarding will delete it.")
+                Text("This card hasn't been saved yet. Discarding will delete it.")
             } else {
                 Text("Your edits since opening this card will be lost.")
+            }
+        }
+        .alert("Use for invoice branding?", isPresented: $showSetPrimaryBrandAlert) {
+            Button("Use for invoices") {
+                studioStore.setPrimaryBrandDesign(id: designID)
+                completeSaveFlow()
+            }
+            Button("Not now", role: .cancel) {
+                completeSaveFlow()
+            }
+        } message: {
+            if studioStore.businessCardLibrary.primaryBrandDesignID == designID {
+                Text("Update invoices to match this card’s latest colors and style?")
+            } else {
+                Text("Invoices can use this card’s colors and style as your business brand.")
             }
         }
         .onAppear {
@@ -219,7 +233,7 @@ struct ProBusinessCardEditorView: View {
                     set: { draft = $0 }
                 ),
                 logoData: studioStore.profile.logoData,
-                onSave: { syncDraftChanges() },
+                onExit: { exitCanvas() },
                 onPickBackgroundPhoto: { pickTarget = .background }
             )
             .environmentObject(themeManager)
@@ -248,13 +262,28 @@ struct ProBusinessCardEditorView: View {
         BuxCenteredTopBar(title: draft?.title ?? "Card Studio", titleFont: .system(size: 17, weight: .semibold)) {
             BuxToolbarBackButton { attemptLeave() }
         } trailing: {
-            Button("Save Draft") {
-                saveDraftToLibrary()
-            }
-            .buxToolbarTextActionStyle(accent: controlTint)
-            .disabled(!canSaveDraft)
+            EmptyView()
         }
         .background(themeManager.screenBackground(for: colorScheme).opacity(0.95))
+    }
+
+    private var editorSaveBar: some View {
+        VStack(spacing: 0) {
+            BuxButton(
+                title: "Save card",
+                systemImage: "checkmark.circle.fill",
+                role: .primary,
+                expands: true,
+                isEnabled: canSaveCard
+            ) {
+                saveCardToLibrary(dismissEditor: true)
+            }
+            .padding(.horizontal, BuxTokens.marginRegular)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+        }
+        .background(themeManager.screenBackground(for: colorScheme))
+        .buxChromeScrollEdgeShadow(.top, colorScheme: colorScheme)
     }
 
     private var cardSidePicker: some View {
@@ -490,6 +519,36 @@ struct ProBusinessCardEditorView: View {
         showFullscreenCanvas = true
     }
 
+    private func exitCanvas() {
+        syncDraftChanges()
+        showFullscreenCanvas = false
+    }
+
+    private func saveCardToLibrary(dismissEditor: Bool = false) {
+        guard var d = draft else { return }
+        CardCanvasSync.ensureDocument(on: &d)
+        CardCanvasSync.pushQuickStudioVisuals(to: &d)
+        d.updatedAt = Date()
+        d.isDraft = false
+        draft = d
+        studioStore.updateBusinessCardDesign(d)
+        designBaseline = d
+
+        if settings.studioMode == .pro {
+            dismissEditorAfterBrandPrompt = dismissEditor
+            showSetPrimaryBrandAlert = true
+        } else if dismissEditor {
+            dismiss()
+        }
+    }
+
+    private func completeSaveFlow() {
+        if dismissEditorAfterBrandPrompt {
+            dismissEditorAfterBrandPrompt = false
+            dismiss()
+        }
+    }
+
     private func photoEditMenu(_ design: ProBusinessCardDesign) -> some View {
         Menu {
             if design.options.showsPhoto && design.style.photoScale != .off {
@@ -592,7 +651,8 @@ struct ProBusinessCardEditorView: View {
                 .buttonStyle(.plain)
             }
         }
-        .background(themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.08 : 0.04))
+        .background(themeManager.screenBackground(for: colorScheme))
+        .buxChromeScrollEdgeShadow(.bottom, colorScheme: colorScheme)
     }
 
     private func inspectorPane(_ design: ProBusinessCardDesign) -> some View {
@@ -1247,18 +1307,6 @@ struct ProBusinessCardEditorView: View {
         CardCanvasSync.pushQuickStudioVisuals(to: &d)
         d.updatedAt = Date()
         draft = d
-    }
-
-    private func saveDraftToLibrary() {
-        guard var d = draft else { return }
-        CardCanvasSync.ensureDocument(on: &d)
-        CardCanvasSync.pushQuickStudioVisuals(to: &d)
-        d.updatedAt = Date()
-        d.isDraft = false
-        draft = d
-        studioStore.updateBusinessCardDesign(d)
-        designBaseline = d
-        dismiss()
     }
 
     private func attemptLeave() {

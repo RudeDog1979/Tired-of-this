@@ -14,7 +14,7 @@ struct CardProCanvasView: View {
 
     @Binding var design: ProBusinessCardDesign
     let logoData: Data?
-    let onSave: () -> Void
+    let onExit: () -> Void
     var onPickBackgroundPhoto: (() -> Void)?
 
     @StateObject private var undoManager = CardUndoManager()
@@ -262,23 +262,17 @@ struct CardProCanvasView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .buxNativeButtonStyle(.secondary)
                     .foregroundStyle(controlTint)
-                Button("Save to Studio") { commitAndDismiss() }
-                    .font(.system(size: 13, weight: .semibold))
-                    .buxNativeButtonStyle(.primary)
-                    .tint(controlTint)
             }
 
-            HStack(spacing: 16) {
-                Toggle("Safe zone", isOn: $showSafeZone)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                Toggle("Snap", isOn: $showSnapGuides)
-                    .frame(maxWidth: .infinity, alignment: .center)
+            HStack(spacing: 20) {
+                canvasToggleRow(title: "Safe zone", isOn: $showSafeZone)
+                canvasToggleRow(title: "Snap", isOn: $showSnapGuides)
+                Spacer(minLength: 0)
             }
             .tint(controlTint)
-            .font(.system(size: 12, weight: .medium))
             .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-            Text("Tap element below · drag to move · top handle to rotate · Save when done")
+            Text("Tap an element to edit · Exit when done, then Save card in the editor")
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -289,9 +283,14 @@ struct CardProCanvasView: View {
     private var topBar: some View {
         BuxCenteredTopBar(title: "Bux Canvas") {
             HStack(spacing: 8) {
-                Button("Cancel") { dismiss() }
+                Button("Exit") { exitAndDismiss() }
                     .font(.system(size: 13, weight: .semibold))
                     .buxNativeButtonStyle(.secondary)
+            }
+            .buxNativeGlassButtonRowContainer()
+            .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
+        } trailing: {
+            HStack(spacing: 8) {
                 Button { undo() } label: {
                     Image(systemName: "arrow.uturn.backward")
                         .font(.system(size: 13, weight: .semibold))
@@ -307,13 +306,6 @@ struct CardProCanvasView: View {
             }
             .buxNativeGlassButtonRowContainer()
             .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
-        } trailing: {
-            HStack(spacing: 8) {
-                Button("Save") { commitAndDismiss() }
-                    .font(.system(size: 13, weight: .semibold))
-                    .buxNativeButtonStyle(.primary)
-                    .tint(controlTint)
-            }
         }
         .background(themeManager.screenBackground(for: colorScheme))
     }
@@ -715,12 +707,21 @@ struct CardProCanvasView: View {
         dragOrigin = nil
     }
 
-    private func commitAndDismiss() {
+    private func canvasToggleRow(title: String, isOn: Binding<Bool>) -> some View {
+        HStack(spacing: 6) {
+            Text(title)
+                .font(.system(size: 12, weight: .medium))
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+        }
+    }
+
+    private func exitAndDismiss() {
         design.ensureCanvasDocument()
         design = CardCanvasSync.syncLegacyStyle(from: design)
         design.editorPreferences = CardEditorPreferences(showSafeZone: showSafeZone, showSnapGuides: showSnapGuides)
         design.updatedAt = Date()
-        onSave()
+        onExit()
         dismiss()
     }
 

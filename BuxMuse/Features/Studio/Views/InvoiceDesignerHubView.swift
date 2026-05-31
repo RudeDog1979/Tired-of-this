@@ -387,6 +387,9 @@ struct InvoiceDesignerHubView: View {
 
     private var brandingControls: some View {
         VStack(alignment: .leading, spacing: 20) {
+            if settingsStore.studioMode == .pro {
+                brandSyncBanner
+            }
 
             // Template Style Picker
             designerSection("Template Style") {
@@ -397,8 +400,10 @@ struct InvoiceDesignerHubView: View {
                             isSelected: engine.templateConfig.style == style,
                             accentColor: themeManager.current.accentColor
                         ) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                engine.templateConfig.style = style
+                            applyBrandingMutation {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    engine.templateConfig.style = style
+                                }
                             }
                         }
                     }
@@ -410,8 +415,14 @@ struct InvoiceDesignerHubView: View {
                 ColorSwatchRow(
                     presets: InvoiceColorPresets.primary,
                     selectedHex: engine.templateConfig.primaryColorHex,
-                    onSelectHex: { engine.templateConfig.primaryColorHex = $0 },
-                    onCustomColor: { engine.templateConfig.primaryColorHex = UIColor($0).hexString }
+                    onSelectHex: { hex in
+                        applyBrandingMutation { engine.templateConfig.primaryColorHex = hex }
+                    },
+                    onCustomColor: { color in
+                        applyBrandingMutation {
+                            engine.templateConfig.primaryColorHex = UIColor(color).hexString
+                        }
+                    }
                 )
             }
 
@@ -420,8 +431,14 @@ struct InvoiceDesignerHubView: View {
                 ColorSwatchRow(
                     presets: InvoiceColorPresets.secondary,
                     selectedHex: engine.templateConfig.secondaryColorHex,
-                    onSelectHex: { engine.templateConfig.secondaryColorHex = $0 },
-                    onCustomColor: { engine.templateConfig.secondaryColorHex = UIColor($0).hexString }
+                    onSelectHex: { hex in
+                        applyBrandingMutation { engine.templateConfig.secondaryColorHex = hex }
+                    },
+                    onCustomColor: { color in
+                        applyBrandingMutation {
+                            engine.templateConfig.secondaryColorHex = UIColor(color).hexString
+                        }
+                    }
                 )
             }
 
@@ -431,7 +448,9 @@ struct InvoiceDesignerHubView: View {
                     options: InvoiceTypographyStyle.allCases,
                     selected: engine.templateConfig.typography,
                     label: \.rawValue,
-                    onSelect: { engine.templateConfig.typography = $0 }
+                    onSelect: { typography in
+                        applyBrandingMutation { engine.templateConfig.typography = typography }
+                    }
                 )
             }
 
@@ -441,7 +460,9 @@ struct InvoiceDesignerHubView: View {
                     options: InvoiceCornerStyle.allCases,
                     selected: engine.templateConfig.cornerStyle,
                     label: \.rawValue,
-                    onSelect: { engine.templateConfig.cornerStyle = $0 }
+                    onSelect: { corner in
+                        applyBrandingMutation { engine.templateConfig.cornerStyle = corner }
+                    }
                 )
             }
 
@@ -451,7 +472,9 @@ struct InvoiceDesignerHubView: View {
                     options: InvoiceDensity.allCases,
                     selected: engine.templateConfig.density,
                     label: \.rawValue,
-                    onSelect: { engine.templateConfig.density = $0 }
+                    onSelect: { density in
+                        applyBrandingMutation { engine.templateConfig.density = density }
+                    }
                 )
             }
 
@@ -461,11 +484,83 @@ struct InvoiceDesignerHubView: View {
                     options: InvoiceLogoPosition.allCases,
                     selected: engine.templateConfig.logoPosition,
                     label: \.rawValue,
-                    onSelect: { engine.templateConfig.logoPosition = $0 }
+                    onSelect: { position in
+                        applyBrandingMutation { engine.templateConfig.logoPosition = position }
+                    }
                 )
             }
         }
         .padding(.horizontal, 16)
+    }
+
+    @ViewBuilder
+    private var brandSyncBanner: some View {
+        if let primary = store.businessCardLibrary.primaryBrandDesign {
+            VStack(alignment: .leading, spacing: 10) {
+                if store.invoiceSettings.brandSyncFromPrimaryCard {
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(Color(hex: primary.palette.accentHex))
+                            .frame(width: 12, height: 12)
+                        Circle()
+                            .fill(Color(hex: primary.palette.backgroundHex))
+                            .frame(width: 12, height: 12)
+                        Circle()
+                            .fill(Color(hex: primary.palette.foregroundHex))
+                            .frame(width: 12, height: 12)
+                        Text("Matching \"\(primary.title)\"")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    if let config = store.invoiceSettings.defaultTemplateConfig {
+                        Text("Header: \(config.headerMotif.rawValue) · Background: \(config.backgroundStyle.rawValue) · Template: \(config.style.rawValue)")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.secondary)
+                    }
+                    if ProBrandSyncEngine.isStale(invoiceSettings: store.invoiceSettings, design: primary) {
+                        Text("Card updated — sync to refresh invoice branding.")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Text("Custom invoice branding")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+
+                HStack(spacing: 10) {
+                    Button {
+                        store.syncInvoiceBrandFromPrimaryCard(force: true)
+                        if let synced = store.invoiceSettings.defaultTemplateConfig {
+                            engine.templateConfig = synced
+                        }
+                    } label: {
+                        Label("Sync from card", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 13, weight: .semibold))
+                    }
+                    .buttonStyle(.bordered)
+
+                    if store.invoiceSettings.brandSyncFromPrimaryCard {
+                        Button {
+                            store.unlinkInvoiceBrandFromCard()
+                        } label: {
+                            Label("Customize only", systemImage: "pencil")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(themeManager.inputFieldFill(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
+        }
+    }
+
+    private func applyBrandingMutation(_ mutation: () -> Void) {
+        if store.invoiceSettings.brandSyncFromPrimaryCard {
+            store.unlinkInvoiceBrandFromCard()
+        }
+        mutation()
     }
 
     // MARK: Tax Controls

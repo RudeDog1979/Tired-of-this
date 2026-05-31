@@ -14,6 +14,7 @@ struct DataSettingsView: View {
     @EnvironmentObject private var persistence: PersistenceController
     @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var studioStore: StudioStore
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
     @ObservedObject private var store = SettingsStore.shared
 
@@ -137,6 +138,15 @@ struct DataSettingsView: View {
                 "goals_count": goals.count
             ]
 
+            if store.includeAnalyticsInExports {
+                payload["performance_metadata"] = [
+                    "platform": "iOS",
+                    "backup_kind": "manual_export",
+                    "studio_mode": store.studioMode.rawValue,
+                    "budgeting_mode": store.budgetingMode.rawValue
+                ]
+            }
+
             var expenseList = [[String: Any]]()
             for exp in expenses {
                 expenseList.append([
@@ -169,6 +179,11 @@ struct DataSettingsView: View {
                    let json = try? JSONSerialization.jsonObject(with: data) {
                     payload["freelance"] = json
                 }
+                let simpleSnapshot = simpleStudioStore.snapshot
+                if let data = try? JSONEncoder().encode(simpleSnapshot),
+                   let json = try? JSONSerialization.jsonObject(with: data) {
+                    payload["simple_studio"] = json
+                }
             }
 
             let data = try JSONSerialization.data(withJSONObject: payload, options: .prettyPrinted)
@@ -193,6 +208,7 @@ struct DataSettingsView: View {
         do {
             try persistence.purgeExpensesAndGoals()
             studioStore.resetAllData()
+            simpleStudioStore.resetAllData()
             brain.refreshExpenses()
             self.showSuccessAlert = true
         } catch {

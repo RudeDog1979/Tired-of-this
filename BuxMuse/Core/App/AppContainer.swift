@@ -95,6 +95,11 @@ final class AppContainer: ObservableObject {
         studioBrain.refreshAll()
         scheduleEngagementRefresh()
         scheduleTaxCatalogRefresh()
+        LocalBackupCoordinator.shared.reschedule(
+            persistence: persistence,
+            studioStore: studioStore,
+            simpleStudioStore: simpleStudioStore
+        )
     }
 
     func scheduleEngagementRefresh() {
@@ -205,6 +210,11 @@ final class AppContainer: ObservableObject {
                 guard let self else { return }
                 self.brain.refreshExpenses()
                 self.scheduleEngagementRefresh()
+                LocalBackupCoordinator.shared.reschedule(
+                    persistence: self.persistence,
+                    studioStore: self.studioStore,
+                    simpleStudioStore: self.simpleStudioStore
+                )
             }
             .store(in: &cancellables)
     }
@@ -232,3 +242,91 @@ final class AppContainer: ObservableObject {
     }
 
 }
+
+// MARK: - Local backup scheduler
+
+@MainActor
+final class LocalBackupCoordinator {
+    static let shared = LocalBackupCoordinator()
+
+    private var pendingWork: DispatchWorkItem?
+
+    private init() {}
+
+    func reschedule(
+        persistence: PersistenceController,
+        studioStore: StudioStore,
+        simpleStudioStore: SimpleStudioStore
+    ) {
+        pendingWork?.cancel()
+        let settings = SettingsStore.shared
+        guard settings.allowLocalBackups else { return }
+        let interval = settings.autoBackupFrequency.backupInterval
+        guard interval > 0 else { return }
+
+        let work = DispatchWorkItem { [weak self] in
+            Self.writeBackup(
+                persistence: persistence,
+                studioStore: studioStore,
+                simpleStudioStore: simpleStudioStore,
+                settings: settings
+            )
+            self?.reschedule(
+                persistence: persistence,
+                studioStore: studioStore,
+                simpleStudioStore: simpleStudioStore
+            )
+        }
+        pendingWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + interval, execute: work)
+    }
+
+    static func writeBackup(
+        persistence: PersistenceController,
+        studioStore: StudioStore,
+        simpleStudioStore: SimpleStudioStore,
+        settings: SettingsStore
+    ) {
+        let expenses = (try? persistence.fetchAllExpenseEntities()) ?? []
+        let goals = (try? persistence.fetchAllGoalEntities()) ?? []
+
+        var payload: [String: Any] = [
+            "buxmuse_app_version": "1.0.0",
+            "export_timestamp": Date().timeIntervalSince1970,
+            "expenses_count": expenses.count,
+            "goals_count": goals.count
+        ]
+
+        if settings.includeAnalyticsInExports {
+            payload["performance_metadata"] = [
+                "platform": "iOS",
+                "backup_kind": "scheduled_local",
+                "studio_mode": settings.studioMode.rawValue
+            ]
+        }
+
+        if settings.includeStudioDataInExports {
+            if let data = try? JSONEncoder().encode(studioStore.currentSnapshot()),
+               let json = try? JSONSerialization.jsonObject(with: data) {
+                payload["freelance"] = json
+            }
+            if let data = try? JSONEncoder().encode(simpleStudioStore.snapshot),
+               let json = try? JSONSerialization.jsonObject(with: data) {
+                payload["simple_studio"] = json
+            }
+        }
+
+        guard let data = try? JSONSerialization.data(withJSONObject: payload, options: .prettyPrinted) else { return }
+
+        let fm = FileManager.default
+        let dir = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("BuxMuseBackups", isDirectory: true)
+        try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
+        let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+        let url = dir.appendingPathComponent("buxmuse_backup_\(stamp).json")
+        try? data.write(to: url, options: [.atomic])
+        settings.lastExportDate = Date()
+        settings.save()
+    }
+}
+

@@ -253,6 +253,7 @@ struct DashboardView: View {
                                     let spent = dashSnapshot.activeBudgetSpent
                                     let remaining = limit - spent
                                     let progress = limit > 0 ? min(1.0, max(0.0, Double(NSDecimalNumber(decimal: spent).doubleValue / NSDecimalNumber(decimal: limit).doubleValue))) : 0.0
+                                    let warnBudget = settingsStore.showBudgetWarnings && progress > 0.9
                                     
                                     Button(action: {
                                         withAnimation {
@@ -274,7 +275,7 @@ struct DashboardView: View {
                                                 
                                                 Text("\(Int(progress * 100))% spent")
                                                     .font(.system(size: 12, weight: .bold))
-                                                    .foregroundColor(progress > 0.9 ? .red : themeManager.labelSecondary(for: colorScheme))
+                                                    .foregroundColor(warnBudget ? .red : themeManager.labelSecondary(for: colorScheme))
                                             }
                                             
                                             // Progress Bar
@@ -286,7 +287,7 @@ struct DashboardView: View {
                                                     
                                                     RoundedRectangle(cornerRadius: 4)
                                                         .fill(LinearGradient(
-                                                            colors: progress > 0.9 ? [.red, .orange] : [themeManager.current.accentColor, themeManager.current.accentColor.opacity(0.7)],
+                                                            colors: warnBudget ? [.red, .orange] : [themeManager.current.accentColor, themeManager.current.accentColor.opacity(0.7)],
                                                             startPoint: .leading,
                                                             endPoint: .trailing
                                                         ))

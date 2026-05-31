@@ -19,6 +19,304 @@ private enum A4 {
     static let contentWidth: CGFloat = width - 2 * margin
 }
 
+// MARK: - Brand sync rendering (from Pro Business Card)
+
+private enum InvoiceBrandRendering {
+    static func isDark(hex: String) -> Bool {
+        let cleaned = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        guard cleaned.count == 6, let val = Int(cleaned, radix: 16) else { return false }
+        let r = Double((val >> 16) & 0xFF) / 255
+        let g = Double((val >> 8) & 0xFF) / 255
+        let b = Double(val & 0xFF) / 255
+        return (0.299 * r + 0.587 * g + 0.114 * b) < 0.45
+    }
+
+    static func headerForeground(config: InvoiceTemplateConfig) -> Color {
+        switch config.style {
+        case .modern, .executive:
+            return .white
+        case .minimalist:
+            return config.secondaryColor
+        }
+    }
+
+    static func usesFilledHeader(config: InvoiceTemplateConfig) -> Bool {
+        config.style == .modern || config.style == .executive
+    }
+}
+
+private struct InvoicePageBackground: View {
+    let config: InvoiceTemplateConfig
+
+    var body: some View {
+        ZStack {
+            config.backgroundColor
+            switch config.backgroundStyle {
+            case .solid:
+                Color.clear
+            case .gradient:
+                LinearGradient(
+                    colors: [
+                        config.backgroundColor,
+                        config.primaryColor.opacity(0.10),
+                        config.backgroundColor
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            case .patternDots:
+                Canvas { ctx, size in
+                    let step: CGFloat = 14
+                    var y: CGFloat = 0
+                    while y < size.height {
+                        var x: CGFloat = 0
+                        while x < size.width {
+                            let rect = CGRect(x: x, y: y, width: 1.6, height: 1.6)
+                            ctx.fill(Path(ellipseIn: rect), with: .color(config.primaryColor.opacity(0.08)))
+                            x += step
+                        }
+                        y += step
+                    }
+                }
+            case .patternLines:
+                Canvas { ctx, size in
+                    var x: CGFloat = -size.height
+                    while x < size.width + size.height {
+                        var path = Path()
+                        path.move(to: CGPoint(x: x, y: 0))
+                        path.addLine(to: CGPoint(x: x + size.height, y: size.height))
+                        ctx.stroke(path, with: .color(config.primaryColor.opacity(0.06)), lineWidth: 1)
+                        x += 18
+                    }
+                }
+            case .photo:
+                LinearGradient(
+                    colors: [config.backgroundColor, config.secondaryColor.opacity(0.06)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+private struct InvoiceBrandMotifOverlay: View {
+    let config: InvoiceTemplateConfig
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            let primary = config.primaryColor
+            let secondary = config.secondaryColor
+
+            switch config.headerMotif {
+            case .none:
+                Color.clear
+            case .sideAccentBar:
+                HStack(spacing: 0) {
+                    primary.frame(width: max(8, w * 0.018))
+                    Spacer(minLength: 0)
+                }
+            case .twoToneSplit:
+                Path { path in
+                    path.move(to: CGPoint(x: w, y: 0))
+                    path.addLine(to: CGPoint(x: w, y: h))
+                    path.addLine(to: CGPoint(x: w * 0.36, y: h))
+                    path.closeSubpath()
+                }
+                .fill(primary.opacity(0.18))
+            case .topGradientBand:
+                VStack(spacing: 0) {
+                    LinearGradient(
+                        colors: [primary.opacity(0.35), primary.opacity(0.05)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(height: h * 0.22)
+                    Spacer(minLength: 0)
+                }
+            case .diagonalBands:
+                Canvas { ctx, size in
+                    var x: CGFloat = -size.height
+                    while x < size.width + size.height {
+                        var path = Path()
+                        path.move(to: CGPoint(x: x, y: 0))
+                        path.addLine(to: CGPoint(x: x + size.height * 0.45, y: size.height))
+                        ctx.stroke(path, with: .color(primary.opacity(0.14)), lineWidth: 10)
+                        x += 34
+                    }
+                }
+            case .cornerBlocks:
+                VStack {
+                    HStack {
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(primary.opacity(0.22))
+                            .frame(width: w * 0.14, height: h * 0.28)
+                        Spacer()
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(secondary.opacity(0.12))
+                            .frame(width: w * 0.10, height: h * 0.18)
+                    }
+                    Spacer()
+                }
+                .padding(10)
+            case .hexAccent:
+                Path { path in
+                    let cx = w * 0.84
+                    let cy = h * 0.42
+                    let r: CGFloat = min(w, h) * 0.12
+                    for i in 0..<6 {
+                        let angle = Double(i) * .pi / 3 - .pi / 2
+                        let pt = CGPoint(x: cx + r * CGFloat(cos(angle)), y: cy + r * CGFloat(sin(angle)))
+                        if i == 0 { path.move(to: pt) } else { path.addLine(to: pt) }
+                    }
+                    path.closeSubpath()
+                }
+                .stroke(primary.opacity(0.35), lineWidth: 2.5)
+            case .circleBadge:
+                Circle()
+                    .stroke(primary.opacity(0.28), lineWidth: 3)
+                    .frame(width: h * 0.55)
+                    .position(x: w * 0.82, y: h * 0.48)
+            case .neonFrame:
+                RoundedRectangle(cornerRadius: config.cornerStyle.radius)
+                    .stroke(
+                        LinearGradient(
+                            colors: [primary, primary.opacity(0.25)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
+                    )
+                    .padding(6)
+            case .minimalRule:
+                VStack {
+                    Spacer()
+                    Rectangle()
+                        .fill(secondary.opacity(0.18))
+                        .frame(height: 1)
+                        .padding(.horizontal, A4.margin * 0.5)
+                        .padding(.bottom, 12)
+                }
+            case .geometricGrid:
+                Canvas { ctx, size in
+                    let step: CGFloat = 28
+                    var x: CGFloat = 0
+                    while x < size.width {
+                        var v = Path()
+                        v.move(to: CGPoint(x: x, y: 0))
+                        v.addLine(to: CGPoint(x: x, y: size.height))
+                        ctx.stroke(v, with: .color(primary.opacity(0.07)), lineWidth: 0.5)
+                        x += step
+                    }
+                    var y: CGFloat = 0
+                    while y < size.height {
+                        var hPath = Path()
+                        hPath.move(to: CGPoint(x: 0, y: y))
+                        hPath.addLine(to: CGPoint(x: size.width, y: y))
+                        ctx.stroke(hPath, with: .color(primary.opacity(0.07)), lineWidth: 0.5)
+                        y += step
+                    }
+                }
+            case .splitVertical:
+                HStack(spacing: 0) {
+                    primary.opacity(0.12).frame(width: w * 0.34)
+                    Spacer(minLength: 0)
+                }
+            case .arcSweep:
+                Path { path in
+                    path.addArc(
+                        center: CGPoint(x: w * 0.12, y: h * 1.05),
+                        radius: h * 0.75,
+                        startAngle: .degrees(-90),
+                        endAngle: .degrees(10),
+                        clockwise: false
+                    )
+                }
+                .fill(primary.opacity(0.12))
+            case .monogramBand:
+                HStack {
+                    ZStack {
+                        Circle().fill(primary.opacity(0.18)).frame(width: 36, height: 36)
+                        Text("◆")
+                            .font(.system(size: 14, weight: .black))
+                            .foregroundColor(primary)
+                    }
+                    .padding(.leading, A4.margin)
+                    Spacer()
+                }
+            case .editorialLine:
+                HStack {
+                    Rectangle().fill(primary).frame(width: 28, height: 2)
+                        .padding(.leading, A4.margin)
+                    Spacer()
+                }
+                .frame(maxHeight: .infinity, alignment: .center)
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+private struct InvoiceBrandHeaderBackground: View {
+    let config: InvoiceTemplateConfig
+
+    var body: some View {
+        Group {
+            if InvoiceBrandRendering.usesFilledHeader(config: config) {
+                if config.backgroundStyle == .gradient || config.headerMotif == .topGradientBand {
+                    LinearGradient(
+                        colors: [config.primaryColor, config.secondaryColor.opacity(0.85)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                } else {
+                    config.primaryColor
+                }
+            } else {
+                config.backgroundColor
+            }
+        }
+    }
+}
+
+private struct InvoiceBrandBorderOverlay: View {
+    let config: InvoiceTemplateConfig
+
+    var body: some View {
+        Group {
+            switch config.borderStyle {
+            case .none:
+                Color.clear
+            case .thin:
+                RoundedRectangle(cornerRadius: config.cornerStyle.radius)
+                    .stroke(config.primaryColor.opacity(0.25), lineWidth: 1)
+            case .double:
+                RoundedRectangle(cornerRadius: config.cornerStyle.radius)
+                    .stroke(config.primaryColor.opacity(0.35), lineWidth: 1)
+                    .padding(3)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: config.cornerStyle.radius)
+                            .stroke(config.secondaryColor.opacity(0.25), lineWidth: 0.5)
+                    )
+            case .accent:
+                RoundedRectangle(cornerRadius: config.cornerStyle.radius)
+                    .stroke(
+                        LinearGradient(
+                            colors: [config.primaryColor, config.secondaryColor],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2.5
+                    )
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
 // MARK: - Shared Sub-Views
 
 /// Line-items table shared across templates.
@@ -317,7 +615,7 @@ public struct ModernInvoiceTemplateView: View {
 
     public var body: some View {
         ZStack(alignment: .topLeading) {
-            Color.white.ignoresSafeArea()
+            InvoicePageBackground(config: context.templateConfig)
 
             VStack(alignment: .leading, spacing: 0) {
 
@@ -344,7 +642,7 @@ public struct ModernInvoiceTemplateView: View {
                     context: context,
                     headerBackground: primary,
                     headerForeground: .white,
-                    altRowBackground: secondary.opacity(0.06), // Use secondary (accent) color here
+                    altRowBackground: context.templateConfig.backgroundColor.opacity(0.6),
                     showRowNumbers: false
                 )
                 .padding(.horizontal, A4.margin)
@@ -355,7 +653,7 @@ public struct ModernInvoiceTemplateView: View {
                 // ── Totals ───────────────────────────────────────────
                 InvoiceTotalsBlock(
                     context: context,
-                    grandTotalAccent: secondary, // Use secondary (accent) color for Grand Total
+                    grandTotalAccent: secondary,
                     style: .rightAligned
                 )
                 .frame(width: 240, alignment: .trailing)
@@ -377,47 +675,48 @@ public struct ModernInvoiceTemplateView: View {
                         .padding(.bottom, 10)
                 }
             }
+
+            InvoiceBrandBorderOverlay(config: context.templateConfig)
         }
         .frame(width: A4.width, height: A4.height)
     }
 
     private var headerBand: some View {
         ZStack(alignment: .leading) {
-            primary
+            InvoiceBrandHeaderBackground(config: context.templateConfig)
+            InvoiceBrandMotifOverlay(config: context.templateConfig)
 
             HStack(alignment: .center, spacing: 12) {
-                // Logo
-                if let data = context.profile.logoData, let img = UIImage(data: data) {
+                if context.templateConfig.logoPosition != .none,
+                   let data = context.profile.logoData, let img = UIImage(data: data) {
                     Image(uiImage: img)
                         .resizable()
                         .scaledToFit()
                         .frame(height: 48)
-                        .cornerRadius(4)
+                        .cornerRadius(context.templateConfig.cornerStyle.radius)
                 }
-                // Business info
                 VStack(alignment: .leading, spacing: 2) {
                     Text(context.issuerBlock.title.isEmpty ? "Your Business" : context.issuerBlock.title)
                         .font(typo.headingFont(size: 17, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig))
                     if let subtitle = context.issuerBlock.subtitle, !subtitle.isEmpty {
                         Text(subtitle)
                             .font(typo.bodyFont(size: 9))
-                            .foregroundColor(.white.opacity(0.75))
+                            .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.75))
                     } else if !context.profile.displayName.isEmpty {
                         Text(context.profile.displayName)
                             .font(typo.bodyFont(size: 9))
-                            .foregroundColor(.white.opacity(0.75))
+                            .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.75))
                     }
                 }
                 Spacer()
-                // Invoice meta
                 VStack(alignment: .trailing, spacing: 3) {
                     Text(context.settings.documentLabel.uppercased())
                         .font(typo.headingFont(size: 20, weight: .black))
-                        .foregroundColor(.white)
+                        .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig))
                     Text(context.invoice.invoiceNumber)
                         .font(typo.bodyFont(size: 8.5))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.8))
                 }
             }
             .padding(.horizontal, A4.margin)
@@ -472,38 +771,45 @@ public struct MinimalistInvoiceTemplateView: View {
 
     public var body: some View {
         ZStack(alignment: .topLeading) {
-            Color.white.ignoresSafeArea()
+            InvoicePageBackground(config: context.templateConfig)
 
             VStack(alignment: .leading, spacing: 0) {
 
                 Spacer().frame(height: 44)
 
-                // ── Business Name + Invoice Label ────────────────────
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        // Logo (minimal, small)
-                        if let data = context.profile.logoData, let img = UIImage(data: data) {
-                            Image(uiImage: img)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 32)
+                ZStack(alignment: .topLeading) {
+                    if context.templateConfig.headerMotif != .none {
+                        InvoiceBrandMotifOverlay(config: context.templateConfig)
+                            .frame(height: 72)
+                    }
+
+                    HStack(alignment: .bottom) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            if context.templateConfig.logoPosition != .none,
+                               let data = context.profile.logoData, let img = UIImage(data: data) {
+                                Image(uiImage: img)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 32)
+                            }
+                            Text(context.issuerBlock.title.isEmpty ? "Your Business" : context.issuerBlock.title)
+                                .font(typo.headingFont(size: 22, weight: .light))
+                                .foregroundColor(secondary)
                         }
-                        Text(context.issuerBlock.title.isEmpty ? "Your Business" : context.issuerBlock.title)
-                            .font(typo.headingFont(size: 22, weight: .light))
-                            .foregroundColor(Color(UIColor.label))
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(context.settings.documentLabel.uppercased())
+                                .font(typo.bodyFont(size: 9, weight: .semibold))
+                                .foregroundColor(primary)
+                                .tracking(2.5)
+                            Text(context.invoice.invoiceNumber)
+                                .font(typo.headingFont(size: 13))
+                                .foregroundColor(secondary)
+                        }
                     }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text(context.settings.documentLabel.uppercased())
-                            .font(typo.bodyFont(size: 9, weight: .semibold))
-                            .foregroundColor(secondary) // Use secondary (accent) color
-                            .tracking(2.5)
-                        Text(context.invoice.invoiceNumber)
-                            .font(typo.headingFont(size: 13))
-                            .foregroundColor(Color(UIColor.label))
-                    }
+                    .padding(.horizontal, A4.margin)
                 }
-                .padding(.horizontal, A4.margin)
+                .frame(height: context.templateConfig.headerMotif == .none ? nil : 72, alignment: .bottom)
 
                 Spacer().frame(height: 20)
                 thinRule
@@ -601,6 +907,8 @@ public struct MinimalistInvoiceTemplateView: View {
                     .padding(.bottom, 12)
                 Spacer().frame(height: 12)
             }
+
+            InvoiceBrandBorderOverlay(config: context.templateConfig)
         }
         .frame(width: A4.width, height: A4.height)
     }
@@ -649,7 +957,7 @@ public struct ExecutiveInvoiceTemplateView: View {
 
     public var body: some View {
         ZStack(alignment: .topLeading) {
-            Color.white.ignoresSafeArea()
+            InvoicePageBackground(config: context.templateConfig)
 
             VStack(alignment: .leading, spacing: 0) {
 
@@ -721,64 +1029,68 @@ public struct ExecutiveInvoiceTemplateView: View {
 
                 Spacer().frame(height: 8)
             }
+
+            InvoiceBrandBorderOverlay(config: context.templateConfig)
         }
         .frame(width: A4.width, height: A4.height)
     }
 
     private var executiveBanner: some View {
         ZStack {
-            LinearGradient(
-                colors: [primary, secondary],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
+            InvoiceBrandHeaderBackground(config: context.templateConfig)
+            if context.templateConfig.backgroundStyle == .gradient || context.templateConfig.headerMotif == .topGradientBand {
+                LinearGradient(
+                    colors: [primary, secondary.opacity(0.85)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            }
+            InvoiceBrandMotifOverlay(config: context.templateConfig)
 
             HStack(alignment: .center, spacing: 14) {
-                // Logo
-                if let data = context.profile.logoData, let img = UIImage(data: data) {
+                if context.templateConfig.logoPosition != .none,
+                   let data = context.profile.logoData, let img = UIImage(data: data) {
                     Image(uiImage: img)
                         .resizable()
                         .scaledToFit()
                         .frame(height: 52)
-                        .cornerRadius(6)
+                        .cornerRadius(context.templateConfig.cornerStyle.radius)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 6)
+                            RoundedRectangle(cornerRadius: context.templateConfig.cornerStyle.radius)
                                 .stroke(Color.white.opacity(0.3), lineWidth: 1)
                         )
                 }
-                // Business name
                 VStack(alignment: .leading, spacing: 3) {
                     Text(context.profile.businessName.isEmpty ? "Your Business" : context.profile.businessName)
                         .font(typo.headingFont(size: 18, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig))
                     if !context.profile.displayName.isEmpty {
                         Text(context.profile.displayName)
                             .font(typo.bodyFont(size: 8.5))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.7))
                     }
                 }
 
                 Spacer()
 
-                // Invoice meta
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(context.settings.documentLabel.uppercased())
                         .font(typo.headingFont(size: 16, weight: .black))
-                        .foregroundColor(.white)
+                        .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig))
                         .tracking(1.5)
                     Text(context.invoice.invoiceNumber)
                         .font(typo.bodyFont(size: 8, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.8))
                     Rectangle()
-                        .fill(Color.white.opacity(0.3))
+                        .fill(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.3))
                         .frame(height: 0.5)
                     HStack(spacing: 12) {
                         Text("Issued: \(context.invoice.issueDate.formatted(date: .abbreviated, time: .omitted))")
                             .font(typo.bodyFont(size: 7.5))
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.8))
                         Text("Due: \(context.invoice.dueDate.formatted(date: .abbreviated, time: .omitted))")
                             .font(typo.bodyFont(size: 7.5, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig))
                     }
                 }
             }
