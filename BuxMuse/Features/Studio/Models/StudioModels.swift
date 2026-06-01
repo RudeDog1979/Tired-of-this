@@ -125,6 +125,8 @@ public struct StudioClient: Codable, Identifiable, Hashable, Equatable {
     public var paymentTermsDays: Int?
     public var isFlaggedForStress: Bool
     public var partyDetails: InvoicePartyDetails?
+    /// Optional workspace tag when Side-Hustle Matrix is enabled.
+    public var hustleId: UUID?
     
     public init(
         id: UUID = UUID(),
@@ -137,7 +139,8 @@ public struct StudioClient: Codable, Identifiable, Hashable, Equatable {
         defaultRate: Decimal? = nil,
         paymentTermsDays: Int? = nil,
         isFlaggedForStress: Bool = false,
-        partyDetails: InvoicePartyDetails? = nil
+        partyDetails: InvoicePartyDetails? = nil,
+        hustleId: UUID? = nil
     ) {
         self.id = id
         self.name = name
@@ -150,6 +153,7 @@ public struct StudioClient: Codable, Identifiable, Hashable, Equatable {
         self.paymentTermsDays = paymentTermsDays
         self.isFlaggedForStress = isFlaggedForStress
         self.partyDetails = partyDetails
+        self.hustleId = hustleId
     }
 }
 
@@ -205,6 +209,7 @@ public struct StudioInvoice: Codable, Identifiable, Equatable {
     /// Locked designer snapshot. Set when designer is applied or invoice is sent.
     /// Nil for invoices created before the Designer Hub was introduced.
     public var designerSnapshot: InvoiceDesignerSnapshot?
+    public var hustleId: UUID?
     
     public init(
         id: UUID = UUID(),
@@ -224,7 +229,8 @@ public struct StudioInvoice: Codable, Identifiable, Equatable {
         paymentDate: Date? = nil,
         externalReference: String? = nil,
         projectId: UUID? = nil,
-        designerSnapshot: InvoiceDesignerSnapshot? = nil
+        designerSnapshot: InvoiceDesignerSnapshot? = nil,
+        hustleId: UUID? = nil
     ) {
         self.id = id
         self.clientId = clientId
@@ -244,12 +250,13 @@ public struct StudioInvoice: Codable, Identifiable, Equatable {
         self.externalReference = externalReference
         self.projectId         = projectId
         self.designerSnapshot  = designerSnapshot
+        self.hustleId          = hustleId
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, clientId, invoiceNumber, issueDate, dueDate, status, currencyCode
         case lineItems, subtotal, taxAmount, total, vatRate, taxLabel, notes
-        case paymentDate, externalReference, projectId, designerSnapshot
+        case paymentDate, externalReference, projectId, designerSnapshot, hustleId
     }
 
     public init(from decoder: Decoder) throws {
@@ -272,6 +279,7 @@ public struct StudioInvoice: Codable, Identifiable, Equatable {
         externalReference = try c.decodeIfPresent(String.self, forKey: .externalReference)
         projectId         = try c.decodeIfPresent(UUID.self, forKey: .projectId)
         designerSnapshot  = try c.decodeIfPresent(InvoiceDesignerSnapshot.self, forKey: .designerSnapshot)
+        hustleId          = try c.decodeIfPresent(UUID.self, forKey: .hustleId)
     }
 }
 
@@ -318,6 +326,13 @@ public struct StudioProject: Codable, Identifiable, Equatable {
     public var timeEntries: [StudioTimeEntry]
     public var expenseIds: [UUID] // Linked receipt IDs
     public var generatedInvoiceIds: [UUID]
+    public var hustleId: UUID?
+    /// Scope Creep Radar — budgeted hours for this project (Pro).
+    public var budgetedHours: Double
+    /// Included revision rounds in the original agreement.
+    public var allowedRevisions: Int
+    /// Revisions consumed so far.
+    public var currentRevisions: Int
     
     public init(
         id: UUID = UUID(),
@@ -330,7 +345,11 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         notes: String = "",
         timeEntries: [StudioTimeEntry] = [],
         expenseIds: [UUID] = [],
-        generatedInvoiceIds: [UUID] = []
+        generatedInvoiceIds: [UUID] = [],
+        hustleId: UUID? = nil,
+        budgetedHours: Double = 0,
+        allowedRevisions: Int = 0,
+        currentRevisions: Int = 0
     ) {
         self.id = id
         self.name = name
@@ -343,6 +362,35 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         self.timeEntries = timeEntries
         self.expenseIds = expenseIds
         self.generatedInvoiceIds = generatedInvoiceIds
+        self.hustleId = hustleId
+        self.budgetedHours = budgetedHours
+        self.allowedRevisions = allowedRevisions
+        self.currentRevisions = currentRevisions
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, clientId, startDate, endDate, hourlyRate, fixedFee, notes
+        case timeEntries, expenseIds, generatedInvoiceIds, hustleId
+        case budgetedHours, allowedRevisions, currentRevisions
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        clientId = try c.decodeIfPresent(UUID.self, forKey: .clientId)
+        startDate = try c.decode(Date.self, forKey: .startDate)
+        endDate = try c.decodeIfPresent(Date.self, forKey: .endDate)
+        hourlyRate = try c.decodeIfPresent(Decimal.self, forKey: .hourlyRate)
+        fixedFee = try c.decodeIfPresent(Decimal.self, forKey: .fixedFee)
+        notes = try c.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        timeEntries = try c.decodeIfPresent([StudioTimeEntry].self, forKey: .timeEntries) ?? []
+        expenseIds = try c.decodeIfPresent([UUID].self, forKey: .expenseIds) ?? []
+        generatedInvoiceIds = try c.decodeIfPresent([UUID].self, forKey: .generatedInvoiceIds) ?? []
+        hustleId = try c.decodeIfPresent(UUID.self, forKey: .hustleId)
+        budgetedHours = try c.decodeIfPresent(Double.self, forKey: .budgetedHours) ?? 0
+        allowedRevisions = try c.decodeIfPresent(Int.self, forKey: .allowedRevisions) ?? 0
+        currentRevisions = try c.decodeIfPresent(Int.self, forKey: .currentRevisions) ?? 0
     }
 }
 
@@ -678,6 +726,7 @@ public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
     public var startLongitude: Double?
     public var endLatitude: Double?
     public var endLongitude: Double?
+    public var hustleId: UUID?
 
     public init(
         id: UUID = UUID(),
@@ -690,7 +739,8 @@ public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
         startLatitude: Double? = nil,
         startLongitude: Double? = nil,
         endLatitude: Double? = nil,
-        endLongitude: Double? = nil
+        endLongitude: Double? = nil,
+        hustleId: UUID? = nil
     ) {
         self.id = id
         self.date = date
@@ -703,6 +753,7 @@ public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
         self.startLongitude = startLongitude
         self.endLatitude = endLatitude
         self.endLongitude = endLongitude
+        self.hustleId = hustleId
     }
 
     public var startCoordinate: CLLocationCoordinate2D? {
@@ -726,6 +777,77 @@ public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
     }
 }
 
+// MARK: - Agreement Scratchpad (Pro)
+
+public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
+    public var id: UUID
+    public var title: String
+    public var clientId: UUID?
+    public var projectId: UUID?
+    public var scopeBullets: String
+    public var deliverables: String
+    public var outOfScope: String
+    public var signOffName: String
+    public var signOffDate: Date?
+    public var updatedAt: Date
+
+    public init(
+        id: UUID = UUID(),
+        title: String = "Client agreement",
+        clientId: UUID? = nil,
+        projectId: UUID? = nil,
+        scopeBullets: String = "",
+        deliverables: String = "",
+        outOfScope: String = "",
+        signOffName: String = "",
+        signOffDate: Date? = nil,
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
+        self.title = title
+        self.clientId = clientId
+        self.projectId = projectId
+        self.scopeBullets = scopeBullets
+        self.deliverables = deliverables
+        self.outOfScope = outOfScope
+        self.signOffName = signOffName
+        self.signOffDate = signOffDate
+        self.updatedAt = updatedAt
+    }
+
+    public func formattedShareText(clientName: String?, projectName: String?) -> String {
+        var lines: [String] = [title]
+        if let clientName, !clientName.isEmpty { lines.append("Client: \(clientName)") }
+        if let projectName, !projectName.isEmpty { lines.append("Project: \(projectName)") }
+        lines.append("")
+
+        if !scopeBullets.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            lines.append("Scope")
+            lines.append(scopeBullets.trimmingCharacters(in: .whitespacesAndNewlines))
+            lines.append("")
+        }
+        if !deliverables.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            lines.append("Deliverables")
+            lines.append(deliverables.trimmingCharacters(in: .whitespacesAndNewlines))
+            lines.append("")
+        }
+        if !outOfScope.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            lines.append("Out of scope")
+            lines.append(outOfScope.trimmingCharacters(in: .whitespacesAndNewlines))
+            lines.append("")
+        }
+        if !signOffName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let dateStr = signOffDate.map {
+                DateFormatter.localizedString(from: $0, dateStyle: .medium, timeStyle: .none)
+            } ?? "________"
+            lines.append("Approved by: \(signOffName.trimmingCharacters(in: .whitespacesAndNewlines)) · \(dateStr)")
+        }
+        lines.append("")
+        lines.append("— Drafted in BuxMuse Studio (local record, not e-sign)")
+        return lines.joined(separator: "\n")
+    }
+}
+
 // MARK: - Snapshot (JSON persistence envelope)
 
 public struct StudioSnapshot: Codable, Equatable {
@@ -738,6 +860,7 @@ public struct StudioSnapshot: Codable, Equatable {
     public var invoiceSettings: StudioInvoiceSettings
     public var mileageEntries: [MileageEntry]
     public var businessCardLibrary: ProBusinessCardLibrary
+    public var agreementDrafts: [AgreementDraft]
 
     public init(
         profile: StudioProfile,
@@ -748,7 +871,8 @@ public struct StudioSnapshot: Codable, Equatable {
         taxProfile: StudioTaxProfile,
         invoiceSettings: StudioInvoiceSettings = StudioInvoiceSettings(),
         mileageEntries: [MileageEntry] = [],
-        businessCardLibrary: ProBusinessCardLibrary = ProBusinessCardLibrary()
+        businessCardLibrary: ProBusinessCardLibrary = ProBusinessCardLibrary(),
+        agreementDrafts: [AgreementDraft] = []
     ) {
         self.profile = profile
         self.clients = clients
@@ -759,10 +883,11 @@ public struct StudioSnapshot: Codable, Equatable {
         self.invoiceSettings = invoiceSettings
         self.mileageEntries = mileageEntries
         self.businessCardLibrary = businessCardLibrary
+        self.agreementDrafts = agreementDrafts
     }
 
     private enum CodingKeys: String, CodingKey {
-        case profile, clients, invoices, projects, receipts, taxProfile, invoiceSettings, mileageEntries, businessCardLibrary
+        case profile, clients, invoices, projects, receipts, taxProfile, invoiceSettings, mileageEntries, businessCardLibrary, agreementDrafts
     }
 
     public init(from decoder: Decoder) throws {
@@ -776,6 +901,7 @@ public struct StudioSnapshot: Codable, Equatable {
         invoiceSettings = try c.decodeIfPresent(StudioInvoiceSettings.self, forKey: .invoiceSettings) ?? StudioInvoiceSettings()
         mileageEntries = try c.decodeIfPresent([MileageEntry].self, forKey: .mileageEntries) ?? []
         businessCardLibrary = try c.decodeIfPresent(ProBusinessCardLibrary.self, forKey: .businessCardLibrary) ?? ProBusinessCardLibrary()
+        agreementDrafts = try c.decodeIfPresent([AgreementDraft].self, forKey: .agreementDrafts) ?? []
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -789,5 +915,6 @@ public struct StudioSnapshot: Codable, Equatable {
         try c.encode(invoiceSettings, forKey: .invoiceSettings)
         try c.encode(mileageEntries, forKey: .mileageEntries)
         try c.encode(businessCardLibrary, forKey: .businessCardLibrary)
+        try c.encode(agreementDrafts, forKey: .agreementDrafts)
     }
 }

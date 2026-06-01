@@ -53,7 +53,12 @@ struct BuxGlassCircleBackground: View {
     var body: some View {
         let shape = Circle()
         Group {
-            if settings.useGlassmorphism {
+            if settings.solarContrastModeEnabled {
+                shape
+                    .fill(Color.white)
+                    .frame(width: diameter, height: diameter)
+                    .overlay(shape.stroke(Color.black, lineWidth: 2.0))
+            } else if settings.useGlassmorphism {
                 if #available(iOS 26.0, *) {
                     GlassEffectContainer {
                         shape
@@ -81,7 +86,7 @@ struct BuxGlassCircleBackground: View {
         .buxGlassRimShimmer(
             shape: shape,
             colorScheme: colorScheme,
-            enabled: settings.useGlassmorphism
+            enabled: settings.useGlassmorphism && !settings.solarContrastModeEnabled
         )
     }
 }
@@ -97,7 +102,11 @@ struct BuxGlassCapsuleBackground: View {
     var body: some View {
         let shape = Capsule(style: .continuous)
         Group {
-            if settings.useGlassmorphism {
+            if settings.solarContrastModeEnabled {
+                shape
+                    .fill(Color.white)
+                    .overlay(shape.stroke(Color.black, lineWidth: 2.0))
+            } else if settings.useGlassmorphism {
                 if #available(iOS 26.0, *) {
                     GlassEffectContainer {
                         shape
@@ -114,7 +123,7 @@ struct BuxGlassCapsuleBackground: View {
         .buxGlassRimShimmer(
             shape: shape,
             colorScheme: colorScheme,
-            enabled: settings.useGlassmorphism && castsShadow
+            enabled: settings.useGlassmorphism && castsShadow && !settings.solarContrastModeEnabled
         )
     }
 }
@@ -131,7 +140,11 @@ struct BuxGlassPillBackground: View {
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         Group {
-            if settings.useGlassmorphism {
+            if settings.solarContrastModeEnabled {
+                shape
+                    .fill(Color.white)
+                    .overlay(shape.stroke(Color.black, lineWidth: 2.0))
+            } else if settings.useGlassmorphism {
                 if #available(iOS 26.0, *) {
                     GlassEffectContainer {
                         shape

@@ -247,52 +247,99 @@ struct BuxCard<Content: View>: View {
     }
 }
 
-// MARK: - Horizontal scroll edge fade
+// MARK: - Scroll edge mask (clips content at edges — no painted header bars)
+
+struct BuxScrollEdgeMaskModifier: ViewModifier {
+    let edges: Edge.Set
+    let fadeSize: CGFloat
+
+    private var showsTop: Bool { edges.contains(.top) }
+    private var showsBottom: Bool { edges.contains(.bottom) }
+    private var showsLeading: Bool { edges.contains(.leading) }
+    private var showsTrailing: Bool { edges.contains(.trailing) }
+
+    func body(content: Content) -> some View {
+        content.mask {
+            Group {
+                if showsLeading || showsTrailing {
+                    horizontalMask
+                } else {
+                    verticalMask
+                }
+            }
+        }
+    }
+
+    private var verticalMask: some View {
+        VStack(spacing: 0) {
+            if showsTop {
+                LinearGradient(
+                    colors: [.clear, .black],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: fadeSize)
+            }
+            Color.black
+            if showsBottom {
+                LinearGradient(
+                    colors: [.black, .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: fadeSize)
+            }
+        }
+    }
+
+    private var horizontalMask: some View {
+        HStack(spacing: 0) {
+            if showsLeading {
+                LinearGradient(
+                    colors: [.clear, .black],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: fadeSize)
+            }
+            Color.black
+            if showsTrailing {
+                LinearGradient(
+                    colors: [.black, .clear],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: fadeSize)
+            }
+        }
+    }
+}
 
 private struct BuxHorizontalScrollEdgeFadeModifier: ViewModifier {
     let fadeWidth: CGFloat
-    let backgroundColor: Color
 
     func body(content: Content) -> some View {
-        content
-            .clipShape(Rectangle())
-            .overlay {
-                HStack(spacing: 0) {
-                    LinearGradient(
-                        colors: [backgroundColor, backgroundColor.opacity(0)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(width: fadeWidth)
-
-                    Spacer(minLength: 0)
-
-                    LinearGradient(
-                        colors: [backgroundColor.opacity(0), backgroundColor],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(width: fadeWidth)
-                }
-                .allowsHitTesting(false)
-            }
+        content.modifier(
+            BuxScrollEdgeMaskModifier(edges: .horizontal, fadeSize: fadeWidth)
+        )
     }
 }
 
 extension View {
-    func buxHorizontalScrollEdgeFade(background: Color, width: CGFloat = 16) -> some View {
-        modifier(BuxHorizontalScrollEdgeFadeModifier(fadeWidth: width, backgroundColor: background))
+    func buxScrollEdgeMask(edges: Edge.Set, size: CGFloat = 20) -> some View {
+        modifier(BuxScrollEdgeMaskModifier(edges: edges, fadeSize: size))
+    }
+
+    func buxHorizontalScrollEdgeFade(background: Color, width: CGFloat = 20) -> some View {
+        modifier(BuxHorizontalScrollEdgeFadeModifier(fadeWidth: width))
     }
 
     func buxThemedHorizontalScrollEdgeFade(
         themeManager: ThemeManager,
         colorScheme: ColorScheme,
-        width: CGFloat = 16
+        width: CGFloat = 20
     ) -> some View {
-        buxHorizontalScrollEdgeFade(
-            background: themeManager.screenBackground(for: colorScheme),
-            width: width
-        )
+        buxHorizontalScrollEdgeFade(background: .clear, width: width)
     }
 
     /// Soft drop shadow on chrome bars (tab bar, save bar) — not on scroll content.

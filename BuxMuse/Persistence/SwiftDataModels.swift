@@ -32,6 +32,7 @@ final class ExpenseEntity {
     var heatZoneBucket: String?
     var emotion: String?
     var contextTag: String?
+    var hustleId: UUID?
     var habitSignatureId: String?
     var subscriptionConfidence: Double?
     var microCommitmentType: String?
@@ -44,6 +45,15 @@ final class ExpenseEntity {
     var categoryRaw: String
     /// Legacy display field — mirrors `name`.
     var merchantName: String
+    var paymentMethod: String?
+    /// Barter/trade exchange — no money changes hands.
+    var isBarterExchange: Bool
+    /// Goods or services given in the barter.
+    var barterGoodsGiven: String?
+    /// Goods or services received in the barter.
+    var barterGoodsReceived: String?
+    /// Manually estimated monetary equivalent of the barter.
+    var barterEstimatedValue: Decimal?
 
     init(
         id: UUID = UUID(),
@@ -66,6 +76,7 @@ final class ExpenseEntity {
         heatZoneBucket: String? = nil,
         emotion: String? = nil,
         contextTag: String? = nil,
+        hustleId: UUID? = nil,
         habitSignatureId: String? = nil,
         subscriptionConfidence: Double? = nil,
         microCommitmentType: String? = nil,
@@ -75,7 +86,12 @@ final class ExpenseEntity {
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
         categoryRaw: String,
-        merchantName: String
+        merchantName: String,
+        paymentMethod: String? = nil,
+        isBarterExchange: Bool = false,
+        barterGoodsGiven: String? = nil,
+        barterGoodsReceived: String? = nil,
+        barterEstimatedValue: Decimal? = nil
     ) {
         self.id = id
         self.name = name
@@ -97,6 +113,7 @@ final class ExpenseEntity {
         self.heatZoneBucket = heatZoneBucket
         self.emotion = emotion
         self.contextTag = contextTag
+        self.hustleId = hustleId
         self.habitSignatureId = habitSignatureId
         self.subscriptionConfidence = subscriptionConfidence
         self.microCommitmentType = microCommitmentType
@@ -107,6 +124,11 @@ final class ExpenseEntity {
         self.updatedAt = updatedAt
         self.categoryRaw = categoryRaw
         self.merchantName = merchantName
+        self.paymentMethod = paymentMethod
+        self.isBarterExchange = isBarterExchange
+        self.barterGoodsGiven = barterGoodsGiven
+        self.barterGoodsReceived = barterGoodsReceived
+        self.barterEstimatedValue = barterEstimatedValue
     }
 }
 
@@ -401,7 +423,13 @@ extension ExpenseEntity {
             isTrial: isTrial,
             nextExpectedDate: nextExpectedDate,
             subscriptionStartDate: subscriptionStartDate,
-            trialEndDate: trialEndDate
+            trialEndDate: trialEndDate,
+            hustleId: hustleId,
+            paymentMethod: paymentMethod,
+            isBarterExchange: isBarterExchange,
+            barterGoodsGiven: barterGoodsGiven,
+            barterGoodsReceived: barterGoodsReceived,
+            barterEstimatedValue: barterEstimatedValue
         )
     }
 }

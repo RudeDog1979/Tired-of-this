@@ -276,6 +276,15 @@ public final class SimpleStudioStore: ObservableObject {
         }
     }
 
+    public func apply(_ snapshot: SimpleStudioSnapshot) {
+        entries = snapshot.entries
+        customers = snapshot.customers
+        invoices = snapshot.invoices
+        hourlyRateHint = snapshot.hourlyRateHint
+        businessCard = snapshot.businessCard
+        save()
+    }
+
     private func upsertCustomer(from entry: SimpleStudioEntry) {
         let name = entry.customerName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return }

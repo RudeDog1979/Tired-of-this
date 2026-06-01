@@ -63,11 +63,22 @@ public struct Transaction: Identifiable, Codable, Equatable {
     public let merchantName: String
     public let category: TransactionCategory
     public let notes: String?
+    public let emotion: String?
     public let isSubscriptionLike: Bool
     public let isTrial: Bool
     public let nextExpectedDate: Date?
     public let subscriptionStartDate: Date?
     public let trialEndDate: Date?
+    public let hustleId: UUID?
+    public let paymentMethod: String?
+    /// Barter / trade exchange flag — no money changes hands.
+    public let isBarterExchange: Bool
+    /// What was given in the barter (goods or services).
+    public let barterGoodsGiven: String?
+    /// What was received in the barter (goods or services).
+    public let barterGoodsReceived: String?
+    /// Manually estimated monetary value of the barter in the user's primary currency.
+    public let barterEstimatedValue: Decimal?
 
     public init(
         id: UUID = UUID(),
@@ -76,11 +87,18 @@ public struct Transaction: Identifiable, Codable, Equatable {
         merchantName: String,
         category: TransactionCategory,
         notes: String? = nil,
+        emotion: String? = nil,
         isSubscriptionLike: Bool = false,
         isTrial: Bool = false,
         nextExpectedDate: Date? = nil,
         subscriptionStartDate: Date? = nil,
-        trialEndDate: Date? = nil
+        trialEndDate: Date? = nil,
+        hustleId: UUID? = nil,
+        paymentMethod: String? = nil,
+        isBarterExchange: Bool = false,
+        barterGoodsGiven: String? = nil,
+        barterGoodsReceived: String? = nil,
+        barterEstimatedValue: Decimal? = nil
     ) {
         self.id = id
         self.date = date
@@ -88,11 +106,18 @@ public struct Transaction: Identifiable, Codable, Equatable {
         self.merchantName = merchantName
         self.category = category
         self.notes = notes
+        self.emotion = emotion
         self.isSubscriptionLike = isSubscriptionLike
         self.isTrial = isTrial
         self.nextExpectedDate = nextExpectedDate
         self.subscriptionStartDate = subscriptionStartDate
         self.trialEndDate = trialEndDate
+        self.hustleId = hustleId
+        self.paymentMethod = paymentMethod
+        self.isBarterExchange = isBarterExchange
+        self.barterGoodsGiven = barterGoodsGiven
+        self.barterGoodsReceived = barterGoodsReceived
+        self.barterEstimatedValue = barterEstimatedValue
     }
 }
 

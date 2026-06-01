@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSHealthShareUsageDescription</key>
+	<string>BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>BuxMuse does not write health data; this permission is reserved for future wellness integrations.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BuxMuse uses your location to fill start or end addresses when logging business mileage.</string>
 	<key>CFBundleURLTypes</key>

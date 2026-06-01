@@ -104,6 +104,11 @@ public final class StudioBrain: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.refreshAll() }
             .store(in: &cancellables)
+
+        HustleManager.shared.$selectedHustleId
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.refreshAll() }
+            .store(in: &cancellables)
     }
 
     // MARK: - Hub
@@ -111,34 +116,57 @@ public final class StudioBrain: ObservableObject {
     private func buildHubDisplay() -> StudioHubDisplay {
         guard settings.studioEnabled else { return .empty }
 
+        let scopedProjects = HustleWorkspaceFilter.filter(store.projects) { $0.hustleId }
+        let scopedInvoices = HustleWorkspaceFilter.filter(store.invoices) { $0.hustleId }
+        let mergedClients = HustleWorkspaceFilter.filter(store.clients) { $0.hustleId }
+            + store.clients.filter { client in
+                guard HustleWorkspaceFilter.isFilteringActive else { return false }
+                guard client.hustleId == nil else { return false }
+                return scopedInvoices.contains(where: { $0.clientId == client.id })
+                    || scopedProjects.contains(where: { $0.clientId == client.id })
+            }
+        let scopedClients = Dictionary(grouping: mergedClients, by: \.id).compactMap(\.value.first)
+        let scopedReceipts = store.receipts.filter { receipt in
+            guard HustleWorkspaceFilter.isFilteringActive else { return true }
+            if let projectId = receipt.linkedProjectId,
+               scopedProjects.contains(where: { $0.id == projectId }) {
+                return true
+            }
+            if let clientId = receipt.linkedClientId,
+               scopedClients.contains(where: { $0.id == clientId }) {
+                return true
+            }
+            return receipt.linkedProjectId == nil && receipt.linkedClientId == nil
+        }
+
         let profile = store.profile
         let mileageRate = SettingsStore.shared.mileageRatePerUnit
         let taxResult = StudioTaxEngine.computeEstimatedTax(
             profile: profile,
             taxProfile: store.taxProfile,
-            invoices: store.invoices,
-            receipts: store.receipts,
+            invoices: scopedInvoices,
+            receipts: scopedReceipts,
             mileageEntries: store.mileageEntries,
             mileageRatePerUnit: mileageRate
         )
         let forecast = StudioCashflowEngine.computeForecast(
-            invoices: store.invoices,
-            receipts: store.receipts,
+            invoices: scopedInvoices,
+            receipts: scopedReceipts,
             estimatedTax: taxResult.estimatedTax
         )
         let deductions = StudioDeductionEngine.computeDeductions(
-            receipts: store.receipts,
+            receipts: scopedReceipts,
             taxProfile: store.taxProfile,
             mileageEntries: store.mileageEntries,
             mileageRatePerUnit: mileageRate
         )
 
-        let paidInvoices = store.invoices.filter { $0.status == .paid }
-        let outstandingInvoices = store.invoices.filter { $0.status == .sent || $0.status == .overdue }
+        let paidInvoices = scopedInvoices.filter { $0.status == .paid }
+        let outstandingInvoices = scopedInvoices.filter { $0.status == .sent || $0.status == .overdue }
         let totalPaid = paidInvoices.reduce(Decimal(0)) { $0 + $1.total }
         let totalOutstanding = outstandingInvoices.reduce(Decimal(0)) { $0 + $1.total }
 
-        let hasData = !store.clients.isEmpty || !store.invoices.isEmpty || !store.receipts.isEmpty || !store.projects.isEmpty
+        let hasData = !scopedClients.isEmpty || !scopedInvoices.isEmpty || !scopedReceipts.isEmpty || !scopedProjects.isEmpty
             || !profile.businessName.isEmpty || !profile.displayName.isEmpty
 
         let hero = StudioHeroDisplay(
@@ -152,23 +180,23 @@ public final class StudioBrain: ObservableObject {
             totalOutstandingFormatted: appSettings.format(totalOutstanding),
             paidInvoiceCount: paidInvoices.count,
             outstandingInvoiceCount: outstandingInvoices.count,
-            timeToMoneyDays: computeTimeToMoneyDays(invoices: store.invoices),
+            timeToMoneyDays: computeTimeToMoneyDays(invoices: scopedInvoices),
             hasData: hasData
         )
 
         return StudioHubDisplay(
             hero: hero,
-            invoicesSummary: buildInvoiceSummary(invoices: store.invoices, clients: store.clients),
-            topClients: buildTopClients(clients: store.clients, invoices: store.invoices, projects: store.projects, receipts: store.receipts),
+            invoicesSummary: buildInvoiceSummary(invoices: scopedInvoices, clients: scopedClients),
+            topClients: buildTopClients(clients: scopedClients, invoices: scopedInvoices, projects: scopedProjects, receipts: scopedReceipts),
             taxSummary: buildTaxDisplay(result: taxResult, taxProfile: store.taxProfile, profile: profile),
             cashflow: buildCashflowDisplay(from: forecast, hasData: hasData),
-            projectsSummary: buildProjectsSummary(projects: store.projects, receipts: store.receipts),
-            receiptsSummary: buildReceiptsSummary(receipts: store.receipts, deductibleTotal: deductions.totalDeductible),
+            projectsSummary: buildProjectsSummary(projects: scopedProjects, receipts: scopedReceipts),
+            receiptsSummary: buildReceiptsSummary(receipts: scopedReceipts, deductibleTotal: deductions.totalDeductible),
             deductionOpportunities: mapDeductionOpportunities(deductions.opportunities),
             alerts: buildAlerts(
-                clients: buildTopClients(clients: store.clients, invoices: store.invoices, projects: store.projects, receipts: store.receipts),
-                invoices: store.invoices,
-                projects: store.projects,
+                clients: buildTopClients(clients: scopedClients, invoices: scopedInvoices, projects: scopedProjects, receipts: scopedReceipts),
+                invoices: scopedInvoices,
+                projects: scopedProjects,
                 taxSummary: buildTaxDisplay(result: taxResult, taxProfile: store.taxProfile, profile: profile),
                 cashflow: buildCashflowDisplay(from: forecast, hasData: hasData)
             ),

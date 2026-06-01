@@ -41,6 +41,29 @@ struct BuxMaterialScheme: Equatable {
         branded: Bool,
         interactiveAccent: Color? = nil
     ) -> BuxMaterialScheme {
+        if SettingsStore.shared.solarContrastModeEnabled {
+            return BuxMaterialScheme(
+                primary: .black,
+                onPrimary: .white,
+                primaryContainer: .white,
+                onPrimaryContainer: .black,
+                secondary: .black,
+                onSecondary: .white,
+                surface: .white,
+                onSurface: .black,
+                onSurfaceVariant: .black,
+                surfaceContainerLowest: .white,
+                surfaceContainerLow: .white,
+                surfaceContainer: .white,
+                surfaceContainerHigh: .white,
+                surfaceContainerHighest: .white,
+                outline: .black,
+                outlineVariant: .black,
+                error: .red,
+                onError: .white
+            )
+        }
+
         if !branded {
             let accent = interactiveAccent ?? BuxSystemAccent.systemBlue.color(for: colorScheme)
             if colorScheme == .dark {

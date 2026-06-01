@@ -45,6 +45,13 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published public var trialEndDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
     @Published public var renewalReminderDays = 3
     @Published public var emotionTag = ""
+    @Published public var selectedHustleId: UUID? = nil
+    @Published public var paymentMethod: String? = nil
+    // MARK: - Barter Logger Fields
+    @Published public var isBarterExchange: Bool = false
+    @Published public var barterGoodsGiven: String = ""
+    @Published public var barterGoodsReceived: String = ""
+    @Published public var barterEstimatedValue: String = ""
 
     private var categoryBeforeSubscription: TransactionCategory?
     private var categoryIdBeforeSubscription: UUID?
@@ -70,6 +77,12 @@ public final class AddExpenseViewModel: ObservableObject {
             notes = tx.notes ?? ""
             let absAmount = abs(tx.amount.value)
             amountString = String(format: "%.2f", NSDecimalNumber(decimal: absAmount).doubleValue)
+            selectedHustleId = tx.hustleId
+            paymentMethod = tx.paymentMethod
+            isBarterExchange = tx.isBarterExchange
+            barterGoodsGiven = tx.barterGoodsGiven ?? ""
+            barterGoodsReceived = tx.barterGoodsReceived ?? ""
+            barterEstimatedValue = tx.barterEstimatedValue.map { String(format: "%.2f", NSDecimalNumber(decimal: $0).doubleValue) } ?? ""
             if let record = try? brain.fetchExpenseRecord(id: tx.id) {
                 selectedCategoryId = record.categoryId
                 selectedMerchantId = record.merchantId
@@ -80,12 +93,23 @@ public final class AddExpenseViewModel: ObservableObject {
                 if let end = record.trialEndDate { trialEndDate = end }
                 renewalReminderDays = record.renewalReminderDays ?? 3
                 emotionTag = record.emotion ?? ""
+                paymentMethod = record.paymentMethod
             }
         } else if let preset = presetCategory {
             selectedCategory = preset
             selectedCategoryId = try? brain.categoryId(for: preset)
+            selectedHustleId = SettingsStore.shared.sideHustleMatrixEnabled
+                ? HustleManager.shared.selectedHustleId
+                : nil
         } else {
             selectedCategoryId = try? brain.categoryId(for: .other)
+            selectedHustleId = SettingsStore.shared.sideHustleMatrixEnabled
+                ? HustleManager.shared.selectedHustleId
+                : nil
+        }
+
+        if paymentMethod?.isEmpty == true {
+            paymentMethod = nil
         }
 
         refreshMerchantSuggestions(resetSelection: true)
@@ -212,6 +236,17 @@ public final class AddExpenseViewModel: ObservableObject {
 
     public func deleteExpense() throws {
         guard let editingId else { return }
+        if let record = try? brain.fetchExpenseRecord(id: editingId) {
+            if let pm = record.paymentMethod {
+                let store = SettingsStore.shared
+                let doubleAmt = NSDecimalNumber(decimal: record.amountValue).doubleValue
+                if pm == "Cash (\(store.primaryLocalCurrency))" {
+                    store.cashLocalBalanceValue -= doubleAmt
+                } else if pm == "Cash (\(store.secondaryTradingCurrency))" {
+                    store.cashSecondaryBalanceValue -= doubleAmt
+                }
+            }
+        }
         try brain.deleteExpense(id: editingId)
     }
 
@@ -258,6 +293,43 @@ public final class AddExpenseViewModel: ObservableObject {
         let finalValue = selectedCategory == .income ? abs(decimalValue) : -abs(decimalValue)
         let amount = MoneyAmount(value: finalValue, currencyCode: settingsManager.selectedCurrency.id)
 
+        // Adjust Cash Drawer Balances if needed
+        let oldRecord = editingId.flatMap { try? brain.fetchExpenseRecord(id: $0) }
+        let oldPaymentMethod = oldRecord?.paymentMethod
+        
+        if paymentMethod != oldPaymentMethod {
+            let store = SettingsStore.shared
+            // Reverse old cash transaction if any
+            if let oldPm = oldPaymentMethod, let oldAmt = oldRecord?.amountValue {
+                let doubleAmt = NSDecimalNumber(decimal: oldAmt).doubleValue
+                if oldPm == "Cash (\(store.primaryLocalCurrency))" {
+                    store.cashLocalBalanceValue -= doubleAmt
+                } else if oldPm == "Cash (\(store.secondaryTradingCurrency))" {
+                    store.cashSecondaryBalanceValue -= doubleAmt
+                }
+            }
+            // Apply new cash transaction
+            if let newPm = paymentMethod {
+                let doubleAmt = NSDecimalNumber(decimal: finalValue).doubleValue
+                if newPm == "Cash (\(store.primaryLocalCurrency))" {
+                    store.cashLocalBalanceValue += doubleAmt
+                } else if newPm == "Cash (\(store.secondaryTradingCurrency))" {
+                    store.cashSecondaryBalanceValue += doubleAmt
+                }
+            }
+        } else if oldRecord != nil, let oldAmt = oldRecord?.amountValue, oldAmt != finalValue {
+            // Same cash payment method but amount changed
+            let store = SettingsStore.shared
+            if let pm = paymentMethod {
+                let diff = NSDecimalNumber(decimal: finalValue - oldAmt).doubleValue
+                if pm == "Cash (\(store.primaryLocalCurrency))" {
+                    store.cashLocalBalanceValue += diff
+                } else if pm == "Cash (\(store.secondaryTradingCurrency))" {
+                    store.cashSecondaryBalanceValue += diff
+                }
+            }
+        }
+
         var record = ExpenseRecord(
             id: editingId ?? UUID(),
             name: cleanName,
@@ -272,7 +344,13 @@ public final class AddExpenseViewModel: ObservableObject {
             trialEndDate: isSubscription && isTrial ? trialEndDate : nil,
             renewalReminderDays: isSubscription ? renewalReminderDays : nil,
             categoryRaw: isSubscription ? TransactionCategory.subscriptions.rawValue : selectedCategory.rawValue,
-            merchantName: cleanName
+            merchantName: cleanName,
+            hustleId: resolvedHustleIdForSave(),
+            paymentMethod: normalizedPaymentMethod(),
+            isBarterExchange: isBarterExchange,
+            barterGoodsGiven: isBarterExchange && !barterGoodsGiven.isEmpty ? barterGoodsGiven : nil,
+            barterGoodsReceived: isBarterExchange && !barterGoodsReceived.isEmpty ? barterGoodsReceived : nil,
+            barterEstimatedValue: isBarterExchange ? Decimal(Double(barterEstimatedValue) ?? 0) : nil
         )
 
         if let editingId, let existing = try? brain.fetchExpenseRecord(id: editingId) {
@@ -308,6 +386,22 @@ public final class AddExpenseViewModel: ObservableObject {
 
     // MARK: - Private
 
+    private func normalizedPaymentMethod() -> String? {
+        guard let paymentMethod else { return nil }
+        let trimmed = paymentMethod.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func resolvedHustleIdForSave() -> UUID? {
+        guard SettingsStore.shared.sideHustleMatrixEnabled else {
+            if let editingId, let record = try? brain.fetchExpenseRecord(id: editingId) {
+                return record.hustleId
+            }
+            return nil
+        }
+        return selectedHustleId
+    }
+
     private func reloadEditingRecord() {
         guard let editingId, let record = try? brain.fetchExpenseRecord(id: editingId) else { return }
         merchantName = record.name
@@ -319,6 +413,7 @@ public final class AddExpenseViewModel: ObservableObject {
         let absAmount = abs(record.amountValue)
         amountString = String(format: "%.2f", NSDecimalNumber(decimal: absAmount).doubleValue)
         isSubscription = record.isSubscriptionLike
+        paymentMethod = record.paymentMethod
         isRecurring = record.isRecurring && (record.recurrenceConfidence ?? 0) >= 0.85
         isTrial = record.isTrial
         if let start = record.subscriptionStartDate { subscriptionStartDate = start }
@@ -416,5 +511,9 @@ public final class AddExpenseViewModel: ObservableObject {
         if let recurrence = analysis.display.recurrenceSummary { hints.append(recurrence) }
         if let sub = analysis.display.subscriptionSummary { hints.append(sub) }
         smartHint = hints.isEmpty ? nil : hints.joined(separator: " · ")
+    }
+
+    deinit {
+        // Stabilize object lifecycle for unit tests deallocation
     }
 }

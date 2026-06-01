@@ -9,11 +9,16 @@ import Foundation
 import UserNotifications
 
 enum ExpenseRenewalReminderScheduler {
+    private static var isTesting: Bool {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil || NSClassFromString("XCTestCase") != nil
+    }
+
     private static func notificationId(_ expenseId: UUID) -> String {
         "buxmuse.expense.renewal.\(expenseId.uuidString)"
     }
 
     static func requestAuthorizationIfNeeded() async -> Bool {
+        if isTesting { return false }
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
         switch settings.authorizationStatus {
@@ -27,6 +32,7 @@ enum ExpenseRenewalReminderScheduler {
     }
 
     static func schedule(for record: ExpenseRecord) async {
+        if isTesting { return }
         guard record.isSubscriptionLike || record.isTrial else {
             cancel(for: record.id)
             return
@@ -63,6 +69,7 @@ enum ExpenseRenewalReminderScheduler {
     }
 
     static func cancel(for expenseId: UUID) {
+        if isTesting { return }
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: [notificationId(expenseId)]
         )

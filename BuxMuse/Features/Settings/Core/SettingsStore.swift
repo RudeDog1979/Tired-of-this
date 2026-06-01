@@ -46,7 +46,18 @@ public final class SettingsStore: ObservableObject {
     @Published public var neutralAccentId: String = BuxSystemAccent.systemBlue.rawValue
     @Published public var useGlassmorphism: Bool = true
     @Published public var brandThemesEnabled: Bool = true
+    @Published public var landingBackdropEnabled: Bool = {
+        if UserDefaults.standard.object(forKey: "buxmuse.landingBackdrop.enabled") == nil {
+            return true
+        }
+        return UserDefaults.standard.bool(forKey: "buxmuse.landingBackdrop.enabled")
+    }() {
+        didSet {
+            UserDefaults.standard.set(landingBackdropEnabled, forKey: "buxmuse.landingBackdrop.enabled")
+        }
+    }
     @Published public var reducedMotion: Bool = false
+    @Published public var solarContrastModeEnabled: Bool = false
     
     // MARK: - Region Settings
     @Published public var weekStartDay: WeekStartDay = .monday
@@ -82,6 +93,105 @@ public final class SettingsStore: ObservableObject {
     @Published public var quietHoursStartMinute: Int = 0
     @Published public var quietHoursEndHour: Int = 7
     @Published public var quietHoursEndMinute: Int = 0
+    
+    // MARK: - Workspace Preferences Settings
+    @Published public var burnoutGuardEnabled: Bool = true
+    @Published public var healthKitSyncEnabled: Bool = false
+    @Published public var manualSleepHours: Double = 7.5
+    @Published public var manualStressLevel: Double = 5.0
+    
+    // MARK: - Data Guard Mode Settings
+    @Published public var dataGuardModeEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.dataguard.enabled") {
+        didSet {
+            UserDefaults.standard.set(dataGuardModeEnabled, forKey: "buxmuse.dataguard.enabled")
+        }
+    }
+
+    // MARK: - Barter Logger Settings
+    @Published public var barterLoggerEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.barter.enabled") {
+        didSet {
+            UserDefaults.standard.set(barterLoggerEnabled, forKey: "buxmuse.barter.enabled")
+        }
+    }
+
+    // MARK: - Anti-Scope Creep Settings
+    @Published public var antiScopeCreepEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.scopecreep.enabled") {
+        didSet {
+            UserDefaults.standard.set(antiScopeCreepEnabled, forKey: "buxmuse.scopecreep.enabled")
+        }
+    }
+
+    // MARK: - Agreement Scratchpad Settings
+    @Published public var agreementScratchpadEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.agreementscratchpad.enabled") {
+        didSet {
+            UserDefaults.standard.set(agreementScratchpadEnabled, forKey: "buxmuse.agreementscratchpad.enabled")
+        }
+    }
+
+    // MARK: - Side-Hustle Matrix Settings
+    @Published public var sideHustleMatrixEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.sidehustle.enabled") {
+        didSet {
+            UserDefaults.standard.set(sideHustleMatrixEnabled, forKey: "buxmuse.sidehustle.enabled")
+            if !sideHustleMatrixEnabled {
+                HustleManager.shared.selectHustle(nil)
+            }
+        }
+    }
+
+    /// When a workspace is selected, include expenses with no workspace tag (shown with an Unassigned badge).
+    @Published public var showUnassignedExpensesInWorkspace: Bool = {
+        if UserDefaults.standard.object(forKey: "buxmuse.sidehustle.showUnassigned") == nil {
+            return true
+        }
+        return UserDefaults.standard.bool(forKey: "buxmuse.sidehustle.showUnassigned")
+    }() {
+        didSet {
+            UserDefaults.standard.set(showUnassignedExpensesInWorkspace, forKey: "buxmuse.sidehustle.showUnassigned")
+        }
+    }
+
+    // MARK: - Payment Source Tracking (on by default — user can disable in Settings)
+    @Published public var paymentSourceTrackingEnabled: Bool = {
+        if UserDefaults.standard.object(forKey: "buxmuse.paymentsource.enabled") == nil {
+            return true
+        }
+        return UserDefaults.standard.bool(forKey: "buxmuse.paymentsource.enabled")
+    }() {
+        didSet {
+            UserDefaults.standard.set(paymentSourceTrackingEnabled, forKey: "buxmuse.paymentsource.enabled")
+        }
+    }
+
+    // MARK: - Dual-Cash Drawer Settings
+    @Published public var dualCashDrawerEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.cashdrawer.enabled") {
+        didSet {
+            UserDefaults.standard.set(dualCashDrawerEnabled, forKey: "buxmuse.cashdrawer.enabled")
+        }
+    }
+    
+    @Published public var primaryLocalCurrency: String = UserDefaults.standard.string(forKey: "buxmuse.cashdrawer.primaryCurrency") ?? "USD" {
+        didSet {
+            UserDefaults.standard.set(primaryLocalCurrency, forKey: "buxmuse.cashdrawer.primaryCurrency")
+        }
+    }
+    
+    @Published public var secondaryTradingCurrency: String = UserDefaults.standard.string(forKey: "buxmuse.cashdrawer.secondaryCurrency") ?? "DOP" {
+        didSet {
+            UserDefaults.standard.set(secondaryTradingCurrency, forKey: "buxmuse.cashdrawer.secondaryCurrency")
+        }
+    }
+    
+    @Published public var cashLocalBalanceValue: Double = UserDefaults.standard.double(forKey: "buxmuse.cashdrawer.localBalance") {
+        didSet {
+            UserDefaults.standard.set(cashLocalBalanceValue, forKey: "buxmuse.cashdrawer.localBalance")
+        }
+    }
+    
+    @Published public var cashSecondaryBalanceValue: Double = UserDefaults.standard.double(forKey: "buxmuse.cashdrawer.secondaryBalance") {
+        didSet {
+            UserDefaults.standard.set(cashSecondaryBalanceValue, forKey: "buxmuse.cashdrawer.secondaryBalance")
+        }
+    }
     
     // MARK: - Security Settings
     @Published public var biometricLockEnabled: Bool = false
@@ -192,6 +302,7 @@ public final class SettingsStore: ObservableObject {
         let useGlassmorphism: Bool
         let brandThemesEnabled: Bool?
         let reducedMotion: Bool
+        let solarContrastModeEnabled: Bool?
         
         let weekStartDay: WeekStartDay
         
@@ -220,6 +331,10 @@ public final class SettingsStore: ObservableObject {
         let quietHoursStartMinute: Int
         let quietHoursEndHour: Int
         let quietHoursEndMinute: Int
+        let burnoutGuardEnabled: Bool?
+        let healthKitSyncEnabled: Bool?
+        let manualSleepHours: Double?
+        let manualStressLevel: Double?
         
         let biometricLockEnabled: Bool
         let requireBiometricOnLaunch: Bool
@@ -239,6 +354,7 @@ public final class SettingsStore: ObservableObject {
         enum CodingKeys: String, CodingKey {
             case firstName, lastName, userDisplayName, profileAvatarData, preferredNameStyle
             case themeMode, accentColorId, neutralAccentId, useGlassmorphism, brandThemesEnabled, reducedMotion
+            case solarContrastModeEnabled
             case weekStartDay, budgetingMode, defaultBudgetPeriod
             case showBudgetWarnings, autoAdjustBudgetsFromHistory, customBudgetProfiles
             case simpleBudgetLimit, customBudgetLimit, customBudgetPeriod
@@ -249,6 +365,7 @@ public final class SettingsStore: ObservableObject {
             case studioInvoiceRemindersEnabled, freelanceInvoiceRemindersEnabled
             case taxDeadlineRemindersEnabled, dailySummaryEnabled
             case quietHoursStartHour, quietHoursStartMinute, quietHoursEndHour, quietHoursEndMinute
+            case burnoutGuardEnabled, healthKitSyncEnabled, manualSleepHours, manualStressLevel
             case biometricLockEnabled, requireBiometricOnLaunch, lockAfterInactivityMinutes
             case privacyBlurInAppSwitching, cancelledSubscriptionMerchants
             case allowLocalBackups, autoBackupFrequency
@@ -292,6 +409,7 @@ public final class SettingsStore: ObservableObject {
             useGlassmorphism = try c.decode(Bool.self, forKey: .useGlassmorphism)
             brandThemesEnabled = try c.decodeIfPresent(Bool.self, forKey: .brandThemesEnabled) ?? true
             reducedMotion = try c.decode(Bool.self, forKey: .reducedMotion)
+            solarContrastModeEnabled = try c.decodeIfPresent(Bool.self, forKey: .solarContrastModeEnabled) ?? false
             weekStartDay = try c.decode(WeekStartDay.self, forKey: .weekStartDay)
             budgetingMode = try c.decode(BudgetingMode.self, forKey: .budgetingMode)
             defaultBudgetPeriod = try c.decode(DefaultBudgetPeriod.self, forKey: .defaultBudgetPeriod)
@@ -319,6 +437,10 @@ public final class SettingsStore: ObservableObject {
             quietHoursStartMinute = try c.decode(Int.self, forKey: .quietHoursStartMinute)
             quietHoursEndHour = try c.decode(Int.self, forKey: .quietHoursEndHour)
             quietHoursEndMinute = try c.decode(Int.self, forKey: .quietHoursEndMinute)
+            self.burnoutGuardEnabled = try c.decodeIfPresent(Bool.self, forKey: .burnoutGuardEnabled) ?? true
+            self.healthKitSyncEnabled = try c.decodeIfPresent(Bool.self, forKey: .healthKitSyncEnabled) ?? false
+            self.manualSleepHours = try c.decodeIfPresent(Double.self, forKey: .manualSleepHours) ?? 7.5
+            self.manualStressLevel = try c.decodeIfPresent(Double.self, forKey: .manualStressLevel) ?? 5.0
             biometricLockEnabled = try c.decode(Bool.self, forKey: .biometricLockEnabled)
             requireBiometricOnLaunch = try c.decode(Bool.self, forKey: .requireBiometricOnLaunch)
             lockAfterInactivityMinutes = try c.decode(Int.self, forKey: .lockAfterInactivityMinutes)
@@ -346,6 +468,7 @@ public final class SettingsStore: ObservableObject {
             useGlassmorphism: Bool,
             brandThemesEnabled: Bool,
             reducedMotion: Bool,
+            solarContrastModeEnabled: Bool?,
             weekStartDay: WeekStartDay,
             budgetingMode: BudgetingMode,
             defaultBudgetPeriod: DefaultBudgetPeriod,
@@ -370,6 +493,10 @@ public final class SettingsStore: ObservableObject {
             quietHoursStartMinute: Int,
             quietHoursEndHour: Int,
             quietHoursEndMinute: Int,
+            burnoutGuardEnabled: Bool?,
+            healthKitSyncEnabled: Bool?,
+            manualSleepHours: Double?,
+            manualStressLevel: Double?,
             biometricLockEnabled: Bool,
             requireBiometricOnLaunch: Bool,
             lockAfterInactivityMinutes: Int,
@@ -394,6 +521,7 @@ public final class SettingsStore: ObservableObject {
             self.useGlassmorphism = useGlassmorphism
             self.brandThemesEnabled = brandThemesEnabled
             self.reducedMotion = reducedMotion
+            self.solarContrastModeEnabled = solarContrastModeEnabled ?? false
             self.weekStartDay = weekStartDay
             self.budgetingMode = budgetingMode
             self.defaultBudgetPeriod = defaultBudgetPeriod
@@ -418,6 +546,10 @@ public final class SettingsStore: ObservableObject {
             self.quietHoursStartMinute = quietHoursStartMinute
             self.quietHoursEndHour = quietHoursEndHour
             self.quietHoursEndMinute = quietHoursEndMinute
+            self.burnoutGuardEnabled = burnoutGuardEnabled ?? true
+            self.healthKitSyncEnabled = healthKitSyncEnabled ?? false
+            self.manualSleepHours = manualSleepHours ?? 7.5
+            self.manualStressLevel = manualStressLevel ?? 5.0
             self.biometricLockEnabled = biometricLockEnabled
             self.requireBiometricOnLaunch = requireBiometricOnLaunch
             self.lockAfterInactivityMinutes = lockAfterInactivityMinutes
@@ -445,6 +577,7 @@ public final class SettingsStore: ObservableObject {
             try c.encode(useGlassmorphism, forKey: .useGlassmorphism)
             try c.encode(brandThemesEnabled, forKey: .brandThemesEnabled)
             try c.encode(reducedMotion, forKey: .reducedMotion)
+            try c.encode(solarContrastModeEnabled, forKey: .solarContrastModeEnabled)
             try c.encode(weekStartDay, forKey: .weekStartDay)
             try c.encode(budgetingMode, forKey: .budgetingMode)
             try c.encode(defaultBudgetPeriod, forKey: .defaultBudgetPeriod)
@@ -469,6 +602,10 @@ public final class SettingsStore: ObservableObject {
             try c.encode(quietHoursStartMinute, forKey: .quietHoursStartMinute)
             try c.encode(quietHoursEndHour, forKey: .quietHoursEndHour)
             try c.encode(quietHoursEndMinute, forKey: .quietHoursEndMinute)
+            try c.encode(burnoutGuardEnabled, forKey: .burnoutGuardEnabled)
+            try c.encode(healthKitSyncEnabled, forKey: .healthKitSyncEnabled)
+            try c.encode(manualSleepHours, forKey: .manualSleepHours)
+            try c.encode(manualStressLevel, forKey: .manualStressLevel)
             try c.encode(biometricLockEnabled, forKey: .biometricLockEnabled)
             try c.encode(requireBiometricOnLaunch, forKey: .requireBiometricOnLaunch)
             try c.encode(lockAfterInactivityMinutes, forKey: .lockAfterInactivityMinutes)
@@ -518,6 +655,7 @@ public final class SettingsStore: ObservableObject {
                 self.useGlassmorphism = payload.useGlassmorphism
                 self.brandThemesEnabled = payload.brandThemesEnabled ?? true
                 self.reducedMotion = payload.reducedMotion
+                self.solarContrastModeEnabled = payload.solarContrastModeEnabled ?? false
                 
                 self.weekStartDay = payload.weekStartDay
                 
@@ -546,6 +684,10 @@ public final class SettingsStore: ObservableObject {
                 self.quietHoursStartMinute = payload.quietHoursStartMinute
                 self.quietHoursEndHour = payload.quietHoursEndHour
                 self.quietHoursEndMinute = payload.quietHoursEndMinute
+                self.burnoutGuardEnabled = payload.burnoutGuardEnabled ?? true
+                self.healthKitSyncEnabled = payload.healthKitSyncEnabled ?? false
+                self.manualSleepHours = payload.manualSleepHours ?? 7.5
+                self.manualStressLevel = payload.manualStressLevel ?? 5.0
                 
                 self.biometricLockEnabled = payload.biometricLockEnabled
                 self.requireBiometricOnLaunch = payload.requireBiometricOnLaunch
@@ -584,6 +726,7 @@ public final class SettingsStore: ObservableObject {
         self.firstName = nil
         self.lastName = nil
         self.themeMode = .system
+        self.solarContrastModeEnabled = false
         self.accentColorId = AppTheme.buxDefault.name
         self.neutralAccentId = BuxSystemAccent.systemBlue.rawValue
         self.weekStartDay = .monday
@@ -591,7 +734,19 @@ public final class SettingsStore: ObservableObject {
         self.defaultBudgetPeriod = .monthly
         self.studioEnabled = false
         self.notificationsEnabled = true
+        self.burnoutGuardEnabled = true
+        self.healthKitSyncEnabled = false
+        self.manualSleepHours = 7.5
+        self.manualStressLevel = 5.0
         self.biometricLockEnabled = false
+        self.sideHustleMatrixEnabled = false
+        self.showUnassignedExpensesInWorkspace = true
+        self.paymentSourceTrackingEnabled = true
+        self.dualCashDrawerEnabled = false
+        self.primaryLocalCurrency = "USD"
+        self.secondaryTradingCurrency = "DOP"
+        self.cashLocalBalanceValue = 0.0
+        self.cashSecondaryBalanceValue = 0.0
         self.customBudgetProfiles = []
         self.simpleBudgetLimit = 1000
         self.customBudgetLimit = 50
@@ -661,6 +816,7 @@ public final class SettingsStore: ObservableObject {
             useGlassmorphism: useGlassmorphism,
             brandThemesEnabled: brandThemesEnabled,
             reducedMotion: reducedMotion,
+            solarContrastModeEnabled: solarContrastModeEnabled,
             weekStartDay: weekStartDay,
             budgetingMode: budgetingMode,
             defaultBudgetPeriod: defaultBudgetPeriod,
@@ -685,6 +841,10 @@ public final class SettingsStore: ObservableObject {
             quietHoursStartMinute: quietHoursStartMinute,
             quietHoursEndHour: quietHoursEndHour,
             quietHoursEndMinute: quietHoursEndMinute,
+            burnoutGuardEnabled: burnoutGuardEnabled,
+            healthKitSyncEnabled: healthKitSyncEnabled,
+            manualSleepHours: manualSleepHours,
+            manualStressLevel: manualStressLevel,
             biometricLockEnabled: biometricLockEnabled,
             requireBiometricOnLaunch: requireBiometricOnLaunch,
             lockAfterInactivityMinutes: lockAfterInactivityMinutes,
@@ -716,6 +876,17 @@ public final class SettingsStore: ObservableObject {
         seedDefaults()
     }
 
+    public func exportArchiveSettingsData() -> Data? {
+        save()
+        return try? Data(contentsOf: storeURL)
+    }
+
+    public func importArchiveSettingsData(_ data: Data) throws {
+        try data.write(to: storeURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        isLoaded = false
+        loadStore()
+    }
+
     // MARK: - Brand themes
 
     func resolvedBrandTheme() -> AppTheme {
@@ -745,6 +916,11 @@ public final class SettingsStore: ObservableObject {
         } else {
             themeManager.applyTheme(AppTheme.standardNeutral(accent: resolvedSystemAccent()))
         }
+    }
+
+    /// Accent rim on cards from landing backdrop — themed presets or neutral ambient glow.
+    var showsLandingCardShine: Bool {
+        brandThemesEnabled || landingBackdropEnabled
     }
 
     /// Persist appearance + sync ThemeManager (call from theme picker).

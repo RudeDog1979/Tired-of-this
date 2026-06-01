@@ -49,7 +49,10 @@ public final class ConnectivityBrain: ObservableObject {
         monitor.start(queue: queue)
     }
 
-    public var shouldFetchMerchantIcons: Bool { isOnline }
+    /// Gates merchant icon / favicon network fetches (offline + Data Guard).
+    public var shouldFetchMerchantIcons: Bool {
+        isOnline && !SettingsStore.shared.dataGuardModeEnabled
+    }
 
     public func dismissToast() {
         activeToast = nil

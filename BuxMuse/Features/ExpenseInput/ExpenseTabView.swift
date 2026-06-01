@@ -300,6 +300,9 @@ struct ExpenseTabView: View {
                     .padding(.bottom, 16)
                 }
 
+                HustleSelectorBar()
+                    .padding(.bottom, 4)
+
                 ForEach(display.sections) { section in
                     Section {
                         ForEach(section.expenses) { expense in
@@ -333,7 +336,15 @@ struct ExpenseTabView: View {
 
     @ViewBuilder
     private func expenseRowContent(expense: ExpenseRowDisplay, record: ExpenseRecord) -> some View {
-        ExpandableExpenseCard(expense: expense, expandedId: $expandedExpenseId) {
+        ExpandableExpenseCard(
+            expense: expense,
+            expandedId: $expandedExpenseId,
+            onOpenDetail: {
+                withAnimation(.buxSnap) {
+                    selectedRecord = record
+                }
+            }
+        ) {
             withAnimation(.buxSnap) {
                 activeSheet = .edit(record.toTransaction())
             }

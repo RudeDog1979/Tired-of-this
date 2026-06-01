@@ -7,11 +7,11 @@ import SwiftUI
 
 enum BuxTypography {
     static func moneyHero(_ text: String) -> Text {
-        Text(text).font(.system(size: 34, weight: .semibold, design: .rounded).monospacedDigit())
+        return Text(text).font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit())
     }
 
     static func moneyTitle(_ text: String) -> Text {
-        Text(text).font(.system(size: 22, weight: .semibold, design: .rounded).monospacedDigit())
+        return Text(text).font(.system(size: 22, weight: .bold, design: .rounded).monospacedDigit())
     }
 
     static func titleLarge(_ text: String) -> Text {
@@ -23,83 +23,99 @@ enum BuxTypography {
     }
 
     static func headline(_ text: String) -> Text {
-        Text(text).font(.system(size: 15, weight: .semibold))
+        Text(text).font(.system(size: 15, weight: .bold))
     }
 
     static func body(_ text: String) -> Text {
-        Text(text).font(.system(size: 15, weight: .regular))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return Text(text).font(.system(size: 15, weight: isSolar ? .bold : .regular))
     }
 
     static func callout(_ text: String) -> Text {
-        Text(text).font(.system(size: 14, weight: .regular))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return Text(text).font(.system(size: 14, weight: isSolar ? .bold : .regular))
     }
 
     static func caption(_ text: String) -> Text {
-        Text(text).font(.system(size: 13, weight: .medium))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return Text(text).font(.system(size: 13, weight: isSolar ? .bold : .medium))
     }
 
     static func sectionLabel(_ text: String) -> Text {
-        Text(text).font(.footnote.weight(.semibold))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return Text(text).font(.footnote.weight(isSolar ? .bold : .semibold))
     }
 
     static var buttonFont: Font {
-        .system(size: 16, weight: .semibold)
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return .system(size: 16, weight: isSolar ? .bold : .semibold)
     }
 
     static var buttonFontCompact: Font {
-        .system(size: 15, weight: .semibold)
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return .system(size: 15, weight: isSolar ? .bold : .semibold)
     }
 }
 
 extension View {
     /// M3 Body Medium — supporting card text (semantic secondary).
     func buxMaterialBodyMedium() -> some View {
-        modifier(BuxMaterialTextStyle(role: .secondary, font: .system(size: 14, weight: .regular)))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return modifier(BuxMaterialTextStyle(role: .secondary, font: .system(size: 14, weight: isSolar ? .bold : .regular)))
     }
 
     /// M3 Label Medium — captions under controls (semantic tertiary).
     func buxMaterialLabelMedium() -> some View {
-        modifier(BuxMaterialTextStyle(role: .tertiary, font: .system(size: 12, weight: .medium)))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return modifier(BuxMaterialTextStyle(role: .tertiary, font: .system(size: 12, weight: isSolar ? .semibold : .medium)))
     }
 
     /// M3 Title Medium — card titles (semantic primary).
     func buxMaterialTitleMedium() -> some View {
-        modifier(BuxMaterialTextStyle(role: .primary, font: .system(size: 16, weight: .medium)))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return modifier(BuxMaterialTextStyle(role: .primary, font: .system(size: 16, weight: isSolar ? .bold : .medium)))
     }
 
     /// M3 Title Large — section headers (semantic primary).
     func buxMaterialTitleLarge() -> some View {
-        modifier(BuxMaterialTextStyle(role: .primary, font: .system(size: 22, weight: .regular)))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return modifier(BuxMaterialTextStyle(role: .primary, font: .system(size: 22, weight: isSolar ? .bold : .regular)))
     }
 
     /// M3 Display Small — hero numerics (keeps Bux rounded money feel).
     func buxMaterialDisplaySmall() -> some View {
-        font(.system(size: 36, weight: .semibold, design: .rounded))
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return font(.system(size: 36, weight: isSolar ? .bold : .semibold, design: .rounded))
     }
 
     func buxSectionLabelStyle(color: Color) -> some View {
-        buxMaterialLabelMedium()
-            .foregroundStyle(color)
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return buxMaterialLabelMedium()
+            .foregroundStyle(isSolar ? .black : color)
     }
 
     func buxTitleStyle(color: Color) -> some View {
-        font(.system(size: 17, weight: .bold))
-            .foregroundStyle(color)
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return font(.system(size: 17, weight: .bold))
+            .foregroundStyle(isSolar ? .black : color)
     }
 
     func buxHeadlineStyle(color: Color) -> some View {
-        font(.system(size: 15, weight: .semibold))
-            .foregroundStyle(color)
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return font(.system(size: 15, weight: .bold))
+            .foregroundStyle(isSolar ? .black : color)
     }
 
     func buxBodyStyle(color: Color) -> some View {
-        font(.system(size: 15, weight: .regular))
-            .foregroundStyle(color)
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return font(.system(size: 15, weight: isSolar ? .bold : .regular))
+            .foregroundStyle(isSolar ? .black : color)
     }
 
     func buxCaptionStyle(color: Color) -> some View {
-        font(.system(size: 13, weight: .medium))
-            .foregroundStyle(color)
+        let isSolar = SettingsStore.shared.solarContrastModeEnabled
+        return font(.system(size: 13, weight: isSolar ? .bold : .medium))
+            .foregroundStyle(isSolar ? .black : color)
     }
 }
 
@@ -111,6 +127,7 @@ private struct BuxMaterialTextStyle: ViewModifier {
     let role: BuxMaterialTextRole
     let font: Font
     @Environment(\.buxSemanticTheme) private var theme
+    @ObservedObject private var settings = SettingsStore.shared
 
     func body(content: Content) -> some View {
         content
@@ -119,6 +136,9 @@ private struct BuxMaterialTextStyle: ViewModifier {
     }
 
     private var color: Color {
+        if settings.solarContrastModeEnabled {
+            return .black
+        }
         switch role {
         case .primary: return theme.labelPrimary
         case .secondary: return theme.labelSecondary

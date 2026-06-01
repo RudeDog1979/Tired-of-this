@@ -31,16 +31,16 @@ public final class InsightsEngine: ObservableObject {
         transactions: [Transaction],
         subscriptions: [SubscriptionInfo],
         goals: [Goal],
-        goalsViewModel: GoalsViewModel
+        goalsViewModel: GoalsViewModel,
+        projects: [StudioProject] = []
     ) {
-        // Detect XCTest unit testing environment to run synchronously
         let isTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil || NSClassFromString("XCTest") != nil
         
         if isTesting {
-            self.performRecalculation(transactions: transactions, subscriptions: subscriptions, goals: goals, goalsViewModel: goalsViewModel)
+            self.performRecalculation(transactions: transactions, subscriptions: subscriptions, goals: goals, goalsViewModel: goalsViewModel, projects: projects)
         } else {
             calculationQueue.async { [weak self] in
-                self?.performRecalculation(transactions: transactions, subscriptions: subscriptions, goals: goals, goalsViewModel: goalsViewModel)
+                self?.performRecalculation(transactions: transactions, subscriptions: subscriptions, goals: goals, goalsViewModel: goalsViewModel, projects: projects)
             }
         }
     }
@@ -49,7 +49,8 @@ public final class InsightsEngine: ObservableObject {
         transactions: [Transaction],
         subscriptions: [SubscriptionInfo],
         goals: [Goal],
-        goalsViewModel: GoalsViewModel
+        goalsViewModel: GoalsViewModel,
+        projects: [StudioProject]
     ) {
         var generated: [FinancialInsight] = []
         
@@ -61,6 +62,11 @@ public final class InsightsEngine: ObservableObject {
         generated.append(contentsOf: goalEngine.generateInsights(goals: goals, goalsViewModel: goalsViewModel))
         generated.append(contentsOf: patternEngine.generateInsights(transactions: transactions))
         generated.append(contentsOf: predictiveEngine.generateInsights(transactions: transactions))
+        generated.append(contentsOf: BarterInsightsEngine.generateInsights(transactions: transactions))
+        generated.append(contentsOf: PaymentSourceInsightsEngine.generateInsights(transactions: transactions))
+        generated.append(contentsOf: WorkspaceInsightsEngine.generateInsights(transactions: transactions))
+        generated.append(contentsOf: CashDigitalInsightsEngine.generateInsights(transactions: transactions))
+        generated.append(contentsOf: ScopeCreepInsightsEngine.generateInsights(projects: projects))
         
         // 2. Timing filters
         let curated = timingEngine.filterByTiming(insights: generated)

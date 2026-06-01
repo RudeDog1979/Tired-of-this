@@ -487,6 +487,8 @@
 				INFOPLIST_FILE = "BuxMuse-Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "BuxMuse needs camera access to scan physical receipts and documents.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "BuxMuse secures your local financial summaries with Face ID authentication.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "BuxMuse does not write health data; this permission is reserved for future wellness integrations.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "BuxMuse needs photo library access to let you select stored receipt images.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "BuxMuse sends local reminders before subscriptions and trials renew.";
@@ -525,6 +527,8 @@
 				INFOPLIST_FILE = "BuxMuse-Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "BuxMuse needs camera access to scan physical receipts and documents.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "BuxMuse secures your local financial summaries with Face ID authentication.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "BuxMuse does not write health data; this permission is reserved for future wellness integrations.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "BuxMuse needs photo library access to let you select stored receipt images.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "BuxMuse sends local reminders before subscriptions and trials renew.";

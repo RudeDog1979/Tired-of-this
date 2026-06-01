@@ -30,7 +30,6 @@ struct DashboardView: View {
     @State private var isPillSectionExpanded = false
     @State private var expensesPillScale: CGFloat = 1.0
     @State private var isFabMenuExpanded = false
-    @State private var scrollOffset: CGFloat = 0
     @State private var categorySlideDirection: Int = 1
     @State private var categoryMotionToken = UUID()
     @State private var activeSheet: DashboardActiveSheet?
@@ -43,30 +42,6 @@ struct DashboardView: View {
     /// Keeps hero sizing proportional on narrow phones (fixed 82×4 slots were overflowing the card).
     private var heroLayoutScale: CGFloat {
         min(1, UIScreen.main.bounds.width / 430)
-    }
-
-    private var heroCardPadding: CGFloat {
-        heroLayoutScale < 0.92 ? BuxTokens.section : BuxTokens.block
-    }
-
-    private var heroAvatarSize: CGFloat {
-        collapseValue(start: 66 * heroLayoutScale, end: 52 * heroLayoutScale)
-    }
-
-    private var heroBellSize: CGFloat {
-        collapseValue(start: 50 * heroLayoutScale, end: 44 * heroLayoutScale)
-    }
-
-    private var heroBellIconSize: CGFloat {
-        max(16, 18 * heroLayoutScale)
-    }
-
-    private var heroActionDiameter: CGFloat {
-        58 * heroLayoutScale
-    }
-
-    private var heroActionIconSize: CGFloat {
-        max(18, 22 * heroLayoutScale)
     }
 
     var body: some View {
@@ -83,169 +58,18 @@ struct DashboardView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxTokens.block) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {
-                        BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.sheet, padding: heroCardPadding) {
-                        VStack(alignment: .leading, spacing: 0) {
-
-                                // Header — avatar + name left, liquid-glass bell right
-                                HStack(alignment: .center, spacing: 0) {
-                                    HStack(spacing: 12) {
-                                        Button(action: { navigationCoordinator.openProfileSettings() }) {
-                                            BuxUserAvatarView(size: heroAvatarSize)
-                                        }
-                                        .buttonStyle(BuxmationPressCardStyle())
-                                        .accessibilityLabel("Profile settings")
-
-                                        Text(settingsStore.resolvedDisplayName)
-                                            .font(.system(size: collapseValue(start: 16, end: 14), weight: .bold))
-                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                            .lineLimit(1)
-                                    }
-
-                                    Spacer(minLength: 12)
-
-                                    heroNotificationBell
-                                }
-                                .padding(.top, collapseValue(start: 8, end: 0))
-                                .opacity(max(0, 1.0 + (scrollOffset / 140.0)))
-
-                                // Balance Section collapses smoothly
-                                VStack(alignment: .leading, spacing: 6) {
-                                    HStack(spacing: 6) {
-                                        let balanceTitle: String = {
-                                            switch settingsStore.budgetingMode {
-                                            case .simple:
-                                                return "Remaining simple budget"
-                                            case .envelope, .custom:
-                                                if dashSnapshot.activeBudgetName != nil {
-                                                    return "Remaining budget"
-                                                } else {
-                                                    return "Total balance (no active budget)"
-                                                }
-                                            }
-                                        }()
-                                        
-                                        Text(balanceTitle)
-                                            .font(.system(size: 13, weight: .medium))
-                                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                            .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
-                                        
-                                        Button(action: {
-                                            withAnimation { navigationCoordinator.isBalanceVisible.toggle() }
-                                        }) {
-                                            Image(systemName: navigationCoordinator.isBalanceVisible ? "eye" : "eye.slash")
-                                                .font(.system(size: 12))
-                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                        }
-                                        .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
-                                    }
-                                    
-                                    let balanceToFormat: Decimal = {
-                                        switch settingsStore.budgetingMode {
-                                        case .simple:
-                                            return dashSnapshot.activeBudgetLimit - dashSnapshot.activeBudgetSpent
-                                        case .envelope, .custom:
-                                            if dashSnapshot.activeBudgetName != nil {
-                                                return dashSnapshot.activeBudgetLimit - dashSnapshot.activeBudgetSpent
-                                            } else {
-                                                return dashSnapshot.totalBalance
-                                            }
-                                        }
-                                    }()
-                                    
-                                    Text(navigationCoordinator.isBalanceVisible ? appSettingsManager.format(balanceToFormat) : "\(appSettingsManager.selectedCurrency.symbol) ••••••••")
-                                        .font(.system(size: collapseValue(start: 38, end: 24), weight: .semibold, design: .rounded))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                        .offset(y: collapseValue(start: 0, end: -10))
-                                }
-                                .padding(.top, BuxTokens.section + BuxTokens.tight)
-
-                                // 4 Circular Quick Action Buttons (Updated with custom staggers, Subscriptions, & arrow-down)
-                                HStack(spacing: 0) {
-                                    BuxHeroQuickActionButton(
-                                        action: {
-                                            withAnimation(.spring(response: 0.35, dampingFraction: 0.62)) {
-                                                isFabMenuExpanded.toggle()
-                                            }
-                                        },
-                                        diameter: heroActionDiameter,
-                                        title: "Add expense",
-                                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                                        titleColor: themeManager.labelSecondary(for: colorScheme)
-                                    ) { isPressed in
-                                        Image(systemName: "plus")
-                                            .font(.system(size: heroActionIconSize, weight: .semibold))
-                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                                            .buxHeroActionIcon(.plus(isExpanded: isFabMenuExpanded), isPressed: isPressed)
-                                    }
-                                    .buxScreenEntrance(index: 0, isVisible: navigationCoordinator.isScreenLoaded)
-
-                                    BuxHeroQuickActionButton(
-                                        action: { activeSheet = .addExpense(.addIncome) },
-                                        diameter: heroActionDiameter,
-                                        title: "Log income",
-                                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                                        titleColor: themeManager.labelSecondary(for: colorScheme)
-                                    ) { isPressed in
-                                        Image(systemName: "arrow.down.circle.fill")
-                                            .font(.system(size: heroActionIconSize + 2))
-                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                                            .buxHeroActionIcon(.income, isPressed: isPressed)
-                                    }
-                                    .buxScreenEntrance(index: 1, isVisible: navigationCoordinator.isScreenLoaded)
-
-                                    BuxHeroQuickActionButton(
-                                        action: {
-                                            withAnimation(BuxMotion.tipPopupPresent) {
-                                                showTipPopup = true
-                                            }
-                                        },
-                                        diameter: heroActionDiameter,
-                                        title: "Tips",
-                                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                                        titleColor: themeManager.labelSecondary(for: colorScheme),
-                                        circleShadowColor: brain.tipNeedsAttention && tipGlowPhase ? Color.yellow.opacity(0.55) : .clear,
-                                        circleShadowRadius: 12
-                                    ) { isPressed in
-                                        Image(systemName: "lightbulb.fill")
-                                            .font(.system(size: heroActionIconSize))
-                                            .foregroundColor(brain.tipNeedsAttention ? .yellow : themeManager.contrastAccentColor(for: colorScheme))
-                                            .buxHeroActionIcon(.tips, isPressed: isPressed)
-                                    }
-                                    .onChange(of: brain.tipPulseToken) { _, _ in
-                                        guard brain.tipNeedsAttention else { return }
-                                        withAnimation(.easeInOut(duration: 0.45).repeatCount(2, autoreverses: true)) {
-                                            tipGlowPhase = true
-                                        }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                            tipGlowPhase = false
-                                        }
-                                    }
-                                    .buxScreenEntrance(index: 2, isVisible: navigationCoordinator.isScreenLoaded)
-
-                                    BuxHeroQuickActionButton(
-                                        action: {
-                                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                                                navigationCoordinator.openSubscriptionHub()
-                                            }
-                                        },
-                                        diameter: heroActionDiameter,
-                                        title: "Subscriptions",
-                                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                                        titleColor: themeManager.labelSecondary(for: colorScheme)
-                                    ) { isPressed in
-                                        Image(systemName: "arrow.triangle.2.circlepath")
-                                            .font(.system(size: heroActionIconSize, weight: .semibold))
-                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                                            .buxHeroActionIcon(.subscriptions, isPressed: isPressed)
-                                    }
-                                    .buxScreenEntrance(index: 3, isVisible: navigationCoordinator.isScreenLoaded)
-                                }
-                                .padding(.top, BuxTokens.block + BuxTokens.tight)
-                                .padding(.bottom, BuxTokens.section)
-                                .offset(y: collapseValue(start: 0, end: -15))
-                        }
-                        }
+                        DashboardHeroSection(
+                            dashSnapshot: dashSnapshot,
+                            heroLayoutScale: heroLayoutScale,
+                            activeSheet: $activeSheet,
+                            isFabMenuExpanded: $isFabMenuExpanded,
+                            showTipPopup: $showTipPopup,
+                            tipGlowPhase: $tipGlowPhase
+                        )
                         .frame(maxWidth: .infinity, alignment: .leading)
+
+                        HustleSelectorBar()
+                            .padding(.bottom, 4)
 
                         VStack(alignment: .leading, spacing: BuxTokens.tight) {
                                 if let budgetName = dashSnapshot.activeBudgetName {
@@ -588,75 +412,28 @@ struct DashboardView: View {
                                     }
                                 }
                                 .transition(.buxCategorySlide(direction: categorySlideDirection))
-                            } else {
-                                let displayInsights = insightsViewModel.rankedInsights
-                                HStack(alignment: .top, spacing: BuxTokens.tight) {
-                                    if displayInsights.isEmpty {
-                                        HStack {
-                                            Spacer()
-                                            VStack(spacing: 8) {
-                                                Image(systemName: "sparkles")
-                                                    .font(.system(size: 24))
-                                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                                                Text("No insights yet.")
-                                                    .font(.system(size: 13, weight: .medium))
-                                                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                                Text("Add expenses to unlock spending insights.")
-                                                    .font(.system(size: 11, weight: .medium))
-                                                    .foregroundStyle(.tertiary)
-                                                    .multilineTextAlignment(.center)
-                                            }
-                                            Spacer()
-                                        }
-                                        .padding(.vertical, 32)
-                                        .frame(maxWidth: .infinity, minHeight: BuxLayout.dashboardSmallCardHeight, alignment: .top)
-                                        .dashboardMaterialCardChrome(.outlined)
-                                        .buxDashboardCategoryCard(
-                                            index: 0,
-                                            direction: categorySlideDirection,
-                                            motionToken: categoryMotionToken
-                                        )
-                                        .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
-                                        .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                        .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05), value: navigationCoordinator.isScreenLoaded)
-                                    } else {
-                                        ForEach(Array(displayInsights.prefix(2).enumerated()), id: \.element.id) { index, insight in
-                                            let accentColor: Color = {
-                                                switch insight.accentColorName {
-                                                case "red": return .red
-                                                case "green": return .green
-                                                case "orange": return .orange
-                                                case "blue": return .blue
-                                                case "purple": return .purple
-                                                default: return themeManager.current.accentColor
-                                                }
-                                            }()
-                                            
-                                            Button(action: {
-                                                insightsViewModel.selectInsight(insight)
-                                            }) {
-                                                InsightCardView(
-                                                    title: insight.title,
-                                                    value: insight.value,
-                                                    description: insight.description,
-                                                    accentColor: accentColor,
-                                                    includesDashboardChrome: false
-                                                )
-                                                .dashboardMaterialPillCardLabel()
-                                            }
-                                            .buttonStyle(BuxDashboardCardButtonStyle())
-                                            .buxDashboardCategoryCard(
-                                                index: index,
-                                                direction: categorySlideDirection,
-                                                motionToken: categoryMotionToken
-                                            )
-                                            .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
-                                            .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                            .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05 + Double(index) * 0.07), value: navigationCoordinator.isScreenLoaded)
-                                        }
-                                    }
-                                }
-                                .transition(.buxCategorySlide(direction: categorySlideDirection))
+                            } else if navigationCoordinator.activeCategoryPill == "Insights" {
+                                DashboardInsightsPanel(
+                                    categorySlideDirection: categorySlideDirection,
+                                    categoryMotionToken: categoryMotionToken,
+                                    isScreenLoaded: navigationCoordinator.isScreenLoaded,
+                                    onOpenStudioSettings: openStudioSettings
+                                )
+                                .environmentObject(themeManager)
+                                .environmentObject(insightsViewModel)
+                            } else if navigationCoordinator.activeCategoryPill == "Money Map" {
+                                MoneyMapDashboardPanel(
+                                    categorySlideDirection: categorySlideDirection,
+                                    categoryMotionToken: categoryMotionToken,
+                                    onOpenStudioSettings: openStudioSettings
+                                )
+                                .environmentObject(themeManager)
+                                .environmentObject(appSettingsManager)
+                                .environmentObject(brain)
+                                .environmentObject(financialBridge)
+                                .environmentObject(insightsViewModel)
+                                .environmentObject(studioStore)
+                                .environmentObject(navigationCoordinator)
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -692,25 +469,10 @@ struct DashboardView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, BuxTokens.section)
-                .background {
-                    GeometryReader { geo in
-                        Color.clear.preference(
-                            key: ScrollOffsetPreferenceKey.self,
-                            value: geo.frame(in: .named("dashboard_scroll")).minY
-                        )
-                    }
-                }
                 .environment(\.dashboardEnhancedTint, true)
             }
             .buxRootTabScrollChrome()
             .coordinateSpace(name: "dashboard_scroll")
-            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                if value < 0 {
-                    scrollOffset = max(-150, value)
-                } else {
-                    scrollOffset = 0
-                }
-            }
             .onTapGesture {
                 // Tapping scroll area collapses category and transaction bars
                 if isPillSectionExpanded {
@@ -820,12 +582,258 @@ struct DashboardView: View {
         }
     }
 
-    @ViewBuilder
+    private func closeFabAnd(_ action: @escaping () -> Void) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            isFabMenuExpanded = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            action()
+        }
+    }
+
+    private func openStudioSettings() {
+        navigationCoordinator.openStudioSettings()
+    }
+
+    private func categoryIndex(for name: String) -> Int {
+        switch name {
+        case "Expenses": return 0
+        case "Subscriptions": return 1
+        case "Goals": return 2
+        case "Insights": return 3
+        case "Money Map": return 4
+        default: return 0
+        }
+    }
+}
+
+
+// MARK: - Hero card (isolated scroll collapse — avoids commit hitches on Money Map / pills)
+
+private struct DashboardHeroSection: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var brain: BuxMuseBrain
+
+    @ObservedObject private var settingsStore = SettingsStore.shared
+
+    let dashSnapshot: DashboardSnapshot
+    let heroLayoutScale: CGFloat
+
+    @Binding var activeSheet: DashboardActiveSheet?
+    @Binding var isFabMenuExpanded: Bool
+    @Binding var showTipPopup: Bool
+    @Binding var tipGlowPhase: Bool
+
+    /// Local only — scroll collapse must not invalidate Money Map / category pills.
+    @State private var scrollOffset: CGFloat = 0
+
+    private var heroCardPadding: CGFloat {
+        heroLayoutScale < 0.92 ? BuxTokens.section : BuxTokens.block
+    }
+
+    private var heroAvatarSize: CGFloat {
+        collapseValue(start: 66 * heroLayoutScale, end: 52 * heroLayoutScale)
+    }
+
+    private var heroBellSize: CGFloat {
+        collapseValue(start: 50 * heroLayoutScale, end: 44 * heroLayoutScale)
+    }
+
+    private var heroBellIconSize: CGFloat {
+        max(16, 18 * heroLayoutScale)
+    }
+
+    private var heroActionDiameter: CGFloat {
+        58 * heroLayoutScale
+    }
+
+    private var heroActionIconSize: CGFloat {
+        max(18, 22 * heroLayoutScale)
+    }
+
+    var body: some View {
+        BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.sheet, padding: heroCardPadding) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .center, spacing: 0) {
+                    HStack(spacing: 12) {
+                        Button(action: { navigationCoordinator.openProfileSettings() }) {
+                            BuxUserAvatarView(size: heroAvatarSize)
+                        }
+                        .buttonStyle(BuxmationPressCardStyle())
+                        .accessibilityLabel("Profile settings")
+
+                        Text(settingsStore.resolvedDisplayName)
+                            .font(.system(size: collapseValue(start: 16, end: 14), weight: .bold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                            .lineLimit(1)
+                    }
+
+                    Spacer(minLength: 12)
+
+                    heroNotificationBell
+                }
+                .padding(.top, collapseValue(start: 8, end: 0))
+                .opacity(max(0, 1.0 + (scrollOffset / 140.0)))
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        let balanceTitle: String = {
+                            switch settingsStore.budgetingMode {
+                            case .simple:
+                                return "Remaining budget"
+                            case .envelope, .custom:
+                                if dashSnapshot.activeBudgetName != nil {
+                                    return "Remaining budget"
+                                } else {
+                                    return "Total balance (no active budget)"
+                                }
+                            }
+                        }()
+
+                        Text(balanceTitle)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                            .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
+
+                        Button(action: {
+                            withAnimation { navigationCoordinator.isBalanceVisible.toggle() }
+                        }) {
+                            Image(systemName: navigationCoordinator.isBalanceVisible ? "eye" : "eye.slash")
+                                .font(.system(size: 12))
+                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                        }
+                        .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
+                    }
+
+                    let balanceToFormat: Decimal = {
+                        switch settingsStore.budgetingMode {
+                        case .simple:
+                            return dashSnapshot.activeBudgetLimit - dashSnapshot.activeBudgetSpent
+                        case .envelope, .custom:
+                            if dashSnapshot.activeBudgetName != nil {
+                                return dashSnapshot.activeBudgetLimit - dashSnapshot.activeBudgetSpent
+                            } else {
+                                return dashSnapshot.totalBalance
+                            }
+                        }
+                    }()
+
+                    Text(navigationCoordinator.isBalanceVisible ? appSettingsManager.format(balanceToFormat) : "\(appSettingsManager.selectedCurrency.symbol) ••••••••")
+                        .font(.system(size: collapseValue(start: 38, end: 24), weight: .semibold, design: .rounded))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        .offset(y: collapseValue(start: 0, end: -10))
+                }
+                .padding(.top, BuxTokens.section + BuxTokens.tight)
+
+                HStack(spacing: 0) {
+                    BuxHeroQuickActionButton(
+                        action: {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.62)) {
+                                isFabMenuExpanded.toggle()
+                            }
+                        },
+                        diameter: heroActionDiameter,
+                        title: "Add expense",
+                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                    ) { isPressed in
+                        Image(systemName: "plus")
+                            .font(.system(size: heroActionIconSize, weight: .semibold))
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                            .buxHeroActionIcon(.plus(isExpanded: isFabMenuExpanded), isPressed: isPressed)
+                    }
+                    .buxScreenEntrance(index: 0, isVisible: navigationCoordinator.isScreenLoaded)
+
+                    BuxHeroQuickActionButton(
+                        action: { activeSheet = .addExpense(.addIncome) },
+                        diameter: heroActionDiameter,
+                        title: "Log income",
+                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                    ) { isPressed in
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.system(size: heroActionIconSize + 2))
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                            .buxHeroActionIcon(.income, isPressed: isPressed)
+                    }
+                    .buxScreenEntrance(index: 1, isVisible: navigationCoordinator.isScreenLoaded)
+
+                    BuxHeroQuickActionButton(
+                        action: {
+                            withAnimation(BuxMotion.tipPopupPresent) {
+                                showTipPopup = true
+                            }
+                        },
+                        diameter: heroActionDiameter,
+                        title: "Tips",
+                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                        titleColor: themeManager.labelSecondary(for: colorScheme),
+                        circleShadowColor: brain.tipNeedsAttention && tipGlowPhase ? Color.yellow.opacity(0.55) : .clear,
+                        circleShadowRadius: 12
+                    ) { isPressed in
+                        Image(systemName: "lightbulb.fill")
+                            .font(.system(size: heroActionIconSize))
+                            .foregroundColor(brain.tipNeedsAttention ? .yellow : themeManager.contrastAccentColor(for: colorScheme))
+                            .buxHeroActionIcon(.tips, isPressed: isPressed)
+                    }
+                    .onChange(of: brain.tipPulseToken) { _, _ in
+                        guard brain.tipNeedsAttention else { return }
+                        withAnimation(.easeInOut(duration: 0.45).repeatCount(2, autoreverses: true)) {
+                            tipGlowPhase = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            tipGlowPhase = false
+                        }
+                    }
+                    .buxScreenEntrance(index: 2, isVisible: navigationCoordinator.isScreenLoaded)
+
+                    BuxHeroQuickActionButton(
+                        action: {
+                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                navigationCoordinator.openSubscriptionHub()
+                            }
+                        },
+                        diameter: heroActionDiameter,
+                        title: "Subscriptions",
+                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                    ) { isPressed in
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.system(size: heroActionIconSize, weight: .semibold))
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                            .buxHeroActionIcon(.subscriptions, isPressed: isPressed)
+                    }
+                    .buxScreenEntrance(index: 3, isVisible: navigationCoordinator.isScreenLoaded)
+                }
+                .padding(.top, BuxTokens.block + BuxTokens.tight)
+                .padding(.bottom, BuxTokens.section)
+                .offset(y: collapseValue(start: 0, end: -15))
+            }
+        }
+        .background {
+            GeometryReader { geo in
+                Color.clear.preference(
+                    key: ScrollOffsetPreferenceKey.self,
+                    value: geo.frame(in: .named("dashboard_scroll")).minY
+                )
+            }
+        }
+        .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+            let next = value < 0 ? max(-150, value) : 0
+            let stepped = (next / 8).rounded() * 8
+            guard abs(stepped - scrollOffset) >= 7 else { return }
+            scrollOffset = stepped
+        }
+    }
+
     private var heroNotificationBell: some View {
         let diameter = heroBellSize
         let hasUnread = brain.notificationInboxDisplay.unreadCount > 0
 
-        Button(action: { activeSheet = .notificationInbox }) {
+        return Button(action: { activeSheet = .notificationInbox }) {
             Image(systemName: hasUnread ? "bell.fill" : "bell")
                 .font(.system(size: heroBellIconSize, weight: .semibold))
                 .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
@@ -836,28 +844,10 @@ struct DashboardView: View {
         .accessibilityLabel(hasUnread ? "Notifications, unread" : "Notifications")
     }
 
-    private func closeFabAnd(_ action: @escaping () -> Void) {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            isFabMenuExpanded = false
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            action()
-        }
-    }
-
     private func collapseValue(start: CGFloat, end: CGFloat) -> CGFloat {
         let range = start - end
         let factor = min(1.0, max(0.0, -scrollOffset / 100.0))
         return start - (range * factor)
-    }
-
-    private func categoryIndex(for name: String) -> Int {
-        switch name {
-        case "Expenses": return 0
-        case "Subscriptions": return 1
-        case "Goals": return 2
-        default: return 3
-        }
     }
 }
 

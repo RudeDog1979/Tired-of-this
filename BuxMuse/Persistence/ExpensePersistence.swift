@@ -103,9 +103,7 @@ extension PersistenceController {
 
     func categoryRecord(for transactionCategory: TransactionCategory) throws -> ExpenseCategoryRecord? {
         let id = try categoryId(for: transactionCategory)
-        var descriptor = FetchDescriptor<CategoryEntity>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first.map { ExpenseCategoryRecord.from($0) }
+        return try fetchCategoryEntity(id: id).map { ExpenseCategoryRecord.from($0) }
     }
 
     func fetchAllCategoryRecords() throws -> [ExpenseCategoryRecord] {
@@ -123,9 +121,8 @@ extension PersistenceController {
     }
 
     func fetchExpenseRecord(id: UUID) throws -> ExpenseRecord? {
-        var descriptor = FetchDescriptor<ExpenseEntity>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first.map { ExpenseRecord.from($0) }
+        let all = try fetchAllExpenseRecords()
+        return all.first(where: { $0.id == id })
     }
 
     func upsertExpenseRecord(_ record: ExpenseRecord, merchantSelection: MerchantSelection? = nil) throws -> ExpenseRecord {
@@ -145,11 +142,9 @@ extension PersistenceController {
         }
 
         let id = saved.id
-        var descriptor = FetchDescriptor<ExpenseEntity>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
         let now = Date()
 
-        if let existing = try context.fetch(descriptor).first {
+        if let existing = try fetchExpenseEntity(id: id) {
             apply(record: saved, to: existing, updatedAt: now)
         } else {
             let entity = ExpenseEntity(
@@ -173,6 +168,7 @@ extension PersistenceController {
                 heatZoneBucket: saved.heatZoneBucket,
                 emotion: saved.emotion,
                 contextTag: saved.contextTag,
+                hustleId: saved.hustleId,
                 habitSignatureId: saved.habitSignatureId,
                 subscriptionConfidence: saved.subscriptionConfidence,
                 microCommitmentType: saved.microCommitmentType,
@@ -182,7 +178,12 @@ extension PersistenceController {
                 createdAt: saved.createdAt,
                 updatedAt: now,
                 categoryRaw: saved.categoryRaw,
-                merchantName: saved.merchantName
+                merchantName: saved.merchantName,
+                paymentMethod: saved.paymentMethod,
+                isBarterExchange: saved.isBarterExchange,
+                barterGoodsGiven: saved.barterGoodsGiven,
+                barterGoodsReceived: saved.barterGoodsReceived,
+                barterEstimatedValue: saved.barterEstimatedValue
             )
             context.insert(entity)
         }
@@ -211,6 +212,7 @@ extension PersistenceController {
         entity.heatZoneBucket = record.heatZoneBucket
         entity.emotion = record.emotion
         entity.contextTag = record.contextTag
+        entity.hustleId = record.hustleId
         entity.habitSignatureId = record.habitSignatureId
         entity.subscriptionConfidence = record.subscriptionConfidence
         entity.microCommitmentType = record.microCommitmentType
@@ -218,22 +220,23 @@ extension PersistenceController {
         entity.futureImpact1Y = record.futureImpact1Y
         entity.futureImpact5Y = record.futureImpact5Y
         entity.categoryRaw = record.categoryRaw
+        entity.paymentMethod = record.paymentMethod
+        entity.isBarterExchange = record.isBarterExchange
+        entity.barterGoodsGiven = record.barterGoodsGiven
+        entity.barterGoodsReceived = record.barterGoodsReceived
+        entity.barterEstimatedValue = record.barterEstimatedValue
         entity.updatedAt = updatedAt
     }
 
     func deleteExpenseRecord(id: UUID) throws {
-        var descriptor = FetchDescriptor<ExpenseEntity>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        if let existing = try context.fetch(descriptor).first {
+        if let existing = try fetchExpenseEntity(id: id) {
             context.delete(existing)
             try context.save()
         }
     }
 
     func updateExpenseCategory(id: UUID, category: TransactionCategory, categoryId explicitCategoryId: UUID? = nil) throws {
-        var descriptor = FetchDescriptor<ExpenseEntity>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        guard let existing = try context.fetch(descriptor).first else { return }
+        guard let existing = try fetchExpenseEntity(id: id) else { return }
         existing.categoryRaw = category.rawValue
         if let explicitCategoryId {
             existing.categoryId = explicitCategoryId
@@ -245,9 +248,7 @@ extension PersistenceController {
     }
 
     func updateExpenseNotes(id: UUID, notes: String?) throws {
-        var descriptor = FetchDescriptor<ExpenseEntity>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        guard let existing = try context.fetch(descriptor).first else { return }
+        guard let existing = try fetchExpenseEntity(id: id) else { return }
         existing.notes = notes
         existing.updatedAt = Date()
         try context.save()
@@ -268,10 +269,7 @@ extension PersistenceController {
     }
 
     func updateCategory(_ record: ExpenseCategoryRecord) throws {
-        let targetId = record.id
-        var descriptor = FetchDescriptor<CategoryEntity>(predicate: #Predicate { $0.id == targetId })
-        descriptor.fetchLimit = 1
-        guard let entity = try context.fetch(descriptor).first else { return }
+        guard let entity = try fetchCategoryEntity(id: record.id) else { return }
         entity.name = record.name
         entity.icon = record.icon
         entity.color = record.color
@@ -281,9 +279,7 @@ extension PersistenceController {
     }
 
     func deleteCategory(id: UUID) throws {
-        var descriptor = FetchDescriptor<CategoryEntity>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        guard let entity = try context.fetch(descriptor).first, entity.isCustom else { return }
+        guard let entity = try fetchCategoryEntity(id: id), entity.isCustom else { return }
         context.delete(entity)
         try context.save()
     }
@@ -294,9 +290,7 @@ extension PersistenceController {
             expense.categoryId = targetId
             expense.updatedAt = Date()
         }
-        var descriptor = FetchDescriptor<CategoryEntity>(predicate: #Predicate { $0.id == sourceId })
-        descriptor.fetchLimit = 1
-        if let source = try context.fetch(descriptor).first, source.isCustom {
+        if let source = try fetchCategoryEntity(id: sourceId), source.isCustom {
             context.delete(source)
         }
         try context.save()
@@ -361,10 +355,7 @@ extension PersistenceController {
     }
 
     private func touchMerchant(_ merchant: ExpenseMerchantRecord, displayName: String) throws -> ExpenseMerchantRecord {
-        let targetId = merchant.id
-        var descriptor = FetchDescriptor<MerchantEntity>(predicate: #Predicate { $0.id == targetId })
-        descriptor.fetchLimit = 1
-        guard let entity = try context.fetch(descriptor).first else { return merchant }
+        guard let entity = try fetchMerchantEntity(id: merchant.id) else { return merchant }
         entity.name = displayName
         entity.lastSeenAt = Date()
         if entity.logoURL == nil, let domain = MerchantLogoEngine.resolveDomain(for: displayName) {
@@ -394,16 +385,11 @@ extension PersistenceController {
     }
 
     func fetchMerchantRecord(id: UUID) throws -> ExpenseMerchantRecord? {
-        var descriptor = FetchDescriptor<MerchantEntity>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first.map { ExpenseMerchantRecord.from($0) }
+        return try fetchMerchantEntity(id: id).map { ExpenseMerchantRecord.from($0) }
     }
 
     func updateMerchant(_ record: ExpenseMerchantRecord) throws {
-        let targetId = record.id
-        var descriptor = FetchDescriptor<MerchantEntity>(predicate: #Predicate { $0.id == targetId })
-        descriptor.fetchLimit = 1
-        guard let entity = try context.fetch(descriptor).first else { return }
+        guard let entity = try fetchMerchantEntity(id: record.id) else { return }
         entity.name = record.name
         entity.disambiguator = record.disambiguator
         entity.logoURL = record.logoURL
@@ -427,5 +413,22 @@ extension PersistenceController {
             merchantId: nil
         )
         _ = try upsertExpenseRecord(record)
+    }
+
+    // MARK: - Safe Entity Fetch Helpers
+
+    private func fetchExpenseEntity(id: UUID) throws -> ExpenseEntity? {
+        let all = try context.fetch(FetchDescriptor<ExpenseEntity>())
+        return all.first(where: { $0.id == id })
+    }
+
+    private func fetchCategoryEntity(id: UUID) throws -> CategoryEntity? {
+        let all = try context.fetch(FetchDescriptor<CategoryEntity>())
+        return all.first(where: { $0.id == id })
+    }
+
+    private func fetchMerchantEntity(id: UUID) throws -> MerchantEntity? {
+        let all = try context.fetch(FetchDescriptor<MerchantEntity>())
+        return all.first(where: { $0.id == id })
     }
 }

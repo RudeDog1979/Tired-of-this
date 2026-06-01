@@ -9,6 +9,7 @@ struct ExpandableExpenseCard: View {
     let expense: ExpenseRowDisplay
 
     @Binding var expandedId: UUID?
+    var onOpenDetail: (() -> Void)? = nil
     var onEdit: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
@@ -25,40 +26,66 @@ struct ExpandableExpenseCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Button {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-                    expandedId = isExpanded ? nil : expense.id
-                }
-            } label: {
-                HStack(spacing: 14) {
-                    AsyncMerchantLogoView(merchantName: expense.name, size: 44)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(expense.name)
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-
-                        if let category = expense.category {
-                            Text(category)
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+            HStack(spacing: 14) {
+                Button {
+                    if let onOpenDetail {
+                        onOpenDetail()
+                    } else {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                            expandedId = isExpanded ? nil : expense.id
                         }
                     }
+                } label: {
+                    HStack(spacing: 14) {
+                        AsyncMerchantLogoView(merchantName: expense.name, size: 44)
 
-                    Spacer()
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(expense.name)
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-                    Text(expense.amountFormatted)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                            if let category = expense.category {
+                                Text(category)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                            }
 
+                            if expense.isUnassignedWorkspace {
+                                Text("Unassigned")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.orange)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.orange.opacity(0.12))
+                                    .clipShape(Capsule())
+                            }
+                        }
+
+                        Spacer()
+
+                        Text(expense.amountFormatted)
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(BuxMicroShrinkStyle())
+
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                        expandedId = isExpanded ? nil : expense.id
+                    }
+                } label: {
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.gray)
+                        .frame(width: 28, height: 44)
+                        .contentShape(Rectangle())
                 }
-                .padding(16)
-                .contentShape(Rectangle())
+                .buttonStyle(BuxMicroShrinkStyle())
             }
-            .buttonStyle(BuxMicroShrinkStyle())
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
 
             if isExpanded {
                 VStack(alignment: .leading, spacing: 12) {

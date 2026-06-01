@@ -12,6 +12,11 @@ import Combine
 public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngine, ObservableObject {
     @Published private var transactions: [UUID: Transaction] = [:]
     
+    private var filteredTransactions: [Transaction] {
+        let all = Array(transactions.values)
+        return HustleWorkspaceFilter.filter(all) { $0.hustleId }
+    }
+    
     private var cachedActiveSubscriptions: [SubscriptionInfo] = []
     private var cachedSubscriptionDetails: [String: SubscriptionDetail] = [:]
     private let calculationQueue = DispatchQueue(label: "com.buxmuse.financial.calculations", qos: .userInitiated)
@@ -45,7 +50,7 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
     }
     
     private func queueBackgroundRecalculations() {
-        let txs = Array(transactions.values)
+        let txs = filteredTransactions
         
         let performRecalc = { [weak self] in
             guard let self = self else { return }
@@ -110,14 +115,14 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
     }
     
     public func allTransactions() -> [Transaction] {
-        return Array(transactions.values).sorted(by: { $0.date > $1.date })
+        return filteredTransactions.sorted(by: { $0.date > $1.date })
     }
     
     public func categorySummaries(for range: DateInterval) -> [CategorySummary] {
-        let currentPeriodTransactions = transactions.values.filter { range.contains($0.date) }
+        let currentPeriodTransactions = filteredTransactions.filter { range.contains($0.date) }
         let duration = range.duration
         let prevRange = DateInterval(start: range.start.addingTimeInterval(-duration), end: range.start)
-        let prevPeriodTransactions = transactions.values.filter { prevRange.contains($0.date) }
+        let prevPeriodTransactions = filteredTransactions.filter { prevRange.contains($0.date) }
         
         var summaries: [CategorySummary] = []
         let currencyCode = currentPeriodTransactions.first?.amount.currencyCode ?? "USD"
@@ -162,12 +167,12 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
     
     public func overspendAlerts(for range: DateInterval) -> [OverspendAlert] {
         var alerts: [OverspendAlert] = []
-        let currencyCode = transactions.values.first?.amount.currencyCode ?? "USD"
+        let currencyCode = filteredTransactions.first?.amount.currencyCode ?? "USD"
         
         for category in TransactionCategory.allCases {
             guard category != .income else { continue }
             
-            let currentTotal = transactions.values
+            let currentTotal = filteredTransactions
                 .filter { range.contains($0.date) && $0.category == category }
                 .reduce(Decimal(0)) { $0 + $1.amount.value }
             
@@ -195,7 +200,7 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
     public func savingsOpportunities(for range: DateInterval) -> [SavingsOpportunity] {
         var opportunities: [SavingsOpportunity] = []
         let summaries = categorySummaries(for: range).filter { $0.category != .income && $0.total.value != 0 }
-        let currencyCode = transactions.values.first?.amount.currencyCode ?? "USD"
+        let currencyCode = filteredTransactions.first?.amount.currencyCode ?? "USD"
         
         let sortedSummaries = summaries.sorted(by: { abs($0.total.value) > abs($1.total.value) })
         let topCategories = Array(sortedSummaries.prefix(2))
@@ -227,7 +232,7 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
     }
     
     public func merchantClusters() -> [MerchantCluster] {
-        let merchantNames = Array(Set(transactions.values.map { $0.merchantName }))
+        let merchantNames = Array(Set(filteredTransactions.map { $0.merchantName }))
         return MerchantIntelligence.clusterMerchants(merchantNames)
     }
     
@@ -240,7 +245,7 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
         }
         
         let baselineRange = DateInterval(start: sixMonthsAgo, end: threeMonthsAgo)
-        let baselineTransactions = transactions.values.filter {
+        let baselineTransactions = filteredTransactions.filter {
             baselineRange.contains($0.date) && $0.category == category
         }
         

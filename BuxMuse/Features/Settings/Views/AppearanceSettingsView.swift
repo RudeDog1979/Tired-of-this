@@ -108,7 +108,24 @@ struct AppearanceSettingsView: View {
                             .padding(.vertical, 14)
                             
                             Divider().opacity(0.08)
-                            
+
+                            if !store.brandThemesEnabled {
+                                Toggle(isOn: $store.landingBackdropEnabled) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Landing backdrop glow")
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                        Text("Top-left ambient light and card edge shine — off uses plain iOS surfaces")
+                                            .font(.system(size: 11))
+                                            .buxLabelSecondary()
+                                    }
+                                }
+                                .padding(.horizontal, BuxLayout.section)
+                                .padding(.vertical, 12)
+
+                                Divider().opacity(0.08)
+                            }
+
                             // Glassmorphism Toggle
                             Toggle(isOn: $store.useGlassmorphism) {
                                 VStack(alignment: .leading, spacing: 2) {
@@ -140,6 +157,22 @@ struct AppearanceSettingsView: View {
                             }
                             .padding(.horizontal, BuxLayout.section)
                             .padding(.vertical, 12)
+                            
+                            Divider().opacity(0.08)
+                            
+                            // Solar Contrast Mode Toggle
+                            Toggle(isOn: $store.solarContrastModeEnabled) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Solar Contrast Mode")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                    Text("Optimize contrast and text weight for direct tropical sunlight")
+                                        .font(.system(size: 11))
+                                        .buxLabelSecondary()
+                                }
+                            }
+                            .padding(.horizontal, BuxLayout.section)
+                            .padding(.vertical, 12)
                         }
                         .settingsThemedCardChrome(cornerRadius: 20)
                         .padding(.horizontal, 20)
@@ -156,6 +189,7 @@ struct AppearanceSettingsView: View {
         .onChange(of: store.themeMode) { _, _ in store.save() }
         .onChange(of: store.useGlassmorphism) { _, _ in store.save() }
         .onChange(of: store.reducedMotion) { _, _ in store.save() }
+        .onChange(of: store.solarContrastModeEnabled) { _, _ in store.save() }
         .onChange(of: store.neutralAccentId) { _, _ in
             store.applyBrandThemesAppearance(to: themeManager)
             store.save()
@@ -164,6 +198,7 @@ struct AppearanceSettingsView: View {
             store.applyBrandThemesAppearance(to: themeManager)
             store.save()
         }
+        .onChange(of: store.landingBackdropEnabled) { _, _ in store.save() }
     }
 }
 

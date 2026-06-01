@@ -12,18 +12,26 @@ import Combine
 
 public final class InsightsViewModel: ObservableObject {
     @Published public var rankedInsights: [FinancialInsight] = []
+    @Published public var featureStrips: [FeatureInsightStrip] = []
     @Published public var selectedInsight: FinancialInsight? = nil
     @Published public var showInsightDetail: Bool = false
     
     private let insightsEngine: InsightsEngine
     private let financialEngine: FinancialIntelligenceEngine
     private let goalsViewModel: GoalsViewModel
+    private weak var studioStore: StudioStore?
     private var cancellables = Set<AnyCancellable>()
     
-    public init(insightsEngine: InsightsEngine, financialEngine: FinancialIntelligenceEngine, goalsViewModel: GoalsViewModel) {
+    public init(
+        insightsEngine: InsightsEngine,
+        financialEngine: FinancialIntelligenceEngine,
+        goalsViewModel: GoalsViewModel,
+        studioStore: StudioStore? = nil
+    ) {
         self.insightsEngine = insightsEngine
         self.financialEngine = financialEngine
         self.goalsViewModel = goalsViewModel
+        self.studioStore = studioStore
         
         // Observe insights from insightsEngine
         insightsEngine.$insights
@@ -66,13 +74,37 @@ public final class InsightsViewModel: ObservableObject {
         let txs = financialEngine.allTransactions()
         let subs = financialEngine.activeSubscriptions()
         let gls = goalsViewModel.goals
+        let projects = studioStore?.projects ?? []
         
         insightsEngine.recalculateAllInsightsAsync(
             transactions: txs,
             subscriptions: subs,
             goals: gls,
-            goalsViewModel: goalsViewModel
+            goalsViewModel: goalsViewModel,
+            projects: projects
         )
+
+        Task { @MainActor in
+            let settings = SettingsStore.shared
+            if settings.burnoutGuardEnabled {
+                await BurnoutEngine.shared.recalculate(
+                    projects: projects,
+                    transactions: txs,
+                    settings: settings
+                )
+            }
+            let burnout = BurnoutEngine.shared.currentStatus
+            featureStrips = FeatureInsightStripEngine.buildStrips(
+                transactions: txs,
+                burnout: burnout,
+                projects: projects
+            )
+        }
+    }
+
+    public func attachStudioStore(_ store: StudioStore) {
+        studioStore = store
+        recalculate()
     }
     
     public func selectInsight(_ insight: FinancialInsight) {

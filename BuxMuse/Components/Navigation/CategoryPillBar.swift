@@ -12,6 +12,7 @@ private enum DashboardCategory: String, CaseIterable, Identifiable {
     case subscriptions = "Subscriptions"
     case goals = "Goals"
     case insights = "Insights"
+    case moneyMap = "Money Map"
 
     var id: String { rawValue }
 }

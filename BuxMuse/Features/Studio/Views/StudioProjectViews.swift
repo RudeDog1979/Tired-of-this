@@ -112,7 +112,7 @@ struct StudioProjectsListView: View {
             
             BuxButton(
                 title: "Add Project",
-                systemImage: "plus.folder.fill",
+                systemImage: "folder.badge.plus",
                 role: .primary,
                 size: .regular
             ) {
@@ -135,8 +135,27 @@ struct StudioProjectDetailView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     
     @EnvironmentObject private var store: StudioStore
+    @ObservedObject private var settingsStore = SettingsStore.shared
     
     var project: StudioProject
+    
+    @State private var showAgreementEditor = false
+    
+    private var loggedHours: Double {
+        project.timeEntries.reduce(0.0) { $0 + $1.duration / 3600.0 }
+    }
+    
+    private var scopeAnalysis: ScopeRadarAnalysis? {
+        guard settingsStore.antiScopeCreepEnabled,
+              settingsStore.studioMode == .pro,
+              project.budgetedHours > 0 || project.allowedRevisions > 0 else { return nil }
+        return ScopeRadarBrain.shared.analyze(
+            budgetedHours: project.budgetedHours,
+            loggedHours: loggedHours,
+            allowedRevisions: project.allowedRevisions,
+            currentRevisions: project.currentRevisions
+        )
+    }
     
     var body: some View {
         let analysis = StudioProjectEngine.analyzeProject(project: project, receipts: store.receipts)
@@ -147,6 +166,18 @@ struct StudioProjectDetailView: View {
             
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
+                    
+                    if let scope = scopeAnalysis, scope.isAnyAlertActive {
+                        scopeAlertBanner(scope)
+                    }
+                    
+                    if let scope = scopeAnalysis {
+                        scopeRadarSection(scope)
+                    }
+
+                    if settingsStore.agreementScratchpadEnabled, settingsStore.studioMode == .pro {
+                        agreementScratchpadSection
+                    }
                     
                     // Overrun Risk banner
                     if analysis.isOverrunRisk {
@@ -177,6 +208,101 @@ struct StudioProjectDetailView: View {
             }
         }
         .navigationTitle(project.name)
+    }
+    
+    private func scopeAlertBanner(_ scope: ScopeRadarAnalysis) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: scope.overallRisk.systemIcon)
+                .foregroundColor(Color(hex: scope.overallRisk.color))
+            Text(scope.warningBannerText(projectName: project.name))
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(Color(hex: scope.overallRisk.color))
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(hex: scope.overallRisk.color).opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+    
+    private func scopeRadarSection(_ scope: ScopeRadarAnalysis) -> some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            HStack(spacing: 6) {
+                Text("SCOPE RADAR")
+                    .font(.system(size: 11, weight: .bold))
+                    .buxLabelSecondary()
+                ProFeatureBadge(compact: true)
+            }
+            
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Label(scope.overallRisk.rawValue, systemImage: scope.overallRisk.systemIcon)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(Color(hex: scope.overallRisk.color))
+                    Spacer()
+                    if project.budgetedHours > 0 {
+                        Text("\(String(format: "%.1f", scope.loggedHours))/\(String(format: "%.1f", scope.budgetedHours))h")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .buxLabelSecondary()
+                    }
+                }
+                
+                if project.allowedRevisions > 0 {
+                    Text("Revisions: \(project.currentRevisions)/\(project.allowedRevisions)")
+                        .font(.system(size: 12, weight: .medium))
+                        .buxLabelSecondary()
+                }
+                
+                if scope.isAnyAlertActive {
+                    ShareLink(item: scope.scopeChangeEmail(
+                        projectName: project.name,
+                        clientName: store.clients.first(where: { $0.id == project.clientId })?.name ?? "Client"
+                    )) {
+                        Label("Copy scope-change email", systemImage: "envelope.fill")
+                            .font(.system(size: 12, weight: .bold))
+                    }
+                }
+            }
+            .padding(BuxLayout.section)
+            .studioThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var agreementScratchpadSection: some View {
+        let existing = store.agreementDraft(forProjectId: project.id)
+        return VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            HStack(spacing: 6) {
+                Text("AGREEMENT SCRATCHPAD")
+                    .font(.system(size: 11, weight: .bold))
+                    .buxLabelSecondary()
+                ProFeatureBadge(compact: true)
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text(existing == nil ? "No agreement draft yet for this project." : "Draft saved · \(existing!.title)")
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+
+                Button {
+                    showAgreementEditor = true
+                } label: {
+                    Label(existing == nil ? "Create agreement draft" : "Edit agreement draft", systemImage: "doc.text.fill")
+                        .font(.system(size: 12, weight: .bold))
+                }
+            }
+            .padding(BuxLayout.section)
+            .studioThemedCardChrome(cornerRadius: 20)
+        }
+        .sheet(isPresented: $showAgreementEditor) {
+            NavigationStack {
+                AgreementScratchpadEditorView(
+                    project: project,
+                    existingDraft: existing
+                )
+                .environmentObject(store)
+                .environmentObject(themeManager)
+            }
+            .buxStudioSheetContent()
+        }
     }
     
     // MARK: - Subviews
@@ -919,11 +1045,15 @@ struct NewProjectSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var store: StudioStore
     
+    @ObservedObject private var settingsStore = SettingsStore.shared
+    
     @State private var name = ""
     @State private var clientId: UUID = UUID()
     @State private var hourlyRate = ""
     @State private var fixedFee = ""
     @State private var notes = ""
+    @State private var budgetedHours = ""
+    @State private var allowedRevisions = ""
     
     var body: some View {
         NavigationStack {
@@ -962,6 +1092,18 @@ struct NewProjectSheet: View {
                         TextField("Notes", text: $notes)
                             .buxFormFieldPadding()
                     }
+
+                    if settingsStore.studioMode == .pro, settingsStore.antiScopeCreepEnabled {
+                        BuxFormSection(title: "Scope Radar budgets") {
+                            TextField("Budgeted hours", text: $budgetedHours)
+                                .keyboardType(.decimalPad)
+                                .buxFormFieldPadding()
+                            BuxFormRowDivider()
+                            TextField("Included revisions", text: $allowedRevisions)
+                                .keyboardType(.numberPad)
+                                .buxFormFieldPadding()
+                        }
+                    }
                 }
             }
             .navigationTitle("New Project")
@@ -977,7 +1119,12 @@ struct NewProjectSheet: View {
                             clientId: clientId == UUID() ? nil : clientId,
                             hourlyRate: Decimal(string: hourlyRate),
                             fixedFee: Decimal(string: fixedFee),
-                            notes: notes
+                            notes: notes,
+                            hustleId: settingsStore.sideHustleMatrixEnabled
+                                ? HustleManager.shared.selectedHustleId
+                                : nil,
+                            budgetedHours: Double(budgetedHours) ?? 0,
+                            allowedRevisions: Int(allowedRevisions) ?? 0
                         )
                         store.addProject(proj)
                         BuxSaveFeedback.success()

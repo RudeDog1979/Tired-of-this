@@ -16,6 +16,7 @@ struct StudioHubView: View {
     @EnvironmentObject private var appDataManager: AppDataManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var financialBridge: FinancialEngineBridge
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var studioTimer = StudioTimerController.shared
 
@@ -72,8 +73,21 @@ struct StudioHubView: View {
                             .padding(.horizontal, BuxTokens.marginRegular)
                             .buxScreenEntrance(index: 0, isVisible: hubAppeared)
 
+                        HustleSelectorBar()
+                            .padding(.bottom, 4)
+
                         StudioHeroCard(display: display.hero)
                             .buxScreenEntrance(index: 1, isVisible: hubAppeared)
+
+                        if settingsStore.studioEnabled {
+                            StudioIntelligenceSummaryCard(
+                                projects: store.projects,
+                                transactions: financialBridge.engine.allTransactions()
+                            )
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                            .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+                        }
 
                         if display.isEmpty {
                             StudioHubEmptyState()
@@ -435,7 +449,10 @@ struct NewClientSheet: View {
                             email: party.email.isEmpty ? email : party.email,
                             phone: party.phone.isEmpty ? phone : party.phone,
                             defaultRate: Decimal(string: rate),
-                            paymentTermsDays: Int(terms)
+                            paymentTermsDays: Int(terms),
+                            hustleId: SettingsStore.shared.sideHustleMatrixEnabled
+                                ? HustleManager.shared.selectedHustleId
+                                : nil
                         )
                         if party.countryCode.isEmpty {
                             party.countryCode = appSettingsManager.selectedCountry.id

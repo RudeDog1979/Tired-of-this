@@ -22,6 +22,10 @@ struct StudioProUpsellSheet: View {
         case pdfInvoices
         case fullTax
         case businessCardPro
+        case scopeCreepRadar
+        case agreementScratchpad
+        case hustleUnlimited
+        case burnoutHealthKit
 
         var id: String { rawValue }
 
@@ -30,6 +34,10 @@ struct StudioProUpsellSheet: View {
             case .pdfInvoices: return "PDF invoices"
             case .fullTax: return "Full Tax Studio"
             case .businessCardPro: return "Pro business card"
+            case .scopeCreepRadar: return "Anti-Scope Creep Radar"
+            case .agreementScratchpad: return "Agreement Scratchpad"
+            case .hustleUnlimited: return "Unlimited gig workspaces"
+            case .burnoutHealthKit: return "HealthKit sleep sync"
             }
         }
 
@@ -41,6 +49,14 @@ struct StudioProUpsellSheet: View {
                 return "Open Tax Studio for deductions, mileage, cashflow, and country-aware tax estimates."
             case .businessCardPro:
                 return "Design multiple cards with templates, colors, QR codes, and print-ready PDF export."
+            case .scopeCreepRadar:
+                return "Track budgeted hours and revision limits per Studio project. Get alerts and scope-change email templates before work goes off-rails."
+            case .agreementScratchpad:
+                return "Draft lightweight client agreements, scope bullets, and sign-off notes — stored locally on your device."
+            case .hustleUnlimited:
+                return "Simple Studio supports 3 active gig workspaces. Pro unlocks unlimited side-hustle ledgers with full filtering across Home, Expenses, and Studio."
+            case .burnoutHealthKit:
+                return "Sync sleep duration from Apple Health for automatic Creative Energy scoring — no manual sliders required."
             }
         }
 
@@ -49,6 +65,10 @@ struct StudioProUpsellSheet: View {
             case .pdfInvoices: return "doc.richtext.fill"
             case .fullTax: return "percent"
             case .businessCardPro: return "person.crop.rectangle.fill"
+            case .scopeCreepRadar: return "scope"
+            case .agreementScratchpad: return "doc.text.fill"
+            case .hustleUnlimited: return "briefcase.fill"
+            case .burnoutHealthKit: return "applewatch.side.right"
             }
         }
     }

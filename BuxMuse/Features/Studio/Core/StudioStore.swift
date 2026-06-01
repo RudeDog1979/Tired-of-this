@@ -22,6 +22,7 @@ public final class StudioStore: ObservableObject {
     @Published public var invoiceSettings: StudioInvoiceSettings = StudioInvoiceSettings()
     @Published public var mileageEntries: [MileageEntry] = []
     @Published public var businessCardLibrary: ProBusinessCardLibrary = ProBusinessCardLibrary()
+    @Published public var agreementDrafts: [AgreementDraft] = []
 
     private let saveQueue = DispatchQueue(label: "com.buxmuse.freelance.save", qos: .utility)
     private var isLoaded = false
@@ -122,7 +123,8 @@ public final class StudioStore: ObservableObject {
             taxProfile: taxProfile,
             invoiceSettings: invoiceSettings,
             mileageEntries: mileageEntries,
-            businessCardLibrary: businessCardLibrary
+            businessCardLibrary: businessCardLibrary,
+            agreementDrafts: agreementDrafts
         )
     }
 
@@ -136,6 +138,29 @@ public final class StudioStore: ObservableObject {
         invoiceSettings = snapshot.invoiceSettings
         mileageEntries = snapshot.mileageEntries
         businessCardLibrary = snapshot.businessCardLibrary
+        agreementDrafts = snapshot.agreementDrafts
+    }
+
+    // MARK: - CRUD: Agreement drafts
+
+    public func agreementDraft(forProjectId projectId: UUID) -> AgreementDraft? {
+        agreementDrafts.first { $0.projectId == projectId }
+    }
+
+    public func upsertAgreementDraft(_ draft: AgreementDraft) {
+        var updated = draft
+        updated.updatedAt = Date()
+        if let index = agreementDrafts.firstIndex(where: { $0.id == draft.id }) {
+            agreementDrafts[index] = updated
+        } else {
+            agreementDrafts.append(updated)
+        }
+        save()
+    }
+
+    public func deleteAgreementDraft(id: UUID) {
+        agreementDrafts.removeAll { $0.id == id }
+        save()
     }
 
     // MARK: - CRUD: Mileage
@@ -430,7 +455,9 @@ public final class StudioStore: ObservableObject {
             paymentSchedule: "annually"
         )
         invoiceSettings = StudioInvoiceSettings()
+        mileageEntries = []
         businessCardLibrary = ProBusinessCardLibrary()
+        agreementDrafts = []
     }
 
     public func resetAllData() {

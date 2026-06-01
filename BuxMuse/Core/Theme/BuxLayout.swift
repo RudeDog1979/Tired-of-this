@@ -103,7 +103,7 @@ extension View {
     /// Detail hubs & pushed drill-ins — content scrolls under inline nav bar.
     func buxDetailScrollChrome() -> some View {
         buxReportsContainerWidth()
-            .buxSoftScrollChrome()
+            .buxSoftScrollChrome(edges: .top)
     }
 
     /// Adaptive horizontal margins — prefer on all root screens.

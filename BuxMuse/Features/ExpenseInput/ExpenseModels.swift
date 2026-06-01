@@ -40,6 +40,12 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
     public var updatedAt: Date
     public var categoryRaw: String
     public var merchantName: String
+    public var hustleId: UUID?
+    public var paymentMethod: String?
+    public var isBarterExchange: Bool
+    public var barterGoodsGiven: String?
+    public var barterGoodsReceived: String?
+    public var barterEstimatedValue: Decimal?
 
     public var amountDouble: Double {
         NSDecimalNumber(decimal: amountValue).doubleValue
@@ -83,7 +89,13 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
         categoryRaw: String,
-        merchantName: String
+        merchantName: String,
+        hustleId: UUID? = nil,
+        paymentMethod: String? = nil,
+        isBarterExchange: Bool = false,
+        barterGoodsGiven: String? = nil,
+        barterGoodsReceived: String? = nil,
+        barterEstimatedValue: Decimal? = nil
     ) {
         self.id = id
         self.name = name
@@ -115,6 +127,12 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         self.updatedAt = updatedAt
         self.categoryRaw = categoryRaw
         self.merchantName = merchantName
+        self.hustleId = hustleId
+        self.paymentMethod = paymentMethod
+        self.isBarterExchange = isBarterExchange
+        self.barterGoodsGiven = barterGoodsGiven
+        self.barterGoodsReceived = barterGoodsReceived
+        self.barterEstimatedValue = barterEstimatedValue
     }
 
     public func toTransaction() -> Transaction {
@@ -125,11 +143,18 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
             merchantName: name,
             category: transactionCategory,
             notes: notes,
+            emotion: emotion,
             isSubscriptionLike: isSubscriptionLike,
             isTrial: isTrial,
             nextExpectedDate: nextExpectedDate,
             subscriptionStartDate: subscriptionStartDate,
-            trialEndDate: trialEndDate
+            trialEndDate: trialEndDate,
+            hustleId: hustleId,
+            paymentMethod: paymentMethod,
+            isBarterExchange: isBarterExchange,
+            barterGoodsGiven: barterGoodsGiven,
+            barterGoodsReceived: barterGoodsReceived,
+            barterEstimatedValue: barterEstimatedValue
         )
     }
 
@@ -164,7 +189,13 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
             categoryRaw: entity.categoryRaw,
-            merchantName: entity.merchantName.isEmpty ? entity.name : entity.merchantName
+            merchantName: entity.merchantName.isEmpty ? entity.name : entity.merchantName,
+            hustleId: entity.hustleId,
+            paymentMethod: entity.paymentMethod,
+            isBarterExchange: entity.isBarterExchange,
+            barterGoodsGiven: entity.barterGoodsGiven,
+            barterGoodsReceived: entity.barterGoodsReceived,
+            barterEstimatedValue: entity.barterEstimatedValue
         )
     }
 
@@ -179,7 +210,13 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
             date: transaction.date,
             notes: transaction.notes,
             categoryRaw: transaction.category.rawValue,
-            merchantName: transaction.merchantName
+            merchantName: transaction.merchantName,
+            hustleId: transaction.hustleId,
+            paymentMethod: transaction.paymentMethod,
+            isBarterExchange: transaction.isBarterExchange,
+            barterGoodsGiven: transaction.barterGoodsGiven,
+            barterGoodsReceived: transaction.barterGoodsReceived,
+            barterEstimatedValue: transaction.barterEstimatedValue
         )
     }
 }
@@ -439,6 +476,8 @@ public struct ExpenseRowDisplay: Identifiable {
     public var emotion: String?
     public var emotionSymbol: String?
     public var context: String?
+    public var hustleId: UUID?
+    public var isUnassignedWorkspace: Bool
 }
 
 public struct ExpensesSummaryDisplay {

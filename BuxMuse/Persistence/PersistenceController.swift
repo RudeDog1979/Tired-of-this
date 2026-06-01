@@ -41,7 +41,7 @@ public final class PersistenceController: ObservableObject {
         let config: ModelConfiguration
         if inMemory {
             config = ModelConfiguration(
-                Self.storeName,
+                "\(Self.storeName)_\(UUID().uuidString)",
                 schema: schema,
                 isStoredInMemoryOnly: true
             )

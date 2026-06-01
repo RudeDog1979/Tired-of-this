@@ -20,6 +20,21 @@ public enum SettingsDestinationType: String, Codable, CaseIterable {
     case security
     case data
     case about
+    case hustles
+    case dualCashDrawer
+    case barterLogger
+    case scopeCreepRadar
+    case agreementScratchpad
+    case burnoutGuard
+    case paymentSources
+}
+
+public enum SettingsRowTier: Equatable {
+    case standard
+    /// Pro-only — Simple users see PRO badge and upsell on tap.
+    case proOnly
+    /// Available on Simple with limits; Pro unlocks extras.
+    case freemium
 }
 
 public struct SettingsRowDisplay: Identifiable, Equatable {
@@ -30,14 +45,32 @@ public struct SettingsRowDisplay: Identifiable, Equatable {
     public let hexColor: String // Hex string to resolve to SwiftUI color safely
     public let trailingText: String?
     public let destination: SettingsDestinationType
+    public let tier: SettingsRowTier
     
-    public init(title: String, subtitle: String, iconName: String, hexColor: String, trailingText: String? = nil, destination: SettingsDestinationType) {
+    public init(
+        title: String,
+        subtitle: String,
+        iconName: String,
+        hexColor: String,
+        trailingText: String? = nil,
+        destination: SettingsDestinationType,
+        tier: SettingsRowTier = .standard
+    ) {
         self.title = title
         self.subtitle = subtitle
         self.iconName = iconName
         self.hexColor = hexColor
         self.trailingText = trailingText
         self.destination = destination
+        self.tier = tier
+    }
+
+    public var showsProBadge: Bool {
+        switch tier {
+        case .proOnly: return true
+        case .freemium: return true
+        case .standard: return false
+        }
     }
 }
 
@@ -135,31 +168,23 @@ public final class SettingsBrain {
             destination: .studio
         )
 
-        let bankTypeLabel = store.autoDetectInvoiceBankAccountType
-            ? "Auto"
-            : (store.invoiceBankAccountTypeOverride?.displayName ?? "Manual")
-        let invoicePaymentRow = SettingsRowDisplay(
-            title: "Invoice Payment & Bank Type",
-            subtitle: "Account fields on generated invoices",
-            iconName: "building.columns.fill",
-            hexColor: "#5AC8FA",
-            trailingText: bankTypeLabel,
-            destination: .invoicePayment
+        let paymentSourcesRow = SettingsRowDisplay(
+            title: "Payment Sources",
+            subtitle: "Visa, PayPal, Klarna tags for credit insights",
+            iconName: "creditcard.fill",
+            hexColor: "#5856D6",
+            trailingText: store.paymentSourceTrackingEnabled ? "On" : "Off",
+            destination: .paymentSources
         )
 
-        let mileageLocationLabel = store.autoLocationForMileage ? "On" : "Off"
-        let mileageRow = SettingsRowDisplay(
-            title: "Mileage Log",
-            subtitle: "Trip log, allowance rate, auto-location",
-            iconName: "car.fill",
-            hexColor: "#64D2FF",
-            trailingText: mileageLocationLabel,
-            destination: .mileage
+        let expenseIntelligenceSection = SettingsSectionDisplay(
+            title: "Expense Intelligence",
+            rows: [paymentSourcesRow]
         )
-        
-        let rulesSection = SettingsSectionDisplay(
-            title: "Finance & Studio",
-            rows: [budgetRow, studioRow, invoicePaymentRow, mileageRow]
+
+        let financeSection = SettingsSectionDisplay(
+            title: "Finance",
+            rows: [budgetRow, studioRow]
         )
         
         // 3. Security & Access Section
@@ -189,10 +214,10 @@ public final class SettingsBrain {
         
         // 4. Data Control Section
         let dataRow = SettingsRowDisplay(
-            title: "Data & Export",
-            subtitle: "Backups, export JSON, delete account",
+            title: "Backup & Restore",
+            subtitle: "Encrypted archive, export, full restore",
             iconName: "arrow.down.doc.fill",
-            hexColor: "#E0C3FC", // Lavender
+            hexColor: "#E0C3FC",
             destination: .data
         )
         
@@ -210,6 +235,6 @@ public final class SettingsBrain {
             rows: [dataRow, aboutRow]
         )
         
-        return SettingsOverviewDisplay(sections: [generalSection, rulesSection, securitySection, dataSection])
+        return SettingsOverviewDisplay(sections: [generalSection, financeSection, expenseIntelligenceSection, securitySection, dataSection])
     }
 }

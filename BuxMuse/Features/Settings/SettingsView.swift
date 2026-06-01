@@ -14,8 +14,11 @@ struct SettingsView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var studioStore: StudioStore
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @ObservedObject private var store = SettingsStore.shared
     @State private var settingsPath = NavigationPath()
+    @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
 
     var body: some View {
         NavigationStack(path: $settingsPath) {
@@ -44,15 +47,7 @@ struct SettingsView: View {
 
                                 VStack(spacing: 0) {
                                     ForEach(Array(section.rows.enumerated()), id: \.element.id) { index, row in
-                                        NavigationLink(value: row.destination) {
-                                            SettingsRow(
-                                                icon: row.iconName,
-                                                label: row.title,
-                                                color: Color(hex: row.hexColor),
-                                                trailingText: row.trailingText
-                                            )
-                                        }
-                                        .buttonStyle(BuxMicroShrinkStyle())
+                                        settingsRowButton(for: row)
                                         
                                         if index < section.rows.count - 1 {
                                             Divider().opacity(0.08)
@@ -77,6 +72,11 @@ struct SettingsView: View {
                 guard requested else { return }
                 settingsPath.append(SettingsDestinationType.studio)
                 _ = navigationCoordinator.consumeStudioSettingsRequest()
+            }
+            .onChange(of: navigationCoordinator.openPaymentSettingsRequest) { _, requested in
+                guard requested else { return }
+                settingsPath.append(SettingsDestinationType.paymentSources)
+                _ = navigationCoordinator.consumePaymentSettingsRequest()
             }
             .onChange(of: navigationCoordinator.openProfileSettingsRequest) { _, requested in
                 guard requested else { return }
@@ -109,12 +109,64 @@ struct SettingsView: View {
                             DataSettingsView()
                         case .about:
                             AboutSettingsView()
+                        case .hustles:
+                            HustleSettingsView()
+                        case .dualCashDrawer:
+                            DualCashDrawerSettingsView()
+                        case .barterLogger:
+                            BarterLoggerSettingsView()
+                        case .scopeCreepRadar:
+                            ScopeCreepRadarSettingsView()
+                        case .agreementScratchpad:
+                            AgreementScratchpadSettingsView()
+                        case .burnoutGuard:
+                            BurnoutGuardSettingsView()
+                        case .paymentSources:
+                            PaymentSourceSettingsView()
                         }
                     }
                 }
                 .environment(\.settingsEnhancedTint, true)
             }
             .environment(\.settingsEnhancedTint, true)
+            .sheet(item: $proUpsellFeature) { feature in
+                StudioProUpsellSheet(feature: feature)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+                    .environmentObject(simpleStudioStore)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func settingsRowButton(for row: SettingsRowDisplay) -> some View {
+        let showsUpsell = row.tier == .proOnly && !StudioFeatureGate.isPro
+
+        if showsUpsell, let feature = StudioFeatureGate.upsellFeature(for: row.destination) {
+            Button {
+                proUpsellFeature = feature
+            } label: {
+                SettingsRow(
+                    icon: row.iconName,
+                    label: row.title,
+                    color: Color(hex: row.hexColor),
+                    trailingText: row.trailingText,
+                    showsProBadge: row.showsProBadge
+                )
+            }
+            .buttonStyle(BuxMicroShrinkStyle())
+        } else {
+            NavigationLink(value: row.destination) {
+                SettingsRow(
+                    icon: row.iconName,
+                    label: row.title,
+                    color: Color(hex: row.hexColor),
+                    trailingText: row.trailingText,
+                    showsProBadge: row.showsProBadge && (row.tier == .freemium || StudioFeatureGate.isPro)
+                )
+            }
+            .buttonStyle(BuxMicroShrinkStyle())
         }
     }
 }
@@ -172,6 +224,7 @@ struct SettingsRow: View {
     let label: String
     let color: Color
     var trailingText: String? = nil
+    var showsProBadge: Bool = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -189,6 +242,11 @@ struct SettingsRow: View {
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             Spacer()
+
+            if showsProBadge {
+                ProFeatureBadge(compact: true)
+                    .padding(.trailing, trailingText == nil ? 4 : 0)
+            }
 
             if let trailing = trailingText {
                 Text(trailing)

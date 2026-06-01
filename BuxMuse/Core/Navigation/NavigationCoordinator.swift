@@ -70,6 +70,9 @@ final class NavigationCoordinator: ObservableObject {
     /// Set when Home discovery card routes to Studio settings.
     @Published var openStudioSettingsRequest = false
 
+    /// Set when Money Map deep-links to Payment Sources in Settings.
+    @Published var openPaymentSettingsRequest = false
+
     /// Set when Home hero avatar opens Profile settings.
     @Published var openProfileSettingsRequest = false
 
@@ -80,9 +83,22 @@ final class NavigationCoordinator: ObservableObject {
         }
     }
 
+    func openPaymentSettings() {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            selectedTab = .settings
+            openPaymentSettingsRequest = true
+        }
+    }
+
     func consumeStudioSettingsRequest() -> Bool {
         guard openStudioSettingsRequest else { return false }
         openStudioSettingsRequest = false
+        return true
+    }
+
+    func consumePaymentSettingsRequest() -> Bool {
+        guard openPaymentSettingsRequest else { return false }
+        openPaymentSettingsRequest = false
         return true
     }
 

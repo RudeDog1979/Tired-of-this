@@ -151,6 +151,9 @@ struct RootView: View {
                         .environmentObject(themeManager)
                         .environmentObject(appSettingsManager)
                         .environmentObject(navigationCoordinator)
+                        .environmentObject(financialBridge)
+                        .environmentObject(container.studioStore)
+                        .environmentObject(container.studioBrain)
                         .environmentObject(container.simpleStudioStore)
                         .environmentObject(container.simpleStudioBrain)
                 } label: {

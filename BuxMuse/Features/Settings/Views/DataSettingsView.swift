@@ -13,6 +13,8 @@ struct DataSettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var persistence: PersistenceController
     @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var financialBridge: FinancialEngineBridge
+    @EnvironmentObject private var goalsViewModel: GoalsViewModel
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
@@ -24,6 +26,8 @@ struct DataSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
+            BackupRestoreSettingsView()
+
             BuxFormSection(title: "Sandbox backup") {
                 Toggle("Allow Local Backups", isOn: $store.allowLocalBackups)
                     .tint(themeManager.current.accentColor)
@@ -40,6 +44,21 @@ struct DataSettingsView: View {
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
                 }
+            }
+
+            BuxFormSection(title: "Data Guard Mode") {
+                Toggle(isOn: $store.dataGuardModeEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Data Guard Mode")
+                            .font(.system(size: 15, weight: .semibold))
+                        Text("Blocks all outbound merchant logo requests. Renders local monogram avatars. Zero data cost when on prepaid mobile.")
+                            .font(.system(size: 12, weight: .medium))
+                            .buxLabelSecondary()
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .tint(themeManager.current.accentColor)
+                .buxFormFieldPadding()
             }
 
             BuxFormSection(title: "Merchant data") {
@@ -103,7 +122,7 @@ struct DataSettingsView: View {
                 .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Data Control")
+        .navigationTitle("Backup & Restore")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Database Reset Complete", isPresented: $showSuccessAlert) {
             Button("OK", role: .cancel) {}

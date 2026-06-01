@@ -2,7 +2,7 @@
 //  BuxNavigationChrome.swift
 //  BuxMuse
 //
-//  Root / pushed navigation bar + scroll edge polish (iOS 26 glass, iOS 18 fallback).
+//  Root / pushed navigation bar + scroll edge polish (iOS 26 glass, iOS 18 content mask).
 //
 
 import SwiftUI
@@ -12,7 +12,6 @@ import SwiftUI
 private struct BuxRootNavigationChromeModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
-            // Let system Liquid Glass style the bar — no custom bar fill.
             content
         } else {
             content.toolbarBackground(.hidden, for: .navigationBar)
@@ -65,7 +64,7 @@ private struct BuxSheetNavigationChromeModifier: ViewModifier {
     }
 }
 
-// MARK: - Scroll edge (content ↔ bar separation on iOS 26)
+// MARK: - Scroll edge
 
 @available(iOS 26, *)
 private struct BuxSoftScrollEdgeModifier: ViewModifier {
@@ -76,10 +75,28 @@ private struct BuxSoftScrollEdgeModifier: ViewModifier {
     }
 }
 
+private struct BuxSoftScrollChromeModifier: ViewModifier {
+    let edges: Edge.Set
+    var fadeSize: CGFloat
+
+    private var isHorizontal: Bool {
+        edges.contains(.leading) || edges.contains(.trailing)
+    }
+
+    func body(content: Content) -> some View {
+        if isHorizontal {
+            content.modifier(BuxScrollEdgeMaskModifier(edges: edges, fadeSize: fadeSize))
+        } else if #available(iOS 26, *) {
+            content.modifier(BuxSoftScrollEdgeModifier(edges: edges))
+        } else {
+            content.modifier(BuxScrollEdgeMaskModifier(edges: edges, fadeSize: fadeSize))
+        }
+    }
+}
+
 // MARK: - Toolbar shared glass (plain icon items)
 
 extension ToolbarContent {
-    /// Hide the shared glass pill behind plain icon / menu toolbar items on iOS 26.
     @ToolbarContentBuilder
     func buxPlainToolbarBackground() -> some ToolbarContent {
         if #available(iOS 26, *) {
@@ -91,13 +108,10 @@ extension ToolbarContent {
 }
 
 extension View {
-    /// Large-title root screens — mesh shows through; system glass on iOS 26.
     func buxRootNavigationChrome() -> some View {
         modifier(BuxRootNavigationChromeModifier())
     }
 
-    /// Pushed Studio / settings lists with mesh backdrop.
-    /// Prefer `buxDetailNavigationChrome()` for headerless soft-scroll screens.
     func buxPushedNavigationChrome() -> some View {
         modifier(BuxPushedNavigationChromeModifier())
     }
@@ -107,33 +121,24 @@ extension View {
         buxRootNavigationChrome()
     }
 
-    /// Sheets that need a standard navigation bar surface.
     func buxPolishedNavigationBar() -> some View {
         modifier(BuxPolishedNavigationBarModifier())
     }
 
-    /// Sheet / full-screen cover — themed nav bar matching M3 canvas.
     func buxSheetNavigationChrome() -> some View {
         modifier(BuxSheetNavigationChromeModifier())
     }
 
-    /// Scroll views / lists under a navigation bar — soft edge on iOS 26.
-    @ViewBuilder
-    func buxSoftScrollChrome(edges: Edge.Set = .top) -> some View {
-        if #available(iOS 26, *) {
-            modifier(BuxSoftScrollEdgeModifier(edges: edges))
-        } else {
-            self
-        }
+    /// Scroll views — iOS 26 system scroll edge; iOS 18 content mask (no painted bars).
+    func buxSoftScrollChrome(edges: Edge.Set = .top, fadeSize: CGFloat = 20) -> some View {
+        modifier(BuxSoftScrollChromeModifier(edges: edges, fadeSize: fadeSize))
     }
 
-    /// Alias for root tabs and detail vertical scrolls.
     func buxRootScrollEdgeChrome() -> some View {
         buxSoftScrollChrome(edges: .top)
     }
 
-    /// Horizontal carousels under mesh (renewals, category chips, etc.).
-    func buxSoftHorizontalScrollChrome() -> some View {
-        buxSoftScrollChrome(edges: .horizontal)
+    func buxSoftHorizontalScrollChrome(fadeSize: CGFloat = 20) -> some View {
+        buxSoftScrollChrome(edges: .horizontal, fadeSize: fadeSize)
     }
 }

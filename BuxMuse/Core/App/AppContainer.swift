@@ -73,7 +73,8 @@ final class AppContainer: ObservableObject {
         insightsViewModel = InsightsViewModel(
             insightsEngine: insightsEngine,
             financialEngine: financialBridge.engine,
-            goalsViewModel: goalsViewModel
+            goalsViewModel: goalsViewModel,
+            studioStore: studioStore
         )
         goalsSheetCoordinator = GoalsSheetCoordinator()
 
@@ -201,6 +202,7 @@ final class AppContainer: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.scheduleEngagementRefresh()
+                self?.insightsViewModel.recalculate()
             }
             .store(in: &cancellables)
 

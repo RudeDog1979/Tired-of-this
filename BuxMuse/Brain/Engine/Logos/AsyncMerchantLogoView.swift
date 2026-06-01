@@ -23,7 +23,10 @@ public struct AsyncMerchantLogoView: View {
 
     public var body: some View {
         ZStack {
-            if let uiImage = image {
+            // Data Guard: render text monogram instead of any logo network call
+            if SettingsStore.shared.dataGuardModeEnabled {
+                monogramAvatar
+            } else if let uiImage = image {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
@@ -49,8 +52,40 @@ public struct AsyncMerchantLogoView: View {
             }
         }
         .frame(width: size, height: size)
-        .onAppear { loadLogo() }
-        .onChange(of: merchantName) { _, _ in loadLogo() }
+        .onAppear { if !SettingsStore.shared.dataGuardModeEnabled { loadLogo() } }
+        .onChange(of: merchantName) { _, _ in if !SettingsStore.shared.dataGuardModeEnabled { loadLogo() } }
+    }
+
+    /// Premium monogram avatar rendered locally — no network, no data cost.
+    private var monogramAvatar: some View {
+        ZStack {
+            Circle()
+                .fill(monogramBackground)
+                .frame(width: size, height: size)
+            Text(monogramInitials)
+                .font(.system(size: size * 0.38, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+        }
+    }
+
+    private var monogramInitials: String {
+        let words = merchantName
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+        if words.count >= 2 {
+            return String((words[0].first ?? Character("?")).uppercased() + (words[1].first ?? Character("?")).uppercased())
+        } else if let first = words.first, !first.isEmpty {
+            return String(first.prefix(2).uppercased())
+        }
+        return "?"
+    }
+
+    private var monogramBackground: Color {
+        // Deterministic pastel hue from merchant name hash
+        let hash = abs(merchantName.hashValue)
+        let hue = Double(hash % 360) / 360.0
+        return Color(hue: hue, saturation: 0.55, brightness: 0.62)
     }
 
     private func loadLogo() {

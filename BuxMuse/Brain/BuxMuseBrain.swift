@@ -72,6 +72,29 @@ public final class BuxMuseBrain: ObservableObject {
                 self?.scheduleSnapshotRefresh()
             }
             .store(in: &cancellables)
+            
+        HustleManager.shared.$selectedHustleId
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshExpenses()
+            }
+            .store(in: &cancellables)
+
+        SettingsStore.shared.$sideHustleMatrixEnabled
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshExpenses()
+                self?.scheduleSnapshotRefresh()
+            }
+            .store(in: &cancellables)
+
+        SettingsStore.shared.$showUnassignedExpensesInWorkspace
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshExpenses()
+                self?.scheduleSnapshotRefresh()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Hydration
@@ -144,7 +167,8 @@ public final class BuxMuseBrain: ObservableObject {
     }
 
     private func reloadExpenseRecordsFromStore() {
-        expenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
+        let all = (try? persistence.fetchAllExpenseRecords()) ?? []
+        expenseRecords = HustleWorkspaceFilter.filter(all) { $0.hustleId }
     }
 
     @discardableResult
@@ -624,8 +648,9 @@ public final class BuxMuseBrain: ObservableObject {
 
     public func generateExpenseInteractionDisplay() async -> ExpenseInteractionDisplay {
         let allRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
+        let scoped = HustleWorkspaceFilter.filter(allRecords) { $0.hustleId }
         return buildExpenseInteractionDisplay(
-            from: allRecords,
+            from: scoped,
             currency: AppSettingsManager.currencySetting(for: AppSettingsManager.preferredCurrencyCode)
         )
     }
@@ -689,7 +714,9 @@ public final class BuxMuseBrain: ObservableObject {
                     habitSignature: r.habitSignatureId,
                     emotion: r.emotion,
                     emotionSymbol: r.emotion.flatMap { EmotionalTaggingEngine.tag(for: $0)?.symbol },
-                    context: r.contextTag
+                    context: r.contextTag,
+                    hustleId: r.hustleId,
+                    isUnassignedWorkspace: HustleWorkspaceFilter.isFilteringActive && HustleWorkspaceFilter.isUnassigned(r.hustleId)
                 )
             }
             sections.append(ExpenseSectionDisplay(

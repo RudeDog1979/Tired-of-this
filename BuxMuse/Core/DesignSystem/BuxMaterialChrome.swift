@@ -76,6 +76,10 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        let borderLineWidth: CGFloat = settings.solarContrastModeEnabled ? 2.0 : 0.5
+        let shadowColor: Color = (variant == .elevated && castsShadow && !settings.solarContrastModeEnabled)
+            ? BuxMaterialChrome.elevatedShadowColor(for: colorScheme)
+            : .clear
 
         content
             .background {
@@ -85,17 +89,19 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
             .clipShape(shape)
             .overlay {
                 if showsBorder {
-                    shape.stroke(scheme.outlineVariant, lineWidth: 0.5)
+                    shape.stroke(scheme.outlineVariant, lineWidth: borderLineWidth)
                 }
             }
             .shadow(
-                color: variant == .elevated && castsShadow
-                    ? BuxMaterialChrome.elevatedShadowColor(for: colorScheme)
-                    : .clear,
-                radius: variant == .elevated && castsShadow ? BuxMaterialChrome.elevatedShadowRadius : 0,
+                color: shadowColor,
+                radius: variant == .elevated && castsShadow && !settings.solarContrastModeEnabled ? BuxMaterialChrome.elevatedShadowRadius : 0,
                 x: 0,
-                y: variant == .elevated && castsShadow ? BuxMaterialChrome.elevatedShadowY : 0
+                y: variant == .elevated && castsShadow && !settings.solarContrastModeEnabled ? BuxMaterialChrome.elevatedShadowY : 0
             )
+            .modifier(BuxLandingLightRimWhenEnabled(
+                cornerRadius: cornerRadius,
+                enabled: settings.showsLandingCardShine
+            ))
     }
 }
 

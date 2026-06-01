@@ -221,6 +221,8 @@ struct StudioSettingsView: View {
                     }
                     .buxFormFieldPadding()
                 }
+
+                studioToolsSection
             }
         }
         .navigationTitle("Studio")
@@ -238,6 +240,97 @@ struct StudioSettingsView: View {
         .onChange(of: businessType) { _, _ in saveStudioProfile() }
         .onChange(of: paymentTerms) { _, _ in saveStudioProfile() }
         .onChange(of: hourlyRate) { _, _ in saveStudioProfile() }
+    }
+
+    private var studioToolsSection: some View {
+        BuxFormSection(title: "Studio tools") {
+            studioToolLink(title: "Workspaces", subtitle: workspaceSubtitle, icon: "briefcase.fill") {
+                HustleSettingsView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+                    .environmentObject(simpleStudioStore)
+            }
+            BuxFormRowDivider()
+            studioToolLink(title: "Cash & Barter", subtitle: cashBarterSubtitle, icon: "banknote.fill") {
+                StudioCashBarterSettingsView()
+                    .environmentObject(themeManager)
+            }
+            BuxFormRowDivider()
+            studioToolLink(title: "Workload & Energy", subtitle: store.burnoutGuardEnabled ? "On" : "Off", icon: "bolt.heart.fill") {
+                BurnoutGuardSettingsView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+                    .environmentObject(simpleStudioStore)
+            }
+            BuxFormRowDivider()
+            studioToolLink(title: "Invoice Payment", subtitle: invoicePaymentSubtitle, icon: "building.columns.fill") {
+                InvoicePaymentSettingsView()
+            }
+            BuxFormRowDivider()
+            studioToolLink(title: "Mileage Log", subtitle: store.autoLocationForMileage ? "On" : "Off", icon: "car.fill") {
+                MileageSettingsView()
+            }
+            if store.studioMode == .pro {
+                BuxFormRowDivider()
+                studioToolLink(title: "Scope Radar", subtitle: store.antiScopeCreepEnabled ? "On" : "Off", icon: "scope") {
+                    ScopeCreepRadarSettingsView()
+                        .environmentObject(themeManager)
+                }
+                BuxFormRowDivider()
+                studioToolLink(title: "Agreement Scratchpad", subtitle: store.agreementScratchpadEnabled ? "On" : "Off", icon: "doc.text.fill") {
+                    AgreementScratchpadSettingsView()
+                        .environmentObject(themeManager)
+                }
+            }
+        }
+    }
+
+    private var workspaceSubtitle: String {
+        guard store.sideHustleMatrixEnabled else { return "Off" }
+        return store.studioMode == .pro ? "On · Unlimited" : "On · Up to 3"
+    }
+
+    private var cashBarterSubtitle: String {
+        let parts = [
+            store.dualCashDrawerEnabled ? "Cash on" : nil,
+            store.barterLoggerEnabled ? "Barter on" : nil
+        ].compactMap { $0 }
+        return parts.isEmpty ? "Off" : parts.joined(separator: " · ")
+    }
+
+    private var invoicePaymentSubtitle: String {
+        store.autoDetectInvoiceBankAccountType ? "Auto" : (store.invoiceBankAccountTypeOverride?.displayName ?? "Manual")
+    }
+
+    private func studioToolLink<Destination: View>(
+        title: String,
+        subtitle: String,
+        icon: String,
+        @ViewBuilder destination: () -> Destination
+    ) -> some View {
+        NavigationLink {
+            destination()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(themeManager.current.accentColor)
+                    .frame(width: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                    Text(subtitle)
+                        .font(.system(size: 12, weight: .medium))
+                        .buxLabelSecondary()
+                }
+                Spacer()
+                BuxChevron()
+            }
+            .buxFormFieldPadding()
+        }
     }
 
     private var studioToggleBinding: Binding<Bool> {

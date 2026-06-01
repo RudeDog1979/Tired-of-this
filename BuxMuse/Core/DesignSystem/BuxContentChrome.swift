@@ -132,11 +132,15 @@ struct BuxHeroCardPlateBackground: View {
 struct BuxHeroCardChromeModifier: ViewModifier {
     let cornerRadius: CGFloat
     var useMeshPlate: Bool = true
+    @ObservedObject private var settings = SettingsStore.shared
 
     func body(content: Content) -> some View {
         content
             .buxMaterialCardChrome(.elevated, cornerRadius: cornerRadius, castsShadow: false)
-            .buxLandingLightRim(cornerRadius: cornerRadius, intensity: .hero)
+            .modifier(BuxLandingLightRimWhenEnabled(
+                cornerRadius: cornerRadius,
+                enabled: settings.showsLandingCardShine
+            ))
     }
 }
 
@@ -149,12 +153,12 @@ struct BuxListCardChromeModifier: ViewModifier {
             .buxMaterialCardChrome(.outlined, cornerRadius: cornerRadius)
             .modifier(BuxLandingLightRimWhenEnabled(
                 cornerRadius: cornerRadius,
-                enabled: settings.brandThemesEnabled
+                enabled: settings.showsLandingCardShine
             ))
     }
 }
 
-private struct BuxLandingLightRimWhenEnabled: ViewModifier {
+struct BuxLandingLightRimWhenEnabled: ViewModifier {
     let cornerRadius: CGFloat
     let enabled: Bool
 
