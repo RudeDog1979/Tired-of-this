@@ -49,8 +49,11 @@ struct HustleSettingsView: View {
                 .tint(themeManager.current.accentColor)
                 .buxFormFieldPadding()
                 .onChange(of: store.sideHustleMatrixEnabled) { _, enabled in
-                    if enabled, hustleManager.hustles.isEmpty {
-                        _ = hustleManager.ensureDefaultWorkspaceIfNeeded()
+                    if enabled {
+                        hustleManager.loadHustles()
+                        if hustleManager.hustles.isEmpty {
+                            _ = hustleManager.ensureDefaultWorkspaceIfNeeded()
+                        }
                     }
                     store.save()
                 }
