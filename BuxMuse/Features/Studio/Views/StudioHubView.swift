@@ -29,6 +29,7 @@ struct StudioHubView: View {
     @State private var navigateToCashflow = false
     @State private var navigateToDeductions = false
     @State private var navigateToMileage = false
+    @State private var navigateToAgreements = false
     @State private var taxHubInitialTab: TaxStudioTab = .overview
 
     @State private var showNewInvoice = false
@@ -241,6 +242,12 @@ struct StudioHubView: View {
                     .environmentObject(store)
                     .environment(\.studioEnhancedTint, true)
             }
+            .navigationDestination(isPresented: $navigateToAgreements) {
+                AgreementScratchpadListView()
+                    .environmentObject(themeManager)
+                    .environmentObject(store)
+                    .environment(\.studioEnhancedTint, true)
+            }
             .navigationDestination(isPresented: $navigateToReceipts) {
                 StudioReceiptsListView()
                     .environmentObject(themeManager)
@@ -346,6 +353,8 @@ struct StudioHubView: View {
                     navRow(title: "Expenses", icon: "doc.plaintext.fill", color: .teal) { navigateToReceipts = true }
                     studioRowDivider
                     navRow(title: "Projects", icon: "folder.fill", color: .purple) { navigateToProjects = true }
+                    studioRowDivider
+                    navRow(title: "Agreements", icon: "signature", color: .indigo) { navigateToAgreements = true }
                     studioRowDivider
                     navRow(title: "Tax Studio", icon: "percent", color: .red) { openTaxHub(.overview) }
                     studioRowDivider

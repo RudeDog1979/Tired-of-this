@@ -503,14 +503,14 @@ struct StudioProjectDetailView: View {
         let existing = store.agreementDraft(forProjectId: project.id)
         return VStack(alignment: .leading, spacing: BuxLayout.tight) {
             HStack(spacing: 6) {
-                Text("AGREEMENT SCRATCHPAD")
+                Text("AGREEMENT")
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 ProFeatureBadge(compact: true)
             }
 
             VStack(alignment: .leading, spacing: 10) {
-                Text(existing == nil ? "No agreement draft yet for this project." : "Draft saved · \(existing!.title)")
+                Text(existing == nil ? "No agreement yet for this project." : "\(existing!.statusDisplayLabel) · \(existing!.title)")
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
 

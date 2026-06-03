@@ -150,6 +150,7 @@ public final class StudioStore: ObservableObject {
     public func upsertAgreementDraft(_ draft: AgreementDraft) {
         var updated = draft
         updated.updatedAt = Date()
+        StudioSyncCoordinator.alignAgreementDraft(&updated, store: self)
         if let index = agreementDrafts.firstIndex(where: { $0.id == draft.id }) {
             agreementDrafts[index] = updated
         } else {

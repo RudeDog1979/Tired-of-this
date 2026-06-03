@@ -59,4 +59,22 @@ enum StudioSyncCoordinator {
             store.updateEntry(job)
         }
     }
+
+    // MARK: - Agreement ↔ project / client
+
+    /// Aligns agreement links with project client and optional invoice reference.
+    static func alignAgreementDraft(_ draft: inout AgreementDraft, store: StudioStore) {
+        if let projectId = draft.projectId,
+           let project = store.projects.first(where: { $0.id == projectId }) {
+            if draft.clientId == nil {
+                draft.clientId = project.clientId
+            }
+        }
+        if let invoiceId = draft.linkedInvoiceId,
+           let invoice = store.invoices.first(where: { $0.id == invoiceId }) {
+            if draft.clientId == nil { draft.clientId = invoice.clientId }
+            if draft.projectId == nil { draft.projectId = invoice.projectId }
+        }
+        draft.refreshAgreementStatus()
+    }
 }

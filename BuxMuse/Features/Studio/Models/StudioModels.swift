@@ -835,6 +835,12 @@ public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
 
 // MARK: - Agreement Scratchpad (Pro)
 
+public enum StudioAgreementStatus: String, Codable, CaseIterable, Sendable {
+    case draft
+    case awaitingSignatures
+    case signed
+}
+
 public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     public var id: UUID
     public var title: String
@@ -846,6 +852,18 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     public var signOffName: String
     public var signOffDate: Date?
     public var updatedAt: Date
+    /// Payment & timing (guided agreement fields).
+    public var paymentTerms: String
+    public var timelineNotes: String
+    public var paymentAmountNotes: String
+    public var providerSignatoryName: String
+    /// Finger signatures stored as PNG (on-device record).
+    public var clientSignaturePNG: Data?
+    public var providerSignaturePNG: Data?
+    public var clientSignedAt: Date?
+    public var providerSignedAt: Date?
+    public var linkedInvoiceId: UUID?
+    public var agreementStatus: StudioAgreementStatus
 
     public init(
         id: UUID = UUID(),
@@ -857,7 +875,17 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         outOfScope: String = "",
         signOffName: String = "",
         signOffDate: Date? = nil,
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        paymentTerms: String = "",
+        timelineNotes: String = "",
+        paymentAmountNotes: String = "",
+        providerSignatoryName: String = "",
+        clientSignaturePNG: Data? = nil,
+        providerSignaturePNG: Data? = nil,
+        clientSignedAt: Date? = nil,
+        providerSignedAt: Date? = nil,
+        linkedInvoiceId: UUID? = nil,
+        agreementStatus: StudioAgreementStatus = .draft
     ) {
         self.id = id
         self.title = title
@@ -869,38 +897,119 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         self.signOffName = signOffName
         self.signOffDate = signOffDate
         self.updatedAt = updatedAt
+        self.paymentTerms = paymentTerms
+        self.timelineNotes = timelineNotes
+        self.paymentAmountNotes = paymentAmountNotes
+        self.providerSignatoryName = providerSignatoryName
+        self.clientSignaturePNG = clientSignaturePNG
+        self.providerSignaturePNG = providerSignaturePNG
+        self.clientSignedAt = clientSignedAt
+        self.providerSignedAt = providerSignedAt
+        self.linkedInvoiceId = linkedInvoiceId
+        self.agreementStatus = agreementStatus
     }
 
-    public func formattedShareText(clientName: String?, projectName: String?) -> String {
+    public var isFullySigned: Bool {
+        clientSignaturePNG != nil && providerSignaturePNG != nil
+    }
+
+    public mutating func refreshAgreementStatus() {
+        if isFullySigned {
+            agreementStatus = .signed
+        } else if clientSignaturePNG != nil || providerSignaturePNG != nil {
+            agreementStatus = .awaitingSignatures
+        } else {
+            agreementStatus = .draft
+        }
+    }
+
+    public var statusDisplayLabel: String {
+        switch agreementStatus {
+        case .draft: "Draft"
+        case .awaitingSignatures: "Awaiting signatures"
+        case .signed: "Signed"
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        title = try c.decodeIfPresent(String.self, forKey: .title) ?? "Client agreement"
+        clientId = try c.decodeIfPresent(UUID.self, forKey: .clientId)
+        projectId = try c.decodeIfPresent(UUID.self, forKey: .projectId)
+        scopeBullets = try c.decodeIfPresent(String.self, forKey: .scopeBullets) ?? ""
+        deliverables = try c.decodeIfPresent(String.self, forKey: .deliverables) ?? ""
+        outOfScope = try c.decodeIfPresent(String.self, forKey: .outOfScope) ?? ""
+        signOffName = try c.decodeIfPresent(String.self, forKey: .signOffName) ?? ""
+        signOffDate = try c.decodeIfPresent(Date.self, forKey: .signOffDate)
+        updatedAt = try c.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date()
+        paymentTerms = try c.decodeIfPresent(String.self, forKey: .paymentTerms) ?? ""
+        timelineNotes = try c.decodeIfPresent(String.self, forKey: .timelineNotes) ?? ""
+        paymentAmountNotes = try c.decodeIfPresent(String.self, forKey: .paymentAmountNotes) ?? ""
+        providerSignatoryName = try c.decodeIfPresent(String.self, forKey: .providerSignatoryName) ?? ""
+        clientSignaturePNG = try c.decodeIfPresent(Data.self, forKey: .clientSignaturePNG)
+        providerSignaturePNG = try c.decodeIfPresent(Data.self, forKey: .providerSignaturePNG)
+        clientSignedAt = try c.decodeIfPresent(Date.self, forKey: .clientSignedAt)
+        providerSignedAt = try c.decodeIfPresent(Date.self, forKey: .providerSignedAt)
+        linkedInvoiceId = try c.decodeIfPresent(UUID.self, forKey: .linkedInvoiceId)
+        agreementStatus = try c.decodeIfPresent(StudioAgreementStatus.self, forKey: .agreementStatus) ?? .draft
+        refreshAgreementStatus()
+    }
+
+    public func formattedShareText(
+        clientName: String?,
+        projectName: String?,
+        providerName: String? = nil
+    ) -> String {
         var lines: [String] = [title]
         if let clientName, !clientName.isEmpty { lines.append("Client: \(clientName)") }
         if let projectName, !projectName.isEmpty { lines.append("Project: \(projectName)") }
+        if let providerName, !providerName.isEmpty { lines.append("Provider: \(providerName)") }
+        lines.append("Status: \(statusDisplayLabel)")
         lines.append("")
 
-        if !scopeBullets.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            lines.append("Scope")
-            lines.append(scopeBullets.trimmingCharacters(in: .whitespacesAndNewlines))
-            lines.append("")
-        }
-        if !deliverables.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            lines.append("Deliverables")
-            lines.append(deliverables.trimmingCharacters(in: .whitespacesAndNewlines))
-            lines.append("")
-        }
-        if !outOfScope.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            lines.append("Out of scope")
-            lines.append(outOfScope.trimmingCharacters(in: .whitespacesAndNewlines))
-            lines.append("")
-        }
+        appendSection("Scope", body: scopeBullets, to: &lines)
+        appendSection("Deliverables", body: deliverables, to: &lines)
+        appendSection("Out of scope", body: outOfScope, to: &lines)
+        appendSection("Payment", body: paymentAmountNotes, to: &lines)
+        appendSection("Payment terms", body: paymentTerms, to: &lines)
+        appendSection("Timeline", body: timelineNotes, to: &lines)
+
         if !signOffName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let dateStr = signOffDate.map {
                 DateFormatter.localizedString(from: $0, dateStyle: .medium, timeStyle: .none)
             } ?? "________"
             lines.append("Approved by: \(signOffName.trimmingCharacters(in: .whitespacesAndNewlines)) · \(dateStr)")
+            lines.append("")
+        }
+        if clientSignaturePNG != nil {
+            let when = clientSignedAt.map {
+                DateFormatter.localizedString(from: $0, dateStyle: .medium, timeStyle: .none)
+            } ?? "recorded"
+            lines.append("Client signature captured · \(when)")
+        }
+        if providerSignaturePNG != nil {
+            let when = providerSignedAt.map {
+                DateFormatter.localizedString(from: $0, dateStyle: .medium, timeStyle: .none)
+            } ?? "recorded"
+            let who = providerSignatoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let label = who.isEmpty ? "Provider signature" : "Provider signature (\(who))"
+            lines.append("\(label) · \(when)")
         }
         lines.append("")
-        lines.append("— Drafted in BuxMuse Studio (local record, not e-sign)")
+        let footer = isFullySigned
+            ? "— Signed in BuxMuse Studio (on-device record; not a certified e-sign service)"
+            : "— Drafted in BuxMuse Studio (local record)"
+        lines.append(footer)
         return lines.joined(separator: "\n")
+    }
+
+    private func appendSection(_ heading: String, body: String, to lines: inout [String]) {
+        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        lines.append(heading)
+        lines.append(trimmed)
+        lines.append("")
     }
 }
 
