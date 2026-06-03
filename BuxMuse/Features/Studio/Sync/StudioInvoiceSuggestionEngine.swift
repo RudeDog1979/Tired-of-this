@@ -13,6 +13,7 @@ public enum StudioInvoiceSuggestionReason: String, Codable, Sendable, CaseIterab
     case projectExpenses
     case jobBalanceDue
     case hourlyLoggedTime
+    case agreementLinked
 
     public var chipLabel: String {
         switch self {
@@ -21,7 +22,24 @@ public enum StudioInvoiceSuggestionReason: String, Codable, Sendable, CaseIterab
         case .projectExpenses: return "Expenses"
         case .jobBalanceDue: return "Still owed"
         case .hourlyLoggedTime: return "Hours logged"
+        case .agreementLinked: return "Agreement"
         }
+    }
+}
+
+public struct SimpleJobInvoicePick: Identifiable, Equatable, Sendable {
+    public let id: UUID
+    public let jobId: UUID
+    public let jobLabel: String
+    public let subtitle: String
+    public let amount: Decimal
+
+    public init(jobId: UUID, jobLabel: String, subtitle: String, amount: Decimal) {
+        self.id = jobId
+        self.jobId = jobId
+        self.jobLabel = jobLabel
+        self.subtitle = subtitle
+        self.amount = amount
     }
 }
 
@@ -204,6 +222,7 @@ enum StudioInvoiceSuggestionEngine {
         project: StudioProject,
         store: StudioStore
     ) -> StudioInvoiceSuggestion? {
+        let agreement = store.agreementDraft(forProjectId: project.id)
         let linkedInvoices = store.invoices.filter { inv in
             inv.projectId == project.id || project.generatedInvoiceIds.contains(inv.id)
         }
@@ -270,7 +289,13 @@ enum StudioInvoiceSuggestionEngine {
         let amount = max(subtotal, balanceGap)
         if amount <= 0 { return nil }
 
-        let subtitle = reasons.map(\.chipLabel).joined(separator: " · ")
+        if agreement != nil, !reasons.contains(.agreementLinked) {
+            reasons.append(.agreementLinked)
+        }
+        var subtitle = reasons.map(\.chipLabel).joined(separator: " · ")
+        if let agreement, !agreement.paymentAmountNotes.isEmpty {
+            subtitle += " · per agreement"
+        }
         return StudioInvoiceSuggestion(
             title: project.name,
             subtitle: subtitle,
@@ -309,16 +334,39 @@ enum StudioInvoiceSuggestionEngine {
 
     // MARK: - Simple
 
-    static func simpleSuggestions(store: SimpleStudioStore) -> [SimpleInvoiceSuggestion] {
+    /// Jobs ready to bill for a customer (mirrors Pro completed-project picker).
+    static func billableJobPicks(
+        forCustomerName name: String,
+        store: SimpleStudioStore
+    ) -> [SimpleJobInvoicePick] {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
+        return simpleSuggestions(store: store)
+            .filter { $0.customerName.caseInsensitiveCompare(trimmed) == .orderedSame }
+            .map {
+                SimpleJobInvoicePick(
+                    jobId: $0.jobId,
+                    jobLabel: $0.jobDescription,
+                    subtitle: $0.subtitle,
+                    amount: $0.amount
+                )
+            }
+    }
+
+    static func simpleSuggestions(
+        store: SimpleStudioStore,
+        studioStore: StudioStore = .shared
+    ) -> [SimpleInvoiceSuggestion] {
         store.entries
             .filter { $0.kind == .job }
-            .compactMap { simpleJobSuggestion(job: $0, store: store) }
+            .compactMap { simpleJobSuggestion(job: $0, store: store, studioStore: studioStore) }
             .sorted { $0.amount > $1.amount }
     }
 
     private static func simpleJobSuggestion(
         job: SimpleStudioEntry,
-        store: SimpleStudioStore
+        store: SimpleStudioStore,
+        studioStore: StudioStore? = nil
     ) -> SimpleInvoiceSuggestion? {
         let balance = job.jobBalanceDue
         guard balance > 0 else { return nil }
@@ -340,6 +388,12 @@ enum StudioInvoiceSuggestionEngine {
             reasons.append(.hourlyLoggedTime)
             let hours = SimpleStudioTimePayEngine.formattedHours(logged)
             subtitle = "\(hours) logged at \(rate)/hr"
+        }
+
+        if let studioStore,
+           StudioWorkDealHelpers.agreement(forJob: job, studioStore: studioStore) != nil {
+            reasons.append(.agreementLinked)
+            subtitle += " · agreement on file"
         }
 
         let label = job.jobLabel?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""

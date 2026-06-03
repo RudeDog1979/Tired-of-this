@@ -177,6 +177,8 @@ struct StudioProjectDetailView: View {
     @State private var showAgreementEditor = false
     @State private var showProjectEditor = false
     @State private var invoicePrefill: StudioInvoiceSuggestion?
+    @State private var editingTimeEntry: StudioTimeEntry?
+    @State private var timeEntryPendingDelete: StudioTimeEntry?
 
     private var project: StudioProject? {
         store.project(id: projectId)
@@ -629,12 +631,48 @@ struct StudioProjectDetailView: View {
                             .clipShape(Capsule())
                     }
                     .padding(.vertical, 4)
+                    .contentShape(Rectangle())
+                    .onTapGesture { editingTimeEntry = entry }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            timeEntryPendingDelete = entry
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
                 }
             }
         }
         .padding(BuxLayout.section)
         .frame(maxWidth: .infinity, alignment: .leading)
         .studioThemedCardChrome(cornerRadius: 24)
+        .sheet(item: $editingTimeEntry) { entry in
+            StudioTimeEntryEditorSheet(projectId: projectId, entry: entry)
+                .environmentObject(store)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+        }
+        .alert("Delete time entry?", isPresented: Binding(
+            get: { timeEntryPendingDelete != nil },
+            set: { if !$0 { timeEntryPendingDelete = nil } }
+        )) {
+            Button("Delete", role: .destructive) {
+                if let entry = timeEntryPendingDelete {
+                    deleteTimeEntry(entry)
+                }
+                timeEntryPendingDelete = nil
+            }
+            Button("Cancel", role: .cancel) { timeEntryPendingDelete = nil }
+        } message: {
+            Text("This removes the entry from the project log.")
+        }
+    }
+
+    private func deleteTimeEntry(_ entry: StudioTimeEntry) {
+        guard var project = store.project(id: projectId) else { return }
+        project.timeEntries.removeAll { $0.id == entry.id }
+        store.updateProject(project)
+        BuxSaveFeedback.success()
     }
     
     private func expensesSection(projectExpenses: Decimal) -> some View {
@@ -698,6 +736,17 @@ struct ActiveTimeTrackerView: View {
         return store.projects.first?.id
     }
 
+    @ViewBuilder
+    private var workDealApprovalBanner: some View {
+        if let projectId = resolvedProjectId,
+           StudioWorkDealHelpers.needsClientApproval(projectId: projectId, studioStore: store) {
+            StudioWorkDealApprovalBanner(
+                message: "No client approval on file for this project. Logging time is allowed — capture agreement when you can."
+            )
+            .padding(.horizontal, BuxTokens.marginRegular)
+        }
+    }
+
     private var canLog: Bool {
         displayElapsed > 0 && resolvedProjectId != nil
     }
@@ -744,6 +793,7 @@ struct ActiveTimeTrackerView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: BuxLayout.section) {
                         projectPicker
+                        workDealApprovalBanner
                         jobNameSection
 
                         BuxStopwatchFace(
@@ -1233,6 +1283,8 @@ struct StudioProjectEditorSheet: View {
     @State private var hourlyRate = ""
     @State private var fixedFee = ""
     @State private var notes = ""
+    @State private var plannedScope = ""
+    @State private var plannedDeliverables = ""
     @State private var budgetedHours = ""
     @State private var allowedRevisions = ""
     @State private var currentRevisions = ""
@@ -1330,8 +1382,24 @@ struct StudioProjectEditorSheet: View {
                             }
                         }
 
-                        BuxFormSection(title: "Notes") {
-                            TextField("Scope, deliverables, reminders…", text: $notes, axis: .vertical)
+                        BuxFormSection(title: "Project plan") {
+                            Text("Used when you fill an agreement from this project.")
+                                .font(.system(size: 11, weight: .medium))
+                                .buxLabelSecondary()
+                                .padding(.horizontal, BuxTokens.section)
+                                .padding(.top, 8)
+                            BuxFormRowDivider()
+                            TextField("Scope (for agreements)", text: $plannedScope, axis: .vertical)
+                                .lineLimit(2...6)
+                                .buxFormFieldPadding()
+                            BuxFormRowDivider()
+                            TextField("Deliverables", text: $plannedDeliverables, axis: .vertical)
+                                .lineLimit(2...6)
+                                .buxFormFieldPadding()
+                        }
+
+                        BuxFormSection(title: "Internal notes") {
+                            TextField("Reminders, links, private notes…", text: $notes, axis: .vertical)
                                 .lineLimit(2...5)
                                 .buxFormFieldPadding()
                         }
@@ -1394,6 +1462,8 @@ struct StudioProjectEditorSheet: View {
         clientId = project.clientId ?? (store.clients.first?.id ?? UUID())
         status = project.resolvedStatus
         notes = project.notes
+        plannedScope = project.plannedScope
+        plannedDeliverables = project.plannedDeliverables
         hourlyRate = project.hourlyRate.map { "\($0)" } ?? ""
         fixedFee = project.fixedFee.map { "\($0)" } ?? ""
         budgetedHours = project.budgetedHours > 0 ? "\(project.budgetedHours)" : ""
@@ -1439,6 +1509,8 @@ struct StudioProjectEditorSheet: View {
             existing.hourlyRate = hourly
             existing.fixedFee = fixed
             existing.notes = notes
+            existing.plannedScope = plannedScope
+            existing.plannedDeliverables = plannedDeliverables
             existing.startDate = startDate
             existing.endDate = resolvedEnd
             existing.budgetedHours = Double(budgetedHours) ?? existing.budgetedHours
@@ -1454,6 +1526,8 @@ struct StudioProjectEditorSheet: View {
                 hourlyRate: hourly,
                 fixedFee: fixed,
                 notes: notes,
+                plannedScope: plannedScope,
+                plannedDeliverables: plannedDeliverables,
                 hustleId: settingsStore.sideHustleMatrixEnabled
                     ? HustleManager.shared.selectedHustleId
                     : nil,

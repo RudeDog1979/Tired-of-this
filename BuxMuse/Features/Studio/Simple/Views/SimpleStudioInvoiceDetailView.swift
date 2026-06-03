@@ -44,6 +44,14 @@ struct SimpleStudioInvoiceDetailView: View {
                             )
                             .padding(.horizontal, BuxTokens.marginRegular)
 
+                            StudioAgreementDealLinkButton(
+                                agreement: invoiceDealAgreement,
+                                linkedJob: invoiceLinkedJob,
+                                linkedProject: nil
+                            )
+                            .environmentObject(store)
+                            .padding(.horizontal, BuxTokens.marginRegular)
+
                             BuxThemedCardForm {
                                 BuxFormSection(title: "Invoice") {
                                     detailRow("Customer", invoice.customerName)
@@ -123,6 +131,20 @@ struct SimpleStudioInvoiceDetailView: View {
 
     private var matchingProInvoice: StudioInvoice? {
         studioStore.invoices.first { $0.id == invoiceId }
+    }
+
+    private var invoiceLinkedJob: SimpleStudioEntry? {
+        guard let invoice else { return nil }
+        return StudioWorkDealHelpers.linkedJob(forSimpleInvoice: invoice, simpleStore: store)
+    }
+
+    private var invoiceDealAgreement: AgreementDraft? {
+        guard let invoice else { return nil }
+        return StudioWorkDealHelpers.agreement(
+            forSimpleInvoice: invoice,
+            studioStore: studioStore,
+            simpleStore: store
+        )
     }
 
     private func exportProPDF(_ invoice: StudioInvoice) {

@@ -33,11 +33,19 @@ enum StudioAgreementPrefillEngine {
             }
         }
         if options.contains(.scope), draft.scopeBullets.isEmpty {
-            let notes = project.notes.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !notes.isEmpty { draft.scopeBullets = notes }
+            let planned = project.plannedScope.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !planned.isEmpty {
+                draft.scopeBullets = planned
+            } else {
+                let notes = project.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !notes.isEmpty { draft.scopeBullets = notes }
+            }
         }
         if options.contains(.deliverables), draft.deliverables.isEmpty {
-            if project.budgetedHours > 0 {
+            let planned = project.plannedDeliverables.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !planned.isEmpty {
+                draft.deliverables = planned
+            } else if project.budgetedHours > 0 {
                 draft.deliverables = "Work delivered within agreed scope and revision limits."
             }
         }

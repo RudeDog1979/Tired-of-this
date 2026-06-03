@@ -358,6 +358,8 @@ struct SimpleStudioChartLegend: View {
 struct SimpleStudioWaitingSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var studioStore: StudioStore
+    @EnvironmentObject private var simpleStore: SimpleStudioStore
 
     let items: [SimpleWaitingItem]
     var onMarkPaid: ((UUID) -> Void)?
@@ -413,6 +415,15 @@ struct SimpleStudioWaitingSection: View {
                 Text("\(item.jobLabel) · \(item.daysWaiting)d")
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
+                if let chip = agreementChip(for: item) {
+                    Text(chip)
+                        .font(.system(size: 9, weight: .bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(chipColor(chip).opacity(0.15))
+                        .foregroundColor(chipColor(chip))
+                        .clipShape(Capsule())
+                }
                 if let advance = item.advanceBalanceFormatted {
                     Text("Advance left: \(advance)")
                         .font(.system(size: 10, weight: .semibold))
@@ -442,6 +453,19 @@ struct SimpleStudioWaitingSection: View {
         .padding(.vertical, 12)
         .contentShape(Rectangle())
         .onTapGesture { onTap?(item.id) }
+    }
+
+    private func agreementChip(for item: SimpleWaitingItem) -> String? {
+        guard let entry = simpleStore.entry(id: item.id), entry.kind == .job else { return nil }
+        return StudioWorkDealHelpers.agreementStatusChip(
+            for: StudioWorkDealHelpers.agreement(forJob: entry, studioStore: studioStore)
+        )
+    }
+
+    private func chipColor(_ label: String) -> Color {
+        if label.contains("clear") || label.contains("Signed") || label.contains("attached") { return .green }
+        if label == "No agreement" { return .orange }
+        return .secondary
     }
 }
 

@@ -14,6 +14,7 @@ struct SimpleStudioLogTimeView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var simpleStore: SimpleStudioStore
+    @EnvironmentObject private var studioStore: StudioStore
 
     @ObservedObject private var timer = StudioTimerController.shared
 
@@ -31,6 +32,17 @@ struct SimpleStudioLogTimeView: View {
     private var selectedJob: SimpleStudioEntry? {
         guard let id = selectedJobId ?? jobs.first?.id else { return nil }
         return simpleStore.entry(id: id)
+    }
+
+    @ViewBuilder
+    private var approvalBanner: some View {
+        if let job = selectedJob,
+           StudioWorkDealHelpers.needsClientApproval(job: job, studioStore: studioStore) {
+            StudioWorkDealApprovalBanner(
+                message: "No client approval recorded yet. You can still log time — set up the agreement when you can."
+            )
+            .padding(.horizontal, BuxTokens.marginRegular)
+        }
     }
 
     private var paySnapshot: SimpleStudioTimePayEngine.WorkClockSnapshot? {
@@ -72,6 +84,7 @@ struct SimpleStudioLogTimeView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: BuxLayout.section) {
                         introCard
+                        approvalBanner
                         jobPicker
                         if let snapshot = paySnapshot {
                             payContextCard(snapshot)

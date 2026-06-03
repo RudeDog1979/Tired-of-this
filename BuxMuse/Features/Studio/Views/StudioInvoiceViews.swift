@@ -379,12 +379,21 @@ struct StudioInvoiceDetailView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     
     @EnvironmentObject private var store: StudioStore
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @State private var showEdit = false
     @State private var pdfData: Data? = nil
     @State private var shareURL: URL? = nil
     @State private var showShareSheet = false
     
     var invoice: StudioInvoice
+
+    private var invoiceLinkedProject: StudioProject? {
+        StudioWorkDealHelpers.linkedProject(forProInvoice: invoice, studioStore: store)
+    }
+
+    private var invoiceDealAgreement: AgreementDraft? {
+        StudioWorkDealHelpers.agreement(forProInvoice: invoice, studioStore: store)
+    }
     
     var body: some View {
         let client = store.clients.first { $0.id == invoice.clientId }
@@ -472,6 +481,13 @@ struct StudioInvoiceDetailView: View {
                     .padding(BuxLayout.section)
                     .studioThemedCardChrome(cornerRadius: 24)
                     
+                    StudioAgreementDealLinkButton(
+                        agreement: invoiceDealAgreement,
+                        linkedJob: nil,
+                        linkedProject: invoiceLinkedProject
+                    )
+                    .environmentObject(simpleStudioStore)
+
                     BuxActionButton(
                         title: "Export & Share PDF",
                         systemImage: invoice.designerSnapshot != nil

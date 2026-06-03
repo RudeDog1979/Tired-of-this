@@ -17,6 +17,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
     var prefill: SimpleInvoiceSuggestion?
 
     @State private var linkedJobId: UUID?
+    @State private var selectedJobPickId: UUID?
     @State private var customerName = ""
     @State private var amountText = ""
     @State private var jobDescription = ""
@@ -39,6 +40,8 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                                 TextField("Amount", text: $amountText)
                                     .keyboardType(.decimalPad)
                                     .buxFormFieldPadding()
+                                BuxFormRowDivider()
+                                completedJobPicker
                                 BuxFormRowDivider()
                                 TextField("For what?", text: $jobDescription)
                                     .buxFormFieldPadding()
@@ -97,9 +100,39 @@ struct SimpleStudioSimpleInvoiceSheet: View {
         }
     }
 
+    private var jobPicks: [SimpleJobInvoicePick] {
+        StudioInvoiceSuggestionEngine.billableJobPicks(
+            forCustomerName: customerName,
+            store: store
+        )
+    }
+
+    @ViewBuilder
+    private var completedJobPicker: some View {
+        if !jobPicks.isEmpty {
+            Picker("Bill from job", selection: $selectedJobPickId) {
+                Text("None").tag(UUID?.none)
+                ForEach(jobPicks) { pick in
+                    Text("\(pick.jobLabel) · \(appSettingsManager.format(pick.amount))")
+                        .tag(Optional(pick.jobId))
+                }
+            }
+            .pickerStyle(.menu)
+            .buxFormFieldPadding()
+            .onChange(of: selectedJobPickId) { _, newId in
+                guard let newId,
+                      let pick = jobPicks.first(where: { $0.jobId == newId }) else { return }
+                linkedJobId = pick.jobId
+                amountText = "\(pick.amount)"
+                jobDescription = pick.jobLabel
+            }
+        }
+    }
+
     private func applyPrefillIfNeeded() {
         guard let prefill else { return }
         linkedJobId = prefill.jobId
+        selectedJobPickId = prefill.jobId
         customerName = prefill.customerName
         amountText = "\(prefill.amount)"
         jobDescription = prefill.jobDescription

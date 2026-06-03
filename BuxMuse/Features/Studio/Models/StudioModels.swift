@@ -339,6 +339,9 @@ public struct StudioProject: Codable, Identifiable, Equatable {
     public var hourlyRate: Decimal?
     public var fixedFee: Decimal?
     public var notes: String
+    /// Plan fields — pre-fill agreements (scope / deliverables).
+    public var plannedScope: String
+    public var plannedDeliverables: String
     public var timeEntries: [StudioTimeEntry]
     public var expenseIds: [UUID] // Linked receipt IDs
     public var generatedInvoiceIds: [UUID]
@@ -361,6 +364,8 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         hourlyRate: Decimal? = nil,
         fixedFee: Decimal? = nil,
         notes: String = "",
+        plannedScope: String = "",
+        plannedDeliverables: String = "",
         timeEntries: [StudioTimeEntry] = [],
         expenseIds: [UUID] = [],
         generatedInvoiceIds: [UUID] = [],
@@ -378,6 +383,8 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         self.hourlyRate = hourlyRate
         self.fixedFee = fixedFee
         self.notes = notes
+        self.plannedScope = plannedScope
+        self.plannedDeliverables = plannedDeliverables
         self.timeEntries = timeEntries
         self.expenseIds = expenseIds
         self.generatedInvoiceIds = generatedInvoiceIds
@@ -390,6 +397,7 @@ public struct StudioProject: Codable, Identifiable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case id, name, clientId, startDate, endDate, hourlyRate, fixedFee, notes
+        case plannedScope, plannedDeliverables
         case timeEntries, expenseIds, generatedInvoiceIds, hustleId
         case budgetedHours, allowedRevisions, currentRevisions, status
     }
@@ -404,6 +412,8 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         hourlyRate = try c.decodeIfPresent(Decimal.self, forKey: .hourlyRate)
         fixedFee = try c.decodeIfPresent(Decimal.self, forKey: .fixedFee)
         notes = try c.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        plannedScope = try c.decodeIfPresent(String.self, forKey: .plannedScope) ?? ""
+        plannedDeliverables = try c.decodeIfPresent(String.self, forKey: .plannedDeliverables) ?? ""
         timeEntries = try c.decodeIfPresent([StudioTimeEntry].self, forKey: .timeEntries) ?? []
         expenseIds = try c.decodeIfPresent([UUID].self, forKey: .expenseIds) ?? []
         generatedInvoiceIds = try c.decodeIfPresent([UUID].self, forKey: .generatedInvoiceIds) ?? []

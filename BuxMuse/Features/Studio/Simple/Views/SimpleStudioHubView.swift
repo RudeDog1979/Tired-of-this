@@ -195,6 +195,7 @@ struct SimpleStudioHubView: View {
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(simpleStudioStore)
+                    .environmentObject(studioStore)
                     .buxStudioSheetContent()
             }
             .alert(markPaidAlertTitle, isPresented: $showMarkPaidConfirmation) {
