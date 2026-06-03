@@ -240,12 +240,14 @@ struct StudioHubView: View {
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .environmentObject(simpleStudioStore)
                     .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToAgreements) {
                 AgreementScratchpadListView()
                     .environmentObject(themeManager)
                     .environmentObject(store)
+                    .environmentObject(simpleStudioStore)
                     .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToReceipts) {

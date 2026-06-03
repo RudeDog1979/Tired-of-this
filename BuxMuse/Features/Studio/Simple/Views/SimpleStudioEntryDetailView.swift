@@ -45,6 +45,13 @@ struct SimpleStudioEntryDetailView: View {
                                 .padding(.horizontal, BuxTokens.marginRegular)
                             }
 
+                            if entry.kind == .job {
+                                StudioJobAgreementSummarySection(job: entry)
+                                    .environmentObject(studioStore)
+                                    .environmentObject(store)
+                                    .padding(.horizontal, BuxTokens.marginRegular)
+                            }
+
                             BuxThemedCardForm {
                                 BuxFormSection(title: "Details") {
                                     detailRow("Type", entry.kind.logTitle)

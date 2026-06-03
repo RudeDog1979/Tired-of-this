@@ -42,6 +42,8 @@ struct AgreementScratchpadSettingsView: View {
                     NavigationLink {
                         AgreementScratchpadListView()
                             .environmentObject(studioStore)
+                            .environmentObject(SimpleStudioStore.shared)
+                            .environmentObject(themeManager)
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
@@ -63,9 +65,9 @@ struct AgreementScratchpadSettingsView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         infoRow(icon: "list.bullet.rectangle", color: .indigo, title: "Scope & deliverables", body: "Capture what you're delivering and what's out of scope before work starts.")
                         Divider().opacity(0.1)
-                        infoRow(icon: "signature", color: .green, title: "Sign-off line", body: "Record client name and date when they approve — for your records, not e-sign.")
+                        infoRow(icon: "signature", color: .green, title: "Client approval", body: "In person, clear to go, attach a signed PDF, or note an external service — stored on your device.")
                         Divider().opacity(0.1)
-                        infoRow(icon: "square.and.arrow.up", color: .blue, title: "Share as text", body: "Send agreement text via Messages, WhatsApp, or email from Studio.")
+                        infoRow(icon: "square.and.arrow.up", color: .blue, title: "Share & attach", body: "Export PDF, mark terms sent, and attach what the client signed and returned.")
                     }
                     .buxFormFieldPadding()
                 }

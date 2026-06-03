@@ -14,6 +14,7 @@ struct StudioProjectsListView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     
     @EnvironmentObject private var store: StudioStore
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @State private var showCreateProject = false
     
     var body: some View {
@@ -56,6 +57,7 @@ struct StudioProjectsListView: View {
                         .environmentObject(themeManager)
                         .environmentObject(appSettingsManager)
                         .environmentObject(store)
+                        .environmentObject(simpleStudioStore)
                 ) {
                     projectRowCard(
                         project: project,
@@ -167,6 +169,7 @@ struct StudioProjectDetailView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     
     @EnvironmentObject private var store: StudioStore
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @ObservedObject private var settingsStore = SettingsStore.shared
     
     let projectId: UUID
@@ -532,6 +535,7 @@ struct StudioProjectDetailView: View {
                 )
                 .environmentObject(store)
                 .environmentObject(themeManager)
+                .environmentObject(simpleStudioStore)
             }
             .buxStudioSheetContent()
         }

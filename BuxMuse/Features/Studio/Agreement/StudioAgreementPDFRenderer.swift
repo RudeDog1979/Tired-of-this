@@ -2,6 +2,8 @@
 //  StudioAgreementPDFRenderer.swift
 //  BuxMuse
 //
+//  UIKit PDF layout (iOS 18+). No iOS 26-only APIs.
+//
 
 import UIKit
 
@@ -33,15 +35,16 @@ enum StudioAgreementPDFRenderer {
 
             func drawLine(_ text: String, font: UIFont, color: UIColor = .black, extraSpacing: CGFloat = 6) {
                 let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
-                let rect = CGRect(x: margin, y: y, width: contentWidth, height: 10_000)
+                let maxSize = CGSize(width: contentWidth, height: .greatestFiniteMagnitude)
                 let measured = (text as NSString).boundingRect(
-                    with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude),
+                    with: maxSize,
                     options: [.usesLineFragmentOrigin, .usesFontLeading],
                     attributes: attrs,
                     context: nil
                 )
-                (text as NSString).draw(in: CGRect(x: margin, y: y, width: contentWidth, height: measured.height), withAttributes: attrs)
-                y += measured.height + extraSpacing
+                let rect = CGRect(x: margin, y: y, width: contentWidth, height: ceil(measured.height))
+                (text as NSString).draw(in: rect, withAttributes: attrs)
+                y = rect.maxY + extraSpacing
             }
 
             func ensureSpace(_ needed: CGFloat) {
@@ -94,14 +97,15 @@ enum StudioAgreementPDFRenderer {
                 x: CGFloat
             ) {
                 let frame = CGRect(x: x, y: y, width: sigWidth, height: sigHeight + 28)
+                let boxRect = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: sigHeight)
                 UIColor(white: 0.96, alpha: 1).setFill()
-                UIBezierPath(roundedRect: CGRect(x: x, y: y, width: sigWidth, height: sigHeight), cornerRadius: 6).fill()
+                UIBezierPath(roundedRect: boxRect, cornerRadius: 6).fill()
                 UIColor.lightGray.setStroke()
-                UIBezierPath(roundedRect: CGRect(x: x, y: y, width: sigWidth, height: sigHeight), cornerRadius: 6).stroke()
+                UIBezierPath(roundedRect: boxRect, cornerRadius: 6).stroke()
 
                 if let png, let image = UIImage(data: png) {
                     let inset: CGFloat = 6
-                    let inner = CGRect(x: x + inset, y: y + inset, width: sigWidth - inset * 2, height: sigHeight - inset * 2)
+                    let inner = boxRect.insetBy(dx: inset, dy: inset)
                     let scale = min(inner.width / image.size.width, inner.height / image.size.height)
                     let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
                     let origin = CGPoint(
@@ -117,7 +121,10 @@ enum StudioAgreementPDFRenderer {
                     ]
                     let size = (placeholder as NSString).size(withAttributes: attrs)
                     (placeholder as NSString).draw(
-                        at: CGPoint(x: x + (sigWidth - size.width) / 2, y: y + (sigHeight - size.height) / 2),
+                        at: CGPoint(
+                            x: boxRect.midX - size.width / 2,
+                            y: boxRect.midY - size.height / 2
+                        ),
                         withAttributes: attrs
                     )
                 }
@@ -132,7 +139,7 @@ enum StudioAgreementPDFRenderer {
                     .foregroundColor: UIColor.darkGray
                 ]
                 (caption as NSString).draw(
-                    at: CGPoint(x: x, y: y + sigHeight + 6),
+                    at: CGPoint(x: frame.minX, y: boxRect.maxY + 6),
                     withAttributes: capAttrs
                 )
             }
@@ -150,7 +157,7 @@ enum StudioAgreementPDFRenderer {
                 signedAt: draft.providerSignedAt,
                 x: margin + sigWidth + 16
             )
-            y += sigHeight + 36
+            y += sigHeight + 40
 
             ensureSpace(40)
             let footer = draft.isFullySigned

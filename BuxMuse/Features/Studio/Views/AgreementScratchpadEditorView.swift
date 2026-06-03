@@ -11,6 +11,7 @@ struct AgreementScratchpadListView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var store: StudioStore
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
     @State private var showNewDraft = false
 
@@ -29,13 +30,14 @@ struct AgreementScratchpadListView: View {
                             AgreementScratchpadEditorView(draft: draft)
                                 .environmentObject(store)
                                 .environmentObject(themeManager)
+                                .environmentObject(simpleStudioStore)
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
                                     Text(draft.title)
                                         .font(.system(size: 15, weight: .semibold))
                                     Spacer(minLength: 8)
-                                    agreementStatusChip(draft.agreementStatus)
+                                    agreementStatusChip(draft)
                                 }
                                 Text(draftSubtitle(draft))
                                     .font(.system(size: 11, weight: .medium))
@@ -71,28 +73,21 @@ struct AgreementScratchpadListView: View {
                 )
                 .environmentObject(store)
                 .environmentObject(themeManager)
+                .environmentObject(simpleStudioStore)
             }
             .buxStudioSheetContent()
         }
     }
 
     @ViewBuilder
-    private func agreementStatusChip(_ status: StudioAgreementStatus) -> some View {
-        Text(status == .signed ? "Signed" : (status == .awaitingSignatures ? "Signing" : "Draft"))
+    private func agreementStatusChip(_ draft: AgreementDraft) -> some View {
+        Text(draft.hasApprovalProof ? "OK" : (draft.agreementSentAt != nil ? "Sent" : "Draft"))
             .font(.system(size: 9, weight: .bold))
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
-            .background(chipColor(status).opacity(0.15))
-            .foregroundColor(chipColor(status))
+            .background((draft.hasApprovalProof ? Color.green : Color.orange).opacity(0.15))
+            .foregroundColor(draft.hasApprovalProof ? .green : .orange)
             .clipShape(Capsule())
-    }
-
-    private func chipColor(_ status: StudioAgreementStatus) -> Color {
-        switch status {
-        case .draft: .secondary
-        case .awaitingSignatures: .orange
-        case .signed: .green
-        }
     }
 
     private func draftSubtitle(_ draft: AgreementDraft) -> String {
@@ -115,18 +110,27 @@ struct AgreementScratchpadEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var store: StudioStore
+    @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
     @State private var draft: AgreementDraft
     @State private var didSave = false
     @State private var showGuidedBuilder = false
+    @State private var showImportSheet = false
     @State private var signatureRole: AgreementSignatureRole?
     @State private var pdfShareURL: URL?
 
+    private let linkedProject: StudioProject?
+    private let linkedJob: SimpleStudioEntry?
+
     init(draft: AgreementDraft) {
         _draft = State(initialValue: draft)
+        linkedProject = nil
+        linkedJob = nil
     }
 
     init(project: StudioProject, existingDraft: AgreementDraft?) {
+        linkedProject = project
+        linkedJob = nil
         if let existingDraft {
             _draft = State(initialValue: existingDraft)
         } else {
@@ -134,6 +138,19 @@ struct AgreementScratchpadEditorView: View {
                 title: "\(project.name) agreement",
                 clientId: project.clientId,
                 projectId: project.id
+            ))
+        }
+    }
+
+    init(job: SimpleStudioEntry, existingDraft: AgreementDraft?) {
+        linkedProject = nil
+        linkedJob = job
+        if let existingDraft {
+            _draft = State(initialValue: existingDraft)
+        } else {
+            _draft = State(initialValue: AgreementDraft(
+                title: job.jobLabel.map { "\($0) agreement" } ?? "\(job.customerName) agreement",
+                linkedJobEntryId: job.id
             ))
         }
     }
@@ -146,6 +163,24 @@ struct AgreementScratchpadEditorView: View {
                 TextField("Title", text: $draft.title)
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
+                if linkedProject != nil || linkedJob != nil {
+                    Button {
+                        showImportSheet = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.down.doc.fill")
+                            Text("Fill from \(linkedJob != nil ? "job" : "project")")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11, weight: .bold))
+                                .buxLabelSecondary()
+                        }
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(themeManager.current.accentColor)
+                    }
+                    .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                }
                 Button {
                     showGuidedBuilder = true
                 } label: {
@@ -188,7 +223,23 @@ struct AgreementScratchpadEditorView: View {
                 }
                 .pickerStyle(.menu)
                 .buxFormFieldPadding()
+                if !simpleStudioStore.entries.filter({ $0.kind == .job }).isEmpty {
+                    BuxFormRowDivider()
+                    Picker("Linked job", selection: jobBinding) {
+                        Text("None").tag(UUID?.none)
+                        ForEach(simpleStudioStore.entries.filter { $0.kind == .job }) { job in
+                            Text(job.jobLabel ?? job.customerName).tag(Optional(job.id))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .buxFormFieldPadding()
+                }
             }
+
+            StudioAgreementApprovalSection(
+                draft: $draft,
+                workAlreadyStarted: workAlreadyStarted
+            )
 
             BuxFormSection(title: "Scope & deliverables") {
                 scratchpadField("What's included (scope bullets)", text: $draft.scopeBullets)
@@ -206,7 +257,8 @@ struct AgreementScratchpadEditorView: View {
                 scratchpadField("Timeline & milestones", text: $draft.timelineNotes)
             }
 
-            BuxFormSection(title: "Signatures") {
+            if showsInPersonSignatures {
+            BuxFormSection(title: "Signatures (in person)") {
                 signatureRow(
                     title: "Client",
                     hasSignature: draft.clientSignaturePNG != nil,
@@ -233,6 +285,7 @@ struct AgreementScratchpadEditorView: View {
                     }
                     .buxFormFieldPadding()
                 }
+            }
             }
 
             BuxFormSection(title: "Sign-off note (optional)") {
@@ -292,6 +345,16 @@ struct AgreementScratchpadEditorView: View {
                 .environmentObject(store)
                 .environmentObject(themeManager)
         }
+        .sheet(isPresented: $showImportSheet) {
+            StudioAgreementImportSheet(
+                draft: $draft,
+                simpleStore: simpleStudioStore,
+                project: linkedProject,
+                job: linkedJob ?? linkedJobFromPicker
+            )
+            .environmentObject(store)
+            .environmentObject(themeManager)
+        }
         .sheet(item: $signatureRole) { role in
             AgreementSignatureCaptureSheet(role: role) { png in
                 applySignature(png, role: role)
@@ -311,7 +374,7 @@ struct AgreementScratchpadEditorView: View {
                 Text(draft.statusDisplayLabel)
                     .font(.system(size: 15, weight: .bold))
                 Spacer()
-                if draft.isFullySigned {
+                if draft.hasApprovalProof {
                     Image(systemName: "checkmark.seal.fill")
                         .foregroundColor(.green)
                 }
@@ -334,6 +397,24 @@ struct AgreementScratchpadEditorView: View {
         return "\(number) · \(invoice.issueDate.formatted(date: .abbreviated, time: .omitted))"
     }
 
+    private var workAlreadyStarted: Bool {
+        if let job = linkedJob ?? linkedJobFromPicker { return job.hasWorkStarted }
+        if let projectId = draft.projectId,
+           let project = store.projects.first(where: { $0.id == projectId }) {
+            return !project.timeEntries.isEmpty
+        }
+        return false
+    }
+
+    private var linkedJobFromPicker: SimpleStudioEntry? {
+        guard let id = draft.linkedJobEntryId else { return nil }
+        return simpleStudioStore.entry(id: id)
+    }
+
+    private var showsInPersonSignatures: Bool {
+        draft.approvalChannel == .inPerson || draft.approvalChannel == nil
+    }
+
     private var hasMeaningfulContent: Bool {
         !draft.scopeBullets.isEmpty
             || !draft.deliverables.isEmpty
@@ -343,6 +424,8 @@ struct AgreementScratchpadEditorView: View {
             || !draft.paymentAmountNotes.isEmpty
             || draft.clientSignaturePNG != nil
             || draft.providerSignaturePNG != nil
+            || draft.hasApprovalProof
+            || draft.approvalChannel != nil
     }
 
     private var shareText: String {
@@ -364,8 +447,20 @@ struct AgreementScratchpadEditorView: View {
 
     private func persistDraft() {
         draft.refreshAgreementStatus()
-        store.upsertAgreementDraft(draft)
+        store.upsertAgreementDraft(draft, simpleStore: simpleStudioStore)
         BuxSaveFeedback.success()
+    }
+
+    private var jobBinding: Binding<UUID?> {
+        Binding(
+            get: { draft.linkedJobEntryId },
+            set: { newId in
+                draft.linkedJobEntryId = newId
+                if let newId, let job = simpleStudioStore.entry(id: newId) {
+                    if draft.signOffName.isEmpty { draft.signOffName = job.customerName }
+                }
+            }
+        )
     }
 
     private func exportPDF() {
@@ -392,6 +487,7 @@ struct AgreementScratchpadEditorView: View {
             draft.providerSignaturePNG = png
             draft.providerSignedAt = Date()
         }
+        if draft.approvalChannel == nil { draft.approvalChannel = .inPerson }
         draft.refreshAgreementStatus()
     }
 

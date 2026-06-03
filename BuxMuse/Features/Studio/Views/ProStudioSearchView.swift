@@ -72,6 +72,7 @@ struct ProStudioSearchView: View {
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
+                    .environmentObject(simpleStudioStore)
             }
         }
         .navigationDestination(item: $receiptRouteID) { receiptID in

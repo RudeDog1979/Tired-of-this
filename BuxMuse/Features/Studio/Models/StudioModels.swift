@@ -841,6 +841,41 @@ public enum StudioAgreementStatus: String, Codable, CaseIterable, Sendable {
     case signed
 }
 
+/// How the client approved — user picks the channel; proof is stored on the deal.
+public enum StudioAgreementApprovalChannel: String, Codable, CaseIterable, Sendable, Identifiable {
+    case inPerson
+    case returnedPDF
+    case printedScanned
+    case clearToProceed
+    case externalService
+
+    public var id: String { rawValue }
+
+    public var title: String {
+        switch self {
+        case .inPerson: "Signed in person (this device)"
+        case .returnedPDF: "Signed PDF sent back to me"
+        case .printedScanned: "Printed, signed & scanned"
+        case .clearToProceed: "Clear to go ahead (call / message)"
+        case .externalService: "Another app or service"
+        }
+    }
+
+    public var shortTitle: String {
+        switch self {
+        case .inPerson: "In person"
+        case .returnedPDF: "PDF returned"
+        case .printedScanned: "Print & scan"
+        case .clearToProceed: "Clear to go"
+        case .externalService: "External"
+        }
+    }
+
+    public var needsExternalPrivacyNotice: Bool {
+        self == .externalService
+    }
+}
+
 public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     public var id: UUID
     public var title: String
@@ -863,7 +898,18 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     public var clientSignedAt: Date?
     public var providerSignedAt: Date?
     public var linkedInvoiceId: UUID?
+    /// Simple Studio job entry linked to this agreement.
+    public var linkedJobEntryId: UUID?
     public var agreementStatus: StudioAgreementStatus
+    public var approvalChannel: StudioAgreementApprovalChannel?
+    public var externalServiceName: String
+    public var clientClearToProceed: Bool
+    public var clientClearNote: String
+    public var clientClearAt: Date?
+    /// Relative path under Application Support (`agreements/…`).
+    public var signedDocumentPath: String?
+    public var agreementSentAt: Date?
+    public var proofRecordedAt: Date?
 
     public init(
         id: UUID = UUID(),
@@ -885,7 +931,16 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         clientSignedAt: Date? = nil,
         providerSignedAt: Date? = nil,
         linkedInvoiceId: UUID? = nil,
-        agreementStatus: StudioAgreementStatus = .draft
+        linkedJobEntryId: UUID? = nil,
+        agreementStatus: StudioAgreementStatus = .draft,
+        approvalChannel: StudioAgreementApprovalChannel? = nil,
+        externalServiceName: String = "",
+        clientClearToProceed: Bool = false,
+        clientClearNote: String = "",
+        clientClearAt: Date? = nil,
+        signedDocumentPath: String? = nil,
+        agreementSentAt: Date? = nil,
+        proofRecordedAt: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -906,17 +961,50 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         self.clientSignedAt = clientSignedAt
         self.providerSignedAt = providerSignedAt
         self.linkedInvoiceId = linkedInvoiceId
+        self.linkedJobEntryId = linkedJobEntryId
         self.agreementStatus = agreementStatus
+        self.approvalChannel = approvalChannel
+        self.externalServiceName = externalServiceName
+        self.clientClearToProceed = clientClearToProceed
+        self.clientClearNote = clientClearNote
+        self.clientClearAt = clientClearAt
+        self.signedDocumentPath = signedDocumentPath
+        self.agreementSentAt = agreementSentAt
+        self.proofRecordedAt = proofRecordedAt
     }
 
     public var isFullySigned: Bool {
         clientSignaturePNG != nil && providerSignaturePNG != nil
     }
 
+    public var hasUploadedSignedDocument: Bool {
+        guard let signedDocumentPath else { return false }
+        return !signedDocumentPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    public var hasApprovalProof: Bool {
+        switch approvalChannel {
+        case .clearToProceed:
+            return clientClearToProceed
+        case .returnedPDF, .printedScanned, .externalService:
+            return hasUploadedSignedDocument
+        case .inPerson:
+            return isFullySigned
+        case nil:
+            return clientClearToProceed
+                || hasUploadedSignedDocument
+                || isFullySigned
+        }
+    }
+
     public mutating func refreshAgreementStatus() {
-        if isFullySigned {
+        if hasApprovalProof {
             agreementStatus = .signed
-        } else if clientSignaturePNG != nil || providerSignaturePNG != nil {
+            if proofRecordedAt == nil { proofRecordedAt = Date() }
+        } else if agreementSentAt != nil
+            || clientSignaturePNG != nil
+            || providerSignaturePNG != nil
+            || approvalChannel != nil {
             agreementStatus = .awaitingSignatures
         } else {
             agreementStatus = .draft
@@ -924,10 +1012,31 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     }
 
     public var statusDisplayLabel: String {
+        if hasApprovalProof { return approvalProofLabel }
+        if agreementSentAt != nil { return "Sent · awaiting proof" }
         switch agreementStatus {
-        case .draft: "Draft"
-        case .awaitingSignatures: "Awaiting signatures"
-        case .signed: "Signed"
+        case .draft: return "Draft"
+        case .awaitingSignatures: return "Awaiting client"
+        case .signed: return approvalProofLabel
+        }
+    }
+
+    public var approvalProofLabel: String {
+        switch approvalChannel {
+        case .clearToProceed:
+            return "Client clear to go"
+        case .returnedPDF, .printedScanned:
+            return "Signed document attached"
+        case .externalService:
+            let name = externalServiceName.trimmingCharacters(in: .whitespacesAndNewlines)
+            return name.isEmpty ? "Approved (external)" : "Approved · \(name)"
+        case .inPerson:
+            return "Signed in person"
+        case nil:
+            if clientClearToProceed { return "Client clear to go" }
+            if hasUploadedSignedDocument { return "Signed document attached" }
+            if isFullySigned { return "Signed in person" }
+            return "Approved"
         }
     }
 
@@ -952,7 +1061,16 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         clientSignedAt = try c.decodeIfPresent(Date.self, forKey: .clientSignedAt)
         providerSignedAt = try c.decodeIfPresent(Date.self, forKey: .providerSignedAt)
         linkedInvoiceId = try c.decodeIfPresent(UUID.self, forKey: .linkedInvoiceId)
+        linkedJobEntryId = try c.decodeIfPresent(UUID.self, forKey: .linkedJobEntryId)
         agreementStatus = try c.decodeIfPresent(StudioAgreementStatus.self, forKey: .agreementStatus) ?? .draft
+        approvalChannel = try c.decodeIfPresent(StudioAgreementApprovalChannel.self, forKey: .approvalChannel)
+        externalServiceName = try c.decodeIfPresent(String.self, forKey: .externalServiceName) ?? ""
+        clientClearToProceed = try c.decodeIfPresent(Bool.self, forKey: .clientClearToProceed) ?? false
+        clientClearNote = try c.decodeIfPresent(String.self, forKey: .clientClearNote) ?? ""
+        clientClearAt = try c.decodeIfPresent(Date.self, forKey: .clientClearAt)
+        signedDocumentPath = try c.decodeIfPresent(String.self, forKey: .signedDocumentPath)
+        agreementSentAt = try c.decodeIfPresent(Date.self, forKey: .agreementSentAt)
+        proofRecordedAt = try c.decodeIfPresent(Date.self, forKey: .proofRecordedAt)
         refreshAgreementStatus()
     }
 
@@ -966,6 +1084,9 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         if let projectName, !projectName.isEmpty { lines.append("Project: \(projectName)") }
         if let providerName, !providerName.isEmpty { lines.append("Provider: \(providerName)") }
         lines.append("Status: \(statusDisplayLabel)")
+        if let channel = approvalChannel {
+            lines.append("Approval: \(channel.title)")
+        }
         lines.append("")
 
         appendSection("Scope", body: scopeBullets, to: &lines)
@@ -996,9 +1117,21 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
             let label = who.isEmpty ? "Provider signature" : "Provider signature (\(who))"
             lines.append("\(label) · \(when)")
         }
+        if clientClearToProceed {
+            let when = clientClearAt.map {
+                DateFormatter.localizedString(from: $0, dateStyle: .medium, timeStyle: .none)
+            } ?? "recorded"
+            var line = "Client clear to go · \(when)"
+            let note = clientClearNote.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !note.isEmpty { line += " — \(note)" }
+            lines.append(line)
+        }
+        if hasUploadedSignedDocument {
+            lines.append("Signed document attached in BuxMuse")
+        }
         lines.append("")
-        let footer = isFullySigned
-            ? "— Signed in BuxMuse Studio (on-device record; not a certified e-sign service)"
+        let footer = hasApprovalProof
+            ? "— Work approval recorded in BuxMuse Studio (on-device; not a certified e-sign service)"
             : "— Drafted in BuxMuse Studio (local record)"
         lines.append(footer)
         return lines.joined(separator: "\n")

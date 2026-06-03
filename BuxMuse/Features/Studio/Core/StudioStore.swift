@@ -147,7 +147,18 @@ public final class StudioStore: ObservableObject {
         agreementDrafts.first { $0.projectId == projectId }
     }
 
-    public func upsertAgreementDraft(_ draft: AgreementDraft) {
+    public func agreementDraft(forJobEntryId jobEntryId: UUID) -> AgreementDraft? {
+        agreementDrafts.first { $0.linkedJobEntryId == jobEntryId }
+    }
+
+    public func agreementDraft(id: UUID) -> AgreementDraft? {
+        agreementDrafts.first { $0.id == id }
+    }
+
+    public func upsertAgreementDraft(
+        _ draft: AgreementDraft,
+        simpleStore: SimpleStudioStore? = nil
+    ) {
         var updated = draft
         updated.updatedAt = Date()
         StudioSyncCoordinator.alignAgreementDraft(&updated, store: self)
@@ -155,6 +166,9 @@ public final class StudioStore: ObservableObject {
             agreementDrafts[index] = updated
         } else {
             agreementDrafts.append(updated)
+        }
+        if let simpleStore {
+            StudioSyncCoordinator.linkAgreementToJob(draft: updated, simpleStore: simpleStore)
         }
         save()
     }

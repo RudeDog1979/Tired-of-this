@@ -75,6 +75,37 @@ enum StudioSyncCoordinator {
             if draft.clientId == nil { draft.clientId = invoice.clientId }
             if draft.projectId == nil { draft.projectId = invoice.projectId }
         }
+        if let path = draft.signedDocumentPath {
+            draft.signedDocumentPath = AgreementDocumentStore.normalizedStoredPath(path)
+        }
         draft.refreshAgreementStatus()
+    }
+
+    /// Keeps `SimpleStudioEntry.linkedAgreementId` ↔ `AgreementDraft.linkedJobEntryId` in sync.
+    static func linkAgreementToJob(
+        draft: AgreementDraft,
+        simpleStore: SimpleStudioStore
+    ) {
+        guard let jobId = draft.linkedJobEntryId else { return }
+        guard var job = simpleStore.entry(id: jobId), job.kind == .job else { return }
+        if job.linkedAgreementId != draft.id {
+            job.linkedAgreementId = draft.id
+            simpleStore.updateEntry(job)
+        }
+    }
+
+    static func unlinkAgreementFromJob(
+        agreementId: UUID,
+        jobEntryId: UUID?,
+        simpleStore: SimpleStudioStore
+    ) {
+        guard let jobId = jobEntryId ?? simpleStore.entries.first(where: { $0.linkedAgreementId == agreementId })?.id else {
+            return
+        }
+        guard var job = simpleStore.entry(id: jobId) else { return }
+        if job.linkedAgreementId == agreementId {
+            job.linkedAgreementId = nil
+            simpleStore.updateEntry(job)
+        }
     }
 }

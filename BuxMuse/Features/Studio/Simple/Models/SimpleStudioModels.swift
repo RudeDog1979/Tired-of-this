@@ -164,6 +164,8 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
     public var hourlyRate: Decimal?
     public var linkedJobId: UUID?
     public var linkedInvoiceId: UUID?
+    /// Pro/Simple shared agreement draft id (`StudioStore.agreementDrafts`).
+    public var linkedAgreementId: UUID?
     /// Stopwatch time logged against this job (Simple Studio Log Time).
     public var loggedSeconds: TimeInterval?
     /// Customer-agreed time for the job (lock-screen walker + optional auto-pause).
@@ -193,6 +195,7 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
         hourlyRate: Decimal? = nil,
         linkedJobId: UUID? = nil,
         linkedInvoiceId: UUID? = nil,
+        linkedAgreementId: UUID? = nil,
         loggedSeconds: TimeInterval? = nil,
         plannedWorkSeconds: TimeInterval? = nil,
         pauseWhenPlanEnds: Bool? = nil,
@@ -218,6 +221,7 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
         self.hourlyRate = hourlyRate
         self.linkedJobId = linkedJobId
         self.linkedInvoiceId = linkedInvoiceId
+        self.linkedAgreementId = linkedAgreementId
         self.loggedSeconds = loggedSeconds
         self.plannedWorkSeconds = plannedWorkSeconds
         self.pauseWhenPlanEnds = pauseWhenPlanEnds
@@ -281,6 +285,12 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
             projectedKept: projectedKept,
             hasQuote: agreedPrice != nil
         )
+    }
+
+    /// True when time has been logged on this job (used for agreement-before-start hints).
+    public var hasWorkStarted: Bool {
+        guard kind == .job else { return false }
+        return (loggedSeconds ?? 0) > 0
     }
 
     public var netKept: Decimal {
