@@ -32,15 +32,30 @@ public final class InsightsEngine: ObservableObject {
         subscriptions: [SubscriptionInfo],
         goals: [Goal],
         goalsViewModel: GoalsViewModel,
-        projects: [StudioProject] = []
+        projects: [StudioProject] = [],
+        locale: Locale
     ) {
         let isTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil || NSClassFromString("XCTest") != nil
         
         if isTesting {
-            self.performRecalculation(transactions: transactions, subscriptions: subscriptions, goals: goals, goalsViewModel: goalsViewModel, projects: projects)
+            self.performRecalculation(
+                transactions: transactions,
+                subscriptions: subscriptions,
+                goals: goals,
+                goalsViewModel: goalsViewModel,
+                projects: projects,
+                locale: locale
+            )
         } else {
             calculationQueue.async { [weak self] in
-                self?.performRecalculation(transactions: transactions, subscriptions: subscriptions, goals: goals, goalsViewModel: goalsViewModel, projects: projects)
+                self?.performRecalculation(
+                    transactions: transactions,
+                    subscriptions: subscriptions,
+                    goals: goals,
+                    goalsViewModel: goalsViewModel,
+                    projects: projects,
+                    locale: locale
+                )
             }
         }
     }
@@ -50,31 +65,27 @@ public final class InsightsEngine: ObservableObject {
         subscriptions: [SubscriptionInfo],
         goals: [Goal],
         goalsViewModel: GoalsViewModel,
-        projects: [StudioProject]
+        projects: [StudioProject],
+        locale: Locale
     ) {
         var generated: [FinancialInsight] = []
         
-        // 1. Core sub-engines sweeps
-        generated.append(contentsOf: spendingEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: subscriptionEngine.generateInsights(subscriptions: subscriptions, goals: goals))
-        generated.append(contentsOf: categoryEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: merchantEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: goalEngine.generateInsights(goals: goals, goalsViewModel: goalsViewModel))
-        generated.append(contentsOf: patternEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: predictiveEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: BarterInsightsEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: PaymentSourceInsightsEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: WorkspaceInsightsEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: CashDigitalInsightsEngine.generateInsights(transactions: transactions))
-        generated.append(contentsOf: ScopeCreepInsightsEngine.generateInsights(projects: projects))
+        generated.append(contentsOf: spendingEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: subscriptionEngine.generateInsights(subscriptions: subscriptions, goals: goals, locale: locale))
+        generated.append(contentsOf: categoryEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: merchantEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: goalEngine.generateInsights(goals: goals, goalsViewModel: goalsViewModel, locale: locale))
+        generated.append(contentsOf: patternEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: predictiveEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: BarterInsightsEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: PaymentSourceInsightsEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: WorkspaceInsightsEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: CashDigitalInsightsEngine.generateInsights(transactions: transactions, locale: locale))
+        generated.append(contentsOf: ScopeCreepInsightsEngine.generateInsights(projects: projects, locale: locale))
         
-        // 2. Timing filters
         let curated = timingEngine.filterByTiming(insights: generated)
-        
-        // 3. Ranking weights
         let ranked = rankingEngine.rank(insights: curated)
         
-        // 4. Thread-safe publishing
         if Thread.isMainThread {
             self.insights = ranked
         } else {

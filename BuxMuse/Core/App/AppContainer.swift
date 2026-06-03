@@ -74,6 +74,7 @@ final class AppContainer: ObservableObject {
             insightsEngine: insightsEngine,
             financialEngine: financialBridge.engine,
             goalsViewModel: goalsViewModel,
+            appSettingsManager: appSettingsManager,
             studioStore: studioStore
         )
         goalsSheetCoordinator = GoalsSheetCoordinator()
@@ -185,6 +186,16 @@ final class AppContainer: ObservableObject {
                     navigation: self.navigationCoordinator,
                     appSettings: self.appSettingsManager
                 )
+                self.goalsEngine.invalidateLocalizedCaches(andRecalculate: self.financialBridge.engine)
+                self.goalsViewModel.refreshSelectedDetailIfNeeded()
+                self.insightsViewModel.recalculate()
+                self.studioBrain.refreshAll()
+                self.brain.scheduleSnapshotRefresh()
+                if let engine18 = self.financialBridge.engine as? LocalFinancialIntelligenceEngine18 {
+                    engine18.refreshSubscriptionAnalysis()
+                } else if #available(iOS 26, *), let engine26 = self.financialBridge.engine as? LocalFinancialIntelligenceEngine {
+                    engine26.refreshSubscriptionAnalysis()
+                }
                 self.scheduleEngagementRefresh()
                 self.scheduleTipsRefresh()
             }

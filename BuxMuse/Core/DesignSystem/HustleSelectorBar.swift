@@ -11,6 +11,7 @@ import SwiftUI
 public struct HustleSelectorBar: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var hustleManager = HustleManager.shared
     @ObservedObject private var store = SettingsStore.shared
     
@@ -23,10 +24,16 @@ public struct HustleSelectorBar: View {
                     HStack(spacing: 6) {
                         Image(systemName: "rectangle.3.group.fill")
                             .font(.system(size: 11, weight: .bold))
-                        Text("Viewing: \(label)")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Viewing: %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                label
+                            )
+                        )
                             .font(.system(size: 12, weight: .semibold))
                         if store.showUnassignedExpensesInWorkspace {
-                            Text("· includes unassigned")
+                            BuxCatalogDynamicText(key: "· includes unassigned")
                                 .font(.system(size: 11, weight: .medium))
                                 .opacity(0.75)
                         }
@@ -75,7 +82,7 @@ public struct HustleSelectorBar: View {
                         .font(.system(size: 10, weight: .bold))
                 }
                 
-                Text(title)
+                BuxCatalogText.text(title)
                     .font(.system(size: 13, weight: isSelected ? .bold : .semibold))
             }
             .foregroundColor(pillForegroundColor(isSelected: isSelected, isSolar: isSolar, selectedColor: accentColor))

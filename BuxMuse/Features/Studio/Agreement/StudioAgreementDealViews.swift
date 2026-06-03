@@ -18,22 +18,18 @@ struct StudioAgreementExternalPrivacySheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: BuxTokens.section) {
-                    Text("Signing outside BuxMuse")
+                    BuxCatalogDynamicText(key: "Signing outside BuxMuse")
                         .font(.system(size: 20, weight: .bold))
-                    Text(
-                        "DocuSign, email, WhatsApp, and similar services may process your client's name, contact details, and document on their servers—not only on your device."
-                    )
+                    BuxCatalogDynamicText(key: "DocuSign, email, WhatsApp, and similar services may process your client's name, contact details, and document on their servers—not only on your device.")
                     .font(.system(size: 14, weight: .medium))
                     .buxLabelSecondary()
-                    Text(
-                        "BuxMuse stores what you bring back (for example a signed PDF you upload). For maximum privacy, use in-app signing or attach a file you already received."
-                    )
+                    BuxCatalogDynamicText(key: "BuxMuse stores what you bring back (for example a signed PDF you upload). For maximum privacy, use in-app signing or attach a file you already received.")
                     .font(.system(size: 14, weight: .medium))
                     .buxLabelSecondary()
                 }
                 .padding(BuxTokens.marginRegular)
             }
-            .navigationTitle("Privacy")
+            .buxCatalogNavigationTitle("Privacy")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -85,7 +81,7 @@ struct StudioAgreementImportSheet: View {
                     toggleRow("Link client / job / project", option: .links)
                 }
             }
-            .navigationTitle("Fill from…")
+            .buxCatalogNavigationTitle("Fill from…")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -169,7 +165,7 @@ struct StudioAgreementApprovalSection: View {
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.orange)
-                    Text("Work may have already started. Capture client approval now and attach their signed copy if you have it.")
+                    BuxCatalogDynamicText(key: "Work may have already started. Capture client approval now and attach their signed copy if you have it.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
@@ -179,7 +175,7 @@ struct StudioAgreementApprovalSection: View {
             }
 
             Picker("How did the client approve?", selection: channelBinding) {
-                Text("Choose…").tag(StudioAgreementApprovalChannel?.none)
+                BuxCatalogDynamicText(key: "Choose…").tag(StudioAgreementApprovalChannel?.none)
                 ForEach(StudioAgreementApprovalChannel.allCases) { channel in
                     Text(channel.shortTitle).tag(Optional(channel))
                 }
@@ -207,7 +203,7 @@ struct StudioAgreementApprovalSection: View {
             } else {
                 BuxFormRowDivider()
                 HStack {
-                    Text("Sent")
+                    BuxCatalogDynamicText(key: "Sent")
                         .font(.system(size: 13, weight: .medium))
                         .buxLabelSecondary()
                     Spacer()
@@ -237,7 +233,7 @@ struct StudioAgreementApprovalSection: View {
         case .clearToProceed:
             BuxFormRowDivider()
             Toggle(isOn: $draft.clientClearToProceed) {
-                Text("Client clear to go ahead")
+                BuxCatalogDynamicText(key: "Client clear to go ahead")
                     .font(.system(size: 15, weight: .semibold))
             }
             .tint(themeManager.current.accentColor)
@@ -259,7 +255,7 @@ struct StudioAgreementApprovalSection: View {
                 Button {
                     showPrivacy = true
                 } label: {
-                    Text("Privacy notice")
+                    BuxCatalogDynamicText(key: "Privacy notice")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
                 }
@@ -278,7 +274,7 @@ struct StudioAgreementApprovalSection: View {
             uploadProofBlock
         case .inPerson:
             BuxFormRowDivider()
-            Text("Scroll to Client signature (in person only) below to capture the client's finger signature on this device.")
+            BuxCatalogDynamicText(key: "Scroll to Client signature (in person only) below to capture the client's finger signature on this device.")
                 .font(.system(size: 12, weight: .medium))
                 .buxLabelSecondary()
                 .fixedSize(horizontal: false, vertical: true)
@@ -317,7 +313,7 @@ struct StudioAgreementApprovalSection: View {
                 Button(role: .destructive) {
                     removeAttachment()
                 } label: {
-                    Text("Remove attachment")
+                    BuxCatalogDynamicText(key: "Remove attachment")
                         .font(.system(size: 14, weight: .semibold))
                 }
                 .buxFormFieldPadding()
@@ -410,7 +406,7 @@ struct StudioJobAgreementSummarySection: View {
         BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("AGREEMENT")
+                    BuxCatalogDynamicText(key: "AGREEMENT")
                         .font(.system(size: 11, weight: .bold))
                         .buxLabelSecondary()
                     Spacer()
@@ -429,12 +425,12 @@ struct StudioJobAgreementSummarySection: View {
                     Text(draft.title)
                         .font(.system(size: 14, weight: .semibold))
                     if job.hasWorkStarted, !draft.hasApprovalProof {
-                        Text("Time is on this job — get client approval when you can.")
+                        BuxCatalogDynamicText(key: "Time is on this job — get client approval when you can.")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.orange)
                     }
                 } else {
-                    Text("Link terms and client approval to this job.")
+                    BuxCatalogDynamicText(key: "Link terms and client approval to this job.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                 }

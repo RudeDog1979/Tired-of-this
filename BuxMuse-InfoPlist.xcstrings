@@ -1,0 +1,209 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCameraUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse needs camera access to scan physical receipts and documents."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita acceso a la cámara para escanear recibos y documentos físicos."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita acceso a la cámara para escanear recibos y documentos físicos."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita acceso a la cámara para escanear recibos y documentos físicos."
+          }
+        }
+      }
+    },
+    "NSFaceIDUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse secures your local financial summaries with Face ID authentication."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse protege tus resúmenes financieros locales con Face ID."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse protege tus resúmenes financieros locales con Face ID."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse protege tus resúmenes financieros locales con Face ID."
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse lee datos de sueño de Apple Health para mejorar tu puntuación de Energía Creativa cuando activas la sincronización con HealthKit."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse lee datos de sueño de Apple Health para mejorar tu puntuación de Energía Creativa cuando activas la sincronización con HealthKit."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse lee datos de sueño de Apple Health para mejorar tu puntuación de Energía Creativa cuando activas la sincronización con HealthKit."
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse does not write health data; this permission is reserved for future wellness integrations."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse no escribe datos de salud; este permiso está reservado para futuras integraciones de bienestar."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse no escribe datos de salud; este permiso está reservado para futuras integraciones de bienestar."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse no escribe datos de salud; este permiso está reservado para futuras integraciones de bienestar."
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse uses your location to fill start or end addresses when logging business mileage."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse usa tu ubicación para completar direcciones de inicio o fin al registrar millaje de negocios."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse usa tu ubicación para completar direcciones de inicio o fin al registrar millaje de negocios."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse usa tu ubicación para rellenar direcciones de inicio o fin al registrar kilometraje de negocios."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse needs photo library access to let you select stored receipt images."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita acceso a tu fototeca para que puedas seleccionar imágenes de recibos guardadas."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita acceso a tu fototeca para que puedas seleccionar imágenes de recibos guardadas."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita acceso a tu fototeca para que puedas seleccionar imágenes de recibos guardadas."
+          }
+        }
+      }
+    },
+    "NSUserNotificationsUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse sends local reminders before subscriptions and trials renew."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse envía recordatorios locales antes de que se renueven suscripciones y periodos de prueba."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse envía recordatorios locales antes de que se renueven suscripciones y periodos de prueba."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse envía recordatorios locales antes de que se renueven suscripciones y periodos de prueba."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

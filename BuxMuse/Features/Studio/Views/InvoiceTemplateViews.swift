@@ -355,13 +355,13 @@ private struct InvoiceLineItemsTable: View {
                     Text("#")
                         .frame(width: 20, alignment: .leading)
                 }
-                Text("Description")
+                BuxCatalogDynamicText(key: "Description")
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("Qty")
+                BuxCatalogDynamicText(key: "Qty")
                     .frame(width: 36, alignment: .trailing)
-                Text("Rate")
+                BuxCatalogDynamicText(key: "Rate")
                     .frame(width: 72, alignment: .trailing)
-                Text("Amount")
+                BuxCatalogDynamicText(key: "Amount")
                     .frame(width: 80, alignment: .trailing)
             }
             .font(context.templateConfig.typography.bodyFont(size: 8, weight: .semibold))
@@ -374,7 +374,7 @@ private struct InvoiceLineItemsTable: View {
             ForEach(Array(context.invoice.lineItems.enumerated()), id: \.element.id) { idx, item in
                 HStack(spacing: 0) {
                     if showRowNumbers {
-                        Text("\(idx + 1)")
+                        Text(idx + 1, format: .number)
                             .frame(width: 20, alignment: .leading)
                             .buxLabelSecondary()
                     }
@@ -538,7 +538,7 @@ private struct InvoicePaymentFooter: View {
 
     private var bankBlock: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("PAYMENT DETAILS")
+            BuxCatalogDynamicText(key: "PAYMENT DETAILS")
                 .font(context.templateConfig.typography.bodyFont(size: 7, weight: .semibold))
                 .foregroundColor(accentColor)
                 .tracking(0.8)
@@ -568,7 +568,7 @@ private struct InvoicePaymentFooter: View {
 
     private var qrBlock: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text("SCAN TO PAY")
+            BuxCatalogDynamicText(key: "SCAN TO PAY")
                 .font(context.templateConfig.typography.bodyFont(size: 7, weight: .semibold))
                 .foregroundColor(accentColor)
                 .tracking(0.8)
@@ -583,7 +583,7 @@ private struct InvoicePaymentFooter: View {
 
     private var linkBlock: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text("PAY ONLINE")
+            BuxCatalogDynamicText(key: "PAY ONLINE")
                 .font(context.templateConfig.typography.bodyFont(size: 7, weight: .semibold))
                 .foregroundColor(accentColor)
                 .tracking(0.8)
@@ -597,7 +597,7 @@ private struct InvoicePaymentFooter: View {
 
     private var notesBlock: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("NOTES & TERMS")
+            BuxCatalogDynamicText(key: "NOTES & TERMS")
                 .font(context.templateConfig.typography.bodyFont(size: 7, weight: .semibold))
                 .foregroundColor(Color(UIColor.secondaryLabel))
                 .tracking(0.8)
@@ -856,13 +856,13 @@ public struct MinimalistInvoiceTemplateView: View {
 
                 // ── Column headers ───────────────────────────────────
                 HStack(spacing: 0) {
-                    Text("Description")
+                    BuxCatalogDynamicText(key: "Description")
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Text("Qty")
+                    BuxCatalogDynamicText(key: "Qty")
                         .frame(width: 36, alignment: .trailing)
-                    Text("Rate")
+                    BuxCatalogDynamicText(key: "Rate")
                         .frame(width: 72, alignment: .trailing)
-                    Text("Amount")
+                    BuxCatalogDynamicText(key: "Amount")
                         .frame(width: 80, alignment: .trailing)
                 }
                 .font(typo.bodyFont(size: 7.5, weight: .semibold))
@@ -1105,10 +1105,22 @@ public struct ExecutiveInvoiceTemplateView: View {
                         .fill(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.3))
                         .frame(height: 0.5)
                     HStack(spacing: 12) {
-                        Text("Issued: \(context.invoice.issueDate.formatted(date: .abbreviated, time: .omitted))")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Issued: %@",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                context.invoice.issueDate.formatted(date: .abbreviated, time: .omitted)
+                            )
+                        )
                             .font(typo.bodyFont(size: 7.5))
                             .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig).opacity(0.8))
-                        Text("Due: \(context.invoice.dueDate.formatted(date: .abbreviated, time: .omitted))")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Due: %@",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                context.invoice.dueDate.formatted(date: .abbreviated, time: .omitted)
+                            )
+                        )
                             .font(typo.bodyFont(size: 7.5, weight: .semibold))
                             .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig))
                     }
@@ -1123,7 +1135,7 @@ public struct ExecutiveInvoiceTemplateView: View {
             // Subtotal + tax breakdown
             HStack(spacing: 20) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Subtotal")
+                    BuxCatalogDynamicText(key: "Subtotal")
                         .font(typo.bodyFont(size: 7.5))
                         .foregroundColor(Color(UIColor.secondaryLabel))
                     Text(context.formatAmount(context.totals.subtotal))
@@ -1148,7 +1160,7 @@ public struct ExecutiveInvoiceTemplateView: View {
 
             // Grand total accent block
             HStack(spacing: 10) {
-                Text("TOTAL DUE")
+                BuxCatalogDynamicText(key: "TOTAL DUE")
                     .font(typo.bodyFont(size: 8, weight: .bold))
                     .foregroundColor(.white.opacity(0.8))
                     .tracking(1)

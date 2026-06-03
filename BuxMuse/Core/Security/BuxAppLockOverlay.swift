@@ -33,11 +33,11 @@ struct BuxAppLockOverlay: View {
                     .font(.system(size: 48))
                     .foregroundColor(themeManager.current.accentColor)
 
-                Text("BuxMuse Vault Active")
+                BuxCatalogDynamicText(key: "BuxMuse Vault Active")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                Text("Authenticate to continue")
+                BuxCatalogDynamicText(key: "Authenticate to continue")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.gray)
 

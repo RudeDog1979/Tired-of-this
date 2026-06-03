@@ -119,7 +119,7 @@ struct BusinessCard3DLookView: View {
 
             Spacer()
 
-            Text("Drag to spin · pinch to zoom")
+            BuxCatalogDynamicText(key: "Drag to spin · pinch to zoom")
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
                 .padding(.bottom, 24)

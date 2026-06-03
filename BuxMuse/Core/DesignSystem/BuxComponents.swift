@@ -14,7 +14,7 @@ struct BuxSectionHeader: View {
     let title: String
 
     var body: some View {
-        Text(title)
+        BuxCatalogText.text(title)
             .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
             .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -96,7 +96,7 @@ struct BuxSheetScaffold<Content: View, Footer: View>: View {
 
             Spacer()
 
-            Text(title)
+            BuxCatalogText.text(title)
                 .buxTitleStyle(color: themeManager.labelPrimary(for: colorScheme))
 
             Spacer()
@@ -151,7 +151,7 @@ struct BuxQuickActionButton: View {
         VStack(spacing: 6) {
             Image(systemName: systemImage)
                 .font(.system(size: 16, weight: .semibold))
-            Text(title)
+            BuxCatalogText.text(title)
                 .font(.system(size: 10, weight: .bold))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
@@ -365,7 +365,7 @@ struct BuxCenteredTopBar<Leading: View, Trailing: View>: View {
 
     var body: some View {
         ZStack {
-            Text(title)
+            BuxCatalogText.text(title)
                 .font(titleFont)
                 .multilineTextAlignment(.center)
                 .lineLimit(1)
@@ -437,12 +437,12 @@ struct BuxDebugOverlay: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("BuxMuse Debug")
+            BuxCatalogDynamicText(key: "BuxMuse Debug")
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
-            Text("Pipeline: Brain → UI")
+            BuxCatalogDynamicText(key: "Pipeline: Brain → UI")
                 .font(.system(size: 9, design: .monospaced))
             if showMetrics {
-                Text("Perf metrics: on")
+                BuxCatalogDynamicText(key: "Perf metrics: on")
                     .font(.system(size: 9, design: .monospaced))
                 Text(Date(), style: .time)
                     .font(.system(size: 9, design: .monospaced))

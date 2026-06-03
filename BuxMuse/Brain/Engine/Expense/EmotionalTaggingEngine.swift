@@ -13,6 +13,10 @@ struct EmotionalTag: Identifiable, Equatable, Hashable {
     let symbol: String
 
     var isEmpty: Bool { id.isEmpty }
+
+    func localizedLabel(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
+        BuxCatalogLabel.string(label, locale: locale)
+    }
 }
 
 struct EmotionalTaggingEngine {
@@ -33,25 +37,47 @@ struct EmotionalTaggingEngine {
         selectableTags.first { $0.id == id }
     }
 
-    static func analyze(emotion: String?) -> String? {
+    static func analyze(emotion: String?, locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String? {
         guard let emotion = emotion?.lowercased(), !emotion.isEmpty else { return nil }
         switch emotion {
         case "joy":
-            return "This purchase brought you joy — worth celebrating."
+            return BuxLocalizedString.string(
+                "This purchase brought you joy — worth celebrating.",
+                locale: locale
+            )
         case "excited":
-            return "You felt excited about this one. Enjoy it mindfully."
+            return BuxLocalizedString.string(
+                "You felt excited about this one. Enjoy it mindfully.",
+                locale: locale
+            )
         case "calm":
-            return "A calm, intentional spend. Nice balance."
+            return BuxLocalizedString.string(
+                "A calm, intentional spend. Nice balance.",
+                locale: locale
+            )
         case "neutral":
-            return "A practical, neutral expense."
+            return BuxLocalizedString.string("A practical, neutral expense.", locale: locale)
         case "stress":
-            return "Tagged under stress. Worth a pause before the next similar buy."
+            return BuxLocalizedString.string(
+                "Tagged under stress. Worth a pause before the next similar buy.",
+                locale: locale
+            )
         case "regret":
-            return "Tagged as regret. Consider avoiding similar purchases."
+            return BuxLocalizedString.string(
+                "Tagged as regret. Consider avoiding similar purchases.",
+                locale: locale
+            )
         case "guilty":
-            return "Some guilt here — reflect on whether this matched your values."
+            return BuxLocalizedString.string(
+                "Some guilt here — reflect on whether this matched your values.",
+                locale: locale
+            )
         default:
-            return "Emotional tag: \(emotion.capitalized)."
+            return BuxLocalizedString.format(
+                "Emotional tag: %@.",
+                locale: locale,
+                emotion.capitalized
+            )
         }
     }
 }

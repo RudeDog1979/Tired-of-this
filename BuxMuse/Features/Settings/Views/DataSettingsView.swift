@@ -17,6 +17,7 @@ struct DataSettingsView: View {
     @EnvironmentObject private var goalsViewModel: GoalsViewModel
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @ObservedObject private var store = SettingsStore.shared
 
@@ -37,7 +38,7 @@ struct DataSettingsView: View {
                     BuxFormRowDivider()
                     Picker("Backup Frequency", selection: $store.autoBackupFrequency) {
                         ForEach(AutoBackupFrequency.allCases) { freq in
-                            Text(freq.rawValue).tag(freq)
+                            Text(freq.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(freq)
                         }
                     }
                     .pickerStyle(.menu)
@@ -49,9 +50,9 @@ struct DataSettingsView: View {
             BuxFormSection(title: "Data Guard Mode") {
                 Toggle(isOn: $store.dataGuardModeEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Data Guard Mode")
+                        BuxCatalogDynamicText(key: "Data Guard Mode")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Blocks all outbound merchant logo requests. Renders local monogram avatars. Zero data cost when on prepaid mobile.")
+                        BuxCatalogDynamicText(key: "Blocks all outbound merchant logo requests. Renders local monogram avatars. Zero data cost when on prepaid mobile.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)
@@ -62,7 +63,7 @@ struct DataSettingsView: View {
             }
 
             BuxFormSection(title: "Merchant data") {
-                Text("Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.")
+                BuxCatalogDynamicText(key: "Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.")
                     .font(.system(size: 13, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
@@ -83,7 +84,7 @@ struct DataSettingsView: View {
                     ShareLink(item: url) {
                         HStack {
                             Image(systemName: "square.and.arrow.up.fill")
-                            Text("Save JSON Backup Archive")
+                            BuxCatalogDynamicText(key: "Save JSON Backup Archive")
                         }
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
@@ -94,7 +95,7 @@ struct DataSettingsView: View {
                     Button(action: generateJSONDump) {
                         HStack {
                             Image(systemName: "doc.text.magnifyingglass")
-                            Text("Compile JSON Data Export")
+                            BuxCatalogDynamicText(key: "Compile JSON Data Export")
                         }
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
@@ -105,7 +106,7 @@ struct DataSettingsView: View {
                 if let lastExport = store.lastExportDate {
                     BuxFormRowDivider()
                     HStack {
-                        Text("Last Compiled")
+                        BuxCatalogDynamicText(key: "Last Compiled")
                         Spacer()
                         Text(lastExport, style: .date)
                             .buxLabelSecondary()
@@ -127,7 +128,7 @@ struct DataSettingsView: View {
         .alert("Database Reset Complete", isPresented: $showSuccessAlert) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Your BuxMuse database and settings have been restored to fresh seeds. All private database entries are deleted.")
+            BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. All private database entries are deleted.")
         }
         .confirmationDialog("WARNING: Delete All Data?", isPresented: $showResetDialog, titleVisibility: .visible) {
             Button("Confirm Complete Purge", role: .destructive) {
@@ -135,7 +136,7 @@ struct DataSettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This action is completely offline and irreversible. It will wipe all expenses, Studio records, secure passcodes, and reset everything.")
+            BuxCatalogDynamicText(key: "This action is completely offline and irreversible. It will wipe all expenses, Studio records, secure passcodes, and reset everything.")
         }
         .onChange(of: store.allowLocalBackups) { _, _ in store.save() }
         .onChange(of: store.autoBackupFrequency) { _, _ in store.save() }

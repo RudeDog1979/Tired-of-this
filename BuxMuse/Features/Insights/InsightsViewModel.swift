@@ -19,6 +19,7 @@ public final class InsightsViewModel: ObservableObject {
     private let insightsEngine: InsightsEngine
     private let financialEngine: FinancialIntelligenceEngine
     private let goalsViewModel: GoalsViewModel
+    private let appSettingsManager: AppSettingsManager
     private weak var studioStore: StudioStore?
     private var cancellables = Set<AnyCancellable>()
     
@@ -26,11 +27,13 @@ public final class InsightsViewModel: ObservableObject {
         insightsEngine: InsightsEngine,
         financialEngine: FinancialIntelligenceEngine,
         goalsViewModel: GoalsViewModel,
+        appSettingsManager: AppSettingsManager,
         studioStore: StudioStore? = nil
     ) {
         self.insightsEngine = insightsEngine
         self.financialEngine = financialEngine
         self.goalsViewModel = goalsViewModel
+        self.appSettingsManager = appSettingsManager
         self.studioStore = studioStore
         
         // Observe insights from insightsEngine
@@ -76,12 +79,14 @@ public final class InsightsViewModel: ObservableObject {
         let gls = goalsViewModel.goals
         let projects = studioStore?.projects ?? []
         
+        let locale = appSettingsManager.interfaceLocale
         insightsEngine.recalculateAllInsightsAsync(
             transactions: txs,
             subscriptions: subs,
             goals: gls,
             goalsViewModel: goalsViewModel,
-            projects: projects
+            projects: projects,
+            locale: locale
         )
 
         Task { @MainActor in
@@ -97,7 +102,8 @@ public final class InsightsViewModel: ObservableObject {
             featureStrips = FeatureInsightStripEngine.buildStrips(
                 transactions: txs,
                 burnout: burnout,
-                projects: projects
+                projects: projects,
+                locale: appSettingsManager.interfaceLocale
             )
         }
     }

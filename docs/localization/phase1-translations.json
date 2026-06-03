@@ -1,0 +1,2034 @@
+{
+  "1 Minute": {
+    "es-419": "1 minuto",
+    "es-ES": "1 minuto"
+  },
+  "100% on-device local sandbox parsing. Your bank statements and scanned documents never touch the cloud.": {
+    "es-419": "Análisis 100 % local en tu dispositivo. Tus estados de cuenta y documentos escaneados nunca salen a la nube.",
+    "es-ES": "Análisis 100 % local en tu dispositivo. Tus estados de cuenta y documentos escaneados nunca salen a la nube."
+  },
+  "15 Minutes": {
+    "es-419": "15 minutos",
+    "es-ES": "15 minutos"
+  },
+  "5 Minutes": {
+    "es-419": "5 minutos",
+    "es-ES": "5 minutos"
+  },
+  "7-day trend": {
+    "es-419": "Tendencia 7 días",
+    "es-ES": "Tendencia 7 días"
+  },
+  "A compact overview of today's spend & active goals": {
+    "es-419": "Un resumen compacto del gasto de hoy y tus metas activas",
+    "es-ES": "Un resumen compacto del gasto de hoy y tus metas activas"
+  },
+  "About": {
+    "es-419": "Acerca de",
+    "es-ES": "Acerca de"
+  },
+  "Accent color": {
+    "es-419": "Color de acento",
+    "es-ES": "Color de acento"
+  },
+  "Accent, glassmorphism, motion": {
+    "es-419": "Acento, glassmorphism y animación",
+    "es-ES": "Acento, glassmorphism y animación"
+  },
+  "Active": {
+    "es-419": "Activo",
+    "es-ES": "Activo"
+  },
+  "Active savings goals": {
+    "es-419": "Metas de ahorro activas",
+    "es-ES": "Metas de ahorro activas"
+  },
+  "Add": {
+    "es-419": "Agregar",
+    "es-ES": "Añadir"
+  },
+  "Add Cash": {
+    "es-419": "Agregar efectivo",
+    "es-ES": "Añadir efectivo"
+  },
+  "Add Custom Envelope Profile": {
+    "es-419": "Agregar perfil de sobre personalizado",
+    "es-ES": "Añadir perfil de sobre personalizado"
+  },
+  "Add Goal": {
+    "es-419": "Agregar meta",
+    "es-ES": "Añadir meta"
+  },
+  "Add a new gig workspace": {
+    "es-419": "Agregar un nuevo espacio de trabajo",
+    "es-ES": "Añadir un nuevo espacio de trabajo"
+  },
+  "Add category": {
+    "es-419": "Agregar categoría",
+    "es-ES": "Añadir categoría"
+  },
+  "Add expense": {
+    "es-419": "Agregar gasto",
+    "es-ES": "Añadir gasto"
+  },
+  "Add expenses to unlock spending insights.": {
+    "es-419": "Agrega gastos para desbloquear insights de gasto.",
+    "es-ES": "Añade gastos para desbloquear insights de gasto."
+  },
+  "Add note": {
+    "es-419": "Agregar nota",
+    "es-ES": "Añadir nota"
+  },
+  "Adjustment type": {
+    "es-419": "Tipo de ajuste",
+    "es-ES": "Tipo de ajuste"
+  },
+  "Advanced diagnostics": {
+    "es-419": "Diagnóstico avanzado",
+    "es-ES": "Diagnóstico avanzado"
+  },
+  "Advanced filters…": {
+    "es-419": "Filtros avanzados…",
+    "es-ES": "Filtros avanzados…"
+  },
+  "Agreement Scratchpad": {
+    "es-419": "Borrador de acuerdos",
+    "es-ES": "Borrador de acuerdos"
+  },
+  "Alerts & radar": {
+    "es-419": "Alertas y radar",
+    "es-ES": "Alertas y radar"
+  },
+  "All lines": {
+    "es-419": "Todas las líneas",
+    "es-ES": "Todas las líneas"
+  },
+  "Allowance per mile": {
+    "es-419": "Tarifa por milla",
+    "es-ES": "Tarifa por kilómetro"
+  },
+  "Another merchant shares this name — add a label to tell them apart.": {
+    "es-419": "Otro comercio comparte este nombre — agrega una etiqueta para distinguirlos.",
+    "es-ES": "Otro comercio comparte este nombre — añade una etiqueta para distinguirlos."
+  },
+  "Any category": {
+    "es-419": "Cualquier categoría",
+    "es-ES": "Cualquier categoría"
+  },
+  "Any merchant": {
+    "es-419": "Cualquier comercio",
+    "es-ES": "Cualquier comercio"
+  },
+  "Any zone": {
+    "es-419": "Cualquier zona",
+    "es-ES": "Cualquier zona"
+  },
+  "Appearance": {
+    "es-419": "Apariencia",
+    "es-ES": "Apariencia"
+  },
+  "Appearance & Themes": {
+    "es-419": "Apariencia y temas",
+    "es-ES": "Apariencia y temas"
+  },
+  "Apple Health sync": {
+    "es-419": "Sincronización con Apple Health",
+    "es-ES": "Sincronización con Apple Health"
+  },
+  "Applied to business-purpose trips in Studio deductions and tax estimates.": {
+    "es-419": "Se aplica a viajes de negocio en deducciones y estimaciones fiscales de Studio.",
+    "es-ES": "Se aplica a viajes de negocio en deducciones y estimaciones fiscales de Studio."
+  },
+  "Apply": {
+    "es-419": "Aplicar",
+    "es-ES": "Aplicar"
+  },
+  "Auto-adjust from History": {
+    "es-419": "Ajuste automático según historial",
+    "es-ES": "Ajuste automático según historial"
+  },
+  "Auto-location for mileage": {
+    "es-419": "Ubicación automática para millaje",
+    "es-ES": "Ubicación automática para kilometraje"
+  },
+  "Avatar & identity": {
+    "es-419": "Avatar e identidad",
+    "es-ES": "Avatar e identidad"
+  },
+  "Backup & Restore": {
+    "es-419": "Copia y restauración",
+    "es-ES": "Copia y restauración"
+  },
+  "Backup Frequency": {
+    "es-419": "Frecuencia de copia",
+    "es-ES": "Frecuencia de copia"
+  },
+  "Barter": {
+    "es-419": "Trueque",
+    "es-ES": "Trueque"
+  },
+  "Barter & Trade": {
+    "es-419": "Trueque e intercambio",
+    "es-ES": "Trueque e intercambio"
+  },
+  "Barter & Trade Logger": {
+    "es-419": "Registro de trueque e intercambio",
+    "es-ES": "Registro de trueque e intercambio"
+  },
+  "Barter / Exchange": {
+    "es-419": "Trueque / intercambio",
+    "es-ES": "Trueque / intercambio"
+  },
+  "Barter Details": {
+    "es-419": "Detalles del trueque",
+    "es-ES": "Detalles del trueque"
+  },
+  "Barter Logger": {
+    "es-419": "Registro de trueque",
+    "es-ES": "Registro de trueque"
+  },
+  "Barter insight card": {
+    "es-419": "Tarjeta de insight de trueque",
+    "es-ES": "Tarjeta de insight de trueque"
+  },
+  "Before you backup": {
+    "es-419": "Antes de hacer la copia",
+    "es-ES": "Antes de hacer la copia"
+  },
+  "Biometric access": {
+    "es-419": "Acceso biométrico",
+    "es-ES": "Acceso biométrico"
+  },
+  "Blocks all outbound merchant logo requests. Renders local monogram avatars. Zero data cost when on prepaid mobile.": {
+    "es-419": "Bloquea solicitudes de logos de comercios. Muestra monogramas locales. Cero consumo de datos en móvil prepago.",
+    "es-ES": "Bloquea solicitudes de logos de comercios. Muestra monogramas locales. Cero consumo de datos en móvil prepago."
+  },
+  "Blur in App Switcher": {
+    "es-419": "Desenfoque en el conmutador de apps",
+    "es-ES": "Desenfoque en el conmutador de apps"
+  },
+  "Brand": {
+    "es-419": "Marca",
+    "es-ES": "Marca"
+  },
+  "Brand Color": {
+    "es-419": "Color de marca",
+    "es-ES": "Color de marca"
+  },
+  "Brand Themes": {
+    "es-419": "Temas de marca",
+    "es-ES": "Temas de marca"
+  },
+  "Brand design presets": {
+    "es-419": "Presets de diseño de marca",
+    "es-ES": "Presets de diseño de marca"
+  },
+  "Breakdown": {
+    "es-419": "Desglose",
+    "es-ES": "Desglose"
+  },
+  "Budget Period": {
+    "es-419": "Período de presupuesto",
+    "es-ES": "Período de presupuesto"
+  },
+  "Budget alerts, renewals, and Studio reminders will appear here.": {
+    "es-419": "Las alertas de presupuesto, renovaciones y recordatorios de Studio aparecerán aquí.",
+    "es-ES": "Las alertas de presupuesto, renovaciones y recordatorios de Studio aparecerán aquí."
+  },
+  "Budget method": {
+    "es-419": "Método de presupuesto",
+    "es-ES": "Método de presupuesto"
+  },
+  "Budgeting Mode": {
+    "es-419": "Modo de presupuesto",
+    "es-ES": "Modo de presupuesto"
+  },
+  "Budgets": {
+    "es-419": "Presupuestos",
+    "es-ES": "Presupuestos"
+  },
+  "Budgets & Custom Budgets": {
+    "es-419": "Presupuestos",
+    "es-ES": "Presupuestos"
+  },
+  "Business Card Studio": {
+    "es-419": "Business Card Studio",
+    "es-ES": "Business Card Studio"
+  },
+  "Business Type": {
+    "es-419": "Tipo de negocio",
+    "es-ES": "Tipo de negocio"
+  },
+  "Business profile": {
+    "es-419": "Perfil de negocio",
+    "es-ES": "Perfil de negocio"
+  },
+  "Business profile, invoices, tax": {
+    "es-419": "Perfil de negocio, facturas e impuestos",
+    "es-ES": "Perfil de negocio, facturas e impuestos"
+  },
+  "BuxMuse": {
+    "es-419": "BuxMuse",
+    "es-ES": "BuxMuse"
+  },
+  "BuxMuse Brain will adjust limits based on seasonal spend trends": {
+    "es-419": "BuxMuse Brain ajustará los límites según tendencias de gasto estacionales",
+    "es-ES": "BuxMuse Brain ajustará los límites según tendencias de gasto estacionales"
+  },
+  "BuxMuse Intelligence": {
+    "es-419": "BuxMuse Intelligence",
+    "es-ES": "BuxMuse Intelligence"
+  },
+  "BuxMuse never saves your password or recovery key on this device. You hold both — store them in a password manager, secure note, or offline copy.": {
+    "es-419": "BuxMuse nunca guarda tu contraseña ni tu clave de recuperación en este dispositivo. Tú las tienes — guárdalas en un gestor de contraseñas, nota segura o copia offline.",
+    "es-ES": "BuxMuse nunca guarda tu contraseña ni tu clave de recuperación en este dispositivo. Tú las tienes — guárdalas en un gestor de contraseñas, nota segura o copia offline."
+  },
+  "BuxMuse version, credits": {
+    "es-419": "Versión de BuxMuse, créditos",
+    "es-ES": "Versión de BuxMuse, créditos"
+  },
+  "Cancel": {
+    "es-419": "Cancelar",
+    "es-ES": "Cancelar"
+  },
+  "Canonical name": {
+    "es-419": "Nombre canónico",
+    "es-ES": "Nombre canónico"
+  },
+  "Cash & Barter": {
+    "es-419": "Efectivo y trueque",
+    "es-ES": "Efectivo y trueque"
+  },
+  "Cash Drawer": {
+    "es-419": "Caja de efectivo",
+    "es-ES": "Caja de efectivo"
+  },
+  "Cash drawer": {
+    "es-419": "Caja de efectivo",
+    "es-ES": "Caja de efectivo"
+  },
+  "Cash flow": {
+    "es-419": "Flujo de efectivo",
+    "es-ES": "Flujo de efectivo"
+  },
+  "Categories": {
+    "es-419": "Categorías",
+    "es-ES": "Categorías"
+  },
+  "Category": {
+    "es-419": "Categoría",
+    "es-ES": "Categoría"
+  },
+  "Category Breakdown": {
+    "es-419": "Desglose por categoría",
+    "es-ES": "Desglose por categoría"
+  },
+  "Category breakdown": {
+    "es-419": "Desglose por categoría",
+    "es-ES": "Desglose por categoría"
+  },
+  "Change category": {
+    "es-419": "Cambiar categoría",
+    "es-ES": "Cambiar categoría"
+  },
+  "Charts, lines, insights & actions": {
+    "es-419": "Gráficos, líneas, insights y acciones",
+    "es-ES": "Gráficos, líneas, insights y acciones"
+  },
+  "Choose backup to restore": {
+    "es-419": "Elige la copia a restaurar",
+    "es-ES": "Elige la copia a restaurar"
+  },
+  "Choose merchant": {
+    "es-419": "Elegir comercio",
+    "es-ES": "Elegir comercio"
+  },
+  "Choose store": {
+    "es-419": "Elegir tienda",
+    "es-ES": "Elegir tienda"
+  },
+  "Choose your preferred regional formatting": {
+    "es-419": "Elige el formato regional que prefieras",
+    "es-ES": "Elige el formato regional que prefieras"
+  },
+  "Clear": {
+    "es-419": "Limpiar",
+    "es-ES": "Limpiar"
+  },
+  "Clear all filters": {
+    "es-419": "Borrar todos los filtros",
+    "es-ES": "Borrar todos los filtros"
+  },
+  "Clear filters": {
+    "es-419": "Borrar filtros",
+    "es-ES": "Borrar filtros"
+  },
+  "Clear payment source": {
+    "es-419": "Quitar fuente de pago",
+    "es-ES": "Quitar fuente de pago"
+  },
+  "Clear store link": {
+    "es-419": "Quitar enlace de tienda",
+    "es-ES": "Quitar enlace de tienda"
+  },
+  "Client approval": {
+    "es-419": "Aprobación del cliente",
+    "es-ES": "Aprobación del cliente"
+  },
+  "Company Logo": {
+    "es-419": "Logo de la empresa",
+    "es-ES": "Logo de la empresa"
+  },
+  "Compile JSON Data Export": {
+    "es-419": "Compilar exportación JSON",
+    "es-ES": "Compilar exportación JSON"
+  },
+  "Confirm Complete Purge": {
+    "es-419": "Confirmar borrado total",
+    "es-ES": "Confirmar borrado total"
+  },
+  "Context": {
+    "es-419": "Contexto",
+    "es-ES": "Contexto"
+  },
+  "Copy key": {
+    "es-419": "Copiar clave",
+    "es-ES": "Copiar clave"
+  },
+  "Couldn't load that photo — try another image.": {
+    "es-419": "No se pudo cargar esa foto — prueba con otra imagen.",
+    "es-ES": "No se pudo cargar esa foto — prueba con otra imagen."
+  },
+  "Country / Region": {
+    "es-419": "País / Región",
+    "es-ES": "País / Región"
+  },
+  "Create Workspace": {
+    "es-419": "Crear espacio de trabajo",
+    "es-ES": "Crear espacio de trabajo"
+  },
+  "Create encrypted backup": {
+    "es-419": "Crear copia cifrada",
+    "es-ES": "Crear copia cifrada"
+  },
+  "Create, edit, and share scope agreements with clients.": {
+    "es-419": "Crea, edita y comparte acuerdos de alcance con clientes.",
+    "es-ES": "Crea, edita y comparte acuerdos de alcance con clientes."
+  },
+  "Creates a password-protected `.buxmuse` file with settings, expenses, goals, workspaces, and Studio data. Share via iCloud Drive, email, or save locally.": {
+    "es-419": "Crea un archivo `.buxmuse` protegido con contraseña con ajustes, gastos, metas, espacios y datos de Studio. Compártelo por iCloud Drive, correo o guárdalo localmente.",
+    "es-ES": "Crea un archivo `.buxmuse` protegido con contraseña con ajustes, gastos, metas, espacios y datos de Studio. Compártelo por iCloud Drive, correo o guárdalo localmente."
+  },
+  "Creative Energy": {
+    "es-419": "Energía creativa",
+    "es-ES": "Energía creativa"
+  },
+  "Creative Energy widget": {
+    "es-419": "Widget de energía creativa",
+    "es-ES": "Widget de energía creativa"
+  },
+  "Creative fuel left after workload, sleep, and stress spend.": {
+    "es-419": "Combustible creativo que te queda tras carga de trabajo, sueño y gasto por estrés.",
+    "es-ES": "Combustible creativo que te queda tras carga de trabajo, sueño y gasto por estrés."
+  },
+  "Credit & BNPL": {
+    "es-419": "Crédito y BNPL",
+    "es-ES": "Crédito y BNPL"
+  },
+  "Crop Avatar": {
+    "es-419": "Recortar avatar",
+    "es-ES": "Recortar avatar"
+  },
+  "Currency & Region": {
+    "es-419": "Moneda y región",
+    "es-ES": "Moneda y región"
+  },
+  "Currency Configuration": {
+    "es-419": "Configuración de moneda",
+    "es-ES": "Configuración de moneda"
+  },
+  "Currency code, formatting": {
+    "es-419": "Código de moneda y formato",
+    "es-ES": "Código de moneda y formato"
+  },
+  "Current active ledger context": {
+    "es-419": "Contexto de libro activo",
+    "es-ES": "Contexto de libro activo"
+  },
+  "Custom envelope profiles": {
+    "es-419": "Perfiles de sobre personalizados",
+    "es-ES": "Perfiles de sobre personalizados"
+  },
+  "Daily Average": {
+    "es-419": "Promedio diario",
+    "es-ES": "Promedio diario"
+  },
+  "Daily Financial Summary": {
+    "es-419": "Resumen financiero diario",
+    "es-ES": "Resumen financiero diario"
+  },
+  "Daily digest": {
+    "es-419": "Resumen diario",
+    "es-ES": "Resumen diario"
+  },
+  "Daily tips": {
+    "es-419": "Consejos diarios",
+    "es-ES": "Consejos diarios"
+  },
+  "Data Guard Mode": {
+    "es-419": "Modo guardián de datos",
+    "es-ES": "Modo guardián de datos"
+  },
+  "Date": {
+    "es-419": "Fecha",
+    "es-ES": "Fecha"
+  },
+  "Default Cycle": {
+    "es-419": "Ciclo predeterminado",
+    "es-ES": "Ciclo predeterminado"
+  },
+  "Default Hourly Rate": {
+    "es-419": "Tarifa por hora predeterminada",
+    "es-ES": "Tarifa por hora predeterminada"
+  },
+  "Default sleep hours": {
+    "es-419": "Horas de sueño predeterminadas",
+    "es-ES": "Horas de sueño predeterminadas"
+  },
+  "Default stress level": {
+    "es-419": "Nivel de estrés predeterminado",
+    "es-ES": "Nivel de estrés predeterminado"
+  },
+  "Default terms & conditions": {
+    "es-419": "Términos y condiciones predeterminados",
+    "es-ES": "Términos y condiciones predeterminados"
+  },
+  "Delete": {
+    "es-419": "Eliminar",
+    "es-ES": "Eliminar"
+  },
+  "Delete data": {
+    "es-419": "Eliminar datos",
+    "es-ES": "Eliminar datos"
+  },
+  "Delete expense": {
+    "es-419": "Eliminar gasto",
+    "es-ES": "Eliminar gasto"
+  },
+  "Detected pattern warnings": {
+    "es-419": "Advertencias de patrones detectados",
+    "es-ES": "Advertencias de patrones detectados"
+  },
+  "Disable PIN": {
+    "es-419": "Desactivar PIN",
+    "es-ES": "Desactivar PIN"
+  },
+  "Dismiss": {
+    "es-419": "Descartar",
+    "es-ES": "Descartar"
+  },
+  "Dismiss All": {
+    "es-419": "Descartar todo",
+    "es-ES": "Descartar todo"
+  },
+  "Display Mode": {
+    "es-419": "Modo de visualización",
+    "es-ES": "Modo de visualización"
+  },
+  "Display Style": {
+    "es-419": "Estilo de visualización",
+    "es-ES": "Estilo de visualización"
+  },
+  "Display currency": {
+    "es-419": "Moneda de visualización",
+    "es-ES": "Moneda de visualización"
+  },
+  "Done": {
+    "es-419": "Listo",
+    "es-ES": "Hecho"
+  },
+  "Draft scope bullets, deliverables, and sign-off notes for clients — stored locally on your device.": {
+    "es-419": "Borradores de alcance, entregables y notas de aprobación para clientes — guardados localmente en tu dispositivo.",
+    "es-ES": "Borradores de alcance, entregables y notas de aprobación para clientes — guardados localmente en tu dispositivo."
+  },
+  "Drafts": {
+    "es-419": "Borradores",
+    "es-ES": "Borradores"
+  },
+  "Dual-Cash Drawer": {
+    "es-419": "Caja de doble efectivo",
+    "es-ES": "Caja de doble efectivo"
+  },
+  "Duplicate": {
+    "es-419": "Duplicar",
+    "es-ES": "Duplicar"
+  },
+  "ENTER CASH AMOUNT": {
+    "es-419": "INGRESA MONTO EN EFECTIVO",
+    "es-ES": "INTRODUCE IMPORTE EN EFECTIVO"
+  },
+  "Edit": {
+    "es-419": "Editar",
+    "es-ES": "Editar"
+  },
+  "Edit Transaction": {
+    "es-419": "Editar transacción",
+    "es-ES": "Editar transacción"
+  },
+  "Emotion": {
+    "es-419": "Emoción",
+    "es-ES": "Emoción"
+  },
+  "Emotional tag": {
+    "es-419": "Etiqueta emocional",
+    "es-ES": "Etiqueta emocional"
+  },
+  "Enable Agreement Scratchpad": {
+    "es-419": "Activar borrador de acuerdos",
+    "es-ES": "Activar borrador de acuerdos"
+  },
+  "Enable Barter Logger": {
+    "es-419": "Activar registro de trueque",
+    "es-ES": "Activar registro de trueque"
+  },
+  "Enable Cash Drawer": {
+    "es-419": "Activar caja de efectivo",
+    "es-ES": "Activar caja de efectivo"
+  },
+  "Enable Notifications": {
+    "es-419": "Activar notificaciones",
+    "es-ES": "Activar notificaciones"
+  },
+  "Enable PIN": {
+    "es-419": "Activar PIN",
+    "es-ES": "Activar PIN"
+  },
+  "Enable Scope Radar": {
+    "es-419": "Activar Scope Radar",
+    "es-ES": "Activar Scope Radar"
+  },
+  "Enable on Add Expense": {
+    "es-419": "Activar al agregar gasto",
+    "es-ES": "Activar al añadir gasto"
+  },
+  "Enable workspace switching": {
+    "es-419": "Activar cambio de espacio de trabajo",
+    "es-ES": "Activar cambio de espacio de trabajo"
+  },
+  "Encrypted archive, export, full restore": {
+    "es-419": "Archivo cifrado, exportación y restauración completa",
+    "es-ES": "Archivo cifrado, exportación y restauración completa"
+  },
+  "Encrypted backup": {
+    "es-419": "Copia cifrada",
+    "es-ES": "Copia cifrada"
+  },
+  "Energy": {
+    "es-419": "Energía",
+    "es-ES": "Energía"
+  },
+  "English": {
+    "es-419": "Inglés",
+    "es-ES": "Inglés"
+  },
+  "Envelope categories": {
+    "es-419": "Categorías de sobre",
+    "es-ES": "Categorías de sobre"
+  },
+  "Estimated value tracking": {
+    "es-419": "Seguimiento de valor estimado",
+    "es-ES": "Seguimiento de valor estimado"
+  },
+  "Expense Intelligence": {
+    "es-419": "Inteligencia de gastos",
+    "es-ES": "Inteligencia de gastos"
+  },
+  "Expenses": {
+    "es-419": "Gastos",
+    "es-ES": "Gastos"
+  },
+  "Export compliance": {
+    "es-419": "Cumplimiento de exportación",
+    "es-ES": "Cumplimiento de exportación"
+  },
+  "FREE": {
+    "es-419": "GRATIS",
+    "es-ES": "GRATIS"
+  },
+  "FULL TERRITORY VIEW": {
+    "es-419": "VISTA DE TERRITORIO COMPLETA",
+    "es-ES": "VISTA DE TERRITORIO COMPLETA"
+  },
+  "Face ID / Touch ID": {
+    "es-419": "Face ID / Touch ID",
+    "es-ES": "Face ID / Touch ID"
+  },
+  "Face ID, PIN passcode": {
+    "es-419": "Face ID, PIN de acceso",
+    "es-ES": "Face ID, PIN de acceso"
+  },
+  "Fast, private verification via Apple Secure Enclave": {
+    "es-419": "Verificación rápida y privada mediante Apple Secure Enclave",
+    "es-ES": "Verificación rápida y privada mediante Apple Secure Enclave"
+  },
+  "Feature intelligence": {
+    "es-419": "Inteligencia de funciones",
+    "es-ES": "Inteligencia de funciones"
+  },
+  "Filter expenses": {
+    "es-419": "Filtrar gastos",
+    "es-ES": "Filtrar gastos"
+  },
+  "Filters": {
+    "es-419": "Filtros",
+    "es-ES": "Filtros"
+  },
+  "Finance": {
+    "es-419": "Finanzas",
+    "es-ES": "Finanzas"
+  },
+  "Formatting Preview": {
+    "es-419": "Vista previa de formato",
+    "es-ES": "Vista previa de formato"
+  },
+  "Full themed surfaces and presets — off uses standard iOS light/dark": {
+    "es-419": "Superficies y presets temáticos completos — desactivado usa claro/oscuro estándar de iOS",
+    "es-ES": "Superficies y presets temáticos completos — desactivado usa claro/oscuro estándar de iOS"
+  },
+  "Future impact": {
+    "es-419": "Impacto futuro",
+    "es-ES": "Impacto futuro"
+  },
+  "GOODS / SERVICES GIVEN": {
+    "es-419": "BIENES / SERVICIOS ENTREGADOS",
+    "es-ES": "BIENES / SERVICIOS ENTREGADOS"
+  },
+  "GOODS / SERVICES RECEIVED": {
+    "es-419": "BIENES / SERVICIOS RECIBIDOS",
+    "es-ES": "BIENES / SERVICIOS RECIBIDOS"
+  },
+  "General": {
+    "es-419": "General",
+    "es-ES": "General"
+  },
+  "Generate recovery key": {
+    "es-419": "Generar clave de recuperación",
+    "es-ES": "Generar clave de recuperación"
+  },
+  "Get structural forecast and potential acceleration timeline AI insights.": {
+    "es-419": "Obtén pronóstico estructural e insights de IA sobre posibles aceleraciones en el tiempo.",
+    "es-ES": "Obtén pronóstico estructural e insights de IA sobre posibles aceleraciones en el tiempo."
+  },
+  "Gig Spaces": {
+    "es-419": "Espacios de trabajo",
+    "es-ES": "Espacios de trabajo"
+  },
+  "Glass navigation chrome": {
+    "es-419": "Barra de navegación glass",
+    "es-ES": "Barra de navegación glass"
+  },
+  "Global locale": {
+    "es-419": "Configuración regional global",
+    "es-ES": "Configuración regional global"
+  },
+  "Goals": {
+    "es-419": "Metas",
+    "es-ES": "Metas"
+  },
+  "Got it": {
+    "es-419": "Entendido",
+    "es-ES": "Entendido"
+  },
+  "Habit": {
+    "es-419": "Hábito",
+    "es-ES": "Hábito"
+  },
+  "Habit signature": {
+    "es-419": "Firma de hábito",
+    "es-ES": "Firma de hábito"
+  },
+  "Health access was denied. Enable Sleep in Settings → Health → Data Access, or keep using manual sliders.": {
+    "es-419": "Se denegó el acceso a salud. Activa Sueño en Ajustes → Salud → Acceso a datos, o sigue usando los controles manuales.",
+    "es-ES": "Se denegó el acceso a salud. Activa Sueño en Ajustes → Salud → Acceso a datos, o sigue usando los controles manuales."
+  },
+  "HealthKit sleep sync": {
+    "es-419": "Sincronización de sueño con HealthKit",
+    "es-ES": "Sincronización de sueño con HealthKit"
+  },
+  "Heat Zone": {
+    "es-419": "Zona de calor",
+    "es-ES": "Zona de calor"
+  },
+  "Heat zone": {
+    "es-419": "Zona de calor",
+    "es-ES": "Zona de calor"
+  },
+  "Hides your financial sheets when toggling tasks": {
+    "es-419": "Oculta tus hojas financieras al cambiar de tarea",
+    "es-ES": "Oculta tus hojas financieras al cambiar de tarea"
+  },
+  "High Risk": {
+    "es-419": "Alto riesgo",
+    "es-ES": "Alto riesgo"
+  },
+  "Hours budget": {
+    "es-419": "Presupuesto de horas",
+    "es-ES": "Presupuesto de horas"
+  },
+  "How did this feel?": {
+    "es-419": "¿Cómo te sentiste?",
+    "es-ES": "¿Cómo te sentiste?"
+  },
+  "How did you pay? (optional)": {
+    "es-419": "¿Cómo pagaste? (opcional)",
+    "es-ES": "¿Cómo pagaste? (opcional)"
+  },
+  "How it works": {
+    "es-419": "Cómo funciona",
+    "es-ES": "Cómo funciona"
+  },
+  "I saved my recovery key in a safe place": {
+    "es-419": "Guardé mi clave de recuperación en un lugar seguro",
+    "es-ES": "Guardé mi clave de recuperación en un lugar seguro"
+  },
+  "I understand — create backup": {
+    "es-419": "Entiendo — crear copia",
+    "es-ES": "Entiendo — crear copia"
+  },
+  "Immediately": {
+    "es-419": "De inmediato",
+    "es-ES": "De inmediato"
+  },
+  "Intelligence insights": {
+    "es-419": "Insights de inteligencia",
+    "es-ES": "Insights de inteligencia"
+  },
+  "Intelligence rules": {
+    "es-419": "Reglas de inteligencia",
+    "es-ES": "Reglas de inteligencia"
+  },
+  "Interface": {
+    "es-419": "Interfaz",
+    "es-ES": "Interfaz"
+  },
+  "Invoice Payment": {
+    "es-419": "Pago de factura",
+    "es-ES": "Pago de factura"
+  },
+  "Invoices": {
+    "es-419": "Facturas",
+    "es-ES": "Facturas"
+  },
+  "Invoicing defaults": {
+    "es-419": "Valores predeterminados de facturación",
+    "es-ES": "Valores predeterminados de facturación"
+  },
+  "Landing backdrop glow": {
+    "es-419": "Resplandor del fondo de inicio",
+    "es-ES": "Resplandor del fondo de inicio"
+  },
+  "Largest Purchases": {
+    "es-419": "Compras más grandes",
+    "es-ES": "Compras más grandes"
+  },
+  "Last Compiled": {
+    "es-419": "Última compilación",
+    "es-ES": "Última compilación"
+  },
+  "Link store (optional)": {
+    "es-419": "Vincular tienda (opcional)",
+    "es-ES": "Vincular tienda (opcional)"
+  },
+  "Linked": {
+    "es-419": "Vinculado",
+    "es-ES": "Vinculado"
+  },
+  "List icon": {
+    "es-419": "Icono de lista",
+    "es-ES": "Icono de lista"
+  },
+  "Lock After Inactivity": {
+    "es-419": "Bloquear tras inactividad",
+    "es-ES": "Bloquear tras inactividad"
+  },
+  "Log Cash Transaction": {
+    "es-419": "Registrar transacción en efectivo",
+    "es-ES": "Registrar transacción en efectivo"
+  },
+  "Log Physical Cash": {
+    "es-419": "Registrar efectivo físico",
+    "es-ES": "Registrar efectivo físico"
+  },
+  "Log any trade or exchange": {
+    "es-419": "Registrar cualquier trueque o intercambio",
+    "es-ES": "Registrar cualquier trueque o intercambio"
+  },
+  "Log income": {
+    "es-419": "Registrar ingreso",
+    "es-ES": "Registrar ingreso"
+  },
+  "Long-press & drag to weave the web · tap for territory detail": {
+    "es-419": "Mantén y arrastra para tejer la red · toca para detalle del territorio",
+    "es-ES": "Mantén y arrastra para tejer la red · toca para detalle del territorio"
+  },
+  "Manage Categories": {
+    "es-419": "Administrar categorías",
+    "es-ES": "Gestionar categorías"
+  },
+  "Manage categories": {
+    "es-419": "Administrar categorías",
+    "es-ES": "Gestionar categorías"
+  },
+  "Manage merchants": {
+    "es-419": "Administrar comercios",
+    "es-ES": "Gestionar comercios"
+  },
+  "Manual Entry": {
+    "es-419": "Entrada manual",
+    "es-ES": "Entrada manual"
+  },
+  "Manual account type": {
+    "es-419": "Tipo de cuenta manual",
+    "es-ES": "Tipo de cuenta manual"
+  },
+  "Manual tuning (Simple & Pro)": {
+    "es-419": "Ajuste manual (Simple y Pro)",
+    "es-ES": "Ajuste manual (Simple y Pro)"
+  },
+  "Merchant": {
+    "es-419": "Comercio",
+    "es-ES": "Comercio"
+  },
+  "Merchant data": {
+    "es-419": "Datos de comercios",
+    "es-ES": "Datos de comercios"
+  },
+  "Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.": {
+    "es-419": "Los iconos usan caché local primero. En línea, BuxMuse puede obtener favicons de Google o DuckDuckGo. Tus comercios se guardan solo en este dispositivo.",
+    "es-ES": "Los iconos usan caché local primero. En línea, BuxMuse puede obtener favicons de Google o DuckDuckGo. Tus comercios se guardan solo en este dispositivo."
+  },
+  "Merchants": {
+    "es-419": "Comercios",
+    "es-ES": "Comercios"
+  },
+  "Merge…": {
+    "es-419": "Fusionar…",
+    "es-ES": "Fusionar…"
+  },
+  "Micro commitment": {
+    "es-419": "Microcompromiso",
+    "es-ES": "Microcompromiso"
+  },
+  "Mileage": {
+    "es-419": "Millaje",
+    "es-ES": "Kilometraje"
+  },
+  "Mileage Log": {
+    "es-419": "Registro de millaje",
+    "es-ES": "Registro de kilometraje"
+  },
+  "Mileage rate": {
+    "es-419": "Tarifa de millaje",
+    "es-ES": "Tarifa de kilometraje"
+  },
+  "Mode": {
+    "es-419": "Modo",
+    "es-ES": "Modo"
+  },
+  "Money Map": {
+    "es-419": "Money Map",
+    "es-ES": "Money Map"
+  },
+  "Money in": {
+    "es-419": "Dinero entrante",
+    "es-ES": "Dinero entrante"
+  },
+  "Monitor hours and revision budgets on Studio projects. Get in-app alerts and ready-to-send scope change notices.": {
+    "es-419": "Supervisa horas y presupuestos de revisiones en proyectos de Studio. Recibe alertas en la app y avisos de cambio de alcance listos para enviar.",
+    "es-ES": "Supervisa horas y presupuestos de revisiones en proyectos de Studio. Recibe alertas en la app y avisos de cambio de alcance listos para enviar."
+  },
+  "Monthly Spending Limit": {
+    "es-419": "Límite de gasto mensual",
+    "es-ES": "Límite de gasto mensual"
+  },
+  "Monthly Summary": {
+    "es-419": "Resumen mensual",
+    "es-ES": "Resumen mensual"
+  },
+  "Monthly summary": {
+    "es-419": "Resumen mensual",
+    "es-ES": "Resumen mensual"
+  },
+  "Name settings": {
+    "es-419": "Ajustes de nombre",
+    "es-ES": "Ajustes de nombre"
+  },
+  "Neutral Apple surfaces with your chosen accent on buttons and controls.": {
+    "es-419": "Superficies Apple neutras con tu acento elegido en botones y controles.",
+    "es-ES": "Superficies Apple neutras con tu acento elegido en botones y controles."
+  },
+  "New Invoice": {
+    "es-419": "Nueva factura",
+    "es-ES": "Nueva factura"
+  },
+  "New category": {
+    "es-419": "Nueva categoría",
+    "es-ES": "Nueva categoría"
+  },
+  "No Active Budget Profile": {
+    "es-419": "Sin presupuesto activo",
+    "es-ES": "Sin presupuesto activo"
+  },
+  "No Notifications": {
+    "es-419": "Sin notificaciones",
+    "es-ES": "Sin notificaciones"
+  },
+  "No active savings goals yet.": {
+    "es-419": "Aún no hay metas de ahorro activas.",
+    "es-ES": "Aún no hay metas de ahorro activas."
+  },
+  "No active subscriptions. Tapping quick action opens Subscription Hub.": {
+    "es-419": "No hay suscripciones activas. Al tocar la acción rápida se abre el centro de suscripciones.",
+    "es-ES": "No hay suscripciones activas. Al tocar la acción rápida se abre el centro de suscripciones."
+  },
+  "No categories added yet.": {
+    "es-419": "Aún no hay categorías.",
+    "es-ES": "Aún no hay categorías."
+  },
+  "No currencies found": {
+    "es-419": "No se encontraron monedas",
+    "es-ES": "No se encontraron monedas"
+  },
+  "No custom profiles configured.": {
+    "es-419": "No hay perfiles personalizados configurados.",
+    "es-ES": "No hay perfiles personalizados configurados."
+  },
+  "No data available.": {
+    "es-419": "No hay datos disponibles.",
+    "es-ES": "No hay datos disponibles."
+  },
+  "No expenses in this workspace": {
+    "es-419": "No hay gastos en este espacio",
+    "es-ES": "No hay gastos en este espacio"
+  },
+  "No expenses logged yet": {
+    "es-419": "Aún no hay gastos",
+    "es-ES": "Aún no hay gastos"
+  },
+  "No insights yet.": {
+    "es-419": "Aún no hay insights.",
+    "es-ES": "Aún no hay insights."
+  },
+  "No merchant data available.": {
+    "es-419": "No hay datos de comercios disponibles.",
+    "es-ES": "No hay datos de comercios disponibles."
+  },
+  "No merchants match your search.": {
+    "es-419": "Ningún comercio coincide con tu búsqueda.",
+    "es-ES": "Ningún comercio coincide con tu búsqueda."
+  },
+  "No specific workspace": {
+    "es-419": "Sin espacio de trabajo específico",
+    "es-ES": "Sin espacio de trabajo específico"
+  },
+  "No transactions logged in this range.": {
+    "es-419": "No hay transacciones en este rango.",
+    "es-ES": "No hay transacciones en este rango."
+  },
+  "No workspaces found. Tap below to create your first business gig.": {
+    "es-419": "No se encontraron espacios. Toca abajo para crear tu primer proyecto.",
+    "es-ES": "No se encontraron espacios. Toca abajo para crear tu primer proyecto."
+  },
+  "Not cash or barter": {
+    "es-419": "No es efectivo ni trueque",
+    "es-ES": "No es efectivo ni trueque"
+  },
+  "Not configured": {
+    "es-419": "Sin configurar",
+    "es-ES": "Sin configurar"
+  },
+  "Note": {
+    "es-419": "Nota",
+    "es-ES": "Nota"
+  },
+  "Notes": {
+    "es-419": "Notas",
+    "es-ES": "Notas"
+  },
+  "Notifications": {
+    "es-419": "Notificaciones",
+    "es-ES": "Notificaciones"
+  },
+  "Numeric secondary passcode backup": {
+    "es-419": "PIN numérico de respaldo",
+    "es-ES": "PIN numérico de respaldo"
+  },
+  "Only if you want a shop logo — e.g. Amazon for a refund. Otherwise the category icon shows in your list.": {
+    "es-419": "Solo si quieres el logo de una tienda — p. ej. Amazon para un reembolso. Si no, verás el icono de la categoría en tu lista.",
+    "es-ES": "Solo si quieres el logo de una tienda — p. ej. Amazon para un reembolso. Si no, verás el icono de la categoría en tu lista."
+  },
+  "Open agreement drafts": {
+    "es-419": "Abrir borradores de acuerdos",
+    "es-ES": "Abrir borradores de acuerdos"
+  },
+  "Open full Money Map": {
+    "es-419": "Abrir Money Map completo",
+    "es-ES": "Abrir Money Map completo"
+  },
+  "Open full territory detail": {
+    "es-419": "Abrir detalle completo del territorio",
+    "es-ES": "Abrir detalle completo del territorio"
+  },
+  "Open insight detail": {
+    "es-419": "Abrir detalle del insight",
+    "es-ES": "Abrir detalle del insight"
+  },
+  "Optimize contrast and text weight for direct tropical sunlight": {
+    "es-419": "Optimiza contraste y peso del texto para luz solar tropical directa",
+    "es-ES": "Optimiza contraste y peso del texto para luz solar tropical directa"
+  },
+  "Optional for solo operators and teams. Keeps personal and business ledgers separate when you need it — off by default.": {
+    "es-419": "Opcional para autónomos y equipos. Separa libros personales y de negocio cuando lo necesites — desactivado por defecto.",
+    "es-ES": "Opcional para autónomos y equipos. Separa libros personales y de negocio cuando lo necesites — desactivado por defecto."
+  },
+  "Optional searchable tags (Visa, PayPal, Klarna, etc.) power credit and BNPL insights. Off by default — simple logging stays clean.": {
+    "es-419": "Etiquetas opcionales (Visa, PayPal, Klarna, etc.) alimentan insights de crédito y BNPL. Desactivado por defecto — el registro simple se mantiene limpio.",
+    "es-ES": "Etiquetas opcionales (Visa, PayPal, Klarna, etc.) alimentan insights de crédito y BNPL. Desactivado por defecto — el registro simple se mantiene limpio."
+  },
+  "PIN passcode": {
+    "es-419": "PIN de acceso",
+    "es-ES": "PIN de acceso"
+  },
+  "Payment Sources": {
+    "es-419": "Fuentes de pago",
+    "es-ES": "Fuentes de pago"
+  },
+  "Payment source tracking": {
+    "es-419": "Seguimiento de fuente de pago",
+    "es-ES": "Seguimiento de fuente de pago"
+  },
+  "Persona": {
+    "es-419": "Persona",
+    "es-ES": "Persona"
+  },
+  "Pick": {
+    "es-419": "Elegir",
+    "es-ES": "Elegir"
+  },
+  "Popular": {
+    "es-419": "Popular",
+    "es-ES": "Popular"
+  },
+  "Pre-made clauses for new agreements — deposits, cancellations, liability, and more.": {
+    "es-419": "Cláusulas prediseñadas para nuevos acuerdos — depósitos, cancelaciones, responsabilidad y más.",
+    "es-ES": "Cláusulas prediseñadas para nuevos acuerdos — depósitos, cancelaciones, responsabilidad y más."
+  },
+  "Preferred Currency": {
+    "es-419": "Moneda preferida",
+    "es-ES": "Moneda preferida"
+  },
+  "Primary Local Currency": {
+    "es-419": "Moneda local principal",
+    "es-ES": "Moneda local principal"
+  },
+  "Privacy": {
+    "es-419": "Privacidad",
+    "es-ES": "Privacidad"
+  },
+  "Privacy shield": {
+    "es-419": "Escudo de privacidad",
+    "es-ES": "Escudo de privacidad"
+  },
+  "Pro Studio": {
+    "es-419": "Pro Studio",
+    "es-ES": "Pro Studio"
+  },
+  "Pro territories show merchants, scope radar, invoices, mileage, and more as you enable Studio tools.": {
+    "es-419": "Los territorios Pro muestran comercios, scope radar, facturas, millaje y más al activar herramientas de Studio.",
+    "es-ES": "Los territorios Pro muestran comercios, scope radar, facturas, kilometraje y más al activar herramientas de Studio."
+  },
+  "Profile": {
+    "es-419": "Perfil",
+    "es-ES": "Perfil"
+  },
+  "Profile Photo": {
+    "es-419": "Foto de perfil",
+    "es-ES": "Foto de perfil"
+  },
+  "Profile details": {
+    "es-419": "Detalles del perfil",
+    "es-ES": "Detalles del perfil"
+  },
+  "Profile settings": {
+    "es-419": "Ajustes de perfil",
+    "es-ES": "Ajustes de perfil"
+  },
+  "Quick filters": {
+    "es-419": "Filtros rápidos",
+    "es-ES": "Filtros rápidos"
+  },
+  "Quiet hours": {
+    "es-419": "Horas silenciosas",
+    "es-ES": "Horas silenciosas"
+  },
+  "Range": {
+    "es-419": "Rango",
+    "es-ES": "Rango"
+  },
+  "Receive Cash (Income)": {
+    "es-419": "Recibir efectivo (ingreso)",
+    "es-ES": "Recibir efectivo (ingreso)"
+  },
+  "Receive timely financial alerts and insights": {
+    "es-419": "Recibe alertas e insights financieros a tiempo",
+    "es-ES": "Recibe alertas e insights financieros a tiempo"
+  },
+  "Recovery key": {
+    "es-419": "Clave de recuperación",
+    "es-ES": "Clave de recuperación"
+  },
+  "Recovery key (optional backup)": {
+    "es-419": "Clave de recuperación (respaldo opcional)",
+    "es-ES": "Clave de recuperación (respaldo opcional)"
+  },
+  "Recurrence": {
+    "es-419": "Recurrencia",
+    "es-ES": "Recurrencia"
+  },
+  "Reduced Motion": {
+    "es-419": "Reducir movimiento",
+    "es-ES": "Reducir movimiento"
+  },
+  "Refund": {
+    "es-419": "Reembolso",
+    "es-ES": "Reembolso"
+  },
+  "Region & Currency": {
+    "es-419": "Región y moneda",
+    "es-ES": "Región y moneda"
+  },
+  "Regional rules": {
+    "es-419": "Reglas regionales",
+    "es-ES": "Reglas regionales"
+  },
+  "Remember this password": {
+    "es-419": "Recordar esta contraseña",
+    "es-ES": "Recordar esta contraseña"
+  },
+  "Remind me before renewal": {
+    "es-419": "Recordarme antes de la renovación",
+    "es-ES": "Recordarme antes de la renovación"
+  },
+  "Remove Passcode": {
+    "es-419": "Quitar código de acceso",
+    "es-ES": "Quitar código de acceso"
+  },
+  "Reset map layout": {
+    "es-419": "Restablecer diseño del mapa",
+    "es-ES": "Restablecer diseño del mapa"
+  },
+  "Restore backup": {
+    "es-419": "Restaurar copia",
+    "es-ES": "Restaurar copia"
+  },
+  "Restoring replaces local expenses, goals, workspaces, and Studio records on this device.": {
+    "es-419": "Al restaurar se reemplazan gastos, metas, espacios y registros de Studio locales en este dispositivo.",
+    "es-ES": "Al restaurar se reemplazan gastos, metas, espacios y registros de Studio locales en este dispositivo."
+  },
+  "Revision slots": {
+    "es-419": "Cupos de revisión",
+    "es-ES": "Cupos de revisión"
+  },
+  "SELECT CASH DRAWER": {
+    "es-419": "SELECCIONAR CAJA DE EFECTIVO",
+    "es-ES": "SELECCIONAR CAJA DE EFECTIVO"
+  },
+  "Safe Zone": {
+    "es-419": "Zona segura",
+    "es-ES": "Zona segura"
+  },
+  "Salary, refund, gift, cash — type anything. No shop linking required.": {
+    "es-419": "Sueldo, reembolso, regalo, efectivo — escribe lo que sea. No hace falta vincular tienda.",
+    "es-ES": "Sueldo, reembolso, regalo, efectivo — escribe lo que sea. No hace falta vincular tienda."
+  },
+  "Sandbox backup": {
+    "es-419": "Copia en sandbox",
+    "es-ES": "Copia en sandbox"
+  },
+  "Save": {
+    "es-419": "Guardar",
+    "es-ES": "Guardar"
+  },
+  "Save JSON Backup Archive": {
+    "es-419": "Guardar archivo de copia JSON",
+    "es-ES": "Guardar archivo de copia JSON"
+  },
+  "Save in a safe place": {
+    "es-419": "Guarda en un lugar seguro",
+    "es-ES": "Guarda en un lugar seguro"
+  },
+  "Save note": {
+    "es-419": "Guardar nota",
+    "es-ES": "Guardar nota"
+  },
+  "Save your recovery key": {
+    "es-419": "Guarda tu clave de recuperación",
+    "es-ES": "Guarda tu clave de recuperación"
+  },
+  "Saved locally on your device.": {
+    "es-419": "Guardado localmente en tu dispositivo.",
+    "es-ES": "Guardado localmente en tu dispositivo."
+  },
+  "Scan Receipt": {
+    "es-419": "Escanear recibo",
+    "es-ES": "Escanear ticket"
+  },
+  "Scope & deliverables": {
+    "es-419": "Alcance y entregables",
+    "es-ES": "Alcance y entregables"
+  },
+  "Scope Creep Radar": {
+    "es-419": "Scope Creep Radar",
+    "es-ES": "Scope Creep Radar"
+  },
+  "Scope Radar": {
+    "es-419": "Scope Radar",
+    "es-ES": "Scope Radar"
+  },
+  "Scope email template": {
+    "es-419": "Plantilla de correo de alcance",
+    "es-ES": "Plantilla de correo de alcance"
+  },
+  "Scope radar": {
+    "es-419": "Scope radar",
+    "es-ES": "Scope radar"
+  },
+  "Secondary Trade Currency": {
+    "es-419": "Moneda secundaria de intercambio",
+    "es-ES": "Moneda secundaria de intercambio"
+  },
+  "Secure App Passcode": {
+    "es-419": "Código de acceso seguro",
+    "es-ES": "Código de acceso seguro"
+  },
+  "Security & App Lock": {
+    "es-419": "Seguridad y bloqueo",
+    "es-ES": "Seguridad y bloqueo"
+  },
+  "Security & Notifications": {
+    "es-419": "Seguridad y notificaciones",
+    "es-ES": "Seguridad y notificaciones"
+  },
+  "Security & Privacy": {
+    "es-419": "Seguridad y privacidad",
+    "es-ES": "Seguridad y privacidad"
+  },
+  "See Studio in Settings": {
+    "es-419": "Ver Studio en Ajustes",
+    "es-ES": "Ver Studio en Ajustes"
+  },
+  "See your progress": {
+    "es-419": "Mira tu progreso",
+    "es-ES": "Mira tu progreso"
+  },
+  "Seed Physical Cash Balances": {
+    "es-419": "Sembrar saldos de efectivo físico",
+    "es-ES": "Sembrar saldos de efectivo físico"
+  },
+  "Segregate dynamic physical wallets for informal, spotty internet environments.": {
+    "es-419": "Separa billeteras físicas dinámicas para entornos informales con internet irregular.",
+    "es-ES": "Separa billeteras físicas dinámicas para entornos informales con internet irregular."
+  },
+  "Select": {
+    "es-419": "Seleccionar",
+    "es-ES": "Seleccionar"
+  },
+  "Select Category": {
+    "es-419": "Seleccionar categoría",
+    "es-ES": "Seleccionar categoría"
+  },
+  "Select a creative brand preset": {
+    "es-419": "Selecciona un preset de marca creativo",
+    "es-ES": "Selecciona un preset de marca creativo"
+  },
+  "Selected": {
+    "es-419": "Seleccionado",
+    "es-ES": "Seleccionado"
+  },
+  "Self-employed?": {
+    "es-419": "¿Trabajas por cuenta propia?",
+    "es-ES": "¿Trabajas por cuenta propia?"
+  },
+  "Settings": {
+    "es-419": "Ajustes",
+    "es-ES": "Ajustes"
+  },
+  "Share": {
+    "es-419": "Compartir",
+    "es-ES": "Compartir"
+  },
+  "Share & attach": {
+    "es-419": "Compartir y adjuntar",
+    "es-ES": "Compartir y adjuntar"
+  },
+  "Share backup file": {
+    "es-419": "Compartir archivo de copia",
+    "es-ES": "Compartir archivo de copia"
+  },
+  "Show Studio Tab": {
+    "es-419": "Mostrar pestaña Studio",
+    "es-ES": "Mostrar pestaña Studio"
+  },
+  "Show on Home dashboard": {
+    "es-419": "Mostrar en el panel de Inicio",
+    "es-ES": "Mostrar en el panel de Inicio"
+  },
+  "Show unassigned when filtering": {
+    "es-419": "Mostrar sin asignar al filtrar",
+    "es-ES": "Mostrar sin asignar al filtrar"
+  },
+  "Shown on exported invoice PDFs": {
+    "es-419": "Se muestra en PDFs de factura exportados",
+    "es-ES": "Se muestra en PDFs de factura exportados"
+  },
+  "Shown once after backup. Save it separately — opens the file if you forget your password. BuxMuse never stores it.": {
+    "es-419": "Se muestra una vez tras la copia. Guárdala aparte — abre el archivo si olvidas tu contraseña. BuxMuse nunca la almacena.",
+    "es-ES": "Se muestra una vez tras la copia. Guárdala aparte — abre el archivo si olvidas tu contraseña. BuxMuse nunca la almacena."
+  },
+  "Shows scope status on Pro Studio projects with budgeted hours and revision limits.": {
+    "es-419": "Muestra estado de alcance en proyectos Pro Studio con horas presupuestadas y límites de revisión.",
+    "es-ES": "Muestra estado de alcance en proyectos Pro Studio con horas presupuestadas y límites de revisión."
+  },
+  "Signals": {
+    "es-419": "Señales",
+    "es-ES": "Señales"
+  },
+  "Silence Ends": {
+    "es-419": "Fin del silencio",
+    "es-ES": "Fin del silencio"
+  },
+  "Silence Starts": {
+    "es-419": "Inicio del silencio",
+    "es-ES": "Inicio del silencio"
+  },
+  "Simple": {
+    "es-419": "Simple",
+    "es-ES": "Simple"
+  },
+  "Simple Studio": {
+    "es-419": "Simple Studio",
+    "es-ES": "Simple Studio"
+  },
+  "Simple work ledger or full Pro tools": {
+    "es-419": "Libro de trabajo simple o herramientas Pro completas",
+    "es-ES": "Libro de trabajo simple o herramientas Pro completas"
+  },
+  "Simplify transition animations for comfort": {
+    "es-419": "Simplifica animaciones de transición por comodidad",
+    "es-ES": "Simplifica animaciones de transición por comodidad"
+  },
+  "Solar Contrast Mode": {
+    "es-419": "Modo contraste solar",
+    "es-ES": "Modo contraste solar"
+  },
+  "Spanish (Latin America)": {
+    "es-419": "Español (Latinoamérica)",
+    "es-ES": "Español (Latinoamérica)"
+  },
+  "Spanish (Spain)": {
+    "es-419": "Español (España)",
+    "es-ES": "Español (España)"
+  },
+  "Spend Cash": {
+    "es-419": "Gastar efectivo",
+    "es-ES": "Gastar efectivo"
+  },
+  "Spend Cash (Expense)": {
+    "es-419": "Gastar efectivo (gasto)",
+    "es-ES": "Gastar efectivo (gasto)"
+  },
+  "Spending Analysis": {
+    "es-419": "Análisis de gasto",
+    "es-ES": "Análisis de gasto"
+  },
+  "Spending Cap": {
+    "es-419": "Tope de gasto",
+    "es-ES": "Tope de gasto"
+  },
+  "Spending Heat Zones": {
+    "es-419": "Zonas de calor de gasto",
+    "es-ES": "Zonas de calor de gasto"
+  },
+  "Start of Week": {
+    "es-419": "Inicio de semana",
+    "es-ES": "Inicio de semana"
+  },
+  "Status": {
+    "es-419": "Estado",
+    "es-ES": "Estado"
+  },
+  "Status & Activation": {
+    "es-419": "Estado y activación",
+    "es-ES": "Estado y activación"
+  },
+  "Studio": {
+    "es-419": "Studio",
+    "es-ES": "Studio"
+  },
+  "Studio adds work tracking, simple invoices, and job pockets. Turn it on when you need it — Home and Expenses stay the same.": {
+    "es-419": "Studio agrega seguimiento de trabajo, facturas simples y bolsillos de proyectos. Actívalo cuando lo necesites — Inicio y Gastos siguen igual.",
+    "es-ES": "Studio agrega seguimiento de trabajo, facturas simples y bolsillos de proyectos. Actívalo cuando lo necesites — Inicio y Gastos siguen igual."
+  },
+  "Studio mode": {
+    "es-419": "Modo Studio",
+    "es-ES": "Modo Studio"
+  },
+  "Studio tools": {
+    "es-419": "Herramientas de Studio",
+    "es-ES": "Herramientas de Studio"
+  },
+  "Subscription": {
+    "es-419": "Suscripción",
+    "es-ES": "Suscripción"
+  },
+  "Subscription start": {
+    "es-419": "Inicio de suscripción",
+    "es-ES": "Inicio de suscripción"
+  },
+  "Subscriptions": {
+    "es-419": "Suscripciones",
+    "es-ES": "Suscripciones"
+  },
+  "Summary": {
+    "es-419": "Resumen",
+    "es-ES": "Resumen"
+  },
+  "Supported providers": {
+    "es-419": "Proveedores compatibles",
+    "es-ES": "Proveedores compatibles"
+  },
+  "Switchboard": {
+    "es-419": "Panel de control",
+    "es-ES": "Panel de control"
+  },
+  "Sync sleep from HealthKit": {
+    "es-419": "Sincronizar sueño desde HealthKit",
+    "es-ES": "Sincronizar sueño desde HealthKit"
+  },
+  "System & Privacy": {
+    "es-419": "Sistema y privacidad",
+    "es-ES": "Sistema y privacidad"
+  },
+  "TRANSACTION NOTES": {
+    "es-419": "NOTAS DE TRANSACCIÓN",
+    "es-ES": "NOTAS DE TRANSACCIÓN"
+  },
+  "Tag expenses with the provider you used. BuxMuse uses this locally to surface credit-heavy months and active buy-now-pay-later plans.": {
+    "es-419": "Etiqueta gastos con el proveedor que usaste. BuxMuse lo usa localmente para detectar meses con mucho crédito y planes BNPL activos.",
+    "es-ES": "Etiqueta gastos con el proveedor que usaste. BuxMuse lo usa localmente para detectar meses con mucho crédito y planes BNPL activos."
+  },
+  "Tap a merchant to review details. Changes save automatically.": {
+    "es-419": "Toca un comercio para ver detalles. Los cambios se guardan solos.",
+    "es-ES": "Toca un comercio para ver detalles. Los cambios se guardan solos."
+  },
+  "Tax Profile": {
+    "es-419": "Perfil fiscal",
+    "es-ES": "Perfil fiscal"
+  },
+  "Terms & conditions": {
+    "es-419": "Términos y condiciones",
+    "es-ES": "Términos y condiciones"
+  },
+  "This Month": {
+    "es-419": "Este mes",
+    "es-ES": "Este mes"
+  },
+  "This action is completely offline and irreversible. It will wipe all expenses, Studio records, secure passcodes, and reset everything.": {
+    "es-419": "Esta acción es totalmente offline e irreversible. Borrará todos los gastos, registros de Studio, códigos seguros y restablecerá todo.",
+    "es-ES": "Esta acción es totalmente offline e irreversible. Borrará todos los gastos, registros de Studio, códigos seguros y restablecerá todo."
+  },
+  "This code secures BuxMuse locally on your device.": {
+    "es-419": "Este código protege BuxMuse localmente en tu dispositivo.",
+    "es-ES": "Este código protege BuxMuse localmente en tu dispositivo."
+  },
+  "This key is shown once. BuxMuse does not store it. Paste it when restoring if you forget your password.": {
+    "es-419": "Esta clave se muestra una sola vez. BuxMuse no la guarda. Pégala al restaurar si olvidas tu contraseña.",
+    "es-ES": "Esta clave se muestra una sola vez. BuxMuse no la guarda. Pégala al restaurar si olvidas tu contraseña."
+  },
+  "This will delete your local generic password from Apple Keychain.": {
+    "es-419": "Esto eliminará tu contraseña genérica local del llavero de Apple.",
+    "es-ES": "Esto eliminará tu contraseña genérica local del llavero de Apple."
+  },
+  "Tips": {
+    "es-419": "Consejos",
+    "es-ES": "Consejos"
+  },
+  "Top Categories": {
+    "es-419": "Principales categorías",
+    "es-ES": "Principales categorías"
+  },
+  "Top Merchants": {
+    "es-419": "Principales comercios",
+    "es-ES": "Principales comercios"
+  },
+  "Top insight": {
+    "es-419": "Insight principal",
+    "es-ES": "Insight principal"
+  },
+  "Top insights": {
+    "es-419": "Principales insights",
+    "es-ES": "Principales insights"
+  },
+  "Top-left ambient light and card edge shine — off uses plain iOS surfaces": {
+    "es-419": "Luz ambiental superior izquierda y brillo en bordes de tarjeta — desactivado usa superficies iOS simples",
+    "es-ES": "Luz ambiental superior izquierda y brillo en bordes de tarjeta — desactivado usa superficies iOS simples"
+  },
+  "Total Budget Limit": {
+    "es-419": "Límite total de presupuesto",
+    "es-ES": "Límite total de presupuesto"
+  },
+  "Total Spend": {
+    "es-419": "Gasto total",
+    "es-ES": "Gasto total"
+  },
+  "Track physical paper money balances": {
+    "es-419": "Registrar saldos de efectivo en papel",
+    "es-ES": "Registrar saldos de efectivo en papel"
+  },
+  "Tracked hours": {
+    "es-419": "Horas registradas",
+    "es-ES": "Horas registradas"
+  },
+  "Tracks workload, sleep, and stress signals into a Creative Energy score.": {
+    "es-419": "Convierte carga de trabajo, sueño y estrés en una puntuación de Energía creativa.",
+    "es-ES": "Convierte carga de trabajo, sueño y estrés en una puntuación de Energía creativa."
+  },
+  "Transaction Date": {
+    "es-419": "Fecha de transacción",
+    "es-ES": "Fecha de transacción"
+  },
+  "Transactions": {
+    "es-419": "Transacciones",
+    "es-ES": "Transacciones"
+  },
+  "Trend": {
+    "es-419": "Tendencia",
+    "es-ES": "Tendencia"
+  },
+  "Trend Over Time": {
+    "es-419": "Tendencia en el tiempo",
+    "es-ES": "Tendencia en el tiempo"
+  },
+  "Trial end date": {
+    "es-419": "Fecha de fin de prueba",
+    "es-ES": "Fecha de fin de prueba"
+  },
+  "Turn on Brand Themes in Appearance to choose a preset.": {
+    "es-419": "Activa Temas de marca en Apariencia para elegir un preset.",
+    "es-ES": "Activa Temas de marca en Apariencia para elegir un preset."
+  },
+  "Turn on Studio for invoices, mileage, and tax estimates — optional, in Settings.": {
+    "es-419": "Activa Studio para facturas, millaje y estimaciones fiscales — opcional, en Ajustes.",
+    "es-ES": "Activa Studio para facturas, kilometraje y estimaciones fiscales — opcional, en Ajustes."
+  },
+  "Type": {
+    "es-419": "Tipo",
+    "es-ES": "Tipo"
+  },
+  "Unassigned": {
+    "es-419": "Sin asignar",
+    "es-ES": "Sin asignar"
+  },
+  "Unassigned expenses": {
+    "es-419": "Gastos sin asignar",
+    "es-ES": "Gastos sin asignar"
+  },
+  "Unlock Pro Studio Matrix": {
+    "es-419": "Desbloquear matriz Pro Studio",
+    "es-ES": "Desbloquear matriz Pro Studio"
+  },
+  "Unlocks \\": {
+    "es-419": "Desbloquea",
+    "es-ES": "Desbloquea"
+  },
+  "Unlocks agreement drafts linked to Studio clients and projects.": {
+    "es-419": "Desbloquea borradores de acuerdos vinculados a clientes y proyectos de Studio.",
+    "es-ES": "Desbloquea borradores de acuerdos vinculados a clientes y proyectos de Studio."
+  },
+  "Upgrade to Pro Studio": {
+    "es-419": "Actualizar a Pro Studio",
+    "es-ES": "Actualizar a Pro Studio"
+  },
+  "Upgrade to Pro Studio for automatic sleep scoring from Apple Health.": {
+    "es-419": "Actualiza a Pro Studio para puntuación automática de sueño desde Apple Health.",
+    "es-ES": "Actualiza a Pro Studio para puntuación automática de sueño desde Apple Health."
+  },
+  "Used for tax presets, formatting, and regional defaults": {
+    "es-419": "Se usa para presets fiscales, formato y valores regionales predeterminados",
+    "es-ES": "Se usa para presets fiscales, formato y valores regionales predeterminados"
+  },
+  "Uses last week's sleep analysis when authorized. Falls back to manual values if unavailable.": {
+    "es-419": "Usa el análisis de sueño de la semana pasada cuando está autorizado. Si no, usa valores manuales.",
+    "es-ES": "Usa el análisis de sueño de la semana pasada cuando está autorizado. Si no, usa valores manuales."
+  },
+  "Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.": {
+    "es-419": "Usa tu región para elegir IBAN, sort code del Reino Unido, routing de EE. UU. y otros campos en facturas.",
+    "es-ES": "Usa tu región para elegir IBAN, sort code del Reino Unido, routing de EE. UU. y otros campos en facturas."
+  },
+  "Version 1.0.0 (Build 26)": {
+    "es-419": "Versión 1.0.0 (compilación 26)",
+    "es-ES": "Versión 1.0.0 (compilación 26)"
+  },
+  "Visa, PayPal, Klarna tags for credit insights": {
+    "es-419": "Etiquetas Visa, PayPal, Klarna para insights de crédito",
+    "es-ES": "Etiquetas Visa, PayPal, Klarna para insights de crédito"
+  },
+  "Warning": {
+    "es-419": "Advertencia",
+    "es-ES": "Advertencia"
+  },
+  "What was this?": {
+    "es-419": "¿Qué fue esto?",
+    "es-ES": "¿Qué fue esto?"
+  },
+  "When a workspace is selected, expenses without a workspace tag appear with an Unassigned badge.": {
+    "es-419": "Con un espacio seleccionado, los gastos sin etiqueta de espacio muestran la insignia Sin asignar.",
+    "es-ES": "Con un espacio seleccionado, los gastos sin etiqueta de espacio muestran la insignia Sin asignar."
+  },
+  "When enabled, trip sheets can capture your current place name for start or end.": {
+    "es-419": "Al activarlo, las hojas de viaje pueden capturar el nombre del lugar actual como inicio o fin.",
+    "es-ES": "Al activarlo, las hojas de viaje pueden capturar el nombre del lugar actual como inicio o fin."
+  },
+  "Work type": {
+    "es-419": "Tipo de trabajo",
+    "es-ES": "Tipo de trabajo"
+  },
+  "Workload & Energy": {
+    "es-419": "Carga de trabajo y energía",
+    "es-ES": "Carga de trabajo y energía"
+  },
+  "Workspace": {
+    "es-419": "Espacio de trabajo",
+    "es-ES": "Espacio de trabajo"
+  },
+  "Workspace mode": {
+    "es-419": "Modo de espacio de trabajo",
+    "es-ES": "Modo de espacio de trabajo"
+  },
+  "Workspace spend": {
+    "es-419": "Gasto del espacio",
+    "es-ES": "Gasto del espacio"
+  },
+  "Workspaces": {
+    "es-419": "Espacios de trabajo",
+    "es-ES": "Espacios de trabajo"
+  },
+  "You hold the key": {
+    "es-419": "Tú tienes la clave",
+    "es-ES": "Tú tienes la clave"
+  },
+  "You've hit the active side-gig limit for Simple Studio. Upgrade to Pro Studio to unlock unlimited ledgers, business card design, automatic invoice generation, and full revenue forecasting.": {
+    "es-419": "Alcanzaste el límite de proyectos paralelos activos en Simple Studio. Actualiza a Pro Studio para libros ilimitados, diseño de tarjeta de negocio, facturas automáticas y pronóstico completo de ingresos.",
+    "es-ES": "Alcanzaste el límite de proyectos paralelos activos en Simple Studio. Actualiza a Pro Studio para libros ilimitados, diseño de tarjeta de negocio, facturas automáticas y pronóstico completo de ingresos."
+  },
+  "Your BuxMuse data was restored from the encrypted archive.": {
+    "es-419": "Tus datos de BuxMuse se restauraron desde el archivo cifrado.",
+    "es-ES": "Tus datos de BuxMuse se restauraron desde el archivo cifrado."
+  },
+  "Your BuxMuse database and settings have been restored to fresh seeds. All private database entries are deleted.": {
+    "es-419": "Tu base de datos y ajustes de BuxMuse se restauraron a valores iniciales. Se eliminaron todas las entradas privadas.",
+    "es-ES": "Tu base de datos y ajustes de BuxMuse se restauraron a valores iniciales. Se eliminaron todas las entradas privadas."
+  },
+  "Your Premium Offline Co-pilot": {
+    "es-419": "Tu copiloto premium offline",
+    "es-ES": "Tu copiloto premium offline"
+  },
+  "Your active workspaces": {
+    "es-419": "Tus espacios de trabajo activos",
+    "es-ES": "Tus espacios de trabajo activos"
+  },
+  "Your backup is encrypted on this device. Without the password you choose now, the file cannot be opened — not by BuxMuse, not by support, not by anyone.": {
+    "es-419": "Tu copia está cifrada en este dispositivo. Sin la contraseña que elijas ahora, nadie puede abrir el archivo — ni BuxMuse, ni soporte, ni nadie.",
+    "es-ES": "Tu copia está cifrada en este dispositivo. Sin la contraseña que elijas ahora, nadie puede abrir el archivo — ni BuxMuse, ni soporte, ni nadie."
+  },
+  "Your financial details are kept strictly offline and secure inside the BuxMuse Brain.": {
+    "es-419": "Tus datos financieros se mantienen estrictamente offline y seguros dentro de BuxMuse Brain.",
+    "es-ES": "Tus datos financieros se mantienen estrictamente offline y seguros dentro de BuxMuse Brain."
+  },
+  "Your financial landscape": {
+    "es-419": "Tu panorama financiero",
+    "es-ES": "Tu panorama financiero"
+  },
+  "Your own words — salary, refund, gift, sold something, etc.": {
+    "es-419": "Tus propias palabras — sueldo, reembolso, regalo, vendiste algo, etc.",
+    "es-ES": "Tus propias palabras — sueldo, reembolso, regalo, vendiste algo, etc."
+  },
+  "Your region": {
+    "es-419": "Tu región",
+    "es-ES": "Tu región"
+  },
+  "Zero data leakage for us": {
+    "es-419": "Cero fugas de datos para nosotros",
+    "es-ES": "Cero fugas de datos para nosotros"
+  },
+  "Zero network analytics trackers. Zero external APIs. BuxMuse operates fully private and autonomous.": {
+    "es-419": "Cero rastreadores de analítica en red. Cero APIs externas. BuxMuse opera de forma totalmente privada y autónoma.",
+    "es-ES": "Cero rastreadores de analítica en red. Cero APIs externas. BuxMuse opera de forma totalmente privada y autónoma."
+  },
+  "alerts active": {
+    "es-419": "alertas activas",
+    "es-ES": "alertas activas"
+  },
+  "awaiting payment": {
+    "es-419": "pendiente de pago",
+    "es-ES": "pendiente de pago"
+  },
+  "creative fuel": {
+    "es-419": "combustible creativo",
+    "es-ES": "combustible creativo"
+  },
+  "live strips": {
+    "es-419": "franjas en vivo",
+    "es-ES": "franjas en vivo"
+  },
+  "rate / unit": {
+    "es-419": "tarifa / unidad",
+    "es-ES": "tarifa / unidad"
+  },
+  "recurring lanes": {
+    "es-419": "carriles recurrentes",
+    "es-ES": "carriles recurrentes"
+  },
+  "top spend lane": {
+    "es-419": "carril de mayor gasto",
+    "es-ES": "carril de mayor gasto"
+  },
+  "trade exchanges": {
+    "es-419": "intercambios comerciales",
+    "es-ES": "intercambios comerciales"
+  },
+  "vs last mo": {
+    "es-419": "vs mes ant.",
+    "es-ES": "vs mes ant."
+  },
+  "vs last month": {
+    "es-419": "vs mes anterior",
+    "es-ES": "vs mes anterior"
+  },
+  "Spending limit": {
+    "es-419": "Límite de gasto",
+    "es-ES": "Límite de gasto"
+  },
+  "Spending pace": {
+    "es-419": "Ritmo de gasto",
+    "es-ES": "Ritmo de gasto"
+  },
+  "Start tracking": {
+    "es-419": "Empezar a registrar",
+    "es-ES": "Empezar a registrar"
+  },
+  "Status & scope": {
+    "es-419": "Estado y alcance",
+    "es-ES": "Estado y alcance"
+  },
+  "Stay offline-first": {
+    "es-419": "Mantente offline primero",
+    "es-ES": "Mantente offline primero"
+  },
+  "Store link": {
+    "es-419": "Enlace de tienda",
+    "es-ES": "Enlace de tienda"
+  },
+  "Store name": {
+    "es-419": "Nombre de tienda",
+    "es-ES": "Nombre de tienda"
+  },
+  "Stress level": {
+    "es-419": "Nivel de estrés",
+    "es-ES": "Nivel de estrés"
+  },
+  "Subscription Hub opens from quick actions when you have recurring charges.": {
+    "es-419": "El hub de suscripciones se abre desde acciones rápidas cuando tienes cargos recurrentes.",
+    "es-ES": "El hub de suscripciones se abre desde acciones rápidas cuando tienes cargos recurrentes."
+  },
+  "Subscription renewal": {
+    "es-419": "Renovación de suscripción",
+    "es-ES": "Renovación de suscripción"
+  },
+  "Sunlight Readability": {
+    "es-419": "Legibilidad bajo sol",
+    "es-ES": "Legibilidad bajo sol"
+  },
+  "Switch workspace": {
+    "es-419": "Cambiar espacio",
+    "es-ES": "Cambiar espacio"
+  },
+  "Sync from Apple Health": {
+    "es-419": "Sincronizar desde Apple Health",
+    "es-ES": "Sincronizar desde Apple Health"
+  },
+  "Tap territory nodes for merchant and scope detail": {
+    "es-419": "Toca nodos del territorio para detalle de comercio y alcance",
+    "es-ES": "Toca nodos del territorio para detalle de comercio y alcance"
+  },
+  "Tap to configure": {
+    "es-419": "Toca para configurar",
+    "es-ES": "Toca para configurar"
+  },
+  "Tax ID": {
+    "es-419": "ID fiscal",
+    "es-ES": "ID fiscal"
+  },
+  "Tax profile": {
+    "es-419": "Perfil fiscal",
+    "es-ES": "Perfil fiscal"
+  },
+  "Tax year": {
+    "es-419": "Año fiscal",
+    "es-ES": "Año fiscal"
+  },
+  "Terms sent": {
+    "es-419": "Términos enviados",
+    "es-ES": "Términos enviados"
+  },
+  "Territory map": {
+    "es-419": "Mapa de territorio",
+    "es-ES": "Mapa de territorio"
+  },
+  "Territory overview": {
+    "es-419": "Resumen de territorio",
+    "es-ES": "Resumen de territorio"
+  },
+  "This device only": {
+    "es-419": "Solo este dispositivo",
+    "es-ES": "Solo este dispositivo"
+  },
+  "This month vs last": {
+    "es-419": "Este mes vs anterior",
+    "es-ES": "Este mes vs anterior"
+  },
+  "This restores your encrypted archive. Current data will be replaced.": {
+    "es-419": "Esto restaura tu archivo cifrado. Los datos actuales serán reemplazados.",
+    "es-ES": "Esto restaura tu archivo cifrado. Los datos actuales serán reemplazados."
+  },
+  "Time range": {
+    "es-419": "Rango de tiempo",
+    "es-ES": "Rango de tiempo"
+  },
+  "Tip of the day": {
+    "es-419": "Consejo del día",
+    "es-ES": "Consejo del día"
+  },
+  "Today vs average": {
+    "es-419": "Hoy vs promedio",
+    "es-ES": "Hoy vs promedio"
+  },
+  "Top Merchant": {
+    "es-419": "Comercio principal",
+    "es-ES": "Comercio principal"
+  },
+  "Total balance hidden": {
+    "es-419": "Saldo total oculto",
+    "es-ES": "Saldo total oculto"
+  },
+  "Track barter trades and informal exchanges alongside cash expenses.": {
+    "es-419": "Registra trueques e intercambios informales junto con gastos en efectivo.",
+    "es-ES": "Registra trueques e intercambios informales junto con gastos en efectivo."
+  },
+  "Track physical cash in two currencies for informal trade environments.": {
+    "es-419": "Registra efectivo físico en dos monedas para entornos de comercio informal.",
+    "es-ES": "Registra efectivo físico en dos monedas para entornos de comercio informal."
+  },
+  "Transaction list": {
+    "es-419": "Lista de transacciones",
+    "es-ES": "Lista de transacciones"
+  },
+  "Travel & mileage": {
+    "es-419": "Viajes y millaje",
+    "es-ES": "Viajes y kilometraje"
+  },
+  "Trending categories": {
+    "es-419": "Categorías en tendencia",
+    "es-ES": "Categorías en tendencia"
+  },
+  "Turn off Studio": {
+    "es-419": "Desactivar Studio",
+    "es-ES": "Desactivar Studio"
+  },
+  "Unable to restore — wrong password or corrupted file.": {
+    "es-419": "No se pudo restaurar — contraseña incorrecta o archivo corrupto.",
+    "es-ES": "No se pudo restaurar — contraseña incorrecta o archivo corrupto."
+  },
+  "Under budget": {
+    "es-419": "Bajo presupuesto",
+    "es-ES": "Bajo presupuesto"
+  },
+  "Unlock Pro": {
+    "es-419": "Desbloquear Pro",
+    "es-ES": "Desbloquear Pro"
+  },
+  "Update currency too?": {
+    "es-419": "¿Actualizar moneda también?",
+    "es-ES": "¿Actualizar moneda también?"
+  },
+  "Upgrade to Pro": {
+    "es-419": "Mejorar a Pro",
+    "es-ES": "Mejorar a Pro"
+  },
+  "Use encrypted `.buxmuse` backups to move data between devices.": {
+    "es-419": "Usa copias `.buxmuse` cifradas para mover datos entre dispositivos.",
+    "es-ES": "Usa copias `.buxmuse` cifradas para mover datos entre dispositivos."
+  },
+  "Use recovery key": {
+    "es-419": "Usar clave de recuperación",
+    "es-ES": "Usar clave de recuperación"
+  },
+  "User display name": {
+    "es-419": "Nombre para mostrar",
+    "es-ES": "Nombre para mostrar"
+  },
+  "Weekly": {
+    "es-419": "Semanal",
+    "es-ES": "Semanal"
+  },
+  "Weekly digest": {
+    "es-419": "Resumen semanal",
+    "es-ES": "Resumen semanal"
+  },
+  "Weekly spending": {
+    "es-419": "Gasto semanal",
+    "es-ES": "Gasto semanal"
+  },
+  "What changed?": {
+    "es-419": "¿Qué cambió?",
+    "es-ES": "¿Qué cambió?"
+  },
+  "Workspace filter": {
+    "es-419": "Filtro de espacio",
+    "es-ES": "Filtro de espacio"
+  },
+  "Workspace name": {
+    "es-419": "Nombre del espacio",
+    "es-ES": "Nombre del espacio"
+  },
+  "Workspaces & hustles": {
+    "es-419": "Espacios y proyectos",
+    "es-ES": "Espacios y proyectos"
+  },
+  "Write a note…": {
+    "es-419": "Escribe una nota…",
+    "es-ES": "Escribe una nota…"
+  },
+  "Year to date": {
+    "es-419": "Año hasta la fecha",
+    "es-ES": "Año hasta la fecha"
+  },
+  "Your recovery key": {
+    "es-419": "Tu clave de recuperación",
+    "es-ES": "Tu clave de recuperación"
+  },
+  "Zone": {
+    "es-419": "Zona",
+    "es-ES": "Zona"
+  }
+}

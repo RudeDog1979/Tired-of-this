@@ -8,6 +8,7 @@ import SwiftUI
 struct TipPopupView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let tip: DailyTipDisplay
     let onDismiss: () -> Void
@@ -60,13 +61,20 @@ struct TipPopupView: View {
                     // 2. Centered Typography + scroll + CTA — staggered after card lands
                     VStack(spacing: 0) {
                         VStack(spacing: 4) {
-                            Text("Daily tips")
+                            BuxCatalogDynamicText(key: "Daily tips")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.secondary)
                                 .kerning(1.2)
                                 .textCase(.uppercase)
 
-                            Text("\(tip.regionFlag) \(tip.regionCode)")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "%@ %@",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    tip.regionFlag,
+                                    tip.regionCode
+                                )
+                            )
                                 .font(.system(size: 17, weight: .bold, design: .rounded))
                                 .foregroundStyle(colorScheme == .dark ? .white : .primary)
 
@@ -203,12 +211,12 @@ struct TipPopupView: View {
                 Spacer(minLength: 0)
             }
 
-            Text(section.title)
+            BuxCatalogDynamicText(key: section.title)
                 .font(.system(size: isPrimary ? 20 : 16, weight: .bold, design: .rounded))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text(section.body)
+            BuxCatalogDynamicText(key: section.body)
                 .font(.system(size: isPrimary ? 16 : 14, weight: .regular))
                 .foregroundStyle(colorScheme == .dark ? .white.opacity(0.82) : Color(red: 55/255, green: 60/255, blue: 70/255))
                 .lineSpacing(4)

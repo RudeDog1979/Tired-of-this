@@ -25,7 +25,7 @@ struct BuxCanvasElementsStrip: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Elements")
+            BuxCatalogDynamicText(key: "Elements")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(.secondary)
 

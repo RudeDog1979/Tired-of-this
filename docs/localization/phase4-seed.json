@@ -1,0 +1,38 @@
+{
+  "Metric Details": {
+    "es-419": "Detalles de la métrica",
+    "es-ES": "Detalles de la métrica"
+  },
+  "saved": {
+    "es-419": "ahorrado",
+    "es-ES": "ahorrado"
+  },
+  "Save Money": {
+    "es-419": "Ahorrar",
+    "es-ES": "Ahorrar"
+  },
+  "Edit Goal": {
+    "es-419": "Editar meta",
+    "es-ES": "Editar meta"
+  },
+  "Detected progress threats": {
+    "es-419": "Amenazas detectadas al progreso",
+    "es-ES": "Amenazas detectadas al progreso"
+  },
+  "Smart savings redirections": {
+    "es-419": "Redirecciones inteligentes de ahorro",
+    "es-ES": "Redirecciones inteligentes de ahorro"
+  },
+  "Suggested Actions:": {
+    "es-419": "Acciones sugeridas:",
+    "es-ES": "Acciones sugeridas:"
+  },
+  "Habit Builders:": {
+    "es-419": "Constructores de hábito:",
+    "es-ES": "Constructores de hábito:"
+  },
+  "Applying this insight accelerates this target timeline significantly.": {
+    "es-419": "Aplicar este insight acelera significativamente la línea de tiempo de esta meta.",
+    "es-ES": "Aplicar este insight acelera significativamente la línea de tiempo de este objetivo."
+  }
+}

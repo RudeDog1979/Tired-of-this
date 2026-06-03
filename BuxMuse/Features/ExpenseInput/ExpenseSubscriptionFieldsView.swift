@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ExpenseSubscriptionFieldsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @Binding var isSubscription: Bool
     @Binding var isTrial: Bool
@@ -42,7 +43,7 @@ struct ExpenseSubscriptionFieldsView: View {
     @ViewBuilder
     private var reminderSection: some View {
         VStack(spacing: 10) {
-            Text("Remind me before renewal")
+            BuxCatalogText.text("Remind me before renewal")
                 .font(.subheadline)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -52,7 +53,13 @@ struct ExpenseSubscriptionFieldsView: View {
                     Button {
                         renewalReminderDays = days
                     } label: {
-                        Text("\(days)d")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%lldd",
+                                locale: appSettingsManager.interfaceLocale,
+                                Int64(days)
+                            )
+                        )
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(renewalReminderDays == days ? .white : themeManager.current.accentColor)
                             .padding(.horizontal, 12)
@@ -68,7 +75,13 @@ struct ExpenseSubscriptionFieldsView: View {
                 }
 
                 Stepper(value: $renewalReminderDays, in: 1...30) {
-                    Text("\(renewalReminderDays)d")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lldd",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int64(renewalReminderDays)
+                        )
+                    )
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
                         .frame(minWidth: 36)
@@ -76,7 +89,15 @@ struct ExpenseSubscriptionFieldsView: View {
             }
             .frame(maxWidth: .infinity, alignment: .center)
 
-            Text("Local notification \(renewalReminderDays) day\(renewalReminderDays == 1 ? "" : "s") before renewal.")
+            Text(
+                BuxLocalizedString.format(
+                    renewalReminderDays == 1
+                        ? "Local notification %lld day before renewal."
+                        : "Local notification %lld days before renewal.",
+                    locale: appSettingsManager.interfaceLocale,
+                    Int64(renewalReminderDays)
+                )
+            )
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

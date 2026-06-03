@@ -24,6 +24,8 @@ struct EditGoalSheet: View {
     @State private var priority: Int = 2
     @State private var notes: String = ""
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -32,14 +34,20 @@ struct EditGoalSheet: View {
 
                 BuxThemedCardForm {
                     BuxFormSection(title: "Goal") {
-                        TextField("Goal name", text: $name)
+                        TextField(
+                            BuxCatalogLabel.string("Goal name", locale: locale),
+                            text: $name
+                        )
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         HStack(spacing: 8) {
                             Text(appSettingsManager.selectedCurrency.symbol)
                                 .font(.title2.bold())
                                 .foregroundStyle(themeManager.current.accentColor)
-                            TextField("Target amount", text: $targetString)
+                            TextField(
+                                BuxCatalogLabel.string("Target amount", locale: locale),
+                                text: $targetString
+                            )
                                 .keyboardType(.decimalPad)
                         }
                         .buxFormFieldPadding()
@@ -56,13 +64,17 @@ struct EditGoalSheet: View {
                     }
 
                     BuxFormSection(title: "Notes") {
-                        TextField("Notes", text: $notes, axis: .vertical)
+                        TextField(
+                            BuxCatalogLabel.string("Notes", locale: locale),
+                            text: $notes,
+                            axis: .vertical
+                        )
                             .lineLimit(3...6)
                             .buxFormFieldPadding()
                     }
                 }
             }
-            .navigationTitle("Edit Goal")
+            .buxCatalogNavigationTitle("Edit Goal")
             .navigationBarTitleDisplayMode(.inline)
             .buxThemedSheetContent()
             .toolbar {
@@ -70,7 +82,10 @@ struct EditGoalSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    BuxToolbarConfirmButton(accessibilityLabel: "Save", isEnabled: canSave) {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: BuxCatalogLabel.string("Save", locale: locale),
+                        isEnabled: canSave
+                    ) {
                         saveChanges()
                     }
                 }
@@ -78,6 +93,7 @@ struct EditGoalSheet: View {
             .onAppear { hydrate() }
         }
         .tint(themeManager.current.accentColor)
+        .buxInterfaceLocale()
     }
 
     private var canSave: Bool {

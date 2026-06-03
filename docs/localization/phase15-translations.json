@@ -1,0 +1,202 @@
+{
+  "Today": {
+    "es-419": "Hoy",
+    "es-ES": "Hoy"
+  },
+  "Yesterday": {
+    "es-419": "Ayer",
+    "es-ES": "Ayer"
+  },
+  "This week": {
+    "es-419": "Esta semana",
+    "es-ES": "Esta semana"
+  },
+  "Last week": {
+    "es-419": "Semana pasada",
+    "es-ES": "Semana pasada"
+  },
+  "Last month": {
+    "es-419": "Mes pasado",
+    "es-ES": "Mes pasado"
+  },
+  "Earlier": {
+    "es-419": "Anteriores",
+    "es-ES": "Anteriores"
+  },
+  "Branding": {
+    "es-419": "Marca",
+    "es-ES": "Marca"
+  },
+  "Tax & Rates": {
+    "es-419": "Impuestos y tarifas",
+    "es-ES": "Impuestos y tarifas"
+  },
+  "All Workspaces": {
+    "es-419": "Todos los espacios",
+    "es-ES": "Todos los espacios"
+  },
+  "· includes unassigned": {
+    "es-419": "· incluye sin asignar",
+    "es-ES": "· incluye sin asignar"
+  },
+  "Studio Insights": {
+    "es-419": "Insights de Studio",
+    "es-ES": "Insights de Studio"
+  },
+  "Tax Studio": {
+    "es-419": "Estudio fiscal",
+    "es-ES": "Estudio fiscal"
+  },
+  "Cashflow": {
+    "es-419": "Flujo de caja",
+    "es-ES": "Flujo de caja"
+  },
+  "Deductions": {
+    "es-419": "Deducciones",
+    "es-ES": "Deducciones"
+  },
+  "Mileage Log": {
+    "es-419": "Registro de kilometraje",
+    "es-ES": "Registro de kilometraje"
+  },
+  "Business Card Studio": {
+    "es-419": "Estudio de tarjetas",
+    "es-ES": "Estudio de tarjetas"
+  },
+  "Top Clients": {
+    "es-419": "Mejores clientes",
+    "es-ES": "Mejores clientes"
+  },
+  "Deduction Opportunities": {
+    "es-419": "Oportunidades de deducción",
+    "es-ES": "Oportunidades de deducción"
+  },
+  "Set Up Your Business": {
+    "es-419": "Configura tu negocio",
+    "es-ES": "Configura tu negocio"
+  },
+  "Studio workspace": {
+    "es-419": "Espacio de Studio",
+    "es-ES": "Espacio de Studio"
+  },
+  "Sole Trader": {
+    "es-419": "Trabajador independiente",
+    "es-ES": "Trabajador autónomo"
+  },
+  "LLC": {
+    "es-419": "LLC",
+    "es-ES": "LLC"
+  },
+  "Self Employed": {
+    "es-419": "Autónomo",
+    "es-ES": "Autónomo"
+  },
+  "Contractor": {
+    "es-419": "Contratista",
+    "es-ES": "Contratista"
+  },
+  "Freelancer": {
+    "es-419": "Freelancer",
+    "es-ES": "Freelancer"
+  },
+  "Drafts": {
+    "es-419": "Borradores",
+    "es-ES": "Borradores"
+  },
+  "Waiting": {
+    "es-419": "En espera",
+    "es-ES": "En espera"
+  },
+  "Deductible": {
+    "es-419": "Deducible",
+    "es-ES": "Deducible"
+  },
+  "Time logged": {
+    "es-419": "Tiempo registrado",
+    "es-ES": "Tiempo registrado"
+  },
+  "Tax profile incomplete": {
+    "es-419": "Perfil fiscal incompleto",
+    "es-ES": "Perfil fiscal incompleto"
+  },
+  "Choose a country preset or enter your tax rules in Tax Profile.": {
+    "es-419": "Elige un preset de país o ingresa tus reglas fiscales en Perfil fiscal.",
+    "es-ES": "Elige un preset de país o introduce tus reglas fiscales en Perfil fiscal."
+  },
+  "Cashflow survival mode": {
+    "es-419": "Modo supervivencia de flujo",
+    "es-ES": "Modo supervivencia de flujo"
+  },
+  "High stress impact. Review profitability and terms.": {
+    "es-419": "Impacto de estrés alto. Revisa rentabilidad y condiciones.",
+    "es-ES": "Impacto de estrés alto. Revisa rentabilidad y condiciones."
+  },
+  "Client red flag: %@": {
+    "es-419": "Alerta de cliente: %@",
+    "es-ES": "Alerta de cliente: %@"
+  },
+  "%lld overdue invoice(s). Health score %lld%%.": {
+    "es-419": "%lld factura(s) vencida(s). Salud %lld%%.",
+    "es-ES": "%lld factura(s) vencida(s). Salud %lld%%."
+  },
+  "%lld overdue invoice(s)": {
+    "es-419": "%lld factura(s) vencida(s)",
+    "es-ES": "%lld factura(s) vencida(s)"
+  },
+  "Follow up on outstanding payments to improve cashflow.": {
+    "es-419": "Da seguimiento a pagos pendientes para mejorar el flujo.",
+    "es-ES": "Da seguimiento a pagos pendientes para mejorar el flujo."
+  },
+  "Project overrun risk": {
+    "es-419": "Riesgo de sobrecosto en proyecto",
+    "es-ES": "Riesgo de sobrecosto en proyecto"
+  },
+  "%lld project(s) may exceed time or budget.": {
+    "es-419": "%lld proyecto(s) pueden exceder tiempo o presupuesto.",
+    "es-ES": "%lld proyecto(s) pueden exceder tiempo o presupuesto."
+  },
+  "Tax deadline approaching": {
+    "es-419": "Se acerca el vencimiento fiscal",
+    "es-ES": "Se acerca el vencimiento fiscal"
+  },
+  "%lld days until your next scheduled tax payment.": {
+    "es-419": "%lld días hasta tu próximo pago fiscal programado.",
+    "es-ES": "%lld días hasta tu próximo pago fiscal programado."
+  },
+  "Configure tax rules": {
+    "es-419": "Configura reglas fiscales",
+    "es-ES": "Configura reglas fiscales"
+  },
+  "Business Profile": {
+    "es-419": "Perfil del negocio",
+    "es-ES": "Perfil del negocio"
+  },
+  "Tax Profile": {
+    "es-419": "Perfil fiscal",
+    "es-ES": "Perfil fiscal"
+  },
+  "Spending is up this month": {
+    "es-419": "El gasto subió este mes",
+    "es-ES": "El gasto subió este mes"
+  },
+  "Great job keeping costs down": {
+    "es-419": "Buen trabajo bajando costos",
+    "es-ES": "Buen trabajo bajando costos"
+  },
+  "%lld transactions": {
+    "es-419": "%lld transacciones",
+    "es-ES": "%lld transacciones"
+  },
+  "Income Tax Calculator": {
+    "es-419": "Calculadora de impuesto a la renta",
+    "es-ES": "Calculadora de IRPF"
+  },
+  "Quarterly Tax": {
+    "es-419": "Impuesto trimestral",
+    "es-ES": "Impuesto trimestral"
+  },
+  "12-MONTH PROJECTION": {
+    "es-419": "PROYECCIÓN 12 MESES",
+    "es-ES": "PROYECCIÓN 12 MESES"
+  }
+}

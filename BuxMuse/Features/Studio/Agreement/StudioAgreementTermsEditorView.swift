@@ -67,7 +67,7 @@ struct StudioAgreementTermsEditorView: View {
 
     private var packsSection: some View {
         BuxFormSection(title: "Quick packs") {
-            Text("Start from a set, then turn clauses on/off or edit wording.")
+            BuxCatalogDynamicText(key: "Start from a set, then turn clauses on/off or edit wording.")
                 .font(.system(size: 12, weight: .medium))
                 .buxLabelSecondary()
                 .fixedSize(horizontal: false, vertical: true)
@@ -137,7 +137,7 @@ struct StudioAgreementTermsEditorView: View {
                 Text(clause.title)
                     .font(.system(size: 14, weight: .semibold))
                 if isEdited {
-                    Text("Custom wording")
+                    BuxCatalogDynamicText(key: "Custom wording")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.orange)
                 }
@@ -153,7 +153,7 @@ struct StudioAgreementTermsEditorView: View {
 
     private var customSection: some View {
         BuxFormSection(title: "Your own terms") {
-            Text("Added at the end — policies, fees, or language from your lawyer.")
+            BuxCatalogDynamicText(key: "Added at the end — policies, fees, or language from your lawyer.")
                 .font(.system(size: 12, weight: .medium))
                 .buxLabelSecondary()
                 .fixedSize(horizontal: false, vertical: true)
@@ -251,7 +251,7 @@ private struct StudioAgreementTermsClauseEditSheet: View {
         NavigationStack {
             BuxThemedCardForm {
                 BuxFormSection(title: clause.title) {
-                    Text("Edit for this agreement only. Leave blank to restore the template.")
+                    BuxCatalogDynamicText(key: "Edit for this agreement only. Leave blank to restore the template.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
@@ -271,7 +271,7 @@ private struct StudioAgreementTermsClauseEditSheet: View {
                     .buxFormFieldPadding()
                 }
             }
-            .navigationTitle("Edit clause")
+            .buxCatalogNavigationTitle("Edit clause")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -305,7 +305,7 @@ private struct StudioAgreementTermsPreviewSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(BuxTokens.marginRegular)
             }
-            .navigationTitle("Terms preview")
+            .buxCatalogNavigationTitle("Terms preview")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

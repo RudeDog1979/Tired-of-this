@@ -13,6 +13,7 @@ import SwiftUI
 struct SpendingCategoryStackCard: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var appSettingsManager: AppSettingsManager
     let item: SpendingCategoryItem
     var includesDashboardChrome = true
 
@@ -29,11 +30,17 @@ struct SpendingCategoryStackCard: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.title)
+                BuxCatalogDynamicText(key: item.title)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                Text("\(item.transactionsCount) transactions")
+                Text(
+                    BuxLocalizedString.format(
+                        "%lld transactions",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int64(item.transactionsCount)
+                    )
+                )
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
@@ -61,6 +68,7 @@ struct SpendingCategoryStackCard: View {
 struct SpendingCategoryRow: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var appSettingsManager: AppSettingsManager
     let item: SpendingCategoryItem
 
     var body: some View {
@@ -76,11 +84,17 @@ struct SpendingCategoryRow: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.title)
+                BuxCatalogDynamicText(key: item.title)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                Text("\(item.transactionsCount) transactions")
+                Text(
+                    BuxLocalizedString.format(
+                        "%lld transactions",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int64(item.transactionsCount)
+                    )
+                )
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
@@ -123,7 +137,7 @@ struct TransactionRowCard: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.title)
+                BuxCatalogDynamicText(key: item.title)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 Text(item.date)
@@ -198,6 +212,7 @@ struct SubscriptionCardView: View {
 struct GoalCardView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var appSettingsManager: AppSettingsManager
     let title: String
     let saved: String
     let target: String
@@ -240,7 +255,13 @@ struct GoalCardView: View {
                 }
                 .frame(height: 5)
 
-                Text("Target: \(target)")
+                Text(
+                    BuxLocalizedString.format(
+                        "Target: %@",
+                        locale: appSettingsManager.interfaceLocale,
+                        target
+                    )
+                )
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
             }
@@ -281,12 +302,12 @@ struct InsightCardView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
-                Text(title)
+                BuxCatalogDynamicText(key: title)
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     .lineLimit(1)
 
-                Text(description)
+                BuxCatalogDynamicText(key: description)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                     .lineLimit(1)
@@ -396,7 +417,7 @@ struct SubscriptionSummaryCardView: View {
                     .minimumScaleFactor(0.8)
 
                 HStack(spacing: 4) {
-                    Text(title)
+                    BuxCatalogDynamicText(key: title)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.gray)
                         .lineLimit(1)

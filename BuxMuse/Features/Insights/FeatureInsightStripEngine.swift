@@ -45,75 +45,102 @@ enum FeatureInsightStripEngine {
     static func buildStrips(
         transactions: [Transaction],
         burnout: BurnoutInsightData,
-        projects: [StudioProject]
+        projects: [StudioProject],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> [FeatureInsightStrip] {
         let store = SettingsStore.shared
         var strips: [FeatureInsightStrip] = []
 
         // Payment sources
-        let creditInsight = PaymentSourceInsightsEngine.generateInsights(transactions: transactions).first
+        let creditInsight = PaymentSourceInsightsEngine.generateInsights(transactions: transactions, locale: locale).first
         strips.append(
             FeatureInsightStrip(
                 id: "payment_sources",
-                title: "Credit & BNPL",
-                value: creditInsight?.value ?? (store.paymentSourceTrackingEnabled ? "Tag expenses" : "Off"),
-                subtitle: creditInsight?.description ?? "Enable payment tagging in Settings",
+                title: BuxLocalizedString.string("Credit & BNPL", locale: locale),
+                value: creditInsight?.value ?? BuxLocalizedString.string(
+                    store.paymentSourceTrackingEnabled ? "Tag expenses" : "Off",
+                    locale: locale
+                ),
+                subtitle: creditInsight?.description ?? BuxLocalizedString.string(
+                    "Enable payment tagging in Settings",
+                    locale: locale
+                ),
                 systemIcon: "creditcard.trianglebadge.exclamationmark",
                 accentColorName: "orange",
                 isFeatureEnabled: store.paymentSourceTrackingEnabled,
                 hasData: creditInsight != nil,
-                ctaLabel: store.paymentSourceTrackingEnabled ? nil : "Settings → Payment Sources"
+                ctaLabel: store.paymentSourceTrackingEnabled
+                    ? nil
+                    : BuxLocalizedString.string("Settings → Payment Sources", locale: locale)
             )
         )
 
         // Dual cash
-        let cashInsight = CashDigitalInsightsEngine.generateInsights(transactions: transactions).first
+        let cashInsight = CashDigitalInsightsEngine.generateInsights(transactions: transactions, locale: locale).first
         strips.append(
             FeatureInsightStrip(
                 id: "dual_cash",
-                title: "Cash Drawer",
+                title: BuxLocalizedString.string("Cash Drawer", locale: locale),
                 value: store.dualCashDrawerEnabled
                     ? "\(store.primaryLocalCurrency) \(String(format: "%.0f", store.cashLocalBalanceValue))"
-                    : "Off",
-                subtitle: cashInsight?.description ?? (store.studioEnabled ? "Enable in Studio → Cash & Barter" : "Enable Studio first"),
+                    : BuxLocalizedString.string("Off", locale: locale),
+                subtitle: cashInsight?.description ?? BuxLocalizedString.string(
+                    store.studioEnabled ? "Enable in Studio → Cash & Barter" : "Enable Studio first",
+                    locale: locale
+                ),
                 systemIcon: "banknote.fill",
                 accentColorName: "green",
                 isFeatureEnabled: store.studioEnabled && store.dualCashDrawerEnabled,
                 hasData: cashInsight != nil,
-                ctaLabel: store.studioEnabled ? "Studio → Cash & Barter" : "Studio → Turn on"
+                ctaLabel: store.studioEnabled
+                    ? BuxLocalizedString.string("Studio → Cash & Barter", locale: locale)
+                    : BuxLocalizedString.string("Studio → Turn on", locale: locale)
             )
         )
 
         // Barter
-        let barterInsight = BarterInsightsEngine.generateInsights(transactions: transactions).first
+        let barterInsight = BarterInsightsEngine.generateInsights(transactions: transactions, locale: locale).first
         strips.append(
             FeatureInsightStrip(
                 id: "barter",
-                title: "Barter & Trade",
-                value: barterInsight?.value ?? "No trades",
-                subtitle: barterInsight?.description ?? "Log non-cash exchanges",
+                title: BuxLocalizedString.string("Barter & Trade", locale: locale),
+                value: barterInsight?.value ?? BuxLocalizedString.string("No trades", locale: locale),
+                subtitle: barterInsight?.description ?? BuxLocalizedString.string(
+                    "Log non-cash exchanges",
+                    locale: locale
+                ),
                 systemIcon: "arrow.left.arrow.right.circle.fill",
                 accentColorName: "orange",
                 isFeatureEnabled: store.studioEnabled && store.barterLoggerEnabled,
                 hasData: barterInsight != nil,
-                ctaLabel: store.studioEnabled ? "Studio → Cash & Barter" : "Studio → Turn on"
+                ctaLabel: store.studioEnabled
+                    ? BuxLocalizedString.string("Studio → Cash & Barter", locale: locale)
+                    : BuxLocalizedString.string("Studio → Turn on", locale: locale)
             )
         )
 
         // Workspaces
-        let workspaceInsight = WorkspaceInsightsEngine.generateInsights(transactions: transactions).first
-        let workspaceLabel = HustleWorkspaceFilter.activeWorkspaceLabel() ?? "All workspaces"
+        let workspaceInsight = WorkspaceInsightsEngine.generateInsights(transactions: transactions, locale: locale).first
+        let workspaceLabel = HustleWorkspaceFilter.activeWorkspaceLabel()
+            ?? BuxLocalizedString.string("All workspaces", locale: locale)
         strips.append(
             FeatureInsightStrip(
                 id: "workspaces",
-                title: "Workspaces",
-                value: store.sideHustleMatrixEnabled ? workspaceLabel : "Off",
-                subtitle: workspaceInsight?.description ?? "Separate gigs or departments",
+                title: BuxLocalizedString.string("Workspaces", locale: locale),
+                value: store.sideHustleMatrixEnabled
+                    ? workspaceLabel
+                    : BuxLocalizedString.string("Off", locale: locale),
+                subtitle: workspaceInsight?.description ?? BuxLocalizedString.string(
+                    "Separate gigs or departments",
+                    locale: locale
+                ),
                 systemIcon: "square.grid.2x2.fill",
                 accentColorName: "purple",
                 isFeatureEnabled: store.sideHustleMatrixEnabled,
                 hasData: workspaceInsight != nil || HustleManager.shared.hustles.count > 1,
-                ctaLabel: store.studioEnabled ? "Studio → Workspaces" : "Studio → Turn on"
+                ctaLabel: store.studioEnabled
+                    ? BuxLocalizedString.string("Studio → Workspaces", locale: locale)
+                    : BuxLocalizedString.string("Studio → Turn on", locale: locale)
             )
         )
 
@@ -121,32 +148,46 @@ enum FeatureInsightStripEngine {
         strips.append(
             FeatureInsightStrip(
                 id: "burnout",
-                title: "Creative Energy",
-                value: store.burnoutGuardEnabled ? "\(Int(burnout.creativeEnergyPercent))%" : "Off",
+                title: BuxLocalizedString.string("Creative Energy", locale: locale),
+                value: store.burnoutGuardEnabled
+                    ? "\(Int(burnout.creativeEnergyPercent))%"
+                    : BuxLocalizedString.string("Off", locale: locale),
                 subtitle: store.burnoutGuardEnabled
-                    ? "\(String(format: "%.1f", burnout.workHours))h work · \(String(format: "%.1f", burnout.sleepHours))h sleep"
-                    : "Track workload & rest",
+                    ? BuxLocalizedString.format(
+                        "%.1f h work · %.1f h sleep",
+                        locale: locale,
+                        burnout.workHours,
+                        burnout.sleepHours
+                    )
+                    : BuxLocalizedString.string("Track workload & rest", locale: locale),
                 systemIcon: "bolt.heart.fill",
                 accentColorName: burnout.creativeEnergyPercent > 45 ? "green" : "orange",
                 isFeatureEnabled: store.burnoutGuardEnabled,
                 hasData: burnout.workHours > 0 || burnout.stressExpenseCount > 0,
-                ctaLabel: store.studioEnabled ? "Studio → Workload & Energy" : "Studio → Turn on"
+                ctaLabel: store.studioEnabled
+                    ? BuxLocalizedString.string("Studio → Workload & Energy", locale: locale)
+                    : BuxLocalizedString.string("Studio → Turn on", locale: locale)
             )
         )
 
         // Scope radar (Pro)
-        let scopeInsight = ScopeCreepInsightsEngine.generateInsights(projects: projects).first
+        let scopeInsight = ScopeCreepInsightsEngine.generateInsights(projects: projects, locale: locale).first
         strips.append(
             FeatureInsightStrip(
                 id: "scope_radar",
-                title: "Scope Radar",
-                value: scopeInsight?.value ?? "Clear",
-                subtitle: scopeInsight?.description ?? "Hours & revision guardrails",
+                title: BuxLocalizedString.string("Scope Radar", locale: locale),
+                value: scopeInsight?.value ?? BuxLocalizedString.string("Clear", locale: locale),
+                subtitle: scopeInsight?.description ?? BuxLocalizedString.string(
+                    "Hours & revision guardrails",
+                    locale: locale
+                ),
                 systemIcon: "scope",
                 accentColorName: "red",
                 isFeatureEnabled: store.studioEnabled && store.studioMode == .pro && store.antiScopeCreepEnabled,
                 hasData: scopeInsight != nil,
-                ctaLabel: store.studioMode == .pro ? "Studio → Scope Radar" : "Upgrade to Pro"
+                ctaLabel: store.studioMode == .pro
+                    ? BuxLocalizedString.string("Studio → Scope Radar", locale: locale)
+                    : BuxLocalizedString.string("Upgrade to Pro", locale: locale)
             )
         )
 

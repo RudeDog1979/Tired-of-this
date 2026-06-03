@@ -9,6 +9,7 @@ struct BuxDesignerColorPickerSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let title: String
     let initialHex: String
@@ -86,15 +87,27 @@ struct BuxDesignerColorPickerSheet: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(hexDraft)
                         .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                    Text("Fill strength \(Int(colorAlpha * 100))%")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Fill strength %lld%%",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int(colorAlpha * 100)
+                        )
+                    )
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                     if let layerOpacity {
-                        Text("Layer visibility \(Int(layerOpacity.wrappedValue * 100))%")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Layer visibility %lld%%",
+                                locale: appSettingsManager.interfaceLocale,
+                                Int(layerOpacity.wrappedValue * 100)
+                            )
+                        )
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.secondary)
                     }
-                    Text("Preview matches how the shape will look on the card.")
+                    BuxCatalogDynamicText(key: "Preview matches how the shape will look on the card.")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.tertiary)
                 }
@@ -116,7 +129,7 @@ struct BuxDesignerColorPickerSheet: View {
             BuxFormSectionLabel(title: "Color wheel")
             VStack(spacing: 10) {
                 BuxDesignerHSBControls(hex: $hexDraft, alpha: $colorAlpha, accent: controlTint)
-                Text("Drag the field for saturation and brightness — use Fill strength for transparency.")
+                BuxCatalogDynamicText(key: "Drag the field for saturation and brightness — use Fill strength for transparency.")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -157,12 +170,18 @@ struct BuxDesignerColorPickerSheet: View {
                             .tint(controlTint)
                     }
                     HStack {
-                        Text("Clear")
+                        BuxCatalogDynamicText(key: "Clear")
                         Spacer()
-                        Text("\(Int(colorAlpha * 100))%")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%lld%%",
+                                locale: appSettingsManager.interfaceLocale,
+                                Int(colorAlpha * 100)
+                            )
+                        )
                             .fontWeight(.semibold)
                         Spacer()
-                        Text("Solid")
+                        BuxCatalogDynamicText(key: "Solid")
                     }
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
@@ -176,12 +195,18 @@ struct BuxDesignerColorPickerSheet: View {
         BuxThemedCardForm {
             BuxFormSection(title: "Layer fade") {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Fades the whole element — text, shape, or photo.")
+                    BuxCatalogDynamicText(key: "Fades the whole element — text, shape, or photo.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                     Slider(value: binding, in: 0.05...1)
                         .tint(controlTint)
-                    Text("\(Int(binding.wrappedValue * 100))% visible")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld%% visible",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int(binding.wrappedValue * 100)
+                        )
+                    )
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }

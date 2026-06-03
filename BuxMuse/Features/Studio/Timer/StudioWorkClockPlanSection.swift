@@ -46,6 +46,7 @@ struct StudioWorkClockPlanCopy {
 struct StudioWorkClockPlanSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let copy: StudioWorkClockPlanCopy
     let accent: Color
@@ -125,13 +126,29 @@ struct StudioWorkClockPlanSection: View {
                 } else {
                     HStack(spacing: BuxTokens.tight) {
                         Picker("Hours", selection: $planHours) {
-                            ForEach(0..<13, id: \.self) { Text("\($0)h").tag($0) }
+                            ForEach(0..<13, id: \.self) { hour in
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%lldh",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        Int64(hour)
+                                    )
+                                )
+                                .tag(hour)
+                            }
                         }
                         .pickerStyle(.menu)
 
                         Picker("Minutes", selection: $planMinutes) {
                             ForEach(Array(stride(from: 0, through: 55, by: 5)), id: \.self) { m in
-                                Text("\(m)m").tag(m)
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%lldm",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        Int64(m)
+                                    )
+                                )
+                                .tag(m)
                             }
                         }
                         .pickerStyle(.menu)

@@ -156,7 +156,8 @@ public final class GoalsEngine: ObservableObject {
             goal: goal,
             transactions: financialEngine.allTransactions(),
             activeSubscriptions: financialEngine.activeSubscriptions(),
-            overspendAlerts: financialEngine.overspendAlerts(for: range)
+            overspendAlerts: financialEngine.overspendAlerts(for: range),
+            locale: BuxInterfaceLocale.currentInterfaceLocale
         )
     }
     
@@ -171,14 +172,18 @@ public final class GoalsEngine: ObservableObject {
             goal: goal,
             transactions: financialEngine.allTransactions(),
             activeSubscriptions: financialEngine.activeSubscriptions(),
-            savingsOpportunities: financialEngine.savingsOpportunities(for: range)
+            savingsOpportunities: financialEngine.savingsOpportunities(for: range),
+            locale: BuxInterfaceLocale.currentInterfaceLocale
         )
     }
     
     public func getMomentum(forGoalId id: UUID) -> GoalMomentumResult? {
         if let cached = cachedMomentum[id] { return cached }
         guard let goal = goals.first(where: { $0.id == id }) else { return nil }
-        return momentumEngine.computeMomentum(goal: goal)
+        return momentumEngine.computeMomentum(
+            goal: goal,
+            locale: BuxInterfaceLocale.currentInterfaceLocale
+        )
     }
     
     public func getHealth(forGoalId id: UUID, financialEngine: FinancialIntelligenceEngine) -> GoalHealth? {
@@ -201,7 +206,8 @@ public final class GoalsEngine: ObservableObject {
             goal: goal,
             projection: projection,
             risks: risks,
-            opportunities: opportunities
+            opportunities: opportunities,
+            locale: BuxInterfaceLocale.currentInterfaceLocale
         )
     }
     
@@ -217,6 +223,8 @@ public final class GoalsEngine: ObservableObject {
         let overspendAlerts = financialEngine.overspendAlerts(for: range)
         let savingsOpportunities = financialEngine.savingsOpportunities(for: range)
         
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
+
         calculationQueue.async { [weak self] in
             guard let self = self else { return }
             
@@ -239,7 +247,8 @@ public final class GoalsEngine: ObservableObject {
                     goal: goal,
                     transactions: txs,
                     activeSubscriptions: subs,
-                    overspendAlerts: overspendAlerts
+                    overspendAlerts: overspendAlerts,
+                    locale: locale
                 )
                 risks[goal.id] = rsk
                 
@@ -247,11 +256,12 @@ public final class GoalsEngine: ObservableObject {
                     goal: goal,
                     transactions: txs,
                     activeSubscriptions: subs,
-                    savingsOpportunities: savingsOpportunities
+                    savingsOpportunities: savingsOpportunities,
+                    locale: locale
                 )
                 opportunities[goal.id] = opp
                 
-                let mom = self.momentumEngine.computeMomentum(goal: goal)
+                let mom = self.momentumEngine.computeMomentum(goal: goal, locale: locale)
                 momentum[goal.id] = mom
                 
                 let hlt = self.healthEngine.evaluateHealth(goal: goal, risks: rsk, momentumScore: mom.score)
@@ -261,7 +271,8 @@ public final class GoalsEngine: ObservableObject {
                     goal: goal,
                     projection: proj,
                     risks: rsk,
-                    opportunities: opp
+                    opportunities: opp,
+                    locale: locale
                 )
                 timelines[goal.id] = tml
             }
@@ -276,6 +287,12 @@ public final class GoalsEngine: ObservableObject {
                 self.objectWillChange.send()
             }
         }
+    }
+
+    /// Clears precomputed goal intelligence (e.g. after Country/Region changes).
+    public func invalidateLocalizedCaches(andRecalculate financialEngine: FinancialIntelligenceEngine) {
+        invalidateCaches()
+        precalculateAllGoalsAsync(financialEngine: financialEngine)
     }
 
     private func invalidateCaches() {

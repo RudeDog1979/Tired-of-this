@@ -1,0 +1,82 @@
+{
+  "Header: %@ · Background: %@ · Template: %@": {
+    "es-419": "Encabezado: %@ · Fondo: %@ · Plantilla: %@",
+    "es-ES": "Encabezado: %@ · Fondo: %@ · Plantilla: %@"
+  },
+  "Matching \"%@\"": {
+    "es-419": "Coincide con \"%@\"",
+    "es-ES": "Coincide con \"%@\""
+  },
+  "Live Preview · %@": {
+    "es-419": "Vista previa · %@",
+    "es-ES": "Vista previa · %@"
+  },
+  "%@ — %@%%": {
+    "es-419": "%@ — %@%%",
+    "es-ES": "%@ — %@%%"
+  },
+  "Review %@ preset": {
+    "es-419": "Revisar preset %@",
+    "es-ES": "Revisar preset %@"
+  },
+  "%@ · %@ (%@)": {
+    "es-419": "%@ · %@ (%@)",
+    "es-ES": "%@ · %@ (%@)"
+  },
+  "%@ %@ · %@": {
+    "es-419": "%1$@ %2$@ · %3$@",
+    "es-ES": "%1$@ %2$@ · %3$@"
+  },
+  "%lld designs": {
+    "es-419": "%lld diseños",
+    "es-ES": "%lld diseños"
+  },
+  "Last: %@": {
+    "es-419": "Último: %@",
+    "es-ES": "Último: %@"
+  },
+  "Waiting: %@": {
+    "es-419": "En espera: %@",
+    "es-ES": "En espera: %@"
+  },
+  "Total: %@": {
+    "es-419": "Total: %@",
+    "es-ES": "Total: %@"
+  },
+  "Preview: %@": {
+    "es-419": "Vista previa: %@",
+    "es-ES": "Vista previa: %@"
+  },
+  "%lld%%": {
+    "es-419": "%lld%%",
+    "es-ES": "%lld%%"
+  },
+  "%lldd": {
+    "es-419": "%lld d",
+    "es-ES": "%lld d"
+  },
+  "Local notification %lld day before renewal.": {
+    "es-419": "Notificación local %lld día antes de la renovación.",
+    "es-ES": "Notificación local %lld día antes de la renovación."
+  },
+  "Local notification %lld days before renewal.": {
+    "es-419": "Notificación local %lld días antes de la renovación.",
+    "es-ES": "Notificación local %lld días antes de la renovación."
+  },
+  "Fill from job": {
+    "es-419": "Completar desde trabajo",
+    "es-ES": "Completar desde trabajo"
+  },
+  "Fill from project": {
+    "es-419": "Completar desde proyecto",
+    "es-ES": "Completar desde proyecto"
+  },
+  "this workspace": {
+    "es-419": "este workspace",
+    "es-ES": "este workspace"
+  },
+  "Same trip home — adds a second log with From ↔ To swapped (%@ mi each way).": {
+    "es-419": "Mismo viaje de vuelta — agrega un segundo registro con Origen ↔ Destino invertidos (%@ mi por tramo).",
+    "es-ES": "Mismo viaje de vuelta — añade un segundo registro con Origen ↔ Destino invertidos (%@ mi por trayecto)."
+  }
+}

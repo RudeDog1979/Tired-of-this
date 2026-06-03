@@ -397,11 +397,11 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
             }
             .shadow(color: circleShadowColor, radius: circleShadowRadius)
 
-            Text(title)
+            BuxCatalogDynamicText(key: title)
                 .font(titleFont)
                 .foregroundStyle(titleColor)
                 .lineLimit(1)
-                .minimumScaleFactor(0.85)
+                .minimumScaleFactor(1.0)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
@@ -694,7 +694,7 @@ struct BuxActionButton: View {
         HStack(spacing: 8) {
             Image(systemName: systemImage)
                 .font(.system(size: size.iconSize, weight: .semibold))
-            Text(title)
+            BuxCatalogText.text(title)
                 .font(.system(size: size.fontSize, weight: .semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)

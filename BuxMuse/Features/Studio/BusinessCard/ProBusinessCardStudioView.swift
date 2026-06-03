@@ -16,6 +16,7 @@ struct BusinessCardEditorRoute: Identifiable, Hashable {
 struct ProBusinessCardStudioView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
@@ -86,7 +87,7 @@ struct ProBusinessCardStudioView: View {
                 BusinessCardStudioHeader()
                     .environmentObject(themeManager)
 
-                Text("Design print-ready cards in minutes — geometric templates, Bux Canvas, photo lab, and export to PDF or vCard.")
+                BuxCatalogDynamicText(key: "Design print-ready cards in minutes — geometric templates, Bux Canvas, photo lab, and export to PDF or vCard.")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -191,9 +192,9 @@ struct ProBusinessCardStudioView: View {
                     Image(systemName: "rectangle.stack.badge.plus")
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundStyle(themeManager.current.accentColor.opacity(0.6))
-                    Text("No saved cards yet")
+                    BuxCatalogDynamicText(key: "No saved cards yet")
                         .font(.system(size: 14, weight: .semibold))
-                    Text("Pick a template above to create your first design.")
+                    BuxCatalogDynamicText(key: "Pick a template above to create your first design.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -220,7 +221,13 @@ struct ProBusinessCardStudioView: View {
                             showDesignsLibrary = true
                         } label: {
                             HStack(spacing: 8) {
-                                Text("See all \(sortedDesigns.count) designs")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "See all %lld designs",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        Int64(sortedDesigns.count)
+                                    )
+                                )
                                     .font(.system(size: 14, weight: .bold, design: .rounded))
                                 Image(systemName: "arrow.right.circle.fill")
                                     .font(.system(size: 16, weight: .semibold))
@@ -283,6 +290,7 @@ struct ProBusinessCardStudioView: View {
 struct BusinessCardYourDesignsLibraryView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
 
     var onSelectDesign: (UUID) -> Void
@@ -327,7 +335,7 @@ struct BusinessCardYourDesignsLibraryView: View {
             .padding(.vertical, BuxTokens.section)
         }
         .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
-        .navigationTitle("Your designs")
+        .buxCatalogNavigationTitle("Your designs")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -367,15 +375,23 @@ struct BusinessCardYourDesignsLibraryView: View {
             get: { showDeleteConfirm && isSelecting },
             set: { if !$0 { showDeleteConfirm = false } }
         )) {
-            Button("Delete \(selectedIDs.count)", role: .destructive) {
+            Button(role: .destructive) {
                 studioStore.deleteBusinessCardDesigns(ids: selectedIDs)
                 selectedIDs = []
                 isSelecting = false
                 showDeleteConfirm = false
+            } label: {
+                Text(
+                    BuxLocalizedString.format(
+                        "Delete %lld",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int64(selectedIDs.count)
+                    )
+                )
             }
             Button("Cancel", role: .cancel) { showDeleteConfirm = false }
         } message: {
-            Text("This permanently removes the selected cards from Your designs.")
+            BuxCatalogDynamicText(key: "This permanently removes the selected cards from Your designs.")
         }
     }
 
@@ -398,6 +414,7 @@ struct BusinessCardYourDesignsLibraryView: View {
 struct BusinessCardDesignGridTile: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let design: ProBusinessCardDesign
     let logoData: Data?
@@ -468,12 +485,19 @@ struct BusinessCardDesignGridTile: View {
                     Text(design.title)
                         .font(.system(size: 13, weight: .bold))
                         .lineLimit(1)
-                    Text("\(design.template.title) · \(design.aspect.title)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%@ · %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            design.template.title,
+                            design.aspect.title
+                        )
+                    )
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                     if isPrimaryBrand {
-                        Text("Invoice brand")
+                        BuxCatalogDynamicText(key: "Invoice brand")
                             .font(.system(size: 9, weight: .bold))
                             .foregroundStyle(themeManager.current.accentColor)
                     }

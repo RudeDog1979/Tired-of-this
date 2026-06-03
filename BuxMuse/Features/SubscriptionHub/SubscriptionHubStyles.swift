@@ -34,7 +34,7 @@ struct SubscriptionHubSectionHeader: View {
     @EnvironmentObject private var themeManager: ThemeManager
 
     var body: some View {
-        Text(title)
+        BuxCatalogDynamicText(key: title)
             .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
             .frame(maxWidth: .infinity, alignment: .leading)
     }

@@ -21,9 +21,19 @@ struct CardBackgroundEditor: View {
         Form {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("Recommended: \(cardAspect.detail)", systemImage: "rectangle.portrait.rotate")
+                    Label {
+                        Text(
+                            BuxLocalizedString.format(
+                                "Recommended: %@",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                cardAspect.detail
+                            )
+                        )
+                    } icon: {
+                        Image(systemName: "rectangle.portrait.rotate")
+                    }
                         .font(.system(size: 13, weight: .bold))
-                    Text("You do not need a perfect photo size. Choose any image, then pan, zoom, crop to the card, or pick a free region.")
+                    BuxCatalogDynamicText(key: "You do not need a perfect photo size. Choose any image, then pan, zoom, crop to the card, or pick a free region.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
@@ -55,7 +65,7 @@ struct CardBackgroundEditor: View {
                     }
                 }
             } header: {
-                Text("Background photo")
+                BuxCatalogDynamicText(key: "Background photo")
             }
 
             Picker("Style", selection: $background.style) {
@@ -93,7 +103,13 @@ struct CardBackgroundEditor: View {
                     Slider(value: $background.overlayOpacity, in: 0...0.85)
                         .onChange(of: background.overlayOpacity) { _, _ in onChange() }
                     LabeledContent("Overlay strength") {
-                        Text("\(Int(background.overlayOpacity * 100))%")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%lld%%",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                Int(background.overlayOpacity * 100)
+                            )
+                        )
                     }
                 }
             }
@@ -102,7 +118,15 @@ struct CardBackgroundEditor: View {
                 Section("Photo tuning") {
                     Slider(value: $background.photoOpacity, in: 0.2...1)
                         .onChange(of: background.photoOpacity) { _, _ in onChange() }
-                    LabeledContent("Photo opacity") { Text("\(Int(background.photoOpacity * 100))%") }
+                    LabeledContent("Photo opacity") {
+                        Text(
+                            BuxLocalizedString.format(
+                                "%lld%%",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                Int(background.photoOpacity * 100)
+                            )
+                        )
+                    }
                     Slider(value: $background.saturation, in: 0...2)
                         .onChange(of: background.saturation) { _, _ in onChange() }
                     LabeledContent("Saturation") { Text(String(format: "%.1f", background.saturation)) }

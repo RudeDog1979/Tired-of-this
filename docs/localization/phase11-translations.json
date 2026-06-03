@@ -1,0 +1,238 @@
+{
+  "Fixed %@ — time is tracked for margin & scope, not to recalculate the price.": {
+    "es-419": "Fijo %@ — el tiempo se registra para margen y alcance, no para recalcular el precio.",
+    "es-ES": "Fijo %@ — el tiempo se registra para margen y alcance, no para recalcular el precio."
+  },
+  "%@/hr × %@ billable hrs logged": {
+    "es-419": "%@/h × %@ h facturables registradas",
+    "es-ES": "%@/h × %@ h facturables registradas"
+  },
+  "%lld of %lld used": {
+    "es-419": "%lld de %lld usadas",
+    "es-ES": "%lld de %lld usadas"
+  },
+  "%@ h": {
+    "es-419": "%@ h",
+    "es-ES": "%@ h"
+  },
+  "Time entries below are your task log for this project.": {
+    "es-419": "Las entradas de tiempo abajo son tu registro de tareas para este proyecto.",
+    "es-ES": "Las entradas de tiempo abajo son tu registro de tareas para este proyecto."
+  },
+  "Keep %@": {
+    "es-419": "Quedan %@",
+    "es-ES": "Quedan %@"
+  },
+  "Agreed %@": {
+    "es-419": "Acordado %@",
+    "es-ES": "Acordado %@"
+  },
+  "Spent %@": {
+    "es-419": "Gastado %@",
+    "es-ES": "Gastado %@"
+  },
+  "Paid %@": {
+    "es-419": "Pagado %@",
+    "es-ES": "Pagado %@"
+  },
+  "Waiting %@": {
+    "es-419": "En espera %@",
+    "es-ES": "En espera %@"
+  },
+  "When paid: keep %@": {
+    "es-419": "Al cobrar: quedan %@",
+    "es-ES": "Al cobrar: quedan %@"
+  },
+  "Tap the chart or a row below to filter": {
+    "es-419": "Toca el gráfico o una fila abajo para filtrar",
+    "es-ES": "Toca el gráfico o una fila abajo para filtrar"
+  },
+  "%@ · %lldd": {
+    "es-419": "%@ · %lld d",
+    "es-ES": "%@ · %lld d"
+  },
+  "Advance left: %@": {
+    "es-419": "Anticipo restante: %@",
+    "es-ES": "Anticipo restante: %@"
+  },
+  "Already logged: %@": {
+    "es-419": "Ya registrado: %@",
+    "es-ES": "Ya registrado: %@"
+  },
+  "Planned time: %@": {
+    "es-419": "Tiempo planificado: %@",
+    "es-ES": "Tiempo planificado: %@"
+  },
+  "Almost there — about %lld min left on your plan.": {
+    "es-419": "Casi — quedan unos %lld min en tu plan.",
+    "es-ES": "Casi — quedan unos %lld min en tu plan."
+  },
+  "Health · %@": {
+    "es-419": "Salud · %@",
+    "es-ES": "Salud · %@"
+  },
+  "~%@h to finish at current pace": {
+    "es-419": "~%@ h para terminar al ritmo actual",
+    "es-ES": "~%@ h para terminar al ritmo actual"
+  },
+  "After %@": {
+    "es-419": "Después de %@",
+    "es-ES": "Después de %@"
+  },
+  "After: %@": {
+    "es-419": "Después de: %@",
+    "es-ES": "Después de: %@"
+  },
+  "%lld paid": {
+    "es-419": "%lld pagados",
+    "es-ES": "%lld pagados"
+  },
+  "%lld open": {
+    "es-419": "%lld abiertos",
+    "es-ES": "%lld abiertos"
+  },
+  "%lld result": {
+    "es-419": "%lld resultado",
+    "es-ES": "%lld resultado"
+  },
+  "%lld results": {
+    "es-419": "%lld resultados",
+    "es-ES": "%lld resultados"
+  },
+  "LTV: %@": {
+    "es-419": "LTV: %@",
+    "es-ES": "LTV: %@"
+  },
+  "%lld/100": {
+    "es-419": "%lld/100",
+    "es-ES": "%lld/100"
+  },
+  "%lld days": {
+    "es-419": "%lld días",
+    "es-ES": "%lld días"
+  },
+  "%lld time entries logged": {
+    "es-419": "%lld entradas de tiempo registradas",
+    "es-ES": "%lld entradas de tiempo registradas"
+  },
+  "Runway %@": {
+    "es-419": "Runway %@",
+    "es-ES": "Runway %@"
+  },
+  "%lld invoice(s)": {
+    "es-419": "%lld factura(s)",
+    "es-ES": "%lld factura(s)"
+  },
+  "Issued: %@": {
+    "es-419": "Emitida: %@",
+    "es-ES": "Emitida: %@"
+  },
+  "Due: %@": {
+    "es-419": "Vence: %@",
+    "es-ES": "Vence: %@"
+  },
+  "Template: %@": {
+    "es-419": "Plantilla: %@",
+    "es-ES": "Plantilla: %@"
+  },
+  "Late Risk Detected. Awaiting payment speed estimated at %lld days.": {
+    "es-419": "Riesgo de retraso. Se estima cobro en %lld días.",
+    "es-ES": "Riesgo de retraso. Se estima cobro en %lld días."
+  },
+  "Use %@?": {
+    "es-419": "¿Usar %@?",
+    "es-ES": "¿Usar %@?"
+  },
+  "Cash (%@)": {
+    "es-419": "Efectivo (%@)",
+    "es-ES": "Efectivo (%@)"
+  },
+  "ESTIMATED VALUE (%@)": {
+    "es-419": "VALOR ESTIMADO (%@)",
+    "es-ES": "VALOR ESTIMADO (%@)"
+  },
+  "%@ (%@)": {
+    "es-419": "%1$@ (%2$@)",
+    "es-ES": "%1$@ (%2$@)"
+  },
+  "%@ · typical %@": {
+    "es-419": "%@ · habitual %@",
+    "es-ES": "%@ · habitual %@"
+  },
+  "Viewing: %@": {
+    "es-419": "Viendo: %@",
+    "es-ES": "Viendo: %@"
+  },
+  "%lld/10": {
+    "es-419": "%lld/10",
+    "es-ES": "%lld/10"
+  },
+  "Current %@ Cash in Wallet": {
+    "es-419": "Efectivo %@ actual en la billetera",
+    "es-ES": "Efectivo %@ actual en la cartera"
+  },
+  "%lld Categories · Target: %@": {
+    "es-419": "%lld categorías · Meta: %@",
+    "es-ES": "%lld categorías · Meta: %@"
+  },
+  "See all %lld designs": {
+    "es-419": "Ver las %lld diseños",
+    "es-ES": "Ver los %lld diseños"
+  },
+  "Scale: %.1fx": {
+    "es-419": "Escala: %.1fx",
+    "es-ES": "Escala: %.1fx"
+  },
+  "Card: %@ — any photo size works.": {
+    "es-419": "Tarjeta: %@ — cualquier tamaño de foto sirve.",
+    "es-ES": "Tarjeta: %@ — cualquier tamaño de foto sirve."
+  },
+  "%@ · %@": {
+    "es-419": "%1$@ · %2$@",
+    "es-ES": "%1$@ · %2$@"
+  },
+  "%@ %@": {
+    "es-419": "%1$@ %2$@",
+    "es-ES": "%1$@ %2$@"
+  },
+  "Signed · %@": {
+    "es-419": "Firmado · %@",
+    "es-ES": "Firmado · %@"
+  },
+  "Fill from %@": {
+    "es-419": "Completar desde %@",
+    "es-ES": "Completar desde %@"
+  },
+  "Qty %.1f · %@": {
+    "es-419": "Cant. %.1f · %@",
+    "es-ES": "Cant. %.1f · %@"
+  },
+  "Est. allowance: %@": {
+    "es-419": "Tarifa est.: %@",
+    "es-ES": "Tarifa est.: %@"
+  },
+  "Photos: %@": {
+    "es-419": "Fotos: %@",
+    "es-ES": "Fotos: %@"
+  },
+  "+%@": {
+    "es-419": "+%@",
+    "es-ES": "+%@"
+  },
+  "+%.1f%%": {
+    "es-419": "+%.1f%%",
+    "es-ES": "+%.1f%%"
+  },
+  "Pick another workspace above, or add an expense tagged to %@.": {
+    "es-419": "Elige otro workspace arriba o agrega un gasto etiquetado a %@.",
+    "es-ES": "Elige otro workspace arriba o añade un gasto etiquetado a %@."
+  },
+  "Local · Private · On your phone": {
+    "es-419": "Local · Privado · En tu teléfono",
+    "es-ES": "Local · Privado · En tu teléfono"
+  },
+  "Today kept": {
+    "es-419": "Quedó hoy",
+    "es-ES": "Quedó hoy"
+  }
+}

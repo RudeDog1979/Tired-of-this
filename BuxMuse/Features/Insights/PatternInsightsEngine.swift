@@ -11,10 +11,9 @@ import Foundation
 public final class PatternInsightsEngine {
     public init() {}
 
-    public func generateInsights(transactions: [Transaction]) -> [FinancialInsight] {
+    public func generateInsights(transactions: [Transaction], locale: Locale) -> [FinancialInsight] {
         var insights: [FinancialInsight] = []
         guard !transactions.isEmpty else { return [] }
-
         let expenses = transactions.filter { $0.category != .income }
         let calendar = Calendar.current
 
@@ -43,20 +42,41 @@ public final class PatternInsightsEngine {
             let pct = InsightMoneyFormat.percentChange(from: avgWeekend / avgWeekday)
             let weekendCap = avgWeekday * 1.2
             insights.append(FinancialInsight(
-                title: "Weekend Spending Surge",
-                value: "Weekend Bias",
-                description: "You spend more on weekends.",
-                fullExplanation: "Your weekend spending averages \(InsightMoneyFormat.format(avgWeekend)) per day, which is \(pct)% higher than your weekday average of \(InsightMoneyFormat.format(avgWeekday)).",
+                title: BuxLocalizedString.string("Weekend Spending Surge", locale: locale),
+                value: BuxLocalizedString.string("Weekend Bias", locale: locale),
+                description: BuxLocalizedString.string(
+                    "You spend more on weekends.",
+                    locale: locale
+                ),
+                fullExplanation: BuxLocalizedString.format(
+                    "Your weekend spending averages %@ per day, which is %@%% higher than your weekday average of %@.",
+                    locale: locale,
+                    InsightMoneyFormat.format(avgWeekend),
+                    pct,
+                    InsightMoneyFormat.format(avgWeekday)
+                ),
                 severity: .medium,
                 category: .pattern,
                 systemIcon: "calendar.badge.exclamationmark",
                 accentColorName: "orange",
                 suggestedActions: [
-                    "Establish a concrete 'Weekend Budget cap' of \(InsightMoneyFormat.format(weekendCap)).",
-                    "Plan free or low-cost activities for Saturday afternoons."
+                    BuxLocalizedString.format(
+                        "Establish a concrete 'Weekend Budget cap' of %@.",
+                        locale: locale,
+                        InsightMoneyFormat.format(weekendCap)
+                    ),
+                    BuxLocalizedString.string(
+                        "Plan free or low-cost activities for Saturday afternoons.",
+                        locale: locale
+                    ),
                 ],
                 impactMonthly: (avgWeekend - avgWeekday) * 8,
-                dataBehind: "Weekend Average: \(InsightMoneyFormat.format(avgWeekend)). Weekday Average: \(InsightMoneyFormat.format(avgWeekday))."
+                dataBehind: BuxLocalizedString.format(
+                    "Weekend Average: %@. Weekday Average: %@.",
+                    locale: locale,
+                    InsightMoneyFormat.format(avgWeekend),
+                    InsightMoneyFormat.format(avgWeekday)
+                )
             ))
         }
 
@@ -73,20 +93,39 @@ public final class PatternInsightsEngine {
         if nighttimeTransportTxs.count >= 2 {
             let nighttimeSum = nighttimeTransportTxs.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
             insights.append(FinancialInsight(
-                title: "Late Night Transport Surge",
-                value: "Nighttime Bias",
-                description: "Your transport spending spikes after 8pm.",
-                fullExplanation: "You spent \(InsightMoneyFormat.format(nighttimeSum)) across \(nighttimeTransportTxs.count) late-night rides this month. Fare spikes and premium options contribute to this nocturnal splurge.",
+                title: BuxLocalizedString.string("Late Night Transport Surge", locale: locale),
+                value: BuxLocalizedString.string("Nighttime Bias", locale: locale),
+                description: BuxLocalizedString.string(
+                    "Your transport spending spikes after 8pm.",
+                    locale: locale
+                ),
+                fullExplanation: BuxLocalizedString.format(
+                    "You spent %@ across %lld late-night rides this month. Fare spikes and premium options contribute to this nocturnal splurge.",
+                    locale: locale,
+                    InsightMoneyFormat.format(nighttimeSum),
+                    nighttimeTransportTxs.count
+                ),
                 severity: .low,
                 category: .pattern,
                 systemIcon: "moon.stars.fill",
                 accentColorName: "blue",
                 suggestedActions: [
-                    "Check alternative public transit or shared ride routes if safe.",
-                    "Review rideshare history for peak surge pricing anomalies."
+                    BuxLocalizedString.string(
+                        "Check alternative public transit or shared ride routes if safe.",
+                        locale: locale
+                    ),
+                    BuxLocalizedString.string(
+                        "Review rideshare history for peak surge pricing anomalies.",
+                        locale: locale
+                    ),
                 ],
                 impactMonthly: nighttimeSum * 0.3,
-                dataBehind: "Nighttime Transport Spend: \(InsightMoneyFormat.format(nighttimeSum)). Count: \(nighttimeTransportTxs.count)."
+                dataBehind: BuxLocalizedString.format(
+                    "Nighttime Transport Spend: %@. Count: %lld.",
+                    locale: locale,
+                    InsightMoneyFormat.format(nighttimeSum),
+                    nighttimeTransportTxs.count
+                )
             ))
         }
 

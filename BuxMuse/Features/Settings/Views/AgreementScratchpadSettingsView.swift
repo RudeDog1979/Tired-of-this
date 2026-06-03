@@ -25,9 +25,9 @@ struct AgreementScratchpadSettingsView: View {
             BuxFormSection(title: "Status") {
                 Toggle(isOn: $store.agreementScratchpadEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Enable Agreement Scratchpad")
+                        BuxCatalogDynamicText(key: "Enable Agreement Scratchpad")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Unlocks agreement drafts linked to Studio clients and projects.")
+                        BuxCatalogDynamicText(key: "Unlocks agreement drafts linked to Studio clients and projects.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)
@@ -47,9 +47,9 @@ struct AgreementScratchpadSettingsView: View {
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
-                                Text("Open agreement drafts")
+                                BuxCatalogDynamicText(key: "Open agreement drafts")
                                     .font(.system(size: 15, weight: .semibold))
-                                Text("Create, edit, and share scope agreements with clients.")
+                                BuxCatalogDynamicText(key: "Create, edit, and share scope agreements with clients.")
                                     .font(.system(size: 12, weight: .medium))
                                     .buxLabelSecondary()
                             }
@@ -68,9 +68,9 @@ struct AgreementScratchpadSettingsView: View {
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
-                                Text("Default terms & conditions")
+                                BuxCatalogDynamicText(key: "Default terms & conditions")
                                     .font(.system(size: 15, weight: .semibold))
-                                Text("Pre-made clauses for new agreements — deposits, cancellations, liability, and more.")
+                                BuxCatalogDynamicText(key: "Pre-made clauses for new agreements — deposits, cancellations, liability, and more.")
                                     .font(.system(size: 12, weight: .medium))
                                     .buxLabelSecondary()
                             }

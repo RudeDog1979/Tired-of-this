@@ -1,0 +1,266 @@
+{
+  "On hold": {
+    "es-419": "En pausa",
+    "es-ES": "En pausa"
+  },
+  "Cancelled": {
+    "es-419": "Cancelada",
+    "es-ES": "Cancelada"
+  },
+  "Completed": {
+    "es-419": "Completado",
+    "es-ES": "Completado"
+  },
+  "Strong": {
+    "es-419": "Fuerte",
+    "es-ES": "Fuerte"
+  },
+  "Weak": {
+    "es-419": "Débil",
+    "es-ES": "Débil"
+  },
+  "Risky": {
+    "es-419": "Arriesgado",
+    "es-ES": "Arriesgado"
+  },
+  "Self-employed": {
+    "es-419": "Autónomo",
+    "es-ES": "Autónomo"
+  },
+  "Employed": {
+    "es-419": "Empleado",
+    "es-ES": "Empleado"
+  },
+  "One-off / gig": {
+    "es-419": "Trabajo puntual",
+    "es-ES": "Trabajo puntual"
+  },
+  "Still waiting": {
+    "es-419": "Aún en espera",
+    "es-ES": "Aún en espera"
+  },
+  "Partially paid": {
+    "es-419": "Pago parcial",
+    "es-ES": "Pago parcial"
+  },
+  "Paid in full": {
+    "es-419": "Pagado completo",
+    "es-ES": "Pagado completo"
+  },
+  "Projects": {
+    "es-419": "Proyectos",
+    "es-ES": "Proyectos"
+  },
+  "Receipts": {
+    "es-419": "Recibos",
+    "es-ES": "Recibos"
+  },
+  "Mileage": {
+    "es-419": "Kilometraje",
+    "es-ES": "Kilometraje"
+  },
+  "Time": {
+    "es-419": "Tiempo",
+    "es-ES": "Tiempo"
+  },
+  "Ledger": {
+    "es-419": "Libro mayor",
+    "es-ES": "Libro mayor"
+  },
+  "Off": {
+    "es-419": "Desactivado",
+    "es-ES": "Desactivado"
+  },
+  "Tag expenses": {
+    "es-419": "Etiquetar gastos",
+    "es-ES": "Etiquetar gastos"
+  },
+  "Enable payment tagging in Settings": {
+    "es-419": "Activa el etiquetado de pagos en Ajustes",
+    "es-ES": "Activa el etiquetado de pagos en Ajustes"
+  },
+  "Settings → Payment Sources": {
+    "es-419": "Ajustes → Fuentes de pago",
+    "es-ES": "Ajustes → Fuentes de pago"
+  },
+  "Cash Drawer": {
+    "es-419": "Caja de efectivo",
+    "es-ES": "Caja de efectivo"
+  },
+  "Enable in Studio → Cash & Barter": {
+    "es-419": "Actívalo en Studio → Efectivo y trueque",
+    "es-ES": "Actívalo en Studio → Efectivo y trueque"
+  },
+  "Enable Studio first": {
+    "es-419": "Activa Studio primero",
+    "es-ES": "Activa Studio primero"
+  },
+  "Studio → Cash & Barter": {
+    "es-419": "Studio → Efectivo y trueque",
+    "es-ES": "Studio → Efectivo y trueque"
+  },
+  "Studio → Turn on": {
+    "es-419": "Studio → Activar",
+    "es-ES": "Studio → Activar"
+  },
+  "Barter & Trade": {
+    "es-419": "Trueque e intercambio",
+    "es-ES": "Trueque e intercambio"
+  },
+  "No trades": {
+    "es-419": "Sin trueques",
+    "es-ES": "Sin trueques"
+  },
+  "Log non-cash exchanges": {
+    "es-419": "Registra intercambios sin efectivo",
+    "es-ES": "Registra intercambios sin efectivo"
+  },
+  "All workspaces": {
+    "es-419": "Todos los workspaces",
+    "es-ES": "Todos los workspaces"
+  },
+  "Workspaces": {
+    "es-419": "Workspaces",
+    "es-ES": "Workspaces"
+  },
+  "Separate gigs or departments": {
+    "es-419": "Separa trabajos o áreas",
+    "es-ES": "Separa trabajos o áreas"
+  },
+  "Studio → Workspaces": {
+    "es-419": "Studio → Workspaces",
+    "es-ES": "Studio → Workspaces"
+  },
+  "Creative Energy": {
+    "es-419": "Energía creativa",
+    "es-ES": "Energía creativa"
+  },
+  "Track workload & rest": {
+    "es-419": "Registra carga y descanso",
+    "es-ES": "Registra carga y descanso"
+  },
+  "Studio → Workload & Energy": {
+    "es-419": "Studio → Carga y energía",
+    "es-ES": "Studio → Carga y energía"
+  },
+  "Scope Radar": {
+    "es-419": "Radar de alcance",
+    "es-ES": "Radar de alcance"
+  },
+  "Clear": {
+    "es-419": "Todo claro",
+    "es-ES": "Todo claro"
+  },
+  "Hours & revision guardrails": {
+    "es-419": "Horas y límites de revisiones",
+    "es-ES": "Horas y límites de revisiones"
+  },
+  "Studio → Scope Radar": {
+    "es-419": "Studio → Radar de alcance",
+    "es-ES": "Studio → Radar de alcance"
+  },
+  "Upgrade to Pro": {
+    "es-419": "Pasar a Pro",
+    "es-ES": "Pasar a Pro"
+  },
+  "%.1f h work · %.1f h sleep": {
+    "es-419": "%.1f h trabajo · %.1f h sueño",
+    "es-ES": "%.1f h trabajo · %.1f h sueño"
+  },
+  "Custom profile": {
+    "es-419": "Perfil personalizado",
+    "es-ES": "Perfil personalizado"
+  },
+  "Saved · %@ · %@ · %@": {
+    "es-419": "Guardado · %@ · %@ · %@",
+    "es-ES": "Guardado · %@ · %@ · %@"
+  },
+  "Unknown Client": {
+    "es-419": "Cliente desconocido",
+    "es-ES": "Cliente desconocido"
+  },
+  "Restaurants": {
+    "es-419": "Restaurantes",
+    "es-ES": "Restaurantes"
+  },
+  "Transport": {
+    "es-419": "Transporte",
+    "es-ES": "Transporte"
+  },
+  "Subscriptions": {
+    "es-419": "Suscripciones",
+    "es-ES": "Suscripciones"
+  },
+  "Housing": {
+    "es-419": "Vivienda",
+    "es-ES": "Vivienda"
+  },
+  "Entertainment": {
+    "es-419": "Entretenimiento",
+    "es-ES": "Entretenimiento"
+  },
+  "Shopping": {
+    "es-419": "Compras",
+    "es-ES": "Compras"
+  },
+  "Health": {
+    "es-419": "Salud",
+    "es-ES": "Salud"
+  },
+  "Utilities": {
+    "es-419": "Servicios",
+    "es-ES": "Servicios"
+  },
+  "Travel": {
+    "es-419": "Viajes",
+    "es-ES": "Viajes"
+  },
+  "Education": {
+    "es-419": "Educación",
+    "es-ES": "Educación"
+  },
+  "Personal": {
+    "es-419": "Personal",
+    "es-ES": "Personal"
+  },
+  "Income": {
+    "es-419": "Ingresos",
+    "es-ES": "Ingresos"
+  },
+  "Other": {
+    "es-419": "Otros",
+    "es-ES": "Otros"
+  },
+  "Weekly": {
+    "es-419": "Semanal",
+    "es-ES": "Semanal"
+  },
+  "Monthly": {
+    "es-419": "Mensual",
+    "es-ES": "Mensual"
+  },
+  "Quarterly": {
+    "es-419": "Trimestral",
+    "es-ES": "Trimestral"
+  },
+  "Semi-Annual": {
+    "es-419": "Semestral",
+    "es-ES": "Semestral"
+  },
+  "Yearly": {
+    "es-419": "Anual",
+    "es-ES": "Anual"
+  },
+  "this workspace": {
+    "es-419": "este workspace",
+    "es-ES": "este workspace"
+  },
+  "This looks like a subscription · %@ cycle": {
+    "es-419": "Parece una suscripción · ciclo %@",
+    "es-ES": "Parece una suscripción · ciclo %@"
+  },
+  "Part of a monthly cycle at this merchant": {
+    "es-419": "Parte de un ciclo mensual en este comercio",
+    "es-ES": "Parte de un ciclo mensual en este comercio"
+  }
+}

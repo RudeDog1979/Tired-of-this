@@ -11,6 +11,7 @@ struct ExpenseCategoryPickerView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var settings = SettingsStore.shared
 
     @Binding var selectedCategoryId: UUID?
@@ -36,7 +37,7 @@ struct ExpenseCategoryPickerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Category")
+            BuxCatalogText.text("Category")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -86,7 +87,7 @@ struct ExpenseCategoryPickerView: View {
                     glassNewCategoryChip
                 }
             }
-            .buxNativeButtonRowChrome(accent: accent, role: .secondary)
+            .buxNativeGlassButtonRowContainer(spacing: 8)
         } else {
             HStack(spacing: 8) {
                 ForEach(categories) { cat in
@@ -109,11 +110,12 @@ struct ExpenseCategoryPickerView: View {
             HStack(spacing: 6) {
                 Image(systemName: cat.icon)
                     .font(.system(size: 12, weight: .semibold))
-                Text(cat.name)
+                Text(cat.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: isSelected ? .bold : .semibold))
             }
         }
         .buxNativeButtonStyle(isSelected ? .primary : .secondary, controlSize: .small)
+        .buxActionButtonChrome(role: isSelected ? .primary : .secondary, accent: accent)
     }
 
     private var glassNewCategoryChip: some View {
@@ -123,11 +125,12 @@ struct ExpenseCategoryPickerView: View {
             HStack(spacing: 4) {
                 Image(systemName: "plus")
                     .font(.system(size: 12, weight: .bold))
-                Text("New")
+                BuxCatalogText.text("New")
                     .font(.system(size: 13, weight: .semibold))
             }
         }
         .buxNativeButtonStyle(.secondary, controlSize: .small)
+        .buxActionButtonChrome(role: .secondary, accent: accent)
     }
 
     private func legacyCategoryChip(_ cat: ExpenseCategoryRecord) -> some View {
@@ -140,7 +143,7 @@ struct ExpenseCategoryPickerView: View {
             HStack(spacing: 6) {
                 Image(systemName: cat.icon)
                     .font(.system(size: 12, weight: .semibold))
-                Text(cat.name)
+                Text(cat.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .semibold))
             }
             .foregroundColor(isSelected ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
@@ -169,7 +172,7 @@ struct ExpenseCategoryPickerView: View {
             HStack(spacing: 4) {
                 Image(systemName: "plus")
                     .font(.system(size: 12, weight: .bold))
-                Text("New")
+                BuxCatalogText.text("New")
                     .font(.system(size: 13, weight: .semibold))
             }
             .foregroundColor(themeManager.current.accentColor)

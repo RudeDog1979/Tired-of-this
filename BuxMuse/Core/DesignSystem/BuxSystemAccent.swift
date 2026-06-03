@@ -25,7 +25,8 @@ enum BuxSystemAccent: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var displayName: String {
+    /// English catalog key (`Blue`, `Green`, …).
+    var displayNameKey: String {
         switch self {
         case .systemBlue: return "Blue"
         case .green: return "Green"
@@ -39,6 +40,10 @@ enum BuxSystemAccent: String, CaseIterable, Identifiable {
         case .cyan: return "Cyan"
         case .yellow: return "Yellow"
         }
+    }
+
+    func localizedDisplayName(locale: Locale) -> String {
+        BuxCatalogLabel.string(displayNameKey, locale: locale)
     }
 
     static func resolve(id: String) -> BuxSystemAccent {

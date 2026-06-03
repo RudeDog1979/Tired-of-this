@@ -18,7 +18,7 @@ struct InvoicePaymentSettingsView: View {
                 Toggle("Auto-detect bank account type", isOn: $store.autoDetectInvoiceBankAccountType)
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
-                Text("Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.")
+                BuxCatalogDynamicText(key: "Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
                     .buxFormFieldPadding()

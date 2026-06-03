@@ -44,7 +44,7 @@ struct MoneyMapNodeDetailSheet: View {
                 }
                 .buxDetailScrollChrome()
             }
-            .navigationTitle(node.title)
+            .navigationTitle(node.localizedTitle(locale: appSettingsManager.interfaceLocale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -118,7 +118,7 @@ struct MoneyMapNodeDetailSheet: View {
     private var previewChartBlock: some View {
         if !detail.sparkline.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Trend")
+                BuxCatalogText.text("Trend")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(themeManager.sectionHeaderColor(for: colorScheme))
                 SparklineChart(points: detail.sparkline, color: node.accentColor, showAreaFill: true)
@@ -162,11 +162,17 @@ struct MoneyMapNodeDetailSheet: View {
                     .trim(from: 0, to: pct / 100)
                     .stroke(node.accentColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                Text("\(Int(pct))%")
+                Text(
+                    BuxLocalizedString.format(
+                        "%lld%%",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int(pct)
+                    )
+                )
                     .font(.system(size: 16, weight: .black, design: .rounded))
             }
             .frame(width: 72, height: 72)
-            Text("Creative fuel left after workload, sleep, and stress spend.")
+            BuxCatalogText.text("Creative fuel left after workload, sleep, and stress spend.")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
         }
@@ -177,7 +183,7 @@ struct MoneyMapNodeDetailSheet: View {
         let rows = detail.breakdown.isEmpty ? fallbackBreakdown : detail.breakdown
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Breakdown")
+                BuxCatalogText.text("Breakdown")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(themeManager.sectionHeaderColor(for: colorScheme))
                 ForEach(Array(rows.prefix(4).enumerated()), id: \.offset) { index, item in
@@ -237,9 +243,9 @@ struct MoneyMapNodeDetailSheet: View {
                 Image(systemName: "chart.xyaxis.line")
                     .font(.system(size: 16, weight: .bold))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Open full territory detail")
+                    BuxCatalogText.text("Open full territory detail")
                         .font(.system(size: 14, weight: .black))
-                    Text("Charts, lines, insights & actions")
+                    BuxCatalogText.text("Charts, lines, insights & actions")
                         .font(.system(size: 11, weight: .medium))
                         .opacity(0.85)
                 }
@@ -305,7 +311,7 @@ struct MoneyMapNodeFullDetailView: View {
                 }
                 .buxDetailScrollChrome()
             }
-            .navigationTitle(node.title)
+            .navigationTitle(node.localizedTitle(locale: appSettingsManager.interfaceLocale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -357,7 +363,7 @@ struct MoneyMapNodeFullDetailView: View {
         let rows = node.detail.breakdown.isEmpty ? fallbackBreakdown : node.detail.breakdown
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                Text("All lines")
+                BuxCatalogText.text("All lines")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(themeManager.sectionHeaderColor(for: colorScheme))
                 ForEach(Array(rows.enumerated()), id: \.offset) { index, item in
@@ -391,14 +397,17 @@ struct MoneyMapNodeFullDetailView: View {
     private var insightActions: some View {
         if node.kind == .insight, let top = graph.topInsight ?? insightsViewModel.rankedInsights.first {
             VStack(alignment: .leading, spacing: 10) {
-                Text(top.title)
+                Text(top.localizedTitle(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 16, weight: .bold))
-                Text(top.fullExplanation)
+                Text(top.localizedFullExplanation(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 if !top.suggestedActions.isEmpty {
                     ForEach(top.suggestedActions, id: \.self) { action in
-                        Label(action, systemImage: "checkmark.circle")
+                        Label(
+                            top.localizedSuggestedAction(action, locale: appSettingsManager.interfaceLocale),
+                            systemImage: "checkmark.circle"
+                        )
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(themeManager.current.accentColor)
                     }
@@ -409,7 +418,7 @@ struct MoneyMapNodeFullDetailView: View {
                         insightsViewModel.selectInsight(top)
                     }
                 } label: {
-                    Text("Open insight detail")
+                    BuxCatalogText.text("Open insight detail")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
                 }
@@ -481,14 +490,38 @@ struct MoneyMapNodeFullDetailView: View {
                     .trim(from: 0, to: pct / 100)
                     .stroke(node.accentColor, style: StrokeStyle(lineWidth: 10, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                Text("\(Int(pct))%")
+                Text(
+                    BuxLocalizedString.format(
+                        "%lld%%",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int(pct)
+                    )
+                )
                     .font(.system(size: 18, weight: .black, design: .rounded))
             }
             .frame(width: 88, height: 88)
             VStack(alignment: .leading, spacing: 6) {
-                Text("Work \(String(format: "%.1f", BurnoutEngine.shared.currentStatus.workHours))h")
-                Text("Sleep \(String(format: "%.1f", BurnoutEngine.shared.currentStatus.sleepHours))h")
-                Text("Stress expenses: \(BurnoutEngine.shared.currentStatus.stressExpenseCount)")
+                Text(
+                    BuxLocalizedString.format(
+                        "Work %@h",
+                        locale: appSettingsManager.interfaceLocale,
+                        String(format: "%.1f", BurnoutEngine.shared.currentStatus.workHours)
+                    )
+                )
+                Text(
+                    BuxLocalizedString.format(
+                        "Sleep: %@ hrs",
+                        locale: appSettingsManager.interfaceLocale,
+                        String(format: "%.1f", BurnoutEngine.shared.currentStatus.sleepHours)
+                    )
+                )
+                Text(
+                    BuxLocalizedString.format(
+                        "Stress expenses: %lld",
+                        locale: appSettingsManager.interfaceLocale,
+                        BurnoutEngine.shared.currentStatus.stressExpenseCount
+                    )
+                )
             }
             .font(.system(size: 13, weight: .medium))
             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
@@ -497,13 +530,20 @@ struct MoneyMapNodeFullDetailView: View {
 
     private var insightPanel: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if let title = graph.topInsightTitle {
-                Text(title).font(.system(size: 15, weight: .bold))
-            }
-            if let detail = graph.topInsightDetail {
-                Text(detail)
+            if let insight = graph.topInsight {
+                Text(insight.localizedTitle(locale: appSettingsManager.interfaceLocale))
+                    .font(.system(size: 15, weight: .bold))
+                Text(insight.localizedDescription(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+            } else if let title = graph.topInsightTitle {
+                Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
+                    .font(.system(size: 15, weight: .bold))
+                if let detail = graph.topInsightDetail {
+                    Text(BuxCatalogLabel.string(detail, locale: appSettingsManager.interfaceLocale))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                }
             }
         }
     }

@@ -272,7 +272,7 @@ struct BuxDesignerHSBControls: View {
 
     private var hueSlider: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Hue")
+            BuxCatalogDynamicText(key: "Hue")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(.secondary)
             ZStack {

@@ -25,7 +25,7 @@ struct BuxCanvasShapeColorStrip: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Shape color")
+            BuxCatalogDynamicText(key: "Shape color")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(.secondary)
             ScrollView(.horizontal, showsIndicators: false) {

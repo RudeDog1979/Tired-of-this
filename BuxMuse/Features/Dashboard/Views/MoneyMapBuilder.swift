@@ -126,16 +126,17 @@ enum MoneyMapBuilder {
         invoices: [StudioInvoice] = [],
         format: (Decimal) -> String
     ) -> MoneyMapGraph {
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         let header = snapshot.header
         let summary = snapshot.summary
         let monthStart = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
         let scopedTxs = HustleWorkspaceFilter.filter(transactions) { $0.hustleId }
         let isPro = settings.studioMode == .pro
         let scopedProjects = HustleWorkspaceFilter.filter(projects) { $0.hustleId }
-        let scopeInsights = ScopeCreepInsightsEngine.generateInsights(projects: scopedProjects)
+        let scopeInsights = ScopeCreepInsightsEngine.generateInsights(projects: scopedProjects, locale: locale)
         let subs = transactions.filter { $0.isSubscriptionLike && $0.amount.value < 0 }
         let barterTxs = transactions.filter(\.isBarterExchange)
-        let workspaceBreakdown = workspaceTotals(scopedTxs, monthStart: monthStart)
+        let workspaceBreakdown = workspaceTotals(scopedTxs, monthStart: monthStart, locale: locale)
         let trendPoints = summary.trendPoints.isEmpty ? header.sparklinePoints : summary.trendPoints
 
         var nodes: [MoneyMapNode] = []
@@ -181,22 +182,25 @@ enum MoneyMapBuilder {
             place(
                 id: "categories",
                 kind: .categories,
-                title: "Categories",
+                title: MoneyMapL10n.string("Categories", locale: locale),
                 value: top.0,
-                subtitle: "\(summary.categoryBreakdown.count) lanes",
+                subtitle: MoneyMapL10n.format("%lld lanes", locale: locale, summary.categoryBreakdown.count),
                 weight: 0.55 + min(top.1 / max(summary.totalSpent, 1), 0.45),
                 accent: "purple",
                 icon: "chart.pie.fill",
                 detail: MoneyMapTerritoryDetail(
-                    explanation: "Where your money went this month — each lane is a spending category ranked by total.",
+                    explanation: MoneyMapL10n.string(
+                        "Where your money went this month — each lane is a spending category ranked by total.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("Top category", top.0),
-                        ("Top share", pctString(top.1, of: total)),
-                        ("Categories tracked", "\(summary.categoryBreakdown.count)")
+                        (MoneyMapL10n.string("Top category", locale: locale), top.0),
+                        (MoneyMapL10n.string("Top share", locale: locale), pctString(top.1, of: total)),
+                        (MoneyMapL10n.string("Categories tracked", locale: locale), "\(summary.categoryBreakdown.count)")
                     ],
                     breakdown: summary.categoryBreakdown,
                     deepLink: .expensesTab,
-                    deepLinkLabel: "Open Expenses →"
+                    deepLinkLabel: MoneyMapL10n.string("Open Expenses →", locale: locale)
                 )
             )
         }
@@ -206,20 +210,23 @@ enum MoneyMapBuilder {
             place(
                 id: "flow",
                 kind: .flow,
-                title: "Cash flow",
+                title: MoneyMapL10n.string("Cash flow", locale: locale),
                 value: delta >= 0 ? "+\(Int(delta))%" : "\(Int(delta))%",
-                subtitle: "vs last month",
+                subtitle: MoneyMapL10n.string("vs last month", locale: locale),
                 weight: 0.5 + min(abs(delta) / 100, 0.5),
                 accent: delta <= 0 ? "green" : "orange",
                 icon: "waveform.path.ecg",
                 detail: MoneyMapTerritoryDetail(
-                    explanation: delta <= 0
-                        ? "Spending is cooling compared to last month — a healthier cash-flow lane."
-                        : "Spending is running hotter than last month — watch the trend line.",
+                    explanation: MoneyMapL10n.string(
+                        delta <= 0
+                            ? "Spending is cooling compared to last month — a healthier cash-flow lane."
+                            : "Spending is running hotter than last month — watch the trend line.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("This month", format(Decimal(header.totalSpent))),
-                        ("Vs last month", delta >= 0 ? "+\(Int(delta))%" : "\(Int(delta))%"),
-                        ("Transactions", "\(header.monthlyTransactionCount)")
+                        (MoneyMapL10n.string("This month", locale: locale), format(Decimal(header.totalSpent))),
+                        (MoneyMapL10n.string("Vs last month", locale: locale), delta >= 0 ? "+\(Int(delta))%" : "\(Int(delta))%"),
+                        (MoneyMapL10n.string("Transactions", locale: locale), "\(header.monthlyTransactionCount)")
                     ],
                     sparkline: trendPoints
                 )
@@ -237,23 +244,26 @@ enum MoneyMapBuilder {
             place(
                 id: "subscriptions",
                 kind: .subscriptions,
-                title: "Subscriptions",
+                title: MoneyMapL10n.string("Subscriptions", locale: locale),
                 value: "\(subs.count)",
-                subtitle: "recurring lanes",
+                subtitle: MoneyMapL10n.string("recurring lanes", locale: locale),
                 weight: min(0.45 + Double(subs.count) / 20.0, 0.9),
                 accent: "orange",
                 icon: "repeat.circle.fill",
                 pro: isPro,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: "Recurring charges detected this month — subscriptions are their own territory on your map.",
+                    explanation: MoneyMapL10n.string(
+                        "Recurring charges detected this month — subscriptions are their own territory on your map.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("Active subs", "\(subs.count)"),
-                        ("Monthly total", format(subTotal)),
-                        ("Top sub", subBreakdown.first?.0 ?? "—")
+                        (MoneyMapL10n.string("Active subs", locale: locale), "\(subs.count)"),
+                        (MoneyMapL10n.string("Monthly total", locale: locale), format(subTotal)),
+                        (MoneyMapL10n.string("Top sub", locale: locale), subBreakdown.first?.0 ?? "—")
                     ],
                     breakdown: subBreakdown,
                     deepLink: .subscriptionHub,
-                    deepLinkLabel: "Open Subscription Hub →"
+                    deepLinkLabel: MoneyMapL10n.string("Open Subscription Hub →", locale: locale)
                 )
             )
         }
@@ -264,23 +274,26 @@ enum MoneyMapBuilder {
             place(
                 id: "merchants",
                 kind: .merchants,
-                title: "Merchants",
+                title: MoneyMapL10n.string("Merchants", locale: locale),
                 value: top.0,
-                subtitle: "top spend lane",
+                subtitle: MoneyMapL10n.string("top spend lane", locale: locale),
                 weight: 0.6,
                 accent: "blue",
                 icon: "storefront.fill",
                 pro: true,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: "Pro territory — see which merchants absorb the most spend this month.",
+                    explanation: MoneyMapL10n.string(
+                        "Pro territory — see which merchants absorb the most spend this month.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("Top merchant", top.0),
-                        ("Share of spend", pctString(top.1, of: total)),
-                        ("Merchants tracked", "\(summary.merchantBreakdown.count)")
+                        (MoneyMapL10n.string("Top merchant", locale: locale), top.0),
+                        (MoneyMapL10n.string("Share of spend", locale: locale), pctString(top.1, of: total)),
+                        (MoneyMapL10n.string("Merchants tracked", locale: locale), "\(summary.merchantBreakdown.count)")
                     ],
                     breakdown: summary.merchantBreakdown,
                     deepLink: .expensesTab,
-                    deepLinkLabel: "Review in Expenses →"
+                    deepLinkLabel: MoneyMapL10n.string("Review in Expenses →", locale: locale)
                 )
             )
         }
@@ -289,22 +302,25 @@ enum MoneyMapBuilder {
             place(
                 id: "workspace",
                 kind: .workspace,
-                title: "Workspaces",
+                title: MoneyMapL10n.string("Workspaces", locale: locale),
                 value: workspaceBreakdown[0].0,
-                subtitle: "\(workspaceBreakdown.count) territories",
+                subtitle: MoneyMapL10n.format("%lld territories", locale: locale, workspaceBreakdown.count),
                 weight: 0.6,
                 accent: "blue",
                 icon: "square.grid.2x2.fill",
                 detail: MoneyMapTerritoryDetail(
-                    explanation: "Side-Hustle Matrix splits spend across gigs, departments, or clients.",
+                    explanation: MoneyMapL10n.string(
+                        "Side-Hustle Matrix splits spend across gigs, departments, or clients.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("Leading workspace", workspaceBreakdown[0].0),
-                        ("Workspaces active", "\(workspaceBreakdown.count)"),
-                        ("Filter", HustleWorkspaceFilter.activeWorkspaceLabel() ?? "All")
+                        (MoneyMapL10n.string("Leading workspace", locale: locale), workspaceBreakdown[0].0),
+                        (MoneyMapL10n.string("Workspaces active", locale: locale), "\(workspaceBreakdown.count)"),
+                        (MoneyMapL10n.string("Filter", locale: locale), HustleWorkspaceFilter.activeWorkspaceLabel() ?? MoneyMapL10n.string("All", locale: locale))
                     ],
                     breakdown: workspaceBreakdown,
                     deepLink: .studioSettings,
-                    deepLinkLabel: "Studio → Workspaces →"
+                    deepLinkLabel: MoneyMapL10n.string("Studio → Workspaces →", locale: locale)
                 )
             )
         }
@@ -313,21 +329,24 @@ enum MoneyMapBuilder {
             place(
                 id: "cash",
                 kind: .cash,
-                title: "Cash drawer",
+                title: MoneyMapL10n.string("Cash drawer", locale: locale),
                 value: settings.primaryLocalCurrency,
-                subtitle: "\(Int(settings.cashLocalBalanceValue)) local",
+                subtitle: MoneyMapL10n.format("%lld local", locale: locale, Int(settings.cashLocalBalanceValue)),
                 weight: 0.55,
                 accent: "green",
                 icon: "banknote.fill",
                 detail: MoneyMapTerritoryDetail(
-                    explanation: "Dual Cash Drawer tracks physical local currency alongside your digital ledger.",
+                    explanation: MoneyMapL10n.string(
+                        "Dual Cash Drawer tracks physical local currency alongside your digital ledger.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("Local (\(settings.primaryLocalCurrency))", String(format: "%.0f", settings.cashLocalBalanceValue)),
-                        ("Trading (\(settings.secondaryTradingCurrency))", String(format: "%.0f", settings.cashSecondaryBalanceValue)),
-                        ("Status", settings.dualCashDrawerEnabled ? "Active" : "Off")
+                        (MoneyMapL10n.format("Local (%@)", locale: locale, settings.primaryLocalCurrency), String(format: "%.0f", settings.cashLocalBalanceValue)),
+                        (MoneyMapL10n.format("Trading (%@)", locale: locale, settings.secondaryTradingCurrency), String(format: "%.0f", settings.cashSecondaryBalanceValue)),
+                        (MoneyMapL10n.string("Status", locale: locale), settings.dualCashDrawerEnabled ? MoneyMapL10n.string("Active", locale: locale) : MoneyMapL10n.string("Off", locale: locale))
                     ],
                     deepLink: .studioSettings,
-                    deepLinkLabel: "Studio → Cash & Barter →"
+                    deepLinkLabel: MoneyMapL10n.string("Studio → Cash & Barter →", locale: locale)
                 )
             )
         }
@@ -343,31 +362,34 @@ enum MoneyMapBuilder {
             place(
                 id: "barter",
                 kind: .barter,
-                title: "Barter",
+                title: MoneyMapL10n.string("Barter", locale: locale),
                 value: "\(barterTxs.count)",
-                subtitle: "trade exchanges",
+                subtitle: MoneyMapL10n.string("trade exchanges", locale: locale),
                 weight: barterTxs.isEmpty ? 0.4 : 0.7,
                 accent: "orange",
                 icon: "arrow.left.arrow.right.circle.fill",
                 pro: isPro,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: barterTxs.isEmpty
-                        ? "Log non-cash trades here — they appear as their own map lane when you record exchanges."
-                        : "Non-cash exchanges logged separately from cash spend for your records.",
+                    explanation: MoneyMapL10n.string(
+                        barterTxs.isEmpty
+                            ? "Log non-cash trades here — they appear as their own map lane when you record exchanges."
+                            : "Non-cash exchanges logged separately from cash spend for your records.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("Trades logged", "\(barterTxs.count)"),
-                        ("Est. value", barterValue > 0 ? format(barterValue) : "Add values when logging"),
-                        ("Latest", barterBreakdown.first?.0 ?? "—")
+                        (MoneyMapL10n.string("Trades logged", locale: locale), "\(barterTxs.count)"),
+                        (MoneyMapL10n.string("Est. value", locale: locale), barterValue > 0 ? format(barterValue) : MoneyMapL10n.string("Add values when logging", locale: locale)),
+                        (MoneyMapL10n.string("Latest", locale: locale), barterBreakdown.first?.0 ?? "—")
                     ],
                     breakdown: barterBreakdown,
                     deepLink: .studioSettings,
-                    deepLinkLabel: "Studio → Cash & Barter →"
+                    deepLinkLabel: MoneyMapL10n.string("Studio → Cash & Barter →", locale: locale)
                 )
             )
         }
 
         if settings.paymentSourceTrackingEnabled {
-            let paymentInsight = PaymentSourceInsightsEngine.generateInsights(transactions: transactions).first
+            let paymentInsight = PaymentSourceInsightsEngine.generateInsights(transactions: transactions, locale: locale).first
             let tagged = transactions.filter { $0.amount.value < 0 && !($0.paymentMethod?.isEmpty ?? true) }
             var creditTotal = 0.0
             var bnplTotal = 0.0
@@ -383,27 +405,30 @@ enum MoneyMapBuilder {
             place(
                 id: "payments",
                 kind: .payments,
-                title: "Credit & BNPL",
-                value: paymentInsight?.value ?? "\(tagged.count) tagged",
-                subtitle: paymentInsight?.title ?? "payment lanes",
+                title: MoneyMapL10n.string("Credit & BNPL", locale: locale),
+                value: paymentInsight?.localizedValue(locale: locale) ?? MoneyMapL10n.format("%lld tagged", locale: locale, tagged.count),
+                subtitle: paymentInsight?.localizedDescription(locale: locale) ?? MoneyMapL10n.string("payment lanes", locale: locale),
                 weight: 0.5,
                 accent: "orange",
                 icon: "creditcard.trianglebadge.exclamationmark",
                 ring: 0,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: paymentInsight?.description
-                        ?? "Tag expenses with payment methods to see credit vs BNPL concentration.",
+                    explanation: paymentInsight?.localizedDescription(locale: locale)
+                        ?? MoneyMapL10n.string(
+                            "Tag expenses with payment methods to see credit vs BNPL concentration.",
+                            locale: locale
+                        ),
                     metricLines: [
-                        ("Tagged expenses", "\(tagged.count)"),
-                        ("Credit volume", format(Decimal(creditTotal))),
-                        ("BNPL volume", format(Decimal(bnplTotal)))
+                        (MoneyMapL10n.string("Tagged expenses", locale: locale), "\(tagged.count)"),
+                        (MoneyMapL10n.string("Credit volume", locale: locale), format(Decimal(creditTotal))),
+                        (MoneyMapL10n.string("BNPL volume", locale: locale), format(Decimal(bnplTotal)))
                     ],
                     breakdown: [
-                        ("Credit & store credit", creditTotal),
-                        ("Buy now, pay later", bnplTotal)
+                        (MoneyMapL10n.string("Credit & store credit", locale: locale), creditTotal),
+                        (MoneyMapL10n.string("Buy now, pay later", locale: locale), bnplTotal)
                     ].filter { $0.1 > 0 },
                     deepLink: .paymentSettings,
-                    deepLinkLabel: "Settings → Payment Sources →"
+                    deepLinkLabel: MoneyMapL10n.string("Settings → Payment Sources →", locale: locale)
                 )
             )
         }
@@ -414,26 +439,29 @@ enum MoneyMapBuilder {
             place(
                 id: "energy",
                 kind: .energy,
-                title: "Energy",
+                title: MoneyMapL10n.string("Energy", locale: locale),
                 value: "\(Int(pct))%",
-                subtitle: "creative fuel",
+                subtitle: MoneyMapL10n.string("creative fuel", locale: locale),
                 weight: pct / 100,
                 accent: pct > 45 ? "mint" : "orange",
                 icon: "bolt.heart.fill",
                 ring: 0,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: pct > 45
-                        ? "Creative energy is holding — workload and rest are in a workable balance."
-                        : "Energy is running low — stress expenses and long hours may be draining your fuel.",
+                    explanation: MoneyMapL10n.string(
+                        pct > 45
+                            ? "Creative energy is holding — workload and rest are in a workable balance."
+                            : "Energy is running low — stress expenses and long hours may be draining your fuel.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("Creative energy", "\(Int(pct))%"),
-                        ("Work hours", String(format: "%.1fh", status.workHours)),
-                        ("Sleep hours", String(format: "%.1fh", status.sleepHours)),
-                        ("Stress expenses", "\(status.stressExpenseCount)")
+                        (MoneyMapL10n.string("Creative energy", locale: locale), "\(Int(pct))%"),
+                        (MoneyMapL10n.string("Work hours", locale: locale), String(format: "%.1fh", status.workHours)),
+                        (MoneyMapL10n.string("Sleep hours", locale: locale), String(format: "%.1fh", status.sleepHours)),
+                        (MoneyMapL10n.string("Stress expenses", locale: locale), "\(status.stressExpenseCount)")
                     ],
                     sparkline: [status.workHours, status.sleepHours, Double(status.stressExpenseCount)],
                     deepLink: .studioSettings,
-                    deepLinkLabel: "Studio → Workload & Energy →"
+                    deepLinkLabel: MoneyMapL10n.string("Studio → Workload & Energy →", locale: locale)
                 )
             )
         }
@@ -442,22 +470,25 @@ enum MoneyMapBuilder {
             place(
                 id: "scope",
                 kind: .scope,
-                title: "Scope radar",
+                title: MoneyMapL10n.string("Scope radar", locale: locale),
                 value: "\(scopeInsights.count)",
-                subtitle: "alerts active",
+                subtitle: MoneyMapL10n.string("alerts active", locale: locale),
                 weight: 0.85,
                 accent: "red",
                 icon: "scope",
                 ring: 0,
                 pro: true,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: "Pro scope guardrails — projects near or over budgeted hours light up on the map.",
-                    metricLines: scopeInsights.prefix(3).map { ($0.value, $0.description) },
+                    explanation: MoneyMapL10n.string(
+                        "Pro scope guardrails — projects near or over budgeted hours light up on the map.",
+                        locale: locale
+                    ),
+                    metricLines: scopeInsights.prefix(3).map { ($0.localizedValue(locale: locale), $0.localizedDescription(locale: locale)) },
                     breakdown: scopeInsights.map { insight in
-                        (insight.value, insight.severity == .high ? 1.0 : 0.6)
+                        (insight.localizedValue(locale: locale), insight.severity == .high ? 1.0 : 0.6)
                     },
                     deepLink: .studioTab,
-                    deepLinkLabel: "Open Studio → Scope →"
+                    deepLinkLabel: MoneyMapL10n.string("Open Studio → Scope →", locale: locale)
                 )
             )
         }
@@ -466,22 +497,22 @@ enum MoneyMapBuilder {
             place(
                 id: "insight",
                 kind: .insight,
-                title: "Top insight",
-                value: top.value,
-                subtitle: top.title,
+                title: MoneyMapL10n.string("Top insight", locale: locale),
+                value: top.localizedValue(locale: locale),
+                subtitle: top.localizedTitle(locale: locale),
                 weight: severityWeight(top.severity),
                 accent: top.accentColorName,
                 icon: top.systemIcon,
                 ring: 0,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: top.fullExplanation,
+                    explanation: top.localizedFullExplanation(locale: locale),
                     metricLines: [
-                        ("Signal", top.title),
-                        ("Impact / mo", InsightMoneyFormat.format(top.impactMonthly)),
-                        ("Severity", top.severity.rawValue.capitalized)
+                        (MoneyMapL10n.string("Signal", locale: locale), top.localizedTitle(locale: locale)),
+                        (MoneyMapL10n.string("Impact / mo", locale: locale), InsightMoneyFormat.format(top.impactMonthly)),
+                        (MoneyMapL10n.string("Severity", locale: locale), top.severity.localizedDisplayName(locale: locale))
                     ],
                     deepLink: .insightsPill,
-                    deepLinkLabel: "Open Insights pill →"
+                    deepLinkLabel: MoneyMapL10n.string("Open Insights pill →", locale: locale)
                 )
             )
         } else if featureStrips.contains(where: \.hasData) {
@@ -489,18 +520,21 @@ enum MoneyMapBuilder {
             place(
                 id: "insight",
                 kind: .insight,
-                title: "Signals",
+                title: MoneyMapL10n.string("Signals", locale: locale),
                 value: "\(live.count)",
-                subtitle: "live strips",
+                subtitle: MoneyMapL10n.string("live strips", locale: locale),
                 weight: 0.5,
                 accent: "orange",
                 icon: "sparkles",
                 ring: 0,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: "Live feature strips are pulsing — each one connects a BuxMuse tool to real data.",
-                    metricLines: live.prefix(4).map { ($0.title, $0.value) },
+                    explanation: MoneyMapL10n.string(
+                        "Live feature strips are pulsing — each one connects a BuxMuse tool to real data.",
+                        locale: locale
+                    ),
+                    metricLines: live.prefix(4).map { ($0.localizedTitle(locale: locale), $0.value) },
                     deepLink: .insightsPill,
-                    deepLinkLabel: "Open Insights pill →"
+                    deepLinkLabel: MoneyMapL10n.string("Open Insights pill →", locale: locale)
                 )
             )
         }
@@ -512,24 +546,27 @@ enum MoneyMapBuilder {
             place(
                 id: "studio",
                 kind: .studio,
-                title: "Studio",
+                title: MoneyMapL10n.string("Studio", locale: locale),
                 value: format(monthSpend),
-                subtitle: HustleWorkspaceFilter.activeWorkspaceLabel() ?? "All workspaces",
+                subtitle: HustleWorkspaceFilter.activeWorkspaceLabel() ?? MoneyMapL10n.string("All workspaces", locale: locale),
                 weight: 0.65,
                 accent: "purple",
                 icon: "briefcase.fill",
                 ring: 0,
                 detail: MoneyMapTerritoryDetail(
-                    explanation: "Studio workspace spend this month — client work, projects, and creative ops.",
+                    explanation: MoneyMapL10n.string(
+                        "Studio workspace spend this month — client work, projects, and creative ops.",
+                        locale: locale
+                    ),
                     metricLines: [
-                        ("Month spend", format(monthSpend)),
-                        ("Active projects", "\(scopedProjects.count)"),
-                        ("Clients", "\(Set(scopedProjects.map(\.clientId)).count)"),
-                        ("Workspace", HustleWorkspaceFilter.activeWorkspaceLabel() ?? "All")
+                        (MoneyMapL10n.string("Month spend", locale: locale), format(monthSpend)),
+                        (MoneyMapL10n.string("Active projects", locale: locale), "\(scopedProjects.count)"),
+                        (MoneyMapL10n.string("Clients", locale: locale), "\(Set(scopedProjects.map(\.clientId)).count)"),
+                        (MoneyMapL10n.string("Workspace", locale: locale), HustleWorkspaceFilter.activeWorkspaceLabel() ?? MoneyMapL10n.string("All", locale: locale))
                     ],
                     breakdown: workspaceBreakdown,
                     deepLink: .studioTab,
-                    deepLinkLabel: "Open Studio →"
+                    deepLinkLabel: MoneyMapL10n.string("Open Studio →", locale: locale)
                 )
             )
         }
@@ -541,25 +578,28 @@ enum MoneyMapBuilder {
                 place(
                     id: "invoices",
                     kind: .invoices,
-                    title: "Invoices",
+                    title: MoneyMapL10n.string("Invoices", locale: locale),
                     value: "\(openInvoices.count)",
-                    subtitle: "awaiting payment",
+                    subtitle: MoneyMapL10n.string("awaiting payment", locale: locale),
                     weight: 0.7,
                     accent: "green",
                     icon: "doc.text.fill",
                     pro: true,
                     detail: MoneyMapTerritoryDetail(
-                        explanation: "Open invoices waiting on client payment — cash still in transit.",
+                        explanation: MoneyMapL10n.string(
+                            "Open invoices waiting on client payment — cash still in transit.",
+                            locale: locale
+                        ),
                         metricLines: [
-                            ("Outstanding", format(outstanding)),
-                            ("Open count", "\(openInvoices.count)"),
-                            ("Overdue", "\(openInvoices.filter { $0.status == .overdue }.count)")
+                            (MoneyMapL10n.string("Outstanding", locale: locale), format(outstanding)),
+                            (MoneyMapL10n.string("Open count", locale: locale), "\(openInvoices.count)"),
+                            (MoneyMapL10n.string("Overdue", locale: locale), "\(openInvoices.filter { $0.status == .overdue }.count)")
                         ],
                         breakdown: openInvoices.prefix(6).map {
-                            ($0.invoiceNumber.isEmpty ? "Invoice" : $0.invoiceNumber, NSDecimalNumber(decimal: $0.total).doubleValue)
+                            ($0.invoiceNumber.isEmpty ? MoneyMapL10n.string("Invoice", locale: locale) : $0.invoiceNumber, NSDecimalNumber(decimal: $0.total).doubleValue)
                         },
                         deepLink: .studioTab,
-                        deepLinkLabel: "Studio → Invoices →"
+                        deepLinkLabel: MoneyMapL10n.string("Studio → Invoices →", locale: locale)
                     )
                 )
             }
@@ -569,22 +609,25 @@ enum MoneyMapBuilder {
                 place(
                     id: "mileage",
                     kind: .mileage,
-                    title: "Mileage",
+                    title: MoneyMapL10n.string("Mileage", locale: locale),
                     value: String(format: "%.2f", settings.mileageRatePerUnitValue),
-                    subtitle: "rate / unit",
+                    subtitle: MoneyMapL10n.string("rate / unit", locale: locale),
                     weight: 0.45,
                     accent: "blue",
                     icon: "car.fill",
                     pro: true,
                     detail: MoneyMapTerritoryDetail(
-                        explanation: "Mileage rate for deductible travel — tied to Studio projects and location logging.",
+                        explanation: MoneyMapL10n.string(
+                            "Mileage rate for deductible travel — tied to Studio projects and location logging.",
+                            locale: locale
+                        ),
                         metricLines: [
-                            ("Rate / unit", String(format: "%.2f", settings.mileageRatePerUnitValue)),
-                            ("Unit", "mile"),
-                            ("Projects w/ time", "\(mileageProjects)")
+                            (MoneyMapL10n.string("Rate / unit", locale: locale), String(format: "%.2f", settings.mileageRatePerUnitValue)),
+                            (MoneyMapL10n.string("Unit", locale: locale), MoneyMapL10n.string("mile", locale: locale)),
+                            (MoneyMapL10n.string("Projects w/ time", locale: locale), "\(mileageProjects)")
                         ],
                         deepLink: .studioSettings,
-                        deepLinkLabel: "Studio → Mileage →"
+                        deepLinkLabel: MoneyMapL10n.string("Studio → Mileage →", locale: locale)
                     )
                 )
             }
@@ -593,9 +636,14 @@ enum MoneyMapBuilder {
         let proCount = nodes.filter(\.isProTerritory).count
 
         return MoneyMapGraph(
-            centerTitle: "Money Map",
+            centerTitle: MoneyMapL10n.string("Money Map", locale: locale),
             centerValue: format(Decimal(header.totalSpent)),
-            centerSubtitle: "\(header.monthlyTransactionCount) moves · \(nodes.count) territories",
+            centerSubtitle: MoneyMapL10n.format(
+                "%lld moves · %lld territories",
+                locale: locale,
+                header.monthlyTransactionCount,
+                nodes.count
+            ),
             nodes: nodes,
             categoryBreakdown: summary.categoryBreakdown,
             merchantBreakdown: summary.merchantBreakdown,
@@ -611,7 +659,7 @@ enum MoneyMapBuilder {
         )
     }
 
-    private static func workspaceTotals(_ scopedTxs: [Transaction], monthStart: Date) -> [(String, Double)] {
+    private static func workspaceTotals(_ scopedTxs: [Transaction], monthStart: Date, locale: Locale) -> [(String, Double)] {
         var totals: [String: Double] = [:]
         for tx in scopedTxs where tx.date >= monthStart && tx.amount.value < 0 {
             let label: String
@@ -619,7 +667,7 @@ enum MoneyMapBuilder {
                let hustle = HustleManager.shared.hustles.first(where: { $0.id == id }) {
                 label = hustle.name
             } else {
-                label = "Unassigned"
+                label = MoneyMapL10n.string("Unassigned", locale: locale)
             }
             totals[label, default: 0] += abs(NSDecimalNumber(decimal: tx.amount.value).doubleValue)
         }

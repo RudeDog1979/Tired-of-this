@@ -1,0 +1,558 @@
+{
+  "%": {
+    "es-419": "%",
+    "es-ES": "%"
+  },
+  "%@ %@": {
+    "es-419": "%1$@ %2$@",
+    "es-ES": "%1$@ %2$@"
+  },
+  "%@ %@ · %@": {
+    "es-419": "%1$@ · %2$@",
+    "es-ES": "%1$@ · %2$@"
+  },
+  "%@ (%@)": {
+    "es-419": "%1$@ (%2$@)",
+    "es-ES": "%1$@ (%2$@)"
+  },
+  "%@ / %@h": {
+    "es-419": "%1$@ / %2$@h",
+    "es-ES": "%1$@ / %2$@h"
+  },
+  "%@ Cash": {
+    "es-419": "Efectivo %@",
+    "es-ES": "Efectivo %@"
+  },
+  "%@ Portfolio": {
+    "es-419": "Portafolio %@",
+    "es-ES": "Cartera %@"
+  },
+  "%@ Wallet": {
+    "es-419": "Billetera %@",
+    "es-ES": "Monedero %@"
+  },
+  "%@ color": {
+    "es-419": "Color %@",
+    "es-ES": "Color %@"
+  },
+  "%@ hours": {
+    "es-419": "%@ horas",
+    "es-ES": "%@ horas"
+  },
+  "%@ of %@": {
+    "es-419": "%1$@ de %2$@",
+    "es-ES": "%1$@ de %2$@"
+  },
+  "%@ · %@": {
+    "es-419": "%1$@ · %2$@",
+    "es-ES": "%1$@ · %2$@"
+  },
+  "%@ · %@ (%@)": {
+    "es-419": "%1$@ · %2$@ (%3$@)",
+    "es-ES": "%1$@ · %2$@ (%3$@)"
+  },
+  "%@ · %lldd": {
+    "es-419": "%1$@ · %2$lldd",
+    "es-ES": "%1$@ · %2$lldd"
+  },
+  "%@ · typical %@": {
+    "es-419": "%1$@ · típico %2$@",
+    "es-ES": "%1$@ · típico %2$@"
+  },
+  "%@ — %@%%": {
+    "es-419": "%1$@ — %2$@%%",
+    "es-ES": "%1$@ — %2$@%%"
+  },
+  "%@%lld°": {
+    "es-419": "%1$@%2$lld°",
+    "es-ES": "%1$@%2$lld°"
+  },
+  "%@, open color picker": {
+    "es-419": "%@, abrir selector de color",
+    "es-ES": "%@, abrir selector de color"
+  },
+  "%@. %@. %lld percent.": {
+    "es-419": "%1$@. %2$@. %3$lld por ciento.",
+    "es-ES": "%1$@. %2$@. %3$lld por ciento."
+  },
+  "%@/%@h": {
+    "es-419": "%1$@/%2$@h",
+    "es-ES": "%1$@/%2$@h"
+  },
+  "%@/hr": {
+    "es-419": "%@/h",
+    "es-ES": "%@/h"
+  },
+  "%@:": {
+    "es-419": "%@:",
+    "es-ES": "%@:"
+  },
+  "%lld": {
+    "es-419": "%lld",
+    "es-ES": "%lld"
+  },
+  "%lld Active • %lld%% of total": {
+    "es-419": "%1$lld activos • %2$lld%% del total",
+    "es-ES": "%1$lld activos • %2$lld%% del total"
+  },
+  "%lld Categories · Target: %@": {
+    "es-419": "%1$lld categorías · Meta: %2$@",
+    "es-ES": "%1$lld categorías · Objetivo: %2$@"
+  },
+  "%lld active · %lld overrun risk": {
+    "es-419": "%1$lld activos · %2$lld en riesgo de exceso",
+    "es-ES": "%1$lld activos · %2$lld en riesgo de exceso"
+  },
+  "%lld countries": {
+    "es-419": "%lld países",
+    "es-ES": "%lld países"
+  },
+  "%lld days": {
+    "es-419": "%lld días",
+    "es-ES": "%lld días"
+  },
+  "%lld designs": {
+    "es-419": "%lld diseños",
+    "es-ES": "%lld diseños"
+  },
+  "%lld h": {
+    "es-419": "%lld h",
+    "es-ES": "%lld h"
+  },
+  "%lld invoice(s)": {
+    "es-419": "%lld factura(s)",
+    "es-ES": "%lld factura(s)"
+  },
+  "%lld items": {
+    "es-419": "%lld ítems",
+    "es-ES": "%lld ítems"
+  },
+  "%lld m": {
+    "es-419": "%lld m",
+    "es-ES": "%lld m"
+  },
+  "%lld milestone(s)": {
+    "es-419": "%lld hito(s)",
+    "es-ES": "%lld hito(s)"
+  },
+  "%lld open": {
+    "es-419": "%lld abiertas",
+    "es-ES": "%lld abiertas"
+  },
+  "%lld paid": {
+    "es-419": "%lld pagadas",
+    "es-ES": "%lld pagadas"
+  },
+  "%lld result%@": {
+    "es-419": "%1$lld resultado%2$@",
+    "es-ES": "%1$lld resultado%2$@"
+  },
+  "%lld time entries logged": {
+    "es-419": "%lld entradas de tiempo registradas",
+    "es-ES": "%lld entradas de tiempo registradas"
+  },
+  "%lld total · %lld this month": {
+    "es-419": "%1$lld total · %2$lld este mes",
+    "es-ES": "%1$lld total · %2$lld este mes"
+  },
+  "%lld transactions": {
+    "es-419": "%lld transacciones",
+    "es-ES": "%lld transacciones"
+  },
+  "%lld%%": {
+    "es-419": "%lld%%",
+    "es-ES": "%lld%%"
+  },
+  "%lld/10": {
+    "es-419": "%lld/10",
+    "es-ES": "%lld/10"
+  },
+  "%lld/100": {
+    "es-419": "%lld/100",
+    "es-ES": "%lld/100"
+  },
+  "%lldd": {
+    "es-419": "%lldd",
+    "es-ES": "%lldd"
+  },
+  "%lldh": {
+    "es-419": "%lldh",
+    "es-ES": "%lldh"
+  },
+  "%lldm": {
+    "es-419": "%lldm",
+    "es-ES": "%lldm"
+  },
+  "+%@": {
+    "es-419": "+%@",
+    "es-ES": "+%@"
+  },
+  "+%@%%": {
+    "es-419": "+%@%%",
+    "es-ES": "+%@%%"
+  },
+  "+%lld more": {
+    "es-419": "+%lld más",
+    "es-ES": "+%lld más"
+  },
+  "6-Month Emergency target: %@": {
+    "es-419": "Meta de emergencia 6 meses: %@",
+    "es-ES": "Meta de emergencia 6 meses: %@"
+  },
+  "Add %@": {
+    "es-419": "Agregar %@",
+    "es-ES": "Añadir %@"
+  },
+  "Advance left: %@": {
+    "es-419": "Anticipo restante: %@",
+    "es-ES": "Anticipo restante: %@"
+  },
+  "After %@": {
+    "es-419": "Después de %@",
+    "es-ES": "Después de %@"
+  },
+  "After: %@": {
+    "es-419": "Después: %@",
+    "es-ES": "Después: %@"
+  },
+  "Agreed %@": {
+    "es-419": "Acordado %@",
+    "es-ES": "Acordado %@"
+  },
+  "Almost there — about %lld min left on your plan.": {
+    "es-419": "Casi listo — unos %lld min restantes en tu plan.",
+    "es-ES": "Casi listo — unos %lld min restantes en tu plan."
+  },
+  "Already logged: %@": {
+    "es-419": "Ya registrado: %@",
+    "es-ES": "Ya registrado: %@"
+  },
+  "Anxiety count: %lld": {
+    "es-419": "Conteo de ansiedad: %lld",
+    "es-ES": "Conteo de ansiedad: %lld"
+  },
+  "Avg. time to payment: %lld days": {
+    "es-419": "Tiempo prom. al pago: %lld días",
+    "es-ES": "Tiempo prom. al pago: %lld días"
+  },
+  "Cash (%@)": {
+    "es-419": "Efectivo (%@)",
+    "es-ES": "Efectivo (%@)"
+  },
+  "Current %@ Cash in Wallet": {
+    "es-419": "Efectivo %@ actual en billetera",
+    "es-ES": "Efectivo %@ actual en monedero"
+  },
+  "Deductible: %@": {
+    "es-419": "Deducible: %@",
+    "es-ES": "Deducible: %@"
+  },
+  "Default tax rate %": {
+    "es-419": "Tasa impositiva predet. %",
+    "es-ES": "Tasa impositiva predet. %"
+  },
+  "Delay Risk: %@": {
+    "es-419": "Riesgo de demora: %@",
+    "es-ES": "Riesgo de demora: %@"
+  },
+  "Delete %lld": {
+    "es-419": "Eliminar %lld",
+    "es-ES": "Eliminar %lld"
+  },
+  "Due: %@": {
+    "es-419": "Vence: %@",
+    "es-ES": "Vence: %@"
+  },
+  "ESTIMATED VALUE (%@)": {
+    "es-419": "VALOR ESTIMADO (%@)",
+    "es-ES": "VALOR ESTIMADO (%@)"
+  },
+  "Effective rate %lld%% on recorded income": {
+    "es-419": "Tasa efectiva %lld%% sobre ingresos registrados",
+    "es-ES": "Tasa efectiva %lld%% sobre ingresos registrados"
+  },
+  "Ended %@": {
+    "es-419": "Finalizó %@",
+    "es-ES": "Finalizó %@"
+  },
+  "Est. allowance: %@": {
+    "es-419": "Asignación est.: %@",
+    "es-ES": "Asignación est.: %@"
+  },
+  "Estimated runway based on your %@ monthly burn rate.": {
+    "es-419": "Pista estimada según tu quema mensual de %@.",
+    "es-ES": "Pista estimada según tu quema mensual de %@."
+  },
+  "Fill from %@": {
+    "es-419": "Rellenar desde %@",
+    "es-ES": "Rellenar desde %@"
+  },
+  "Fix: %@": {
+    "es-419": "Corregir: %@",
+    "es-ES": "Corregir: %@"
+  },
+  "Forecast: %@ Risk": {
+    "es-419": "Pronóstico: riesgo %@",
+    "es-ES": "Pronóstico: riesgo %@"
+  },
+  "Header: %@ · Background: %@ · Template: %@": {
+    "es-419": "Encabezado: %1$@ · Fondo: %2$@ · Plantilla: %3$@",
+    "es-ES": "Encabezado: %1$@ · Fondo: %2$@ · Plantilla: %3$@"
+  },
+  "Health Score: %lld%%": {
+    "es-419": "Puntaje de salud: %lld%%",
+    "es-ES": "Puntaje de salud: %lld%%"
+  },
+  "Health · %@": {
+    "es-419": "Salud · %@",
+    "es-ES": "Salud · %@"
+  },
+  "Health: %lld%%": {
+    "es-419": "Salud: %lld%%",
+    "es-ES": "Salud: %lld%%"
+  },
+  "INCOME & DEDUCTIONS (%@)": {
+    "es-419": "INGRESOS Y DEDUCCIONES (%@)",
+    "es-ES": "INGRESOS Y DEDUCCIONES (%@)"
+  },
+  "Impact on '%@'": {
+    "es-419": "Impacto en '%@'",
+    "es-ES": "Impacto en '%@'"
+  },
+  "Irregular: %@": {
+    "es-419": "Irregular: %@",
+    "es-ES": "Irregular: %@"
+  },
+  "Issued: %@": {
+    "es-419": "Emitido: %@",
+    "es-ES": "Emitido: %@"
+  },
+  "LTV %@ · Health %lld%%": {
+    "es-419": "LTV %1$@ · Salud %2$lld%%",
+    "es-ES": "LTV %1$@ · Salud %2$lld%%"
+  },
+  "LTV: %@": {
+    "es-419": "LTV: %@",
+    "es-ES": "LTV: %@"
+  },
+  "Lap %lld": {
+    "es-419": "Vuelta %lld",
+    "es-ES": "Vuelta %lld"
+  },
+  "Last: %@": {
+    "es-419": "Último: %@",
+    "es-ES": "Último: %@"
+  },
+  "Late Risk Detected. Awaiting payment speed estimated at %lld days.": {
+    "es-419": "Riesgo de demora detectado. Pago estimado en %lld días.",
+    "es-ES": "Riesgo de demora detectado. Pago estimado en %lld días."
+  },
+  "Level %lld/10": {
+    "es-419": "Nivel %lld/10",
+    "es-ES": "Nivel %lld/10"
+  },
+  "Live Preview · %@": {
+    "es-419": "Vista previa · %@",
+    "es-ES": "Vista previa · %@"
+  },
+  "Local notification %lld day%@ before renewal.": {
+    "es-419": "Notificación local %1$lld día%2$@ antes de renovar.",
+    "es-ES": "Notificación local %1$lld día%2$@ antes de renovar."
+  },
+  "Log %@ and stop": {
+    "es-419": "Registrar %@ y detener",
+    "es-ES": "Registrar %@ y detener"
+  },
+  "Matching \"%@\"": {
+    "es-419": "Coincidencias con \"%@\"",
+    "es-ES": "Coincidencias con \"%@\""
+  },
+  "More colors for %@": {
+    "es-419": "Más colores para %@",
+    "es-ES": "Más colores para %@"
+  },
+  "Next Renewal: %@": {
+    "es-419": "Próxima renovación: %@",
+    "es-ES": "Próxima renovación: %@"
+  },
+  "Next due: %@ · %@": {
+    "es-419": "Próximo vencimiento: %1$@ · %2$@",
+    "es-ES": "Próximo vencimiento: %1$@ · %2$@"
+  },
+  "Paid %@": {
+    "es-419": "Pagado %@",
+    "es-ES": "Pagado %@"
+  },
+  "Payment Terms: %lld Days": {
+    "es-419": "Plazo de pago: %lld días",
+    "es-ES": "Plazo de pago: %lld días"
+  },
+  "Photos: %@": {
+    "es-419": "Fotos: %@",
+    "es-ES": "Fotos: %@"
+  },
+  "Planned time: %@": {
+    "es-419": "Tiempo planificado: %@",
+    "es-ES": "Tiempo planificado: %@"
+  },
+  "Preview: %@": {
+    "es-419": "Vista previa: %@",
+    "es-ES": "Vista previa: %@"
+  },
+  "Qty %@ · %@": {
+    "es-419": "Cant. %1$@ · %2$@",
+    "es-ES": "Cant. %1$@ · %2$@"
+  },
+  "Rate %": {
+    "es-419": "Tarifa %",
+    "es-ES": "Tarifa %"
+  },
+  "Recommended: %@": {
+    "es-419": "Recomendado: %@",
+    "es-ES": "Recomendado: %@"
+  },
+  "Reliability: %lld%%": {
+    "es-419": "Confiabilidad: %lld%%",
+    "es-ES": "Confiabilidad: %lld%%"
+  },
+  "Review %@ preset": {
+    "es-419": "Revisar preset %@",
+    "es-ES": "Revisar preset %@"
+  },
+  "Revisions: %lld/%lld": {
+    "es-419": "Revisiones: %1$lld/%2$lld",
+    "es-ES": "Revisiones: %1$lld/%2$lld"
+  },
+  "Runway %@": {
+    "es-419": "Pista %@",
+    "es-ES": "Pista %@"
+  },
+  "Same trip home — adds a second log with From ↔ To swapped (%@ mi each way).": {
+    "es-419": "Mismo viaje de vuelta — agrega un segundo registro con Origen ↔ Destino invertidos (%@ mi por tramo).",
+    "es-ES": "Mismo viaje de vuelta — añade un segundo registro con Origen ↔ Destino invertidos (%@ mi por tramo)."
+  },
+  "Save %@": {
+    "es-419": "Ahorra %@",
+    "es-ES": "Ahorra %@"
+  },
+  "Save %@/mo": {
+    "es-419": "Ahorra %@/mes",
+    "es-ES": "Ahorra %@/mes"
+  },
+  "Scale: %@": {
+    "es-419": "Escala: %@",
+    "es-ES": "Escala: %@"
+  },
+  "See all %lld designs": {
+    "es-419": "Ver los %lld diseños",
+    "es-ES": "Ver los %lld diseños"
+  },
+  "Shown as %@ · %@": {
+    "es-419": "Mostrado como %1$@ · %2$@",
+    "es-ES": "Mostrado como %1$@ · %2$@"
+  },
+  "Signed · %@": {
+    "es-419": "Firmado · %@",
+    "es-ES": "Firmado · %@"
+  },
+  "Sleep %@h": {
+    "es-419": "Sueño %@h",
+    "es-ES": "Sueño %@h"
+  },
+  "Sleep: %@ hrs": {
+    "es-419": "Sueño: %@ h",
+    "es-ES": "Sueño: %@ h"
+  },
+  "Spent %@": {
+    "es-419": "Gastado %@",
+    "es-ES": "Gastado %@"
+  },
+  "Status: %@": {
+    "es-419": "Estado: %@",
+    "es-ES": "Estado: %@"
+  },
+  "Stress expenses: %lld": {
+    "es-419": "Gastos por estrés: %lld",
+    "es-ES": "Gastos por estrés: %lld"
+  },
+  "Target: %@": {
+    "es-419": "Meta: %@",
+    "es-ES": "Objetivo: %@"
+  },
+  "Tax Health · %@ risk": {
+    "es-419": "Salud fiscal · riesgo %@",
+    "es-ES": "Salud fiscal · riesgo %@"
+  },
+  "Template: %@": {
+    "es-419": "Plantilla: %@",
+    "es-ES": "Plantilla: %@"
+  },
+  "Top: %@ (%@ projected profit)": {
+    "es-419": "Top: %1$@ (%2$@ ganancia proyectada)",
+    "es-ES": "Top: %1$@ (%2$@ beneficio proyectado)"
+  },
+  "Total spent (%@)": {
+    "es-419": "Total gastado (%@)",
+    "es-ES": "Total gastado (%@)"
+  },
+  "Total: %@": {
+    "es-419": "Total: %@",
+    "es-ES": "Total: %@"
+  },
+  "Updated %@": {
+    "es-419": "Actualizado %@",
+    "es-ES": "Actualizado %@"
+  },
+  "Use %@": {
+    "es-419": "Usar %@",
+    "es-ES": "Usar %@"
+  },
+  "Viewing: %@": {
+    "es-419": "Viendo: %@",
+    "es-ES": "Viendo: %@"
+  },
+  "Waiting %@": {
+    "es-419": "Esperando %@",
+    "es-ES": "Esperando %@"
+  },
+  "Waiting: %@": {
+    "es-419": "En espera: %@",
+    "es-ES": "En espera: %@"
+  },
+  "Weekly subs: %@": {
+    "es-419": "Suscripciones semanales: %@",
+    "es-ES": "Suscripciones semanales: %@"
+  },
+  "When paid: keep %@": {
+    "es-419": "Al pagar: conserva %@",
+    "es-ES": "Al pagar: conserva %@"
+  },
+  "Work %@h": {
+    "es-419": "Trabajo %@h",
+    "es-ES": "Trabajo %@h"
+  },
+  "Work logged: %@ hrs": {
+    "es-419": "Trabajo registrado: %@ h",
+    "es-ES": "Trabajo registrado: %@ h"
+  },
+  "Workload %@h vs project time %@h · Scope alerts %lld": {
+    "es-419": "Carga %1$@h vs proyecto %2$@h · Alertas de alcance %3$lld",
+    "es-ES": "Carga %1$@h vs proyecto %2$@h · Alertas de alcance %3$lld"
+  },
+  "Your recurring subscriptions account for roughly %@ of your overall spending. Taking advantage of multi-month prepayments could unlock up to 15%% in annual savings across active plans.": {
+    "es-419": "Tus suscripciones recurrentes representan ~%@ de tu gasto. Pagos anticipados multimes podrían ahorrarte hasta 15%% anual en planes activos.",
+    "es-ES": "Tus suscripciones recurrentes representan ~%@ de tu gasto. Pagos anticipados multimes podrían ahorrarte hasta 15%% anual en planes activos."
+  },
+  "~%@h to finish at current pace": {
+    "es-419": "~%@h para terminar al ritmo actual",
+    "es-ES": "~%@h para terminar al ritmo actual"
+  },
+  "↑ %@%% Increase": {
+    "es-419": "↑ %@%% aumento",
+    "es-ES": "↑ %@%% aumento"
+  },
+  "↓ %@%% Decrease": {
+    "es-419": "↓ %@%% disminución",
+    "es-ES": "↓ %@%% disminución"
+  }
+}

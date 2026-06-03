@@ -28,7 +28,7 @@ struct SubscriptionOpportunitiesView: View {
                         .font(.system(size: 20))
                         .foregroundColor(themeManager.current.accentColor)
 
-                    Text("Your subscriptions are fully optimized.")
+                    BuxCatalogText.text("Your subscriptions are fully optimized.")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(colorScheme == .dark ? .white.opacity(0.8) : .black.opacity(0.7))
 
@@ -88,7 +88,13 @@ struct SubscriptionOpportunitiesView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text("Save \(appSettingsManager.format(item.monthlySavings))/mo")
+                Text(
+                    BuxLocalizedString.format(
+                        "Save %@/mo",
+                        locale: appSettingsManager.interfaceLocale,
+                        appSettingsManager.format(item.monthlySavings)
+                    )
+                )
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.green)
                     .lineLimit(2)

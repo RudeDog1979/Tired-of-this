@@ -1,0 +1,2522 @@
+{
+  "14 Days": {
+    "es-419": "14 días",
+    "es-ES": "14 días"
+  },
+  "30 Days": {
+    "es-419": "30 días",
+    "es-ES": "30 días"
+  },
+  "60 Days": {
+    "es-419": "60 días",
+    "es-ES": "60 días"
+  },
+  "7 Days": {
+    "es-419": "7 días",
+    "es-ES": "7 días"
+  },
+  "A project is the job you track — fixed price or hourly, time log, expenses, and invoices.": {
+    "es-419": "Un proyecto es el trabajo que sigues — precio fijo o por hora, registro de tiempo, gastos y facturas.",
+    "es-ES": "Un proyecto es el trabajo que sigues — precio fijo o por hora, registro de tiempo, gastos y facturas."
+  },
+  "AFTER DEDUCTIONS": {
+    "es-419": "DESPUÉS DE LAS DEDUCCIONES",
+    "es-ES": "DESPUÉS DE LAS DEDUCCIONES"
+  },
+  "AGREEMENT": {
+    "es-419": "ACUERDO",
+    "es-ES": "ACUERDO"
+  },
+  "ALLOWANCE": {
+    "es-419": "PRESTACIÓN",
+    "es-ES": "PRESTACIÓN"
+  },
+  "Accent": {
+    "es-419": "Acento",
+    "es-ES": "Acento"
+  },
+  "Add": {
+    "es-419": "Agregar",
+    "es-ES": "Añadir"
+  },
+  "Add Client": {
+    "es-419": "Agregar cliente",
+    "es-ES": "Añadir cliente"
+  },
+  "Add Line Item": {
+    "es-419": "Agregar línea",
+    "es-ES": "Añadir línea"
+  },
+  "Add Project": {
+    "es-419": "Agregar proyecto",
+    "es-ES": "Añadir proyecto"
+  },
+  "Add Tax Rate": {
+    "es-419": "Agregar tasa de impuesto",
+    "es-ES": "Añadir tasa de impuesto"
+  },
+  "Add a client in Studio → Clients before sending this invoice.": {
+    "es-419": "Agrega un cliente en Studio → Clientes antes de enviar esta factura.",
+    "es-ES": "Añade un cliente en Studio → Clientes antes de enviar esta factura."
+  },
+  "Add a client, invoice, or receipt to start tracking tax, cashflow, and deductions.": {
+    "es-419": "Agregue un cliente, una factura o un recibo para comenzar a realizar un seguimiento de los impuestos, el flujo de caja y las deducciones.",
+    "es-ES": "Agregue un cliente, una factura o un recibo para comenzar a realizar un seguimiento de los impuestos, el flujo de caja y las deducciones."
+  },
+  "Add a project in Studio first": {
+    "es-419": "Agrega un proyecto en Studio primero",
+    "es-ES": "Añade un proyecto en Studio primero"
+  },
+  "Add at least one line item to save this invoice.": {
+    "es-419": "Agrega al menos una línea para guardar esta factura.",
+    "es-ES": "Añade al menos una línea para guardar esta factura."
+  },
+  "Add business mileage to include allowances in your deduction estimate.": {
+    "es-419": "Agrega millaje de negocio para incluir viáticos en tu estimación de deducciones.",
+    "es-ES": "Añade kilometraje de negocio para incluir viáticos en tu estimación de deducciones."
+  },
+  "Add client": {
+    "es-419": "Agregar cliente",
+    "es-ES": "Añadir cliente"
+  },
+  "Add delivery dates, client reviews, or phase handoffs. They appear on the project planner timeline.": {
+    "es-419": "Agregue fechas de entrega, reseñas de clientes o transferencias de fases. Aparecen en la línea de tiempo del planificador del proyecto.",
+    "es-ES": "Agregue fechas de entrega, reseñas de clientes o transferencias de fases. Aparecen en la línea de tiempo del planificador del proyecto."
+  },
+  "Add line item": {
+    "es-419": "Agregar línea",
+    "es-ES": "Añadir línea"
+  },
+  "Add logo": {
+    "es-419": "Agregar logo",
+    "es-ES": "Añadir logo"
+  },
+  "Add mileage entry": {
+    "es-419": "Agregar entrada de millaje",
+    "es-ES": "Añadir entrada de kilometraje"
+  },
+  "Add milestone": {
+    "es-419": "Agregar hito",
+    "es-ES": "Añadir hito"
+  },
+  "Add milestones before saving the project.": {
+    "es-419": "Agregue hitos antes de guardar el proyecto.",
+    "es-ES": "Agregue hitos antes de guardar el proyecto."
+  },
+  "Add overlay tint": {
+    "es-419": "Agregar tinte superpuesto",
+    "es-ES": "Añadir tinte superpuesto"
+  },
+  "Add photo": {
+    "es-419": "Agregar foto",
+    "es-ES": "Añadir foto"
+  },
+  "Add planner milestones": {
+    "es-419": "Agregar hitos del planificador",
+    "es-ES": "añadir hitos del planificador"
+  },
+  "Add text": {
+    "es-419": "Agregar texto",
+    "es-ES": "Añadir texto"
+  },
+  "Add your photo": {
+    "es-419": "Agrega tu foto",
+    "es-ES": "Añade tu foto"
+  },
+  "Address": {
+    "es-419": "Dirección",
+    "es-ES": "Dirección"
+  },
+  "Adds the drive home (From ↔ To swapped)": {
+    "es-419": "Agrega el disco de inicio (De ↔ A intercambiado)",
+    "es-ES": "añade el disco de inicio (De ↔ A intercambiado)"
+  },
+  "Adjust": {
+    "es-419": "Ajustar",
+    "es-ES": "Ajustar"
+  },
+  "Adjust for card size": {
+    "es-419": "Ajustar al tamaño de la tarjeta",
+    "es-ES": "Ajustar al tamaño de la tarjeta"
+  },
+  "Advance": {
+    "es-419": "Anticipo",
+    "es-ES": "Anticipo"
+  },
+  "Agreed price": {
+    "es-419": "Precio acordado",
+    "es-ES": "Precio acordado"
+  },
+  "Agreement": {
+    "es-419": "Acuerdo",
+    "es-ES": "Acuerdo"
+  },
+  "Agreement drafts": {
+    "es-419": "Borradores de acuerdo",
+    "es-ES": "Borradores de acuerdo"
+  },
+  "Agreements": {
+    "es-419": "Acuerdos",
+    "es-ES": "Acuerdos"
+  },
+  "Alerts": {
+    "es-419": "Alertas",
+    "es-ES": "Alertas"
+  },
+  "Align": {
+    "es-419": "Alinear",
+    "es-ES": "Alinear"
+  },
+  "All": {
+    "es-419": "Todo",
+    "es-ES": "Todo"
+  },
+  "All templates": {
+    "es-419": "Todas las plantillas",
+    "es-ES": "Todas las plantillas"
+  },
+  "Allow photo access to pick backgrounds and portraits for your card.": {
+    "es-419": "Permite acceso a fotos para elegir fondos y retratos para tu tarjeta.",
+    "es-ES": "Permite acceso a fotos para elegir fondos y retratos para tu tarjeta."
+  },
+  "Allow photos": {
+    "es-419": "Permitir fotos",
+    "es-ES": "Permitir fotos"
+  },
+  "Amount": {
+    "es-419": "Monto",
+    "es-ES": "Importe"
+  },
+  "Amount due": {
+    "es-419": "Monto adeudado",
+    "es-ES": "Importe adeudado"
+  },
+  "Annually": {
+    "es-419": "Anual",
+    "es-ES": "Anual"
+  },
+  "Apply": {
+    "es-419": "Aplicar",
+    "es-ES": "Aplicar"
+  },
+  "Apply preset?": {
+    "es-419": "¿Aplicar preset?",
+    "es-ES": "¿Aplicar preset?"
+  },
+  "Approval date recorded": {
+    "es-419": "Fecha de aprobación registrada",
+    "es-ES": "Fecha de aprobación registrada"
+  },
+  "Ask your studio anything": {
+    "es-419": "Pregúntale lo que quieras a tu Studio",
+    "es-ES": "Pregúntale lo que quieras a tu Studio"
+  },
+  "Attachment": {
+    "es-419": "Adjunto",
+    "es-ES": "Adjunto"
+  },
+  "Auto-generated from your name, phone, email & website as a scannable contact card (vCard).": {
+    "es-419": "Generado automáticamente con tu nombre, teléfono, email y web como tarjeta de contacto escaneable (vCard).",
+    "es-ES": "Generado automáticamente con tu nombre, teléfono, email y web como tarjeta de contacto escaneable (vCard)."
+  },
+  "Auto-number pattern": {
+    "es-419": "Patrón de numeración automática",
+    "es-ES": "Patrón de numeración automática"
+  },
+  "BREAKDOWN": {
+    "es-419": "DESCOMPONER",
+    "es-ES": "DESCOMPONER"
+  },
+  "BUSINESS TOTAL": {
+    "es-419": "TOTAL DEL NEGOCIO",
+    "es-ES": "TOTAL DEL NEGOCIO"
+  },
+  "BUXMUSE STUDIO": {
+    "es-419": "BUXMUSE STUDIO",
+    "es-ES": "BUXMUSE STUDIO"
+  },
+  "Back": {
+    "es-419": "Reverso",
+    "es-ES": "Reverso"
+  },
+  "Back of card": {
+    "es-419": "Reverso de la tarjeta",
+    "es-ES": "Reverso de la tarjeta"
+  },
+  "Background": {
+    "es-419": "Fondo",
+    "es-ES": "Fondo"
+  },
+  "Background photo": {
+    "es-419": "Foto de fondo",
+    "es-ES": "Foto de fondo"
+  },
+  "Backward": {
+    "es-419": "Atrás",
+    "es-ES": "Atrás"
+  },
+  "Bank transfer, WhatsApp payment, platform payout, hardware receipt — all stay on your phone.": {
+    "es-419": "Transferencia, pago por WhatsApp, payout de plataforma, recibo de hardware — todo queda en tu teléfono.",
+    "es-ES": "Transferencia, pago por WhatsApp, payout de plataforma, recibo de hardware — todo queda en tu móvil."
+  },
+  "Basics": {
+    "es-419": "Básicos",
+    "es-ES": "Básicos"
+  },
+  "Bill to": {
+    "es-419": "Facturar a",
+    "es-ES": "Facturar a"
+  },
+  "Billable hours": {
+    "es-419": "Horas facturables",
+    "es-ES": "Horas facturables"
+  },
+  "Blank card": {
+    "es-419": "Tarjeta en blanco",
+    "es-ES": "Tarjeta en blanco"
+  },
+  "Bold": {
+    "es-419": "Negrita",
+    "es-ES": "Negrita"
+  },
+  "Border": {
+    "es-419": "Borde",
+    "es-ES": "Borde"
+  },
+  "Brand identity": {
+    "es-419": "Identidad de marca",
+    "es-ES": "Identidad de marca"
+  },
+  "Bring to front": {
+    "es-419": "traer al frente",
+    "es-ES": "traer al frente"
+  },
+  "Budget Overrun Risk. Hours spent exceed contract benchmarks.": {
+    "es-419": "Riesgo de sobrepaso del presupuesto. Las horas invertidas superan los puntos de referencia del contrato.",
+    "es-ES": "Riesgo de sobrepaso del presupuesto. Las horas invertidas superan los puntos de referencia del contrato."
+  },
+  "Budget hours": {
+    "es-419": "Horas de presupuesto",
+    "es-ES": "Horas de presupuesto"
+  },
+  "Business Card Studio": {
+    "es-419": "Business Card Studio",
+    "es-ES": "Business Card Studio"
+  },
+  "Business Profile": {
+    "es-419": "Archivo de negocios Pro",
+    "es-ES": "Archivo de negocios Pro"
+  },
+  "Business card": {
+    "es-419": "Tarjeta de negocio",
+    "es-ES": "Tarjeta de negocio"
+  },
+  "Business classification": {
+    "es-419": "Clasificación empresarial",
+    "es-ES": "Clasificación empresarial"
+  },
+  "Business details": {
+    "es-419": "Detalles del negocio",
+    "es-ES": "Detalles del negocio"
+  },
+  "Business logo": {
+    "es-419": "logotipo de empresa",
+    "es-ES": "logotipo de empresa"
+  },
+  "Bux Adjust": {
+    "es-419": "Bux Adjust",
+    "es-ES": "Bux Adjust"
+  },
+  "Bux Background": {
+    "es-419": "Fondo Bux",
+    "es-ES": "Fondo Bux"
+  },
+  "Bux FX": {
+    "es-419": "Bux FX",
+    "es-ES": "Bux FX"
+  },
+  "Bux Focal Crop": {
+    "es-419": "Bux Focal Crop",
+    "es-ES": "Bux Focal Crop"
+  },
+  "Bux Layers": {
+    "es-419": "Capas Bux",
+    "es-ES": "Capas Bux"
+  },
+  "Bux Photo": {
+    "es-419": "Bux Photo",
+    "es-ES": "Bux Photo"
+  },
+  "Bux Photo Lab": {
+    "es-419": "Bux Photo Lab",
+    "es-ES": "Bux Photo Lab"
+  },
+  "Bux Shape": {
+    "es-419": "Bux Shape",
+    "es-ES": "Bux Shape"
+  },
+  "Bux Shapes": {
+    "es-419": "Formas Bux",
+    "es-ES": "Formas Bux"
+  },
+  "BuxMuse needs photo access to set card backgrounds and portraits. You can allow full or limited access in Settings.": {
+    "es-419": "BuxMuse necesita acceso a fotografías para configurar fondos y retratos de tarjetas. Puede permitir el acceso total o limitado en Configuración.",
+    "es-ES": "BuxMuse necesita acceso a fotografías para configurar fondos y retratos de tarjetas. Puede permitir el acceso total o limitado en Configuración."
+  },
+  "CASH RUNWAY TRAJECTORY": {
+    "es-419": "TRAYECTORIA DE LA PISTA DEL EFECTIVO",
+    "es-ES": "TRAYECTORIA DE LA PISTA DEL EFECTIVO"
+  },
+  "CLIENT": {
+    "es-419": "CLIENTE",
+    "es-ES": "CLIENTE"
+  },
+  "CLIENT HEALTH SCORE": {
+    "es-419": "PUNTUACIÓN DE SALUD DEL CLIENTE",
+    "es-ES": "PUNTUACIÓN DE SALUD DEL CLIENTE"
+  },
+  "CONTACT DETAILS": {
+    "es-419": "DETALLES DE CONTACTO",
+    "es-ES": "DETALLES DE CONTACTO"
+  },
+  "Calculating driving distance…": {
+    "es-419": "Calculando la distancia de conducción...",
+    "es-ES": "Calculando la distancia de conducción..."
+  },
+  "Call": {
+    "es-419": "Llamar",
+    "es-ES": "Llamar"
+  },
+  "Cancel": {
+    "es-419": "Cancelar",
+    "es-ES": "Cancelar"
+  },
+  "Captured scan preview": {
+    "es-419": "Vista previa del escaneo capturado",
+    "es-ES": "Vista previa del escaneo capturado"
+  },
+  "Card": {
+    "es-419": "Tarjeta",
+    "es-ES": "Tarjeta"
+  },
+  "Card accent": {
+    "es-419": "Acento de tarjeta",
+    "es-ES": "Acento de tarjeta"
+  },
+  "Card paper": {
+    "es-419": "papel de tarjeta",
+    "es-ES": "papel de tarjeta"
+  },
+  "Card size": {
+    "es-419": "Tamaño de tarjeta",
+    "es-ES": "Tamaño de tarjeta"
+  },
+  "Card text": {
+    "es-419": "Texto de la tarjeta",
+    "es-ES": "Texto de la tarjeta"
+  },
+  "Card updated — sync to refresh invoice branding.": {
+    "es-419": "Tarjeta actualizada: sincronización para actualizar la marca de la factura.",
+    "es-ES": "Tarjeta actualizada: sincronización para actualizar la marca de la factura."
+  },
+  "Cash Runway": {
+    "es-419": "Pasarela de efectivo",
+    "es-ES": "Pasarela de efectivo"
+  },
+  "Cashflow": {
+    "es-419": "Flujo de fondos",
+    "es-ES": "Flujo de fondos"
+  },
+  "Cashflow forecaster": {
+    "es-419": "Pronosticador de flujo de caja",
+    "es-ES": "Pronosticador de flujo de caja"
+  },
+  "Center": {
+    "es-419": "Centro",
+    "es-ES": "Centro"
+  },
+  "Change in Settings → Currency & Region": {
+    "es-419": "Cambiar en Configuración → Moneda y región",
+    "es-ES": "Cambiar en Configuración → Moneda y región"
+  },
+  "Check your connection or try again later.": {
+    "es-419": "Comprueba tu conexión o vuelve a intentarlo más tarde.",
+    "es-ES": "Comprueba tu conexión o vuelve a intentarlo más tarde."
+  },
+  "Choose Preset": {
+    "es-419": "Elija preestablecido",
+    "es-ES": "Elija preestablecido"
+  },
+  "Choose background photo": {
+    "es-419": "Elige una foto de fondo",
+    "es-ES": "Elige una foto de fondo"
+  },
+  "Choose from photos": {
+    "es-419": "Elige entre fotos",
+    "es-ES": "Elige entre fotos"
+  },
+  "Choose photo": {
+    "es-419": "Elige foto",
+    "es-ES": "Elige foto"
+  },
+  "Choose photo from library": {
+    "es-419": "Elige una foto de la biblioteca",
+    "es-ES": "Elige una foto de la biblioteca"
+  },
+  "Choosing a project fills line items and links this invoice to that job.": {
+    "es-419": "Al elegir un proyecto, se completan las líneas de pedido y se vincula esta factura a ese trabajo.",
+    "es-ES": "Al elegir un proyecto, se completan las líneas de pedido y se vincula esta factura a ese trabajo."
+  },
+  "Circle": {
+    "es-419": "Círculo",
+    "es-ES": "Círculo"
+  },
+  "Classic": {
+    "es-419": "Clásico",
+    "es-ES": "Clásico"
+  },
+  "Clear": {
+    "es-419": "Limpiar",
+    "es-ES": "Limpiar"
+  },
+  "Clear background": {
+    "es-419": "fondo claro",
+    "es-ES": "fondo claro"
+  },
+  "Clear client signature": {
+    "es-419": "Borrar firma del cliente",
+    "es-ES": "Borrar firma del cliente"
+  },
+  "Clear filter": {
+    "es-419": "Limpiar filtro",
+    "es-ES": "Limpiar filtro"
+  },
+  "Clear preset (custom only)": {
+    "es-419": "Borrar preajuste (solo personalizado)",
+    "es-ES": "Borrar preajuste (solo personalizado)"
+  },
+  "Clear your signature": {
+    "es-419": "Limpia tu firma",
+    "es-ES": "Limpia tu firma"
+  },
+  "Client Info": {
+    "es-419": "Información del cliente",
+    "es-ES": "Información del cliente"
+  },
+  "Client approval pending": {
+    "es-419": "Aprobación del cliente pendiente",
+    "es-ES": "Aprobación del cliente pendiente"
+  },
+  "Client signature (in person only)": {
+    "es-419": "Firma del cliente (solo en persona)",
+    "es-ES": "Firma del cliente (solo en persona)"
+  },
+  "Clients": {
+    "es-419": "Clientes",
+    "es-ES": "Clientes"
+  },
+  "Clients CRM": {
+    "es-419": "Clientes CRM",
+    "es-ES": "Clientes CRM"
+  },
+  "Clients, invoices, projects, receipts, mileage, tax deductions, and your Simple ledger — all offline.": {
+    "es-419": "Clientes, facturas, proyectos, recibos, millaje, deducciones fiscales y tu libro Simple — todo sin conexión.",
+    "es-ES": "Clientes, facturas, proyectos, recibos, kilometraje, deducciones fiscales y tu libro Simple — todo sin conexión."
+  },
+  "Close": {
+    "es-419": "Cerca",
+    "es-ES": "Cerca"
+  },
+  "Color": {
+    "es-419": "Color",
+    "es-ES": "Color"
+  },
+  "Color wheel": {
+    "es-419": "rueda de color",
+    "es-ES": "rueda de color"
+  },
+  "Colors": {
+    "es-419": "Bandera",
+    "es-ES": "Bandera"
+  },
+  "Company Logo": {
+    "es-419": "Logo de la empresa",
+    "es-ES": "Logo de la empresa"
+  },
+  "Compounding": {
+    "es-419": "capitalización",
+    "es-ES": "capitalización"
+  },
+  "Compounding rates apply to the running total including previous taxes.": {
+    "es-419": "Se aplican tasas compuestas al total acumulado, incluidos los impuestos anteriores.",
+    "es-ES": "Se aplican tasas compuestas al total acumulado, incluidos los impuestos anteriores."
+  },
+  "Contact": {
+    "es-419": "Contacto",
+    "es-ES": "Contacto"
+  },
+  "Contact QR code": {
+    "es-419": "Contacto QR código",
+    "es-ES": "Contacto QR código"
+  },
+  "Contract settings": {
+    "es-419": "Configuración del contrato",
+    "es-ES": "Configuración del contrato"
+  },
+  "Cool & dark": {
+    "es-419": "Fresco y oscuro",
+    "es-ES": "Fresco y oscuro"
+  },
+  "Copy scope-change email": {
+    "es-419": "Copiar correo electrónico de cambio de alcance",
+    "es-ES": "Copiar correo electrónico de cambio de alcance"
+  },
+  "Couldn't load that photo — try another.": {
+    "es-419": "No se pudo cargar esa foto; prueba con otra.",
+    "es-ES": "No se pudo cargar esa foto; prueba con otra."
+  },
+  "Country preset": {
+    "es-419": "Preajuste de país",
+    "es-ES": "Preajuste de país"
+  },
+  "Create Invoice": {
+    "es-419": "Crear factura",
+    "es-ES": "Crear factura"
+  },
+  "Create invoice": {
+    "es-419": "Crear factura",
+    "es-ES": "Crear factura"
+  },
+  "Create invoice from this project": {
+    "es-419": "Crear factura a partir de este proyecto",
+    "es-ES": "Crear factura a partir de este proyecto"
+  },
+  "Create project": {
+    "es-419": "Crear proyecto",
+    "es-ES": "Crear proyecto"
+  },
+  "Creative Stack": {
+    "es-419": "Pila creativa",
+    "es-ES": "Pila creativa"
+  },
+  "Crop background": {
+    "es-419": "Fondo de cultivo",
+    "es-ES": "Fondo de cultivo"
+  },
+  "Crop photo": {
+    "es-419": "Recortar foto",
+    "es-ES": "Recortar foto"
+  },
+  "Custom": {
+    "es-419": "Costumbre",
+    "es-ES": "Costumbre"
+  },
+  "Custom colors": {
+    "es-419": "Colores personalizados",
+    "es-ES": "Colores personalizados"
+  },
+  "Custom invoice branding": {
+    "es-419": "Marca de factura personalizada",
+    "es-ES": "Marca de factura personalizada"
+  },
+  "Custom palette": {
+    "es-419": "paleta personalizada",
+    "es-ES": "paleta personalizada"
+  },
+  "Customer": {
+    "es-419": "Cliente",
+    "es-ES": "Cliente"
+  },
+  "Customize only": {
+    "es-419": "Personalizar solo",
+    "es-ES": "Personalizar solo"
+  },
+  "Customize prefix & pattern in Studio → Invoices → Settings. You can always type your own number above.": {
+    "es-419": "Personalice el prefijo y el patrón en Studio → Facturas → Configuración. Siempre puedes escribir tu propio número arriba.",
+    "es-ES": "Personalice el prefijo y el patrón en Studio → Facturas → Configuración. Siempre puedes escribir tu propio número arriba."
+  },
+  "DEDUCTIONS": {
+    "es-419": "DEDUCCIONES",
+    "es-ES": "DEDUCCIONES"
+  },
+  "DISTANCE": {
+    "es-419": "DISTANCIA",
+    "es-ES": "DISTANCIA"
+  },
+  "Dates": {
+    "es-419": "Fechas",
+    "es-ES": "Fechas"
+  },
+  "Deductible %": {
+    "es-419": "% deducible",
+    "es-ES": "% deducible"
+  },
+  "Deduction Opportunities": {
+    "es-419": "Oportunidades de deducción",
+    "es-ES": "Oportunidades de deducción"
+  },
+  "Deductions": {
+    "es-419": "Deducciones",
+    "es-ES": "Deducciones"
+  },
+  "Deductions Sandbox": {
+    "es-419": "Zona de pruebas de deducciones",
+    "es-ES": "Zona de pruebas de deducciones"
+  },
+  "Default Hourly Rate": {
+    "es-419": "Tarifa por hora predeterminada",
+    "es-ES": "Tarifa por hora predeterminada"
+  },
+  "Delete": {
+    "es-419": "Eliminar",
+    "es-ES": "Eliminar"
+  },
+  "Delivery": {
+    "es-419": "Entrega",
+    "es-ES": "Entrega"
+  },
+  "Dependency order": {
+    "es-419": "orden de dependencia",
+    "es-ES": "orden de dependencia"
+  },
+  "Description": {
+    "es-419": "Descripción",
+    "es-ES": "Descripción"
+  },
+  "Design": {
+    "es-419": "Diseño",
+    "es-ES": "Diseño"
+  },
+  "Design print-ready cards in minutes — geometric templates, Bux Canvas, photo lab, and export to PDF or vCard.": {
+    "es-419": "Diseña tarjetas listas para imprimir en minutos — plantillas geométricas, Bux Canvas, laboratorio de fotos y exporta a PDF o vCard.",
+    "es-ES": "Diseña tarjetas listas para imprimir en minutos — plantillas geométricas, Bux Canvas, laboratorio de fotos y exporta a PDF o vCard."
+  },
+  "Details": {
+    "es-419": "Detalles",
+    "es-ES": "Detalles"
+  },
+  "Discard": {
+    "es-419": "Desechar",
+    "es-ES": "Desechar"
+  },
+  "Displays company address and registration at the bottom of designed invoices.": {
+    "es-419": "Muestra la dirección y el registro de la empresa en la parte inferior de las facturas diseñadas.",
+    "es-ES": "Muestra la dirección y el registro de la empresa en la parte inferior de las facturas diseñadas."
+  },
+  "Done": {
+    "es-419": "Listo",
+    "es-ES": "Hecho"
+  },
+  "Double": {
+    "es-419": "Doble",
+    "es-ES": "Doble"
+  },
+  "Down": {
+    "es-419": "Abajo",
+    "es-ES": "Abajo"
+  },
+  "Drag a dot on the timeline to reschedule a milestone.": {
+    "es-419": "Arrastre un punto en la línea de tiempo para reprogramar un hito.",
+    "es-ES": "Arrastre un punto en la línea de tiempo para reprogramar un hito."
+  },
+  "Drag the field for saturation and brightness — use Fill strength for transparency.": {
+    "es-419": "Arrastra el campo para saturación y brillo — usa intensidad de relleno para transparencia.",
+    "es-ES": "Arrastra el campo para saturación y brillo — usa intensidad de relleno para transparencia."
+  },
+  "Drag to move · pinch or slide to zoom · rotate to straighten": {
+    "es-419": "Arrastre para mover · pellizque o deslice para hacer zoom · gire para enderezar",
+    "es-ES": "Arrastre para mover · pellizque o deslice para hacer zoom · gire para enderezar"
+  },
+  "Drag to reposition · pinch or slide to zoom": {
+    "es-419": "Arrastra para reposicionar · pellizca o desliza para zoom",
+    "es-ES": "Arrastra para reposicionar · pellizca o desliza para zoom"
+  },
+  "Drag to spin · pinch to zoom": {
+    "es-419": "Arrastrar para girar · pellizcar para hacer zoom",
+    "es-ES": "Arrastrar para girar · pellizcar para hacer zoom"
+  },
+  "Due on Receipt": {
+    "es-419": "Al recibir",
+    "es-ES": "Al recibir"
+  },
+  "Duplicate": {
+    "es-419": "Duplicar",
+    "es-ES": "Duplicar"
+  },
+  "EFFECTIVE": {
+    "es-419": "EFICAZ",
+    "es-ES": "EFICAZ"
+  },
+  "EFFECTIVE TAX RATES (FOR CALCULATOR)": {
+    "es-419": "TASAS DE IMPUESTO EFECTIVAS (PARA CALCULADORA)",
+    "es-ES": "TASAS DE IMPUESTO EFECTIVAS (PARA CALCULADORA)"
+  },
+  "EST. TAX": {
+    "es-419": "EST. IMPUESTO",
+    "es-ES": "EST. IMPUESTO"
+  },
+  "ESTIMATED ANNUAL TAX": {
+    "es-419": "IMPUESTO ANUAL ESTIMADO",
+    "es-ES": "IMPUESTO ANUAL ESTIMADO"
+  },
+  "EXPENSES": {
+    "es-419": "GASTOS",
+    "es-ES": "GASTOS"
+  },
+  "Edge strips (hero size)": {
+    "es-419": "Tiras de borde (tamaño héroe)",
+    "es-ES": "Tiras de borde (tamaño héroe)"
+  },
+  "Edit": {
+    "es-419": "Editar",
+    "es-ES": "Editar"
+  },
+  "Edit in Bux Photo Lab": {
+    "es-419": "Editar en Bux Photo Lab",
+    "es-ES": "Editar en Bux Photo Lab"
+  },
+  "Edit photo": {
+    "es-419": "Editar foto",
+    "es-ES": "Editar foto"
+  },
+  "Edit terms & conditions": {
+    "es-419": "Editar términos y condiciones",
+    "es-ES": "Editar términos y condiciones"
+  },
+  "Edit time": {
+    "es-419": "Editar hora",
+    "es-ES": "Editar hora"
+  },
+  "Effective hourly rate:": {
+    "es-419": "Tarifa horaria efectiva:",
+    "es-ES": "Tarifa horaria efectiva:"
+  },
+  "Elements": {
+    "es-419": "Elementos",
+    "es-ES": "Elementos"
+  },
+  "Entry": {
+    "es-419": "Entrada",
+    "es-ES": "Entrada"
+  },
+  "Entry not found": {
+    "es-419": "Entrada no encontrada",
+    "es-ES": "Entrada no encontrada"
+  },
+  "Estimated Tax": {
+    "es-419": "Impuesto estimado",
+    "es-ES": "Impuesto estimado"
+  },
+  "Estimated income tax:": {
+    "es-419": "Impuesto sobre la renta estimado:",
+    "es-ES": "Impuesto sobre la renta estimado:"
+  },
+  "Example: agreed 2 hours at your hourly rate — set 2 h here and the clock pauses at 2 h.": {
+    "es-419": "Ejemplo: 2 horas acordadas a su tarifa por hora: configure 2 h aquí y el reloj se detendrá a las 2 h.",
+    "es-ES": "Ejemplo: 2 horas acordadas a su tarifa por hora: configure 2 h aquí y el reloj se detendrá a las 2 h."
+  },
+  "Exit": {
+    "es-419": "Salir",
+    "es-ES": "Salir"
+  },
+  "Expense": {
+    "es-419": "Gastos",
+    "es-ES": "Gastos"
+  },
+  "Expense Details": {
+    "es-419": "Detalles de gastos",
+    "es-ES": "Detalles de gastos"
+  },
+  "Expenses": {
+    "es-419": "Gastos",
+    "es-ES": "Gastos"
+  },
+  "Expenses & Receipts": {
+    "es-419": "Gastos y recibos",
+    "es-ES": "Gastos y recibos"
+  },
+  "Export & Share PDF": {
+    "es-419": "Exportar y compartir PDF",
+    "es-ES": "Exportar y compartir PDF"
+  },
+  "Export & share": {
+    "es-419": "Exportar y compartir",
+    "es-ES": "Exportar y compartir"
+  },
+  "Export PDF": {
+    "es-419": "Exportar PDF",
+    "es-ES": "Exportar PDF"
+  },
+  "Export PDF (print ready)": {
+    "es-419": "Exportar PDF (listo para imprimir)",
+    "es-ES": "Exportar PDF (hecho para imprimir)"
+  },
+  "Export PNG image": {
+    "es-419": "Exportar imagen PNG",
+    "es-ES": "Exportar imagen PNG"
+  },
+  "Extra revisions": {
+    "es-419": "Revisiones adicionales",
+    "es-ES": "Revisiones adicionales"
+  },
+  "Extracted document information": {
+    "es-419": "Información del documento extraído",
+    "es-ES": "Información del documento extraído"
+  },
+  "FAQ": {
+    "es-419": "FAQ",
+    "es-ES": "FAQ"
+  },
+  "FINANCIAL MATRIX": {
+    "es-419": "MATRIZ FINANCIERA",
+    "es-ES": "MATRIZ FINANCIERA"
+  },
+  "Fades the whole element — text, shape, or photo.": {
+    "es-419": "Desvanece todo el elemento — texto, forma o foto.",
+    "es-ES": "Desvanece todo el elemento — texto, forma o foto."
+  },
+  "Featured looks": {
+    "es-419": "Looks destacados",
+    "es-ES": "Looks destacados"
+  },
+  "Fill": {
+    "es-419": "Relleno",
+    "es-ES": "Relleno"
+  },
+  "Fill strength": {
+    "es-419": "Fuerza de relleno",
+    "es-ES": "Fuerza de relleno"
+  },
+  "Finished early": {
+    "es-419": "Terminado temprano",
+    "es-ES": "Terminado temprano"
+  },
+  "Fixed-fee overrun": {
+    "es-419": "Sobrepaso de la tarifa fija",
+    "es-ES": "Sobrepaso de la tarifa fija"
+  },
+  "Flip horizontal": {
+    "es-419": "Voltear horizontalmente",
+    "es-ES": "Voltear horizontalmente"
+  },
+  "Flip vertical": {
+    "es-419": "Voltear verticalmente",
+    "es-ES": "Voltear verticalmente"
+  },
+  "Font": {
+    "es-419": "Fuente",
+    "es-ES": "Fuente"
+  },
+  "Fonts": {
+    "es-419": "Fuentes",
+    "es-ES": "Fuentes"
+  },
+  "For": {
+    "es-419": "Para",
+    "es-ES": "Para"
+  },
+  "Forward": {
+    "es-419": "Adelante",
+    "es-ES": "Adelante"
+  },
+  "Frame": {
+    "es-419": "Marco",
+    "es-ES": "Marco"
+  },
+  "From": {
+    "es-419": "De",
+    "es-ES": "De"
+  },
+  "From Settings": {
+    "es-419": "Desde Configuración",
+    "es-ES": "Desde Configuración"
+  },
+  "From billable hours, new time, and project expenses.": {
+    "es-419": "Desde horas facturables, tiempo nuevo y gastos del proyecto.",
+    "es-ES": "Desde horas facturables, tiempo nuevo y gastos del proyecto."
+  },
+  "Front": {
+    "es-419": "Frente",
+    "es-ES": "Frente"
+  },
+  "Full Tax Studio in Pro": {
+    "es-419": "Tax Studio completo en Pro",
+    "es-ES": "Tax Studio completo en Pro"
+  },
+  "Fullscreen": {
+    "es-419": "Pantalla completa",
+    "es-ES": "Pantalla completa"
+  },
+  "GROSS INCOME": {
+    "es-419": "INGRESOS BRUTOS",
+    "es-ES": "INGRESOS BRUTOS"
+  },
+  "Generate PDF": {
+    "es-419": "Generar PDF",
+    "es-ES": "Generar PDF"
+  },
+  "Geometric Card": {
+    "es-419": "Tarjeta Geométrica",
+    "es-ES": "Tarjeta Geométrica"
+  },
+  "Global locale": {
+    "es-419": "Configuración regional global",
+    "es-ES": "Configuración regional global"
+  },
+  "Gross Projected Revenue:": {
+    "es-419": "Ingresos Brutos Proproyectados:",
+    "es-ES": "Ingresos Brutos Proproyectados:"
+  },
+  "Guided setup": {
+    "es-419": "Configuración guiada",
+    "es-ES": "Configuración guiada"
+  },
+  "HOW YOU EARN": {
+    "es-419": "CÓMO GANA",
+    "es-ES": "CÓMO GANA"
+  },
+  "Half blocks + chevron": {
+    "es-419": "Medias cuadras + galón",
+    "es-ES": "Medias cuadras + galón"
+  },
+  "Hardware Assets": {
+    "es-419": "Activos de hardware",
+    "es-ES": "Activos de hardware"
+  },
+  "Hero": {
+    "es-419": "Héroe",
+    "es-ES": "Héroe"
+  },
+  "Hex": {
+    "es-419": "Maleficio",
+    "es-ES": "Maleficio"
+  },
+  "How do you get paid?": {
+    "es-419": "¿Cómo te pagan?",
+    "es-ES": "¿Cómo te pagan?"
+  },
+  "How long should it take?": {
+    "es-419": "¿Cuánto tiempo debería tomar?",
+    "es-ES": "¿Cuánto tiempo debería tomar?"
+  },
+  "How you charge": {
+    "es-419": "como cobras",
+    "es-ES": "como cobras"
+  },
+  "Hue": {
+    "es-419": "Matiz",
+    "es-ES": "Matiz"
+  },
+  "I owe": {
+    "es-419": "debo",
+    "es-ES": "debo"
+  },
+  "INCOME TAX RATE %": {
+    "es-419": "TASA DE IMPUESTO SOBRE LA RENTA %",
+    "es-ES": "TASA DE IMPUESTO SOBRE LA RENTA %"
+  },
+  "INDIRECT TAX RATE % (VAT/GST)": {
+    "es-419": "% DE TIPO DE IMPUESTO INDIRECTO (VAT/GST)",
+    "es-ES": "% DE TIPO DE IMPUESTO INDIRECTO (VAT/GST)"
+  },
+  "INDIRECT TAX STATUS": {
+    "es-419": "ESTADO TRIBUTARIO INDIRECTO",
+    "es-ES": "ESTADO TRIBUTARIO INDIRECTO"
+  },
+  "INTERACTIVE TAX SIMULATOR": {
+    "es-419": "SIMULADOR TRIBUTARIO INTERACTIVO",
+    "es-ES": "SIMULADOR TRIBUTARIO INTERACTIVO"
+  },
+  "INVOICE SUGGESTION": {
+    "es-419": "SUGERENCIA DE FACTURA",
+    "es-ES": "SUGERENCIA DE FACTURA"
+  },
+  "INVOICE SUGGESTIONS": {
+    "es-419": "SUGERENCIAS DE FACTURA",
+    "es-ES": "SUGERENCIAS DE FACTURA"
+  },
+  "INVOICES": {
+    "es-419": "FACTURAS",
+    "es-ES": "FACTURAS"
+  },
+  "Identity": {
+    "es-419": "Identidad",
+    "es-ES": "Identidad"
+  },
+  "Import from Photo Library": {
+    "es-419": "Importar desde la biblioteca de fotos",
+    "es-ES": "Importar desde la biblioteca de fotos"
+  },
+  "Income Tax": {
+    "es-419": "Impuesto sobre la renta",
+    "es-ES": "Impuesto sobre la renta"
+  },
+  "Income Tax Calculator": {
+    "es-419": "Calculadora de Impuesto sobre la Renta",
+    "es-ES": "Calculadora de Impuesto sobre la Renta"
+  },
+  "Indirect Tax": {
+    "es-419": "Impuesto indirecto",
+    "es-ES": "Impuesto indirecto"
+  },
+  "Internal notes": {
+    "es-419": "Notas internas",
+    "es-ES": "Notas internas"
+  },
+  "Invoice": {
+    "es-419": "Factura",
+    "es-ES": "Factura"
+  },
+  "Invoice Bill-To Details": {
+    "es-419": "Detalles de facturación de la factura",
+    "es-ES": "Detalles de facturación de la factura"
+  },
+  "Invoice Settings": {
+    "es-419": "Configuración de factura",
+    "es-ES": "Configuración de factura"
+  },
+  "Invoice brand": {
+    "es-419": "marca de factura",
+    "es-ES": "marca de factura"
+  },
+  "Invoice identity & address": {
+    "es-419": "Identidad y dirección de la factura",
+    "es-ES": "Identidad y dirección de la factura"
+  },
+  "Invoice not found": {
+    "es-419": "Factura no encontrada",
+    "es-ES": "Factura no encontrada"
+  },
+  "Invoices": {
+    "es-419": "Facturas",
+    "es-ES": "Facturas"
+  },
+  "Invoices can use this card’s colors and style as your business brand.": {
+    "es-419": "Las facturas pueden utilizar los colores y el estilo de esta tarjeta como marca comercial.",
+    "es-ES": "Las facturas pueden utilizar los colores y el estilo de esta tarjeta como marca comercial."
+  },
+  "Invoicing defaults": {
+    "es-419": "Valores predeterminados de facturación",
+    "es-ES": "Valores predeterminados de facturación"
+  },
+  "JOB NAME": {
+    "es-419": "NOMBRE DEL TRABAJO",
+    "es-ES": "NOMBRE DEL TRABAJO"
+  },
+  "Job": {
+    "es-419": "Trabajo",
+    "es-ES": "Trabajo"
+  },
+  "Job Quote": {
+    "es-419": "Cotización de trabajo",
+    "es-ES": "Cotización de trabajo"
+  },
+  "Job costs": {
+    "es-419": "Costos laborales",
+    "es-ES": "Costos laborales"
+  },
+  "Job math": {
+    "es-419": "Matemáticas laborales",
+    "es-ES": "Matemáticas laborales"
+  },
+  "Job pockets": {
+    "es-419": "Bolsas de trabajo",
+    "es-ES": "Bolsas de trabajo"
+  },
+  "Jobs": {
+    "es-419": "Empleos",
+    "es-ES": "Empleos"
+  },
+  "Jobs where money is still waiting — tap to send a simple invoice.": {
+    "es-419": "Empleos en los que todavía hay dinero esperando: toque para enviar una factura sencilla.",
+    "es-ES": "Empleos en los que todavía hay dinero esperando: toque para enviar una factura sencilla."
+  },
+  "Keep editing": {
+    "es-419": "Sigue editando",
+    "es-ES": "Sigue editando"
+  },
+  "Kickoff": {
+    "es-419": "Patada inicial",
+    "es-ES": "Patada inicial"
+  },
+  "LAPS": {
+    "es-419": "VUELTAS",
+    "es-ES": "VUELTAS"
+  },
+  "LINKED EXPENSES": {
+    "es-419": "GASTOS VINCULADOS",
+    "es-ES": "GASTOS VINCULADOS"
+  },
+  "Label updates from your indirect tax rules above (VAT, GST, ITBIS, etc.).": {
+    "es-419": "Etiquete las actualizaciones de sus reglas de impuestos indirectos anteriores (VAT, GST, ITBIS, etc.).",
+    "es-ES": "Etiquete las actualizaciones de sus reglas de impuestos indirectos anteriores (VAT, GST, ITBIS, etc.)."
+  },
+  "Landscape": {
+    "es-419": "Paisaje",
+    "es-ES": "Paisaje"
+  },
+  "Lap": {
+    "es-419": "Regazo",
+    "es-ES": "Regazo"
+  },
+  "Layer fade": {
+    "es-419": "Desvanecimiento de capa",
+    "es-ES": "Desvanecimiento de capa"
+  },
+  "Layers": {
+    "es-419": "Capas",
+    "es-ES": "Capas"
+  },
+  "Left": {
+    "es-419": "Izquierda",
+    "es-ES": "Izquierda"
+  },
+  "Legal footer": {
+    "es-419": "Pie de página legal",
+    "es-ES": "Pie de página legal"
+  },
+  "Line item": {
+    "es-419": "Línea de pedido",
+    "es-ES": "Línea de pedido"
+  },
+  "Live on your card": {
+    "es-419": "Vive en tu tarjeta",
+    "es-ES": "Vive en tu tarjeta"
+  },
+  "Live preview": {
+    "es-419": "Vista previa en vivo",
+    "es-ES": "Vista previa en vivo"
+  },
+  "Loading country presets…": {
+    "es-419": "Cargando ajustes preestablecidos de país...",
+    "es-ES": "Cargando ajustes preestablecidos de país..."
+  },
+  "Loading tax presets…": {
+    "es-419": "Cargando ajustes preestablecidos de impuestos...",
+    "es-ES": "Cargando ajustes preestablecidos de impuestos..."
+  },
+  "Local · Private · On your phone": {
+    "es-419": "Local · Privado · En tu teléfono",
+    "es-ES": "Local · Privado · En tu móvil"
+  },
+  "Lock Screen shows a walker moving toward done — clock can stop when time is up.": {
+    "es-419": "Lock Screen muestra un andador moviéndose hacia el final: el reloj puede detenerse cuando se acaba el tiempo.",
+    "es-ES": "Lock Screen muestra un andador moviéndose hacia el final: el reloj puede detenerse cuando se acaba el tiempo."
+  },
+  "Log": {
+    "es-419": "Registro",
+    "es-ES": "Registro"
+  },
+  "Log expense": {
+    "es-419": "Gasto de registro",
+    "es-ES": "Gasto de registro"
+  },
+  "Log money": {
+    "es-419": "Registrar dinero",
+    "es-ES": "Registrar dinero"
+  },
+  "Log same trip back": {
+    "es-419": "Registrar el mismo viaje de vuelta",
+    "es-ES": "Registrar el mismo viaje de vuelta"
+  },
+  "Log to Project": {
+    "es-419": "Iniciar sesión en Project",
+    "es-ES": "Iniciar sesión en Project"
+  },
+  "Log trip": {
+    "es-419": "viaje de registro",
+    "es-ES": "viaje de registro"
+  },
+  "Log work to see where your money goes.": {
+    "es-419": "Registre su trabajo para ver a dónde va su dinero.",
+    "es-ES": "Registre su trabajo para ver a dónde va su dinero."
+  },
+  "Log work to see your month": {
+    "es-419": "Registra tu trabajo para ver tu mes",
+    "es-ES": "Registra tu trabajo para ver tu mes"
+  },
+  "Logo size": {
+    "es-419": "Tamaño del logotipo",
+    "es-ES": "Tamaño del logotipo"
+  },
+  "Look": {
+    "es-419": "Mirar",
+    "es-ES": "Mirar"
+  },
+  "Made": {
+    "es-419": "listo",
+    "es-ES": "Hecho"
+  },
+  "Main card": {
+    "es-419": "tarjeta principal",
+    "es-ES": "tarjeta principal"
+  },
+  "Manage": {
+    "es-419": "Administrar",
+    "es-ES": "Administrar"
+  },
+  "Mark Paid": {
+    "es-419": "Marcar pagado",
+    "es-ES": "Marcar pagado"
+  },
+  "Mark Sent": {
+    "es-419": "Marcar enviado",
+    "es-ES": "Marcar enviado"
+  },
+  "Mark paid": {
+    "es-419": "marca pagada",
+    "es-ES": "marca pagada"
+  },
+  "Mark project complete": {
+    "es-419": "Marcar proyecto completo",
+    "es-ES": "Marcar proyecto completo"
+  },
+  "Mark settled": {
+    "es-419": "marca se estableció",
+    "es-ES": "marca se estableció"
+  },
+  "Market stall": {
+    "es-419": "Puesto en el mercado",
+    "es-ES": "Puesto en el mercado"
+  },
+  "Matching \\": {
+    "es-419": "Coincidencia \\",
+    "es-ES": "Coincidencia \\"
+  },
+  "Medium": {
+    "es-419": "Medio",
+    "es-ES": "Medio"
+  },
+  "Mileage Log": {
+    "es-419": "Registro de millaje",
+    "es-ES": "Registro de kilometraje"
+  },
+  "Milestone": {
+    "es-419": "Hito",
+    "es-ES": "Hito"
+  },
+  "Milestones": {
+    "es-419": "Hitos",
+    "es-ES": "Hitos"
+  },
+  "Minimum monthly inflow needed to comfortably clear direct costs, tax obligations, and hit standard savings cushions.": {
+    "es-419": "Ingreso mensual mínimo necesario para liquidar cómodamente los costos directos, las obligaciones fiscales y alcanzar los ahorros estándar.",
+    "es-ES": "Ingreso mensual mínimo necesario para liquidar cómodamente los costos directos, las obligaciones fiscales y alcanzar los ahorros estándar."
+  },
+  "Modern": {
+    "es-419": "Moderno",
+    "es-ES": "Moderno"
+  },
+  "Money & timing": {
+    "es-419": "Dinero y tiempo",
+    "es-ES": "Dinero y tiempo"
+  },
+  "Monthly": {
+    "es-419": "Mensual",
+    "es-ES": "Mensual"
+  },
+  "Move layers": {
+    "es-419": "Mover capas",
+    "es-ES": "Mover capas"
+  },
+  "My money": {
+    "es-419": "Mi dinero",
+    "es-ES": "Mi dinero"
+  },
+  "NOTES & TERMS": {
+    "es-419": "NOTAS Y TÉRMINOS",
+    "es-ES": "NOTAS Y TÉRMINOS"
+  },
+  "Neutrals": {
+    "es-419": "Neutrales",
+    "es-ES": "Neutrales"
+  },
+  "New Client": {
+    "es-419": "Nuevo cliente",
+    "es-ES": "Nuevo cliente"
+  },
+  "New Invoice": {
+    "es-419": "Nueva factura",
+    "es-ES": "Nueva factura"
+  },
+  "New agreement": {
+    "es-419": "Nuevo acuerdo",
+    "es-ES": "Nuevo acuerdo"
+  },
+  "New agreement draft": {
+    "es-419": "Nuevo borrador de acuerdo",
+    "es-ES": "Nuevo borrador de acuerdo"
+  },
+  "New card": {
+    "es-419": "Nueva tarjeta",
+    "es-ES": "Nueva tarjeta"
+  },
+  "New from template": {
+    "es-419": "Nuevo de plantilla",
+    "es-ES": "Nuevo de plantilla"
+  },
+  "No Clients registered yet": {
+    "es-419": "Aún no hay clientes registrados",
+    "es-ES": "Aún no hay clientes registrados"
+  },
+  "No Invoices logged yet": {
+    "es-419": "Aún no se han registrado facturas",
+    "es-ES": "Aún no se han registrado facturas"
+  },
+  "No alerts. You're all caught up.": {
+    "es-419": "Sin alertas. Estáis todos atrapados.",
+    "es-ES": "Sin alertas. Estáis todos atrapados."
+  },
+  "No client": {
+    "es-419": "Ningún cliente",
+    "es-ES": "Ningún cliente"
+  },
+  "No clients yet. Add your first client to track health and lifetime value.": {
+    "es-419": "Aún no hay clientes. Agregue su primer cliente para realizar un seguimiento de la salud y el valor de por vida.",
+    "es-ES": "Aún no hay clientes. Agregue su primer cliente para realizar un seguimiento de la salud y el valor de por vida."
+  },
+  "No completed projects for this client. Finish a project in Studio → Projects, or add line items below.": {
+    "es-419": "No hay proyectos completados para este cliente. Termine un proyecto en Studio → Projects o agregue líneas de pedido a continuación.",
+    "es-ES": "No hay proyectos completados para este cliente. Termine un proyecto en Studio → Projects o agregue líneas de pedido a continuación."
+  },
+  "No countries available": {
+    "es-419": "No hay países disponibles",
+    "es-ES": "No hay países disponibles"
+  },
+  "No deduction opportunities right now.": {
+    "es-419": "No hay oportunidades de deducción en este momento.",
+    "es-ES": "No hay oportunidades de deducción en este momento."
+  },
+  "No deduction opportunities yet. Log receipts to unlock suggestions.": {
+    "es-419": "Aún no hay oportunidades de deducción. Registre recibos para desbloquear sugerencias.",
+    "es-ES": "Aún no hay oportunidades de deducción. Registre recibos para desbloquear sugerencias."
+  },
+  "No drafts yet. Create one for a client or project before work starts.": {
+    "es-419": "Aún no hay borradores. Cree uno para un cliente o proyecto antes de que comience el trabajo.",
+    "es-ES": "Aún no hay borradores. Cree uno para un cliente o proyecto antes de que comience el trabajo."
+  },
+  "No invoices generated yet.": {
+    "es-419": "Aún no se han generado facturas.",
+    "es-ES": "Aún no se han generado facturas."
+  },
+  "No matches": {
+    "es-419": "No hay coincidencias",
+    "es-ES": "No hay coincidencias"
+  },
+  "No milestones yet": {
+    "es-419": "Aún no hay hitos",
+    "es-ES": "Aún no hay hitos"
+  },
+  "No people match": {
+    "es-419": "Ninguna gente coincide",
+    "es-ES": "Ninguna gente coincide"
+  },
+  "No people yet": {
+    "es-419": "Aún no hay gente",
+    "es-ES": "Aún no hay gente"
+  },
+  "No projects logged yet.": {
+    "es-419": "Aún no se han registrado proyectos.",
+    "es-ES": "Aún no se han registrado proyectos."
+  },
+  "No projects yet": {
+    "es-419": "Aún no hay proyectos",
+    "es-ES": "Aún no hay proyectos"
+  },
+  "No projects yet.": {
+    "es-419": "Aún no hay proyectos.",
+    "es-ES": "Aún no hay proyectos."
+  },
+  "No receipts scanned yet": {
+    "es-419": "Aún no se han escaneado recibos",
+    "es-ES": "Aún no se han escaneado recibos"
+  },
+  "No saved cards yet": {
+    "es-419": "Aún no hay tarjetas guardadas",
+    "es-ES": "Aún no hay tarjetas guardadas"
+  },
+  "No time entries logged yet.": {
+    "es-419": "Aún no se han registrado entradas de tiempo.",
+    "es-ES": "Aún no se han registrado entradas de tiempo."
+  },
+  "No trips logged yet": {
+    "es-419": "Aún no se han registrado viajes",
+    "es-ES": "Aún no se han registrado viajes"
+  },
+  "Nobody owes you right now — nice.": {
+    "es-419": "Nadie te debe nada en este momento, muy bien.",
+    "es-ES": "Nadie te debe nada en este momento, muy bien."
+  },
+  "None": {
+    "es-419": "Ninguno",
+    "es-ES": "Ninguno"
+  },
+  "None — add lines manually": {
+    "es-419": "Ninguno: agregue líneas manualmente",
+    "es-ES": "Ninguno: agregue líneas manualmente"
+  },
+  "Not now": {
+    "es-419": "Ahora no",
+    "es-ES": "Ahora no"
+  },
+  "Note": {
+    "es-419": "Nota",
+    "es-ES": "Nota"
+  },
+  "Notes": {
+    "es-419": "Notas",
+    "es-ES": "Notas"
+  },
+  "Notes & Terms": {
+    "es-419": "Notas y términos",
+    "es-ES": "Notas y términos"
+  },
+  "Numbering": {
+    "es-419": "Numeración",
+    "es-ES": "Numeración"
+  },
+  "OPTIMIZATION OPPORTUNITIES": {
+    "es-419": "OPORTUNIDADES DE OPTIMIZACIÓN",
+    "es-ES": "OPORTUNIDADES DE OPTIMIZACIÓN"
+  },
+  "Office Expenses": {
+    "es-419": "Gastos de oficina",
+    "es-ES": "Gastos de oficina"
+  },
+  "One total price for the job — your work clock only tracks time, not money.": {
+    "es-419": "Un precio total por el trabajo: su reloj de trabajo solo registra el tiempo, no el dinero.",
+    "es-ES": "Un precio total por el trabajo: su reloj de trabajo solo registra el tiempo, no el dinero."
+  },
+  "Only when the client is with you. For PDF, text, or print-back approval, use Client approval above — not this pad.": {
+    "es-419": "Sólo cuando el cliente está contigo. Para aprobación PDF, texto o impresión, utilice la aprobación del cliente arriba, no este bloc.",
+    "es-ES": "Sólo cuando el cliente está contigo. Para aprobación PDF, texto o impresión, utilice la aprobación del cliente arriba, no este bloc."
+  },
+  "Opacity": {
+    "es-419": "Opacidad",
+    "es-ES": "Opacidad"
+  },
+  "Open Settings": {
+    "es-419": "Abrir configuración",
+    "es-ES": "Abrir configuración"
+  },
+  "Open Tax Profile to choose a country preset or enter your rules.": {
+    "es-419": "Abra el archivo Impuestos Pro para elegir un país preestablecido o ingresar sus reglas.",
+    "es-ES": "Abra el archivo Impuestos Pro para elegir un país preestablecido o ingresar sus reglas."
+  },
+  "Open mileage log": {
+    "es-419": "Abrir registro de millaje",
+    "es-ES": "Abrir registro de kilometraje"
+  },
+  "Options": {
+    "es-419": "Opciones",
+    "es-ES": "Opciones"
+  },
+  "Order": {
+    "es-419": "Orden",
+    "es-ES": "Orden"
+  },
+  "Outline": {
+    "es-419": "Describir",
+    "es-ES": "Describir"
+  },
+  "Outstanding": {
+    "es-419": "Pendiente",
+    "es-ES": "Pendiente"
+  },
+  "Overlay": {
+    "es-419": "Cubrir",
+    "es-ES": "Cubrir"
+  },
+  "PAID INFLOW · 6 MO": {
+    "es-419": "ENTRADA PAGADA · 6 MESES",
+    "es-ES": "ENTRADA PAGADA · 6 MESES"
+  },
+  "PAY ONLINE": {
+    "es-419": "PAGAR EN LÍNEA",
+    "es-ES": "PAGAR EN LÍNEA"
+  },
+  "PAYMENT DETAILS": {
+    "es-419": "DETALLES DE PAGO",
+    "es-ES": "DETALLES DE PAGO"
+  },
+  "PROFIT": {
+    "es-419": "GANANCIA",
+    "es-ES": "GANANCIA"
+  },
+  "PROJECT": {
+    "es-419": "PROYECTO",
+    "es-ES": "PROYECTO"
+  },
+  "PROJECT OVERVIEW": {
+    "es-419": "RESUMEN DEL PROYECTO",
+    "es-ES": "RESUMEN DEL PROYECTO"
+  },
+  "PROJECT PLANNER": {
+    "es-419": "PLANIFICADOR DE PROYECTOS",
+    "es-ES": "PLANIFICADOR DE PROYECTOS"
+  },
+  "PROJECTIONS OUTPUT": {
+    "es-419": "SALIDA DE PROYECCIONES",
+    "es-ES": "SALIDA DE PROYECCIONES"
+  },
+  "PROJECTS": {
+    "es-419": "PROYECTOS",
+    "es-ES": "PROYECTOS"
+  },
+  "Paid": {
+    "es-419": "Pagado",
+    "es-ES": "Pagado"
+  },
+  "Paid total": {
+    "es-419": "Total pagado",
+    "es-ES": "Total pagado"
+  },
+  "Paper": {
+    "es-419": "Papel",
+    "es-ES": "Papel"
+  },
+  "Parallelogram + quarter circle": {
+    "es-419": "Paralelogramo + cuarto de círculo",
+    "es-ES": "Paralelogramo + cuarto de círculo"
+  },
+  "Partial": {
+    "es-419": "Parcial",
+    "es-ES": "Parcial"
+  },
+  "Payment": {
+    "es-419": "Pago",
+    "es-ES": "Pago"
+  },
+  "Payment Speed": {
+    "es-419": "Velocidad de pago",
+    "es-ES": "Velocidad de pago"
+  },
+  "Payment status": {
+    "es-419": "Estado de pago",
+    "es-ES": "Estado de pago"
+  },
+  "People": {
+    "es-419": "Gente",
+    "es-ES": "Gente"
+  },
+  "Person": {
+    "es-419": "Persona",
+    "es-ES": "Persona"
+  },
+  "Photo": {
+    "es-419": "Foto",
+    "es-ES": "Foto"
+  },
+  "Photo (optional)": {
+    "es-419": "Foto (opcional)",
+    "es-ES": "Foto (opcional)"
+  },
+  "Photo access": {
+    "es-419": "Acceso a la foto",
+    "es-ES": "Acceso a la foto"
+  },
+  "Photo position": {
+    "es-419": "Posición de la foto",
+    "es-ES": "Posición de la foto"
+  },
+  "Pick a template above to create your first design.": {
+    "es-419": "Elija una plantilla de arriba para crear su primer diseño.",
+    "es-ES": "Elija una plantilla de arriba para crear su primer diseño."
+  },
+  "Pick with Photos picker": {
+    "es-419": "Seleccionar con el selector de fotos",
+    "es-ES": "Seleccionar con el selector de fotos"
+  },
+  "Pinch to resize · Two fingers to rotate · Drag handles for precision": {
+    "es-419": "Pellizca para redimensionar · dos dedos para rotar · arrastra los controles con precisión",
+    "es-ES": "Pellizca para redimensionar · dos dedos para rotar · arrastra los controles con precisión"
+  },
+  "Planner alerts": {
+    "es-419": "Alertas del planificador",
+    "es-ES": "Alertas del planificador"
+  },
+  "Planner milestones": {
+    "es-419": "Hitos del planificador",
+    "es-ES": "Hitos del planificador"
+  },
+  "Portrait": {
+    "es-419": "Retrato",
+    "es-ES": "Retrato"
+  },
+  "Preview matches how the shape will look on the card.": {
+    "es-419": "La vista previa coincide con cómo se verá la forma en la tarjeta.",
+    "es-ES": "La vista previa coincide con cómo se verá la forma en la tarjeta."
+  },
+  "Preview:": {
+    "es-419": "Avance:",
+    "es-ES": "Avance:"
+  },
+  "Print size": {
+    "es-419": "Tamaño de impresión",
+    "es-ES": "Tamaño de impresión"
+  },
+  "Pro Search": {
+    "es-419": "Pro Buscar",
+    "es-ES": "Pro Buscar"
+  },
+  "Pro Studio": {
+    "es-419": "Pro Studio",
+    "es-ES": "Pro Studio"
+  },
+  "Pro card extras": {
+    "es-419": "Pro extras de tarjeta",
+    "es-ES": "Pro extras de tarjeta"
+  },
+  "Profitability": {
+    "es-419": "Profitabilidad",
+    "es-ES": "Profitabilidad"
+  },
+  "Project": {
+    "es-419": "Project",
+    "es-ES": "Project"
+  },
+  "Project plan": {
+    "es-419": "Proplan de proyecto",
+    "es-ES": "Proplan de proyecto"
+  },
+  "Projected Net Profit:": {
+    "es-419": "Prored proyectada Proajuste:",
+    "es-ES": "Prored proyectada Proajuste:"
+  },
+  "Projects": {
+    "es-419": "Proyectos",
+    "es-ES": "Proyectos"
+  },
+  "QR code": {
+    "es-419": "Código QR",
+    "es-ES": "Código QR"
+  },
+  "QR code, logo, premium styling & PDF export": {
+    "es-419": "QR código, logotipo, estilo premium y PDF exportar",
+    "es-ES": "QR código, logotipo, estilo premium y PDF exportar"
+  },
+  "QR ink": {
+    "es-419": "QR tinta",
+    "es-ES": "QR tinta"
+  },
+  "QR paper": {
+    "es-419": "QR papel",
+    "es-ES": "QR papel"
+  },
+  "QUARTERLY SPLIT": {
+    "es-419": "DIVISIÓN TRIMESTRAL",
+    "es-ES": "DIVISIÓN TRIMESTRAL"
+  },
+  "QUOTE": {
+    "es-419": "CITA",
+    "es-ES": "CITA"
+  },
+  "Qty": {
+    "es-419": "Cantidad",
+    "es-ES": "Cantidad"
+  },
+  "Quarterly": {
+    "es-419": "Trimestral",
+    "es-ES": "Trimestral"
+  },
+  "Quarterly Tax": {
+    "es-419": "Impuesto trimestral",
+    "es-ES": "Impuesto trimestral"
+  },
+  "Quick Actions": {
+    "es-419": "Acciones Rápidas",
+    "es-ES": "Acciones Rápidas"
+  },
+  "Quick filters": {
+    "es-419": "Filtros rápidos",
+    "es-ES": "Filtros rápidos"
+  },
+  "Quick picks": {
+    "es-419": "selecciones rápidas",
+    "es-ES": "selecciones rápidas"
+  },
+  "Quote job": {
+    "es-419": "Cotizar trabajo",
+    "es-ES": "Cotizar trabajo"
+  },
+  "READY TO INVOICE": {
+    "es-419": "LISTO PARA FACTURAR",
+    "es-ES": "hecho PARA FACTURAR"
+  },
+  "REVENUE": {
+    "es-419": "GANANCIA",
+    "es-ES": "GANANCIA"
+  },
+  "Rate": {
+    "es-419": "Tasa",
+    "es-ES": "Tasa"
+  },
+  "Rate Details": {
+    "es-419": "Detalles de la tarifa",
+    "es-ES": "Detalles de la tarifa"
+  },
+  "Receipt Scanner": {
+    "es-419": "Escáner de recibos",
+    "es-ES": "Escáner de tickets"
+  },
+  "Receipts": {
+    "es-419": "Recibos",
+    "es-ES": "Recibos"
+  },
+  "Recent": {
+    "es-419": "Reciente",
+    "es-ES": "Reciente"
+  },
+  "Redo": {
+    "es-419": "Rehacer",
+    "es-ES": "Rehacer"
+  },
+  "Refresh QR": {
+    "es-419": "Actualizar QR",
+    "es-ES": "Actualizar QR"
+  },
+  "Region & Currency": {
+    "es-419": "Región y moneda",
+    "es-ES": "Región y moneda"
+  },
+  "Region & currency": {
+    "es-419": "Región y moneda",
+    "es-ES": "Región y moneda"
+  },
+  "Registration": {
+    "es-419": "Registro",
+    "es-ES": "Registro"
+  },
+  "Remove photo": {
+    "es-419": "Quitar foto",
+    "es-ES": "Quitar foto"
+  },
+  "Reopen project": {
+    "es-419": "Reabrir proyecto",
+    "es-ES": "Reabrir proyecto"
+  },
+  "Reset": {
+    "es-419": "Reiniciar",
+    "es-ES": "Reiniciar"
+  },
+  "Reset selection": {
+    "es-419": "Restablecer selección",
+    "es-ES": "Restablecer selección"
+  },
+  "Reset zoom": {
+    "es-419": "Restablecer zoom",
+    "es-ES": "Restablecer zoom"
+  },
+  "Rotate": {
+    "es-419": "Girar",
+    "es-ES": "Girar"
+  },
+  "Rounded": {
+    "es-419": "Redondeado",
+    "es-ES": "Redondeado"
+  },
+  "SCAN TO PAY": {
+    "es-419": "ESCANEAR PARA PAGAR",
+    "es-ES": "ESCANEAR PARA PAGAR"
+  },
+  "SCOPE RADAR": {
+    "es-419": "SCOPE RADAR",
+    "es-ES": "SCOPE RADAR"
+  },
+  "SELF-EMPLOYED TAX RATE %": {
+    "es-419": "TASA DE IMPUESTO PARA AUTÓNOMOS %",
+    "es-ES": "TASA DE IMPUESTO PARA AUTÓNOMOS %"
+  },
+  "SHEET 01 · ISSUED": {
+    "es-419": "HOJA 01 · EMITIDA",
+    "es-ES": "HOJA 01 · EMITIDA"
+  },
+  "SUGGESTED TAX PRESET": {
+    "es-419": "PREAJUSTE DE IMPUESTOS SUGERIDOS",
+    "es-ES": "PREAJUSTE DE IMPUESTOS SUGERIDOS"
+  },
+  "SURVIVAL MODE TARGET": {
+    "es-419": "OBJETIVO DEL MODO DE SUPERVIVENCIA",
+    "es-ES": "OBJETIVO DEL MODO DE SUPERVIVENCIA"
+  },
+  "Safe zone": {
+    "es-419": "Zona segura",
+    "es-ES": "Zona segura"
+  },
+  "Same app for everyone — this just sets smart defaults. Change anytime in Settings.": {
+    "es-419": "La misma aplicación para todos; esto solo establece valores predeterminados inteligentes. Cambie en cualquier momento en Configuración.",
+    "es-ES": "La misma aplicación para todos; esto solo establece valores predeterminados inteligentes. Cambie en cualquier momento en Configuración."
+  },
+  "Same trip back": {
+    "es-419": "Mismo viaje de vuelta",
+    "es-ES": "Mismo viaje de vuelta"
+  },
+  "Save": {
+    "es-419": "Guardar",
+    "es-ES": "Guardar"
+  },
+  "Save & send": {
+    "es-419": "Guardar y enviar",
+    "es-ES": "Guardar y enviar"
+  },
+  "Save & stop": {
+    "es-419": "Guardar y detener",
+    "es-ES": "Guardar y detener"
+  },
+  "Save Default": {
+    "es-419": "Guardar predeterminado",
+    "es-ES": "Guardar predeterminado"
+  },
+  "Save Invoice": {
+    "es-419": "Guardar factura",
+    "es-ES": "Guardar factura"
+  },
+  "Save card": {
+    "es-419": "guardar tarjeta",
+    "es-ES": "guardar tarjeta"
+  },
+  "Save your time entry and end the Live Activity.": {
+    "es-419": "Guarde su entrada de tiempo y finalice el Live Activity.",
+    "es-ES": "Guarde su entrada de tiempo y finalice el Live Activity."
+  },
+  "Scan": {
+    "es-419": "Escanear",
+    "es-ES": "Escanear"
+  },
+  "Scan Receipt": {
+    "es-419": "Escanear recibo",
+    "es-ES": "Escanear ticket"
+  },
+  "Scan a payment screenshot or log money with + — not a bank, your private ledger.": {
+    "es-419": "Escanee una captura de pantalla de pago o registre dinero con +: no un banco, su libro de contabilidad privado.",
+    "es-ES": "Escanee una captura de pantalla de pago o registre dinero con +: no un banco, su libro de contabilidad privado."
+  },
+  "Scan receipt": {
+    "es-419": "Escanear recibo",
+    "es-ES": "Escanear ticket"
+  },
+  "Scan to save contact": {
+    "es-419": "Escanear para guardar contacto",
+    "es-ES": "Escanear para guardar contacto"
+  },
+  "Scope & deliverables": {
+    "es-419": "Alcance y entregables",
+    "es-ES": "Alcance y entregables"
+  },
+  "Scope Radar": {
+    "es-419": "Scope Radar",
+    "es-ES": "Scope Radar"
+  },
+  "Scope budget tight": {
+    "es-419": "Presupuesto de alcance ajustado",
+    "es-ES": "Presupuesto de alcance ajustado"
+  },
+  "Scope checkpoint": {
+    "es-419": "Punto de control de alcance",
+    "es-ES": "Punto de control de alcance"
+  },
+  "Scope creep": {
+    "es-419": "Desplazamiento del alcance",
+    "es-ES": "Desplazamiento del alcance"
+  },
+  "Search": {
+    "es-419": "Buscar",
+    "es-ES": "Buscar"
+  },
+  "Secure offline text digitization using local Apple Neural Engines.": {
+    "es-419": "Digitalización segura de texto sin conexión utilizando Apple Neural Engines locales.",
+    "es-ES": "Digitalización segura de texto sin conexión utilizando Apple Neural Engines locales."
+  },
+  "See the look": {
+    "es-419": "ver la mirada",
+    "es-ES": "ver la mirada"
+  },
+  "Select": {
+    "es-419": "Seleccionar",
+    "es-ES": "Seleccionar"
+  },
+  "Selection size": {
+    "es-419": "Tamaño de selección",
+    "es-ES": "Tamaño de selección"
+  },
+  "Self-Employed Tax": {
+    "es-419": "Impuesto para autónomos",
+    "es-ES": "Impuesto para autónomos"
+  },
+  "Send": {
+    "es-419": "Enviar",
+    "es-ES": "Enviar"
+  },
+  "Send card": {
+    "es-419": "enviar tarjeta",
+    "es-ES": "enviar tarjeta"
+  },
+  "Send only": {
+    "es-419": "Enviar solo",
+    "es-ES": "Enviar solo"
+  },
+  "Send quote": {
+    "es-419": "Enviar cotización",
+    "es-ES": "Enviar cotización"
+  },
+  "Send to back": {
+    "es-419": "enviar atrás",
+    "es-ES": "enviar atrás"
+  },
+  "Send via Messages, WhatsApp, Mail, or any app — includes your card image and a scannable contact file.": {
+    "es-419": "Enviar a través de Mensajes, WhatsApp, Correo o cualquier aplicación: incluye la imagen de tu tarjeta y un archivo de contacto escaneable.",
+    "es-ES": "Enviar a través de Mensajes, WhatsApp, Correo o cualquier aplicación: incluye la imagen de tu tarjeta y un archivo de contacto escaneable."
+  },
+  "Sent via BuxMuse · Not a bank": {
+    "es-419": "Enviado vía BuxMuse · No es un banco",
+    "es-ES": "Enviado vía BuxMuse · No es un banco"
+  },
+  "Set": {
+    "es-419": "Colocar",
+    "es-ES": "Colocar"
+  },
+  "Set a time for this job": {
+    "es-419": "Establecer una hora para este trabajo",
+    "es-ES": "Establecer una hora para este trabajo"
+  },
+  "Set photo background": {
+    "es-419": "Establecer fondo de foto",
+    "es-ES": "Establecer fondo de foto"
+  },
+  "Set your effective income and self-employed tax rates in Tax Profile to enable calculations.": {
+    "es-419": "Establezca sus tasas efectivas de impuestos sobre la renta y para trabajadores por cuenta propia en el archivo Impuestos Pro para permitir los cálculos.",
+    "es-ES": "Establezca sus tasas efectivas de impuestos sobre la renta y para trabajadores por cuenta propia en el archivo Impuestos Pro para permitir los cálculos."
+  },
+  "Settings": {
+    "es-419": "Ajustes",
+    "es-ES": "Ajustes"
+  },
+  "Settled": {
+    "es-419": "Establecido",
+    "es-ES": "Establecido"
+  },
+  "Shape color": {
+    "es-419": "Color de forma",
+    "es-ES": "Color de forma"
+  },
+  "Shape fill": {
+    "es-419": "Relleno de forma",
+    "es-ES": "Relleno de forma"
+  },
+  "Shape stroke": {
+    "es-419": "Trazo de forma",
+    "es-ES": "Trazo de forma"
+  },
+  "Shapes": {
+    "es-419": "Formas",
+    "es-ES": "Formas"
+  },
+  "Share": {
+    "es-419": "Compartir",
+    "es-ES": "Compartir"
+  },
+  "Share agreement PDF": {
+    "es-419": "Acuerdo de compartir PDF",
+    "es-ES": "Acuerdo de compartir PDF"
+  },
+  "Share agreement text": {
+    "es-419": "Compartir texto del acuerdo",
+    "es-ES": "Compartir texto del acuerdo"
+  },
+  "Share card": {
+    "es-419": "compartir tarjeta",
+    "es-ES": "compartir tarjeta"
+  },
+  "Share contact card (.vcf)": {
+    "es-419": "Compartir tarjeta de contacto (.vcf)",
+    "es-ES": "Compartir tarjeta de contacto (.vcf)"
+  },
+  "Share your card": {
+    "es-419": "Comparte tu tarjeta",
+    "es-ES": "Comparte tu tarjeta"
+  },
+  "Show on card": {
+    "es-419": "Mostrar en tarjeta",
+    "es-ES": "Mostrar en tarjeta"
+  },
+  "Shown on exported invoice PDFs": {
+    "es-419": "Se muestra en PDFs de factura exportados",
+    "es-ES": "Se muestra en PDFs de factura exportados"
+  },
+  "Shown on invoice FROM block and legal footer.": {
+    "es-419": "Se muestra en la factura DESDE el bloque y en el pie de página legal.",
+    "es-ES": "Se muestra en la factura DESDE el bloque y en el pie de página legal."
+  },
+  "Sign anytime — included when you export a PDF. Client approval uses the channel you chose above.": {
+    "es-419": "Firme en cualquier momento, incluido cuando exporta un PDF. La aprobación del cliente utiliza el canal que eligió anteriormente.",
+    "es-ES": "Firme en cualquier momento, incluido cuando exporta un PDF. La aprobación del cliente utiliza el canal que eligió anteriormente."
+  },
+  "Sign-off note (optional)": {
+    "es-419": "Nota de despedida (opcional)",
+    "es-ES": "Nota de despedida (opcional)"
+  },
+  "Simple Invoice": {
+    "es-419": "Simple Invoice",
+    "es-ES": "Simple Invoice"
+  },
+  "Simple invoice": {
+    "es-419": "Simple Invoice",
+    "es-ES": "Simple Invoice"
+  },
+  "Simulated Billing Rate Increase:": {
+    "es-419": "Aumento de la tasa de facturación simulada:",
+    "es-ES": "Aumento de la tasa de facturación simulada:"
+  },
+  "Simulated Monthly Billable Hours:": {
+    "es-419": "Horas facturables mensuales simuladas:",
+    "es-ES": "Horas facturables mensuales simuladas:"
+  },
+  "Simulated Workspace Equipment purchases:": {
+    "es-419": "Compras de equipos de espacio de trabajo simulados:",
+    "es-ES": "Compras de equipos de espacio de trabajo simulados:"
+  },
+  "Small": {
+    "es-419": "Pequeño",
+    "es-ES": "Pequeño"
+  },
+  "Snap": {
+    "es-419": "Ajustar",
+    "es-ES": "Ajustar"
+  },
+  "Snap a payment or receipt": {
+    "es-419": "Ajustar un pago o recibo",
+    "es-ES": "Ajustar un pago o recibo"
+  },
+  "Social square": {
+    "es-419": "plaza social",
+    "es-ES": "plaza social"
+  },
+  "Software Subscriptions": {
+    "es-419": "Suscripciones de software",
+    "es-ES": "Suscripciones de software"
+  },
+  "Solid": {
+    "es-419": "Sólido",
+    "es-ES": "Sólido"
+  },
+  "Spent": {
+    "es-419": "Gastado",
+    "es-ES": "Gastado"
+  },
+  "Square": {
+    "es-419": "Cuadrado",
+    "es-ES": "Cuadrado"
+  },
+  "Status": {
+    "es-419": "Estado",
+    "es-ES": "Estado"
+  },
+  "Still waiting": {
+    "es-419": "Todavía esperando",
+    "es-ES": "Todavía esperando"
+  },
+  "Stop the clock when time is up": {
+    "es-419": "Detén el reloj cuando se acabe el tiempo",
+    "es-ES": "Detén el reloj cuando se acabe el tiempo"
+  },
+  "Stress Indicator": {
+    "es-419": "Indicador de estrés",
+    "es-ES": "Indicador de estrés"
+  },
+  "Stroke": {
+    "es-419": "Trazo",
+    "es-ES": "Trazo"
+  },
+  "Stroke W": {
+    "es-419": "Carrera W",
+    "es-ES": "Carrera W"
+  },
+  "Strong bars + triangle": {
+    "es-419": "Barras fuertes + triángulo",
+    "es-ES": "Barras fuertes + triángulo"
+  },
+  "Studio Insights": {
+    "es-419": "Studio Perspectivas",
+    "es-ES": "Studio Perspectivas"
+  },
+  "Style": {
+    "es-419": "Estilo",
+    "es-ES": "Estilo"
+  },
+  "Subtotal": {
+    "es-419": "Total parcial",
+    "es-ES": "Total parcial"
+  },
+  "Swipe the deck — tap to open": {
+    "es-419": "Desliza la plataforma: toca para abrir",
+    "es-ES": "Desliza la plataforma: toca para abrir"
+  },
+  "Swiss Grid": {
+    "es-419": "Cuadrícula suiza",
+    "es-ES": "Cuadrícula suiza"
+  },
+  "Sync from card": {
+    "es-419": "Sincronizar desde la tarjeta",
+    "es-ES": "Sincronizar desde la tarjeta"
+  },
+  "TAX PAYMENT SCHEDULE": {
+    "es-419": "CALENDARIO DE PAGO DE IMPUESTOS",
+    "es-ES": "CALENDARIO DE PAGO DE IMPUESTOS"
+  },
+  "TIME ENTRIES LOG": {
+    "es-419": "REGISTRO DE ENTRADAS DE TIEMPO",
+    "es-ES": "REGISTRO DE ENTRADAS DE TIEMPO"
+  },
+  "TOTAL ACTIVE WRITE-OFF DEDUCTIONS": {
+    "es-419": "TOTAL DEDUCCIONES CANCELADAS ACTIVAS",
+    "es-ES": "TOTAL DEDUCCIONES CANCELADAS ACTIVAS"
+  },
+  "TOTAL DUE": {
+    "es-419": "TOTAL DEBIDO",
+    "es-ES": "TOTAL DEBIDO"
+  },
+  "Tap + to scan or log your first job.": {
+    "es-419": "Toque + para escanear o registrar su primer trabajo.",
+    "es-ES": "Toque + para escanear o registrar su primer trabajo."
+  },
+  "Tap any layer · drag · pinch · twist": {
+    "es-419": "Toca cualquier capa · arrastra · pellizca · gira",
+    "es-ES": "Toca cualquier capa · arrastra · pellizca · gira"
+  },
+  "Tap the chart or a row below to filter": {
+    "es-419": "Toca el gráfico o una fila a continuación para filtrar",
+    "es-ES": "Toca el gráfico o una fila a continuación para filtrar"
+  },
+  "Tap to capture signature": {
+    "es-419": "Toca para capturar la firma",
+    "es-ES": "Toca para capturar la firma"
+  },
+  "Tap to fix": {
+    "es-419": "Toca para arreglar",
+    "es-ES": "Toca para arreglar"
+  },
+  "Tap to open": {
+    "es-419": "Toca para abrir",
+    "es-ES": "Toca para abrir"
+  },
+  "Tap to open My money": {
+    "es-419": "Toca para abrir Mi dinero",
+    "es-ES": "Toca para abrir Mi dinero"
+  },
+  "Target delivery": {
+    "es-419": "Entrega objetivo",
+    "es-ES": "Entrega objetivo"
+  },
+  "Tax Overview": {
+    "es-419": "Descripción general de impuestos",
+    "es-ES": "Descripción general de impuestos"
+  },
+  "Tax Profile": {
+    "es-419": "Perfil fiscal",
+    "es-ES": "Perfil fiscal"
+  },
+  "Tax Studio": {
+    "es-419": "Tax Studio",
+    "es-ES": "Tax Studio"
+  },
+  "Tax details": {
+    "es-419": "Detalles fiscales",
+    "es-ES": "Detalles fiscales"
+  },
+  "Tax on invoices": {
+    "es-419": "Impuesto sobre facturas",
+    "es-ES": "Impuesto sobre facturas"
+  },
+  "Tax sandbox settings": {
+    "es-419": "Configuración de la zona de pruebas de impuestos",
+    "es-ES": "Configuración de la zona de pruebas de impuestos"
+  },
+  "Template": {
+    "es-419": "Plantilla",
+    "es-ES": "Plantilla"
+  },
+  "Terms & conditions": {
+    "es-419": "Términos y condiciones",
+    "es-ES": "Términos y condiciones"
+  },
+  "Text": {
+    "es-419": "Texto",
+    "es-ES": "Texto"
+  },
+  "Text BG": {
+    "es-419": "Texto BG",
+    "es-ES": "Texto BG"
+  },
+  "Text color": {
+    "es-419": "Color del texto",
+    "es-ES": "Color del texto"
+  },
+  "There and back": {
+    "es-419": "Ida y vuelta",
+    "es-ES": "Ida y vuelta"
+  },
+  "These rates power the Income Tax Calculator and quarterly estimates. They are never auto-filled from JSON presets.": {
+    "es-419": "Estas tasas impulsan la Calculadora del Impuesto sobre la Renta y las estimaciones trimestrales. Nunca se completan automáticamente a partir de ajustes preestablecidos JSON.",
+    "es-ES": "Estas tasas impulsan la Calculadora del Impuesto sobre la Renta y las estimaciones trimestrales. Nunca se completan automáticamente a partir de ajustes preestablecidos JSON."
+  },
+  "They appear automatically when you log jobs or send invoices.": {
+    "es-419": "Aparecen automáticamente cuando registra trabajos o envía facturas.",
+    "es-ES": "Aparecen automáticamente cuando registra trabajos o envía facturas."
+  },
+  "They owe me": {
+    "es-419": "me deben",
+    "es-ES": "me deben"
+  },
+  "Thin": {
+    "es-419": "Delgado",
+    "es-ES": "Delgado"
+  },
+  "This card hasn't been saved yet. Discarding will delete it.": {
+    "es-419": "Esta tarjeta aún no se ha guardado. Descartarlo lo eliminará.",
+    "es-ES": "Esta tarjeta aún no se ha guardado. Descartarlo lo eliminará."
+  },
+  "This fills your tax rule text fields only — effective rate percentages stay under your control.": {
+    "es-419": "Esto llena únicamente los campos de texto de su regla fiscal: los porcentajes de tasa efectiva permanecen bajo su control.",
+    "es-ES": "Esto llena únicamente los campos de texto de su regla fiscal: los porcentajes de tasa efectiva permanecen bajo su control."
+  },
+  "This month": {
+    "es-419": "este mes",
+    "es-ES": "este mes"
+  },
+  "This permanently removes the selected cards from Your designs.": {
+    "es-419": "Esto elimina permanentemente las tarjetas seleccionadas de Tus diseños.",
+    "es-ES": "Esto elimina permanentemente las tarjetas seleccionadas de Tus diseños."
+  },
+  "This receipt, along with its metadata, is encrypted and securely stored offline inside your local BuxMuse Sandbox. No data leaves your iPhone.": {
+    "es-419": "Este recibo, junto con sus metadatos, está cifrado y almacenado de forma segura sin conexión dentro de su BuxMuse Sandbox local. No salen datos de tu iPhone.",
+    "es-ES": "Este recibo, junto con sus metadatos, está cifrado y almacenado de forma segura sin conexión dentro de su BuxMuse Sandbox local. No salen datos de tu iPhone."
+  },
+  "This removes the entry from the project log.": {
+    "es-419": "Esto elimina la entrada del registro del proyecto.",
+    "es-ES": "Esto elimina la entrada del registro del proyecto."
+  },
+  "Time entries below are your task log for this project.": {
+    "es-419": "Las entradas de tiempo a continuación son su registro de tareas para este proyecto.",
+    "es-ES": "Las entradas de tiempo a continuación son su registro de tareas para este proyecto."
+  },
+  "Time entry": {
+    "es-419": "Entrada de tiempo",
+    "es-ES": "Entrada de tiempo"
+  },
+  "Time leakage": {
+    "es-419": "fuga de tiempo",
+    "es-ES": "fuga de tiempo"
+  },
+  "Timeline": {
+    "es-419": "Línea de tiempo",
+    "es-ES": "Línea de tiempo"
+  },
+  "Today kept": {
+    "es-419": "hoy mantenido",
+    "es-ES": "hoy mantenido"
+  },
+  "Tools": {
+    "es-419": "Herramientas",
+    "es-ES": "Herramientas"
+  },
+  "Top Clients": {
+    "es-419": "Clientes principales",
+    "es-ES": "Clientes principales"
+  },
+  "Total Deducted Write-offs:": {
+    "es-419": "Total de Castigos Deducidos:",
+    "es-ES": "Total de Castigos Deducidos:"
+  },
+  "Total Paid In": {
+    "es-419": "Total pagado",
+    "es-ES": "Total pagado"
+  },
+  "Total project direct cost:": {
+    "es-419": "Costo directo total del proyecto:",
+    "es-ES": "Costo directo total del proyecto:"
+  },
+  "Track every job. Every payment.": {
+    "es-419": "Realice un seguimiento de cada trabajo. Cada pago.",
+    "es-ES": "Realice un seguimiento de cada trabajo. Cada pago."
+  },
+  "Track time — hourly or one-price jobs": {
+    "es-419": "Seguimiento del tiempo: trabajos por horas o de precio único",
+    "es-ES": "Seguimiento del tiempo: trabajos por horas o de precio único"
+  },
+  "Trade Bold": {
+    "es-419": "Comercio audaz",
+    "es-ES": "Comercio audaz"
+  },
+  "Travel & Lodging": {
+    "es-419": "Viajes y alojamiento",
+    "es-ES": "Viajes y alojamiento"
+  },
+  "Triangles + diamond accents": {
+    "es-419": "Triángulos + detalles de diamantes",
+    "es-ES": "Triángulos + detalles de diamantes"
+  },
+  "Try a name, “waiting on payment”, or “jobs this month”.": {
+    "es-419": "Pruebe con un nombre, \"esperando pago\" o \"trabajos este mes\".",
+    "es-ES": "Pruebe con un nombre, \"esperando pago\" o \"trabajos este mes\"."
+  },
+  "Try another name or phone number.": {
+    "es-419": "Pruebe con otro nombre o número de teléfono.",
+    "es-ES": "Pruebe con otro nombre o número de móvil."
+  },
+  "Try asking like this": {
+    "es-419": "Prueba a preguntar así",
+    "es-ES": "Prueba a preguntar así"
+  },
+  "Try “overdue invoices”, a client name, or “receipts this week”.": {
+    "es-419": "Pruebe con \"facturas vencidas\", el nombre de un cliente o \"recibos de esta semana\".",
+    "es-ES": "Pruebe con \"facturas vencidas\", el nombre de un cliente o \"recibos de esta semana\"."
+  },
+  "Type": {
+    "es-419": "Tipo",
+    "es-ES": "Tipo"
+  },
+  "Type scale": {
+    "es-419": "Tipo de escala",
+    "es-ES": "Tipo de escala"
+  },
+  "Underpricing signal": {
+    "es-419": "Señal de subvaloración",
+    "es-ES": "Señal de subvaloración"
+  },
+  "Undo": {
+    "es-419": "Deshacer",
+    "es-ES": "Deshacer"
+  },
+  "Update invoices to match this card’s latest colors and style?": {
+    "es-419": "¿Actualizar las facturas para que coincidan con los últimos colores y estilos de esta tarjeta?",
+    "es-ES": "¿Actualizar las facturas para que coincidan con los últimos colores y estilos de esta tarjeta?"
+  },
+  "Upgrade to Pro": {
+    "es-419": "Mejorar a Pro",
+    "es-ES": "Mejorar a Pro"
+  },
+  "Upgrade to Pro Studio": {
+    "es-419": "Actualizar a Pro Studio",
+    "es-ES": "Actualizar a Pro Studio"
+  },
+  "Use for invoices": {
+    "es-419": "Usar para facturas",
+    "es-ES": "Usar para facturas"
+  },
+  "Use {PREFIX}, {YEAR}, {SEQ}": {
+    "es-419": "Usa {PREFIX}, {YEAR}, {SEQ}",
+    "es-ES": "Usa {PREFIX}, {YEAR}, {SEQ}"
+  },
+  "Used when you fill an agreement from this project.": {
+    "es-419": "Se utiliza cuando completa un acuerdo de este proyecto.",
+    "es-ES": "Se utiliza cuando completa un acuerdo de este proyecto."
+  },
+  "Vivid": {
+    "es-419": "Vívido",
+    "es-ES": "Vívido"
+  },
+  "WARNINGS": {
+    "es-419": "ADVERTENCIAS",
+    "es-ES": "ADVERTENCIAS"
+  },
+  "Waiting": {
+    "es-419": "Espera",
+    "es-ES": "Espera"
+  },
+  "Waiting on": {
+    "es-419": "esperando",
+    "es-ES": "esperando"
+  },
+  "Waiting on them": {
+    "es-419": "Esperando por ellos",
+    "es-ES": "Esperando por ellos"
+  },
+  "Warm": {
+    "es-419": "Cálido",
+    "es-ES": "Cálido"
+  },
+  "Watermark": {
+    "es-419": "Filigrana",
+    "es-ES": "Filigrana"
+  },
+  "What is this?": {
+    "es-419": "¿Qué es esto?",
+    "es-ES": "¿Qué es esto?"
+  },
+  "What kind of work do you do?": {
+    "es-419": "¿Qué tipo de trabajo haces?",
+    "es-ES": "¿Qué tipo de trabajo haces?"
+  },
+  "What was it for?": {
+    "es-419": "¿Para qué fue?",
+    "es-ES": "¿Para qué fue?"
+  },
+  "What you spent": {
+    "es-419": "lo que gastaste",
+    "es-ES": "lo que gastaste"
+  },
+  "WhatsApp": {
+    "es-419": "WhatsApp",
+    "es-ES": "WhatsApp"
+  },
+  "Who": {
+    "es-419": "OMS",
+    "es-ES": "OMS"
+  },
+  "Work clock": {
+    "es-419": "reloj de trabajo",
+    "es-ES": "reloj de trabajo"
+  },
+  "YOUR TAX PROFILE": {
+    "es-419": "SU PERFIL FISCAL",
+    "es-ES": "SU PERFIL FISCAL"
+  },
+  "YOUR TAX RULES": {
+    "es-419": "SUS NORMAS TRIBUTARIAS",
+    "es-ES": "SUS NORMAS TRIBUTARIAS"
+  },
+  "You charge per hour — the work clock multiplies hours × your rate.": {
+    "es-419": "Cobra por hora: el reloj de trabajo multiplica las horas x su tarifa.",
+    "es-ES": "Cobra por hora: el reloj de trabajo multiplica las horas x su tarifa."
+  },
+  "You do not need a perfect photo size. Choose any image, then pan, zoom, crop to the card, or pick a free region.": {
+    "es-419": "No necesitas un tamaño perfecto. Elige cualquier imagen, luego pan, zoom, recorta a la tarjeta o elige una región libre.",
+    "es-ES": "No necesitas un tamaño perfecto. Elige cualquier imagen, luego pan, zoom, recorta a la tarjeta o elige una región libre."
+  },
+  "You owe": {
+    "es-419": "tu debes",
+    "es-ES": "tu debes"
+  },
+  "Your Studio workspace is empty": {
+    "es-419": "Tu espacio de trabajo Studio está vacío",
+    "es-ES": "Tu espacio de trabajo Studio está vacío"
+  },
+  "Your brand": {
+    "es-419": "Tu marca",
+    "es-ES": "Tu marca"
+  },
+  "Your card": {
+    "es-419": "tu tarjeta",
+    "es-ES": "tu tarjeta"
+  },
+  "Your designs": {
+    "es-419": "Tus diseños",
+    "es-ES": "Tus diseños"
+  },
+  "Your edits since opening this card will be lost.": {
+    "es-419": "Se perderán las modificaciones realizadas desde que abrió esta tarjeta.",
+    "es-ES": "Se perderán las modificaciones realizadas desde que abrió esta tarjeta."
+  },
+  "Your numbers": {
+    "es-419": "Tus numeros",
+    "es-ES": "Tus numeros"
+  },
+  "Your photo": {
+    "es-419": "tu foto",
+    "es-ES": "tu foto"
+  },
+  "Your signature (worker)": {
+    "es-419": "Tu firma (trabajador)",
+    "es-ES": "Tu firma (trabajador)"
+  }
+}

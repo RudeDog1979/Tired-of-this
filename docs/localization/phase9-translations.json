@@ -1,0 +1,378 @@
+{
+  "%lld%%": {
+    "es-419": "%lld%%",
+    "es-ES": "%lld%%"
+  },
+  "Reliability: %lld%%": {
+    "es-419": "Confiabilidad: %lld%%",
+    "es-ES": "Fiabilidad: %lld%%"
+  },
+  "Runway %@": {
+    "es-419": "Pista %@",
+    "es-ES": "Pista %@"
+  },
+  "Photo opacity": {
+    "es-419": "Opacidad de foto",
+    "es-ES": "Opacidad de foto"
+  },
+  "Overlay opacity %lld%%": {
+    "es-419": "Opacidad de superposición %lld%%",
+    "es-ES": "Opacidad de superposición %lld%%"
+  },
+  "Merge %@ into…": {
+    "es-419": "Fusionar %@ en…",
+    "es-ES": "Fusionar %@ en…"
+  },
+  "Status: %@": {
+    "es-419": "Estado: %@",
+    "es-ES": "Estado: %@"
+  },
+  "other": {
+    "es-419": "otro",
+    "es-ES": "otro"
+  },
+  "weekly": {
+    "es-419": "semanal",
+    "es-ES": "semanal"
+  },
+  "bi-weekly": {
+    "es-419": "quincenal",
+    "es-ES": "quincenal"
+  },
+  "monthly": {
+    "es-419": "mensual",
+    "es-ES": "mensual"
+  },
+  "yearly": {
+    "es-419": "anual",
+    "es-ES": "anual"
+  },
+  "irregular": {
+    "es-419": "irregular",
+    "es-ES": "irregular"
+  },
+  "High": {
+    "es-419": "Alto",
+    "es-ES": "Alto"
+  },
+  "Medium": {
+    "es-419": "Medio",
+    "es-ES": "Medio"
+  },
+  "Low": {
+    "es-419": "Bajo",
+    "es-ES": "Bajo"
+  },
+  "Stalled": {
+    "es-419": "Estancado",
+    "es-ES": "Estancado"
+  },
+  "Accelerating": {
+    "es-419": "Acelerando",
+    "es-ES": "Acelerando"
+  },
+  "Slowing Down": {
+    "es-419": "Desacelerando",
+    "es-ES": "Desacelerando"
+  },
+  "Consistent Momentum": {
+    "es-419": "Impulso constante",
+    "es-ES": "Impulso constante"
+  },
+  "Awaiting Kickstart": {
+    "es-419": "Esperando impulso inicial",
+    "es-ES": "Esperando impulso inicial"
+  },
+  "Current Pace": {
+    "es-419": "Ritmo actual",
+    "es-ES": "Ritmo actual"
+  },
+  "Moderate Trim": {
+    "es-419": "Recorte moderado",
+    "es-ES": "Recorte moderado"
+  },
+  "Aggressive Focus": {
+    "es-419": "Enfoque agresivo",
+    "es-ES": "Enfoque agresivo"
+  },
+  "Your %@ spending is %lld%% above baseline. Reducing by 15%% could save you %@ %@/month.": {
+    "es-419": "Tu gasto en %@ está %lld%% por encima de la base. Reducir un 15%% podría ahorrarte %@ %@/mes.",
+    "es-ES": "Tu gasto en %@ está un %lld%% por encima de la base. Reducir un 15%% podría ahorrarte %@ %@/mes."
+  },
+  "Expected completion date is behind your set deadline by %lld month(s).": {
+    "es-419": "La fecha estimada de finalización va %lld mes(es) detrás de tu fecha límite.",
+    "es-ES": "La fecha estimada de finalización va %lld mes(es) por detrás de tu fecha límite."
+  },
+  "Expected completion date is slightly behind your set deadline.": {
+    "es-419": "La fecha estimada de finalización va un poco detrás de tu fecha límite.",
+    "es-ES": "La fecha estimada de finalización va un poco por detrás de tu fecha límite."
+  },
+  "Increase monthly savings to %@ or extend the goal's deadline.": {
+    "es-419": "Aumenta el ahorro mensual a %@ o extiende la fecha límite de la meta.",
+    "es-ES": "Aumenta el ahorro mensual a %@ o amplía la fecha límite de la meta."
+  },
+  "It has been %lld days since your last goal contribution.": {
+    "es-419": "Han pasado %lld días desde tu último aporte a la meta.",
+    "es-ES": "Han pasado %lld días desde tu último aporte a la meta."
+  },
+  "Set up an automatic recurring weekly or monthly transfer to stay on track.": {
+    "es-419": "Configura una transferencia recurrente semanal o mensual para mantenerte al día.",
+    "es-ES": "Configura una transferencia recurrente semanal o mensual para mantenerte al día."
+  },
+  "No contributions have been made to this goal since its creation %lld days ago.": {
+    "es-419": "No has hecho aportes a esta meta desde que la creaste, hace %lld días.",
+    "es-ES": "No has hecho aportes a esta meta desde que la creaste, hace %lld días."
+  },
+  "Kickstart your goal by adding an initial contribution of any amount today.": {
+    "es-419": "Impulsa tu meta con un aporte inicial de cualquier monto hoy.",
+    "es-ES": "Impulsa tu meta con un aporte inicial de cualquier importe hoy."
+  },
+  "Heavy overspending in categories like %@ is draining cash reserves.": {
+    "es-419": "El gasto excesivo en categorías como %@ está drenando tu efectivo.",
+    "es-ES": "El gasto excesivo en categorías como %@ está agotando tu efectivo."
+  },
+  "Pause non-essential shopping and implement category spending caps immediately.": {
+    "es-419": "Pausa compras no esenciales y pon topes de gasto por categoría de inmediato.",
+    "es-ES": "Pausa compras no esenciales y pon topes de gasto por categoría de inmediato."
+  },
+  "Monthly subscription burn rate is %@, reducing your available goal funding.": {
+    "es-419": "El gasto mensual en suscripciones es %@, lo que reduce el dinero disponible para tus metas.",
+    "es-ES": "El gasto mensual en suscripciones es %@, lo que reduce el dinero disponible para tus metas."
+  },
+  "Review subscription hub and consider downgrading or pausing lesser-used services.": {
+    "es-419": "Revisa el centro de suscripciones y considera bajar de plan o pausar servicios que casi no usas.",
+    "es-ES": "Revisa el centro de suscripciones y plantéate bajar de plan o pausar servicios que casi no usas."
+  },
+  "Large, non-recurring expenses registered recently have temporarily impacted liquid savings.": {
+    "es-419": "Gastos grandes y puntuales recientes han afectado temporalmente tu ahorro líquido.",
+    "es-ES": "Gastos grandes y puntuales recientes han afectado temporalmente tu ahorro líquido."
+  },
+  "Create a dedicated buffer fund for unexpected car, travel, or device repairs.": {
+    "es-419": "Crea un fondo de colchón para imprevistos de auto, viajes o reparación de dispositivos.",
+    "es-ES": "Crea un fondo de colchón para imprevistos de coche, viajes o reparación de dispositivos."
+  },
+  "Spike detected: %@ spending is %lld%% above baseline.": {
+    "es-419": "Pico detectado: el gasto en %@ está %lld%% por encima de la base.",
+    "es-ES": "Pico detectado: el gasto en %@ está un %lld%% por encima de la base."
+  },
+  "Trim %@ expenditures by deferring purchases to next month.": {
+    "es-419": "Recorta gastos en %@ posponiendo compras al próximo mes.",
+    "es-ES": "Recorta gastos en %@ posponiendo compras al mes que viene."
+  },
+  "Income flow has decreased by %lld%% compared to last month.": {
+    "es-419": "Tus ingresos bajaron %lld%% frente al mes pasado.",
+    "es-ES": "Tus ingresos han bajado un %lld%% respecto al mes pasado."
+  },
+  "Lower contribution amounts this period to protect your fundamental checking account cash flow.": {
+    "es-419": "Baja los aportes este periodo para proteger el flujo de caja de tu cuenta corriente.",
+    "es-ES": "Baja los aportes este periodo para proteger el flujo de caja de tu cuenta corriente."
+  },
+  "Deposit %@ today to initialize momentum.": {
+    "es-419": "Deposita %@ hoy para iniciar el impulso.",
+    "es-ES": "Ingresa %@ hoy para iniciar el impulso."
+  },
+  "Set a calendar reminder for weekly goal updates.": {
+    "es-419": "Pon un recordatorio semanal en el calendario para revisar tus metas.",
+    "es-ES": "Pon un recordatorio semanal en el calendario para revisar tus metas."
+  },
+  "Form a weekly check-in habit to review cash flow.": {
+    "es-419": "Crea el hábito de revisar tu flujo de caja cada semana.",
+    "es-ES": "Crea el hábito de revisar tu flujo de caja cada semana."
+  },
+  "Match non-essential treats (like coffee) with a goal contribution.": {
+    "es-419": "Empareja caprichos no esenciales (como el café) con un aporte a la meta.",
+    "es-ES": "Empareja caprichos no esenciales (como el café) con un aporte a la meta."
+  },
+  "Make a small %@ micro-contribution to break the dry spell.": {
+    "es-419": "Haz un micro-aporte de %@ para romper la sequía.",
+    "es-ES": "Haz un micro-aporte de %@ para romper la sequía."
+  },
+  "Review your budget to see where cash has been leak-drained.": {
+    "es-419": "Revisa tu presupuesto para ver dónde se te escapa el efectivo.",
+    "es-ES": "Revisa tu presupuesto para ver dónde se te escapa el efectivo."
+  },
+  "Automate a micro-savings deposit of %@ per day.": {
+    "es-419": "Automatiza un micro-ahorro de %@ al día.",
+    "es-ES": "Automatiza un micro-ahorro de %@ al día."
+  },
+  "Link savings goals to positive daily habits.": {
+    "es-419": "Vincula tus metas de ahorro a hábitos diarios positivos.",
+    "es-ES": "Vincula tus metas de ahorro a hábitos diarios positivos."
+  },
+  "Double down! Try to add another %@ while in this active streak.": {
+    "es-419": "¡Aprovecha el impulso! Intenta sumar otros %@ mientras dure esta racha activa.",
+    "es-ES": "¡Aprovecha el impulso! Intenta sumar otros %@ mientras dure esta racha activa."
+  },
+  "Share your savings milestone with a trusted partner.": {
+    "es-419": "Comparte tu hito de ahorro con alguien de confianza.",
+    "es-ES": "Comparte tu hito de ahorro con alguien de confianza."
+  },
+  "Keep this active momentum high by saving at the beginning of the week.": {
+    "es-419": "Mantén este impulso activo ahorrando al inicio de la semana.",
+    "es-ES": "Mantén este impulso activo ahorrando al inicio de la semana."
+  },
+  "Build a 3-week streak of consecutive contributions.": {
+    "es-419": "Arma una racha de 3 semanas con aportes consecutivos.",
+    "es-ES": "Monta una racha de 3 semanas con aportes consecutivos."
+  },
+  "Re-engage today by allocating just %@ to this goal.": {
+    "es-419": "Vuelve a activarte hoy asignando solo %@ a esta meta.",
+    "es-ES": "Vuelve a activarte hoy asignando solo %@ a esta meta."
+  },
+  "Audit recent purchases to identify saving leakages.": {
+    "es-419": "Audita compras recientes para detectar fugas de ahorro.",
+    "es-ES": "Audita compras recientes para detectar fugas de ahorro."
+  },
+  "Reschedule savings day to align precisely with your payday.": {
+    "es-419": "Reprograma tu día de ahorro para que coincida con tu día de pago.",
+    "es-ES": "Reprograma tu día de ahorro para que coincida con tu día de pago."
+  },
+  "Avoid the 'all-or-nothing' mindset: small regular steps outperform large rare steps.": {
+    "es-419": "Evita el todo o nada: pasos pequeños y regulares ganan a saltos grandes y raros.",
+    "es-ES": "Evita el todo o nada: pasos pequeños y regulares ganan a saltos grandes y raros."
+  },
+  "Excellent progress! Consider locking in a portion of this month's extra savings.": {
+    "es-419": "¡Excelente avance! Considera reservar parte del ahorro extra de este mes.",
+    "es-ES": "¡Excelente avance! Plantéate reservar parte del ahorro extra de este mes."
+  },
+  "Review if your target date can be pulled forward.": {
+    "es-419": "Revisa si puedes adelantar tu fecha objetivo.",
+    "es-ES": "Revisa si puedes adelantar tu fecha objetivo."
+  },
+  "Increase your auto-saving amount by 5% to harness your momentum.": {
+    "es-419": "Sube tu auto-ahorro un 5%% para aprovechar el impulso.",
+    "es-ES": "Sube tu auto-ahorro un 5%% para aprovechar el impulso."
+  },
+  "Reward yourself with a small, free celebration for accelerated pacing.": {
+    "es-419": "Celébralo con algo pequeño y gratis por este ritmo acelerado.",
+    "es-ES": "Celébralo con algo pequeño y gratis por este ritmo acelerado."
+  },
+  "Adjust your milestone targets slightly to feel less pressure.": {
+    "es-419": "Ajusta un poco tus hitos para sentir menos presión.",
+    "es-ES": "Ajusta un poco tus hitos para sentir menos presión."
+  },
+  "Audit subscriptions to redirect a quick %@ today.": {
+    "es-419": "Revisa suscripciones para redirigir %@ hoy mismo.",
+    "es-ES": "Revisa suscripciones para redirigir %@ hoy mismo."
+  },
+  "Try 'zero-spend days' once a week to free up cash.": {
+    "es-419": "Prueba días de gasto cero una vez por semana para liberar efectivo.",
+    "es-ES": "Prueba días de gasto cero una vez por semana para liberar efectivo."
+  },
+  "Keep contributions recurring to remove friction.": {
+    "es-419": "Mantén aportes recurrentes para quitar fricción.",
+    "es-ES": "Mantén aportes recurrentes para quitar fricción."
+  },
+  "Maintain this excellent, stable velocity with your regular deposit.": {
+    "es-419": "Mantén esta velocidad estable con tu depósito habitual.",
+    "es-ES": "Mantén esta velocidad estable con tu ingreso habitual."
+  },
+  "Confirm your current cash reserves are healthy.": {
+    "es-419": "Confirma que tus reservas de efectivo están sanas.",
+    "es-ES": "Confirma que tus reservas de efectivo están sanas."
+  },
+  "Establish a permanent auto-contribution so you don't even have to think about it.": {
+    "es-419": "Configura un auto-aporte permanente para no tener que pensarlo.",
+    "es-ES": "Configura un auto-aporte permanente para no tener que pensarlo."
+  },
+  "Maintain the 'pay yourself first' golden rule.": {
+    "es-419": "Mantén la regla de oro: págate primero.",
+    "es-ES": "Mantén la regla de oro: págate primero."
+  },
+  "Maintain your standard deposit speed.": {
+    "es-419": "Mantén tu ritmo habitual de depósitos.",
+    "es-ES": "Mantén tu ritmo habitual de ingresos."
+  },
+  "Reduce groceries and restaurants by 10%.": {
+    "es-419": "Reduce supermercado y restaurantes un 10%%.",
+    "es-ES": "Reduce supermercado y restaurantes un 10%%."
+  },
+  "Cancel unused memberships & pause non-essential shopping.": {
+    "es-419": "Cancela membresías que no usas y pausa compras no esenciales.",
+    "es-ES": "Cancela membresías que no usas y pausa compras no esenciales."
+  },
+  "Reach your goal faster by setting up a small recurring weekly contribution.": {
+    "es-419": "Llega antes a tu meta con un aporte semanal recurrente pequeño.",
+    "es-ES": "Llega antes a tu meta con un aporte semanal recurrente pequeño."
+  },
+  "If you %@ %@": {
+    "es-419": "Si %@ %@",
+    "es-ES": "Si %@ %@"
+  },
+  "Cancel your unused %@ subscription.": {
+    "es-419": "Cancela tu suscripción a %@ que no usas.",
+    "es-ES": "Cancela tu suscripción a %@ que no usas."
+  },
+  "Redirect %@/mo to reach your goal %@ months earlier.": {
+    "es-419": "Redirige %@/mes para llegar a tu meta %@ meses antes.",
+    "es-ES": "Redirige %@/mes para llegar a tu meta %@ meses antes."
+  },
+  "Trim %@ expenses by 15%%.": {
+    "es-419": "Recorta gastos en %@ un 15%%.",
+    "es-ES": "Recorta gastos en %@ un 15%%."
+  },
+  "Redirect %@/mo to finish %@ months earlier.": {
+    "es-419": "Redirige %@/mes para terminar %@ meses antes.",
+    "es-ES": "Redirige %@/mes para terminar %@ meses antes."
+  },
+  "Redirect recent windfall from %@ to your goal.": {
+    "es-419": "Redirige el ingreso extra reciente de %@ a tu meta.",
+    "es-ES": "Redirige el ingreso extra reciente de %@ a tu meta."
+  },
+  "Reach your goal %@ months earlier with a one-time %@ deposit.": {
+    "es-419": "Llega a tu meta %@ meses antes con un depósito único de %@.",
+    "es-ES": "Llega a tu meta %@ meses antes con un ingreso único de %@."
+  },
+  "Save an extra %@/mo by packing your own lunch.": {
+    "es-419": "Ahorra %@/mes extra llevando tu almuerzo.",
+    "es-ES": "Ahorra %@/mes extra llevando tu almuerzo."
+  },
+  "Accelerate your completion timeline by %@ months.": {
+    "es-419": "Acelera tu cronograma de finalización en %@ meses.",
+    "es-ES": "Acelera tu cronograma de finalización en %@ meses."
+  },
+  "Repeats %@ · %lld%% confidence": {
+    "es-419": "Se repite %@ · %lld%% de confianza",
+    "es-ES": "Se repite %@ · %lld%% de confianza"
+  },
+  " · Next around %@": {
+    "es-419": " · Próximo alrededor de %@",
+    "es-ES": " · Próximo alrededor de %@"
+  },
+  "Refund detected — funds returned to your wallet.": {
+    "es-419": "Reembolso detectado — fondos devueltos a tu billetera.",
+    "es-ES": "Reembolso detectado — fondos devueltos a tu cartera."
+  },
+  "Possible duplicate charge — review this transaction.": {
+    "es-419": "Posible cargo duplicado — revisa esta transacción.",
+    "es-ES": "Posible cargo duplicado — revisa esta transacción."
+  },
+  "Spending in %@ affects goal pacing.": {
+    "es-419": "El gasto en %@ afecta el ritmo de tus metas.",
+    "es-ES": "El gasto en %@ afecta el ritmo de tus metas."
+  },
+  "Matches an active subscription pattern in your hub.": {
+    "es-419": "Coincide con un patrón de suscripción activa en tu centro.",
+    "es-ES": "Coincide con un patrón de suscripción activa en tu centro."
+  },
+  "Matches your %@ pattern": {
+    "es-419": "Coincide con tu patrón de %@",
+    "es-ES": "Coincide con tu patrón de %@"
+  },
+  "This looks like a subscription · %@ cycle": {
+    "es-419": "Parece una suscripción · ciclo %@",
+    "es-ES": "Parece una suscripción · ciclo %@"
+  },
+  "Part of a monthly cycle at this merchant": {
+    "es-419": "Parte de un ciclo mensual en este comercio",
+    "es-ES": "Parte de un ciclo mensual en este comercio"
+  },
+  "%@ appears often in your recent activity (%lld times).": {
+    "es-419": "%@ aparece seguido en tu actividad reciente (%lld veces).",
+    "es-ES": "%@ aparece a menudo en tu actividad reciente (%lld veces)."
+  },
+  "You've logged %lld expenses at %@ recently.": {
+    "es-419": "Registraste %lld gastos en %@ recientemente.",
+    "es-ES": "Has registrado %lld gastos en %@ recientemente."
+  }
+}

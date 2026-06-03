@@ -1,0 +1,510 @@
++\(display.merchantBreakdown.count - 3) more
++\(summary.merchantBreakdown.count - 3) more · tap for details
+1 Minute
+100% on-device local sandbox parsing. Your bank statements and scanned documents never touch the cloud.
+15 Minutes
+5 Minutes
+7-day trend
+A compact overview of today's spend & active goals
+About
+Accent color
+Accent, glassmorphism, motion
+Active
+Active budget: \(budgetName)
+Active savings goals
+Add
+Add Cash
+Add Custom Envelope Profile
+Add Goal
+Add a new gig workspace
+Add category
+Add expense
+Add expenses to unlock spending insights.
+Add note
+Adjustment type
+Advanced diagnostics
+Advanced filters…
+Agreement Scratchpad
+Alerts & radar
+Alerts, bill reminders (\(notifyStatus))
+All lines
+Allowance per mile
+Another merchant shares this name — add a label to tell them apart.
+Any category
+Any merchant
+Any zone
+Appearance
+Appearance & Themes
+Apple Health sync
+Applied to business-purpose trips in Studio deductions and tax estimates.
+Apply
+Auto-adjust from History
+Auto-location for mileage
+Avatar & identity
+Backup & Restore
+Backup Frequency
+Barter
+Barter & Trade
+Barter & Trade Logger
+Barter / Exchange
+Barter Details
+Barter Logger
+Barter insight card
+Before you backup
+Biometric access
+Blocks all outbound merchant logo requests. Renders local monogram avatars. Zero data cost when on prepaid mobile.
+Blur in App Switcher
+Brand
+Brand Color
+Brand Themes
+Brand design presets
+Breakdown
+Budget Period
+Budget alerts, renewals, and Studio reminders will appear here.
+Budget method
+Budgeting Mode
+Budgets
+Budgets & Custom Budgets
+Business Card Studio
+Business Type
+Business profile
+Business profile, invoices, tax
+BuxMuse
+BuxMuse Brain will adjust limits based on seasonal spend trends
+BuxMuse Intelligence
+BuxMuse never saves your password or recovery key on this device. You hold both — store them in a password manager, secure note, or offline copy.
+BuxMuse version, credits
+Cancel
+Canonical name
+Cash & Barter
+Cash (\(settingsStore.primaryLocalCurrency))
+Cash (\(settingsStore.secondaryTradingCurrency))
+Cash Drawer
+Cash drawer
+Cash flow
+Categories
+Category
+Category Breakdown
+Category breakdown
+Change category
+Charts, lines, insights & actions
+Choose backup to restore
+Choose merchant
+Choose store
+Choose your preferred regional formatting
+Clear
+Clear all filters
+Clear filters
+Clear payment source
+Clear store link
+Client approval
+Company Logo
+Compile JSON Data Export
+Confirm Complete Purge
+Context
+Copy key
+Couldn't load that photo — try another image.
+Country / Region
+Create Workspace
+Create encrypted backup
+Create, edit, and share scope agreements with clients.
+Creates a password-protected `.buxmuse` file with settings, expenses, goals, workspaces, and Studio data. Share via iCloud Drive, email, or save locally.
+Creative Energy
+Creative Energy widget
+Creative fuel left after workload, sleep, and stress spend.
+Credit & BNPL
+Crop Avatar
+Currency & Region
+Currency Configuration
+Currency code, formatting
+Current \(store.primaryLocalCurrency) Cash in Wallet
+Current \(store.secondaryTradingCurrency) Cash in Wallet
+Current active ledger context
+Custom envelope profiles
+Daily Average
+Daily Financial Summary
+Daily digest
+Daily tips
+Data Guard Mode
+Date
+Default Cycle
+Default Hourly Rate
+Default sleep hours
+Default stress level
+Default terms & conditions
+Delete
+Delete data
+Delete expense
+Detected pattern warnings
+Disable PIN
+Dismiss
+Dismiss All
+Display Mode
+Display Style
+Display currency
+Done
+Draft scope bullets, deliverables, and sign-off notes for clients — stored locally on your device.
+Drafts
+Dual-Cash Drawer
+Duplicate
+ENTER CASH AMOUNT
+ESTIMATED VALUE (\(appSettingsManager.selectedCurrency.id))
+Edit
+Edit Transaction
+Emotion
+Emotional tag
+Enable Agreement Scratchpad
+Enable Barter Logger
+Enable Cash Drawer
+Enable Notifications
+Enable PIN
+Enable Scope Radar
+Enable on Add Expense
+Enable workspace switching
+Encrypted archive, export, full restore
+Encrypted backup
+Energy
+English
+Envelope categories
+Estimated value tracking
+Expense Intelligence
+Expenses
+Export compliance
+FREE
+FULL TERRITORY VIEW
+Face ID / Touch ID
+Face ID, PIN passcode
+Fast, private verification via Apple Secure Enclave
+Feature intelligence
+Filter expenses
+Filters
+Finance
+Formatting Preview
+Full themed surfaces and presets — off uses standard iOS light/dark
+Future impact
+GOODS / SERVICES GIVEN
+GOODS / SERVICES RECEIVED
+General
+Generate recovery key
+Get structural forecast and potential acceleration timeline AI insights.
+Gig Spaces
+Glass navigation chrome
+Global locale
+Goals
+Got it
+Habit
+Habit signature
+Health access was denied. Enable Sleep in Settings → Health → Data Access, or keep using manual sliders.
+HealthKit sleep sync
+Heat Zone
+Heat zone
+Hides your financial sheets when toggling tasks
+High Risk
+Hours budget
+How did this feel?
+How did you pay? (optional)
+How it works
+I saved my recovery key in a safe place
+I understand — create backup
+Immediately
+Intelligence insights
+Intelligence rules
+Interface
+Invoice Payment
+Invoices
+Invoicing defaults
+Keep \(appSettingsManager.selectedCurrency.id)
+Landing backdrop glow
+Largest Purchases
+Last Compiled
+Link store (optional)
+Linked
+List icon
+Local notification \(renewalReminderDays) day\(renewalReminderDays == 1 ?
+Lock After Inactivity
+Log Cash Transaction
+Log Physical Cash
+Log any trade or exchange
+Log income
+Long-press & drag to weave the web · tap for territory detail
+Manage Categories
+Manage categories
+Manage merchants
+Manual Entry
+Manual account type
+Manual tuning (Simple & Pro)
+Merchant
+Merchant data
+Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.
+Merchants
+Merge \(source.name) into…
+Merge…
+Micro commitment
+Mileage
+Mileage Log
+Mileage rate
+Mode
+Money Map
+Money in
+Monitor hours and revision budgets on Studio projects. Get in-app alerts and ready-to-send scope change notices.
+Monthly Spending Limit
+Monthly Summary
+Monthly summary
+Name settings
+Neutral Apple surfaces with your chosen accent on buttons and controls.
+New Invoice
+New category
+No Active Budget Profile
+No Notifications
+No active savings goals yet.
+No active subscriptions. Tapping quick action opens Subscription Hub.
+No categories added yet.
+No currencies found
+No custom profiles configured.
+No data available.
+No expenses in this workspace
+No expenses logged yet
+No insights yet.
+No merchant data available.
+No merchants match your search.
+No specific workspace
+No transactions logged in this range.
+No workspaces found. Tap below to create your first business gig.
+Not cash or barter
+Not configured
+Note
+Notes
+Notifications
+Numeric secondary passcode backup
+Only if you want a shop logo — e.g. Amazon for a refund. Otherwise the category icon shows in your list.
+Open agreement drafts
+Open full Money Map
+Open full territory detail
+Open insight detail
+Optimize contrast and text weight for direct tropical sunlight
+Optional for solo operators and teams. Keeps personal and business ledgers separate when you need it — off by default.
+Optional searchable tags (Visa, PayPal, Klarna, etc.) power credit and BNPL insights. Off by default — simple logging stays clean.
+PIN passcode
+Payment Sources
+Payment source tracking
+Persona
+Pick
+Pick another workspace above, or add an expense tagged to \(HustleWorkspaceFilter.activeWorkspaceLabel() ??
+Popular
+Pre-made clauses for new agreements — deposits, cancellations, liability, and more.
+Preferred Currency
+Primary Local Currency
+Privacy
+Privacy shield
+Pro Studio
+Pro territories show merchants, scope radar, invoices, mileage, and more as you enable Studio tools.
+Profile
+Profile Photo
+Profile details
+Profile settings
+Quick filters
+Quiet hours
+Range
+Receive Cash (Income)
+Receive timely financial alerts and insights
+Recovery key
+Recovery key (optional backup)
+Recurrence
+Reduced Motion
+Refund
+Region & Currency
+Regional rules
+Remember this password
+Remind me before renewal
+Remove Passcode
+Reset map layout
+Restore backup
+Restoring replaces local expenses, goals, workspaces, and Studio records on this device.
+Revision slots
+SELECT CASH DRAWER
+Safe Zone
+Salary, refund, gift, cash — type anything. No shop linking required.
+Sandbox backup
+Save
+Save JSON Backup Archive
+Save in a safe place
+Save note
+Save your recovery key
+Saved locally on your device.
+Scan Receipt
+Scope & deliverables
+Scope Creep Radar
+Scope Radar
+Scope email template
+Scope radar
+Secondary Trade Currency
+Secure App Passcode
+Security & App Lock
+Security & Notifications
+Security & Privacy
+See Studio in Settings
+See your progress
+Seed Physical Cash Balances
+Segregate dynamic physical wallets for informal, spotty internet environments.
+Select
+Select Category
+Select a creative brand preset
+Selected
+Self-employed?
+Settings
+Share
+Share & attach
+Share backup file
+Show Studio Tab
+Show on Home dashboard
+Show unassigned when filtering
+Shown as \(working.name) · \(disambiguatorText.trimmingCharacters(in: .whitespacesAndNewlines))
+Shown on exported invoice PDFs
+Shown once after backup. Save it separately — opens the file if you forget your password. BuxMuse never stores it.
+Shows scope status on Pro Studio projects with budgeted hours and revision limits.
+Signals
+Silence Ends
+Silence Starts
+Simple
+Simple Studio
+Simple work ledger or full Pro tools
+Simplify transition animations for comfort
+Sleep \(String(format:
+Solar Contrast Mode
+Spanish (Latin America)
+Spanish (Spain)
+Spend Cash
+Spend Cash (Expense)
+Spending Analysis
+Spending Cap
+Spending Heat Zones
+Spent this month across \(graph.nodes.count) live territories
+Start of Week
+Status
+Status & Activation
+Stress expenses: \(BurnoutEngine.shared.currentStatus.stressExpenseCount)
+Studio
+Studio adds work tracking, simple invoices, and job pockets. Turn it on when you need it — Home and Expenses stay the same.
+Studio mode
+Studio tools
+Studio · \(workspaceName)
+Subscription
+Subscription start
+Subscriptions
+Summary
+Supported providers
+Switchboard
+Sync sleep from HealthKit
+System & Privacy
+TRANSACTION NOTES
+Tag expenses with the provider you used. BuxMuse uses this locally to surface credit-heavy months and active buy-now-pay-later plans.
+Tap a merchant to review details. Changes save automatically.
+Tax Profile
+Terms & conditions
+This Month
+This action is completely offline and irreversible. It will wipe all expenses, Studio records, secure passcodes, and reset everything.
+This code secures BuxMuse locally on your device.
+This key is shown once. BuxMuse does not store it. Paste it when restoring if you forget your password.
+This will delete your local generic password from Apple Keychain.
+Tips
+Top Categories
+Top Merchants
+Top insight
+Top insights
+Top-left ambient light and card edge shine — off uses plain iOS surfaces
+Total Budget Limit
+Total Spend
+Total spent (\(selectedRange.rawValue))
+Track physical paper money balances
+Tracked hours
+Tracks workload, sleep, and stress signals into a Creative Energy score.
+Transaction Date
+Transactions
+Trend
+Trend Over Time
+Trial end date
+Turn on Brand Themes in Appearance to choose a preset.
+Turn on Studio for invoices, mileage, and tax estimates — optional, in Settings.
+Type
+Unassigned
+Unassigned expenses
+Unlock Pro Studio Matrix
+Unlocks \
+Unlocks agreement drafts linked to Studio clients and projects.
+Upgrade to Pro Studio
+Upgrade to Pro Studio for automatic sleep scoring from Apple Health.
+Use \(hint.displayName)?
+Use \(pendingCountry?.defaultCurrencyCode ??
+Used for tax presets, formatting, and regional defaults
+Uses last week's sleep analysis when authorized. Falls back to manual values if unavailable.
+Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.
+Version 1.0.0 (Build 26)
+Visa, PayPal, Klarna tags for credit insights
+Warning
+What was this?
+When a workspace is selected, expenses without a workspace tag appear with an Unassigned badge.
+When enabled, trip sheets can capture your current place name for start or end.
+Work \(String(format:
+Work type
+Workload & Energy
+Workload \(String(format:
+Workspace
+Workspace mode
+Workspace spend
+Workspaces
+You have enabled \(settingsStore.budgetingMode.rawValue) budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.
+You hold the key
+You've hit the active side-gig limit for Simple Studio. Upgrade to Pro Studio to unlock unlimited ledgers, business card design, automatic invoice generation, and full revenue forecasting.
+Your BuxMuse data was restored from the encrypted archive.
+Your BuxMuse database and settings have been restored to fresh seeds. All private database entries are deleted.
+Your Premium Offline Co-pilot
+Your active workspaces
+Your backup is encrypted on this device. Without the password you choose now, the file cannot be opened — not by BuxMuse, not by support, not by anyone.
+Your financial details are kept strictly offline and secure inside the BuxMuse Brain.
+Your financial landscape
+Your own words — salary, refund, gift, sold something, etc.
+Your recurring subscriptions account for roughly \(String(format:
+Your region
+Zero data leakage for us
+Zero network analytics trackers. Zero external APIs. BuxMuse operates fully private and autonomous.
+\(Int(pct))%
+\(Int(progress * 100))%
+\(Int(progress * 100))% spent
+\(Int(settings.cashLocalBalanceValue)) local
+\(Int(store.manualStressLevel))/10
+\(appSettingsManager.format(remaining)) left of \(appSettingsManager.format(limit))
+\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.id)
+\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.name) · \(appSettingsManager.selectedCurrency.id)
+\(appSettingsManager.selectedCurrency.flag) \(appSettingsManager.selectedCurrency.id)
+\(count) items
+\(country.id) · typical \(country.defaultCurrencyCode)
+\(currency.id) (\(currency.symbol))
+\(days)d
+\(filteredRecords.count)
+\(graph.nodes.count) territories · charts · Pro lanes · insights
+\(graph.nodes.count) territories · tap to open full map
+\(header.monthlyTransactionCount) moves · \(nodes.count) territories
+\(operation.title). \(step?.rawValue ??
+\(pendingCountry?.name ??
+\(profile.categories.count) Categories · Target: \(appSettingsManager.format(profile.targetAmount))
+\(profileSubtitle) · \(preferredStyle)
+\(renewalReminderDays)d
+\(scopeAlerts)
+\(store.primaryLocalCurrency) Cash
+\(store.primaryLocalCurrency) Wallet
+\(store.secondaryTradingCurrency) Cash
+\(store.secondaryTradingCurrency) Wallet
+\(studioStore.businessCardLibrary.savedDesigns.count) designs
+\(summary.categoryBreakdown.count) lanes
+\(tip.regionFlag) \(tip.regionCode)
+\(workspaceBreakdown.count) territories
+alerts active
+awaiting payment
+creative fuel
+live strips
+rate / unit
+recurring lanes
+top spend lane
+trade exchanges
+vs last mo
+vs last month

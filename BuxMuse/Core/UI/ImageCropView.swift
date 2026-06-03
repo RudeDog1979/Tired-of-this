@@ -194,7 +194,13 @@ public struct ImageCropEditorContent: View {
             }
             .padding(.horizontal, 8)
 
-            Text("Scale: \(String(format: "%.1fx", scale))")
+            Text(
+                BuxLocalizedString.format(
+                    "Scale: %.1fx",
+                    locale: BuxInterfaceLocale.currentInterfaceLocale,
+                    scale
+                )
+            )
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(.secondary)
         }
@@ -382,7 +388,7 @@ public struct PhotoPickCropRow: View {
                     .font(.system(size: 11))
                     .foregroundColor(.gray)
                 if loadFailed {
-                    Text("Couldn't load that photo — try another image.")
+                    BuxCatalogDynamicText(key: "Couldn't load that photo — try another image.")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.orange)
                 }

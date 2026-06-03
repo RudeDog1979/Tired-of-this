@@ -10,6 +10,7 @@ import SwiftUI
 struct AgreementScratchpadListView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
@@ -19,7 +20,7 @@ struct AgreementScratchpadListView: View {
         BuxThemedCardForm {
             BuxFormSection(title: "Agreement drafts") {
                 if store.agreementDrafts.isEmpty {
-                    Text("No drafts yet. Create one for a client or project before work starts.")
+                    BuxCatalogDynamicText(key: "No drafts yet. Create one for a client or project before work starts.")
                         .font(.system(size: 13, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
@@ -56,7 +57,7 @@ struct AgreementScratchpadListView: View {
                 Button(action: { showNewDraft = true }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
-                        Text("New agreement draft")
+                        BuxCatalogDynamicText(key: "New agreement draft")
                     }
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.current.accentColor)
@@ -64,7 +65,7 @@ struct AgreementScratchpadListView: View {
                 .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Agreements")
+        .buxCatalogNavigationTitle("Agreements")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showNewDraft) {
             NavigationStack {
@@ -109,6 +110,7 @@ struct AgreementScratchpadEditorView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
@@ -170,7 +172,14 @@ struct AgreementScratchpadEditorView: View {
                     } label: {
                         HStack {
                             Image(systemName: "arrow.down.doc.fill")
-                            Text("Fill from \(linkedJob != nil ? "job" : "project")")
+                            Text(
+                                BuxLocalizedString.string(
+                                    String.LocalizationValue(
+                                        stringLiteral: linkedJob != nil ? "Fill from job" : "Fill from project"
+                                    ),
+                                    locale: appSettingsManager.interfaceLocale
+                                )
+                            )
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 11, weight: .bold))
@@ -187,7 +196,7 @@ struct AgreementScratchpadEditorView: View {
                 } label: {
                     HStack {
                         Image(systemName: "list.bullet.rectangle.portrait.fill")
-                        Text("Guided setup")
+                        BuxCatalogDynamicText(key: "Guided setup")
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.system(size: 11, weight: .bold))
@@ -199,7 +208,7 @@ struct AgreementScratchpadEditorView: View {
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Picker("Client", selection: clientBinding) {
-                    Text("None").tag(UUID?.none)
+                    BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                     ForEach(store.clients) { client in
                         Text(client.name).tag(Optional(client.id))
                     }
@@ -208,7 +217,7 @@ struct AgreementScratchpadEditorView: View {
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Picker("Project", selection: projectBinding) {
-                    Text("None").tag(UUID?.none)
+                    BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                     ForEach(store.projects) { project in
                         Text(project.name).tag(Optional(project.id))
                     }
@@ -217,7 +226,7 @@ struct AgreementScratchpadEditorView: View {
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Picker("Linked invoice", selection: invoiceBinding) {
-                    Text("None").tag(UUID?.none)
+                    BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                     ForEach(linkedInvoiceCandidates) { invoice in
                         Text(invoicePickerLabel(invoice)).tag(Optional(invoice.id))
                     }
@@ -227,7 +236,7 @@ struct AgreementScratchpadEditorView: View {
                 if !simpleStudioStore.entries.filter({ $0.kind == .job }).isEmpty {
                     BuxFormRowDivider()
                     Picker("Linked job", selection: jobBinding) {
-                        Text("None").tag(UUID?.none)
+                        BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                         ForEach(simpleStudioStore.entries.filter { $0.kind == .job }) { job in
                             Text(job.jobLabel ?? job.customerName).tag(Optional(job.id))
                         }
@@ -269,7 +278,7 @@ struct AgreementScratchpadEditorView: View {
                 Button { showTermsEditor = true } label: {
                     HStack {
                         Image(systemName: "doc.text.fill")
-                        Text("Edit terms & conditions")
+                        BuxCatalogDynamicText(key: "Edit terms & conditions")
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.system(size: 11, weight: .bold))
@@ -282,7 +291,7 @@ struct AgreementScratchpadEditorView: View {
             }
 
             BuxFormSection(title: "Your signature (worker)") {
-                Text("Sign anytime — included when you export a PDF. Client approval uses the channel you chose above.")
+                BuxCatalogDynamicText(key: "Sign anytime — included when you export a PDF. Client approval uses the channel you chose above.")
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
@@ -302,7 +311,7 @@ struct AgreementScratchpadEditorView: View {
                     Button(role: .destructive) {
                         clearProviderSignature()
                     } label: {
-                        Text("Clear your signature")
+                        BuxCatalogDynamicText(key: "Clear your signature")
                             .font(.system(size: 14, weight: .semibold))
                     }
                     .buxFormFieldPadding()
@@ -311,7 +320,7 @@ struct AgreementScratchpadEditorView: View {
 
             if showsClientInPersonSignature {
                 BuxFormSection(title: "Client signature (in person only)") {
-                    Text("Only when the client is with you. For PDF, text, or print-back approval, use Client approval above — not this pad.")
+                    BuxCatalogDynamicText(key: "Only when the client is with you. For PDF, text, or print-back approval, use Client approval above — not this pad.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
@@ -328,7 +337,7 @@ struct AgreementScratchpadEditorView: View {
                         Button(role: .destructive) {
                             clearClientSignature()
                         } label: {
-                            Text("Clear client signature")
+                            BuxCatalogDynamicText(key: "Clear client signature")
                                 .font(.system(size: 14, weight: .semibold))
                         }
                         .buxFormFieldPadding()
@@ -341,7 +350,7 @@ struct AgreementScratchpadEditorView: View {
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Toggle(isOn: signOffDateEnabled) {
-                    Text("Approval date recorded")
+                    BuxCatalogDynamicText(key: "Approval date recorded")
                         .font(.system(size: 15, weight: .semibold))
                 }
                 .tint(themeManager.current.accentColor)
@@ -374,7 +383,7 @@ struct AgreementScratchpadEditorView: View {
                 .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Agreement")
+        .buxCatalogNavigationTitle("Agreement")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -640,11 +649,17 @@ struct AgreementScratchpadEditorView: View {
                     Text(title)
                         .font(.system(size: 15, weight: .semibold))
                     if hasSignature, let signedAt {
-                        Text("Signed · \(signedAt.formatted(date: .abbreviated, time: .omitted))")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Signed · %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                signedAt.formatted(date: .abbreviated, time: .omitted)
+                            )
+                        )
                             .font(.system(size: 11, weight: .medium))
                             .buxLabelSecondary()
                     } else {
-                        Text("Tap to capture signature")
+                        BuxCatalogDynamicText(key: "Tap to capture signature")
                             .font(.system(size: 11, weight: .medium))
                             .buxLabelSecondary()
                     }

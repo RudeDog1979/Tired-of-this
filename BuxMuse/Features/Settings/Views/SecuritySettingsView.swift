@@ -41,9 +41,9 @@ struct SecuritySettingsView: View {
                     }
                 )) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Face ID / Touch ID")
+                        BuxCatalogDynamicText(key: "Face ID / Touch ID")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Fast, private verification via Apple Secure Enclave")
+                        BuxCatalogDynamicText(key: "Fast, private verification via Apple Secure Enclave")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
                     }
@@ -58,10 +58,10 @@ struct SecuritySettingsView: View {
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     Picker("Lock After Inactivity", selection: $store.lockAfterInactivityMinutes) {
-                        Text("Immediately").tag(0)
-                        Text("1 Minute").tag(1)
-                        Text("5 Minutes").tag(5)
-                        Text("15 Minutes").tag(15)
+                        BuxCatalogDynamicText(key: "Immediately").tag(0)
+                        BuxCatalogDynamicText(key: "1 Minute").tag(1)
+                        BuxCatalogDynamicText(key: "5 Minutes").tag(5)
+                        BuxCatalogDynamicText(key: "15 Minutes").tag(15)
                     }
                     .pickerStyle(.menu)
                     .tint(themeManager.current.accentColor)
@@ -72,10 +72,10 @@ struct SecuritySettingsView: View {
             BuxFormSection(title: "PIN passcode") {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Secure App Passcode")
+                        BuxCatalogDynamicText(key: "Secure App Passcode")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Text("Numeric secondary passcode backup")
+                        BuxCatalogDynamicText(key: "Numeric secondary passcode backup")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
                     }
@@ -89,7 +89,7 @@ struct SecuritySettingsView: View {
                         .buttonStyle(.plain)
                     } else {
                         Button(action: { showPasscodeSetup = true }) {
-                            Text("Enable PIN")
+                            BuxCatalogDynamicText(key: "Enable PIN")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(themeManager.current.accentColor)
                         }
@@ -102,9 +102,9 @@ struct SecuritySettingsView: View {
             BuxFormSection(title: "Privacy shield") {
                 Toggle(isOn: $store.privacyBlurInAppSwitching) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Blur in App Switcher")
+                        BuxCatalogDynamicText(key: "Blur in App Switcher")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Hides your financial sheets when toggling tasks")
+                        BuxCatalogDynamicText(key: "Hides your financial sheets when toggling tasks")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
                     }
@@ -130,7 +130,7 @@ struct SecuritySettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will delete your local generic password from Apple Keychain.")
+            BuxCatalogDynamicText(key: "This will delete your local generic password from Apple Keychain.")
         }
         .onChange(of: store.requireBiometricOnLaunch) { _, _ in store.save() }
         .onChange(of: store.lockAfterInactivityMinutes) { _, _ in store.save() }
@@ -200,7 +200,7 @@ struct PasscodeSetupSheet: View {
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
-                    Text("This code secures BuxMuse locally on your device.")
+                    BuxCatalogDynamicText(key: "This code secures BuxMuse locally on your device.")
                         .font(.system(size: 13))
                         .buxLabelSecondary()
                         .multilineTextAlignment(.center)

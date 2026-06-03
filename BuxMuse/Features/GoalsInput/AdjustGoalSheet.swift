@@ -22,6 +22,8 @@ struct AdjustGoalSheet: View {
     @State private var deadline: Date = Date()
     @State private var priority: Int = 2
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -32,14 +34,21 @@ struct AdjustGoalSheet: View {
                     BuxFormSection {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Current saved")
+                                BuxCatalogText.text("Current saved")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-                                Text("\(appSettingsManager.format(goal.currentAmount)) of \(appSettingsManager.format(goal.targetAmount))")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%@ of %@",
+                                        locale: locale,
+                                        appSettingsManager.format(goal.currentAmount),
+                                        appSettingsManager.format(goal.targetAmount)
+                                    )
+                                )
                                     .font(.subheadline.weight(.semibold))
                             }
                             Spacer()
-                            Text(priorityLabel(goal.priority))
+                            Text(GoalFormCopy.priorityLabel(goal.priority, locale: locale))
                                 .font(.caption.bold())
                                 .foregroundStyle(themeManager.current.accentColor)
                                 .padding(.horizontal, 10)
@@ -54,7 +63,10 @@ struct AdjustGoalSheet: View {
                             Text(appSettingsManager.selectedCurrency.symbol)
                                 .font(.title2.bold())
                                 .foregroundStyle(themeManager.current.accentColor)
-                            TextField("Target amount", text: $targetString)
+                            TextField(
+                                BuxCatalogLabel.string("Target amount", locale: locale),
+                                text: $targetString
+                            )
                                 .keyboardType(.decimalPad)
                         }
                         .buxFormFieldPadding()
@@ -71,7 +83,7 @@ struct AdjustGoalSheet: View {
                     }
                 }
             }
-            .navigationTitle("Adjust Goal")
+            .buxCatalogNavigationTitle("Adjust Goal")
             .navigationBarTitleDisplayMode(.inline)
             .buxThemedSheetContent()
             .toolbar {
@@ -79,7 +91,10 @@ struct AdjustGoalSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    BuxToolbarConfirmButton(accessibilityLabel: "Apply", isEnabled: canSave) {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: BuxCatalogLabel.string("Apply", locale: locale),
+                        isEnabled: canSave
+                    ) {
                         applyAdjustments()
                     }
                 }
@@ -87,6 +102,7 @@ struct AdjustGoalSheet: View {
             .onAppear { hydrate() }
         }
         .tint(themeManager.current.accentColor)
+        .buxInterfaceLocale()
     }
 
     private var canSave: Bool {
@@ -113,9 +129,5 @@ struct AdjustGoalSheet: View {
         )
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         dismiss()
-    }
-
-    private func priorityLabel(_ prio: Int) -> String {
-        prio == 1 ? "High" : (prio == 2 ? "Medium" : "Low")
     }
 }

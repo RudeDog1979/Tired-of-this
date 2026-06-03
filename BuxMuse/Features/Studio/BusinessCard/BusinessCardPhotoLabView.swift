@@ -32,7 +32,7 @@ struct BusinessCardPhotoLabView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(Color.black.opacity(0.92), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .navigationTitle("Bux Photo Lab")
+            .buxCatalogNavigationTitle("Bux Photo Lab")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -54,7 +54,7 @@ struct BusinessCardPhotoLabView: View {
 
     private var previewSection: some View {
         VStack(spacing: 8) {
-            Text("Live on your card")
+            BuxCatalogDynamicText(key: "Live on your card")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Color.white.opacity(0.65))
             let previewDesign = previewDesignWithAdjustments

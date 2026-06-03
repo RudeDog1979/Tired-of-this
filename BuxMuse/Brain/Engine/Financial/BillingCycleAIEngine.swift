@@ -14,7 +14,8 @@ public struct BillingCycleAIEngine {
     public static func analyzeSubscription(
         merchantName: String,
         transactions: [Transaction],
-        category: TransactionCategory = .subscriptions
+        category: TransactionCategory = .subscriptions,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> SubscriptionInfo? {
         // Filter transactions for this specific normalized merchant
         let normName = MerchantLogoEngine.normalizeMerchantName(merchantName)
@@ -91,7 +92,13 @@ public struct BillingCycleAIEngine {
                 let hikePercent = Int(round(((lastPriceDouble - avgPrev) / avgPrev) * 100.0))
                 risks.append(SubscriptionRisk(
                     type: .priceHike,
-                    description: "Price increased by \(hikePercent)% recently (from \(String(format: "%.2f", avgPrev)) to \(String(format: "%.2f", lastPriceDouble)))",
+                    description: BuxLocalizedString.format(
+                        "Price increased by %lld%% recently (from %@ to %@)",
+                        locale: locale,
+                        hikePercent,
+                        String(format: "%.2f", avgPrev),
+                        String(format: "%.2f", lastPriceDouble)
+                    ),
                     severity: "high"
                 ))
             }
@@ -110,7 +117,10 @@ public struct BillingCycleAIEngine {
             if foundDouble {
                 risks.append(SubscriptionRisk(
                     type: .doubleCharge,
-                    description: "Charged twice in the last cycle (potential billing error or overlapping billing)",
+                    description: BuxLocalizedString.string(
+                        "Charged twice in the last cycle (potential billing error or overlapping billing)",
+                        locale: locale
+                    ),
                     severity: "high"
                 ))
             }
@@ -122,7 +132,10 @@ public struct BillingCycleAIEngine {
             if lastNote.contains("unused") || lastNote.contains("zombie") {
                 risks.append(SubscriptionRisk(
                     type: .zombieSubscription,
-                    description: "Zombie subscription: 0 active interactions logged in 60 days",
+                    description: BuxLocalizedString.string(
+                        "Zombie subscription: 0 active interactions logged in 60 days",
+                        locale: locale
+                    ),
                     severity: "medium"
                 ))
             }
@@ -132,7 +145,10 @@ public struct BillingCycleAIEngine {
         if billingCycle == .irregular {
             risks.append(SubscriptionRisk(
                 type: .irregularCycle,
-                description: "Billing interval is irregular and fluctuates frequently",
+                description: BuxLocalizedString.string(
+                    "Billing interval is irregular and fluctuates frequently",
+                    locale: locale
+                ),
                 severity: "low"
             ))
         }
@@ -143,7 +159,10 @@ public struct BillingCycleAIEngine {
         if let primary = currencies.first, currencies.contains(where: { $0 != primary }) {
             risks.append(SubscriptionRisk(
                 type: .currencyChange,
-                description: "Billed in a foreign currency or dynamically converted with exchange fees",
+                description: BuxLocalizedString.string(
+                    "Billed in a foreign currency or dynamically converted with exchange fees",
+                    locale: locale
+                ),
                 severity: "medium"
             ))
         }
@@ -155,7 +174,12 @@ public struct BillingCycleAIEngine {
             if firstPrice == 0 && lastPrice > 0 {
                 risks.append(SubscriptionRisk(
                     type: .cycleChange,
-                    description: "Free trial converted to a paid billing cycle of \(latestCost.currencyCode) \(latestCost.value)",
+                    description: BuxLocalizedString.format(
+                        "Free trial converted to a paid billing cycle of %@ %@",
+                        locale: locale,
+                        latestCost.currencyCode,
+                        "\(latestCost.value)"
+                    ),
                     severity: "medium"
                 ))
             }
@@ -210,7 +234,8 @@ public struct BillingCycleAIEngine {
     public static func appendUserDeclaredSubscriptions(
         to subs: inout [SubscriptionInfo],
         details: inout [String: SubscriptionDetail],
-        transactions: [Transaction]
+        transactions: [Transaction],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) {
         var seen = Set(subs.map { MerchantLogoEngine.normalizeMerchantName($0.merchantName) })
 
@@ -220,7 +245,7 @@ public struct BillingCycleAIEngine {
             guard let subInfo = subscriptionFromUserDeclaration(transaction) else { continue }
 
             subs.append(subInfo)
-            details[norm] = subscriptionDetail(info: subInfo, allTransactions: transactions)
+            details[norm] = subscriptionDetail(info: subInfo, allTransactions: transactions, locale: locale)
             seen.insert(norm)
         }
     }
@@ -228,7 +253,8 @@ public struct BillingCycleAIEngine {
     /// Returns the detailed info for a specific subscription
     public static func subscriptionDetail(
         info: SubscriptionInfo,
-        allTransactions: [Transaction]
+        allTransactions: [Transaction],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> SubscriptionDetail {
         let normName = MerchantLogoEngine.normalizeMerchantName(info.merchantName)
         let history = allTransactions.filter {
@@ -285,18 +311,50 @@ public struct BillingCycleAIEngine {
         
         // 3. Alternative Suggestions & Notes
         var alternatives: [String] = []
-        var usageInsights = "Your subscription has been active for \(expenses.count) cycles. You interact with this service regularly."
+        var usageInsights = BuxLocalizedString.format(
+            "Your subscription has been active for %lld cycles. You interact with this service regularly.",
+            locale: locale,
+            expenses.count
+        )
         
         let currency = info.cost.currencyCode
         let lowerMerchant = info.merchantName.lowercased()
         if lowerMerchant.contains("netflix") {
-            alternatives = ["Apple TV+ (Cheaper alternatives starting at \(currency) 9.99/mo)", "Ad-supported plan (\(currency) 6.99/mo)"]
-            usageInsights = "Active Netflix Premium account. Price increased by 15% in recent cycle. Consider moving to standard ad-supported tier to save \(currency) 8.50/mo."
+            alternatives = [
+                BuxLocalizedString.format(
+                    "Apple TV+ (Cheaper alternatives starting at %@ 9.99/mo)",
+                    locale: locale,
+                    currency
+                ),
+                BuxLocalizedString.format(
+                    "Ad-supported plan (%@ 6.99/mo)",
+                    locale: locale,
+                    currency
+                ),
+            ]
+            usageInsights = BuxLocalizedString.format(
+                "Active Netflix Premium account. Price increased by 15%% in recent cycle. Consider moving to standard ad-supported tier to save %@ 8.50/mo.",
+                locale: locale,
+                currency
+            )
         } else if lowerMerchant.contains("spotify") {
-            alternatives = ["YouTube Music (Included in Premium)", "Spotify Individual (\(currency) 11.99/mo)"]
-            usageInsights = "Shared Spotify Family account. Consider Spotify Individual if only one person uses it."
+            alternatives = [
+                BuxLocalizedString.string("YouTube Music (Included in Premium)", locale: locale),
+                BuxLocalizedString.format(
+                    "Spotify Individual (%@ 11.99/mo)",
+                    locale: locale,
+                    currency
+                ),
+            ]
+            usageInsights = BuxLocalizedString.string(
+                "Shared Spotify Family account. Consider Spotify Individual if only one person uses it.",
+                locale: locale
+            )
         } else {
-            alternatives = ["Downgrade plan", "Share a bundle with family"]
+            alternatives = [
+                BuxLocalizedString.string("Downgrade plan", locale: locale),
+                BuxLocalizedString.string("Share a bundle with family", locale: locale),
+            ]
         }
         
         // Price history graph (first 6 items)
@@ -306,7 +364,12 @@ public struct BillingCycleAIEngine {
             info: info,
             history: expenses,
             priceHistoryGraph: graphValues,
-            cancellationSteps: "To cancel, go to Settings on your iPhone → Tap Mitchell Santos → Subscriptions → Select \(info.merchantName) → Tap Cancel Subscription. Alternatively, log in direct to \(MerchantLogoEngine.resolveDomain(for: info.merchantName) ?? "service.com") and delete billing profile.",
+            cancellationSteps: BuxLocalizedString.format(
+                "To cancel, go to Settings on your iPhone → Tap Mitchell Santos → Subscriptions → Select %@ → Tap Cancel Subscription. Alternatively, log in direct to %@ and delete billing profile.",
+                locale: locale,
+                info.merchantName,
+                MerchantLogoEngine.resolveDomain(for: info.merchantName) ?? "service.com"
+            ),
             budgetImpactMonthly: budgetMonthly,
             budgetImpactYearly: budgetYearly,
             costChangePercentage: changePercent,

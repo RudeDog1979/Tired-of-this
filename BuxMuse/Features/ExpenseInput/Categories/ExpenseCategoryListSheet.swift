@@ -10,6 +10,7 @@ struct ExpenseCategoryListSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @State private var categories: [ExpenseCategoryRecord] = []
     @State private var showEditor = false
@@ -25,7 +26,7 @@ struct ExpenseCategoryListSheet: View {
                         HStack(spacing: 14) {
                             BuxContentGlassIcon(systemName: category.icon, diameter: 34, pointSize: 15)
 
-                            Text(category.name)
+                            Text(category.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
@@ -125,7 +126,7 @@ struct ExpenseCategoryEditorSheet: View {
         ZStack {
             themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
             VStack(spacing: 16) {
-                Text("New category")
+                BuxCatalogText.text("New category")
                     .font(.system(size: 17, weight: .bold))
                     .padding(.top, 24)
                 TextField("Name", text: $name)
@@ -149,6 +150,7 @@ struct ExpenseCategoryMergeSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let source: ExpenseCategoryRecord
     let targets: [ExpenseCategoryRecord]
@@ -158,7 +160,13 @@ struct ExpenseCategoryMergeSheet: View {
         ZStack {
             themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
             VStack(alignment: .leading, spacing: 12) {
-                Text("Merge \(source.name) into…")
+                Text(
+                    BuxLocalizedString.format(
+                        "Merge %@ into…",
+                        locale: appSettingsManager.interfaceLocale,
+                        source.localizedDisplayName(locale: appSettingsManager.interfaceLocale)
+                    )
+                )
                     .font(.system(size: 17, weight: .bold))
                     .padding(.top, 24)
                     .padding(.horizontal, BuxLayout.marginHorizontal)

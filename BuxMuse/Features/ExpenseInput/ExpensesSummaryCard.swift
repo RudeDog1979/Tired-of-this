@@ -10,19 +10,20 @@ struct ExpensesSummaryCard: View {
     var chromeTier: BuxCardChromeTier = .hero
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var appSettingsManager: AppSettingsManager
 
     @State private var isVisible = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Monthly Summary")
+            BuxCatalogText.text("Monthly Summary")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .heroSummaryReveal(isVisible: isVisible, delay: 0)
 
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Top Categories")
+                    BuxCatalogText.text("Top Categories")
                         .font(.caption.bold())
                         .foregroundColor(.gray)
                     CategoryBreakdownChart(breakdown: display.categoryBreakdown)
@@ -31,7 +32,7 @@ struct ExpensesSummaryCard: View {
                 .heroSummaryReveal(isVisible: isVisible, delay: 0.06)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Top Merchants")
+                    BuxCatalogText.text("Top Merchants")
                         .font(.caption.bold())
                         .foregroundColor(.gray)
                     MerchantBreakdownChart(
@@ -40,7 +41,13 @@ struct ExpensesSummaryCard: View {
                     )
                     .frame(height: MerchantBreakdownChart.compactHeight(itemCount: min(3, display.merchantBreakdown.count)))
                     if display.merchantBreakdown.count > 3 {
-                        Text("+\(display.merchantBreakdown.count - 3) more")
+                        Text(
+                            BuxLocalizedString.format(
+                                "+%lld more",
+                                locale: appSettingsManager.interfaceLocale,
+                                Int64(display.merchantBreakdown.count - 3)
+                            )
+                        )
                             .font(.system(size: 9, weight: .semibold))
                             .foregroundColor(.gray.opacity(0.9))
                     }
@@ -49,7 +56,7 @@ struct ExpensesSummaryCard: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Trend")
+                BuxCatalogText.text("Trend")
                     .font(.caption.bold())
                     .foregroundColor(.gray)
                 MonthlyTrendChart(points: display.trendPoints, prediction: display.prediction)

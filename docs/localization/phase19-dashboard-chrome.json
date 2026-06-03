@@ -1,0 +1,46 @@
+{
+  "Gasto": {
+    "es-419": "Gasto",
+    "es-ES": "Gasto"
+  },
+  "Ingreso": {
+    "es-419": "Ingreso",
+    "es-ES": "Ingreso"
+  },
+  "Expense": {
+    "es-419": "Gasto",
+    "es-ES": "Gasto"
+  },
+  "Income": {
+    "es-419": "Ingreso",
+    "es-ES": "Ingreso"
+  },
+  "low": {
+    "es-419": "bajo",
+    "es-ES": "bajo"
+  },
+  "medium": {
+    "es-419": "medio",
+    "es-ES": "medio"
+  },
+  "high": {
+    "es-419": "alto",
+    "es-ES": "alto"
+  },
+  "Your stress index has breached the 0.85 threshold. We suggest enabling Sunset mode to reduce cognitive overload and ocular strain.": {
+    "es-419": "Tu índice de estrés superó el umbral de 0,85. Te sugerimos activar el modo Atardecer para reducir la sobrecarga cognitiva y la fatiga visual.",
+    "es-ES": "Tu índice de estrés superó el umbral de 0,85. Te sugerimos activar el modo Atardecer para reducir la sobrecarga cognitiva y la fatiga visual."
+  },
+  "Applying this insight accelerates this target timeline significantly.": {
+    "es-419": "Aplicar esta perspectiva acelera mucho la línea de tiempo de esta meta.",
+    "es-ES": "Aplicar esta perspectiva acelera mucho la línea de tiempo de esta meta."
+  },
+  "Switch to Sunset Theme": {
+    "es-419": "Cambiar a tema Atardecer",
+    "es-ES": "Cambiar a tema Atardecer"
+  },
+  "Mapa": {
+    "es-419": "Mapa",
+    "es-ES": "Mapa"
+  }
+}

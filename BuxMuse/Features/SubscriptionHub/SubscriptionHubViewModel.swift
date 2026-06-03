@@ -169,10 +169,18 @@ public final class SubscriptionHubViewModel: ObservableObject {
         
         self.healthScore = max(10, min(100, score))
         
+        let locale = settingsManager.interfaceLocale
         if priceHikeSum > 0 {
-            self.monthlyChangeDescription = "Your subscriptions increased by \(settingsManager.format(priceHikeSum)) this month."
+            self.monthlyChangeDescription = BuxLocalizedString.format(
+                "Your subscriptions increased by %@ this month.",
+                locale: locale,
+                settingsManager.format(priceHikeSum)
+            )
         } else {
-            self.monthlyChangeDescription = "Your subscriptions are fully optimized with no price hikes."
+            self.monthlyChangeDescription = BuxLocalizedString.string(
+                "Your subscriptions are fully optimized with no price hikes.",
+                locale: locale
+            )
         }
         
         // 3. Upcoming Renewals Timeline: sorted by renewal date
@@ -187,9 +195,17 @@ public final class SubscriptionHubViewModel: ObservableObject {
         // Simulation details: "If you cancel X, burn rate drops to Y"
         if let mostExpensive = allSubs.first {
             let nextMonthly = totalMonthly - abs(mostExpensive.cost.value)
-            self.burnRateCancellationProjection = "If you cancel \(mostExpensive.merchantName), monthly burn rate drops to \(settingsManager.format(nextMonthly))"
+            self.burnRateCancellationProjection = BuxLocalizedString.format(
+                "If you cancel %@, monthly burn rate drops to %@",
+                locale: locale,
+                mostExpensive.merchantName,
+                settingsManager.format(nextMonthly)
+            )
         } else {
-            self.burnRateCancellationProjection = "No subscriptions active to optimize."
+            self.burnRateCancellationProjection = BuxLocalizedString.string(
+                "No subscriptions active to optimize.",
+                locale: locale
+            )
         }
         
         // Historical increase from subscription spend (last 90 days vs prior 90 days)

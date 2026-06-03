@@ -55,9 +55,18 @@ struct ProStudioSearchView: View {
             .padding(.bottom, BuxTokens.sheetBottomClearance)
         }
         .background(themeManager.screenBackground(for: colorScheme))
-        .navigationTitle("Pro Search")
+        .buxCatalogNavigationTitle("Pro Search")
         .navigationBarTitleDisplayMode(.large)
-        .searchable(text: $query, prompt: "Overdue invoices, clients, receipts…")
+        .searchable(
+            text: $query,
+            prompt: Text(
+                BuxCatalogLabel.string(
+                    "Overdue invoices, clients, receipts…",
+                    locale: appSettingsManager.interfaceLocale
+                )
+            )
+        )
+        .buxInterfaceLocale()
         .navigationDestination(item: $clientRouteID) { clientID in
             if let client = studioStore.clients.first(where: { $0.id == clientID }) {
                 StudioClientDetailView(client: client)
@@ -135,10 +144,10 @@ struct ProStudioSearchView: View {
                     .frame(width: 44, height: 44)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Ask your studio anything")
+                    BuxCatalogDynamicText(key: "Ask your studio anything")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text("Clients, invoices, projects, receipts, mileage, tax deductions, and your Simple ledger — all offline.")
+                    BuxCatalogDynamicText(key: "Clients, invoices, projects, receipts, mileage, tax deductions, and your Simple ledger — all offline.")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -149,7 +158,7 @@ struct ProStudioSearchView: View {
 
     private var quickFiltersSection: some View {
         VStack(alignment: .leading, spacing: BuxTokens.tight) {
-            Text("Quick filters")
+            BuxCatalogDynamicText(key: "Quick filters")
                 .font(.system(size: 13, weight: .bold))
                 .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
 
@@ -162,7 +171,7 @@ struct ProStudioSearchView: View {
                             HStack(spacing: 6) {
                                 Image(systemName: filter.icon)
                                     .font(.system(size: 11, weight: .bold))
-                                Text(filter.label)
+                                BuxCatalogText.text(filter.label)
                                     .font(.system(size: 12, weight: .bold))
                             }
                             .padding(.horizontal, 12)
@@ -180,7 +189,7 @@ struct ProStudioSearchView: View {
 
     private var suggestionsSection: some View {
         VStack(alignment: .leading, spacing: BuxTokens.section) {
-            Text("Try asking like this")
+            BuxCatalogDynamicText(key: "Try asking like this")
                 .font(.system(size: 13, weight: .bold))
                 .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
 
@@ -226,9 +235,9 @@ struct ProStudioSearchView: View {
             Image(systemName: "sparkle.magnifyingglass")
                 .font(.system(size: 34, weight: .semibold))
                 .foregroundStyle(.secondary)
-            Text("No matches")
+            BuxCatalogDynamicText(key: "No matches")
                 .font(.system(size: 17, weight: .bold))
-            Text("Try “overdue invoices”, a client name, or “receipts this week”.")
+            BuxCatalogDynamicText(key: "Try “overdue invoices”, a client name, or “receipts this week”.")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -239,13 +248,19 @@ struct ProStudioSearchView: View {
 
     private var resultsSection: some View {
         VStack(alignment: .leading, spacing: BuxTokens.block) {
-            Text("\(results.count) result\(results.count == 1 ? "" : "s")")
+            Text(
+                BuxLocalizedString.format(
+                    results.count == 1 ? "%lld result" : "%lld results",
+                    locale: appSettingsManager.interfaceLocale,
+                    Int64(results.count)
+                )
+            )
                 .font(.system(size: 12, weight: .bold))
                 .buxLabelSecondary()
 
             ForEach(groupedResults, id: \.section) { group in
                 VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                    BuxSectionHeader(title: group.section.rawValue)
+                    BuxSectionHeader(title: group.section.catalogLabel(locale: appSettingsManager.interfaceLocale))
 
                     BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: 0) {
                         VStack(spacing: 0) {
@@ -278,12 +293,22 @@ struct ProStudioSearchView: View {
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .multilineTextAlignment(.leading)
                     if !result.subtitle.isEmpty {
-                        Text(result.subtitle)
+                        Text(
+                            BuxCatalogLabel.string(
+                                result.subtitle,
+                                locale: appSettingsManager.interfaceLocale
+                            )
+                        )
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.leading)
                     }
-                    Text(result.matchReason)
+                    Text(
+                        BuxCatalogLabel.string(
+                            result.matchReason,
+                            locale: appSettingsManager.interfaceLocale
+                        )
+                    )
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
                 }

@@ -1,0 +1,139 @@
+%
+%@ %@
+%@ %@ · %@
+%@ (%@)
+%@ / %@h
+%@ Cash
+%@ Portfolio
+%@ Wallet
+%@ color
+%@ hours
+%@ of %@
+%@ · %@
+%@ · %@ (%@)
+%@ · %lldd
+%@ · typical %@
+%@ — %@%%
+%@%lld°
+%@, open color picker
+%@. %@. %lld percent.
+%@/%@h
+%@/hr
+%@:
+%lld
+%lld Active • %lld%% of total
+%lld Categories · Target: %@
+%lld active · %lld overrun risk
+%lld countries
+%lld days
+%lld designs
+%lld h
+%lld invoice(s)
+%lld items
+%lld m
+%lld milestone(s)
+%lld open
+%lld paid
+%lld result%@
+%lld time entries logged
+%lld total · %lld this month
+%lld transactions
+%lld%%
+%lld/10
+%lld/100
+%lldd
+%lldh
+%lldm
++%@
++%@%%
++%lld more
+6-Month Emergency target: %@
+Add %@
+Advance left: %@
+After %@
+After: %@
+Agreed %@
+Almost there — about %lld min left on your plan.
+Already logged: %@
+Anxiety count: %lld
+Avg. time to payment: %lld days
+Cash (%@)
+Current %@ Cash in Wallet
+Deductible: %@
+Default tax rate %
+Delay Risk: %@
+Delete %lld
+Due: %@
+ESTIMATED VALUE (%@)
+Effective rate %lld%% on recorded income
+Ended %@
+Est. allowance: %@
+Estimated runway based on your %@ monthly burn rate.
+Fill from %@
+Fix: %@
+Forecast: %@ Risk
+Header: %@ · Background: %@ · Template: %@
+Health Score: %lld%%
+Health · %@
+Health: %lld%%
+INCOME & DEDUCTIONS (%@)
+Impact on '%@'
+Irregular: %@
+Issued: %@
+LTV %@ · Health %lld%%
+LTV: %@
+Lap %lld
+Last: %@
+Late Risk Detected. Awaiting payment speed estimated at %lld days.
+Level %lld/10
+Live Preview · %@
+Local notification %lld day%@ before renewal.
+Log %@ and stop
+Matching "%@"
+More colors for %@
+Next Renewal: %@
+Next due: %@ · %@
+Paid %@
+Payment Terms: %lld Days
+Photos: %@
+Planned time: %@
+Preview: %@
+Qty %@ · %@
+Rate %
+Recommended: %@
+Reliability: %lld%%
+Review %@ preset
+Revisions: %lld/%lld
+Runway %@
+Same trip home — adds a second log with From ↔ To swapped (%@ mi each way).
+Save %@
+Save %@/mo
+Scale: %@
+See all %lld designs
+Shown as %@ · %@
+Signed · %@
+Sleep %@h
+Sleep: %@ hrs
+Spent %@
+Status: %@
+Stress expenses: %lld
+Target: %@
+Tax Health · %@ risk
+Template: %@
+Top: %@ (%@ projected profit)
+Total spent (%@)
+Total: %@
+Updated %@
+Use %@
+Viewing: %@
+Waiting %@
+Waiting: %@
+Weekly subs: %@
+When paid: keep %@
+Work %@h
+Work logged: %@ hrs
+Workload %@h vs project time %@h · Scope alerts %lld
+Your recurring subscriptions account for roughly %@ of your overall spending. Taking advantage of multi-month prepayments could unlock up to 15%% in annual savings across active plans.
+~%@h to finish at current pace
+↑ %@%% Increase
+↓ %@%% Decrease

@@ -239,6 +239,11 @@ public final class AppSettingsManager: ObservableObject {
             UserDefaults.standard.set(currency.id, forKey: currencyKey)
         }
     }
+
+    /// UI string-catalog locale driven by **Settings → Country/Region**, not the device language.
+    public var interfaceLocale: Locale {
+        BuxInterfaceLocale.locale(for: selectedCountry)
+    }
     
     /// Returns a pre-configured NumberFormatter for currency formatting
     public var formatter: NumberFormatter {

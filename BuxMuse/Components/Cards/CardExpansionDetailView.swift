@@ -12,6 +12,7 @@ import SwiftUI
 struct CardExpansionDetailView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var appSettingsManager: AppSettingsManager
     let cardType: String
     @Binding var isPresented: String?
     
@@ -45,7 +46,13 @@ struct CardExpansionDetailView: View {
                         
                         Spacer()
                         
-                        Text("\(cardType) Portfolio")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%@ Portfolio",
+                                locale: appSettingsManager.interfaceLocale,
+                                cardType
+                            )
+                        )
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         
@@ -63,7 +70,7 @@ struct CardExpansionDetailView: View {
                             .shadow(color: themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.25 : 0.12), radius: 20, x: 0, y: 10)
                         
                         VStack(spacing: 16) {
-                            Text("Current Holdings")
+                            BuxCatalogDynamicText(key: "Current Holdings")
                                 .font(.caption)
                                 .foregroundColor(colorScheme == .dark ? .white.opacity(0.6) : Color.black.opacity(0.5))
                             
@@ -81,7 +88,7 @@ struct CardExpansionDetailView: View {
                     
                     // Interactive Performance Chart
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Performance Chart")
+                        BuxCatalogDynamicText(key: "Performance Chart")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(colorScheme == .dark ? .white.opacity(0.8) : Color.black.opacity(0.7))
                         
@@ -119,7 +126,7 @@ struct CardExpansionDetailView: View {
                     
                     // Transfers / Transactions List
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Recent Transfers")
+                        BuxCatalogDynamicText(key: "Recent Transfers")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .padding(.horizontal, 8)

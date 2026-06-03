@@ -95,17 +95,26 @@ public struct SettingsOverviewDisplay: Equatable {
 
 @MainActor
 public final class SettingsBrain {
+
+    private static func localizedOnOff(_ isOn: Bool, locale: Locale) -> String {
+        BuxLocalizedString.string(isOn ? "On" : "Off", locale: locale)
+    }
     
     public static func generateOverview(
         store: SettingsStore,
         currentThemeName: String,
         activeCurrencyCode: String,
-        activeCurrencyFlag: String
+        activeCurrencyFlag: String,
+        interfaceLocale: Locale
     ) -> SettingsOverviewDisplay {
         
         // 1. General Section
-        let profileSubtitle = store.userDisplayName ?? "Configure display preferences"
-        let preferredStyle = store.preferredNameStyle == .firstName ? "First Name" : "Full Name"
+        let profileSubtitle = store.userDisplayName
+            ?? BuxLocalizedString.string("Configure display preferences", locale: interfaceLocale)
+        let preferredStyle = BuxLocalizedString.string(
+            String.LocalizationValue(stringLiteral: store.preferredNameStyle.rawValue),
+            locale: interfaceLocale
+        )
         
         let profileRow = SettingsRowDisplay(
             title: "Profile",
@@ -141,24 +150,24 @@ public final class SettingsBrain {
         
         // 2. Finance Rules Section
         let activeBudgetCount = store.customBudgetProfiles.count
-        let budgetModeDesc: String
-        switch store.budgetingMode {
-        case .simple: budgetModeDesc = "Simple"
-        case .envelope: budgetModeDesc = "Envelope"
-        case .custom: budgetModeDesc = "Custom"
-        }
-        let budgetSubtitle = "Mode: \(budgetModeDesc) · \(activeBudgetCount) Profile\(activeBudgetCount == 1 ? "" : "s")"
+        let budgetModeName = store.budgetingMode.localizedDisplayName(locale: interfaceLocale)
+        let budgetSubtitle = BuxLocalizedString.format(
+            "Mode: %@ · %lld profiles",
+            locale: interfaceLocale,
+            budgetModeName,
+            activeBudgetCount
+        )
         
         let budgetRow = SettingsRowDisplay(
             title: "Budgets & Custom Budgets",
             subtitle: budgetSubtitle,
             iconName: "chart.pie.fill",
             hexColor: "#30D158", // Bright Green
-            trailingText: budgetModeDesc,
+            trailingText: budgetModeName,
             destination: .budgets
         )
         
-        let studioStatus = store.studioEnabled ? "On" : "Off"
+        let studioStatus = Self.localizedOnOff(store.studioEnabled, locale: interfaceLocale)
         let studioRow = SettingsRowDisplay(
             title: "Studio",
             subtitle: "Business profile, invoices, tax",
@@ -173,7 +182,7 @@ public final class SettingsBrain {
             subtitle: "Visa, PayPal, Klarna tags for credit insights",
             iconName: "creditcard.fill",
             hexColor: "#5856D6",
-            trailingText: store.paymentSourceTrackingEnabled ? "On" : "Off",
+            trailingText: Self.localizedOnOff(store.paymentSourceTrackingEnabled, locale: interfaceLocale),
             destination: .paymentSources
         )
 
@@ -188,10 +197,14 @@ public final class SettingsBrain {
         )
         
         // 3. Security & Access Section
-        let notifyStatus = store.notificationsEnabled ? "On" : "Off"
+        let notifyStatus = Self.localizedOnOff(store.notificationsEnabled, locale: interfaceLocale)
         let notifyRow = SettingsRowDisplay(
             title: "Notifications",
-            subtitle: "Alerts, bill reminders (\(notifyStatus))",
+            subtitle: BuxLocalizedString.format(
+                "Alerts, bill reminders (%@)",
+                locale: interfaceLocale,
+                notifyStatus
+            ),
             iconName: "bell.fill",
             hexColor: "#FF3B30", // Red
             trailingText: notifyStatus,

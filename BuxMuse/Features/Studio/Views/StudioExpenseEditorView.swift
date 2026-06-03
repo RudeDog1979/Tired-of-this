@@ -87,14 +87,14 @@ struct StudioExpenseEditorView: View {
                     BuxFormSection(title: "Business classification") {
                         Picker("Category", selection: $category) {
                             ForEach(BusinessExpenseCategory.allCases) { cat in
-                                Text(cat.rawValue).tag(cat.rawValue)
+                                Text(cat.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(cat.rawValue)
                             }
                         }
                         .buxFormFieldPadding()
                         BuxFormRowDivider()
                         Picker("Use", selection: $businessUse) {
                             ForEach(ExpenseBusinessUse.allCases) { use in
-                                Text(use.rawValue).tag(use)
+                                Text(use.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(use)
                             }
                         }
                         .onChange(of: businessUse) { _, newValue in
@@ -126,9 +126,15 @@ struct StudioExpenseEditorView: View {
                             BuxFormRowDivider()
                             VStack(alignment: .leading, spacing: 6) {
                                 HStack {
-                                    Text("Deductible %")
+                                    BuxCatalogDynamicText(key: "Deductible %")
                                     Spacer()
-                                    Text("\(Int(deductiblePercentage))%")
+                                    Text(
+                                        BuxLocalizedString.format(
+                                            "%lld%%",
+                                            locale: appSettingsManager.interfaceLocale,
+                                            Int64(deductiblePercentage)
+                                        )
+                                    )
                                         .font(.system(size: 13, weight: .bold))
                                 }
                                 Slider(value: $deductiblePercentage, in: 0...100, step: 5)
@@ -139,7 +145,7 @@ struct StudioExpenseEditorView: View {
 
                         BuxFormRowDivider()
                         HStack {
-                            Text(categoryHint.strength.rawValue)
+                            Text(categoryHint.strength.catalogLabel(locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(hintColor(categoryHint.strength))
                                 .padding(.horizontal, 8)
@@ -182,7 +188,7 @@ struct StudioExpenseEditorView: View {
                     }
                 }
             }
-            .navigationTitle(receiptToEdit == nil ? "Log Expense" : "Edit Expense")
+            .buxCatalogNavigationTitle(receiptToEdit == nil ? "Log Expense" : "Edit Expense")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

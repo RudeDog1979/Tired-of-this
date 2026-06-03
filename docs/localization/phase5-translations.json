@@ -1,0 +1,198 @@
+{
+  "Yearly": {
+    "es-419": "Anual",
+    "es-ES": "Anual"
+  },
+  "About %@ of your tagged spending went through credit cards or store credit. High credit share can increase interest risk if balances aren't cleared on time.": {
+    "es-419": "Cerca de %@ de tus gastos etiquetados pasaron por tarjetas de crédito o crédito de tienda. Un alto uso de crédito puede aumentar el riesgo de intereses si no liquidas los saldos a tiempo.",
+    "es-ES": "Cerca de %@ de tus gastos etiquetados pasaron por tarjetas de crédito o crédito de tienda. Un alto uso de crédito puede aumentar el riesgo de intereses si no liquidas los saldos a tiempo."
+  },
+  "You tagged %@ through BNPL providers (%@). Spread due dates so installments don't stack up.": {
+    "es-419": "Etiquetaste %@ con proveedores BNPL (%@). Reparte las fechas de vencimiento para que las cuotas no se acumulen.",
+    "es-ES": "Etiquetaste %@ con proveedores BNPL (%@). Reparte las fechas de vencimiento para que las cuotas no se acumulen."
+  },
+  "%@ of this month's spending isn't tied to a workspace. Tag expenses to see per-gig profit and tax-ready splits.": {
+    "es-419": "%@ del gasto de este mes no está ligado a un workspace. Etiqueta los gastos para ver ganancia por proyecto y cortes listos para impuestos.",
+    "es-ES": "%@ del gasto de este mes no está ligado a un workspace. Etiqueta los gastos para ver beneficio por proyecto y repartos listos para impuestos."
+  },
+  "About %@ went through physical cash this month vs %@ digital. Reconcile your drawer if the split feels off.": {
+    "es-419": "Cerca de %@ pasó en efectivo este mes frente a %@ digital. Concilia tu caja si la proporción no cuadra.",
+    "es-ES": "Cerca de %@ pasó en efectivo este mes frente a %@ digital. Concilia tu caja si la proporción no cuadra."
+  },
+  "Expenses with paymentMethod tagged as credit, store credit, or PayPal Credit.": {
+    "es-419": "Gastos con paymentMethod etiquetado como crédito, crédito de tienda o PayPal Credit.",
+    "es-ES": "Gastos con paymentMethod etiquetado como crédito, crédito de tienda o PayPal Credit."
+  },
+  "Expenses tagged Klarna, Affirm, Afterpay, or Zip.": {
+    "es-419": "Gastos etiquetados Klarna, Affirm, Afterpay o Zip.",
+    "es-ES": "Gastos etiquetados Klarna, Affirm, Afterpay o Zip."
+  },
+  "Expenses with hustleId nil in the active month.": {
+    "es-419": "Gastos con hustleId nil en el mes activo.",
+    "es-ES": "Gastos con hustleId nil en el mes activo."
+  },
+  "Payment method tags starting with Cash (.": {
+    "es-419": "Etiquetas de método de pago que empiezan con Cash (.",
+    "es-ES": "Etiquetas de método de pago que empiezan con Cash (."
+  },
+  "Review credit-tagged expenses": {
+    "es-419": "Revisa los gastos etiquetados como crédito",
+    "es-ES": "Revisa los gastos etiquetados como crédito"
+  },
+  "Set a weekly pay-down reminder": {
+    "es-419": "Configura un recordatorio semanal de pago",
+    "es-ES": "Configura un recordatorio semanal de pago"
+  },
+  "Check BNPL due dates": {
+    "es-419": "Revisa las fechas de vencimiento BNPL",
+    "es-ES": "Revisa las fechas de vencimiento BNPL"
+  },
+  "Consolidate small BNPL plans": {
+    "es-419": "Consolida planes BNPL pequeños",
+    "es-ES": "Consolida planes BNPL pequeños"
+  },
+  "Assign a workspace when logging": {
+    "es-419": "Asigna un workspace al registrar",
+    "es-ES": "Asigna un workspace al registrar"
+  },
+  "Open Workspaces in Studio settings": {
+    "es-419": "Abre Workspaces en ajustes de Studio",
+    "es-ES": "Abre Workspaces en ajustes de Studio"
+  },
+  "Log cash expenses from Add Expense": {
+    "es-419": "Registra gastos en efectivo desde Agregar gasto",
+    "es-ES": "Registra gastos en efectivo desde Agregar gasto"
+  },
+  "Update drawer balances in Studio": {
+    "es-419": "Actualiza saldos de caja en Studio",
+    "es-ES": "Actualiza saldos de caja en Studio"
+  },
+  "Add estimated values for tax records": {
+    "es-419": "Agrega valores estimados para registros fiscales",
+    "es-ES": "Añade valores estimados para registros fiscales"
+  },
+  "Automate savings transfers on payday morning to 'pay yourself first'.": {
+    "es-419": "Automatiza transferencias de ahorro el día de pago por la mañana para «pagarte primero».",
+    "es-ES": "Automatiza transferencias de ahorro el día de pago por la mañana para «pagarte primero»."
+  },
+  "Check alternative public transit or shared ride routes if safe.": {
+    "es-419": "Revisa transporte público alternativo o rutas compartidas si es seguro.",
+    "es-ES": "Revisa transporte público alternativo o rutas compartidas si es seguro."
+  },
+  "Check your recent transactions for irregular large purchases.": {
+    "es-419": "Revisa tus transacciones recientes por compras grandes irregulares.",
+    "es-ES": "Revisa tus transacciones recientes por compras grandes irregulares."
+  },
+  "Consider competitive alternatives or bundling options.": {
+    "es-419": "Considera alternativas competitivas u opciones de paquete.",
+    "es-ES": "Considera alternativas competitivas u opciones de paquete."
+  },
+  "Consider minor target date adjustments to reduce baseline pressure.": {
+    "es-419": "Considera ajustes menores a la fecha meta para reducir presión base.",
+    "es-ES": "Considera ajustes menores a la fecha objetivo para reducir presión base."
+  },
+  "Declare Sunday a recurring 'No-Spend Day' to build savings momentum.": {
+    "es-419": "Declara el domingo como «Día sin gasto» recurrente para impulsar el ahorro.",
+    "es-ES": "Declara el domingo como «Día sin gasto» recurrente para impulsar el ahorro."
+  },
+  "Delay non-essential purchases by 48 hours.": {
+    "es-419": "Retrasa compras no esenciales 48 horas.",
+    "es-ES": "Retrasa compras no esenciales 48 horas."
+  },
+  "Direct extra surplus to accelerate other goals.": {
+    "es-419": "Dirige el excedente a otras metas para acelerarlas.",
+    "es-ES": "Dirige el excedente a otros objetivos para acelerarlos."
+  },
+  "Enjoy peace of mind, your baseline budgets are secure.": {
+    "es-419": "Tranquilo: tus presupuestos base están seguros.",
+    "es-ES": "Tranquilo: tus presupuestos base están seguros."
+  },
+  "Keep your deposit cadence locked in to finish early.": {
+    "es-419": "Mantén tu ritmo de depósitos para terminar antes.",
+    "es-ES": "Mantén tu ritmo de depósitos para terminar antes."
+  },
+  "Lock in strict budget limits for transport and dining categories immediately.": {
+    "es-419": "Fija límites estrictos ya en transporte y restaurantes.",
+    "es-ES": "Fija límites estrictos ya en transporte y restaurantes."
+  },
+  "Lock in this lower baseline budget target for next month.": {
+    "es-419": "Fija esta meta base más baja para el próximo mes.",
+    "es-ES": "Fija este objetivo base más bajo para el próximo mes."
+  },
+  "Look for bundled offers or alternative services.": {
+    "es-419": "Busca ofertas en paquete o servicios alternativos.",
+    "es-ES": "Busca ofertas en paquete o servicios alternativos."
+  },
+  "Monitor your bank sweeps for next month's renewal date.": {
+    "es-419": "Monitorea los cargos bancarios para la renovación del próximo mes.",
+    "es-ES": "Monitorea los cargos bancarios para la renovación del próximo mes."
+  },
+  "Pause active discretionary spending categories for the next 3 days.": {
+    "es-419": "Pausa categorías discrecionales activas por 3 días.",
+    "es-ES": "Pausa categorías discrecionales activas por 3 días."
+  },
+  "Plan free or low-cost activities for Saturday afternoons.": {
+    "es-419": "Planifica actividades gratis o baratas los sábados por la tarde.",
+    "es-ES": "Planifica actividades gratis o baratas los sábados por la tarde."
+  },
+  "Prep your weekly meals on Sunday to lock in restaurant savings.": {
+    "es-419": "Prepara comidas semanales el domingo para ahorrar en restaurantes.",
+    "es-ES": "Prepara comidas semanales el domingo para ahorrar en restaurantes."
+  },
+  "Re-route this refund into your active savings goals.": {
+    "es-419": "Redirige este reembolso a tus metas de ahorro activas.",
+    "es-ES": "Redirige este reembolso a tus objetivos de ahorro activos."
+  },
+  "Review active subscriptions and opt out of zombie services.": {
+    "es-419": "Revisa suscripciones activas y cancela servicios zombie.",
+    "es-ES": "Revisa suscripciones activas y cancela servicios zombie."
+  },
+  "Review barter entries in Expenses": {
+    "es-419": "Revisa entradas de trueque en Gastos",
+    "es-ES": "Revisa entradas de trueque en Gastos"
+  },
+  "Review project scope in Studio": {
+    "es-419": "Revisa el alcance del proyecto en Studio",
+    "es-ES": "Revisa el alcance del proyecto en Studio"
+  },
+  "Review rideshare history for peak surge pricing anomalies.": {
+    "es-419": "Revisa historial de viajes compartidos por picos de tarifa.",
+    "es-ES": "Revisa historial de viajes compartidos por picos de tarifa."
+  },
+  "Review shared bundles or family plan subscriptions.": {
+    "es-419": "Revisa paquetes compartidos o planes familiares.",
+    "es-ES": "Revisa paquetes compartidos o planes familiares."
+  },
+  "Rotate subscriptions: Cancel one, catch up on shows, then switch next month.": {
+    "es-419": "Rota suscripciones: cancela una, pon al día series y cambia el próximo mes.",
+    "es-ES": "Rota suscripciones: cancela una, pon al día series y cambia el próximo mes."
+  },
+  "Save cash by avoiding short taxi rides in bad weather.": {
+    "es-419": "Ahorra evitando taxis cortos con mal clima.",
+    "es-ES": "Ahorra evitando taxis cortos con mal tiempo."
+  },
+  "Send a change-order note to client": {
+    "es-419": "Envía una nota de orden de cambio al cliente",
+    "es-ES": "Envía una nota de orden de cambio al cliente"
+  },
+  "Set a reminder to review active subscriptions every 90 days.": {
+    "es-419": "Configura un recordatorio para revisar suscripciones cada 90 días.",
+    "es-ES": "Configura un recordatorio para revisar suscripciones cada 90 días."
+  },
+  "Set up a warning alert baseline budget limit for this category.": {
+    "es-419": "Configura alerta de límite base para esta categoría.",
+    "es-ES": "Configura alerta de límite base para esta categoría."
+  },
+  "Use rainy days to review your subscription stack and active budgets.": {
+    "es-419": "Usa días lluviosos para revisar suscripciones y presupuestos activos.",
+    "es-ES": "Usa días lluviosos para revisar suscripciones y presupuestos activos."
+  },
+  "Verify if the price change is due to a plan upgrade or extra tax fees.": {
+    "es-419": "Verifica si el cambio de precio es por plan superior o impuestos extra.",
+    "es-ES": "Verifica si el cambio de precio es por plan superior o impuestos extra."
+  },
+  "Verify that this refund matches your expectations.": {
+    "es-419": "Verifica que este reembolso coincida con lo esperado.",
+    "es-ES": "Verifica que este reembolso coincida con lo esperado."
+  }
+}

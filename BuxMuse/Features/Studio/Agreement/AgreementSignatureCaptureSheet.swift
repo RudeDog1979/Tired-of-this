@@ -51,7 +51,7 @@ struct AgreementSignatureCaptureSheet: View {
                             .strokeBorder(Color.primary.opacity(0.12), lineWidth: 1)
                     )
 
-                Text("Sign inside the box. Use Clear to start over.")
+                BuxCatalogDynamicText(key: "Sign inside the box. Use Clear to start over.")
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
             }

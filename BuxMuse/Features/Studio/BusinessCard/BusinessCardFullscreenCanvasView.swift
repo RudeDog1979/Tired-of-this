@@ -49,7 +49,7 @@ struct BusinessCardFullscreenCanvasView: View {
         HStack {
             Button("Cancel") { dismiss() }
             Spacer()
-            Text("Move layers")
+            BuxCatalogDynamicText(key: "Move layers")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(.white)
             Spacer()
@@ -361,7 +361,7 @@ struct BusinessCardFullscreenCanvasView: View {
             .font(.system(size: 12, weight: .medium))
             .foregroundStyle(.white.opacity(0.85))
 
-            Text("Tap any layer · drag · pinch · twist")
+            BuxCatalogDynamicText(key: "Tap any layer · drag · pinch · twist")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.white.opacity(0.45))
         }

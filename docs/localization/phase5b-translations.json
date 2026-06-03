@@ -1,0 +1,246 @@
+{
+  "Your %@ spending reached %@ this month, which is %@%% higher than your baseline average of %@.": {
+    "es-419": "Tu gasto en %@ llegó a %@ este mes, un %@%% por encima de tu promedio base de %@.",
+    "es-ES": "Tu gasto en %@ llegó a %@ este mes, un %@%% por encima de tu promedio base de %@."
+  },
+  "Your %@ spending fell to %@ this month compared to %@ historically, leaving you with an extra surplus of %@.": {
+    "es-419": "Tu gasto en %@ bajó a %@ este mes frente a %@ histórico, con un excedente de %@.",
+    "es-ES": "Tu gasto en %@ bajó a %@ este mes frente a %@ histórico, con un excedente de %@."
+  },
+  "Category: %@. Current: %@. Baseline: %@.": {
+    "es-419": "Categoría: %@. Actual: %@. Base: %@.",
+    "es-ES": "Categoría: %@. Actual: %@. Base: %@."
+  },
+  "Category: %@. Saved: %@.": {
+    "es-419": "Categoría: %@. Ahorrado: %@.",
+    "es-ES": "Categoría: %@. Ahorrado: %@."
+  },
+  "Review recent transaction line items inside %@.": {
+    "es-419": "Revisa los movimientos recientes en %@.",
+    "es-ES": "Revisa los movimientos recientes en %@."
+  },
+  "Redirect this surplus of %@ immediately into savings goals.": {
+    "es-419": "Redirige ya este excedente de %@ a tus metas de ahorro.",
+    "es-ES": "Redirige ya este excedente de %@ a tus objetivos de ahorro."
+  },
+  "Your latest charge of %@ at %@ is higher than the previous transaction of %@. This represents a price rise of %@.": {
+    "es-419": "Tu último cargo de %@ en %@ supera el anterior de %@. Subida de %@.",
+    "es-ES": "Tu último cargo de %@ en %@ supera el anterior de %@. Subida de %@."
+  },
+  "The BuxMuse Brain successfully reconciled a cleared credit/refund of %@ from %@ back into your main wallet.": {
+    "es-419": "BuxMuse concilió un reembolso/abono de %@ de %@ en tu billetera principal.",
+    "es-ES": "BuxMuse concilió un reembolso/abono de %@ de %@ en tu cartera principal."
+  },
+  "Merchant: %@. Current: %@. Previous: %@.": {
+    "es-419": "Comercio: %@. Actual: %@. Anterior: %@.",
+    "es-ES": "Comercio: %@. Actual: %@. Anterior: %@."
+  },
+  "Merchant: %@. Refund: %@.": {
+    "es-419": "Comercio: %@. Reembolso: %@.",
+    "es-ES": "Comercio: %@. Reembolso: %@."
+  },
+  "With a strong health score of %lld%% and consistent contributions, you are trending ahead of your original pacing schedules for '%@'.": {
+    "es-419": "Con salud %lld%% y aportes constantes, vas adelantado al ritmo original de '%@'.",
+    "es-ES": "Con salud %lld%% y aportes constantes, vas adelantado al ritmo original de '%@'."
+  },
+  "A low health score of %lld%% indicates high timeline delay risk. Contributions are falling behind standard forecast timelines.": {
+    "es-419": "Salud baja (%lld%%): alto riesgo de retraso. Los aportes van detrás del pronóstico.",
+    "es-ES": "Salud baja (%lld%%): alto riesgo de retraso. Los aportes van detrás del pronóstico."
+  },
+  "Goal: %@. Health: %lld%%.": {
+    "es-419": "Meta: %@. Salud: %lld%%.",
+    "es-ES": "Objetivo: %@. Salud: %lld%%."
+  },
+  "Re-route %@ from active media subscription overspends to boost momentum.": {
+    "es-419": "Redirige %@ de suscripciones de media activas para impulsar el ritmo.",
+    "es-ES": "Redirige %@ de suscripciones de media activas para impulsar el ritmo."
+  },
+  "The BuxMuse Pattern Engine detected two identical billing sweeps for %@ within the same billing cycle. This likely represents a merchant billing error.": {
+    "es-419": "El motor de patrones detectó dos cargos idénticos de %@ en el mismo ciclo. Probable error del comercio.",
+    "es-ES": "El motor de patrones detectó dos cargos idénticos de %@ en el mismo ciclo. Probable error del comercio."
+  },
+  "The Brain detected a recent price increase for your %@ subscription. You are paying more than the baseline average from previous cycles.": {
+    "es-419": "Detectamos subida de precio en %@. Pagas más que el promedio de ciclos anteriores.",
+    "es-ES": "Detectamos subida de precio en %@. Pagas más que el promedio de ciclos anteriores."
+  },
+  "Your %@ subscription represents a 'Zombie' charge. Usage analytics indicate zero active engagement or features consumed during the last 30 days.": {
+    "es-419": "Tu suscripción %@ es un cargo «zombie»: sin uso en los últimos 30 días.",
+    "es-ES": "Tu suscripción %@ es un cargo «zombie»: sin uso en los últimos 30 días."
+  },
+  "You are maintaining active subscriptions for both %@. Trimming down to a single active streaming platform could optimize your media budget.": {
+    "es-419": "Tienes suscripciones activas a %@. Quedarte con una plataforma optimiza tu presupuesto de media.",
+    "es-ES": "Tienes suscripciones activas a %@. Quedarte con una plataforma optimiza tu presupuesto de media."
+  },
+  "Canceling your %@ subscription (%@/mo) and redirecting that cash flow to %@ allows you to achieve the goal %@ months sooner.": {
+    "es-419": "Cancelar %@ (%@/mes) y redirigir ese flujo a %@ adelanta la meta %@ meses.",
+    "es-ES": "Cancelar %@ (%@/mes) y redirigir ese flujo a %@ adelanta el objetivo %@ meses."
+  },
+  "Merchant: %@. Risk: Double Charge.": {
+    "es-419": "Comercio: %@. Riesgo: cargo duplicado.",
+    "es-ES": "Comercio: %@. Riesgo: cargo duplicado."
+  },
+  "Merchant: %@. Price Hike detected.": {
+    "es-419": "Comercio: %@. Subida de precio detectada.",
+    "es-ES": "Comercio: %@. Subida de precio detectada."
+  },
+  "Zombie flag on %@.": {
+    "es-419": "Marca zombie en %@.",
+    "es-ES": "Marca zombie en %@."
+  },
+  "Overlapping streaming video bundle count: %lld.": {
+    "es-419": "Suscripciones de video superpuestas: %lld.",
+    "es-ES": "Suscripciones de video superpuestas: %lld."
+  },
+  "Sub: %@. Cost: %@. Goal: %@. Pacing: -%@ months.": {
+    "es-419": "Sub: %@. Costo: %@. Meta: %@. Ritmo: -%@ meses.",
+    "es-ES": "Sub: %@. Costo: %@. Objetivo: %@. Ritmo: -%@ meses."
+  },
+  "Contact %@ support to request a double-charge refund.": {
+    "es-419": "Contacta soporte de %@ para pedir reembolso por cargo duplicado.",
+    "es-ES": "Contacta soporte de %@ para pedir reembolso por cargo duplicado."
+  },
+  "Review your usage to check if %@ is still value-aligned.": {
+    "es-419": "Revisa tu uso para ver si %@ sigue valiendo la pena.",
+    "es-ES": "Revisa tu uso para ver si %@ sigue valiendo la pena."
+  },
+  "Cancel %@ immediately to recover the cost.": {
+    "es-419": "Cancela %@ ya para recuperar el costo.",
+    "es-ES": "Cancela %@ ya para recuperar el costo."
+  },
+  "Cancel %@ inside BuxMuse.": {
+    "es-419": "Cancela %@ dentro de BuxMuse.",
+    "es-ES": "Cancela %@ dentro de BuxMuse."
+  },
+  "Set up an automated monthly %@ transfer to '%@'.": {
+    "es-419": "Configura una transferencia mensual automática de %@ a '%@'.",
+    "es-ES": "Configura una transferencia mensual automática de %@ a '%@'."
+  },
+  "Your spending rose by %@%% immediately following your last payday. This matches a standard payday splurge bias.": {
+    "es-419": "Tu gasto subió %@%% justo después del último día de pago. Patrón típico de «gasto de quincena».",
+    "es-ES": "Tu gasto subió %@%% justo después del último día de pago. Patrón típico de «gasto de nómina»."
+  },
+  "Sundays are your quietest financial days, averaging just %@ compared to %@ on other days of the week. This is an optimal rest day for your wallet.": {
+    "es-419": "Los domingos son tus días más tranquilos: %@ de promedio frente a %@ el resto de la semana. Ideal para descansar el bolsillo.",
+    "es-ES": "Los domingos son tus días más tranquilos: %@ de promedio frente a %@ el resto de la semana. Ideal para descansar el bolsillo."
+  },
+  "You spent %@ this week, which is %@%% higher than your weekly baseline average of %@.": {
+    "es-419": "Gastaste %@ esta semana, un %@%% sobre tu promedio semanal de %@.",
+    "es-ES": "Gastaste %@ esta semana, un %@%% sobre tu promedio semanal de %@."
+  },
+  "When local logs indicate rainy weather notes, your discretionary dining and transport spending drops by over 40% as you stay indoors, showing a strong outdoor spending bias.": {
+    "es-419": "Con notas de lluvia en tus registros, bajan restaurantes y transporte (+40%) porque te quedas adentro: sesgo a gastar afuera.",
+    "es-ES": "Con notas de lluvia en tus registros, bajan restaurantes y transporte (+40%) porque te quedas dentro: sesgo a gastar fuera."
+  },
+  "Last Payday: %@. Spend: %@. Baseline: %@.": {
+    "es-419": "Último pago: %@. Gasto: %@. Base: %@.",
+    "es-ES": "Último pago: %@. Gasto: %@. Base: %@."
+  },
+  "Sunday Average: %@. Daily Average: %@.": {
+    "es-419": "Promedio domingo: %@. Promedio diario: %@.",
+    "es-ES": "Promedio domingo: %@. Promedio diario: %@."
+  },
+  "Current Week Spend: %@. Monthly Average Week: %@.": {
+    "es-419": "Gasto semana actual: %@. Promedio semanal mensual: %@.",
+    "es-ES": "Gasto semana actual: %@. Promedio semanal mensual: %@."
+  },
+  "Rainy-note transactions count: %lld.": {
+    "es-419": "Transacciones con nota de lluvia: %lld.",
+    "es-ES": "Transacciones con nota de lluvia: %lld."
+  },
+  "Based on your current daily run-rate of %@, BuxMuse predicts you will spend %@ this month. This is %@%% higher than your standard average (%@), threatening a potential %@ overspend.": {
+    "es-419": "Con ritmo diario %@, BuxMuse proyecta %@ este mes: %@%% sobre tu promedio (%@), con posible exceso de %@.",
+    "es-ES": "Con ritmo diario %@, BuxMuse proyecta %@ este mes: %@%% sobre tu promedio (%@), con posible exceso de %@."
+  },
+  "BuxMuse predicts a stable close to the month, with forecasted spending at %@, well within your safe historical boundaries of %@.": {
+    "es-419": "BuxMuse prevé un cierre estable del mes, con gasto proyectado %@, dentro de tu rango histórico seguro de %@.",
+    "es-ES": "BuxMuse prevé un cierre estable del mes, con gasto proyectado %@, dentro de tu rango histórico seguro de %@."
+  },
+  "Run-rate: %@/day. Predicted: %@. Historical: %@.": {
+    "es-419": "Ritmo: %@/día. Proyectado: %@. Histórico: %@.",
+    "es-ES": "Ritmo: %@/día. Proyectado: %@. Histórico: %@."
+  },
+  "Predicted: %@. Historical Avg: %@.": {
+    "es-419": "Proyectado: %@. Promedio histórico: %@.",
+    "es-ES": "Proyectado: %@. Promedio histórico: %@."
+  },
+  "Transfer 10% of your remaining free budget to savings goals early.": {
+    "es-419": "Transfiere el 10% de tu presupuesto libre restante a metas de ahorro antes de tiempo.",
+    "es-ES": "Transfiere el 10% de tu presupuesto libre restante a objetivos de ahorro antes de tiempo."
+  },
+  "Your weekend spending averages %@ per day, which is %@%% higher than your weekday average of %@.": {
+    "es-419": "Tu gasto de fin de semana promedia %@/día, un %@%% sobre el día entre semana de %@.",
+    "es-ES": "Tu gasto de fin de semana promedia %@/día, un %@%% sobre el día entre semana de %@."
+  },
+  "You spent %@ across %lld late-night rides this month. Fare spikes and premium options contribute to this nocturnal splurge.": {
+    "es-419": "Gastaste %@ en %lld viajes nocturnos este mes. Tarifas dinámicas y opciones premium impulsan el gasto.",
+    "es-ES": "Gastaste %@ en %lld viajes nocturnos este mes. Tarifas dinámicas y opciones premium impulsan el gasto."
+  },
+  "Weekend Average: %@. Weekday Average: %@.": {
+    "es-419": "Promedio fin de semana: %@. Entre semana: %@.",
+    "es-ES": "Promedio fin de semana: %@. Entre semana: %@."
+  },
+  "Nighttime Transport Spend: %@. Count: %lld.": {
+    "es-419": "Transporte nocturno: %@. Cantidad: %lld.",
+    "es-ES": "Transporte nocturno: %@. Cantidad: %lld."
+  },
+  "Establish a concrete 'Weekend Budget cap' of %@.": {
+    "es-419": "Fija un tope concreto de fin de semana de %@.",
+    "es-ES": "Fija un tope concreto de fin de semana de %@."
+  },
+  "You have logged %lld barter or trade exchanges with an estimated combined value of %@. These are tracked separately from cash expenses for your records.": {
+    "es-419": "Registraste %lld intercambios de trueque con valor estimado %@. Se llevan aparte del efectivo.",
+    "es-ES": "Registraste %lld intercambios de trueque con valor estimado %@. Se llevan aparte del efectivo."
+  },
+  "Project \"%@\" has used %@ of %@ budgeted hours. Watch for scope creep before taking extra revisions.": {
+    "es-419": "El proyecto \"%@\" usó %@ de %@ horas presupuestadas. Cuida el scope creep antes de más revisiones.",
+    "es-ES": "El proyecto \"%@\" usó %@ de %@ horas presupuestadas. Cuida el scope creep antes de más revisiones."
+  },
+  "StudioProject budgetedHours vs timeEntries.": {
+    "es-419": "StudioProject: budgetedHours vs timeEntries.",
+    "es-ES": "StudioProject: budgetedHours vs timeEntries."
+  },
+  "Barter transactions where isBarterExchange is true.": {
+    "es-419": "Transacciones de trueque con isBarterExchange en true.",
+    "es-ES": "Transacciones de trueque con isBarterExchange en true."
+  },
+  "%lld territories · charts · Pro lanes · insights": {
+    "es-419": "%lld territorios · gráficos · carriles Pro · insights",
+    "es-ES": "%lld territorios · gráficos · carriles Pro · insights"
+  },
+  "%lld territories · tap to open full map": {
+    "es-419": "%lld territorios · toca para abrir el mapa completo",
+    "es-ES": "%lld territorios · toca para abrir el mapa completo"
+  },
+  "Spent this month across %lld live territories": {
+    "es-419": "Gastado este mes en %lld territorios activos",
+    "es-ES": "Gastado este mes en %lld territorios activos"
+  },
+  "Studio · %@": {
+    "es-419": "Studio · %@",
+    "es-ES": "Studio · %@"
+  },
+  "Workload %@h vs project time %@h · Scope alerts %lld": {
+    "es-419": "Carga %@ h vs proyecto %@ h · Alertas de alcance %lld",
+    "es-ES": "Carga %@ h vs proyecto %@ h · Alertas de alcance %lld"
+  },
+  "Add estimated values when logging trades": {
+    "es-419": "Agrega valores estimados al registrar trueques",
+    "es-ES": "Añade valores estimados al registrar trueques"
+  },
+  "Non-cash exchanges logged in BuxMuse.": {
+    "es-419": "Intercambios sin efectivo registrados en BuxMuse.",
+    "es-ES": "Intercambios sin efectivo registrados en BuxMuse."
+  },
+  "Long-press & drag to weave the web · tap for territory detail": {
+    "es-419": "Mantén y arrastra para tejer la red · toca para detalle del territorio",
+    "es-ES": "Mantén pulsado y arrastra para tejer la red · toca para detalle del territorio"
+  },
+  "FULL TERRITORY VIEW": {
+    "es-419": "VISTA COMPLETA DE TERRITORIOS",
+    "es-ES": "VISTA COMPLETA DE TERRITORIOS"
+  },
+  "Pro territories show merchants, scope radar, invoices, mileage, and more as you enable Studio tools.": {
+    "es-419": "Los territorios Pro muestran comercios, radar de alcance, facturas, kilometraje y más al activar herramientas de Studio.",
+    "es-ES": "Los territorios Pro muestran comercios, radar de alcance, facturas, kilometraje y más al activar herramientas de Studio."
+  }
+}

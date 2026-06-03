@@ -22,6 +22,8 @@ struct ContributeToGoalSheet: View {
     @State private var date: Date = Date()
     @State private var microSuggestion: String?
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -32,16 +34,25 @@ struct ContributeToGoalSheet: View {
                     if let suggestion = microSuggestion {
                         BuxFormSection {
                             VStack(alignment: .leading, spacing: 10) {
-                                Label("Brain savings tip", systemImage: "lightbulb.fill")
+                                Label {
+                                    BuxCatalogText.text("Brain savings tip")
+                                } icon: {
+                                    Image(systemName: "lightbulb.fill")
+                                }
                                     .font(.caption.bold())
                                     .foregroundStyle(.green)
                                 Text(suggestion)
                                     .font(.subheadline.weight(.semibold))
-                                Button("Redirect suggested amount") {
+                                Button {
                                     withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
                                         amountString = "15"
-                                        notes = "Brain micro-savings redirection"
+                                        notes = BuxLocalizedString.string(
+                                            "Brain micro-savings redirection",
+                                            locale: locale
+                                        )
                                     }
+                                } label: {
+                                    BuxCatalogText.text("Redirect suggested amount")
                                 }
                                 .font(.subheadline.weight(.semibold))
                             }
@@ -54,23 +65,32 @@ struct ContributeToGoalSheet: View {
                             Text(appSettingsManager.selectedCurrency.symbol)
                                 .font(.title2.bold())
                                 .foregroundStyle(themeManager.current.accentColor)
-                            TextField("Contribution amount", text: $amountString)
+                            TextField(
+                                BuxCatalogLabel.string("Contribution amount", locale: locale),
+                                text: $amountString
+                            )
                                 .keyboardType(.decimalPad)
                         }
                         .buxFormFieldPadding()
                     }
 
                     BuxFormSection(title: "Details") {
-                        TextField("Memo / source", text: $notes, prompt: Text("e.g. Weekly savings"))
+                        TextField(
+                            BuxCatalogLabel.string("Memo / source", locale: locale),
+                            text: $notes,
+                            prompt: Text(BuxCatalogLabel.string("e.g. Weekly savings", locale: locale))
+                        )
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        DatePicker("Contribution date", selection: $date, displayedComponents: .date)
+                        DatePicker(selection: $date, displayedComponents: .date) {
+                            BuxCatalogText.text("Contribution date")
+                        }
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                     }
                 }
             }
-            .navigationTitle("Contribute")
+            .buxCatalogNavigationTitle("Contribute")
             .navigationBarTitleDisplayMode(.inline)
             .buxThemedSheetContent()
             .toolbar {
@@ -78,7 +98,10 @@ struct ContributeToGoalSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    BuxToolbarConfirmButton(accessibilityLabel: "Confirm", isEnabled: canSave) {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: BuxCatalogLabel.string("Confirm", locale: locale),
+                        isEnabled: canSave
+                    ) {
                         confirmContribution()
                     }
                 }
@@ -88,14 +111,25 @@ struct ContributeToGoalSheet: View {
             }
         }
         .tint(themeManager.current.accentColor)
+        .buxInterfaceLocale()
     }
 
     private func setupMicroSuggestions() {
         let details = goalsViewModel.selectedGoalDetail
         if let opp = details?.opportunities.first {
-            microSuggestion = "Cancel or optimize: \(opp.description) benefits \(opp.benefit)."
+            microSuggestion = BuxLocalizedString.format(
+                "Cancel or optimize: %@ benefits %@.",
+                locale: locale,
+                opp.localizedDescription(locale: locale),
+                opp.localizedBenefit(locale: locale)
+            )
         } else {
-            microSuggestion = "Trim \(appSettingsManager.format(Decimal(15))) from active subscription overspends and redirect it to achieve \(goal.name) sooner."
+            microSuggestion = BuxLocalizedString.format(
+                "Trim %@ from active subscription overspends and redirect it to achieve %@ sooner.",
+                locale: locale,
+                appSettingsManager.format(Decimal(15)),
+                goal.name
+            )
         }
     }
 
@@ -106,10 +140,11 @@ struct ContributeToGoalSheet: View {
 
     private func confirmContribution() {
         guard let amount = Decimal(string: amountString), amount > 0 else { return }
+        let defaultNote = BuxLocalizedString.string("Direct contribution", locale: locale)
         goalsViewModel.addContribution(
             toGoalId: goal.id,
             amount: amount,
-            notes: notes.isEmpty ? "Direct contribution" : notes
+            notes: notes.isEmpty ? defaultNote : notes
         )
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         dismiss()

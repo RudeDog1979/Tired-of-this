@@ -133,7 +133,7 @@ struct InvoiceDesignerHubView: View {
                     }
                 }
             }
-            .navigationTitle(navigationTitle)
+            .buxCatalogNavigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .buxStableNavigationBarWithKeyboard()
             .toolbar { toolbarContent }
@@ -254,15 +254,22 @@ struct InvoiceDesignerHubView: View {
     private var billFromProjectSection: some View {
         designerSection("Bill from completed work") {
             if completedProjectsForClient.isEmpty {
-                Text("No completed projects for this client. Finish a project in Studio → Projects, or add line items below.")
+                BuxCatalogDynamicText(key: "No completed projects for this client. Finish a project in Studio → Projects, or add line items below.")
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
             } else {
                 Picker("Completed project", selection: $linkedProjectId) {
-                    Text("None — add lines manually").tag(nil as UUID?)
+                    BuxCatalogDynamicText(key: "None — add lines manually").tag(nil as UUID?)
                     ForEach(completedProjectsForClient) { pick in
-                        Text("\(pick.projectName) · \(formatCurrency(pick.amount))")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%@ · %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                pick.projectName,
+                                formatCurrency(pick.amount)
+                            )
+                        )
                             .tag(Optional.some(pick.projectId))
                     }
                 }
@@ -274,7 +281,7 @@ struct InvoiceDesignerHubView: View {
                         .buxLabelSecondary()
                 }
 
-                Text("Choosing a project fills line items and links this invoice to that job.")
+                BuxCatalogDynamicText(key: "Choosing a project fills line items and links this invoice to that job.")
                     .font(.system(size: 10, weight: .medium))
                     .buxLabelSecondary()
             }
@@ -299,7 +306,7 @@ struct InvoiceDesignerHubView: View {
             designerSection("Client") {
                 if store.clients.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Add a client in Studio → Clients before sending this invoice.")
+                        BuxCatalogDynamicText(key: "Add a client in Studio → Clients before sending this invoice.")
                             .font(.system(size: 12))
                             .foregroundColor(.orange)
                     }
@@ -331,7 +338,7 @@ struct InvoiceDesignerHubView: View {
 
                     HStack(spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Auto-number pattern")
+                            BuxCatalogDynamicText(key: "Auto-number pattern")
                                 .font(.system(size: 10, weight: .bold))
                                 .buxLabelSecondary()
                             Text(store.invoiceSettings.numberPattern)
@@ -351,7 +358,7 @@ struct InvoiceDesignerHubView: View {
                     .padding(10)
                     .buxThemedInputPlate(cornerRadius: 10)
 
-                    Text("Customize prefix & pattern in Studio → Invoices → Settings. You can always type your own number above.")
+                    BuxCatalogDynamicText(key: "Customize prefix & pattern in Studio → Invoices → Settings. You can always type your own number above.")
                         .font(.system(size: 10))
                         .buxLabelSecondary()
 
@@ -359,7 +366,7 @@ struct InvoiceDesignerHubView: View {
                     DatePicker("Due date", selection: $dueDate, displayedComponents: .date)
                     Picker("Status", selection: $status) {
                         ForEach(InvoiceStatus.allCases) { st in
-                            Text(st.rawValue).tag(st)
+                            Text(st.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(st)
                         }
                     }
                     .pickerStyle(.menu)
@@ -369,7 +376,7 @@ struct InvoiceDesignerHubView: View {
             designerSection("Line Items") {
                 VStack(spacing: 8) {
                     if lineItems.isEmpty {
-                        Text("Add at least one line item to save this invoice.")
+                        BuxCatalogDynamicText(key: "Add at least one line item to save this invoice.")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
                     }
@@ -378,7 +385,14 @@ struct InvoiceDesignerHubView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.description)
                                     .font(.system(size: 13, weight: .semibold))
-                                Text("Qty \(String(format: "%.1f", item.quantity)) · \(formatCurrency(item.unitPrice))")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "Qty %.1f · %@",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        item.quantity,
+                                        formatCurrency(item.unitPrice)
+                                    )
+                                )
                                     .font(.system(size: 10))
                                     .buxLabelSecondary()
                             }
@@ -568,21 +582,35 @@ struct InvoiceDesignerHubView: View {
                         Circle()
                             .fill(Color(hex: primary.palette.foregroundHex))
                             .frame(width: 12, height: 12)
-                        Text("Matching \"\(primary.title)\"")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Matching \"%@\"",
+                                locale: appSettingsManager.interfaceLocale,
+                                primary.title
+                            )
+                        )
                             .font(.system(size: 14, weight: .semibold))
                     }
                     if let config = store.invoiceSettings.defaultTemplateConfig {
-                        Text("Header: \(config.headerMotif.rawValue) · Background: \(config.backgroundStyle.rawValue) · Template: \(config.style.rawValue)")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Header: %@ · Background: %@ · Template: %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                config.headerMotif.rawValue,
+                                config.backgroundStyle.rawValue,
+                                config.style.rawValue
+                            )
+                        )
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(.secondary)
                     }
                     if ProBrandSyncEngine.isStale(invoiceSettings: store.invoiceSettings, design: primary) {
-                        Text("Card updated — sync to refresh invoice branding.")
+                        BuxCatalogDynamicText(key: "Card updated — sync to refresh invoice branding.")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.secondary)
                     }
                 } else {
-                    Text("Custom invoice branding")
+                    BuxCatalogDynamicText(key: "Custom invoice branding")
                         .font(.system(size: 14, weight: .semibold))
                 }
 
@@ -710,7 +738,7 @@ struct InvoiceDesignerHubView: View {
                         if !engine.paymentConfig.qrPayload.isEmpty,
                            let qr = InvoiceDesignerEngine.generateQRImage(from: engine.paymentConfig.qrPayload, size: 72) {
                             HStack {
-                                Text("Preview:")
+                                BuxCatalogDynamicText(key: "Preview:")
                                     .font(.system(size: 11))
                                     .buxLabelSecondary()
                                 Image(uiImage: qr)
@@ -804,7 +832,7 @@ struct InvoiceDesignerHubView: View {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isSelected ? themeManager.current.accentColor : .gray)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(mode.rawValue)
+                    Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                         .foregroundColor(Color(UIColor.label))
                     Text(mode == .exclusive ? "Tax added on top of line item prices" : "Tax extracted from line item prices")
@@ -823,11 +851,18 @@ struct InvoiceDesignerHubView: View {
     private func taxRateRow(rate: InvoiceTaxRate, index: Int) -> some View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(rate.label) — \(NSDecimalNumber(decimal: rate.percentage).stringValue)%")
+                Text(
+                    BuxLocalizedString.format(
+                        "%@ — %@%%",
+                        locale: appSettingsManager.interfaceLocale,
+                        rate.label,
+                        NSDecimalNumber(decimal: rate.percentage).stringValue
+                    )
+                )
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(Color(UIColor.label))
                 if rate.isCompounding {
-                    Text("Compounding")
+                    BuxCatalogDynamicText(key: "Compounding")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundColor(themeManager.current.accentColor)
                 }
@@ -900,7 +935,13 @@ struct InvoiceDesignerHubView: View {
             Circle()
                 .fill(themeManager.current.accentColor)
                 .frame(width: 6, height: 6)
-            Text("Live Preview · \(engine.templateConfig.style.rawValue)")
+            Text(
+                BuxLocalizedString.format(
+                    "Live Preview · %@",
+                    locale: appSettingsManager.interfaceLocale,
+                    engine.templateConfig.style.rawValue
+                )
+            )
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(themeManager.current.accentColor)
         }
@@ -975,7 +1016,7 @@ struct InvoiceDesignerHubView: View {
                     .buxThemedInputPlate(cornerRadius: 16)
                     .padding()
             }
-            .navigationTitle("Notes & Terms")
+            .buxCatalogNavigationTitle("Notes & Terms")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -1005,7 +1046,7 @@ struct InvoiceDesignerHubView: View {
                     }
                 }
             }
-            .navigationTitle("Add Line Item")
+            .buxCatalogNavigationTitle("Add Line Item")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -1135,7 +1176,7 @@ private struct TemplateStyleCard: View {
                     .stroke(isSelected ? accentColor : Color.clear, lineWidth: 2)
             )
 
-            Text(style.rawValue)
+            Text(style.catalogLabel(locale: BuxInterfaceLocale.currentInterfaceLocale))
                 .font(.system(size: 10, weight: isSelected ? .bold : .medium))
                 .foregroundColor(isSelected ? accentColor : Color(UIColor.label))
 
@@ -1278,14 +1319,14 @@ private struct AddTaxRateSheet: View {
                         Toggle("Compounding (stacks on previous rate)", isOn: $compounding)
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
-                        Text("Compounding rates apply to the running total including previous taxes.")
+                        BuxCatalogDynamicText(key: "Compounding rates apply to the running total including previous taxes.")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
                             .buxFormFieldPadding()
                     }
                 }
             }
-            .navigationTitle("Add Tax Rate")
+            .buxCatalogNavigationTitle("Add Tax Rate")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -320,6 +320,7 @@ extension View {
     /// Sheets / covers: accent tint + M3 canvas + themed navigation bar.
     func buxThemedSheetContent() -> some View {
         buxThemedPresentation()
+            .buxInterfaceLocale()
             .buxMeshSheetPresentation()
             .buxSheetNavigationChrome()
     }

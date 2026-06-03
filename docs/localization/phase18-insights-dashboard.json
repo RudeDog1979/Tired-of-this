@@ -1,0 +1,218 @@
+{
+  "Splurge Risk": {
+    "es-419": "Riesgo de exceso",
+    "es-ES": "Riesgo de exceso"
+  },
+  "Low Spend Day": {
+    "es-419": "Día de bajo gasto",
+    "es-ES": "Día de bajo gasto"
+  },
+  "Spike Detected": {
+    "es-419": "Pico detectado",
+    "es-ES": "Pico detectado"
+  },
+  "Weather Bias": {
+    "es-419": "Sesgo climático",
+    "es-ES": "Sesgo climático"
+  },
+  "Weekend Bias": {
+    "es-419": "Sesgo de fin de semana",
+    "es-ES": "Sesgo de fin de semana"
+  },
+  "Nighttime Bias": {
+    "es-419": "Sesgo nocturno",
+    "es-ES": "Sesgo nocturno"
+  },
+  "Overspend Forecast": {
+    "es-419": "Pronóstico de exceso",
+    "es-ES": "Pronóstico de exceso"
+  },
+  "Stable Budget": {
+    "es-419": "Presupuesto estable",
+    "es-ES": "Presupuesto estable"
+  },
+  "Overspend Spike": {
+    "es-419": "Pico de exceso",
+    "es-ES": "Pico de exceso"
+  },
+  "Savings Gained": {
+    "es-419": "Ahorro logrado",
+    "es-ES": "Ahorro logrado"
+  },
+  "Price Hike": {
+    "es-419": "Subida de precio",
+    "es-ES": "Subida de precio"
+  },
+  "Refund Saved": {
+    "es-419": "Reembolso guardado",
+    "es-ES": "Reembolso guardado"
+  },
+  "Ahead Pace": {
+    "es-419": "Ritmo adelantado",
+    "es-ES": "Ritmo adelantado"
+  },
+  "Behind Pace": {
+    "es-419": "Ritmo atrasado",
+    "es-ES": "Ritmo atrasado"
+  },
+  "Action Required": {
+    "es-419": "Acción requerida",
+    "es-ES": "Acción requerida"
+  },
+  "Cost Increase": {
+    "es-419": "Aumento de costo",
+    "es-ES": "Aumento de costo"
+  },
+  "Unused App": {
+    "es-419": "App sin uso",
+    "es-ES": "App sin uso"
+  },
+  "Overlapping Service": {
+    "es-419": "Servicio duplicado",
+    "es-ES": "Servicio duplicado"
+  },
+  "Goal Opportunity": {
+    "es-419": "Oportunidad de meta",
+    "es-ES": "Oportunidad de meta"
+  },
+  "%lld%% on credit": {
+    "es-419": "%lld%% en crédito",
+    "es-ES": "%lld%% en crédito"
+  },
+  "%lld%% untagged": {
+    "es-419": "%lld%% sin etiquetar",
+    "es-ES": "%lld%% sin etiquetar"
+  },
+  "%lld%% cash": {
+    "es-419": "%lld%% en efectivo",
+    "es-ES": "%lld%% en efectivo"
+  },
+  "%lld trade": {
+    "es-419": "%lld trueque",
+    "es-ES": "%lld trueque"
+  },
+  "%lld trades": {
+    "es-419": "%lld trueques",
+    "es-ES": "%lld trueques"
+  },
+  "%lld provider": {
+    "es-419": "%lld proveedor",
+    "es-ES": "%lld proveedor"
+  },
+  "%lld providers": {
+    "es-419": "%lld proveedores",
+    "es-ES": "%lld proveedores"
+  },
+  "Review credit-tagged expenses": {
+    "es-419": "Revisa gastos con crédito",
+    "es-ES": "Revisa gastos con crédito"
+  },
+  "Set a weekly pay-down reminder": {
+    "es-419": "Configura recordatorio semanal de pago",
+    "es-ES": "Configura recordatorio semanal de pago"
+  },
+  "Check BNPL due dates": {
+    "es-419": "Revisa fechas de BNPL",
+    "es-ES": "Revisa fechas de BNPL"
+  },
+  "Consolidate small BNPL plans": {
+    "es-419": "Consolida planes BNPL pequeños",
+    "es-ES": "Consolida planes BNPL pequeños"
+  },
+  "Assign a workspace when logging": {
+    "es-419": "Asigna un espacio al registrar",
+    "es-ES": "Asigna un espacio al registrar"
+  },
+  "Open Workspaces in Studio settings": {
+    "es-419": "Abre Espacios en Ajustes de Studio",
+    "es-ES": "Abre Espacios en Ajustes de Studio"
+  },
+  "Log cash expenses from Add Expense": {
+    "es-419": "Registra gastos en efectivo desde Agregar gasto",
+    "es-ES": "Registra gastos en efectivo desde Agregar gasto"
+  },
+  "Update drawer balances in Studio": {
+    "es-419": "Actualiza saldos de caja en Studio",
+    "es-ES": "Actualiza saldos de caja en Studio"
+  },
+  "Tag expenses": {
+    "es-419": "Etiqueta gastos",
+    "es-ES": "Etiqueta gastos"
+  },
+  "Categories": {
+    "es-419": "Categorías",
+    "es-ES": "Categorías"
+  },
+  "Cash flow": {
+    "es-419": "Flujo de caja",
+    "es-ES": "Flujo de caja"
+  },
+  "Merchants": {
+    "es-419": "Comercios",
+    "es-ES": "Comercios"
+  },
+  "Cash drawer": {
+    "es-419": "Caja en efectivo",
+    "es-ES": "Caja en efectivo"
+  },
+  "Barter": {
+    "es-419": "Trueque",
+    "es-ES": "Trueque"
+  },
+  "Energy": {
+    "es-419": "Energía",
+    "es-ES": "Energía"
+  },
+  "Scope radar": {
+    "es-419": "Radar de alcance",
+    "es-ES": "Radar de alcance"
+  },
+  "Top insight": {
+    "es-419": "Insight principal",
+    "es-ES": "Insight principal"
+  },
+  "Signals": {
+    "es-419": "Señales",
+    "es-ES": "Señales"
+  },
+  "Studio": {
+    "es-419": "Studio",
+    "es-ES": "Studio"
+  },
+  "Invoices": {
+    "es-419": "Facturas",
+    "es-ES": "Facturas"
+  },
+  "Mileage": {
+    "es-419": "Kilometraje",
+    "es-ES": "Kilometraje"
+  },
+  "This Month": {
+    "es-419": "Este mes",
+    "es-ES": "Este mes"
+  },
+  "Transactions": {
+    "es-419": "Transacciones",
+    "es-ES": "Transacciones"
+  },
+  "Simple Monthly Budget": {
+    "es-419": "Presupuesto mensual simple",
+    "es-ES": "Presupuesto mensual simple"
+  },
+  "Custom %@ Budget": {
+    "es-419": "Presupuesto %@ personalizado",
+    "es-ES": "Presupuesto %@ personalizado"
+  },
+  "weekly": {
+    "es-419": "semanal",
+    "es-ES": "semanal"
+  },
+  "monthly": {
+    "es-419": "mensual",
+    "es-ES": "mensual"
+  },
+  "custom": {
+    "es-419": "personalizado",
+    "es-ES": "personalizado"
+  }
+}

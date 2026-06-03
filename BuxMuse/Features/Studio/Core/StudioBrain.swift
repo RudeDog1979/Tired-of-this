@@ -169,9 +169,10 @@ public final class StudioBrain: ObservableObject {
         let hasData = !scopedClients.isEmpty || !scopedInvoices.isEmpty || !scopedReceipts.isEmpty || !scopedProjects.isEmpty
             || !profile.businessName.isEmpty || !profile.displayName.isEmpty
 
+        let locale = appSettings.interfaceLocale
         let hero = StudioHeroDisplay(
             businessTitle: profile.businessName.isEmpty ? "Set Up Your Business" : profile.businessName,
-            businessSubtitle: profile.businessType.rawValue,
+            businessSubtitle: profile.businessType.catalogLabel(locale: locale),
             estimatedTaxFormatted: appSettings.format(taxResult.estimatedTax),
             effectiveTaxRatePercent: Int(taxResult.effectiveTaxRate * 100),
             runwayMonthsFormatted: forecast.runwayMonths > 0 ? String(format: "%.1f mo", forecast.runwayMonths) : "—",
@@ -483,14 +484,15 @@ public final class StudioBrain: ObservableObject {
     }
 
     private func mapDeductionOpportunities(_ opps: [DeductionOpportunity]) -> [StudioDeductionDisplay] {
-        opps.map { opp in
+        let locale = appSettings.interfaceLocale
+        return opps.map { opp in
             StudioDeductionDisplay(
                 id: opp.id,
-                title: opp.title,
-                description: opp.description,
+                title: BuxCatalogLabel.string(opp.title, locale: locale),
+                description: BuxCatalogLabel.string(opp.description, locale: locale),
                 savingsFormatted: opp.estimatedTaxSaving > 0
                     ? appSettings.format(opp.estimatedTaxSaving)
-                    : "Configure tax rules"
+                    : BuxLocalizedString.string("Configure tax rules", locale: appSettings.interfaceLocale)
             )
         }
     }
@@ -618,12 +620,16 @@ public final class StudioBrain: ObservableObject {
         cashflow: StudioCashflowDisplay
     ) -> [StudioAlertDisplay] {
         var alerts: [StudioAlertDisplay] = []
+        let locale = appSettings.interfaceLocale
 
         if taxSummary.needsTaxProfileSetup {
             alerts.append(StudioAlertDisplay(
                 id: "tax-setup",
-                title: "Tax profile incomplete",
-                message: "Choose a country preset or enter your tax rules in Tax Profile.",
+                title: BuxLocalizedString.string("Tax profile incomplete", locale: locale),
+                message: BuxLocalizedString.string(
+                    "Choose a country preset or enter your tax rules in Tax Profile.",
+                    locale: locale
+                ),
                 severity: "medium"
             ))
         }
@@ -631,19 +637,35 @@ public final class StudioBrain: ObservableObject {
         if cashflow.survivalModeActive {
             alerts.append(StudioAlertDisplay(
                 id: "cashflow-survival",
-                title: "Cashflow survival mode",
-                message: cashflow.survivalMessage,
+                title: BuxLocalizedString.string("Cashflow survival mode", locale: locale),
+                message: BuxCatalogLabel.string(cashflow.survivalMessage, locale: locale),
                 severity: "high"
             ))
         }
 
         for client in clients where client.isRedFlag {
+            let message: String
+            if client.overdueInvoiceCount > 0 {
+                message = BuxLocalizedString.format(
+                    "%lld overdue invoice(s). Health score %lld%%.",
+                    locale: locale,
+                    client.overdueInvoiceCount,
+                    client.healthScore
+                )
+            } else {
+                message = BuxLocalizedString.string(
+                    "High stress impact. Review profitability and terms.",
+                    locale: locale
+                )
+            }
             alerts.append(StudioAlertDisplay(
                 id: "client-\(client.id.uuidString)",
-                title: "Client red flag: \(client.name)",
-                message: client.overdueInvoiceCount > 0
-                    ? "\(client.overdueInvoiceCount) overdue invoice(s). Health score \(client.healthScore)%."
-                    : "High stress impact. Review profitability and terms.",
+                title: BuxLocalizedString.format(
+                    "Client red flag: %@",
+                    locale: locale,
+                    client.name
+                ),
+                message: message,
                 severity: "high"
             ))
         }
@@ -652,8 +674,15 @@ public final class StudioBrain: ObservableObject {
         if !overdue.isEmpty {
             alerts.append(StudioAlertDisplay(
                 id: "overdue-invoices",
-                title: "\(overdue.count) overdue invoice(s)",
-                message: "Follow up on outstanding payments to improve cashflow.",
+                title: BuxLocalizedString.format(
+                    "%lld overdue invoice(s)",
+                    locale: locale,
+                    overdue.count
+                ),
+                message: BuxLocalizedString.string(
+                    "Follow up on outstanding payments to improve cashflow.",
+                    locale: locale
+                ),
                 severity: "medium"
             ))
         }
@@ -664,8 +693,12 @@ public final class StudioBrain: ObservableObject {
         if !overrunProjects.isEmpty {
             alerts.append(StudioAlertDisplay(
                 id: "project-overrun",
-                title: "Project overrun risk",
-                message: "\(overrunProjects.count) project(s) may exceed time or budget.",
+                title: BuxLocalizedString.string("Project overrun risk", locale: locale),
+                message: BuxLocalizedString.format(
+                    "%lld project(s) may exceed time or budget.",
+                    locale: locale,
+                    overrunProjects.count
+                ),
                 severity: "medium"
             ))
         }
@@ -673,8 +706,12 @@ public final class StudioBrain: ObservableObject {
         if let days = taxSummary.taxDeadlineDays, days <= 30 {
             alerts.append(StudioAlertDisplay(
                 id: "tax-deadline",
-                title: "Tax deadline approaching",
-                message: "\(days) days until your next scheduled tax payment.",
+                title: BuxLocalizedString.string("Tax deadline approaching", locale: locale),
+                message: BuxLocalizedString.format(
+                    "%lld days until your next scheduled tax payment.",
+                    locale: locale,
+                    days
+                ),
                 severity: days <= 14 ? "high" : "medium"
             ))
         }

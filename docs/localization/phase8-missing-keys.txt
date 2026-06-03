@@ -1,0 +1,350 @@
+#RRGGBB or #AARRGGBB
+$1,801.73
+$67,203.95
+%@h left in scope
+0.6948 ETH
+1.1272 BTC
+12-MONTH PROJECTION
+Aa
+Account type
+Active Budget Rule
+Active workspace ledger cap: 3 gigs
+Add a note
+Add a note...
+Add receipt photo
+Added at the end — policies, fees, or language from your lawyer.
+Additional name(s)
+Address line 1
+Address line 2
+Address or postcode
+Adjust Goal
+Admin
+Agreed price for the job
+Agreement title
+Alerts, bill reminders (%@)
+Alignment guides
+Allow Local Backups
+Any
+Apply suggestion
+Archived
+Attach signed PDF or photo
+Authenticate to continue
+Auto-detect bank account type
+Back note (optional)
+Backup error
+Ballpark total (optional)
+Bank / payment details
+Basic
+Basic shapes
+Bill from job
+Billable
+Billing
+Brain recommendation
+Brain savings tip
+Brightness
+Budget Threshold Warnings
+Budgeted hours
+Business Card 
+Business Card Pro Studio
+Business Name
+Business purpose, project, etc.
+Business registration no.
+Bux Layout Packs
+BuxMuse Debug
+BuxMuse Vault Active
+BuxMuse stores what you bring back (for example a signed PDF you upload). For maximum privacy, use in-app signing or attach a file you already received.
+Canvas
+Category Name
+Category icon (or store logo if linked)
+Change photo
+Choose…
+Clause text
+Clear pad
+Client
+Client clear to go ahead
+Client name
+Close menu
+Company / organization
+Completed
+Completed project
+Compliance Assistant
+Compounding (stacks on previous rate)
+Confirm your Passcode
+Contribute
+Contribution amount
+Contribution date
+Country
+Create agreement draft
+Current Holdings
+Custom terms & conditions
+Custom wording
+Customer name
+Customer or merchant
+Database Reset Complete
+Day
+Deadline
+Deductible
+Deduction Category
+Deduction Strength
+Delete selected designs?
+Delete this design?
+Delete time entry?
+Deliverables
+Depends on
+Design name
+Design not found
+Disable PIN Code?
+Discard changes?
+Display name
+DocuSign, email, WhatsApp, and similar services may process your client's name, contact details, and document on their servers—not only on your device.
+Document label
+Draft
+Drawer: %1$@ %2$@ · %3$@ %4$@
+Due by
+Due date
+Edit Budget Rule
+Edit Expense
+Edit Project
+Edit Trip
+Edit agreement
+Edit agreement draft
+Edit clause
+Edit entry
+Edit for this agreement only. Leave blank to restore the template.
+Edit job
+Edit logo in Bux Photo Lab
+Edit milestone
+Edit text
+Elements · top to bottom
+Eligible for Write-off
+Email
+Email (optional)
+Enable Category Rollover
+Enable Debug Diagnostics Overlay
+End
+Ended
+Enter a 4-Digit Passcode
+Estimated Tax Reminders
+Estimated monetary value
+Expense deleted
+Export PDF for external signing
+Family / surname(s)
+Fill from…
+Find by name or phone
+Finished early?
+Fixed price for whole project
+Font mood
+For what?
+Format
+Full price you agreed
+Full tax, PDF invoices, analytics
+Geometric
+Geometric shapes
+Given / first name(s)
+Goal contribution
+Goal name
+Gradient fill
+Guided agreement
+Hide password
+Hourly rate
+Hours
+How did the client approve?
+How they approved (text, call, etc.)
+Include Local Performance Metadata
+Include Studio Data
+Included revisions
+Income amount
+Income type
+Indirect tax paid (optional)
+Invoice Status Updates
+Invoice number
+Issue date
+Job or description
+Label (e.g. Food, Clothes)
+Label (e.g. VAT, GST, ITBIS)
+Landscape weave · tap territories
+Link terms and client approval to this job.
+Linked invoice
+Linked job
+Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)
+Liquid Glass tab bar and icon buttons (cards stay neutral)
+Local · Private · BuxMuse
+Log Expense
+Log Trip
+Logo frame
+Logo position
+Mark terms sent to client
+Memo / source
+Merchant / vendor
+Merchant name
+Minutes
+Mode: %@ · %lld profiles
+Name
+Name / business
+Name(s)
+Need more time?
+New
+New Budget Rule
+New Project
+New milestone
+Next
+No agreement yet for this project.
+No transactions yet. Add an expense to see activity here.
+None — planner uses auto dates
+Normal
+Not paid yet
+Note (optional)
+Notes (optional)
+Notifications, unread
+Optional
+Optional details
+Optional — e.g. painting, delivery run
+Organization name
+Over budget by %@h
+Overdue invoices, clients, receipts…
+Overlay strength
+Owed from hours so far
+Pattern
+Paused
+Pay type
+Payment Terms (Days)
+Payment schedule
+Perf metrics: on
+Performance Chart
+Phone
+Phone / WhatsApp
+Photo tuning
+Pick the job below. We'll show whether the clock is just for your records, or whether it counts toward what they owe.
+Pipeline: Brain → UI
+Prefix
+Preview full terms
+Primary for invoices
+Print · A8 · Social — your brand, your rules
+Privacy notice
+Pro Search understands plain questions — people, jobs, invoices, and who still owes you. Works offline.
+Pro Studio feature
+Pro Studio · BuxMuse
+Pro tier
+Profile Name (e.g. Summer Travel)
+Project name
+Project not found
+Purpose
+Quantity
+Quote a job first — say if it's one price or paid by the hour.
+Reading photo…
+Recent Transfers
+Recent transactions
+Redirect suggested amount
+Reminders, links, private notes…
+Remove attachment
+Rendering card…
+Replace signed file
+Require Lock on App Launch
+Restore complete
+Restore template
+Revisions used so far
+Running
+STUDIO INSIGHTS
+Saturation
+Save as my default terms
+Scan failed
+Scanning receipt text...
+Scope (for agreements)
+Scroll to Client signature (in person only) below to capture the client's finger signature on this device.
+Search Visa, PayPal, Klarna…
+Search country, ISO, or region
+Search merchants
+Search region, code or symbol...
+Search store (Amazon, employer portal…)
+Security Lock Error
+See all
+See more
+Sent
+Service name (DocuSign, email…)
+Set as primary for invoices
+Set deadline
+Set end date
+Set up agreement
+Share attached file
+Show Budget Warnings
+Show FPS & Cache Latency
+Show QR code block
+Show bank details
+Show password
+Show payment link
+Show registration footer on PDF
+Show tax ID on PDF
+Sign inside the box. Use Clear to start over.
+Signed document attached
+Signing outside BuxMuse
+Size
+Skills
+Skills & jobs I do
+Snap guides
+Start
+Start from a set, then turn clauses on/off or edit wording.
+Started
+Stopwatch
+Store logo when linked
+Subscription merchant
+Subscription-like
+Surname(s)
+Tagline / title
+Tap a territory to explore
+Target Limit Amount
+Target amount
+Tax / VAT registration no.
+Tax added on top of line item prices
+Tax behavior
+Tax extracted from line item prices
+Terms preview
+Text align
+This is a subscription
+This is a trial
+Time is on this job — get client approval when you can.
+Time is up — clock paused. Save your work or add more time.
+Title
+Track jobs, advances, and who owes you — free.
+Trading name (optional)
+Two ways people get paid
+Unit price
+Unlimited multi-gig workspaces unlocked
+Unlock with Face ID / Touch ID
+Unlocks "Barter / Exchange" payment method in every transaction. Log skill swaps, trade deals, and non-cash exchanges.
+Up
+Upcoming Bill Reminders
+Use
+Use for invoice branding?
+Use your backup password, or paste the BM-XXXX recovery key you saved when creating the backup.
+WARNING: Delete All Data?
+WHAT ARE YOU DOING?
+WHICH JOB?
+Walker on your Lock Screen — clock pauses when you hit this time.
+Walker on your Lock Screen — keeps going if you run over.
+Website
+What are you working on?
+What did you give? (e.g. web design)
+What did you receive? (e.g. boat repairs)
+What is the work?
+What you do
+Who owes me? Jobs for Maria…
+Work may have already started. Capture client approval now and attach their signed copy if you have it.
+Works offline — search people, jobs, invoices, and who still owes you.
+Workspace Name (e.g. Design Studio, Consulting)
+YOUR NUMBERS
+You're past the agreed time — add time or save when done.
+Your name on agreement
+Your name on signature
+Your rate per hour
+e.g. 15.3
+e.g. 20
+e.g. 22
+e.g. DOP, USD, EUR
+e.g. New Car, Emergency Fund
+e.g. Salary, Amazon refund, gift
+e.g. Street vendor, taxi fare, project deposit
+e.g. USD, DOP
+e.g. Weekly savings
+mi
+tudio
+· includes unassigned

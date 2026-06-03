@@ -20,10 +20,10 @@ struct NotificationSettingsView: View {
                 BuxFormSection(title: "Switchboard") {
                     Toggle(isOn: $store.notificationsEnabled) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Enable Notifications")
+                            BuxCatalogDynamicText(key: "Enable Notifications")
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Text("Receive timely financial alerts and insights")
+                            BuxCatalogDynamicText(key: "Receive timely financial alerts and insights")
                                 .font(.system(size: 11))
                                 .buxLabelSecondary()
                         }
@@ -54,9 +54,9 @@ struct NotificationSettingsView: View {
                     BuxFormSection(title: "Daily digest") {
                         Toggle(isOn: $store.dailySummaryEnabled) {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Daily Financial Summary")
+                                BuxCatalogDynamicText(key: "Daily Financial Summary")
                                     .font(.system(size: 15, weight: .semibold))
-                                Text("A compact overview of today's spend & active goals")
+                                BuxCatalogDynamicText(key: "A compact overview of today's spend & active goals")
                                     .font(.system(size: 11))
                                     .buxLabelSecondary()
                             }

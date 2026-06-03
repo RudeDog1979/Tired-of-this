@@ -21,7 +21,7 @@ struct StudioCashBarterSettingsView: View {
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Cash Drawer")
+                            BuxCatalogDynamicText(key: "Cash Drawer")
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text(store.dualCashDrawerEnabled ? "On" : "Off")
@@ -42,7 +42,7 @@ struct StudioCashBarterSettingsView: View {
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Barter Logger")
+                            BuxCatalogDynamicText(key: "Barter Logger")
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text(store.barterLoggerEnabled ? "On" : "Off")

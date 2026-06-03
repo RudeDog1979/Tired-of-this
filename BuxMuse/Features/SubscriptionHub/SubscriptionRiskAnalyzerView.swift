@@ -11,6 +11,7 @@ import SwiftUI
 struct SubscriptionRiskAnalyzerView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let subscriptions: [SubscriptionInfo]
     let onSelect: (String) -> Void
@@ -27,7 +28,7 @@ struct SubscriptionRiskAnalyzerView: View {
                         .font(.system(size: 20))
                         .foregroundColor(.green)
 
-                    Text("No pricing or billing risks detected.")
+                    BuxCatalogText.text("No pricing or billing risks detected.")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(colorScheme == .dark ? .white.opacity(0.8) : .black.opacity(0.7))
 
@@ -63,7 +64,7 @@ struct SubscriptionRiskAnalyzerView: View {
 
                                         Spacer(minLength: 4)
 
-                                        Text(item.risk.riskTypeDisplay)
+                                        Text(item.risk.type.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                                             .font(.system(size: 10, weight: .bold))
                                             .foregroundColor(severityColor(item.risk.severity))
                                             .padding(.horizontal, 8)

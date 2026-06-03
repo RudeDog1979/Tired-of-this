@@ -10,6 +10,7 @@ import SwiftUI
 struct AppearanceSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
     
     private var bgColor: Color {
@@ -49,7 +50,7 @@ struct AppearanceSettingsView: View {
                             BuxSectionHeader(title: "Accent color")
                                 .padding(.horizontal, 20)
 
-                            Text("Neutral Apple surfaces with your chosen accent on buttons and controls.")
+                            BuxCatalogDynamicText(key: "Neutral Apple surfaces with your chosen accent on buttons and controls.")
                                 .font(.system(size: 12))
                                 .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                                 .padding(.horizontal, 20)
@@ -78,10 +79,10 @@ struct AppearanceSettingsView: View {
                         VStack(spacing: 0) {
                             Toggle(isOn: $store.brandThemesEnabled) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Brand Themes")
+                                    BuxCatalogDynamicText(key: "Brand Themes")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Text("Full themed surfaces and presets — off uses standard iOS light/dark")
+                                    BuxCatalogDynamicText(key: "Full themed surfaces and presets — off uses standard iOS light/dark")
                                         .font(.system(size: 11))
                                         .buxLabelSecondary()
                                 }
@@ -93,13 +94,13 @@ struct AppearanceSettingsView: View {
 
                             // Theme mode selector
                             HStack {
-                                Text("Display Mode")
+                                BuxCatalogDynamicText(key: "Display Mode")
                                     .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 Spacer()
                                 Picker("Display Mode", selection: $store.themeMode) {
                                     ForEach(ThemeMode.allCases) { mode in
-                                        Text(mode.rawValue).tag(mode)
+                                        Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                                     }
                                 }
                                 .pickerStyle(.menu)
@@ -112,10 +113,10 @@ struct AppearanceSettingsView: View {
                             if !store.brandThemesEnabled {
                                 Toggle(isOn: $store.landingBackdropEnabled) {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("Landing backdrop glow")
+                                        BuxCatalogDynamicText(key: "Landing backdrop glow")
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                        Text("Top-left ambient light and card edge shine — off uses plain iOS surfaces")
+                                        BuxCatalogDynamicText(key: "Top-left ambient light and card edge shine — off uses plain iOS surfaces")
                                             .font(.system(size: 11))
                                             .buxLabelSecondary()
                                     }
@@ -129,7 +130,7 @@ struct AppearanceSettingsView: View {
                             // Glassmorphism Toggle
                             Toggle(isOn: $store.useGlassmorphism) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Glass navigation chrome")
+                                    BuxCatalogDynamicText(key: "Glass navigation chrome")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     Text(store.brandThemesEnabled
@@ -147,10 +148,10 @@ struct AppearanceSettingsView: View {
                             // Reduced Motion Toggle
                             Toggle(isOn: $store.reducedMotion) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Reduced Motion")
+                                    BuxCatalogDynamicText(key: "Reduced Motion")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Text("Simplify transition animations for comfort")
+                                    BuxCatalogDynamicText(key: "Simplify transition animations for comfort")
                                         .font(.system(size: 11))
                                         .buxLabelSecondary()
                                 }
@@ -163,10 +164,10 @@ struct AppearanceSettingsView: View {
                             // Solar Contrast Mode Toggle
                             Toggle(isOn: $store.solarContrastModeEnabled) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Solar Contrast Mode")
+                                    BuxCatalogDynamicText(key: "Solar Contrast Mode")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Text("Optimize contrast and text weight for direct tropical sunlight")
+                                    BuxCatalogDynamicText(key: "Optimize contrast and text weight for direct tropical sunlight")
                                         .font(.system(size: 11))
                                         .buxLabelSecondary()
                                 }
@@ -207,6 +208,7 @@ struct AppearanceSettingsView: View {
 private struct AccentSwatchButton: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let accent: BuxSystemAccent
     let isSelected: Bool
     let onTap: () -> Void
@@ -229,7 +231,7 @@ private struct AccentSwatchButton: View {
                     }
                 }
 
-                Text(accent.displayName)
+                Text(accent.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 10, weight: isSelected ? .semibold : .medium))
                     .foregroundColor(isSelected
                         ? themeManager.labelPrimary(for: colorScheme)

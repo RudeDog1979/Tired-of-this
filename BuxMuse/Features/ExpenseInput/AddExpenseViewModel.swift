@@ -309,7 +309,9 @@ public final class AddExpenseViewModel: ObservableObject {
         saveError = nil
         let cleanName = merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanName.isEmpty else {
-            saveError = isIncomeEntry ? "Add a short label for this income." : "Enter a merchant name."
+            saveError = isIncomeEntry
+                ? BuxCatalogLabel.string("Add a short label for this income.", locale: settingsManager.interfaceLocale)
+                : BuxCatalogLabel.string("Enter a merchant name.", locale: settingsManager.interfaceLocale)
             return false
         }
 
@@ -626,7 +628,8 @@ public final class AddExpenseViewModel: ObservableObject {
         let analysis = ExpenseIntelligenceEngine.analyze(
             record: preview,
             allRecords: records,
-            activeSubscriptions: brain.financialEngine.activeSubscriptions()
+            activeSubscriptions: brain.financialEngine.activeSubscriptions(),
+            locale: settingsManager.interfaceLocale
         )
         var hints: [String] = []
         if let recurrence = analysis.display.recurrenceSummary { hints.append(recurrence) }

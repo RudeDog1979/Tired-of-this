@@ -26,7 +26,10 @@ final class ExpenseDetailViewModel: ObservableObject {
     }
 
     func reloadIntelligence() {
-        intelligence = brain.expenseIntelligenceDisplay(for: record.id)
+        intelligence = brain.expenseIntelligenceDisplay(
+            for: record.id,
+            locale: settingsManager.interfaceLocale
+        )
     }
 
     func reloadRecord() {

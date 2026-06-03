@@ -18,12 +18,12 @@ struct StudioProInvoiceSuggestionsSection: View {
     var body: some View {
         if !suggestions.isEmpty {
             VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                Text("INVOICE SUGGESTIONS")
+                BuxCatalogDynamicText(key: "INVOICE SUGGESTIONS")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                     .kerning(1)
 
-                Text("From billable hours, new time, and project expenses.")
+                BuxCatalogDynamicText(key: "From billable hours, new time, and project expenses.")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
 
@@ -80,12 +80,12 @@ struct SimpleStudioInvoiceSuggestionsSection: View {
     var body: some View {
         if !suggestions.isEmpty {
             VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                Text("READY TO INVOICE")
+                BuxCatalogDynamicText(key: "READY TO INVOICE")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                     .kerning(1)
 
-                Text("Jobs where money is still waiting — tap to send a simple invoice.")
+                BuxCatalogDynamicText(key: "Jobs where money is still waiting — tap to send a simple invoice.")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
 

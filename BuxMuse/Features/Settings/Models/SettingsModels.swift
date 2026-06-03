@@ -30,6 +30,10 @@ public enum BudgetingMode: String, Codable, CaseIterable, Identifiable {
     case custom = "Custom"
     
     public var id: String { rawValue }
+
+    public func localizedDisplayName(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
+        BuxCatalogLabel.string(rawValue, locale: locale)
+    }
 }
 
 public enum DefaultBudgetPeriod: String, Codable, CaseIterable, Identifiable {

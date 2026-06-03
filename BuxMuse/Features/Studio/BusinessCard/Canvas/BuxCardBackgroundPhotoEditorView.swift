@@ -130,7 +130,7 @@ struct BuxCardBackgroundPhotoEditorView: View {
                     .padding(.bottom, 12)
             }
             .background(themeManager.screenBackground(for: colorScheme))
-            .navigationTitle("Background photo")
+            .buxCatalogNavigationTitle("Background photo")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -169,7 +169,7 @@ struct BuxCardBackgroundPhotoEditorView: View {
     private var controlsHeader: some View {
         VStack(alignment: .leading, spacing: 10) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Card size")
+                BuxCatalogDynamicText(key: "Card size")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(.secondary)
                 StudioGlassHorizontalSectionMenu(
@@ -185,7 +185,7 @@ struct BuxCardBackgroundPhotoEditorView: View {
 
             Picker("Mode", selection: $mode) {
                 ForEach(BuxCardBackgroundPhotoMode.allCases) { m in
-                    Text(m.rawValue).tag(m)
+                    Text(m.catalogLabel(locale: BuxInterfaceLocale.currentInterfaceLocale)).tag(m)
                 }
             }
             .pickerStyle(.segmented)
@@ -269,7 +269,7 @@ struct BuxCardBackgroundPhotoEditorView: View {
                         Image(systemName: "rotate.right").foregroundStyle(.secondary)
                     }
                 }
-                Text("Drag to reposition · pinch or slide to zoom")
+                BuxCatalogDynamicText(key: "Drag to reposition · pinch or slide to zoom")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
             }
@@ -278,7 +278,7 @@ struct BuxCardBackgroundPhotoEditorView: View {
         case .freeRegion:
             VStack(spacing: 8) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Selection size")
+                    BuxCatalogDynamicText(key: "Selection size")
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(.secondary)
                     Slider(value: $freeSelectionScale, in: 0.35...1)

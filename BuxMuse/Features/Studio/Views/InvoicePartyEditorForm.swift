@@ -55,7 +55,15 @@ struct InvoicePartyEditorFields: View {
         BuxFormRowDivider()
         Picker("Country", selection: $party.countryCode) {
             ForEach(CountryCatalog.allCountries) { country in
-                Text("\(country.flag) \(country.name)").tag(country.id)
+                Text(
+                    BuxLocalizedString.format(
+                        "%@ %@",
+                        locale: BuxInterfaceLocale.currentInterfaceLocale,
+                        country.flag,
+                        country.name
+                    )
+                )
+                .tag(country.id)
             }
         }
         .buxFormFieldPadding()
@@ -121,7 +129,15 @@ struct InvoicePartyEditorForm: View {
             TextField("Address line 2", text: $party.addressLine2)
             Picker("Country", selection: $party.countryCode) {
                 ForEach(CountryCatalog.allCountries) { country in
-                    Text("\(country.flag) \(country.name)").tag(country.id)
+                    Text(
+                        BuxLocalizedString.format(
+                            "%@ %@",
+                            locale: BuxInterfaceLocale.currentInterfaceLocale,
+                            country.flag,
+                            country.name
+                        )
+                    )
+                    .tag(country.id)
                 }
             }
             if InvoiceAddressRules.requiresSubdivision(for: party.countryCode) {

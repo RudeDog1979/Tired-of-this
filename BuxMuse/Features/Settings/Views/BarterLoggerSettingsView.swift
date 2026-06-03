@@ -18,7 +18,7 @@ struct BarterLoggerSettingsView: View {
             BuxFormSection(title: "Barter & Trade Logger") {
                 Toggle(isOn: $store.barterLoggerEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Enable Barter Logger")
+                        BuxCatalogDynamicText(key: "Enable Barter Logger")
                             .font(.system(size: 15, weight: .semibold))
                         Text("Unlocks \"Barter / Exchange\" payment method in every transaction. Log skill swaps, trade deals, and non-cash exchanges.")
                             .font(.system(size: 12, weight: .medium))

@@ -17,12 +17,12 @@ enum AppTab {
 }
 
 extension AppTab {
-    var nativeTabTitle: String {
+    var nativeTabTitle: LocalizedStringResource {
         switch self {
-        case .home: return "Home"
-        case .expense: return "Expenses"
-        case .studio: return "Studio"
-        case .settings: return "Settings"
+        case .home: "Home"
+        case .expense: "Expenses"
+        case .studio: "Studio"
+        case .settings: "Settings"
         }
     }
 

@@ -24,9 +24,9 @@ struct ScopeCreepRadarSettingsView: View {
             BuxFormSection(title: "Status") {
                 Toggle(isOn: $store.antiScopeCreepEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Enable Scope Radar")
+                        BuxCatalogDynamicText(key: "Enable Scope Radar")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Shows scope status on Pro Studio projects with budgeted hours and revision limits.")
+                        BuxCatalogDynamicText(key: "Shows scope status on Pro Studio projects with budgeted hours and revision limits.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)

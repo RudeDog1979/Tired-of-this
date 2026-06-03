@@ -96,7 +96,7 @@ struct StudioTaxReferenceView: View {
                         taxProfileContent
                     }
                 }
-                .navigationTitle("Tax Profile")
+                .buxCatalogNavigationTitle("Tax Profile")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -186,15 +186,23 @@ struct StudioTaxReferenceView: View {
             Text(appSettingsManager.selectedCountry.flag)
                 .font(.system(size: 22))
             VStack(alignment: .leading, spacing: 2) {
-                Text("Region & currency")
+                BuxCatalogDynamicText(key: "Region & currency")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
-                Text("\(appSettingsManager.selectedCountry.name) · \(appSettingsManager.selectedCurrency.name) (\(appSettingsManager.selectedCurrency.id))")
+                Text(
+                    BuxLocalizedString.format(
+                        "%@ · %@ (%@)",
+                        locale: appSettingsManager.interfaceLocale,
+                        appSettingsManager.selectedCountry.name,
+                        appSettingsManager.selectedCurrency.name,
+                        appSettingsManager.selectedCurrency.id
+                    )
+                )
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
             Spacer()
-            Text("From Settings")
+            BuxCatalogDynamicText(key: "From Settings")
                 .font(.system(size: 10, weight: .medium))
                 .buxLabelSecondary()
         }
@@ -204,7 +212,7 @@ struct StudioTaxReferenceView: View {
 
     private var registrationSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("INDIRECT TAX STATUS")
+            BuxCatalogDynamicText(key: "INDIRECT TAX STATUS")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
@@ -215,7 +223,7 @@ struct StudioTaxReferenceView: View {
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
 
-            Text("Label updates from your indirect tax rules above (VAT, GST, ITBIS, etc.).")
+            BuxCatalogDynamicText(key: "Label updates from your indirect tax rules above (VAT, GST, ITBIS, etc.).")
                 .font(.system(size: 11))
                 .buxLabelSecondary()
         }
@@ -226,15 +234,15 @@ struct StudioTaxReferenceView: View {
 
     private var paymentScheduleSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("TAX PAYMENT SCHEDULE")
+            BuxCatalogDynamicText(key: "TAX PAYMENT SCHEDULE")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
 
             Picker("Payment schedule", selection: $paymentSchedule) {
-                Text("Monthly").tag("monthly")
-                Text("Quarterly").tag("quarterly")
-                Text("Annually").tag("annually")
+                BuxCatalogDynamicText(key: "Monthly").tag("monthly")
+                BuxCatalogDynamicText(key: "Quarterly").tag("quarterly")
+                BuxCatalogDynamicText(key: "Annually").tag("annually")
             }
             .pickerStyle(.segmented)
         }
@@ -245,7 +253,7 @@ struct StudioTaxReferenceView: View {
 
     private var presetDropdownSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("SUGGESTED TAX PRESET")
+            BuxCatalogDynamicText(key: "SUGGESTED TAX PRESET")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
@@ -256,7 +264,7 @@ struct StudioTaxReferenceView: View {
             } label: {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Country preset")
+                        BuxCatalogDynamicText(key: "Country preset")
                             .font(.system(size: 11, weight: .medium))
                             .buxLabelSecondary()
                         Text(savedCountryLabel)
@@ -302,14 +310,14 @@ struct StudioTaxReferenceView: View {
 
     private var incomeTypeSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("HOW YOU EARN")
+            BuxCatalogDynamicText(key: "HOW YOU EARN")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
 
             Picker("Income type", selection: $taxIncomeType) {
                 ForEach(TaxIncomeType.allCases) { type in
-                    Text(type.rawValue).tag(type)
+                    Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
                 }
             }
             .pickerStyle(.segmented)
@@ -327,7 +335,7 @@ struct StudioTaxReferenceView: View {
     private var loadingCatalogCard: some View {
         HStack(spacing: 10) {
             ProgressView()
-            Text("Loading country presets…")
+            BuxCatalogDynamicText(key: "Loading country presets…")
                 .font(.system(size: 12, weight: .medium))
                 .buxLabelSecondary()
         }
@@ -338,7 +346,7 @@ struct StudioTaxReferenceView: View {
 
     private var editableFieldsSection: some View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
-            Text("YOUR TAX RULES")
+            BuxCatalogDynamicText(key: "YOUR TAX RULES")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
@@ -352,13 +360,13 @@ struct StudioTaxReferenceView: View {
 
     private var effectiveRatesSection: some View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
-            Text("EFFECTIVE TAX RATES (FOR CALCULATOR)")
+            BuxCatalogDynamicText(key: "EFFECTIVE TAX RATES (FOR CALCULATOR)")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("INCOME TAX RATE %")
+                BuxCatalogDynamicText(key: "INCOME TAX RATE %")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
                 TextField("e.g. 22", text: $estimatedIncomeRate)
@@ -371,14 +379,14 @@ struct StudioTaxReferenceView: View {
             .referenceCard
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("SELF-EMPLOYED TAX RATE %")
+                BuxCatalogDynamicText(key: "SELF-EMPLOYED TAX RATE %")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
                 TextField("e.g. 15.3", text: $estimatedSERate)
                     .keyboardType(.decimalPad)
                     .padding(10)
                     .buxThemedInputPlate(cornerRadius: 12)
-                Text("These rates power the Income Tax Calculator and quarterly estimates. They are never auto-filled from JSON presets.")
+                BuxCatalogDynamicText(key: "These rates power the Income Tax Calculator and quarterly estimates. They are never auto-filled from JSON presets.")
                     .font(.system(size: 11))
                     .buxLabelSecondary()
             }
@@ -387,7 +395,7 @@ struct StudioTaxReferenceView: View {
             .referenceCard
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("INDIRECT TAX RATE % (VAT/GST)")
+                BuxCatalogDynamicText(key: "INDIRECT TAX RATE % (VAT/GST)")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
                 TextField("e.g. 20", text: $estimatedIndirectRate)
@@ -446,7 +454,13 @@ struct StudioTaxReferenceView: View {
         BuxSaveFeedback.success()
 
         let countryPart = selectedPresetCode.isEmpty ? "Custom profile" : savedCountryLabel
-        saveBanner = "Saved · \(countryPart) · \(taxIncomeType.rawValue) · \(appSettingsManager.selectedCurrency.id)"
+        saveBanner = BuxLocalizedString.format(
+            "Saved · %@ · %@ · %@",
+            locale: appSettingsManager.interfaceLocale,
+            countryPart,
+            taxIncomeType.catalogLabel(locale: appSettingsManager.interfaceLocale),
+            appSettingsManager.selectedCurrency.id
+        )
     }
 
     // MARK: - UI helpers
@@ -496,6 +510,7 @@ struct TaxPresetReviewSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let preset: TaxInfo
     let onConfirm: () -> Void
@@ -508,10 +523,16 @@ struct TaxPresetReviewSheet: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: BuxLayout.section) {
-                        Text("Review \(preset.name) preset")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Review %@ preset",
+                                locale: appSettingsManager.interfaceLocale,
+                                preset.name
+                            )
+                        )
                             .font(.system(size: 18, weight: .bold))
 
-                        Text("This fills your tax rule text fields only — effective rate percentages stay under your control.")
+                        BuxCatalogDynamicText(key: "This fills your tax rule text fields only — effective rate percentages stay under your control.")
                             .font(.system(size: 12))
                             .buxLabelSecondary()
 
@@ -527,7 +548,7 @@ struct TaxPresetReviewSheet: View {
                     .padding(BuxLayout.marginHorizontal)
                 }
             }
-            .navigationTitle("Apply preset?")
+            .buxCatalogNavigationTitle("Apply preset?")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

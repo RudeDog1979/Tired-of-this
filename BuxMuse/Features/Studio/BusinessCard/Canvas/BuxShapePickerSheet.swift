@@ -41,7 +41,7 @@ struct BuxShapePickerSheet: View {
                     }
                 }
             }
-            .navigationTitle("Bux Shapes")
+            .buxCatalogNavigationTitle("Bux Shapes")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
             }

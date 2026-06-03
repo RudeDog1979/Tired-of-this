@@ -1,0 +1,953 @@
+/month
+12-MONTH PROJECTION
+14 Days
+30 Days
+60 Days
+7 Days
+7-day trend
+A project is the job you track — fixed price or hourly, time log, expenses, and invoices.
+About
+Abyssal
+Accent
+Accent Color
+Accent color
+Account type
+Active savings goals
+Add
+Add Cash
+Add Client
+Add Goal
+Add Line Item
+Add Project
+Add Tax Rate
+Add a client in Studio → Clients before sending this invoice.
+Add a client, invoice, or receipt to start tracking tax, cashflow, and deductions.
+Add a new gig workspace
+Add a project in Studio first
+Add at least one line item to save this invoice.
+Add business mileage to include allowances in your deduction estimate.
+Add category
+Add client
+Add delivery dates, client reviews, or phase handoffs. They appear on the project planner timeline.
+Add expense
+Add expenses to unlock spending insights.
+Add logo
+Add mileage entry
+Add milestone
+Add milestones before saving the project.
+Add note
+Add overlay tint
+Add photo
+Add planner milestones
+Add text
+Add your photo
+Added at the end — policies, fees, or language from your lawyer.
+Address
+Adds the drive home (From ↔ To swapped)
+Adjust
+Adjust Goal
+Adjust for card size
+Adjustment type
+Advance
+Advanced diagnostics
+Advanced filters…
+Agreed price
+Agreement
+Agreement Scratchpad
+Agreement drafts
+Agreements
+Alerts & radar
+Align
+All
+All lines
+Allow photo access to pick backgrounds and portraits for your card.
+Allow photos
+Amount
+Amount due
+Annually
+Another merchant shares this name — add a label to tell them apart.
+Any
+Any category
+Any merchant
+Any zone
+Appearance
+Apple Health sync
+Apply
+Apply preset?
+Apply suggestion
+Applying this insight accelerates this target timeline significantly.
+Approval date recorded
+Ask your studio anything
+Attachment
+Authenticate to continue
+Auto-generated from your name, phone, email & website as a scannable contact card (vCard).
+Auto-location for mileage
+Auto-number pattern
+Avatar & identity
+BUSINESS TOTAL
+BUXMUSE STUDIO
+Back
+Back of card
+Background
+Background photo
+Backup & Restore
+Backup Frequency
+Backup error
+Backward
+Bank Transfer
+Bank transfer, WhatsApp payment, platform payout, hardware receipt — all stay on your phone.
+Barter & Trade
+Barter & Trade Logger
+Barter / Exchange
+Barter Details
+Basic shapes
+Basics
+Before you backup
+Bill from completed work
+Bill from job
+Bill to
+Billable hours
+Billing
+Biometric access
+Blank card
+Blue
+Bold
+Border
+Brain recommendation
+Brain savings tip
+Brand
+Brand Color
+Brand design presets
+Brand identity
+Breakdown
+Bring to front
+Budget Overrun Risk. Hours spent exceed contract benchmarks.
+Budget Period
+Budget hours
+Budget method
+Budgeting Mode
+Budgets
+Business Card Pro Studio
+Business Profile
+Business Type
+Business card
+Business classification
+Business details
+Business logo
+Business profile
+Bux
+Bux Adjust
+Bux Background
+Bux FX
+Bux Focal Crop
+Bux Layers
+Bux Layout Packs
+Bux Photo
+Bux Photo Lab
+Bux Shape
+Bux Shapes
+BuxMuse Intelligence
+BuxMuse Vault Active
+BuxMuse needs photo access to set card backgrounds and portraits. You can allow full or limited access in Settings.
+BuxMuse stores what you bring back (for example a signed PDF you upload). For maximum privacy, use in-app signing or attach a file you already received.
+CASH RUNWAY TRAJECTORY
+CLIENT HEALTH SCORE
+CONTACT DETAILS
+Calculating driving distance…
+Cancel
+Canonical name
+Canvas
+Captured scan preview
+Card size
+Card text
+Card updated — sync to refresh invoice branding.
+Cash & Barter
+Cash Drawer
+Cashflow forecaster
+Categories
+Category
+Category Breakdown
+Category breakdown
+Center
+Change category
+Change in Settings → Currency & Region
+Charts, lines, insights & actions
+Check your connection or try again later.
+Choose Preset
+Choose background photo
+Choose from photos
+Choose photo
+Choose photo from library
+Choose…
+Choosing a project fills line items and links this invoice to that job.
+Circle
+Classic
+Clear
+Clear all filters
+Clear background
+Clear client signature
+Clear filter
+Clear filters
+Clear pad
+Clear payment source
+Clear preset (custom only)
+Clear store link
+Clear your signature
+Client
+Client Info
+Client approval
+Client clear to go ahead
+Client signature (in person only)
+Clients CRM
+Clients, invoices, projects, receipts, mileage, tax deductions, and your Simple ledger — all offline.
+Close
+Colors
+Completed project
+Compounding
+Compounding rates apply to the running total including previous taxes.
+Confirm
+Confirm Complete Purge
+Contact
+Contact QR code
+Contract settings
+Contribute
+Contribution date
+Copy key
+Copy scope-change email
+Corners
+Couldn't load that photo — try another image.
+Couldn't load that photo — try another.
+Country
+Country preset
+Create Invoice
+Create invoice
+Create invoice from this project
+Create project
+Creative Energy
+Creative Energy widget
+Creative fuel left after workload, sleep, and stress spend.
+Crimson
+Currency & Region
+Currency Configuration
+Current
+Current saved
+Custom
+Custom colors
+Custom envelope profiles
+Custom invoice branding
+Custom palette
+Custom wording
+Customer
+Customize only
+Customize prefix & pattern in Studio → Invoices → Settings. You can always type your own number above.
+Cyan
+Daily Average
+Daily digest
+Data Guard Mode
+Database Reset Complete
+Date
+Dates
+Deadline
+Deductible %
+Deduction Category
+Deduction Strength
+Deductions Sandbox
+Default Cycle
+Default Hourly Rate
+Defaults for new agreements
+Delete
+Delete Goal & Discard savings data
+Delete data
+Delete expense
+Delete selected designs?
+Delete this design?
+Delete time entry?
+Deliverables
+Density
+Depends on
+Description
+Design
+Design print-ready cards in minutes — geometric templates, Bux Canvas, photo lab, and export to PDF or vCard.
+Details
+Detected pattern warnings
+Detected progress threats
+Disable PIN
+Disable PIN Code?
+Discard
+Discard changes?
+Dismiss
+Dismiss All
+Display Mode
+Display Style
+Display currency
+Displays company address and registration at the bottom of designed invoices.
+DocuSign, email, WhatsApp, and similar services may process your client's name, contact details, and document on their servers—not only on your device.
+Done
+Double
+Down
+Drafts
+Drag a dot on the timeline to reschedule a milestone.
+Drag the field for saturation and brightness — use Fill strength for transparency.
+Drag to move · pinch or slide to zoom · rotate to straighten
+Drag to reposition · pinch or slide to zoom
+Drag to spin · pinch to zoom
+Dual-Cash Drawer
+Due by
+Due date
+Due on Receipt
+Duplicate
+EFFECTIVE TAX RATES (FOR CALCULATOR)
+ENTER CASH AMOUNT
+ESTIMATED ANNUAL TAX
+Edge strips (hero size)
+Edit
+Edit Goal
+Edit Transaction
+Edit clause
+Edit for this agreement only. Leave blank to restore the template.
+Edit in Bux Photo Lab
+Edit photo
+Edit terms & conditions
+Edit time
+Education
+Effective hourly rate:
+Elements
+Elements · top to bottom
+Emerald
+Encrypted backup
+End
+Ended
+English
+Entertainment
+Entry
+Envelope
+Envelope categories
+Example: agreed 2 hours at your hourly rate — set 2 h here and the clock pauses at 2 h.
+Exit
+Expense
+Expense Details
+Expense deleted
+Expenses
+Expenses & Receipts
+Export & share
+Export PDF
+Export PDF (print ready)
+Export PDF for external signing
+Export PNG image
+Export compliance
+Extracted document information
+FINANCIAL MATRIX
+FULL TERRITORY VIEW
+Fades the whole element — text, shape, or photo.
+Feature intelligence
+Fill from…
+Fill strength
+Filter expenses
+Filters
+Finished early
+Finished early?
+First recorded
+Flip horizontal
+Flip vertical
+Font
+Font mood
+Fonts
+For
+Format
+Forward
+Frame
+From Settings
+From billable hours, new time, and project expenses.
+Front
+Full Tax Studio in Pro
+GOODS / SERVICES GIVEN
+GOODS / SERVICES RECEIVED
+Galactic
+Generate PDF
+Geometric shapes
+Get structural forecast and potential acceleration timeline AI insights.
+Global locale
+Goal
+Goals
+Gold
+Got it
+Green
+Groceries
+Guided agreement
+Guided setup
+HOW YOU EARN
+Habit Builders:
+Hardware Assets
+Health
+Heat zone
+Hero
+Hex
+High Stress Alert
+Horizon
+Hours
+Housing
+How did the client approve?
+How did this feel?
+How did you pay? (optional)
+How do you get paid?
+How it works
+How long should it take?
+How you charge
+Hue
+INCOME TAX RATE %
+INDIRECT TAX RATE % (VAT/GST)
+INDIRECT TAX STATUS
+INTERACTIVE TAX SIMULATOR
+INVOICE SUGGESTION
+INVOICE SUGGESTIONS
+Identity
+Import from Photo Library
+Import into agreement
+Income
+Income Tax Calculator
+Income type
+Indigo
+Insights
+Intelligence insights
+Intelligence rules
+Interface
+Internal notes
+Invoice
+Invoice Bill-To Details
+Invoice Details
+Invoice Notes
+Invoice Payment
+Invoice Settings
+Invoice brand
+Invoice identity & address
+Invoices
+Invoices can use this card’s colors and style as your business brand.
+Invoicing defaults
+Issue date
+JOB NAME
+Job
+Job Quote
+Job costs
+Job math
+Job pockets
+Jobs
+Jobs where money is still waiting — tap to send a simple invoice.
+Keep editing
+LINKED EXPENSES
+Label updates from your indirect tax rules above (VAT, GST, ITBIS, etc.).
+Largest Purchases
+Layer fade
+Layers
+Left
+Legal footer
+Line Items
+Line item
+Link store (optional)
+Link terms and client approval to this job.
+Linked
+Linked invoice
+Linked job
+List icon
+Live on your card
+Live preview
+Loading country presets…
+Loading tax presets…
+Local · Private · On your phone
+Lock After Inactivity
+Lock Screen shows a walker moving toward done — clock can stop when time is up.
+Log
+Log Cash Transaction
+Log Physical Cash
+Log Subscription as Cancelled
+Log expense
+Log money
+Log same trip back
+Log to Project
+Log trip
+Log work to see where your money goes.
+Log work to see your month
+Logo Position
+Logo frame
+Logo position
+Logo size
+Long-press & drag to weave the web · tap for territory detail
+Look
+Manage
+Manage categories
+Manage merchants
+Manual account type
+Manual tuning (Simple & Pro)
+Mark paid
+Mark project complete
+Mark settled
+Mark terms sent to client
+Medium
+Merchant
+Merchant data
+Merchants
+Merge…
+Metric Details
+Mileage Log
+Mileage rate
+Milestone
+Milestones
+Minimum monthly inflow needed to comfortably clear direct costs, tax obligations, and hit standard savings cushions.
+Mint
+Minutes
+Mode
+Modern
+Money & timing
+Money Map
+Money in
+Monthly
+Monthly Burn Rate
+Monthly Summary
+Monthly summary
+Move layers
+My money
+NOTES & TERMS
+Name settings
+Need more time?
+New
+New Client
+New agreement draft
+New category
+New from template
+Next
+Night sleep duration
+No Active Budget Profile
+No Clients registered yet
+No Invoices logged yet
+No Notifications
+No active savings goals yet.
+No active subscriptions. Tapping quick action opens Subscription Hub.
+No alerts. You're all caught up.
+No category subscription metrics available.
+No client
+No clients yet. Add your first client to track health and lifetime value.
+No completed projects for this client. Finish a project in Studio → Projects, or add line items below.
+No countries available
+No data available.
+No deduction opportunities right now.
+No deduction opportunities yet. Log receipts to unlock suggestions.
+No drafts yet. Create one for a client or project before work starts.
+No expenses in this workspace
+No expenses logged yet
+No insights yet.
+No invoices generated yet.
+No matches
+No merchant data available.
+No merchants match your search.
+No milestones yet
+No people match
+No people yet
+No pricing or billing risks detected.
+No projects logged yet.
+No projects yet
+No projects yet.
+No receipts scanned yet
+No saved cards yet
+No specific workspace
+No time entries logged yet.
+No transactions logged in this range.
+No transactions yet. Add an expense to see activity here.
+No trips logged yet
+No upcoming renewals scheduled
+Nobody owes you right now — nice.
+None
+None — add lines manually
+Not cash or barter
+Not now
+Note
+Notes
+Notes & Terms
+Notifications
+Numbering
+OPTIMIZATION OPPORTUNITIES
+Ocean
+Office Expenses
+One total price for the job — your work clock only tracks time, not money.
+Only if you want a shop logo — e.g. Amazon for a refund. Otherwise the category icon shows in your list.
+Only when the client is with you. For PDF, text, or print-back approval, use Client approval above — not this pad.
+Opacity
+Open Settings
+Open Tax Profile to choose a country preset or enter your rules.
+Open full Money Map
+Open full territory detail
+Open insight detail
+Open mileage log
+Options
+Orange
+Order
+Other
+Out of scope
+Outstanding
+PAID INFLOW · 6 MO
+PAY ONLINE
+PAYMENT DETAILS
+PIN passcode
+PROJECT OVERVIEW
+PROJECT PLANNER
+PROJECTIONS OUTPUT
+Paid
+Paid total
+Partial
+Pay type
+Payment
+Payment Link
+Payment Sources
+Payment Speed
+Payment Terms (Days)
+Payment schedule
+Payment source tracking
+Payment status
+Payment terms
+People
+Person
+Persona
+Personal
+Photo
+Photo (optional)
+Photo access
+Photo position
+Photo tuning
+Pick
+Pick a template above to create your first design.
+Pick the job below. We'll show whether the clock is just for your records, or whether it counts toward what they owe.
+Pick with Photos picker
+Pinch to resize · Two fingers to rotate · Drag handles for precision
+Pink
+Planner alerts
+Planner milestones
+Popular
+Preview
+Preview full terms
+Preview matches how the shape will look on the card.
+Preview:
+Print size
+Priority
+Privacy
+Privacy notice
+Privacy shield
+Pro Search
+Pro Studio
+Pro Studio feature
+Pro card extras
+Pro territories show merchants, scope radar, invoices, mileage, and more as you enable Studio tools.
+Pro tier
+Profile
+Profile details
+Profile settings
+Profitability
+Project
+Project plan
+Projects
+Purple
+Purpose
+QR Code
+QR code
+QR code, logo, premium styling & PDF export
+QUARTERLY SPLIT
+Qty
+Quantum
+Quarterly
+Quarterly Tax
+Quick Actions
+Quick filters
+Quick packs
+Quiet hours
+Quote a job first — say if it's one price or paid by the hour.
+READY TO INVOICE
+Range
+Rate
+Rate Details
+Rate optimizer
+Receipt Scanner
+Receive Cash (Income)
+Recent
+Recent transactions
+Recovery key
+Red
+Redirect suggested amount
+Redo
+Refresh QR
+Region & Currency
+Region & currency
+Regional rules
+Registration
+Remind me before renewal
+Remove Passcode
+Remove attachment
+Remove photo
+Reopen project
+Reset
+Reset map layout
+Reset selection
+Reset zoom
+Restaurants
+Restore backup
+Restore complete
+Restore template
+Rotate
+Rounded
+SCAN TO PAY
+SCOPE RADAR
+SELECT CASH DRAWER
+SELF-EMPLOYED TAX RATE %
+SHEET 01 · ISSUED
+STUDIO INSIGHTS
+SUGGESTED TAX PRESET
+SURVIVAL MODE TARGET
+Sakura
+Salary, refund, gift, cash — type anything. No shop linking required.
+Same app for everyone — this just sets smart defaults. Change anytime in Settings.
+Same trip back
+Sandbox backup
+Save
+Save & send
+Save & stop
+Save Money
+Save as my default terms
+Save card
+Save note
+Save your time entry and end the Live Activity.
+Scan Receipt
+Scan a payment screenshot or log money with + — not a bank, your private ledger.
+Scan failed
+Scan receipt
+Scan to save contact
+Scope
+Scope & deliverables
+Scope Creep Radar
+Scope Radar
+Scroll to Client signature (in person only) below to capture the client's finger signature on this device.
+Search
+Secure offline text digitization using local Apple Neural Engines.
+Security & Privacy
+Security Lock Error
+See Studio in Settings
+See all
+See more
+See your progress
+Seed Physical Cash Balances
+Select
+Selected
+Selection size
+Self-employed?
+Send
+Send card
+Send only
+Send quote
+Send to back
+Send via Messages, WhatsApp, Mail, or any app — includes your card image and a scannable contact file.
+Sent
+Sent via BuxMuse · Not a bank
+Set
+Set a time for this job
+Set photo background
+Set your effective income and self-employed tax rates in Tax Profile to enable calculations.
+Settings
+Settled
+Shape color
+Shapes
+Share
+Share agreement PDF
+Share agreement text
+Share attached file
+Share card
+Share contact card (.vcf)
+Share your card
+Shopping
+Show on card
+Shown on invoice FROM block and legal footer.
+Sign anytime — included when you export a PDF. Client approval uses the channel you chose above.
+Sign inside the box. Use Clear to start over.
+Sign-off note (optional)
+Signed document attached
+Signing outside BuxMuse
+Silence Ends
+Silence Starts
+Simple
+Simple Invoice
+Simple Studio
+Simple invoice
+Size
+Small
+Smart savings redirections
+Snap a payment or receipt
+Software Subscriptions
+Solid
+Spanish (Latin America)
+Spanish (Spain)
+Spend Cash
+Spend Cash (Expense)
+Spending Analysis
+Spending Heat Zones
+Square
+Standard
+Start
+Start from a set, then turn clauses on/off or edit wording.
+Start of Week
+Started
+Status
+Status & Activation
+Still waiting
+Stop the clock when time is up
+Stopwatch
+Stress Indicator
+Stroke W
+Studio Insights
+Studio mode
+Studio tools
+Style
+Subjective stress zone
+Subscription
+Subscription Hub
+Subscription start
+Subscriptions
+Subtotal
+Suggested Actions:
+Suggested Alternatives:
+Summary
+Sunset
+Supported providers
+Switch to Sunset Theme
+Switchboard
+Sync from card
+Synced
+TAX PAYMENT SCHEDULE
+TIME ENTRIES LOG
+TOTAL ACTIVE WRITE-OFF DEDUCTIONS
+TOTAL DUE
+TRANSACTION NOTES
+Tap + to scan or log your first job.
+Tap a merchant to review details. Changes save automatically.
+Tap any layer · drag · pinch · twist
+Tap the chart or a row below to filter
+Tap to capture signature
+Tap to fix
+Tap to open
+Tap to open My money
+Target
+Tax Mode
+Tax Overview
+Tax Profile
+Tax Rates
+Tax Studio
+Tax behavior
+Tax details
+Tax on invoices
+Tax sandbox settings
+Teal
+Template
+Template Style
+Terms & conditions
+Terms preview
+Text align
+There and back
+These rates power the Income Tax Calculator and quarterly estimates. They are never auto-filled from JSON presets.
+They appear automatically when you log jobs or send invoices.
+Thin
+This Quarter
+This card hasn't been saved yet. Discarding will delete it.
+This fills your tax rule text fields only — effective rate percentages stay under your control.
+This month
+This permanently removes the selected cards from Your designs.
+This receipt, along with its metadata, is encrypted and securely stored offline inside your local BuxMuse Sandbox. No data leaves your iPhone.
+This removes the entry from the project log.
+Time entries below are your task log for this project.
+Time entry
+Time is on this job — get client approval when you can.
+Time is up — clock paused. Save your work or add more time.
+Timeline
+Titanium
+Today kept
+Tools
+Top Categories
+Top Merchants
+Top insights
+Total Spend
+Total project direct cost:
+Totals Preview
+Track every job. Every payment.
+Track time — hourly or one-price jobs
+Transaction Date
+Transactions
+Transport
+Travel
+Travel & Lodging
+Trend
+Trend Over Time
+Trial end date
+Try a name, “waiting on payment”, or “jobs this month”.
+Try another name or phone number.
+Try asking like this
+Try “overdue invoices”, a client name, or “receipts this week”.
+Turn on Studio for invoices, mileage, and tax estimates — optional, in Settings.
+Two ways people get paid
+Type
+Type scale
+Typography
+Unassigned
+Unassigned expenses
+Undo
+Unlock with Face ID / Touch ID
+Unlocks \
+Up
+Update currency too?
+Update invoices to match this card’s latest colors and style?
+Upgrade to Pro
+Upgrade to Pro Studio
+Use
+Use for invoice branding?
+Use for invoices
+Use {PREFIX}, {YEAR}, {SEQ}
+Used when you fill an agreement from this project.
+Utilities
+View deal
+WARNING: Delete All Data?
+WHAT ARE YOU DOING?
+WHICH JOB?
+Waiting on
+Waiting on them
+Watermark
+What are you doing?
+What is this?
+What kind of work do you do?
+What was it for?
+What was this?
+What you spent
+Who
+Who is this for?
+Work clock
+Work may have already started. Capture client approval now and attach their signed copy if you have it.
+Work type
+Workspace
+Workspace mode
+Workspaces
+YOUR NUMBERS
+YOUR TAX PROFILE
+YOUR TAX RULES
+Yellow
+You charge per hour — the work clock multiplies hours × your rate.
+You do not need a perfect photo size. Choose any image, then pan, zoom, crop to the card, or pick a free region.
+You owe
+You're past the agreed time — add time or save when done.
+Your Studio workspace is empty
+Your active workspaces
+Your card
+Your designs
+Your edits since opening this card will be lost.
+Your financial details are kept strictly offline and secure inside the BuxMuse Brain.
+Your financial landscape
+Your numbers
+Your own terms
+Your own words — salary, refund, gift, sold something, etc.
+Your photo
+Your region
+Your signature (worker)
+Your stress index has breached the 0.85 threshold. We suggest enabling Sunset mode to reduce cognitive overload and ocular strain.
+Your subscriptions are fully optimized.
+battery
+saved
+vs last mo

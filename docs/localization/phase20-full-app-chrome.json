@@ -1,0 +1,370 @@
+{
+  "Envelope": {
+    "es-419": "Sobres",
+    "es-ES": "Sobres"
+  },
+  "Simple": {
+    "es-419": "Sencillo",
+    "es-ES": "Sencillo"
+  },
+  "Standard": {
+    "es-419": "Estándar",
+    "es-ES": "Estándar"
+  },
+  "Bux": {
+    "es-419": "Bux",
+    "es-ES": "Bux"
+  },
+  "Ocean": {
+    "es-419": "Océano",
+    "es-ES": "Océano"
+  },
+  "Sunset": {
+    "es-419": "Atardecer",
+    "es-ES": "Atardecer"
+  },
+  "Emerald": {
+    "es-419": "Esmeralda",
+    "es-ES": "Esmeralda"
+  },
+  "Sakura": {
+    "es-419": "Sakura",
+    "es-ES": "Sakura"
+  },
+  "Gold": {
+    "es-419": "Oro",
+    "es-ES": "Oro"
+  },
+  "Crimson": {
+    "es-419": "Carmesí",
+    "es-ES": "Carmesí"
+  },
+  "Horizon": {
+    "es-419": "Horizonte",
+    "es-ES": "Horizonte"
+  },
+  "Quantum": {
+    "es-419": "Cuántico",
+    "es-ES": "Cuántico"
+  },
+  "Galactic": {
+    "es-419": "Galáctico",
+    "es-ES": "Galáctico"
+  },
+  "Titanium": {
+    "es-419": "Titanio",
+    "es-ES": "Titanio"
+  },
+  "Abyssal": {
+    "es-419": "Abisal",
+    "es-ES": "Abisal"
+  },
+  "Blue": {
+    "es-419": "Azul",
+    "es-ES": "Azul"
+  },
+  "Green": {
+    "es-419": "Verde",
+    "es-ES": "Verde"
+  },
+  "Orange": {
+    "es-419": "Naranja",
+    "es-ES": "Naranja"
+  },
+  "Pink": {
+    "es-419": "Rosa",
+    "es-ES": "Rosa"
+  },
+  "Purple": {
+    "es-419": "Morado",
+    "es-ES": "Morado"
+  },
+  "Red": {
+    "es-419": "Rojo",
+    "es-ES": "Rojo"
+  },
+  "Teal": {
+    "es-419": "Verde azulado",
+    "es-ES": "Verde azulado"
+  },
+  "Indigo": {
+    "es-419": "Índigo",
+    "es-ES": "Índigo"
+  },
+  "Mint": {
+    "es-419": "Menta",
+    "es-ES": "Menta"
+  },
+  "Cyan": {
+    "es-419": "Cian",
+    "es-ES": "Cian"
+  },
+  "Yellow": {
+    "es-419": "Amarillo",
+    "es-ES": "Amarillo"
+  },
+  "Recent transactions": {
+    "es-419": "Transacciones recientes",
+    "es-ES": "Transacciones recientes"
+  },
+  "See more": {
+    "es-419": "Ver más",
+    "es-ES": "Ver más"
+  },
+  "No transactions yet. Add an expense to see activity here.": {
+    "es-419": "Aún no hay transacciones. Agregá un gasto para ver actividad acá.",
+    "es-ES": "Aún no hay transacciones. Agrega un gasto para ver actividad aquí."
+  },
+  "Monthly Summary": {
+    "es-419": "Resumen mensual",
+    "es-ES": "Resumen mensual"
+  },
+  "Expenses": {
+    "es-419": "Gastos",
+    "es-ES": "Gastos"
+  },
+  "Subscriptions": {
+    "es-419": "Suscripciones",
+    "es-ES": "Suscripciones"
+  },
+  "Goals": {
+    "es-419": "Metas",
+    "es-ES": "Metas"
+  },
+  "Insights": {
+    "es-419": "Perspectivas",
+    "es-ES": "Perspectivas"
+  },
+  "Money Map": {
+    "es-419": "Mapa del dinero",
+    "es-ES": "Mapa del dinero"
+  },
+  "Gasto": {
+    "es-419": "Gasto",
+    "es-ES": "Gasto"
+  },
+  "Ingreso": {
+    "es-419": "Ingreso",
+    "es-ES": "Ingreso"
+  },
+  "Manual Entry": {
+    "es-419": "Carga manual",
+    "es-ES": "Entrada manual"
+  },
+  "Select Category": {
+    "es-419": "Elegir categoría",
+    "es-ES": "Elegir categoría"
+  },
+  "Manage Categories": {
+    "es-419": "Gestionar categorías",
+    "es-ES": "Gestionar categorías"
+  },
+  "Scan Receipt": {
+    "es-419": "Escanear recibo",
+    "es-ES": "Escanear recibo"
+  },
+  "New Invoice": {
+    "es-419": "Nueva factura",
+    "es-ES": "Nueva factura"
+  },
+  "Insight Deep Dive": {
+    "es-419": "Detalle de la perspectiva",
+    "es-ES": "Detalle de la perspectiva"
+  },
+  "Explanation": {
+    "es-419": "Explicación",
+    "es-ES": "Explicación"
+  },
+  "Data metrics": {
+    "es-419": "Métricas de datos",
+    "es-ES": "Métricas de datos"
+  },
+  "Metric Details": {
+    "es-419": "Detalle de métricas",
+    "es-ES": "Detalle de métricas"
+  },
+  "Projected financial impact": {
+    "es-419": "Impacto financiero proyectado",
+    "es-ES": "Impacto financiero proyectado"
+  },
+  "Monthly": {
+    "es-419": "Mensual",
+    "es-ES": "Mensual"
+  },
+  "Yearly": {
+    "es-419": "Anual",
+    "es-ES": "Anual"
+  },
+  "Goal acceleration effect": {
+    "es-419": "Efecto en aceleración de meta",
+    "es-ES": "Efecto en aceleración de meta"
+  },
+  "BuxMuse suggested actions": {
+    "es-419": "Acciones sugeridas por BuxMuse",
+    "es-ES": "Acciones sugeridas por BuxMuse"
+  },
+  "low": {
+    "es-419": "bajo",
+    "es-ES": "bajo"
+  },
+  "medium": {
+    "es-419": "medio",
+    "es-ES": "medio"
+  },
+  "high": {
+    "es-419": "alto",
+    "es-ES": "alto"
+  },
+  "Severity": {
+    "es-419": "Severidad",
+    "es-ES": "Severidad"
+  },
+  "Remaining budget": {
+    "es-419": "Presupuesto restante",
+    "es-ES": "Presupuesto restante"
+  },
+  "Total balance (no active budget)": {
+    "es-419": "Saldo total (sin presupuesto activo)",
+    "es-ES": "Saldo total (sin presupuesto activo)"
+  },
+  "Active budget: %@": {
+    "es-419": "Presupuesto activo: %@",
+    "es-ES": "Presupuesto activo: %@"
+  },
+  "%@ left of %@": {
+    "es-419": "Quedan %@ de %@",
+    "es-ES": "Quedan %@ de %@"
+  },
+  "%lld%% spent": {
+    "es-419": "%lld%% gastado",
+    "es-ES": "%lld%% gastado"
+  },
+  "No Active Budget Profile": {
+    "es-419": "Sin perfil de presupuesto activo",
+    "es-ES": "Sin perfil de presupuesto activo"
+  },
+  "Feature intelligence": {
+    "es-419": "Inteligencia de funciones",
+    "es-ES": "Inteligencia de funciones"
+  },
+  "Brand Themes": {
+    "es-419": "Temas de marca",
+    "es-ES": "Temas de marca"
+  },
+  "Display Mode": {
+    "es-419": "Modo de pantalla",
+    "es-ES": "Modo de pantalla"
+  },
+  "Brand design presets": {
+    "es-419": "Presets de diseño de marca",
+    "es-ES": "Presets de diseño de marca"
+  },
+  "Accent color": {
+    "es-419": "Color de acento",
+    "es-ES": "Color de acento"
+  },
+  "Interface": {
+    "es-419": "Interfaz",
+    "es-ES": "Interfaz"
+  },
+  "Budget method": {
+    "es-419": "Método de presupuesto",
+    "es-ES": "Método de presupuesto"
+  },
+  "Budgeting Mode": {
+    "es-419": "Modo de presupuesto",
+    "es-ES": "Modo de presupuesto"
+  },
+  "Monthly Spending Limit": {
+    "es-419": "Límite de gasto mensual",
+    "es-ES": "Límite de gasto mensual"
+  },
+  "Spending Cap": {
+    "es-419": "Tope de gasto",
+    "es-ES": "Tope de gasto"
+  },
+  "Budget Period": {
+    "es-419": "Período del presupuesto",
+    "es-ES": "Período del presupuesto"
+  },
+  "Default Cycle": {
+    "es-419": "Ciclo predeterminado",
+    "es-ES": "Ciclo predeterminado"
+  },
+  "Intelligence rules": {
+    "es-419": "Reglas de inteligencia",
+    "es-ES": "Reglas de inteligencia"
+  },
+  "Show Budget Warnings": {
+    "es-419": "Mostrar alertas de presupuesto",
+    "es-ES": "Mostrar alertas de presupuesto"
+  },
+  "Auto-adjust from History": {
+    "es-419": "Autoajustar según historial",
+    "es-ES": "Autoajustar según historial"
+  },
+  "Custom envelope profiles": {
+    "es-419": "Perfiles de sobre personalizados",
+    "es-ES": "Perfiles de sobre personalizados"
+  },
+  "System": {
+    "es-419": "Sistema",
+    "es-ES": "Sistema"
+  },
+  "Light": {
+    "es-419": "Claro",
+    "es-ES": "Claro"
+  },
+  "Dark": {
+    "es-419": "Oscuro",
+    "es-ES": "Oscuro"
+  },
+  "Weekly": {
+    "es-419": "Semanal",
+    "es-ES": "Semanal"
+  },
+  "Off": {
+    "es-419": "Apagado",
+    "es-ES": "Apagado"
+  },
+  "Daily": {
+    "es-419": "Diario",
+    "es-ES": "Diario"
+  },
+  "Sunday": {
+    "es-419": "Domingo",
+    "es-ES": "Domingo"
+  },
+  "Monday": {
+    "es-419": "Lunes",
+    "es-ES": "Lunes"
+  },
+  "Tuesday": {
+    "es-419": "Martes",
+    "es-ES": "Martes"
+  },
+  "Wednesday": {
+    "es-419": "Miércoles",
+    "es-ES": "Miércoles"
+  },
+  "Thursday": {
+    "es-419": "Jueves",
+    "es-ES": "Jueves"
+  },
+  "Friday": {
+    "es-419": "Viernes",
+    "es-ES": "Viernes"
+  },
+  "Saturday": {
+    "es-419": "Sábado",
+    "es-ES": "Sábado"
+  },
+  "First Name Only": {
+    "es-419": "Solo nombre",
+    "es-ES": "Solo nombre"
+  },
+  "Full Name": {
+    "es-419": "Nombre completo",
+    "es-ES": "Nombre completo"
+  }
+}

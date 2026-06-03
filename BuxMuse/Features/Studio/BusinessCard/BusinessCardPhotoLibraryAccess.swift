@@ -16,12 +16,18 @@ enum BusinessCardPhotoLibraryAccess {
         case restricted
 
         var label: String {
+            let locale = BuxInterfaceLocale.currentInterfaceLocale
             switch self {
-            case .notDetermined: return "Not asked yet"
-            case .limited: return "Limited access"
-            case .authorized: return "Full access"
-            case .denied: return "Denied"
-            case .restricted: return "Restricted"
+            case .notDetermined:
+                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Not asked yet"), locale: locale)
+            case .limited:
+                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Limited access"), locale: locale)
+            case .authorized:
+                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Full access"), locale: locale)
+            case .denied:
+                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Denied"), locale: locale)
+            case .restricted:
+                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Restricted"), locale: locale)
             }
         }
     }
@@ -65,7 +71,7 @@ struct BusinessCardPhotoAccessBanner: View {
         if status == .denied || status == .restricted {
             BuxThemedCardForm {
                 BuxFormSection(title: "Photo access") {
-                    Text("BuxMuse needs photo access to set card backgrounds and portraits. You can allow full or limited access in Settings.")
+                    BuxCatalogDynamicText(key: "BuxMuse needs photo access to set card backgrounds and portraits. You can allow full or limited access in Settings.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                         .buxFormFieldPadding()
@@ -79,7 +85,7 @@ struct BusinessCardPhotoAccessBanner: View {
         } else if status == .notDetermined {
             BuxThemedCardForm {
                 BuxFormSection(title: "Photo access") {
-                    Text("Allow photo access to pick backgrounds and portraits for your card.")
+                    BuxCatalogDynamicText(key: "Allow photo access to pick backgrounds and portraits for your card.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                         .buxFormFieldPadding()
@@ -96,7 +102,13 @@ struct BusinessCardPhotoAccessBanner: View {
             HStack {
                 Image(systemName: status == .limited ? "photo.badge.checkmark" : "photo.on.rectangle.angled")
                     .foregroundColor(themeManager.current.accentColor)
-                Text("Photos: \(status.label)")
+                Text(
+                    BuxLocalizedString.format(
+                        "Photos: %@",
+                        locale: BuxInterfaceLocale.currentInterfaceLocale,
+                        status.label
+                    )
+                )
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Spacer()

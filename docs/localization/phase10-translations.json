@@ -1,0 +1,70 @@
+{
+  "%lld%% effective": {
+    "es-419": "%lld%% efectiva",
+    "es-ES": "%lld%% efectiva"
+  },
+  "Burn %@/mo": {
+    "es-419": "Quema %@/mes",
+    "es-ES": "Quema %@/mes"
+  },
+  "%lld invoices": {
+    "es-419": "%lld facturas",
+    "es-ES": "%lld facturas"
+  },
+  "%lld awaiting": {
+    "es-419": "%lld pendientes",
+    "es-ES": "%lld pendientes"
+  },
+  "Ended %@": {
+    "es-419": "Terminó %@",
+    "es-ES": "Finalizó %@"
+  },
+  "%@/%@h": {
+    "es-419": "%1$@/%2$@ h",
+    "es-ES": "%1$@/%2$@ h"
+  },
+  "Revisions: %lld/%lld": {
+    "es-419": "Revisiones: %lld/%lld",
+    "es-ES": "Revisiones: %lld/%lld"
+  },
+  "%@/hr": {
+    "es-419": "%@/h",
+    "es-ES": "%@/h"
+  },
+  "Lap %lld": {
+    "es-419": "Vuelta %lld",
+    "es-ES": "Vuelta %lld"
+  },
+  "%@ · %@": {
+    "es-419": "%1$@ · %2$@",
+    "es-ES": "%1$@ · %2$@"
+  },
+  "%@ typically uses %@.": {
+    "es-419": "%@ suele usar %@.",
+    "es-ES": "%@ suele usar %@."
+  },
+  "%@ · typical %@": {
+    "es-419": "%@ · habitual %@",
+    "es-ES": "%@ · habitual %@"
+  },
+  "English": {
+    "es-419": "English",
+    "es-ES": "English"
+  },
+  "Spanish (Latin America)": {
+    "es-419": "Español (Latinoamérica)",
+    "es-ES": "Español (Latinoamérica)"
+  },
+  "Spanish (Spain)": {
+    "es-419": "Español (España)",
+    "es-ES": "Español (España)"
+  },
+  "This country": {
+    "es-419": "Este país",
+    "es-ES": "Este país"
+  },
+  "a local currency": {
+    "es-419": "una moneda local",
+    "es-ES": "una moneda local"
+  }
+}

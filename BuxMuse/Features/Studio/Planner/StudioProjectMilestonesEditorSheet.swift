@@ -9,6 +9,7 @@ struct StudioProjectMilestonesEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var store: StudioStore
 
     let projectId: UUID
@@ -29,9 +30,9 @@ struct StudioProjectMilestonesEditorSheet: View {
                         Image(systemName: "flag.checkered")
                             .font(.system(size: 36, weight: .semibold))
                             .foregroundStyle(.secondary)
-                        Text("No milestones yet")
+                        BuxCatalogDynamicText(key: "No milestones yet")
                             .font(.system(size: 16, weight: .bold))
-                        Text("Add delivery dates, client reviews, or phase handoffs. They appear on the project planner timeline.")
+                        BuxCatalogDynamicText(key: "Add delivery dates, client reviews, or phase handoffs. They appear on the project planner timeline.")
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -53,7 +54,7 @@ struct StudioProjectMilestonesEditorSheet: View {
                     }
                 }
             }
-            .navigationTitle("Planner milestones")
+            .buxCatalogNavigationTitle("Planner milestones")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -119,7 +120,13 @@ struct StudioProjectMilestonesEditorSheet: View {
                     .buxLabelSecondary()
                 if let dep = milestone.wrappedValue.dependsOnMilestoneId,
                    let parent = milestones.first(where: { $0.id == dep }) {
-                    Text("After: \(parent.title)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "After: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            parent.title
+                        )
+                    )
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.orange)
                 }
@@ -196,7 +203,7 @@ private struct StudioProjectMilestoneFormSheet: View {
                     if !siblingMilestones.isEmpty {
                         BuxFormRowDivider()
                         Picker("Depends on", selection: $dependsOnId) {
-                            Text("None").tag(UUID?.none)
+                            BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                             ForEach(siblingMilestones.sorted(by: { $0.dueDate < $1.dueDate })) { s in
                                 Text(s.title).tag(Optional(s.id))
                             }
@@ -206,7 +213,7 @@ private struct StudioProjectMilestoneFormSheet: View {
                     }
                 }
             }
-            .navigationTitle(milestone == nil ? "New milestone" : "Edit milestone")
+            .buxCatalogNavigationTitle(milestone == nil ? "New milestone" : "Edit milestone")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -262,7 +269,7 @@ struct StudioProjectMilestonesDraftEditorSheet: View {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
                 if milestones.isEmpty {
                     VStack(spacing: BuxTokens.section) {
-                        Text("Add milestones before saving the project.")
+                        BuxCatalogDynamicText(key: "Add milestones before saving the project.")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -284,7 +291,7 @@ struct StudioProjectMilestonesDraftEditorSheet: View {
                     }
                 }
             }
-            .navigationTitle("Planner milestones")
+            .buxCatalogNavigationTitle("Planner milestones")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

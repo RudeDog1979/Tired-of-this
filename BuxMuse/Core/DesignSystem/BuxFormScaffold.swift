@@ -126,8 +126,9 @@ struct BuxFormSectionLabel: View {
     let title: String
 
     var body: some View {
-        Text(title.uppercased())
+        BuxCatalogText.text(title)
             .font(.system(size: 11, weight: .bold))
+            .textCase(.uppercase)
             .buxLabelSecondary()
             .frame(maxWidth: .infinity, alignment: .leading)
     }

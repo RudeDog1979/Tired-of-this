@@ -23,6 +23,8 @@ struct AddGoalSheet: View {
     @State private var notes: String = ""
     @State private var brainSuggestions: GoalSuggestions?
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -37,14 +39,21 @@ struct AddGoalSheet: View {
                     }
 
                     BuxFormSection(title: "Goal") {
-                        TextField("Goal name", text: $name, prompt: Text("e.g. New Car, Emergency Fund"))
+                        TextField(
+                            BuxCatalogLabel.string("Goal name", locale: locale),
+                            text: $name,
+                            prompt: Text(BuxCatalogLabel.string("e.g. New Car, Emergency Fund", locale: locale))
+                        )
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         HStack(spacing: 8) {
                             Text(appSettingsManager.selectedCurrency.symbol)
                                 .font(.title2.bold())
                                 .foregroundStyle(themeManager.current.accentColor)
-                            TextField("Target amount", text: $targetString)
+                            TextField(
+                                BuxCatalogLabel.string("Target amount", locale: locale),
+                                text: $targetString
+                            )
                                 .keyboardType(.decimalPad)
                         }
                         .buxFormFieldPadding()
@@ -61,13 +70,17 @@ struct AddGoalSheet: View {
                     }
 
                     BuxFormSection(title: "Notes") {
-                        TextField("Notes", text: $notes, axis: .vertical)
+                        TextField(
+                            BuxCatalogLabel.string("Notes", locale: locale),
+                            text: $notes,
+                            axis: .vertical
+                        )
                             .lineLimit(3...6)
                             .buxFormFieldPadding()
                     }
                 }
             }
-            .navigationTitle("Add Goal")
+            .buxCatalogNavigationTitle("Add Goal")
             .navigationBarTitleDisplayMode(.inline)
             .buxThemedSheetContent()
             .toolbar {
@@ -75,7 +88,10 @@ struct AddGoalSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    BuxToolbarConfirmButton(accessibilityLabel: "Save", isEnabled: canSave) {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: BuxCatalogLabel.string("Save", locale: locale),
+                        isEnabled: canSave
+                    ) {
                         saveGoal()
                     }
                 }
@@ -85,25 +101,38 @@ struct AddGoalSheet: View {
             }
         }
         .tint(themeManager.current.accentColor)
+        .buxInterfaceLocale()
     }
 
     @ViewBuilder
     private func brainRecommendationRow(_ suggestions: GoalSuggestions) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Brain recommendation", systemImage: "sparkles")
+            Label {
+                BuxCatalogText.text("Brain recommendation")
+            } icon: {
+                Image(systemName: "sparkles")
+            }
                 .font(.caption.bold())
                 .foregroundStyle(themeManager.current.accentColor)
 
-            Text("6-Month Emergency target: \(appSettingsManager.format(suggestions.suggestedTargetAmount))")
+            Text(
+                BuxLocalizedString.format(
+                    "6-Month Emergency target: %@",
+                    locale: locale,
+                    appSettingsManager.format(suggestions.suggestedTargetAmount)
+                )
+            )
                 .font(.subheadline.weight(.semibold))
 
-            Button("Apply suggestion") {
+            Button {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
                     targetString = String(format: "%.0f", NSDecimalNumber(decimal: suggestions.suggestedTargetAmount).doubleValue)
                     deadline = suggestions.suggestedDeadline
                     selectDeadline = true
                     priority = suggestions.suggestedPriority
                 }
+            } label: {
+                BuxCatalogText.text("Apply suggestion")
             }
             .font(.subheadline.weight(.semibold))
         }

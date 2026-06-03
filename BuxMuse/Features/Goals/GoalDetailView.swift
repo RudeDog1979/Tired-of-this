@@ -48,6 +48,7 @@ struct GoalDetailView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(goalsViewModel)
                 .buxThemedSheetContent()
+                .buxInterfaceLocale()
         }
         .sheet(isPresented: $showContributeGoal) {
             ContributeToGoalSheet(goal: detail.goal)
@@ -55,6 +56,7 @@ struct GoalDetailView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(goalsViewModel)
                 .buxThemedSheetContent()
+                .buxInterfaceLocale()
         }
         .sheet(isPresented: $showAdjustGoal) {
             AdjustGoalSheet(goal: detail.goal)
@@ -62,6 +64,7 @@ struct GoalDetailView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(goalsViewModel)
                 .buxThemedSheetContent()
+                .buxInterfaceLocale()
         }
     }
 
@@ -99,7 +102,7 @@ struct GoalDetailView: View {
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                    Text("saved")
+                    BuxCatalogText.text("saved")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(secondary)
                 }
@@ -119,9 +122,21 @@ struct GoalDetailView: View {
                 .padding(.horizontal, 12)
 
                 HStack {
-                    Text("Target: \(appSettingsManager.format(detail.goal.targetAmount))")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Target: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            appSettingsManager.format(detail.goal.targetAmount)
+                        )
+                    )
                     Spacer()
-                    Text("\(Int(detail.progress * 100))%")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld%%",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int(detail.progress * 100)
+                        )
+                    )
                 }
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(secondary)
@@ -131,12 +146,26 @@ struct GoalDetailView: View {
             Divider().opacity(0.08)
 
             HStack {
-                Label("Health Score: \(detail.health.score)%", systemImage: "heart.text.square.fill")
+                Label(
+                    BuxLocalizedString.format(
+                        "Health Score: %lld%%",
+                        locale: appSettingsManager.interfaceLocale,
+                        detail.health.score
+                    ),
+                    systemImage: "heart.text.square.fill"
+                )
                     .foregroundColor(detail.health.score >= 75 ? .green : (detail.health.score >= 45 ? .orange : .red))
 
                 Spacer()
 
-                Label("Forecast: \(detail.timelineAI.delayRisk) Risk", systemImage: "chart.line.uptrend.xyaxis")
+                Label(
+                    BuxLocalizedString.format(
+                        "Forecast: %@ Risk",
+                        locale: appSettingsManager.interfaceLocale,
+                        BuxGoalCopy.line(detail.timelineAI.delayRisk, locale: appSettingsManager.interfaceLocale)
+                    ),
+                    systemImage: "chart.line.uptrend.xyaxis"
+                )
                     .foregroundColor(detail.timelineAI.delayRisk == "Low" ? .green : (detail.timelineAI.delayRisk == "Medium" ? .orange : .red))
             }
             .font(.system(size: 12, weight: .bold))
@@ -152,7 +181,7 @@ struct GoalDetailView: View {
                 VStack(spacing: 6) {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 18))
-                    Text("Save Money")
+                    BuxCatalogText.text("Save Money")
                         .font(.system(size: 12, weight: .bold))
                 }
                 .foregroundColor(.white)
@@ -166,7 +195,7 @@ struct GoalDetailView: View {
                 VStack(spacing: 6) {
                     Image(systemName: "slider.horizontal.3")
                         .font(.system(size: 18))
-                    Text("Adjust")
+                    BuxCatalogText.text("Adjust")
                         .font(.system(size: 12, weight: .bold))
                 }
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -179,7 +208,7 @@ struct GoalDetailView: View {
                 VStack(spacing: 6) {
                     Image(systemName: "pencil")
                         .font(.system(size: 18))
-                    Text("Edit Goal")
+                    BuxCatalogText.text("Edit Goal")
                         .font(.system(size: 12, weight: .bold))
                 }
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -201,11 +230,11 @@ struct GoalDetailView: View {
                 ForEach(detail.timelineAI.scenarios) { scenario in
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(scenario.name)
+                            Text(scenario.localizedName(locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                            Text(scenario.description)
+                            Text(scenario.localizedDescription(locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 11, weight: .medium))
                                 .foregroundColor(secondary)
                         }
@@ -217,9 +246,15 @@ struct GoalDetailView: View {
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(themeManager.current.accentColor)
 
-                            Text("Delay Risk: \(scenario.delayRisk)")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Delay Risk: %@",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    scenario.localizedDelayRisk(locale: appSettingsManager.interfaceLocale)
+                                )
+                            )
                                 .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(scenario.delayRisk == "Low" ? .green : (scenario.delayRisk == "Medium" ? .orange : .red))
+                                .foregroundColor(delayRiskColor(scenario.delayRisk))
                         }
                     }
                     .buxDetailRowCard()
@@ -234,7 +269,7 @@ struct GoalDetailView: View {
     private var risksSection: some View {
         if !detail.risks.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Detected progress threats")
+                BuxCatalogText.text("Detected progress threats")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.red.opacity(0.8))
                     .kerning(0.6)
@@ -244,12 +279,18 @@ struct GoalDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.red)
-                            Text(risk.description)
+                            Text(risk.localizedDescription(locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         }
 
-                        Text("Fix: \(risk.suggestedFix)")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Fix: %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                risk.localizedSuggestedFix(locale: appSettingsManager.interfaceLocale)
+                            )
+                        )
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.red.opacity(0.8))
                             .padding(.leading, 22)
@@ -273,7 +314,7 @@ struct GoalDetailView: View {
     private var opportunitiesSection: some View {
         if !detail.opportunities.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Smart savings redirections")
+                BuxCatalogText.text("Smart savings redirections")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.green)
                     .kerning(0.6)
@@ -283,12 +324,12 @@ struct GoalDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "lightbulb.fill")
                                 .foregroundColor(.green)
-                            Text(opportunity.description)
+                            Text(opportunity.localizedDescription(locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         }
 
-                        Text(opportunity.benefit)
+                        Text(opportunity.localizedBenefit(locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.green)
                             .padding(.leading, 22)
@@ -314,13 +355,25 @@ struct GoalDetailView: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("Status: \(detail.momentum.statusDescription)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Status: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            detail.momentum.localizedStatus(locale: appSettingsManager.interfaceLocale)
+                        )
+                    )
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                     Spacer()
 
-                    Text(String(format: "%+.1f", detail.momentum.score))
+                    Text(
+                        BuxLocalizedString.format(
+                            "%+.1f",
+                            locale: appSettingsManager.interfaceLocale,
+                            detail.momentum.score
+                        )
+                    )
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(detail.momentum.score >= 0.2 ? .green : (detail.momentum.score <= -0.2 ? .red : .orange))
                 }
@@ -341,11 +394,11 @@ struct GoalDetailView: View {
                 if !detail.momentum.microActions.isEmpty {
                     Divider().opacity(0.08)
 
-                    Text("Suggested Actions:")
+                    BuxCatalogText.text("Suggested Actions:")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                    ForEach(detail.momentum.microActions, id: \.self) { act in
+                    ForEach(detail.momentum.localizedMicroActions(locale: appSettingsManager.interfaceLocale), id: \.self) { act in
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "bolt.fill")
                                 .font(.system(size: 12))
@@ -363,11 +416,11 @@ struct GoalDetailView: View {
                 if !detail.momentum.habitActions.isEmpty {
                     Divider().opacity(0.08)
 
-                    Text("Habit Builders:")
+                    BuxCatalogText.text("Habit Builders:")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                    ForEach(detail.momentum.habitActions, id: \.self) { act in
+                    ForEach(detail.momentum.localizedHabitActions(locale: appSettingsManager.interfaceLocale), id: \.self) { act in
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "arrow.right.circle.fill")
                                 .font(.system(size: 12))
@@ -398,7 +451,13 @@ struct GoalDetailView: View {
                     ForEach(detail.sortedContributions) { contrib in
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(contrib.notes ?? "Goal contribution")
+                                Text(
+                                    contrib.notes
+                                        ?? BuxLocalizedString.string(
+                                            "Goal contribution",
+                                            locale: appSettingsManager.interfaceLocale
+                                        )
+                                )
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
@@ -409,7 +468,13 @@ struct GoalDetailView: View {
 
                             Spacer()
 
-                            Text("+\(appSettingsManager.format(contrib.amount))")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "+%@",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    appSettingsManager.format(contrib.amount)
+                                )
+                            )
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(.green)
                         }
@@ -439,7 +504,16 @@ struct GoalDetailView: View {
 
     private func formatDate(_ date: Date) -> String {
         let fmt = DateFormatter()
-        fmt.dateFormat = "MMM dd, yyyy"
+        fmt.locale = appSettingsManager.interfaceLocale
+        fmt.dateStyle = .medium
+        fmt.timeStyle = .none
         return fmt.string(from: date)
+    }
+
+    private func delayRiskColor(_ localizedRisk: String) -> Color {
+        let locale = appSettingsManager.interfaceLocale
+        if localizedRisk == BuxLocalizedString.string("Low", locale: locale) { return .green }
+        if localizedRisk == BuxLocalizedString.string("Medium", locale: locale) { return .orange }
+        return .red
     }
 }

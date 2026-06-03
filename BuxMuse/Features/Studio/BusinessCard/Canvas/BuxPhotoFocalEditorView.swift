@@ -49,7 +49,7 @@ struct BuxPhotoFocalEditorView: View {
                             Slider(value: $rotation, in: -180...180).tint(themeManager.current.accentColor)
                             Image(systemName: "rotate.right").foregroundStyle(Color.white.opacity(0.55))
                         }
-                        Text("Drag to reposition · pinch or slide to zoom")
+                        BuxCatalogDynamicText(key: "Drag to reposition · pinch or slide to zoom")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(Color.white.opacity(0.45))
                     }

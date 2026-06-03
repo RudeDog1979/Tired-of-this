@@ -32,7 +32,7 @@ struct ExpenseCategorySheet: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {
-                Text("Change category")
+                BuxCatalogText.text("Change category")
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .padding(.top, 24)
@@ -53,7 +53,7 @@ struct ExpenseCategorySheet: View {
                     }
                     dismiss()
                 }) {
-                    Text("Apply")
+                    BuxCatalogText.text("Apply")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)

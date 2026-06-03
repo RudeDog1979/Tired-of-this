@@ -61,7 +61,7 @@ struct ProBusinessCardPalettePicker: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(.white)
                 }
-                Text("Custom")
+                BuxCatalogDynamicText(key: "Custom")
                     .font(.system(size: 10, weight: .bold, design: .rounded))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
             }
@@ -151,7 +151,7 @@ struct ProBusinessCardCustomColorSheet: View {
                 .padding(BuxTokens.marginRegular)
             }
             .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
-            .navigationTitle("Custom palette")
+            .buxCatalogNavigationTitle("Custom palette")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -11,7 +11,7 @@ import Foundation
 public final class CategoryInsightsEngine {
     public init() {}
 
-    public func generateInsights(transactions: [Transaction]) -> [FinancialInsight] {
+    public func generateInsights(transactions: [Transaction], locale: Locale) -> [FinancialInsight] {
         var insights: [FinancialInsight] = []
         guard !transactions.isEmpty else { return [] }
 
@@ -24,6 +24,7 @@ public final class CategoryInsightsEngine {
         let ninetyDaysAgo = calendar.date(byAdding: .day, value: -90, to: now) ?? now
 
         for cat in categories {
+            let catName = cat.localizedDisplayName(locale: locale)
             let recentTxs = expenses.filter { $0.category == cat && $0.date >= thirtyDaysAgo }
             let historicalTxs = expenses.filter { $0.category == cat && $0.date >= ninetyDaysAgo && $0.date < thirtyDaysAgo }
 
@@ -36,18 +37,42 @@ public final class CategoryInsightsEngine {
                 insights.append(FinancialInsight(
                     title: "\(cat.displayName) Overspend",
                     value: "Overspend Spike",
-                    description: "You spent more on \(cat.displayName) this month.",
-                    fullExplanation: "Your \(cat.displayName) spending reached \(InsightMoneyFormat.format(recentTotal)) this month, which is \(pct)% higher than your baseline average of \(InsightMoneyFormat.format(avgHistoricalTotal)).",
+                    description: BuxLocalizedString.format(
+                        "You spent more on %@ this month.",
+                        locale: locale,
+                        catName
+                    ),
+                    fullExplanation: BuxLocalizedString.format(
+                        "Your %@ spending reached %@ this month, which is %@%% higher than your baseline average of %@.",
+                        locale: locale,
+                        catName,
+                        InsightMoneyFormat.format(recentTotal),
+                        pct,
+                        InsightMoneyFormat.format(avgHistoricalTotal)
+                    ),
                     severity: .high,
                     category: .category,
                     systemIcon: "exclamationmark.square.fill",
                     accentColorName: "red",
                     suggestedActions: [
-                        "Review recent transaction line items inside \(cat.displayName).",
-                        "Set up a warning alert baseline budget limit for this category."
+                        BuxLocalizedString.format(
+                            "Review recent transaction line items inside %@.",
+                            locale: locale,
+                            catName
+                        ),
+                        BuxLocalizedString.string(
+                            "Set up a warning alert baseline budget limit for this category.",
+                            locale: locale
+                        ),
                     ],
                     impactMonthly: recentTotal - avgHistoricalTotal,
-                    dataBehind: "Category: \(cat.displayName). Current: \(InsightMoneyFormat.format(recentTotal)). Baseline: \(InsightMoneyFormat.format(avgHistoricalTotal))."
+                    dataBehind: BuxLocalizedString.format(
+                        "Category: %@. Current: %@. Baseline: %@.",
+                        locale: locale,
+                        catName,
+                        InsightMoneyFormat.format(recentTotal),
+                        InsightMoneyFormat.format(avgHistoricalTotal)
+                    )
                 ))
             }
 
@@ -56,18 +81,41 @@ public final class CategoryInsightsEngine {
                 insights.append(FinancialInsight(
                     title: "\(cat.displayName) Optimization",
                     value: "Savings Gained",
-                    description: "Excellent job limiting your \(cat.displayName) budget.",
-                    fullExplanation: "Your \(cat.displayName) spending fell to \(InsightMoneyFormat.format(recentTotal)) this month compared to \(InsightMoneyFormat.format(avgHistoricalTotal)) historically, leaving you with an extra surplus of \(InsightMoneyFormat.format(surplus)).",
+                    description: BuxLocalizedString.format(
+                        "Excellent job limiting your %@ budget.",
+                        locale: locale,
+                        catName
+                    ),
+                    fullExplanation: BuxLocalizedString.format(
+                        "Your %@ spending fell to %@ this month compared to %@ historically, leaving you with an extra surplus of %@.",
+                        locale: locale,
+                        catName,
+                        InsightMoneyFormat.format(recentTotal),
+                        InsightMoneyFormat.format(avgHistoricalTotal),
+                        InsightMoneyFormat.format(surplus)
+                    ),
                     severity: .low,
                     category: .category,
                     systemIcon: "sparkles",
                     accentColorName: "green",
                     suggestedActions: [
-                        "Redirect this surplus of \(InsightMoneyFormat.format(surplus)) immediately into savings goals.",
-                        "Lock in this lower baseline budget target for next month."
+                        BuxLocalizedString.format(
+                            "Redirect this surplus of %@ immediately into savings goals.",
+                            locale: locale,
+                            InsightMoneyFormat.format(surplus)
+                        ),
+                        BuxLocalizedString.string(
+                            "Lock in this lower baseline budget target for next month.",
+                            locale: locale
+                        ),
                     ],
                     impactMonthly: surplus,
-                    dataBehind: "Category: \(cat.displayName). Saved: \(InsightMoneyFormat.format(surplus))."
+                    dataBehind: BuxLocalizedString.format(
+                        "Category: %@. Saved: %@.",
+                        locale: locale,
+                        catName,
+                        InsightMoneyFormat.format(surplus)
+                    )
                 ))
             }
         }

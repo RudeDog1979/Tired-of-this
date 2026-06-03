@@ -73,7 +73,7 @@ struct MonthlySummaryDetailSheet: View {
 
     private var forecastingHeader: some View {
         VStack(spacing: 16) {
-            Text("Monthly summary")
+            BuxCatalogText.text("Monthly summary")
                 .buxSectionLabelStyle(color: .gray)
 
             Text(formatAmount(Decimal(summary.totalSpent)))
@@ -137,13 +137,13 @@ struct MonthlySummaryDetailSheet: View {
 
     private var categoryBreakdownSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Category Breakdown")
+            BuxCatalogText.text("Category Breakdown")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.gray)
                 .kerning(0.5)
 
             if summary.categoryBreakdown.isEmpty {
-                Text("No data available.")
+                BuxCatalogText.text("No data available.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -200,7 +200,13 @@ struct MonthlySummaryDetailSheet: View {
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
-                    Text(String(format: "%.0f%%", percentage))
+                    Text(
+                        BuxLocalizedString.format(
+                            "%.0f%%",
+                            locale: appSettingsManager.interfaceLocale,
+                            percentage
+                        )
+                    )
                         .font(.caption2.bold())
                         .foregroundColor(.gray)
                 }
@@ -228,13 +234,13 @@ struct MonthlySummaryDetailSheet: View {
 
     private var merchantLeaderboardSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Top Merchants")
+            BuxCatalogText.text("Top Merchants")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.gray)
                 .kerning(0.5)
 
             if summary.merchantBreakdown.isEmpty {
-                Text("No merchant data available.")
+                BuxCatalogText.text("No merchant data available.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -307,12 +313,18 @@ struct MonthlySummaryDetailSheet: View {
                 Image(systemName: "lightbulb.fill")
                     .font(.system(size: 18))
                     .foregroundColor(.yellow)
-                Text("BuxMuse Intelligence")
+                BuxCatalogText.text("BuxMuse Intelligence")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
 
-            Text("Your recurring subscriptions account for roughly \(String(format: "%.0f%%", subscriptionPercentage)) of your overall spending. Taking advantage of multi-month prepayments could unlock up to 15% in annual savings across active plans.")
+            Text(
+                BuxLocalizedString.format(
+                    "Your recurring subscriptions account for roughly %.0f%% of your overall spending. Taking advantage of multi-month prepayments could unlock up to 15%% in annual savings across active plans.",
+                    locale: appSettingsManager.interfaceLocale,
+                    subscriptionPercentage
+                )
+            )
                 .font(.system(size: 13))
                 .foregroundColor(.gray)
                 .lineSpacing(4)

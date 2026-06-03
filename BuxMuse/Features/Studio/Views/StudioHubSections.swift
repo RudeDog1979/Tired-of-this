@@ -12,6 +12,7 @@ import SwiftUI
 struct StudioHeroCard: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var store: StudioStore
 
     let display: StudioHeroDisplay
@@ -43,7 +44,13 @@ struct StudioHeroCard: View {
                     Text(display.businessSubtitle)
                         .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                     if let days = display.timeToMoneyDays {
-                        Text("Avg. time to payment: \(days) days")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Avg. time to payment: %lld days",
+                                locale: appSettingsManager.interfaceLocale,
+                                days
+                            )
+                        )
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(themeManager.current.accentColor)
                     }
@@ -57,6 +64,7 @@ struct StudioHeroCard: View {
 struct StudioMetricsGrid: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let display: StudioHeroDisplay
 
@@ -65,17 +73,53 @@ struct StudioMetricsGrid: View {
             columns: [GridItem(.flexible(), spacing: BuxTokens.tight), GridItem(.flexible(), spacing: BuxTokens.tight)],
             spacing: BuxTokens.tight
         ) {
-            metricCard(title: "Estimated Tax", value: display.estimatedTaxFormatted, subtitle: "\(display.effectiveTaxRatePercent)% effective", color: themeManager.current.accentColor)
-            metricCard(title: "Cash Runway", value: display.runwayMonthsFormatted, subtitle: "Burn \(display.monthlyBurnFormatted)/mo", color: .orange)
-            metricCard(title: "Total Paid In", value: display.totalPaidFormatted, subtitle: "\(display.paidInvoiceCount) invoices", color: .green)
-            metricCard(title: "Outstanding", value: display.totalOutstandingFormatted, subtitle: "\(display.outstandingInvoiceCount) awaiting", color: .red)
+            metricCard(
+                title: "Estimated Tax",
+                value: display.estimatedTaxFormatted,
+                subtitle: BuxLocalizedString.format(
+                    "%lld%% effective",
+                    locale: appSettingsManager.interfaceLocale,
+                    display.effectiveTaxRatePercent
+                ),
+                color: themeManager.current.accentColor
+            )
+            metricCard(
+                title: "Cash Runway",
+                value: display.runwayMonthsFormatted,
+                subtitle: BuxLocalizedString.format(
+                    "Burn %@/mo",
+                    locale: appSettingsManager.interfaceLocale,
+                    display.monthlyBurnFormatted
+                ),
+                color: .orange
+            )
+            metricCard(
+                title: "Total Paid In",
+                value: display.totalPaidFormatted,
+                subtitle: BuxLocalizedString.format(
+                    "%lld invoices",
+                    locale: appSettingsManager.interfaceLocale,
+                    display.paidInvoiceCount
+                ),
+                color: .green
+            )
+            metricCard(
+                title: "Outstanding",
+                value: display.totalOutstandingFormatted,
+                subtitle: BuxLocalizedString.format(
+                    "%lld awaiting",
+                    locale: appSettingsManager.interfaceLocale,
+                    display.outstandingInvoiceCount
+                ),
+                color: .red
+            )
         }
     }
 
     private func metricCard(title: String, value: String, subtitle: String, color: Color) -> some View {
         BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                Text(title)
+                BuxCatalogText.text(title)
                     .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
                 Text(value)
                     .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -103,9 +147,9 @@ struct StudioHubEmptyState: View {
                 Image(systemName: "briefcase")
                     .font(.system(size: 32))
                     .foregroundColor(themeManager.current.accentColor)
-                Text("Your Studio workspace is empty")
+                BuxCatalogText.text("Your Studio workspace is empty")
                     .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
-                Text("Add a client, invoice, or receipt to start tracking tax, cashflow, and deductions.")
+                BuxCatalogText.text("Add a client, invoice, or receipt to start tracking tax, cashflow, and deductions.")
                     .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
             }
@@ -119,6 +163,7 @@ struct StudioHubEmptyState: View {
 struct StudioInvoicesSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: StudioInvoiceSummaryDisplay
     var onTap: () -> Void
 
@@ -142,7 +187,7 @@ struct StudioInvoicesSection: View {
                     .environmentObject(themeManager)
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Outstanding")
+                            BuxCatalogText.text("Outstanding")
                                 .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                             Text(display.totalOutstandingFormatted)
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -150,7 +195,7 @@ struct StudioInvoicesSection: View {
                         }
                         Spacer()
                         VStack(alignment: .trailing, spacing: 4) {
-                            Text("Paid total")
+                            BuxCatalogText.text("Paid total")
                                 .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                             Text(display.totalPaidFormatted)
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -158,7 +203,14 @@ struct StudioInvoicesSection: View {
                         }
                     }
                     if let name = display.nextDueClientName, let date = display.nextDueDate {
-                        Text("Next due: \(name) · \(date.formatted(date: .abbreviated, time: .omitted))")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Next due: %@ · %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                name,
+                                date.formatted(date: .abbreviated, time: .omitted)
+                            )
+                        )
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(themeManager.current.accentColor)
                     }
@@ -170,10 +222,10 @@ struct StudioInvoicesSection: View {
 
     private func statPill(_ label: String, _ count: Int, _ color: Color = .gray) -> some View {
         VStack(spacing: 2) {
-            Text("\(count)")
+            Text(count, format: .number)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-            Text(label)
+            BuxCatalogText.text(label)
                 .font(.system(size: 9, weight: .bold))
                 .foregroundColor(color)
         }
@@ -184,13 +236,14 @@ struct StudioInvoicesSection: View {
 struct StudioClientsSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let clients: [StudioClientDisplay]
     var onTap: () -> Void
 
     var body: some View {
         StudioSectionShell(title: "Top Clients") {
             if clients.isEmpty {
-                Text("No clients yet. Add your first client to track health and lifetime value.")
+                BuxCatalogText.text("No clients yet. Add your first client to track health and lifetime value.")
                     .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
             } else {
                 VStack(spacing: 10) {
@@ -207,11 +260,24 @@ struct StudioClientsSection: View {
                                                 .foregroundColor(.red)
                                         }
                                     }
-                                    Text("LTV \(client.lifetimeValueFormatted) · Health \(client.healthScore)%")
+                                    Text(
+                                        BuxLocalizedString.format(
+                                            "LTV %@ · Health %lld%%",
+                                            locale: appSettingsManager.interfaceLocale,
+                                            client.lifetimeValueFormatted,
+                                            client.healthScore
+                                        )
+                                    )
                                         .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                                 }
                                 Spacer()
-                                Text("\(client.emotionalProfitabilityScore)")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%lld/100",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        Int64(client.emotionalProfitabilityScore)
+                                    )
+                                )
                                     .font(.system(size: 12, weight: .bold))
                                     .foregroundColor(.purple)
                             }
@@ -258,7 +324,7 @@ struct StudioTaxSection: View {
 
     private func row(_ label: String, _ value: String) -> some View {
         HStack {
-            Text(label)
+            BuxCatalogText.text(label)
                 .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
             Spacer()
             Text(value)
@@ -294,7 +360,7 @@ struct StudioCashflowSection: View {
 
     private func row(_ label: String, _ value: String) -> some View {
         HStack {
-            Text(label).buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
+            BuxCatalogText.text(label).buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
             Spacer()
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -306,6 +372,7 @@ struct StudioCashflowSection: View {
 struct StudioProjectsSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: StudioProjectsDisplay
     var onTap: () -> Void
 
@@ -313,13 +380,27 @@ struct StudioProjectsSection: View {
         StudioSectionShell(title: "Projects") {
             BuxCardButton(action: onTap) {
                 VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                    Text("\(display.activeCount) active · \(display.overrunRiskCount) overrun risk")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld active · %lld overrun risk",
+                            locale: appSettingsManager.interfaceLocale,
+                            display.activeCount,
+                            display.overrunRiskCount
+                        )
+                    )
                         .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
                     if let name = display.topProjectName, let profit = display.topProjectProfitFormatted {
-                        Text("Top: \(name) (\(profit) projected profit)")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Top: %@ (%@ projected profit)",
+                                locale: appSettingsManager.interfaceLocale,
+                                name,
+                                profit
+                            )
+                        )
                             .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                     } else {
-                        Text("No projects yet.")
+                        BuxCatalogText.text("No projects yet.")
                             .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                     }
                 }
@@ -332,6 +413,7 @@ struct StudioProjectsSection: View {
 struct StudioReceiptsSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: StudioReceiptsDisplay
     var onTap: () -> Void
 
@@ -339,9 +421,22 @@ struct StudioReceiptsSection: View {
         StudioSectionShell(title: "Receipts") {
             BuxCardButton(action: onTap) {
                 VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                    Text("\(display.totalCount) total · \(display.thisMonthCount) this month")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld total · %lld this month",
+                            locale: appSettingsManager.interfaceLocale,
+                            display.totalCount,
+                            display.thisMonthCount
+                        )
+                    )
                         .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
-                    Text("Deductible: \(display.deductibleTotalFormatted)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Deductible: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            display.deductibleTotalFormatted
+                        )
+                    )
                         .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                 }
                 .contentShape(Rectangle())
@@ -359,7 +454,7 @@ struct StudioDeductionsSection: View {
     var body: some View {
         StudioSectionShell(title: "Deduction Opportunities") {
             if items.isEmpty {
-                Text("No deduction opportunities yet. Log receipts to unlock suggestions.")
+                BuxCatalogText.text("No deduction opportunities yet. Log receipts to unlock suggestions.")
                     .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
             } else {
                 VStack(spacing: BuxTokens.tight) {
@@ -390,7 +485,7 @@ struct StudioAlertsSection: View {
     var body: some View {
         StudioSectionShell(title: "Alerts") {
             if alerts.isEmpty {
-                Text("No alerts. You're all caught up.")
+                BuxCatalogText.text("No alerts. You're all caught up.")
                     .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
             } else {
                 VStack(spacing: BuxTokens.tight) {
@@ -432,7 +527,7 @@ struct StudioHubPulseCard: View {
             BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("PAID INFLOW · 6 MO")
+                        BuxCatalogText.text("PAID INFLOW · 6 MO")
                             .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
                             .font(.system(size: 10, weight: .bold))
                         Spacer()

@@ -40,7 +40,7 @@ struct StudioInvoicesListView: View {
                 invoiceList
             }
         }
-        .navigationTitle("Invoices")
+        .buxCatalogNavigationTitle("Invoices")
         .navigationBarTitleDisplayMode(.large)
         .buxRootNavigationChrome()
         .toolbar { invoiceToolbar }
@@ -126,7 +126,9 @@ struct StudioInvoicesListView: View {
             Menu {
                 Button("All") { statusFilter = nil }
                 ForEach(InvoiceStatus.allCases) { status in
-                    Button(status.rawValue) { statusFilter = status }
+                    Button(status.catalogLabel(locale: appSettingsManager.interfaceLocale)) {
+                        statusFilter = status
+                    }
                 }
             } label: {
                 BuxToolbarIcon(systemName: "line.3.horizontal.decrease.circle")
@@ -147,7 +149,10 @@ struct StudioInvoicesListView: View {
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-                Text(client?.name ?? "Unknown Client")
+                Text(
+                    client?.name
+                        ?? BuxCatalogLabel.string("Unknown Client", locale: appSettingsManager.interfaceLocale)
+                )
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             }
@@ -159,7 +164,7 @@ struct StudioInvoicesListView: View {
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-                Text(invoice.status.rawValue)
+                Text(invoice.status.catalogLabel(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(statusColor(invoice.status))
                     .padding(.horizontal, 8)
@@ -174,7 +179,7 @@ struct StudioInvoicesListView: View {
     private var invoiceFilterBar: some View {
         HStack {
             if let statusFilter {
-                Text(statusFilter.rawValue)
+                Text(statusFilter.catalogLabel(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(themeManager.current.accentColor)
                     .padding(.horizontal, 10)
@@ -183,7 +188,13 @@ struct StudioInvoicesListView: View {
                     .clipShape(Capsule())
             }
             Spacer()
-            Text("\(filteredInvoices.count) invoice(s)")
+            Text(
+                BuxLocalizedString.format(
+                    filteredInvoices.count == 1 ? "%lld invoice(s)" : "%lld invoice(s)",
+                    locale: appSettingsManager.interfaceLocale,
+                    filteredInvoices.count
+                )
+            )
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
         }
@@ -197,7 +208,7 @@ struct StudioInvoicesListView: View {
                 .font(.system(size: 32))
                 .buxLabelSecondary()
             
-            Text("No Invoices logged yet")
+            BuxCatalogDynamicText(key: "No Invoices logged yet")
                 .font(.system(size: 14, weight: .semibold))
                 .buxLabelSecondary()
             
@@ -440,7 +451,13 @@ struct StudioInvoiceDetailView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "clock.fill")
                                 .foregroundColor(.red)
-                            Text("Late Risk Detected. Awaiting payment speed estimated at \(intelligence.paymentPredictionDays) days.")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Late Risk Detected. Awaiting payment speed estimated at %lld days.",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    intelligence.paymentPredictionDays
+                                )
+                            )
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(.red)
                         }
@@ -458,7 +475,7 @@ struct StudioInvoiceDetailView: View {
                             
                             Spacer()
                             
-                            Text(invoice.status.rawValue)
+                            Text(invoice.status.catalogLabel(locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(statusColor(invoice.status))
                                 .padding(.horizontal, 10)
@@ -471,7 +488,7 @@ struct StudioInvoiceDetailView: View {
                         
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("CLIENT")
+                                BuxCatalogDynamicText(key: "CLIENT")
                                     .font(.system(size: 10, weight: .semibold))
                                     .buxLabelSecondary()
                                 Text(client?.name ?? "Unknown Client")
@@ -479,7 +496,7 @@ struct StudioInvoiceDetailView: View {
                             }
                             Spacer()
                             VStack(alignment: .trailing, spacing: 4) {
-                                Text("TOTAL DUE")
+                                BuxCatalogDynamicText(key: "TOTAL DUE")
                                     .font(.system(size: 10, weight: .semibold))
                                     .buxLabelSecondary()
                                 Text(appSettingsManager.format(invoice.total))
@@ -489,7 +506,13 @@ struct StudioInvoiceDetailView: View {
                         }
 
                         if let style = invoice.designerSnapshot?.templateConfig.style.rawValue {
-                            Text("Template: \(style)")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Template: %@",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    style
+                                )
+                            )
                                 .font(.system(size: 11, weight: .medium))
                                 .buxLabelSecondary()
                         }

@@ -1,0 +1,26 @@
+{
+  "Cancel or optimize: %@ benefits %@.": {
+    "es-419": "Cancela u optimiza: %@ — beneficio: %@.",
+    "es-ES": "Cancela u optimiza: %@ — beneficio: %@."
+  },
+  "Trim %@ from active subscription overspends and redirect it to achieve %@ sooner.": {
+    "es-419": "Recorta %@ en suscripciones de más y redirígelo para lograr %@ antes.",
+    "es-ES": "Recorta %@ en suscripciones de más y redirígelo para lograr %@ antes."
+  },
+  "Brain micro-savings redirection": {
+    "es-419": "Redirección de microahorro (Brain)",
+    "es-ES": "Redirección de microahorro (Brain)"
+  },
+  "Direct contribution": {
+    "es-419": "Aporte directo",
+    "es-ES": "Aporte directo"
+  },
+  "Convert to subscription": {
+    "es-419": "Convertir en suscripción",
+    "es-ES": "Convertir en suscripción"
+  },
+  "Remove subscription": {
+    "es-419": "Quitar suscripción",
+    "es-ES": "Quitar suscripción"
+  }
+}

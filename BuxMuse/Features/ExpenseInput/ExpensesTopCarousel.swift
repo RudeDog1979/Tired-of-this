@@ -140,7 +140,7 @@ struct ExpensesTopCarousel: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Total Spend")
+                    BuxCatalogText.text("Total Spend")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
@@ -163,7 +163,7 @@ struct ExpensesTopCarousel: View {
                 HStack(spacing: 16) {
                     if !summary.categoryBreakdown.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Top Categories")
+                            BuxCatalogText.text("Top Categories")
                                 .font(.caption.bold())
                                 .foregroundColor(.gray)
                             CategoryBreakdownChart(breakdown: summary.categoryBreakdown)
@@ -174,7 +174,7 @@ struct ExpensesTopCarousel: View {
 
                     if !summary.merchantBreakdown.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Top Merchants")
+                            BuxCatalogText.text("Top Merchants")
                                 .font(.caption.bold())
                                 .foregroundColor(.gray)
                             MerchantBreakdownChart(
@@ -183,7 +183,13 @@ struct ExpensesTopCarousel: View {
                             )
                             .frame(height: MerchantBreakdownChart.compactHeight(itemCount: min(3, summary.merchantBreakdown.count)))
                             if summary.merchantBreakdown.count > 3 {
-                                Text("+\(summary.merchantBreakdown.count - 3) more · tap for details")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "+%lld more · tap for details",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        Int64(summary.merchantBreakdown.count - 3)
+                                    )
+                                )
                                     .font(.system(size: 9, weight: .semibold))
                                     .foregroundColor(.gray.opacity(0.9))
                             }
@@ -196,7 +202,7 @@ struct ExpensesTopCarousel: View {
 
             if !header.sparklinePoints.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("7-day trend")
+                    BuxCatalogText.text("7-day trend")
                         .font(.caption.bold())
                         .foregroundColor(.gray)
 
@@ -229,7 +235,7 @@ struct ExpensesTopCarousel: View {
         let tint: Color = isUp ? .orange : (isDown ? Color(red: 46/255, green: 204/255, blue: 113/255) : .gray)
 
         return VStack(alignment: .trailing, spacing: 2) {
-            Text("vs last mo")
+            BuxCatalogText.text("vs last mo")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(colorScheme == .dark ? .white.opacity(0.35) : Color(red: 140/255, green: 145/255, blue: 160/255))
                 .kerning(0.4)

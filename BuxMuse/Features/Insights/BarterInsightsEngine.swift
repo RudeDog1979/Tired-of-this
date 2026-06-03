@@ -8,7 +8,7 @@
 import Foundation
 
 enum BarterInsightsEngine {
-    static func generateInsights(transactions: [Transaction]) -> [FinancialInsight] {
+    static func generateInsights(transactions: [Transaction], locale: Locale) -> [FinancialInsight] {
         guard SettingsStore.shared.barterLoggerEnabled else { return [] }
 
         let barterTxs = transactions.filter { $0.isBarterExchange }
@@ -18,22 +18,41 @@ enum BarterInsightsEngine {
         let totalValue = barterTxs.compactMap { $0.barterEstimatedValue }.reduce(Decimal(0), +)
         let valueLabel = totalValue > 0
             ? InsightMoneyFormat.format(totalValue)
-            : "Add estimated values when logging trades"
+            : BuxLocalizedString.string(
+                "Add estimated values when logging trades",
+                locale: locale
+            )
 
         return [
             FinancialInsight(
-                title: "Barter & Trade Activity",
-                value: "\(count) trade\(count == 1 ? "" : "s")",
-                description: "Non-cash exchanges logged in BuxMuse.",
-                fullExplanation: "You have logged \(count) barter or trade exchange\(count == 1 ? "" : "s") with an estimated combined value of \(valueLabel). These are tracked separately from cash expenses for your records.",
+                title: BuxLocalizedString.string("Barter & Trade Activity", locale: locale),
+                value: count == 1
+                    ? BuxLocalizedString.format("%lld trade", locale: locale, count)
+                    : BuxLocalizedString.format("%lld trades", locale: locale, count),
+                description: BuxLocalizedString.string(
+                    "Non-cash exchanges logged in BuxMuse.",
+                    locale: locale
+                ),
+                fullExplanation: BuxLocalizedString.format(
+                    "You have logged %lld barter or trade exchanges with an estimated combined value of %@. These are tracked separately from cash expenses for your records.",
+                    locale: locale,
+                    count,
+                    valueLabel
+                ),
                 severity: .low,
                 category: .pattern,
                 systemIcon: "arrow.left.arrow.right.circle.fill",
                 accentColorName: "orange",
-                suggestedActions: ["Review barter entries in Expenses", "Add estimated values for tax records"],
+                suggestedActions: [
+                    BuxLocalizedString.string("Review barter entries in Expenses", locale: locale),
+                    BuxLocalizedString.string("Add estimated values for tax records", locale: locale),
+                ],
                 impactMonthly: totalValue,
                 impactYearly: totalValue * 12,
-                dataBehind: "Barter transactions where isBarterExchange is true."
+                dataBehind: BuxLocalizedString.string(
+                    "Barter transactions where isBarterExchange is true.",
+                    locale: locale
+                )
             )
         ]
     }

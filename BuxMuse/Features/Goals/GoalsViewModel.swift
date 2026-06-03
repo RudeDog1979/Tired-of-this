@@ -67,6 +67,13 @@ public final class GoalsViewModel: ObservableObject {
                 self.goalsEngine.precalculateAllGoalsAsync(financialEngine: self.financialEngine)
             }
             .store(in: &cancellables)
+
+        goalsEngine.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateSelectedGoalDetailIfNeeded()
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Actions
@@ -125,9 +132,10 @@ public final class GoalsViewModel: ObservableObject {
         )
         let risks = goalsEngine.getRisks(forGoalId: goal.id, financialEngine: financialEngine)
         let opportunities = goalsEngine.getOpportunities(forGoalId: goal.id, financialEngine: financialEngine)
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         let momentum = goalsEngine.getMomentum(forGoalId: goal.id) ?? GoalMomentumResult(
             score: 0.0,
-            statusDescription: "Consistent Momentum",
+            statusDescription: BuxLocalizedString.string("Consistent Momentum", locale: locale),
             microActions: [],
             habitActions: []
         )
@@ -138,10 +146,13 @@ public final class GoalsViewModel: ObservableObject {
         )
         let timeline = goalsEngine.getTimelineAI(forGoalId: goal.id, financialEngine: financialEngine) ?? GoalsTimelineAIResult(
             expectedCompletionDate: projection.expectedCompletionDate,
-            delayRisk: "Low",
+            delayRisk: BuxLocalizedString.string("Low", locale: locale),
             accelerationPotentialMonths: 0.0,
             scenarios: [],
-            actionableInsight: "Save regularly to achieve your goal."
+            actionableInsight: BuxLocalizedString.string(
+                "Reach your goal faster by setting up a small recurring weekly contribution.",
+                locale: locale
+            )
         )
         
         let sorted = goal.contributions.sorted(by: { $0.date > $1.date })
@@ -162,6 +173,11 @@ public final class GoalsViewModel: ObservableObject {
         )
     }
     
+    /// Rebuilds open goal detail after locale-driven cache refresh.
+    public func refreshSelectedDetailIfNeeded() {
+        updateSelectedGoalDetailIfNeeded()
+    }
+
     private func updateSelectedGoalDetailIfNeeded() {
         if let currentDetail = selectedGoalDetail,
            let updatedGoal = goals.first(where: { $0.id == currentDetail.goal.id }) {

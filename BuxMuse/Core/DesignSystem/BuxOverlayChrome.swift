@@ -17,8 +17,11 @@ enum BuxOverlayMetrics {
 struct BuxDetailOverlayScaffold<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let title: String
+    /// When true, `title` is looked up in `Localizable.xcstrings` (e.g. "Goal Details"). Merchant names should pass false.
+    var localizeTitle: Bool = true
     let onDismiss: () -> Void
     var showsBackdropDismiss: Bool = false
     @ViewBuilder var content: () -> Content
@@ -45,7 +48,11 @@ struct BuxDetailOverlayScaffold<Content: View>: View {
                 }
                 .buxDetailScrollChrome()
             }
-            .navigationTitle(title)
+            .navigationTitle(
+                localizeTitle
+                    ? BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale)
+                    : title
+            )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -53,6 +60,7 @@ struct BuxDetailOverlayScaffold<Content: View>: View {
                 }
             }
             .buxDetailNavigationChrome()
+            .buxInterfaceLocale()
         }
     }
 }

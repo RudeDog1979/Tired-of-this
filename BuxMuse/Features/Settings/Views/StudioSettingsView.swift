@@ -33,7 +33,7 @@ struct StudioSettingsView: View {
         BuxThemedCardForm {
             if !store.studioEnabled {
                 BuxFormSection {
-                    Text("Studio adds work tracking, simple invoices, and job pockets. Turn it on when you need it — Home and Expenses stay the same.")
+                    BuxCatalogDynamicText(key: "Studio adds work tracking, simple invoices, and job pockets. Turn it on when you need it — Home and Expenses stay the same.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
@@ -44,10 +44,10 @@ struct StudioSettingsView: View {
             BuxFormSection(title: "Studio") {
                 Toggle(isOn: studioToggleBinding) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Show Studio Tab")
+                        BuxCatalogDynamicText(key: "Show Studio Tab")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Text("Simple work ledger or full Pro tools")
+                        BuxCatalogDynamicText(key: "Simple work ledger or full Pro tools")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
                     }
@@ -59,8 +59,8 @@ struct StudioSettingsView: View {
             if store.studioEnabled {
                 BuxFormSection(title: "Studio mode") {
                     Picker("Mode", selection: $store.studioMode) {
-                        Text("Simple Studio").tag(StudioMode.simple)
-                        Text("Pro Studio").tag(StudioMode.pro)
+                        BuxCatalogDynamicText(key: "Simple Studio").tag(StudioMode.simple)
+                        BuxCatalogDynamicText(key: "Pro Studio").tag(StudioMode.pro)
                     }
                     .buxThemedSegmentedPicker()
                     .buxFormFieldPadding()
@@ -81,7 +81,7 @@ struct StudioSettingsView: View {
                         if store.studioMode == .pro {
                             StudioTierWordmark(style: .badge)
                         } else {
-                            Text("Simple")
+                            BuxCatalogDynamicText(key: "Simple")
                                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 .padding(.horizontal, 8)
@@ -120,10 +120,16 @@ struct StudioSettingsView: View {
                                 .environmentObject(simpleStudioStore)
                         } label: {
                             HStack {
-                                Text("Business Card Studio")
+                                BuxCatalogDynamicText(key: "Business Card Studio")
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 Spacer()
-                                Text("\(studioStore.businessCardLibrary.savedDesigns.count) designs")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%lld designs",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        Int64(studioStore.businessCardLibrary.savedDesigns.count)
+                                    )
+                                )
                                     .font(.system(size: 12, weight: .semibold))
                                     .buxLabelSecondary()
                                 BuxChevron()
@@ -156,7 +162,7 @@ struct StudioSettingsView: View {
                     BuxFormRowDivider()
                     Picker("Business Type", selection: $businessType) {
                         ForEach(BusinessType.allCases) { type in
-                            Text(type.rawValue).tag(type)
+                            Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
                         }
                     }
                     .tint(themeManager.current.accentColor)
@@ -168,10 +174,18 @@ struct StudioSettingsView: View {
                         RegionCurrencySettingsView()
                     } label: {
                         HStack {
-                            Text("Region & Currency")
+                            BuxCatalogDynamicText(key: "Region & Currency")
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Spacer()
-                            Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.name) · \(appSettingsManager.selectedCurrency.id)")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "%@ %@ · %@",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    appSettingsManager.selectedCountry.flag,
+                                    appSettingsManager.selectedCountry.name,
+                                    appSettingsManager.selectedCurrency.id
+                                )
+                            )
                                 .font(.system(size: 12, weight: .semibold))
                                 .buxLabelSecondary()
                                 .lineLimit(1)
@@ -188,7 +202,7 @@ struct StudioSettingsView: View {
                             .environmentObject(studioStore)
                     } label: {
                         HStack {
-                            Text("Tax Profile")
+                            BuxCatalogDynamicText(key: "Tax Profile")
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Spacer()
                             if studioStore.taxProfile.isTaxProfileConfigured {
@@ -196,7 +210,7 @@ struct StudioSettingsView: View {
                                     .font(.system(size: 12, weight: .semibold))
                                     .buxLabelSecondary()
                             } else {
-                                Text("Not configured")
+                                BuxCatalogDynamicText(key: "Not configured")
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(.orange)
                             }
@@ -212,7 +226,7 @@ struct StudioSettingsView: View {
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     HStack {
-                        Text("Default Hourly Rate")
+                        BuxCatalogDynamicText(key: "Default Hourly Rate")
                         Spacer()
                         TextField("Rate", text: $hourlyRate)
                             .keyboardType(.decimalPad)

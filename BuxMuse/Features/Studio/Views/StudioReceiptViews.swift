@@ -27,7 +27,7 @@ struct StudioReceiptsListView: View {
                 receiptList
             }
         }
-        .navigationTitle("Expenses & Receipts")
+        .buxCatalogNavigationTitle("Expenses & Receipts")
         .navigationBarTitleDisplayMode(.large)
         .buxRootNavigationChrome()
         .toolbar {
@@ -90,7 +90,7 @@ struct StudioReceiptsListView: View {
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundColor(.red)
 
-                Text(receipt.deductionStrength.rawValue)
+                Text(receipt.deductionStrength.catalogLabel(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(deductionColor(receipt.deductionStrength))
                     .padding(.horizontal, 8)
@@ -108,7 +108,7 @@ struct StudioReceiptsListView: View {
                 .font(.system(size: 32))
                 .buxLabelSecondary()
             
-            Text("No receipts scanned yet")
+            BuxCatalogDynamicText(key: "No receipts scanned yet")
                 .font(.system(size: 14, weight: .semibold))
                 .buxLabelSecondary()
             
@@ -233,11 +233,11 @@ struct StudioReceiptScannerView: View {
                                         .font(.system(size: 48))
                                         .foregroundColor(themeManager.current.accentColor)
                                     
-                                    Text("Receipt Scanner")
+                                    BuxCatalogDynamicText(key: "Receipt Scanner")
                                         .font(.system(size: 15, weight: .bold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     
-                                    Text("Secure offline text digitization using local Apple Neural Engines.")
+                                    BuxCatalogDynamicText(key: "Secure offline text digitization using local Apple Neural Engines.")
                                         .font(.system(size: 12))
                                         .buxLabelSecondary()
                                         .multilineTextAlignment(.center)
@@ -311,10 +311,10 @@ struct StudioReceiptScannerView: View {
 
                             BuxFormSection(title: "Tax sandbox settings") {
                                 Picker("Deduction Category", selection: $category) {
-                                    Text("Office Expenses").tag("Office Expenses")
-                                    Text("Software Subscriptions").tag("Software Subscriptions")
-                                    Text("Hardware Assets").tag("Hardware Assets")
-                                    Text("Travel & Lodging").tag("Travel & Lodging")
+                                    BuxCatalogDynamicText(key: "Office Expenses").tag("Office Expenses")
+                                    BuxCatalogDynamicText(key: "Software Subscriptions").tag("Software Subscriptions")
+                                    BuxCatalogDynamicText(key: "Hardware Assets").tag("Hardware Assets")
+                                    BuxCatalogDynamicText(key: "Travel & Lodging").tag("Travel & Lodging")
                                 }
                                 .tint(themeManager.current.accentColor)
                                 .buxFormFieldPadding()
@@ -325,7 +325,7 @@ struct StudioReceiptScannerView: View {
                                 BuxFormRowDivider()
                                 Picker("Deduction Strength", selection: $strength) {
                                     ForEach(DeductionStrength.allCases) { st in
-                                        Text(st.rawValue).tag(st)
+                                        Text(st.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(st)
                                     }
                                 }
                                 .tint(themeManager.current.accentColor)
@@ -337,7 +337,7 @@ struct StudioReceiptScannerView: View {
                     Spacer()
                 }
             }
-            .navigationTitle("Receipt Scanner")
+            .buxCatalogNavigationTitle("Receipt Scanner")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -499,7 +499,7 @@ struct StudioReceiptDetailView: View {
                             
                             Spacer()
                             
-                            Text(receipt.deductionStrength.rawValue)
+                            Text(receipt.deductionStrength.catalogLabel(locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(deductionColor(receipt.deductionStrength))
                                 .padding(.horizontal, 8)
@@ -513,7 +513,10 @@ struct StudioReceiptDetailView: View {
                         infoRow(label: "AMOUNT", value: appSettingsManager.format(receipt.amount), isAmount: true)
                         infoRow(label: "DATE LOGGED", value: formattedDate(receipt.date))
                         infoRow(label: "CATEGORY", value: receipt.category)
-                        infoRow(label: "BUSINESS USE", value: receipt.businessUse.rawValue)
+                        infoRow(
+                            label: "BUSINESS USE",
+                            value: receipt.businessUse.catalogLabel(locale: appSettingsManager.interfaceLocale)
+                        )
                         infoRow(label: "DEDUCTIBLE", value: receipt.isDeductible ? "\(Int(receipt.deductiblePercentage))%" : "Non-Deductible")
                         if receipt.isDeductible {
                             infoRow(label: "DEDUCTIBLE AMOUNT", value: appSettingsManager.format(receipt.deductibleAmount))
@@ -523,7 +526,7 @@ struct StudioReceiptDetailView: View {
                     .studioThemedCardChrome(cornerRadius: 24)
                     
                     // Local Storage Sandbox disclaimer
-                    Text("This receipt, along with its metadata, is encrypted and securely stored offline inside your local BuxMuse Sandbox. No data leaves your iPhone.")
+                    BuxCatalogDynamicText(key: "This receipt, along with its metadata, is encrypted and securely stored offline inside your local BuxMuse Sandbox. No data leaves your iPhone.")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
                         .multilineTextAlignment(.center)
@@ -533,7 +536,7 @@ struct StudioReceiptDetailView: View {
                 .padding(.top, BuxLayout.tight)
             }
         }
-        .navigationTitle("Expense Details")
+        .buxCatalogNavigationTitle("Expense Details")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") { showEdit = true }

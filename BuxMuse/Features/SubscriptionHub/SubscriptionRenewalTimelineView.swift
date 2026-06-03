@@ -63,7 +63,7 @@ struct SubscriptionRenewalTimelineView: View {
             Image(systemName: "calendar.badge.clock")
                 .font(.system(size: 24))
                 .foregroundColor(.gray)
-            Text("No upcoming renewals scheduled")
+            BuxCatalogText.text("No upcoming renewals scheduled")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
@@ -84,7 +84,7 @@ struct SubscriptionRenewalTimelineView: View {
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .multilineTextAlignment(.leading)
 
-                    Text(sub.category.displayName)
+                    Text(sub.category.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.leading)
@@ -107,7 +107,7 @@ struct SubscriptionRenewalTimelineView: View {
                     .multilineTextAlignment(.leading)
             }
 
-            Text(sub.billingCycle.displayName)
+            Text(sub.billingCycle.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(themeManager.current.accentColor)
                 .padding(.horizontal, BuxLayout.tight)

@@ -75,6 +75,7 @@ struct StudioHubView: View {
         NavigationStack {
             studioHubLayer
         }
+        .buxInterfaceLocale()
     }
 
     private var studioHubLayer: some View {
@@ -175,11 +176,21 @@ struct StudioHubView: View {
                             Image(systemName: "sparkle.magnifyingglass")
                                 .foregroundColor(themeManager.current.accentColor)
                         }
-                        .accessibilityLabel("Pro Search")
+                        .accessibilityLabel(
+                            BuxCatalogLabel.string("Pro Search", locale: appSettingsManager.interfaceLocale)
+                        )
 
                         BuxProfileToolbarMenu {
-                            Button("Business Profile") { navigateToProfile = true }
-                            Button("Tax Profile") { openTaxHub(.settings) }
+                            Button {
+                                navigateToProfile = true
+                            } label: {
+                                BuxCatalogText.text("Business Profile")
+                            }
+                            Button {
+                                openTaxHub(.settings)
+                            } label: {
+                                BuxCatalogText.text("Tax Profile")
+                            }
                         }
                     }
                 }
@@ -418,7 +429,7 @@ struct StudioHubView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(color)
                 }
-                Text(title)
+                BuxCatalogText.text(title)
                     .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -482,17 +493,17 @@ struct NewClientSheet: View {
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         Picker("Payment Terms (Days)", selection: $terms) {
-                            Text("Due on Receipt").tag("0")
-                            Text("7 Days").tag("7")
-                            Text("14 Days").tag("14")
-                            Text("30 Days").tag("30")
-                            Text("60 Days").tag("60")
+                            BuxCatalogDynamicText(key: "Due on Receipt").tag("0")
+                            BuxCatalogDynamicText(key: "7 Days").tag("7")
+                            BuxCatalogDynamicText(key: "14 Days").tag("14")
+                            BuxCatalogDynamicText(key: "30 Days").tag("30")
+                            BuxCatalogDynamicText(key: "60 Days").tag("60")
                         }
                         .buxFormFieldPadding()
                     }
                 }
             }
-            .navigationTitle("New Client")
+            .buxCatalogNavigationTitle("New Client")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

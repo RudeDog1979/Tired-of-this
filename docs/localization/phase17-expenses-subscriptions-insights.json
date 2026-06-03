@@ -1,0 +1,250 @@
+{
+  "Trending towards %@ this month": {
+    "es-419": "Tendencia hacia %@ este mes",
+    "es-ES": "Tendencia hacia %@ este mes"
+  },
+  "Duplicate": {
+    "es-419": "Duplicado",
+    "es-ES": "Duplicado"
+  },
+  "Refund": {
+    "es-419": "Reembolso",
+    "es-ES": "Reembolso"
+  },
+  "Recurrence": {
+    "es-419": "Recurrencia",
+    "es-ES": "Recurrencia"
+  },
+  "Subscription": {
+    "es-419": "Suscripción",
+    "es-ES": "Suscripción"
+  },
+  "Heat zone": {
+    "es-419": "Zona caliente",
+    "es-ES": "Zona caliente"
+  },
+  "Future impact": {
+    "es-419": "Impacto futuro",
+    "es-ES": "Impacto futuro"
+  },
+  "Habit signature": {
+    "es-419": "Firma de hábito",
+    "es-ES": "Firma de hábito"
+  },
+  "Micro commitment": {
+    "es-419": "Microcompromiso",
+    "es-ES": "Microcompromiso"
+  },
+  "Emotional tag": {
+    "es-419": "Etiqueta emocional",
+    "es-ES": "Etiqueta emocional"
+  },
+  "Context": {
+    "es-419": "Contexto",
+    "es-ES": "Contexto"
+  },
+  "Category": {
+    "es-419": "Categoría",
+    "es-ES": "Categoría"
+  },
+  "Merchant": {
+    "es-419": "Comercio",
+    "es-ES": "Comercio"
+  },
+  "Goals": {
+    "es-419": "Metas",
+    "es-ES": "Metas"
+  },
+  "Subscriptions": {
+    "es-419": "Suscripciones",
+    "es-ES": "Suscripciones"
+  },
+  "Matches your %@ pattern": {
+    "es-419": "Coincide con tu patrón de %@",
+    "es-ES": "Coincide con tu patrón de %@"
+  },
+  "Part of a monthly cycle at this merchant": {
+    "es-419": "Parte de un ciclo mensual en este comercio",
+    "es-ES": "Parte de un ciclo mensual en este comercio"
+  },
+  "None": {
+    "es-419": "Ninguna",
+    "es-ES": "Ninguna"
+  },
+  "Joy": {
+    "es-419": "Alegría",
+    "es-ES": "Alegría"
+  },
+  "Excited": {
+    "es-419": "Emoción",
+    "es-ES": "Emoción"
+  },
+  "Calm": {
+    "es-419": "Calma",
+    "es-ES": "Calma"
+  },
+  "Neutral": {
+    "es-419": "Neutral",
+    "es-ES": "Neutral"
+  },
+  "Stress": {
+    "es-419": "Estrés",
+    "es-ES": "Estrés"
+  },
+  "Regret": {
+    "es-419": "Arrepentimiento",
+    "es-ES": "Arrepentimiento"
+  },
+  "Guilty": {
+    "es-419": "Culpa",
+    "es-ES": "Culpa"
+  },
+  "This purchase brought you joy — worth celebrating.": {
+    "es-419": "Esta compra te dio alegría — vale la pena celebrarla.",
+    "es-ES": "Esta compra te dio alegría — vale la pena celebrarla."
+  },
+  "You felt excited about this one. Enjoy it mindfully.": {
+    "es-419": "Te emocionó esta compra. Disfrútala con conciencia.",
+    "es-ES": "Te emocionó esta compra. Disfrútala con conciencia."
+  },
+  "A calm, intentional spend. Nice balance.": {
+    "es-419": "Un gasto tranquilo e intencional. Buen equilibrio.",
+    "es-ES": "Un gasto tranquilo e intencional. Buen equilibrio."
+  },
+  "A practical, neutral expense.": {
+    "es-419": "Un gasto práctico y neutral.",
+    "es-ES": "Un gasto práctico y neutral."
+  },
+  "Tagged under stress. Worth a pause before the next similar buy.": {
+    "es-419": "Marcado como estrés. Vale la pena pausar antes de una compra similar.",
+    "es-ES": "Marcado como estrés. Vale la pena pausar antes de una compra similar."
+  },
+  "Tagged as regret. Consider avoiding similar purchases.": {
+    "es-419": "Marcado como arrepentimiento. Considera evitar compras similares.",
+    "es-ES": "Marcado como arrepentimiento. Considera evitar compras similares."
+  },
+  "Some guilt here — reflect on whether this matched your values.": {
+    "es-419": "Hay algo de culpa — piensa si esto va con tus valores.",
+    "es-ES": "Hay algo de culpa — piensa si esto va con tus valores."
+  },
+  "Emotional tag: %@.": {
+    "es-419": "Etiqueta emocional: %@.",
+    "es-ES": "Etiqueta emocional: %@."
+  },
+  "Apple TV+ (Cheaper alternatives starting at %@ 9.99/mo)": {
+    "es-419": "Apple TV+ (alternativas desde %@ 9.99/mes)",
+    "es-ES": "Apple TV+ (alternativas desde %@ 9,99/mes)"
+  },
+  "Ad-supported plan (%@ 6.99/mo)": {
+    "es-419": "Plan con anuncios (%@ 6.99/mes)",
+    "es-ES": "Plan con anuncios (%@ 6,99/mes)"
+  },
+  "Active Netflix Premium account. Price increased by 15%% in recent cycle. Consider moving to standard ad-supported tier to save %@ 8.50/mo.": {
+    "es-419": "Cuenta Netflix Premium activa. El precio subió 15%% en el ciclo reciente. Considera el plan con anuncios para ahorrar %@ 8.50/mes.",
+    "es-ES": "Cuenta Netflix Premium activa. El precio subió un 15%% en el ciclo reciente. Considera el plan con anuncios para ahorrar %@ 8,50/mes."
+  },
+  "YouTube Music (Included in Premium)": {
+    "es-419": "YouTube Music (incluido en Premium)",
+    "es-ES": "YouTube Music (incluido en Premium)"
+  },
+  "Spotify Individual (%@ 11.99/mo)": {
+    "es-419": "Spotify Individual (%@ 11.99/mes)",
+    "es-ES": "Spotify Individual (%@ 11,99/mes)"
+  },
+  "Shared Spotify Family account. Consider Spotify Individual if only one person uses it.": {
+    "es-419": "Cuenta Spotify Familiar compartida. Considera Spotify Individual si solo una persona la usa.",
+    "es-ES": "Cuenta Spotify Familiar compartida. Considera Spotify Individual si solo una persona la usa."
+  },
+  "Downgrade plan": {
+    "es-419": "Bajar de plan",
+    "es-ES": "Bajar de plan"
+  },
+  "Share a bundle with family": {
+    "es-419": "Compartir un paquete en familia",
+    "es-ES": "Compartir un paquete en familia"
+  },
+  "Monthly Savings": {
+    "es-419": "Ahorro mensual",
+    "es-ES": "Ahorro mensual"
+  },
+  "Yearly Savings": {
+    "es-419": "Ahorro anual",
+    "es-ES": "Ahorro anual"
+  },
+  "Credit & BNPL": {
+    "es-419": "Crédito y BNPL",
+    "es-ES": "Crédito y BNPL"
+  },
+  "Cash Drawer": {
+    "es-419": "Caja en efectivo",
+    "es-ES": "Caja en efectivo"
+  },
+  "Barter & Trade": {
+    "es-419": "Trueque e intercambio",
+    "es-ES": "Trueque e intercambio"
+  },
+  "Workspaces": {
+    "es-419": "Espacios de trabajo",
+    "es-ES": "Espacios de trabajo"
+  },
+  "Creative Energy": {
+    "es-419": "Energía creativa",
+    "es-ES": "Energía creativa"
+  },
+  "Scope Radar": {
+    "es-419": "Radar de alcance",
+    "es-ES": "Radar de alcance"
+  },
+  "Settings → Payment Sources": {
+    "es-419": "Ajustes → Fuentes de pago",
+    "es-ES": "Ajustes → Fuentes de pago"
+  },
+  "Studio → Cash & Barter": {
+    "es-419": "Studio → Efectivo y trueque",
+    "es-ES": "Studio → Efectivo y trueque"
+  },
+  "Studio → Turn on": {
+    "es-419": "Studio → Activar",
+    "es-ES": "Studio → Activar"
+  },
+  "Studio → Workspaces": {
+    "es-419": "Studio → Espacios de trabajo",
+    "es-ES": "Studio → Espacios de trabajo"
+  },
+  "Studio → Workload & Energy": {
+    "es-419": "Studio → Carga y energía",
+    "es-ES": "Studio → Carga y energía"
+  },
+  "Studio → Scope Radar": {
+    "es-419": "Studio → Radar de alcance",
+    "es-ES": "Studio → Radar de alcance"
+  },
+  "Upgrade to Pro": {
+    "es-419": "Mejorar a Pro",
+    "es-ES": "Pasar a Pro"
+  },
+  "Enable in Studio → Cash & Barter": {
+    "es-419": "Actívalo en Studio → Efectivo y trueque",
+    "es-ES": "Actívalo en Studio → Efectivo y trueque"
+  },
+  "Enable Studio first": {
+    "es-419": "Activa Studio primero",
+    "es-ES": "Activa Studio primero"
+  },
+  "Track workload & rest": {
+    "es-419": "Registra carga de trabajo y descanso",
+    "es-ES": "Registra carga de trabajo y descanso"
+  },
+  "%.1f h work · %.1f h sleep": {
+    "es-419": "%.1f h trabajo · %.1f h sueño",
+    "es-ES": "%.1f h trabajo · %.1f h sueño"
+  },
+  "Your subscriptions increased by %@ this month.": {
+    "es-419": "Tus suscripciones subieron %@ este mes.",
+    "es-ES": "Tus suscripciones subieron %@ este mes."
+  },
+  "Your subscriptions are fully optimized with no price hikes.": {
+    "es-419": "Tus suscripciones están optimizadas, sin aumentos de precio.",
+    "es-ES": "Tus suscripciones están optimizadas, sin subidas de precio."
+  }
+}

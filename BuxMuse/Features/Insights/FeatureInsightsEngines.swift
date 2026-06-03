@@ -8,7 +8,7 @@
 import Foundation
 
 enum WorkspaceInsightsEngine {
-    static func generateInsights(transactions: [Transaction]) -> [FinancialInsight] {
+    static func generateInsights(transactions: [Transaction], locale: Locale) -> [FinancialInsight] {
         guard SettingsStore.shared.sideHustleMatrixEnabled else { return [] }
 
         let monthStart = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
@@ -23,27 +23,42 @@ enum WorkspaceInsightsEngine {
         let share = unassignedTotal / monthTotal
         guard share >= 0.15, unassigned.count >= 2 else { return [] }
 
+        let pct = Int(NSDecimalNumber(decimal: share * 100).doubleValue)
         return [
             FinancialInsight(
-                title: "Unassigned workspace spend",
-                value: "\(Int(NSDecimalNumber(decimal: share * 100).doubleValue))% untagged",
-                description: "\(unassigned.count) expenses this month have no workspace.",
-                fullExplanation: "\(InsightMoneyFormat.format(unassignedTotal)) of this month's spending isn't tied to a workspace. Tag expenses to see per-gig profit and tax-ready splits.",
+                title: BuxLocalizedString.string("Unassigned workspace spend", locale: locale),
+                value: BuxLocalizedString.format("%lld%% untagged", locale: locale, pct),
+                description: BuxLocalizedString.format(
+                    "%lld expenses this month have no workspace.",
+                    locale: locale,
+                    unassigned.count
+                ),
+                fullExplanation: BuxLocalizedString.format(
+                    "%@ of this month's spending isn't tied to a workspace. Tag expenses to see per-gig profit and tax-ready splits.",
+                    locale: locale,
+                    InsightMoneyFormat.format(unassignedTotal)
+                ),
                 severity: share >= 0.35 ? .medium : .low,
                 category: .pattern,
                 systemIcon: "briefcase.circle",
                 accentColorName: "purple",
-                suggestedActions: ["Assign a workspace when logging", "Open Workspaces in Studio settings"],
+                suggestedActions: [
+                    BuxLocalizedString.string("Assign a workspace when logging", locale: locale),
+                    BuxLocalizedString.string("Open Workspaces in Studio settings", locale: locale),
+                ],
                 impactMonthly: unassignedTotal,
                 impactYearly: unassignedTotal * 12,
-                dataBehind: "Expenses with hustleId nil in the active month."
+                dataBehind: BuxLocalizedString.string(
+                    "Expenses with hustleId nil in the active month.",
+                    locale: locale
+                )
             )
         ]
     }
 }
 
 enum CashDigitalInsightsEngine {
-    static func generateInsights(transactions: [Transaction]) -> [FinancialInsight] {
+    static func generateInsights(transactions: [Transaction], locale: Locale) -> [FinancialInsight] {
         guard SettingsStore.shared.studioEnabled,
               SettingsStore.shared.dualCashDrawerEnabled else { return [] }
 
@@ -65,30 +80,49 @@ enum CashDigitalInsightsEngine {
         guard total > 0 else { return [] }
 
         let cashShare = cashTotal / total
+        let pct = Int(NSDecimalNumber(decimal: cashShare * 100).doubleValue)
         let localBal = Decimal(SettingsStore.shared.cashLocalBalanceValue)
         let secondaryBal = Decimal(SettingsStore.shared.cashSecondaryBalanceValue)
 
         return [
             FinancialInsight(
-                title: "Cash vs digital split",
-                value: "\(Int(NSDecimalNumber(decimal: cashShare * 100).doubleValue))% cash",
-                description: "Drawer: \(SettingsStore.shared.primaryLocalCurrency) \(InsightMoneyFormat.format(localBal)) · \(SettingsStore.shared.secondaryTradingCurrency) \(InsightMoneyFormat.format(secondaryBal))",
-                fullExplanation: "About \(InsightMoneyFormat.format(cashTotal)) went through physical cash this month vs \(InsightMoneyFormat.format(digitalTotal)) digital. Reconcile your drawer if the split feels off.",
+                title: BuxLocalizedString.string("Cash vs digital split", locale: locale),
+                value: BuxLocalizedString.format("%lld%% cash", locale: locale, pct),
+                description: BuxLocalizedString.format(
+                    "Drawer: %1$@ %2$@ · %3$@ %4$@",
+                    locale: locale,
+                    SettingsStore.shared.primaryLocalCurrency,
+                    InsightMoneyFormat.format(localBal),
+                    SettingsStore.shared.secondaryTradingCurrency,
+                    InsightMoneyFormat.format(secondaryBal)
+                ),
+                fullExplanation: BuxLocalizedString.format(
+                    "About %@ went through physical cash this month vs %@ digital. Reconcile your drawer if the split feels off.",
+                    locale: locale,
+                    InsightMoneyFormat.format(cashTotal),
+                    InsightMoneyFormat.format(digitalTotal)
+                ),
                 severity: cashShare < 0.05 && (localBal + secondaryBal) > 100 ? .medium : .low,
                 category: .pattern,
                 systemIcon: "banknote.fill",
                 accentColorName: "green",
-                suggestedActions: ["Log cash expenses from Add Expense", "Update drawer balances in Studio"],
+                suggestedActions: [
+                    BuxLocalizedString.string("Log cash expenses from Add Expense", locale: locale),
+                    BuxLocalizedString.string("Update drawer balances in Studio", locale: locale),
+                ],
                 impactMonthly: cashTotal,
                 impactYearly: cashTotal * 12,
-                dataBehind: "Payment method tags starting with Cash (."
+                dataBehind: BuxLocalizedString.string(
+                    "Payment method tags starting with Cash (.",
+                    locale: locale
+                )
             )
         ]
     }
 }
 
 enum ScopeCreepInsightsEngine {
-    static func generateInsights(projects: [StudioProject]) -> [FinancialInsight] {
+    static func generateInsights(projects: [StudioProject], locale: Locale) -> [FinancialInsight] {
         guard SettingsStore.shared.studioEnabled,
               SettingsStore.shared.studioMode == .pro,
               SettingsStore.shared.antiScopeCreepEnabled else { return [] }
@@ -104,20 +138,41 @@ enum ScopeCreepInsightsEngine {
             guard usedRatio >= 0.9 else { continue }
 
             let remaining = max(0, budgetHours - tracked)
+            let description = remaining <= 0
+                ? BuxLocalizedString.format(
+                    "Over budget by %@h",
+                    locale: locale,
+                    String(format: "%.1f", tracked - budgetHours)
+                )
+                : BuxLocalizedString.format(
+                    "%@h left in scope",
+                    locale: locale,
+                    String(format: "%.1f", remaining)
+                )
             alerts.append(
                 FinancialInsight(
-                    title: "Scope budget tight",
+                    title: BuxLocalizedString.string("Scope budget tight", locale: locale),
                     value: project.name,
-                    description: remaining <= 0
-                        ? "Over budget by \(String(format: "%.1f", tracked - budgetHours))h"
-                        : "\(String(format: "%.1f", remaining))h left in scope",
-                    fullExplanation: "Project \"\(project.name)\" has used \(String(format: "%.1f", tracked)) of \(String(format: "%.1f", budgetHours)) budgeted hours. Watch for scope creep before taking extra revisions.",
+                    description: description,
+                    fullExplanation: BuxLocalizedString.format(
+                        "Project \"%@\" has used %@ of %@ budgeted hours. Watch for scope creep before taking extra revisions.",
+                        locale: locale,
+                        project.name,
+                        String(format: "%.1f", tracked),
+                        String(format: "%.1f", budgetHours)
+                    ),
                     severity: usedRatio >= 1.0 ? .high : .medium,
                     category: .pattern,
                     systemIcon: "scope",
                     accentColorName: "red",
-                    suggestedActions: ["Review project scope in Studio", "Send a change-order note to client"],
-                    dataBehind: "StudioProject budgetedHours vs timeEntries."
+                    suggestedActions: [
+                        BuxLocalizedString.string("Review project scope in Studio", locale: locale),
+                        BuxLocalizedString.string("Send a change-order note to client", locale: locale),
+                    ],
+                    dataBehind: BuxLocalizedString.string(
+                        "StudioProject budgetedHours vs timeEntries.",
+                        locale: locale
+                    )
                 )
             )
         }

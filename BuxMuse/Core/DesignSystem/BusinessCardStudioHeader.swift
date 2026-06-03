@@ -17,13 +17,13 @@ struct BusinessCardStudioHeader: View {
         VStack(alignment: .leading, spacing: compact ? 0 : 2) {
             HStack(alignment: .firstTextBaseline, spacing: compact ? 6 : 8) {
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
-                    Text("Business Card ")
+                    BuxCatalogDynamicText(key: "Business Card ")
                         .font(.system(size: compact ? 17 : 28, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Text("S")
                         .font(.system(size: compact ? 17 : 28, weight: .black, design: .rounded))
                         .foregroundStyle(studioSGradient)
-                    Text("tudio")
+                    BuxCatalogDynamicText(key: "tudio")
                         .font(.system(size: compact ? 17 : 28, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 }
@@ -32,7 +32,7 @@ struct BusinessCardStudioHeader: View {
                 }
             }
             if !compact {
-                Text("Print · A8 · Social — your brand, your rules")
+                BuxCatalogDynamicText(key: "Print · A8 · Social — your brand, your rules")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
             }

@@ -49,8 +49,14 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
         queueBackgroundRecalculations()
     }
     
+    /// Rebuilds subscription detection (e.g. after country / interface locale change).
+    public func refreshSubscriptionAnalysis() {
+        queueBackgroundRecalculations()
+    }
+
     private func queueBackgroundRecalculations() {
         let txs = filteredTransactions
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         
         let performRecalc = { [weak self] in
             guard let self = self else { return }
@@ -68,16 +74,26 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
                 if let subInfo = BillingCycleAIEngine.analyzeSubscription(
                     merchantName: merchant,
                     transactions: txs,
-                    category: activeCategory
+                    category: activeCategory,
+                    locale: locale
                 ) {
                     subs.append(subInfo)
                     
-                    let detail = BillingCycleAIEngine.subscriptionDetail(info: subInfo, allTransactions: txs)
+                    let detail = BillingCycleAIEngine.subscriptionDetail(
+                        info: subInfo,
+                        allTransactions: txs,
+                        locale: locale
+                    )
                     details[MerchantLogoEngine.normalizeMerchantName(merchant)] = detail
                 }
             }
 
-            BillingCycleAIEngine.appendUserDeclaredSubscriptions(to: &subs, details: &details, transactions: txs)
+            BillingCycleAIEngine.appendUserDeclaredSubscriptions(
+                to: &subs,
+                details: &details,
+                transactions: txs,
+                locale: locale
+            )
 
             let cancelledMerchants = Set(UserDefaults.standard.stringArray(forKey: "buxmuse.cancelledSubscriptionMerchants") ?? [])
             subs = subs.filter {
@@ -198,6 +214,7 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
     }
     
     public func savingsOpportunities(for range: DateInterval) -> [SavingsOpportunity] {
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         var opportunities: [SavingsOpportunity] = []
         let summaries = categorySummaries(for: range).filter { $0.category != .income && $0.total.value != 0 }
         let currencyCode = filteredTransactions.first?.amount.currencyCode ?? "USD"
@@ -217,8 +234,15 @@ public final class LocalFinancialIntelligenceEngine18: FinancialIntelligenceEngi
                     let overPercent = ((NSDecimalNumber(decimal: differenceVal).doubleValue) / NSDecimalNumber(decimal: baselineVal).doubleValue) * 100.0
                     let potentialSavings = differenceVal * 0.15
                     
-                    let suggestion = "Your \(category.displayName.lowercased()) spending is \(Int(overPercent))% above baseline. Reducing by 15% could save you \(currencyCode) \(String(format: "%.2f", NSDecimalNumber(decimal: potentialSavings).doubleValue))/month."
-                    
+                    let suggestion = BuxLocalizedString.format(
+                        "Your %@ spending is %lld%% above baseline. Reducing by 15%% could save you %@ %@/month.",
+                        locale: locale,
+                        category.localizedDisplayName(locale: locale).lowercased(),
+                        Int(overPercent),
+                        currencyCode,
+                        String(format: "%.2f", NSDecimalNumber(decimal: potentialSavings).doubleValue)
+                    )
+
                     opportunities.append(SavingsOpportunity(
                         description: suggestion,
                         category: category,

@@ -11,6 +11,7 @@ import SwiftUI
 struct DualCashDrawerWidget: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @ObservedObject private var store = SettingsStore.shared
     
@@ -28,7 +29,7 @@ struct DualCashDrawerWidget: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.green)
                     
-                    Text("Cash Drawer")
+                    BuxCatalogText.text("Cash Drawer")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
@@ -43,7 +44,13 @@ struct DualCashDrawerWidget: View {
                 HStack(spacing: 20) {
                     // Primary local cash
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(store.primaryLocalCurrency) Cash")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%@ Cash",
+                                locale: appSettingsManager.interfaceLocale,
+                                store.primaryLocalCurrency
+                            )
+                        )
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
                         
@@ -58,7 +65,13 @@ struct DualCashDrawerWidget: View {
                     
                     // Secondary USD cash
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(store.secondaryTradingCurrency) Cash")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%@ Cash",
+                                locale: appSettingsManager.interfaceLocale,
+                                store.secondaryTradingCurrency
+                            )
+                        )
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
                         
@@ -77,7 +90,7 @@ struct DualCashDrawerWidget: View {
                         HStack(spacing: 6) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 12, weight: .bold))
-                            Text("Add Cash")
+                            BuxCatalogText.text("Add Cash")
                                 .font(.system(size: 12, weight: .bold))
                         }
                         .foregroundColor(.green)
@@ -95,7 +108,7 @@ struct DualCashDrawerWidget: View {
                         HStack(spacing: 6) {
                             Image(systemName: "minus.circle.fill")
                                 .font(.system(size: 12, weight: .bold))
-                            Text("Spend Cash")
+                            BuxCatalogText.text("Spend Cash")
                                 .font(.system(size: 12, weight: .bold))
                         }
                         .foregroundColor(.red)
@@ -136,6 +149,8 @@ struct DualCashDrawerWidget: View {
         .buttonStyle(.plain)
         .sheet(isPresented: $showingQuickCashSheet) {
             QuickCashDrawerAdjustSheet(isIncome: $quickCashIsIncome)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
         }
     }
     
@@ -153,6 +168,7 @@ struct DualCashDrawerWidget: View {
 struct QuickCashDrawerAdjustSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
     
     @Binding var isIncome: Bool
@@ -165,25 +181,38 @@ struct QuickCashDrawerAdjustSheet: View {
             VStack(spacing: 24) {
                 // Header Segment picker
                 Picker("Adjustment type", selection: $isIncome) {
-                    Text("Receive Cash (Income)").tag(true)
-                    Text("Spend Cash (Expense)").tag(false)
+                    BuxCatalogText.text("Receive Cash (Income)").tag(true)
+                    BuxCatalogText.text("Spend Cash (Expense)").tag(false)
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
                 
                 // Select Wallet drawer
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("SELECT CASH DRAWER")
+                    BuxCatalogText.text("SELECT CASH DRAWER")
                         .font(.system(size: 11, weight: .bold))
+                        .textCase(.uppercase)
                         .foregroundColor(.gray)
                         .padding(.horizontal)
                     
                     HStack(spacing: 12) {
                         Button(action: { selectedCurrencyIsPrimary = true }) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("\(store.primaryLocalCurrency) Wallet")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%@ Wallet",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        store.primaryLocalCurrency
+                                    )
+                                )
                                     .font(.system(size: 14, weight: .bold))
-                                Text(String(format: "Balance: %.2f", store.cashLocalBalanceValue))
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "Balance: %@",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        String(format: "%.2f", store.cashLocalBalanceValue)
+                                    )
+                                )
                                     .font(.system(size: 11))
                                     .opacity(0.7)
                             }
@@ -197,9 +226,21 @@ struct QuickCashDrawerAdjustSheet: View {
                         
                         Button(action: { selectedCurrencyIsPrimary = false }) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("\(store.secondaryTradingCurrency) Wallet")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%@ Wallet",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        store.secondaryTradingCurrency
+                                    )
+                                )
                                     .font(.system(size: 14, weight: .bold))
-                                Text(String(format: "Balance: %.2f", store.cashSecondaryBalanceValue))
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "Balance: %@",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        String(format: "%.2f", store.cashSecondaryBalanceValue)
+                                    )
+                                )
                                     .font(.system(size: 11))
                                     .opacity(0.7)
                             }
@@ -216,8 +257,9 @@ struct QuickCashDrawerAdjustSheet: View {
                 
                 // Input Cash Amount
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("ENTER CASH AMOUNT")
+                    BuxCatalogText.text("ENTER CASH AMOUNT")
                         .font(.system(size: 11, weight: .bold))
+                        .textCase(.uppercase)
                         .foregroundColor(.gray)
                         .padding(.horizontal)
                     
@@ -238,8 +280,9 @@ struct QuickCashDrawerAdjustSheet: View {
                 
                 // Optional Note
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("TRANSACTION NOTES")
+                    BuxCatalogText.text("TRANSACTION NOTES")
                         .font(.system(size: 11, weight: .bold))
+                        .textCase(.uppercase)
                         .foregroundColor(.gray)
                         .padding(.horizontal)
                     
@@ -257,7 +300,7 @@ struct QuickCashDrawerAdjustSheet: View {
                     HStack {
                         Spacer()
                         Image(systemName: "checkmark.circle.fill")
-                        Text("Log Cash Transaction")
+                        BuxCatalogText.text("Log Cash Transaction")
                             .font(.system(size: 16, weight: .black))
                         Spacer()
                     }
@@ -273,7 +316,9 @@ struct QuickCashDrawerAdjustSheet: View {
                 .buttonStyle(.plain)
             }
             .padding(.vertical)
-            .navigationTitle("Log Physical Cash")
+            .navigationTitle(
+                Text(LocalizedStringKey(stringLiteral: "Log Physical Cash"))
+            )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -74,7 +74,7 @@ struct BackupRestoreSettingsView: View {
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Encrypted backup") {
-                Text("Creates a password-protected `.buxmuse` file with settings, expenses, goals, workspaces, and Studio data. Share via iCloud Drive, email, or save locally.")
+                BuxCatalogDynamicText(key: "Creates a password-protected `.buxmuse` file with settings, expenses, goals, workspaces, and Studio data. Share via iCloud Drive, email, or save locally.")
                     .font(.system(size: 13, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
@@ -90,9 +90,9 @@ struct BackupRestoreSettingsView: View {
                 BuxFormRowDivider()
                 Toggle(isOn: $includeRecoveryKey) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Generate recovery key")
+                        BuxCatalogDynamicText(key: "Generate recovery key")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Shown once after backup. Save it separately — opens the file if you forget your password. BuxMuse never stores it.")
+                        BuxCatalogDynamicText(key: "Shown once after backup. Save it separately — opens the file if you forget your password. BuxMuse never stores it.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)
@@ -106,7 +106,7 @@ struct BackupRestoreSettingsView: View {
                     Image(systemName: "lock.shield.fill")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
-                    Text("BuxMuse never saves your password or recovery key on this device. You hold both — store them in a password manager, secure note, or offline copy.")
+                    BuxCatalogDynamicText(key: "BuxMuse never saves your password or recovery key on this device. You hold both — store them in a password manager, secure note, or offline copy.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
@@ -117,7 +117,7 @@ struct BackupRestoreSettingsView: View {
                 Button(action: { showBackupSecuritySheet = true }) {
                     HStack {
                         Image(systemName: "lock.doc.fill")
-                        Text("Create encrypted backup")
+                        BuxCatalogDynamicText(key: "Create encrypted backup")
                     }
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(passwordsMatch ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
@@ -130,7 +130,7 @@ struct BackupRestoreSettingsView: View {
                     ShareLink(item: url) {
                         HStack {
                             Image(systemName: "square.and.arrow.up.fill")
-                            Text("Share backup file")
+                            BuxCatalogDynamicText(key: "Share backup file")
                         }
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
@@ -140,7 +140,7 @@ struct BackupRestoreSettingsView: View {
             }
 
             BuxFormSection(title: "Restore backup") {
-                Text("Restoring replaces local expenses, goals, workspaces, and Studio records on this device.")
+                BuxCatalogDynamicText(key: "Restoring replaces local expenses, goals, workspaces, and Studio records on this device.")
                     .font(.system(size: 13, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
@@ -160,7 +160,7 @@ struct BackupRestoreSettingsView: View {
                 Button(action: { showRestoreImporter = true }) {
                     HStack {
                         Image(systemName: "arrow.counterclockwise.doc.fill")
-                        Text("Choose backup to restore")
+                        BuxCatalogDynamicText(key: "Choose backup to restore")
                     }
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(restoreSecretReady ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
@@ -212,7 +212,7 @@ struct BackupRestoreSettingsView: View {
         .alert("Restore complete", isPresented: $showRestoreSuccess) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Your BuxMuse data was restored from the encrypted archive.")
+            BuxCatalogDynamicText(key: "Your BuxMuse data was restored from the encrypted archive.")
         }
         .alert("Backup error", isPresented: Binding(
             get: { errorMessage != nil },
@@ -249,9 +249,9 @@ struct BackupRestoreSettingsView: View {
                                     endPoint: .bottomTrailing
                                 )
                             )
-                        Text("Remember this password")
+                        BuxCatalogDynamicText(key: "Remember this password")
                             .font(.system(size: 22, weight: .black, design: .rounded))
-                        Text("Your backup is encrypted on this device. Without the password you choose now, the file cannot be opened — not by BuxMuse, not by support, not by anyone.")
+                        BuxCatalogDynamicText(key: "Your backup is encrypted on this device. Without the password you choose now, the file cannot be opened — not by BuxMuse, not by support, not by anyone.")
                             .font(.system(size: 14, weight: .medium))
                             .multilineTextAlignment(.center)
                             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
@@ -291,7 +291,7 @@ struct BackupRestoreSettingsView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
 
                     Button(action: confirmAndCreateBackup) {
-                        Text("I understand — create backup")
+                        BuxCatalogDynamicText(key: "I understand — create backup")
                             .font(.system(size: 16, weight: .bold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
@@ -330,9 +330,9 @@ struct BackupRestoreSettingsView: View {
                         Image(systemName: "key.viewfinder")
                             .font(.system(size: 40, weight: .semibold))
                             .foregroundColor(themeManager.current.accentColor)
-                        Text("Save your recovery key")
+                        BuxCatalogDynamicText(key: "Save your recovery key")
                             .font(.system(size: 22, weight: .black, design: .rounded))
-                        Text("This key is shown once. BuxMuse does not store it. Paste it when restoring if you forget your password.")
+                        BuxCatalogDynamicText(key: "This key is shown once. BuxMuse does not store it. Paste it when restoring if you forget your password.")
                             .font(.system(size: 13, weight: .medium))
                             .multilineTextAlignment(.center)
                             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
@@ -374,7 +374,7 @@ struct BackupRestoreSettingsView: View {
                     }
 
                     Toggle(isOn: $recoveryKeyAcknowledged) {
-                        Text("I saved my recovery key in a safe place")
+                        BuxCatalogDynamicText(key: "I saved my recovery key in a safe place")
                             .font(.system(size: 14, weight: .semibold))
                     }
                     .tint(themeManager.current.accentColor)
@@ -384,7 +384,7 @@ struct BackupRestoreSettingsView: View {
                         recoveryKeyAcknowledged = false
                         showRecoveryKeySheet = false
                     } label: {
-                        Text("Done")
+                        BuxCatalogDynamicText(key: "Done")
                             .font(.system(size: 16, weight: .bold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
@@ -680,7 +680,7 @@ private struct ArchiveProgressOverlay: View {
                     Text(operation.title)
                         .font(.system(size: 18, weight: .black, design: .rounded))
                     if let step {
-                        Text(step.rawValue)
+                        Text(step.catalogLabel(locale: BuxInterfaceLocale.currentInterfaceLocale))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.secondary)
                             .contentTransition(.numericText())
@@ -690,7 +690,13 @@ private struct ArchiveProgressOverlay: View {
                         .tint(accent)
                         .frame(width: 220)
                         .animation(.easeInOut(duration: 0.95), value: progress)
-                    Text("\(Int(progress * 100))%")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld%%",
+                            locale: BuxInterfaceLocale.currentInterfaceLocale,
+                            Int64(progress * 100)
+                        )
+                    )
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()

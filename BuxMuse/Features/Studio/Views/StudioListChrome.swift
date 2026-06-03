@@ -209,7 +209,7 @@ struct StudioGlassHorizontalSectionMenu<Tab: Hashable & Identifiable>: View {
                 selection = tab
             }
         } label: {
-            Text(label(tab))
+            BuxCatalogDynamicText(key: label(tab))
                 .font(.system(size: 13, weight: isSelected ? .bold : .semibold))
                 .foregroundStyle(
                     isSelected

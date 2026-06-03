@@ -25,7 +25,7 @@ struct StudioProjectsListView: View {
                 projectList
             }
         }
-        .navigationTitle("Projects")
+        .buxCatalogNavigationTitle("Projects")
         .navigationBarTitleDisplayMode(.large)
         .buxRootNavigationChrome()
         .toolbar {
@@ -86,7 +86,7 @@ struct StudioProjectsListView: View {
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                     if project.resolvedStatus != .active {
-                        Text(project.resolvedStatus.rawValue)
+                        Text(project.resolvedStatus.catalogLabel(locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 9, weight: .bold))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
@@ -100,7 +100,14 @@ struct StudioProjectsListView: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
 
-                Text("\(project.billingModeLabel) · \(project.billingAmountLabel(format: appSettingsManager.format))")
+                Text(
+                    BuxLocalizedString.format(
+                        "%@ · %@",
+                        locale: appSettingsManager.interfaceLocale,
+                        project.billingModeLabel,
+                        project.billingAmountLabel(format: appSettingsManager.format)
+                    )
+                )
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                     .lineLimit(1)
@@ -113,7 +120,13 @@ struct StudioProjectsListView: View {
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-                Text(String(format: "%.1f hrs", totalTime / 3600))
+                Text(
+                    BuxLocalizedString.format(
+                        "%.1f hrs",
+                        locale: appSettingsManager.interfaceLocale,
+                        totalTime / 3600
+                    )
+                )
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             }
@@ -135,10 +148,10 @@ struct StudioProjectsListView: View {
                 .font(.system(size: 32))
                 .buxLabelSecondary()
             
-            Text("No projects yet")
+            BuxCatalogDynamicText(key: "No projects yet")
                 .font(.system(size: 14, weight: .semibold))
                 .buxLabelSecondary()
-            Text("A project is the job you track — fixed price or hourly, time log, expenses, and invoices.")
+            BuxCatalogDynamicText(key: "A project is the job you track — fixed price or hourly, time log, expenses, and invoices.")
                 .font(.system(size: 12, weight: .medium))
                 .buxLabelSecondary()
                 .multilineTextAlignment(.center)
@@ -243,7 +256,7 @@ struct StudioProjectDetailView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.red)
-                            Text("Budget Overrun Risk. Hours spent exceed contract benchmarks.")
+                            BuxCatalogDynamicText(key: "Budget Overrun Risk. Hours spent exceed contract benchmarks.")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(.red)
                         }
@@ -312,11 +325,17 @@ struct StudioProjectDetailView: View {
                 HStack(spacing: 8) {
                     Image(systemName: project.resolvedStatus.systemImage)
                         .foregroundStyle(statusColor(project.resolvedStatus))
-                    Text(project.resolvedStatus.rawValue)
+                    Text(project.resolvedStatus.catalogLabel(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 14, weight: .bold))
                     Spacer()
                     if let end = project.endDate, project.resolvedStatus == .completed {
-                        Text("Ended \(formattedDate(end))")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Ended %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                formattedDate(end)
+                            )
+                        )
                             .font(.system(size: 11, weight: .medium))
                             .buxLabelSecondary()
                     }
@@ -329,27 +348,51 @@ struct StudioProjectDetailView: View {
                 if let fixed = project.fixedFee, fixed > 0 {
                     overviewRow(
                         "Revenue model",
-                        "Fixed \(appSettingsManager.format(fixed)) — time is tracked for margin & scope, not to recalculate the price."
+                        BuxLocalizedString.format(
+                            "Fixed %@ — time is tracked for margin & scope, not to recalculate the price.",
+                            locale: appSettingsManager.interfaceLocale,
+                            appSettingsManager.format(fixed)
+                        )
                     )
                 } else if let rate = project.hourlyRate, rate > 0 {
                     overviewRow(
                         "Revenue model",
-                        "\(appSettingsManager.format(rate))/hr × \(String(format: "%.1f", analysis.billableTime / 3600)) billable hrs logged"
+                        BuxLocalizedString.format(
+                            "%@/hr × %@ billable hrs logged",
+                            locale: appSettingsManager.interfaceLocale,
+                            appSettingsManager.format(rate),
+                            String(format: "%.1f", analysis.billableTime / 3600)
+                        )
                     )
                 }
 
                 overviewRow("Started", formattedDate(project.startDate))
                 if project.budgetedHours > 0 {
-                    overviewRow("Budgeted hours", String(format: "%.1f h", project.budgetedHours))
+                    overviewRow(
+                        "Budgeted hours",
+                        BuxLocalizedString.format(
+                            "%@ h",
+                            locale: appSettingsManager.interfaceLocale,
+                            String(format: "%.1f", project.budgetedHours)
+                        )
+                    )
                 }
                 if project.allowedRevisions > 0 {
-                    overviewRow("Revisions", "\(project.currentRevisions) of \(project.allowedRevisions) used")
+                    overviewRow(
+                        "Revisions",
+                        BuxLocalizedString.format(
+                            "%lld of %lld used",
+                            locale: appSettingsManager.interfaceLocale,
+                            project.currentRevisions,
+                            project.allowedRevisions
+                        )
+                    )
                 }
                 if !project.notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     overviewRow("Notes", project.notes)
                 }
 
-                Text("Time entries below are your task log for this project.")
+                BuxCatalogText.text("Time entries below are your task log for this project.")
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
             }
@@ -384,7 +427,7 @@ struct StudioProjectDetailView: View {
 
     private func overviewRow(_ label: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label)
+            BuxCatalogText.text(label)
                 .font(.system(size: 10, weight: .semibold))
                 .buxLabelSecondary()
             Text(value)
@@ -459,7 +502,7 @@ struct StudioProjectDetailView: View {
     private func projectInvoiceSuggestionSection(project: StudioProject) -> some View {
         if let suggestion = projectInvoiceSuggestion(for: project) {
             VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                Text("INVOICE SUGGESTION")
+                BuxCatalogDynamicText(key: "INVOICE SUGGESTION")
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 Button {
@@ -467,7 +510,7 @@ struct StudioProjectDetailView: View {
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Create invoice from this project")
+                            BuxCatalogDynamicText(key: "Create invoice from this project")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                             Text(suggestion.subtitle)
@@ -504,7 +547,7 @@ struct StudioProjectDetailView: View {
     private func scopeRadarSection(_ scope: ScopeRadarAnalysis, project: StudioProject) -> some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
             HStack(spacing: 6) {
-                Text("SCOPE RADAR")
+                BuxCatalogDynamicText(key: "SCOPE RADAR")
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 ProFeatureBadge(compact: true)
@@ -512,19 +555,36 @@ struct StudioProjectDetailView: View {
             
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Label(scope.overallRisk.rawValue, systemImage: scope.overallRisk.systemIcon)
+                    Label(
+                        scope.overallRisk.catalogLabel(locale: appSettingsManager.interfaceLocale),
+                        systemImage: scope.overallRisk.systemIcon
+                    )
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(Color(hex: scope.overallRisk.color))
                     Spacer()
                     if project.budgetedHours > 0 {
-                        Text("\(String(format: "%.1f", scope.loggedHours))/\(String(format: "%.1f", scope.budgetedHours))h")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%@/%@h",
+                                locale: appSettingsManager.interfaceLocale,
+                                String(format: "%.1f", scope.loggedHours),
+                                String(format: "%.1f", scope.budgetedHours)
+                            )
+                        )
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .buxLabelSecondary()
                     }
                 }
                 
                 if project.allowedRevisions > 0 {
-                    Text("Revisions: \(project.currentRevisions)/\(project.allowedRevisions)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Revisions: %lld/%lld",
+                            locale: appSettingsManager.interfaceLocale,
+                            project.currentRevisions,
+                            project.allowedRevisions
+                        )
+                    )
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                 }
@@ -548,7 +608,7 @@ struct StudioProjectDetailView: View {
         let existing = store.agreementDraft(forProjectId: project.id)
         return VStack(alignment: .leading, spacing: BuxLayout.tight) {
             HStack(spacing: 6) {
-                Text("AGREEMENT")
+                BuxCatalogDynamicText(key: "AGREEMENT")
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 ProFeatureBadge(compact: true)
@@ -587,13 +647,13 @@ struct StudioProjectDetailView: View {
     
     private func financialMarginsSection(analysis: (totalTime: TimeInterval, billableTime: TimeInterval, projectedRevenue: Decimal, projectedExpenses: Decimal, projectedProfit: Decimal, effectiveHourlyRate: Decimal, isOverrunRisk: Bool)) -> some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            Text("FINANCIAL MATRIX")
+            BuxCatalogDynamicText(key: "FINANCIAL MATRIX")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("REVENUE")
+                    BuxCatalogDynamicText(key: "REVENUE")
                         .font(.system(size: 9, weight: .semibold))
                         .buxLabelSecondary()
                     Text(appSettingsManager.format(analysis.projectedRevenue))
@@ -602,7 +662,7 @@ struct StudioProjectDetailView: View {
                 }
                 Spacer()
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("EXPENSES")
+                    BuxCatalogDynamicText(key: "EXPENSES")
                         .font(.system(size: 9, weight: .semibold))
                         .buxLabelSecondary()
                     Text(appSettingsManager.format(analysis.projectedExpenses))
@@ -624,11 +684,17 @@ struct StudioProjectDetailView: View {
             Divider()
             
             HStack {
-                Text("Effective hourly rate:")
+                BuxCatalogDynamicText(key: "Effective hourly rate:")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
                 Spacer()
-                Text("\(appSettingsManager.format(analysis.effectiveHourlyRate))/hr")
+                Text(
+                    BuxLocalizedString.format(
+                        "%@/hr",
+                        locale: appSettingsManager.interfaceLocale,
+                        appSettingsManager.format(analysis.effectiveHourlyRate)
+                    )
+                )
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
@@ -639,12 +705,12 @@ struct StudioProjectDetailView: View {
     
     private func timeEntriesSection(project: StudioProject) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("TIME ENTRIES LOG")
+            BuxCatalogDynamicText(key: "TIME ENTRIES LOG")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             
             if project.timeEntries.isEmpty {
-                Text("No time entries logged yet.")
+                BuxCatalogDynamicText(key: "No time entries logged yet.")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
             } else {
@@ -659,7 +725,13 @@ struct StudioProjectDetailView: View {
                                 .buxLabelSecondary()
                         }
                         Spacer()
-                        Text(String(format: "%.1f hrs", entry.duration / 3600))
+                        Text(
+                            BuxLocalizedString.format(
+                                "%.1f hrs",
+                                locale: appSettingsManager.interfaceLocale,
+                                entry.duration / 3600
+                            )
+                        )
                             .font(.system(size: 13, weight: .semibold))
                         
                         Text(entry.isBillable ? "Billable" : "Admin")
@@ -704,7 +776,7 @@ struct StudioProjectDetailView: View {
             }
             Button("Cancel", role: .cancel) { timeEntryPendingDelete = nil }
         } message: {
-            Text("This removes the entry from the project log.")
+            BuxCatalogDynamicText(key: "This removes the entry from the project log.")
         }
     }
 
@@ -717,12 +789,12 @@ struct StudioProjectDetailView: View {
     
     private func expensesSection(projectExpenses: Decimal) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("LINKED EXPENSES")
+            BuxCatalogDynamicText(key: "LINKED EXPENSES")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             
             HStack {
-                Text("Total project direct cost:")
+                BuxCatalogDynamicText(key: "Total project direct cost:")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
                 Spacer()
@@ -748,6 +820,7 @@ struct ActiveTimeTrackerView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var store: StudioStore
     @ObservedObject private var timer = StudioTimerController.shared
@@ -869,7 +942,7 @@ struct ActiveTimeTrackerView: View {
                     dismissNotesKeyboard()
                 }
             )
-            .navigationTitle("Work clock")
+            .buxCatalogNavigationTitle("Work clock")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -939,12 +1012,20 @@ struct ActiveTimeTrackerView: View {
                 isPresented: $showFinishEarlyConfirm,
                 titleVisibility: .visible
             ) {
-                Button("Log \(StudioTimerSession.formattedElapsed(displayElapsed, style: .hub)) and stop") {
+                Button {
                     finishEarlyAndDismiss()
+                } label: {
+                    Text(
+                        BuxLocalizedString.format(
+                            "Log %@ and stop",
+                            locale: appSettingsManager.interfaceLocale,
+                            StudioTimerSession.formattedElapsed(displayElapsed, style: .hub)
+                        )
+                    )
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Save your time entry and end the Live Activity.")
+                BuxCatalogDynamicText(key: "Save your time entry and end the Live Activity.")
             }
         }
         .tint(accent)
@@ -958,7 +1039,7 @@ struct ActiveTimeTrackerView: View {
                 .kerning(1)
 
             if store.projects.isEmpty {
-                Text("Add a project in Studio first")
+                BuxCatalogDynamicText(key: "Add a project in Studio first")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             } else {
@@ -978,7 +1059,7 @@ struct ActiveTimeTrackerView: View {
 
     private var jobNameSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("JOB NAME")
+            BuxCatalogDynamicText(key: "JOB NAME")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(1)
@@ -1039,7 +1120,13 @@ struct ActiveTimeTrackerView: View {
 
             ForEach(Array(laps.enumerated().reversed()), id: \.offset) { index, lap in
                 HStack {
-                    Text("Lap \(laps.count - index)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Lap %lld",
+                            locale: appSettingsManager.interfaceLocale,
+                            laps.count - index
+                        )
+                    )
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                     Spacer()
@@ -1155,7 +1242,7 @@ struct ActiveTimeTrackerView: View {
 
     private var billableSection: some View {
         Toggle(isOn: $isBillable) {
-            Text("Billable hours")
+            BuxCatalogDynamicText(key: "Billable hours")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
         }
@@ -1363,7 +1450,7 @@ struct StudioProjectEditorSheet: View {
                             BuxFormRowDivider()
                             Picker("Client", selection: $clientId) {
                                 if store.clients.isEmpty {
-                                    Text("No client").tag(UUID())
+                                    BuxCatalogDynamicText(key: "No client").tag(UUID())
                                 } else {
                                     ForEach(store.clients) { c in
                                         Text(c.name).tag(c.id)
@@ -1374,7 +1461,7 @@ struct StudioProjectEditorSheet: View {
                             BuxFormRowDivider()
                             Picker("Status", selection: $status) {
                                 ForEach(StudioProjectStatus.allCases) { s in
-                                    Text(s.rawValue).tag(s)
+                                    Text(s.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(s)
                                 }
                             }
                             .buxFormFieldPadding()
@@ -1383,7 +1470,7 @@ struct StudioProjectEditorSheet: View {
                         BuxFormSection(title: "How you charge") {
                             Picker("Billing", selection: $billingChoice) {
                                 ForEach(StudioProjectBillingChoice.allCases) { choice in
-                                    Text(choice.rawValue).tag(choice)
+                                    Text(choice.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(choice)
                                 }
                             }
                             .pickerStyle(.segmented)
@@ -1425,7 +1512,7 @@ struct StudioProjectEditorSheet: View {
                         }
 
                         BuxFormSection(title: "Project plan") {
-                            Text("Used when you fill an agreement from this project.")
+                            BuxCatalogDynamicText(key: "Used when you fill an agreement from this project.")
                                 .font(.system(size: 11, weight: .medium))
                                 .buxLabelSecondary()
                                 .padding(.horizontal, BuxTokens.section)
@@ -1483,7 +1570,7 @@ struct StudioProjectEditorSheet: View {
                     .padding(.bottom, BuxTokens.sheetBottomClearance)
                 }
             }
-            .navigationTitle(isEditing ? "Edit Project" : "New Project")
+            .buxCatalogNavigationTitle(isEditing ? "Edit Project" : "New Project")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

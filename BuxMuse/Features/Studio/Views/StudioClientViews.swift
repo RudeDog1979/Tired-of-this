@@ -23,7 +23,7 @@ struct StudioClientsListView: View {
                 clientList
             }
         }
-        .navigationTitle("Clients CRM")
+        .buxCatalogNavigationTitle("Clients CRM")
         .navigationBarTitleDisplayMode(.large)
         .buxRootNavigationChrome()
         .toolbar {
@@ -83,7 +83,13 @@ struct StudioClientsListView: View {
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
                 HStack(spacing: 6) {
-                    Text("LTV: \(appSettingsManager.format(lifetimeValue))")
+                    Text(
+                        BuxLocalizedString.format(
+                            "LTV: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            appSettingsManager.format(lifetimeValue)
+                        )
+                    )
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
 
@@ -91,7 +97,13 @@ struct StudioClientsListView: View {
                         .font(.system(size: 10))
                         .foregroundStyle(themeManager.labelTertiary(for: colorScheme))
 
-                    Text("Reliability: \(Int(health.reliabilityScore))%")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Reliability: %lld%%",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int(health.reliabilityScore)
+                        )
+                    )
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 }
@@ -114,7 +126,7 @@ struct StudioClientsListView: View {
                 .font(.system(size: 32))
                 .buxLabelSecondary()
             
-            Text("No Clients registered yet")
+            BuxCatalogDynamicText(key: "No Clients registered yet")
                 .font(.system(size: 14, weight: .semibold))
                 .buxLabelSecondary()
             
@@ -185,13 +197,19 @@ struct StudioClientDetailView: View {
     private func healthCockpitHeader(analysis: (lifetimeValue: Decimal, averagePaymentDelay: TimeInterval, health: ClientHealthScore)) -> some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
             HStack {
-                Text("CLIENT HEALTH SCORE")
+                BuxCatalogDynamicText(key: "CLIENT HEALTH SCORE")
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 
                 Spacer()
                 
-                Text("\(Int(analysis.health.overallScore))/100")
+                Text(
+                    BuxLocalizedString.format(
+                        "%lld/100",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int(analysis.health.overallScore)
+                    )
+                )
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(healthColor(analysis.health.overallScore))
             }
@@ -203,25 +221,37 @@ struct StudioClientDetailView: View {
             
             HStack(spacing: BuxLayout.section) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Profitability")
+                    BuxCatalogDynamicText(key: "Profitability")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
-                    Text("\(Int(analysis.health.profitabilityScore))%")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld%%",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int(analysis.health.profitabilityScore)
+                        )
+                    )
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 }
                 Spacer()
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Payment Speed")
+                    BuxCatalogDynamicText(key: "Payment Speed")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
-                    Text("\(Int(analysis.averagePaymentDelay / 86400)) days")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld days",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int(analysis.averagePaymentDelay / 86400)
+                        )
+                    )
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 }
                 Spacer()
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Stress Indicator")
+                    BuxCatalogDynamicText(key: "Stress Indicator")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
                     Text(analysis.health.stressScore > 50 ? "High Risk" : "Normal")
@@ -237,7 +267,7 @@ struct StudioClientDetailView: View {
     
     private var contactDetailsCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("CONTACT DETAILS")
+            BuxCatalogDynamicText(key: "CONTACT DETAILS")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             
@@ -253,7 +283,7 @@ struct StudioClientDetailView: View {
                 }
                 if !client.notes.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Notes")
+                        BuxCatalogDynamicText(key: "Notes")
                             .font(.system(size: 10, weight: .bold))
                             .buxLabelSecondary()
                         Text(client.notes)
@@ -273,12 +303,12 @@ struct StudioClientDetailView: View {
         let clientInvoices = store.invoices.filter { $0.clientId == client.id }
         
         return VStack(alignment: .leading, spacing: 10) {
-            Text("INVOICES")
+            BuxCatalogDynamicText(key: "INVOICES")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             
             if clientInvoices.isEmpty {
-                Text("No invoices generated yet.")
+                BuxCatalogDynamicText(key: "No invoices generated yet.")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
             } else {
@@ -297,7 +327,7 @@ struct StudioClientDetailView: View {
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         
-                        Text(inv.status.rawValue)
+                        Text(inv.status.catalogLabel(locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(statusColor(inv.status))
                             .padding(.horizontal, 8)
@@ -323,7 +353,7 @@ struct StudioClientDetailView: View {
                 .buxLabelSecondary()
             
             if clientProjects.isEmpty {
-                Text("No projects logged yet.")
+                BuxCatalogDynamicText(key: "No projects logged yet.")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
             } else {
@@ -333,13 +363,25 @@ struct StudioClientDetailView: View {
                             Text(proj.name)
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Text("\(proj.timeEntries.count) time entries logged")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "%lld time entries logged",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    proj.timeEntries.count
+                                )
+                            )
                                 .font(.system(size: 11))
                                 .buxLabelSecondary()
                         }
                         Spacer()
                         if let rate = proj.hourlyRate {
-                            Text("\(appSettingsManager.format(rate))/hr")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "%@/hr",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    appSettingsManager.format(rate)
+                                )
+                            )
                                 .font(.system(size: 11, weight: .semibold))
                                 .buxLabelSecondary()
                         }

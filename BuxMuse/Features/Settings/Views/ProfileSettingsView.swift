@@ -10,6 +10,7 @@ import SwiftUI
 struct ProfileSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
 
     @State private var firstName = ""
@@ -31,14 +32,14 @@ struct ProfileSettingsView: View {
                     .buttonStyle(.plain)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Profile Photo")
+                        BuxCatalogDynamicText(key: "Profile Photo")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Text("Saved locally on your device.")
+                        BuxCatalogDynamicText(key: "Saved locally on your device.")
                             .font(.system(size: 12))
                             .buxLabelSecondary()
                         if loadFailed {
-                            Text("Couldn't load that photo — try another image.")
+                            BuxCatalogDynamicText(key: "Couldn't load that photo — try another image.")
                                 .font(.system(size: 10, weight: .medium))
                                 .foregroundColor(.orange)
                         }
@@ -58,7 +59,7 @@ struct ProfileSettingsView: View {
                 BuxFormRowDivider()
                 Picker("Display Style", selection: $preferredNameStyle) {
                     ForEach(PreferredNameStyle.allCases) { style in
-                        Text(style.rawValue).tag(style)
+                        Text(style.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(style)
                     }
                 }
                 .pickerStyle(.menu)

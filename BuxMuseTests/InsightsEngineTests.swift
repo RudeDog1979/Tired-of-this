@@ -23,7 +23,12 @@ final class InsightsEngineTests: XCTestCase {
         goalsEngine = GoalsEngine()
         goalsViewModel = GoalsViewModel(goalsEngine: goalsEngine, financialEngine: financialEngine)
         insightsEngine = InsightsEngine()
-        viewModel = InsightsViewModel(insightsEngine: insightsEngine, financialEngine: financialEngine, goalsViewModel: goalsViewModel)
+        viewModel = InsightsViewModel(
+            insightsEngine: insightsEngine,
+            financialEngine: financialEngine,
+            goalsViewModel: goalsViewModel,
+            appSettingsManager: AppSettingsManager()
+        )
     }
     
     override func tearDown() {
@@ -55,7 +60,8 @@ final class InsightsEngineTests: XCTestCase {
         ]
         
         let engine = SpendingInsightsEngine()
-        let result = engine.generateInsights(transactions: txs)
+        let locale = Locale(identifier: "en")
+        let result = engine.generateInsights(transactions: txs, locale: locale)
         
         // Verify Weekly Spend Spike detection
         let weeklySpike = result.first(where: { $0.title == "Weekly Spend Spike" })
@@ -86,7 +92,8 @@ final class InsightsEngineTests: XCTestCase {
         ]
         
         let engine = SubscriptionInsightsEngine()
-        let result = engine.generateInsights(subscriptions: activeSubs, goals: activeGoals)
+        let locale = Locale(identifier: "en")
+        let result = engine.generateInsights(subscriptions: activeSubs, goals: activeGoals, locale: locale)
         
         // Verify Zombie Subscription
         let zombie = result.first(where: { $0.title == "Zombie Subscription" })
@@ -113,7 +120,8 @@ final class InsightsEngineTests: XCTestCase {
         ]
         
         let catEngine = CategoryInsightsEngine()
-        let catResult = catEngine.generateInsights(transactions: txs)
+        let locale = Locale(identifier: "en")
+        let catResult = catEngine.generateInsights(transactions: txs, locale: locale)
         
         let groceriesOverspend = catResult.first(where: { $0.title == "Groceries Overspend" })
         XCTAssertNotNil(groceriesOverspend)
@@ -121,7 +129,7 @@ final class InsightsEngineTests: XCTestCase {
         
         // Merchant price hikes: previous Tesco was £50, latest Tesco is £300
         let merchEngine = MerchantInsightsEngine()
-        let merchResult = merchEngine.generateInsights(transactions: txs)
+        let merchResult = merchEngine.generateInsights(transactions: txs, locale: locale)
         
         let priceSpike = merchResult.first(where: { $0.title == "Merchant Price Spike" })
         XCTAssertNotNil(priceSpike)
@@ -148,7 +156,8 @@ final class InsightsEngineTests: XCTestCase {
         goalsEngine.updateGoal(newGoal)
         
         let engine = GoalInsightsEngine()
-        let result = engine.generateInsights(goals: [newGoal], goalsViewModel: goalsViewModel)
+        let locale = Locale(identifier: "en")
+        let result = engine.generateInsights(goals: [newGoal], goalsViewModel: goalsViewModel, locale: locale)
         
         // Low health goal should be flagged at risk
         let timelineRisk = result.first(where: { $0.title == "Goal Timeline At Risk" })
@@ -183,14 +192,15 @@ final class InsightsEngineTests: XCTestCase {
         ]
         
         let patternEngine = PatternInsightsEngine()
-        let patternResult = patternEngine.generateInsights(transactions: txs)
+        let locale = Locale(identifier: "en")
+        let patternResult = patternEngine.generateInsights(transactions: txs, locale: locale)
         
         let transportSpike = patternResult.first(where: { $0.title == "Late Night Transport Surge" })
         XCTAssertNotNil(transportSpike)
         XCTAssertEqual(transportSpike?.severity, .low)
         
         let predEngine = PredictiveInsightsEngine()
-        let predResult = predEngine.generateInsights(transactions: txs)
+        let predResult = predEngine.generateInsights(transactions: txs, locale: locale)
         
         // Stable spending predicted if current run-rate is extremely low
         let budgetForecast = predResult.first(where: { $0.title == "Stable Spending Forecast" })

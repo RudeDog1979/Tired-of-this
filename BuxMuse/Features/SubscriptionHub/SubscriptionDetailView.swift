@@ -20,7 +20,7 @@ struct SubscriptionDetailView: View {
     private var secondary: Color { themeManager.labelSecondary(for: colorScheme) }
 
     var body: some View {
-        BuxDetailOverlayScaffold(title: detail.info.merchantName) {
+        BuxDetailOverlayScaffold(title: detail.info.merchantName, localizeTitle: false) {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
                 isPresented = false
             }
@@ -45,7 +45,7 @@ struct SubscriptionDetailView: View {
                     .font(.system(size: 36, weight: .bold, design: .rounded))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                Text(detail.info.billingCycle.displayName)
+                Text(detail.info.billingCycle.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(themeManager.current.accentColor)
                     .padding(.horizontal, 10)
@@ -54,7 +54,14 @@ struct SubscriptionDetailView: View {
                     .clipShape(Capsule())
             }
 
-            Label("Next Renewal: \(formatDate(detail.info.nextRenewalDate))", systemImage: "calendar")
+            Label(
+                BuxLocalizedString.format(
+                    "Next Renewal: %@",
+                    locale: appSettingsManager.interfaceLocale,
+                    formatDate(detail.info.nextRenewalDate)
+                ),
+                systemImage: "calendar"
+            )
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(secondary)
         }
@@ -96,15 +103,23 @@ struct SubscriptionDetailView: View {
                     .padding(.top, 8)
 
                     HStack {
-                        Text("First recorded")
+                        BuxCatalogText.text("First recorded")
                         Spacer()
                         if detail.costChangePercentage != 0 {
-                            Text(detail.costChangePercentage > 0 ? "↑ \(String(format: "%.1f", detail.costChangePercentage))% Increase" : "↓ \(String(format: "%.1f", abs(detail.costChangePercentage)))% Decrease")
+                            Text(
+                                BuxLocalizedString.format(
+                                    detail.costChangePercentage > 0 ? "↑ %.1f%% Increase" : "↓ %.1f%% Decrease",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    detail.costChangePercentage > 0
+                                        ? detail.costChangePercentage
+                                        : abs(detail.costChangePercentage)
+                                )
+                            )
                                 .foregroundColor(detail.costChangePercentage > 0 ? .red : .green)
                                 .font(.system(size: 11, weight: .bold))
                         }
                         Spacer()
-                        Text("Current")
+                        BuxCatalogText.text("Current")
                     }
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(secondary)
@@ -118,7 +133,7 @@ struct SubscriptionDetailView: View {
     private var risksSection: some View {
         if !detail.info.risks.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Detected pattern warnings")
+                BuxCatalogText.text("Detected pattern warnings")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.red.opacity(0.8))
                     .kerning(0.6)
@@ -181,7 +196,7 @@ struct SubscriptionDetailView: View {
 
                 if !detail.alternatives.isEmpty {
                     Divider().opacity(0.08)
-                    Text("Suggested Alternatives:")
+                    BuxCatalogText.text("Suggested Alternatives:")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
@@ -225,17 +240,24 @@ struct SubscriptionDetailView: View {
 struct BudgetImpactItem: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let label: String
     let amount: String
     let color: Color
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(label)
+            BuxCatalogText.text(label)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundColor(themeManager.labelSecondary(for: colorScheme))
 
-            Text("+\(amount)")
+            Text(
+                BuxLocalizedString.format(
+                    "+%@",
+                    locale: appSettingsManager.interfaceLocale,
+                    amount
+                )
+            )
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(color)
         }

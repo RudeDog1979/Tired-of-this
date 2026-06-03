@@ -144,7 +144,7 @@ struct BusinessCardFeaturedCarousel: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
-            Text("Tap to open")
+            BuxCatalogDynamicText(key: "Tap to open")
                 .font(.system(size: 10, weight: .heavy, design: .rounded))
                 .foregroundStyle(themeManager.current.accentColor)
         }

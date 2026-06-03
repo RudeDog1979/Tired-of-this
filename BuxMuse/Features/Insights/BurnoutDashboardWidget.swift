@@ -47,7 +47,7 @@ public struct BurnoutDashboardWidget: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(energyColor)
                     
-                    Text("Creative Energy")
+                    BuxCatalogText.text("Creative Energy")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 }
@@ -62,7 +62,7 @@ public struct BurnoutDashboardWidget: View {
                     }) {
                         HStack(spacing: 4) {
                             Image(systemName: "slider.horizontal.3")
-                            Text(isEditingSliders ? "Done" : "Tune")
+                            BuxCatalogText.text(isEditingSliders ? "Done" : "Tune")
                         }
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
@@ -71,7 +71,7 @@ public struct BurnoutDashboardWidget: View {
                 } else {
                     HStack(spacing: 4) {
                         Image(systemName: "applewatch.side.right")
-                        Text("Synced")
+                        BuxCatalogText.text("Synced")
                     }
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(.green.opacity(0.85))
@@ -104,11 +104,17 @@ public struct BurnoutDashboardWidget: View {
                         .animation(.buxBounce, value: engine.currentStatus.creativeEnergyPercent)
                     
                     VStack(spacing: 0) {
-                        Text("\(Int(engine.currentStatus.creativeEnergyPercent))%")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%lld%%",
+                                locale: appSettingsManager.interfaceLocale,
+                                Int(engine.currentStatus.creativeEnergyPercent)
+                            )
+                        )
                             .font(.system(size: 18, weight: .black, design: .rounded))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         
-                        Text("battery")
+                        BuxCatalogText.text("battery")
                             .font(.system(size: 8, weight: .bold))
                             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                     }
@@ -120,7 +126,13 @@ public struct BurnoutDashboardWidget: View {
                         Image(systemName: "hourglass")
                             .font(.system(size: 11))
                             .foregroundColor(themeManager.current.accentColor)
-                        Text("Work logged: \(String(format: "%.1f", engine.currentStatus.workHours)) hrs")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Work logged: %@ hrs",
+                                locale: appSettingsManager.interfaceLocale,
+                                String(format: "%.1f", engine.currentStatus.workHours)
+                            )
+                        )
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     }
@@ -129,7 +141,13 @@ public struct BurnoutDashboardWidget: View {
                         Image(systemName: "moon.fill")
                             .font(.system(size: 11))
                             .foregroundColor(Color.indigo)
-                        Text("Sleep: \(String(format: "%.1f", engine.currentStatus.sleepHours)) hrs")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Sleep: %@ hrs",
+                                locale: appSettingsManager.interfaceLocale,
+                                String(format: "%.1f", engine.currentStatus.sleepHours)
+                            )
+                        )
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     }
@@ -138,7 +156,13 @@ public struct BurnoutDashboardWidget: View {
                         Image(systemName: "exclamationmark.shield.fill")
                             .font(.system(size: 11))
                             .foregroundColor(.orange)
-                        Text("Anxiety count: \(engine.currentStatus.stressExpenseCount)")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Anxiety count: %lld",
+                                locale: appSettingsManager.interfaceLocale,
+                                engine.currentStatus.stressExpenseCount
+                            )
+                        )
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     }
@@ -155,11 +179,17 @@ public struct BurnoutDashboardWidget: View {
                 VStack(alignment: .leading, spacing: 10) {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text("Night sleep duration")
+                            BuxCatalogText.text("Night sleep duration")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                             Spacer()
-                            Text("\(String(format: "%.1f", localSleepHours)) hours")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "%@ hours",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    String(format: "%.1f", localSleepHours)
+                                )
+                            )
                                 .font(.system(size: 11, weight: .black, design: .rounded))
                                 .foregroundColor(themeManager.current.accentColor)
                         }
@@ -169,11 +199,17 @@ public struct BurnoutDashboardWidget: View {
                     
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text("Subjective stress zone")
+                            BuxCatalogText.text("Subjective stress zone")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                             Spacer()
-                            Text("Level \(Int(localStressLevel))/10")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Level %lld/10",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    Int(localStressLevel)
+                                )
+                            )
                                 .font(.system(size: 11, weight: .black, design: .rounded))
                                 .foregroundColor(Color.orange)
                         }
@@ -204,11 +240,11 @@ public struct BurnoutDashboardWidget: View {
                         Image(systemName: "sun.max.trianglebadge.exclamationmark.fill")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(.orange)
-                        Text("High Stress Alert")
+                        BuxCatalogText.text("High Stress Alert")
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     }
-                    Text("Your stress index has breached the 0.85 threshold. We suggest enabling Sunset mode to reduce cognitive overload and ocular strain.")
+                    BuxCatalogText.text("Your stress index has breached the 0.85 threshold. We suggest enabling Sunset mode to reduce cognitive overload and ocular strain.")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .lineLimit(nil)
@@ -220,7 +256,7 @@ public struct BurnoutDashboardWidget: View {
                         }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "sun.horizon.fill")
-                                Text("Switch to Sunset Theme")
+                                BuxCatalogText.text("Switch to Sunset Theme")
                             }
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.white)
@@ -243,6 +279,7 @@ public struct BurnoutDashboardWidget: View {
         }
         .padding(BuxTokens.section)
         .dashboardMaterialCardChrome(.outlined)
+        .buxInterfaceLocale()
         .onAppear {
             localSleepHours = settings.manualSleepHours
             localStressLevel = settings.manualStressLevel

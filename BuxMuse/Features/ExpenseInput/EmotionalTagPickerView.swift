@@ -12,6 +12,7 @@ struct EmotionalTagPickerView: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -38,7 +39,7 @@ struct EmotionalTagPickerView: View {
             HStack(spacing: 6) {
                 Image(systemName: tag.symbol)
                     .font(.system(size: 13, weight: .semibold))
-                Text(tag.label)
+                Text(tag.localizedLabel(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .semibold))
             }
             .foregroundColor(isSelected ? chipForeground(accent: accent) : themeManager.pillInactiveLabelColor(for: colorScheme))

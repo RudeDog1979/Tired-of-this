@@ -11,6 +11,7 @@ struct ExpenseMerchantListSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var brain: BuxMuseBrain
 
     @State private var merchants: [ExpenseMerchantRecord] = []
@@ -127,7 +128,7 @@ private struct MerchantSheetSubtitleModifier: ViewModifier {
             content.navigationSubtitle("Tap a merchant to review details. Changes save automatically.")
         } else {
             content.safeAreaInset(edge: .top, spacing: 0) {
-                Text("Tap a merchant to review details. Changes save automatically.")
+                BuxCatalogText.text("Tap a merchant to review details. Changes save automatically.")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -143,6 +144,7 @@ private struct MerchantSheetSubtitleModifier: ViewModifier {
 private struct MerchantInlineEditor: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var brain: BuxMuseBrain
 
     let merchant: ExpenseMerchantRecord
@@ -170,7 +172,7 @@ private struct MerchantInlineEditor: View {
             Divider().opacity(0.08)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Canonical name")
+                BuxCatalogText.text("Canonical name")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.gray)
                 Text(working.name)
@@ -187,11 +189,18 @@ private struct MerchantInlineEditor: View {
                     }
 
                 if needsDisambiguatorHint {
-                    Text("Another merchant shares this name — add a label to tell them apart.")
+                    BuxCatalogText.text("Another merchant shares this name — add a label to tell them apart.")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.orange)
                 } else if !disambiguatorText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text("Shown as \(working.name) · \(disambiguatorText.trimmingCharacters(in: .whitespacesAndNewlines))")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Shown as %@ · %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            working.name,
+                            disambiguatorText.trimmingCharacters(in: .whitespacesAndNewlines)
+                        )
+                    )
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.gray)
                 }
@@ -202,7 +211,13 @@ private struct MerchantInlineEditor: View {
                 .tint(themeManager.current.accentColor)
 
             if let risk = working.riskScore {
-                Text(String(format: "Risk score: %.0f%%", risk * 100))
+                Text(
+                    BuxLocalizedString.format(
+                        "Risk score: %.0f%%",
+                        locale: appSettingsManager.interfaceLocale,
+                        risk * 100
+                    )
+                )
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.gray)
             }

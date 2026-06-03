@@ -34,15 +34,15 @@ struct AboutSettingsView: View {
                         .padding(.top, 24)
                         
                         VStack(spacing: 4) {
-                            Text("BuxMuse")
+                            BuxCatalogDynamicText(key: "BuxMuse")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Text("Your Premium Offline Co-pilot")
+                            BuxCatalogDynamicText(key: "Your Premium Offline Co-pilot")
                                 .font(.system(size: 13, weight: .semibold))
                                 .buxLabelSecondary()
                         }
                         
-                        Text("Version 1.0.0 (Build 26)")
+                        BuxCatalogDynamicText(key: "Version 1.0.0 (Build 26)")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.gray.opacity(0.7))
                     }
@@ -56,7 +56,7 @@ struct AboutSettingsView: View {
                             HStack(alignment: .top, spacing: 10) {
                                 Image(systemName: "checkmark.shield.fill")
                                     .foregroundColor(.green)
-                                Text("100% on-device local sandbox parsing. Your bank statements and scanned documents never touch the cloud.")
+                                BuxCatalogDynamicText(key: "100% on-device local sandbox parsing. Your bank statements and scanned documents never touch the cloud.")
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }
@@ -66,7 +66,7 @@ struct AboutSettingsView: View {
                             HStack(alignment: .top, spacing: 10) {
                                 Image(systemName: "network.slash")
                                     .foregroundColor(.red)
-                                Text("Zero network analytics trackers. Zero external APIs. BuxMuse operates fully private and autonomous.")
+                                BuxCatalogDynamicText(key: "Zero network analytics trackers. Zero external APIs. BuxMuse operates fully private and autonomous.")
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }

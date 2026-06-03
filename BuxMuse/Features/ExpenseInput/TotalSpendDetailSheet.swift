@@ -29,6 +29,10 @@ struct TotalSpendDetailSheet: View {
         case days30 = "30 Days"
         case days90 = "90 Days"
 
+        func localizedTitle(locale: Locale) -> String {
+            BuxLocalizedString.string(String.LocalizationValue(stringLiteral: rawValue), locale: locale)
+        }
+
         var id: String { rawValue }
         var dayCount: Int {
             switch self {
@@ -162,7 +166,13 @@ struct TotalSpendDetailSheet: View {
 
     private var glassHeaderSection: some View {
         VStack(alignment: .center, spacing: 16) {
-            Text("Total spent (\(selectedRange.rawValue))")
+            Text(
+                BuxLocalizedString.format(
+                    "Total spent (%@)",
+                    locale: appSettingsManager.interfaceLocale,
+                    selectedRange.localizedTitle(locale: appSettingsManager.interfaceLocale)
+                )
+            )
                 .buxSectionLabelStyle(color: .gray)
 
             Text(formatAmount(Decimal(totalSpentInRange)))
@@ -172,7 +182,7 @@ struct TotalSpendDetailSheet: View {
 
             HStack(spacing: 32) {
                 VStack(spacing: 4) {
-                    Text("Daily Average")
+                    BuxCatalogText.text("Daily Average")
                         .font(.caption)
                         .foregroundColor(.gray)
                     Text(formatAmount(Decimal(dailyAverageInRange)))
@@ -184,10 +194,10 @@ struct TotalSpendDetailSheet: View {
                     .frame(height: 32)
 
                 VStack(spacing: 4) {
-                    Text("Transactions")
+                    BuxCatalogText.text("Transactions")
                         .font(.caption)
                         .foregroundColor(.gray)
-                    Text("\(filteredRecords.count)")
+                    Text(filteredRecords.count, format: .number)
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 }
@@ -232,7 +242,7 @@ struct TotalSpendDetailSheet: View {
     private var pickerSection: some View {
         Picker("Range", selection: $selectedRange) {
             ForEach(TimeRange.allCases) { range in
-                Text(range.rawValue).tag(range)
+                Text(range.localizedTitle(locale: appSettingsManager.interfaceLocale)).tag(range)
             }
         }
         .pickerStyle(.segmented)
@@ -243,7 +253,7 @@ struct TotalSpendDetailSheet: View {
 
     private var chartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Trend Over Time")
+            BuxCatalogText.text("Trend Over Time")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.gray)
                 .kerning(0.5)
@@ -306,7 +316,7 @@ struct TotalSpendDetailSheet: View {
 
     private var heatZoneSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Spending Heat Zones")
+            BuxCatalogText.text("Spending Heat Zones")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.gray)
                 .kerning(0.5)
@@ -363,7 +373,13 @@ struct TotalSpendDetailSheet: View {
                 Text(title)
                     .font(.caption2.bold())
                     .foregroundColor(.gray)
-                Text("\(count) items")
+                Text(
+                    BuxLocalizedString.format(
+                        "%lld items",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int64(count)
+                    )
+                )
                     .font(.caption.bold())
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
@@ -374,13 +390,13 @@ struct TotalSpendDetailSheet: View {
 
     private var largestPurchasesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Largest Purchases")
+            BuxCatalogText.text("Largest Purchases")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.gray)
                 .kerning(0.5)
 
             if largestPurchases.isEmpty {
-                Text("No transactions logged in this range.")
+                BuxCatalogText.text("No transactions logged in this range.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, alignment: .center)

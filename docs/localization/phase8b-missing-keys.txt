@@ -1,0 +1,51 @@
+Accent Color
+Bank Transfer
+Bill from completed work
+Business Card
+Confirm
+Corners
+Current saved
+Defaults for new agreements
+Density
+Effective rate \(snapshot.effectiveRatePercent)% on recorded income
+Fill strength \(Int(colorAlpha * 100))%
+Goal
+Import into agreement
+Invoice Details
+Invoice Notes
+LTV \(client.lifetimeValueFormatted) · Health \(client.healthScore)%
+Layer visibility \(Int(layerOpacity.wrappedValue * 100))%
+Line Items
+Logo Position
+Out of scope
+Payment Link
+Payment terms
+Preview
+Priority
+QR Code
+Quick packs
+Rate optimizer
+Reliability: \(Int(health.reliabilityScore))%
+Scope
+Target
+Tax Mode
+Tax Rates
+Template Style
+Totals Preview
+Typography
+View deal
+What are you doing?
+Who is this for?
+Your own terms
+\(Int(analysis.health.profitabilityScore))%
+\(Int(background.overlayOpacity * 100))%
+\(Int(background.photoOpacity * 100))%
+\(Int(binding.wrappedValue * 100))% visible
+\(Int(colorAlpha * 100))%
+\(Int(deductiblePercentage))%
+\(Int(detail.progress * 100))%
+\(Int(engine.currentStatus.creativeEnergyPercent))%
+\(Int(pct))%
+\(Int(progress * 100))%
+\(Int(value * 100))%
+\(rate.label) — \(NSDecimalNumber(decimal: rate.percentage).stringValue)%

@@ -12,6 +12,7 @@ import SwiftUI
 struct StudioTierWordmark: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var style: Style = .hero
 
@@ -38,13 +39,13 @@ struct StudioTierWordmark: View {
                 studioTitle(size: 34, weight: .bold)
                 tierBadge(compact: false)
             }
-            Text("Full tax, PDF invoices, analytics")
+            BuxCatalogDynamicText(key: "Full tax, PDF invoices, analytics")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Pro Studio")
+        .accessibilityLabel(BuxCatalogLabel.string("Pro Studio", locale: appSettingsManager.interfaceLocale))
     }
 
     private var navigationMark: some View {
@@ -53,7 +54,7 @@ struct StudioTierWordmark: View {
             tierBadge(compact: true)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Pro Studio")
+        .accessibilityLabel(BuxCatalogLabel.string("Pro Studio", locale: appSettingsManager.interfaceLocale))
     }
 
     private func studioTitle(size: CGFloat, weight: Font.Weight) -> some View {
@@ -61,7 +62,7 @@ struct StudioTierWordmark: View {
             Text("S")
                 .font(.system(size: size, weight: .black, design: .rounded))
                 .foregroundStyle(studioSGradient)
-            Text("tudio")
+            BuxCatalogDynamicText(key: "tudio")
                 .font(.system(size: size, weight: weight, design: .rounded))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
         }
@@ -100,7 +101,7 @@ struct StudioTierWordmark: View {
                 Capsule()
                     .stroke(Color.white.opacity(colorScheme == .dark ? 0.12 : 0.35), lineWidth: 0.5)
             )
-            .accessibilityLabel("Pro tier")
+            .accessibilityLabel(BuxCatalogLabel.string("Pro tier", locale: appSettingsManager.interfaceLocale))
     }
 }
 
@@ -108,18 +109,19 @@ struct StudioTierWordmark: View {
 struct SimpleStudioHeader: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("Simple")
+            BuxCatalogDynamicText(key: "Simple")
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-            Text("Track jobs, advances, and who owes you — free.")
+            BuxCatalogDynamicText(key: "Track jobs, advances, and who owes you — free.")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Simple Studio")
+        .accessibilityLabel(BuxCatalogLabel.string("Simple Studio", locale: appSettingsManager.interfaceLocale))
     }
 }

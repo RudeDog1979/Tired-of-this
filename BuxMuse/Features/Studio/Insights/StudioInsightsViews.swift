@@ -16,7 +16,7 @@ struct StudioInsightsHubSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BuxTokens.tight) {
             HStack {
-                Text("STUDIO INSIGHTS")
+                BuxCatalogDynamicText(key: "STUDIO INSIGHTS")
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 Spacer()
@@ -162,7 +162,7 @@ struct StudioInsightsDashboardView: View {
             .padding(.vertical, BuxTokens.section)
         }
         .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
-        .navigationTitle("Studio Insights")
+        .buxCatalogNavigationTitle("Studio Insights")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

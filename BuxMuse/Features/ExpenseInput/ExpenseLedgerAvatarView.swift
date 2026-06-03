@@ -19,7 +19,8 @@ enum IncomeSourceQuickPick: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var label: String {
+    /// Stable English catalog key (stored in `ExpenseRecord.name` when using quick picks).
+    var catalogKey: String {
         switch self {
         case .salary: return "Salary"
         case .paycheck: return "Paycheck"
@@ -30,6 +31,10 @@ enum IncomeSourceQuickPick: String, CaseIterable, Identifiable {
         case .cash: return "Cash received"
         case .other: return "Other income"
         }
+    }
+
+    func localizedLabel(locale: Locale) -> String {
+        BuxCatalogLabel.string(catalogKey, locale: locale)
     }
 
     var symbol: String {
@@ -44,9 +49,21 @@ enum IncomeSourceQuickPick: String, CaseIterable, Identifiable {
         }
     }
 
-    static func matching(label: String) -> IncomeSourceQuickPick? {
-        let trimmed = label.trimmingCharacters(in: .whitespacesAndNewlines)
-        return allCases.first { $0.label == trimmed }
+    static func matchingStoredLabel(_ stored: String, locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> IncomeSourceQuickPick? {
+        let trimmed = stored.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        return allCases.first { pick in
+            if pick.catalogKey.caseInsensitiveCompare(trimmed) == .orderedSame { return true }
+            if pick.localizedLabel(locale: locale).caseInsensitiveCompare(trimmed) == .orderedSame { return true }
+            return false
+        }
+    }
+
+    static func localizedDisplayName(for storedLabel: String, locale: Locale) -> String {
+        if let pick = matchingStoredLabel(storedLabel, locale: locale) {
+            return pick.localizedLabel(locale: locale)
+        }
+        return storedLabel
     }
 }
 
@@ -88,7 +105,7 @@ struct ExpenseLedgerAvatarView: View {
             return ("arrow.down.circle.fill", .green, Color.green.opacity(0.18))
         }
 
-        if let pick = IncomeSourceQuickPick.matching(label: record.name) {
+        if let pick = IncomeSourceQuickPick.matchingStoredLabel(record.name) {
             return quickPickStyle(pick)
         }
 
@@ -115,8 +132,11 @@ struct ExpenseLedgerAvatarView: View {
 
     private var isOtherIncomePresentation: Bool {
         guard record.transactionCategory == .income || record.amountValue > 0 else { return false }
-        if IncomeSourceQuickPick.matching(label: record.name) == .other { return true }
-        if record.name.trimmingCharacters(in: .whitespacesAndNewlines).localizedCaseInsensitiveCompare("Other income") == .orderedSame {
+        if IncomeSourceQuickPick.matchingStoredLabel(record.name) == .other { return true }
+        if record.name.trimmingCharacters(in: .whitespacesAndNewlines).localizedCaseInsensitiveCompare("Other income") == .orderedSame
+            || record.name.trimmingCharacters(in: .whitespacesAndNewlines).localizedCaseInsensitiveCompare(
+                IncomeSourceQuickPick.other.catalogKey
+            ) == .orderedSame {
             return true
         }
         return false

@@ -66,6 +66,10 @@ struct ExpenseDetailView: View {
             }
             .buxDetailNavigationChrome()
             .environment(\.expensesEnhancedTint, true)
+            .buxInterfaceLocale()
+            .onChange(of: appSettingsManager.selectedCountry.id) { _, _ in
+                viewModel.reloadIntelligence()
+            }
         }
         .sheet(isPresented: $showCategorySheet) {
             ExpenseCategorySheet(transaction: viewModel.record.toTransaction()) { category, categoryId in
@@ -180,7 +184,9 @@ struct ExpenseDetailView: View {
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                    Text(viewModel.record.transactionCategory.displayName)
+                    Text(viewModel.record.transactionCategory.localizedDisplayName(
+                        locale: appSettingsManager.interfaceLocale
+                    ))
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(brandAccent)
                         .padding(.horizontal, 10)
@@ -205,7 +211,7 @@ struct ExpenseDetailView: View {
                 .foregroundColor(themeManager.labelSecondary(for: colorScheme))
 
                 Button { showCategorySheet = true } label: {
-                    Text("Change category")
+                    BuxCatalogText.text("Change category")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
                 }
@@ -248,7 +254,7 @@ struct ExpenseDetailView: View {
 
         if !warnings.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Detected pattern warnings")
+                BuxCatalogText.text("Detected pattern warnings")
                     .buxSectionLabelStyle(color: .red.opacity(0.8))
 
                 ForEach(warnings, id: \.title) { item in
@@ -275,7 +281,7 @@ struct ExpenseDetailView: View {
 
         if !standard.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Intelligence insights")
+                BuxCatalogText.text("Intelligence insights")
                     .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
                 VStack(alignment: .leading, spacing: 14) {
@@ -289,7 +295,7 @@ struct ExpenseDetailView: View {
                                 .foregroundColor(themeManager.current.accentColor)
                                 .frame(width: 22)
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(item.title)
+                                Text(localizedInsightTitle(item.title))
                                     .font(.system(size: 11, weight: .bold))
                                     .foregroundColor(.gray)
                                 Text(item.body)
@@ -310,7 +316,7 @@ struct ExpenseDetailView: View {
 
     private var notesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Notes")
+            BuxCatalogText.text("Notes")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             VStack(alignment: .leading, spacing: 12) {
@@ -430,5 +436,9 @@ struct ExpenseDetailView: View {
             items.append(.init(title: "Subscriptions", body: s, icon: "creditcard", isWarning: false))
         }
         return items
+    }
+
+    private func localizedInsightTitle(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: appSettingsManager.interfaceLocale)
     }
 }

@@ -18,7 +18,7 @@ struct MileageSettingsView: View {
                 Toggle("Auto-location for mileage", isOn: $store.autoLocationForMileage)
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
-                Text("When enabled, trip sheets can capture your current place name for start or end.")
+                BuxCatalogDynamicText(key: "When enabled, trip sheets can capture your current place name for start or end.")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
                     .buxFormFieldPadding()
@@ -26,7 +26,7 @@ struct MileageSettingsView: View {
 
             BuxFormSection(title: "Mileage rate") {
                 HStack {
-                    Text("Allowance per mile")
+                    BuxCatalogDynamicText(key: "Allowance per mile")
                     Spacer()
                     TextField("0.45", value: $store.mileageRatePerUnitValue, format: .number.precision(.fractionLength(2)))
                         .keyboardType(.decimalPad)
@@ -34,7 +34,7 @@ struct MileageSettingsView: View {
                         .frame(maxWidth: 88)
                 }
                 .buxFormFieldPadding()
-                Text("Applied to business-purpose trips in Studio deductions and tax estimates.")
+                BuxCatalogDynamicText(key: "Applied to business-purpose trips in Studio deductions and tax estimates.")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
                     .buxFormFieldPadding()

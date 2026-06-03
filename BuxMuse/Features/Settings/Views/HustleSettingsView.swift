@@ -38,9 +38,9 @@ struct HustleSettingsView: View {
             BuxFormSection(title: "Workspace mode") {
                 Toggle(isOn: $store.sideHustleMatrixEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Enable workspace switching")
+                        BuxCatalogDynamicText(key: "Enable workspace switching")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Optional for solo operators and teams. Keeps personal and business ledgers separate when you need it — off by default.")
+                        BuxCatalogDynamicText(key: "Optional for solo operators and teams. Keeps personal and business ledgers separate when you need it — off by default.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)
@@ -60,9 +60,9 @@ struct HustleSettingsView: View {
                 BuxFormSection(title: "Unassigned expenses") {
                     Toggle(isOn: $store.showUnassignedExpensesInWorkspace) {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("Show unassigned when filtering")
+                            BuxCatalogDynamicText(key: "Show unassigned when filtering")
                                 .font(.system(size: 15, weight: .semibold))
-                            Text("When a workspace is selected, expenses without a workspace tag appear with an Unassigned badge.")
+                            BuxCatalogDynamicText(key: "When a workspace is selected, expenses without a workspace tag appear with an Unassigned badge.")
                                 .font(.system(size: 12, weight: .medium))
                                 .buxLabelSecondary()
                                 .fixedSize(horizontal: false, vertical: true)
@@ -78,7 +78,7 @@ struct HustleSettingsView: View {
                 // Section 2: Manage Active Hustles
                 BuxFormSection(title: "Your active workspaces") {
                 if hustleManager.hustles.isEmpty {
-                    Text("No workspaces found. Tap below to create your first business gig.")
+                    BuxCatalogDynamicText(key: "No workspaces found. Tap below to create your first business gig.")
                         .font(.system(size: 13, weight: .medium))
                         .buxLabelSecondary()
                         .buxFormFieldPadding()
@@ -104,7 +104,7 @@ struct HustleSettingsView: View {
                         Divider().opacity(0.1)
                         
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Brand Color")
+                            BuxCatalogDynamicText(key: "Brand Color")
                                 .font(.system(size: 12, weight: .bold))
                                 .buxLabelSecondary()
                             
@@ -136,7 +136,7 @@ struct HustleSettingsView: View {
                             HStack {
                                 Spacer()
                                 Image(systemName: "plus.circle.fill")
-                                Text("Create Workspace")
+                                BuxCatalogDynamicText(key: "Create Workspace")
                                 Spacer()
                             }
                             .font(.system(size: 14, weight: .bold))
@@ -195,7 +195,7 @@ struct HustleSettingsView: View {
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 
                 if hustleManager.selectedHustleId == hustle.id {
-                    Text("Current active ledger context")
+                    BuxCatalogDynamicText(key: "Current active ledger context")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
                 } else {
@@ -214,7 +214,7 @@ struct HustleSettingsView: View {
                             hustleManager.selectHustle(hustle.id)
                         }
                     }) {
-                        Text("Select")
+                        BuxCatalogDynamicText(key: "Select")
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(themeManager.current.accentColor)
                             .padding(.horizontal, 10)
@@ -255,7 +255,7 @@ struct HustleSettingsView: View {
             
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
-                    Text("Gig Spaces")
+                    BuxCatalogDynamicText(key: "Gig Spaces")
                         .font(.system(size: 16, weight: .black, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
@@ -290,12 +290,12 @@ struct HustleSettingsView: View {
                     .foregroundColor(.yellow)
                     .font(.system(size: 20))
                 
-                Text("Upgrade to Pro Studio")
+                BuxCatalogDynamicText(key: "Upgrade to Pro Studio")
                     .font(.system(size: 15, weight: .black, design: .rounded))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
             
-            Text("You've hit the active side-gig limit for Simple Studio. Upgrade to Pro Studio to unlock unlimited ledgers, business card design, automatic invoice generation, and full revenue forecasting.")
+            BuxCatalogDynamicText(key: "You've hit the active side-gig limit for Simple Studio. Upgrade to Pro Studio to unlock unlimited ledgers, business card design, automatic invoice generation, and full revenue forecasting.")
                 .font(.system(size: 12, weight: .medium))
                 .buxLabelSecondary()
                 .fixedSize(horizontal: false, vertical: true)
@@ -305,7 +305,7 @@ struct HustleSettingsView: View {
             }) {
                 HStack {
                     Spacer()
-                    Text("Unlock Pro Studio Matrix")
+                    BuxCatalogDynamicText(key: "Unlock Pro Studio Matrix")
                     Spacer()
                 }
                 .font(.system(size: 14, weight: .bold))

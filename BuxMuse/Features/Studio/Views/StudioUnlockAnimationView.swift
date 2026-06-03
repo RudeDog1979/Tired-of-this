@@ -10,6 +10,8 @@ import SwiftUI
 // MARK: - Unlock overlay
 
 struct StudioUnlockAnimationView: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     @Binding var isPresented: Bool
     var onMidpointReveal: (() -> Void)?
 
@@ -64,7 +66,11 @@ struct StudioUnlockAnimationView: View {
                 )
                 .opacity(gridOpacity * sheetOpacity)
 
-                BlueprintSheetMargin(size: geo.size, ink: blueprintInk.opacity(0.22))
+                BlueprintSheetMargin(
+                    size: geo.size,
+                    ink: blueprintInk.opacity(0.22),
+                    stampText: BuxCatalogLabel.string("BUXMUSE STUDIO", locale: appSettingsManager.interfaceLocale)
+                )
                     .opacity(gridOpacity * 0.85 * sheetOpacity)
 
                 ZStack {
@@ -96,7 +102,8 @@ struct StudioUnlockAnimationView: View {
                     strokeProgress: titleStrokeProgress,
                     fillOpacity: titleFillOpacity,
                     blur: titleBlur,
-                    ink: blueprintInk
+                    ink: blueprintInk,
+                    title: BuxCatalogLabel.string("STUDIO MODE UNLOCKED", locale: appSettingsManager.interfaceLocale)
                 )
                 .position(x: w * 0.5, y: h * 0.72)
                 .opacity(sheetOpacity)
@@ -291,8 +298,7 @@ private struct StudioUnlockTitleBlock: View {
     let fillOpacity: CGFloat
     let blur: CGFloat
     let ink: Color
-
-    private var title: String { "STUDIO MODE UNLOCKED" }
+    let title: String
     private var fontSize: CGFloat { unit * 0.042 }
     private var subSize: CGFloat { unit * 0.018 }
 
@@ -326,7 +332,7 @@ private struct StudioUnlockTitleBlock: View {
             }
             .blur(radius: blur)
 
-            Text("SHEET 01 · ISSUED")
+            BuxCatalogDynamicText(key: "SHEET 01 · ISSUED")
                 .font(.system(size: subSize, weight: .semibold, design: .monospaced))
                 .kerning(unit * 0.003)
                 .foregroundStyle(ink.opacity(0.45 * fillOpacity))
@@ -422,6 +428,7 @@ private struct BlueprintGridLayer: View {
 private struct BlueprintSheetMargin: View {
     let size: CGSize
     let ink: Color
+    let stampText: String
 
     var body: some View {
         Canvas { context, canvasSize in
@@ -433,7 +440,7 @@ private struct BlueprintSheetMargin: View {
             cross.addLine(to: CGPoint(x: corner.x, y: corner.y + canvasSize.width * 0.08))
             context.stroke(cross, with: .color(ink), lineWidth: 1)
 
-            let label = Text("BUXMUSE STUDIO")
+            let label = Text(stampText)
                 .font(.system(size: canvasSize.width * 0.022, weight: .bold, design: .monospaced))
             context.draw(context.resolve(label), at: CGPoint(x: canvasSize.width * 0.5, y: inset * 0.75), anchor: .center)
         }

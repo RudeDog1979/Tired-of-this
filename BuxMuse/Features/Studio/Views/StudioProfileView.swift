@@ -47,7 +47,7 @@ struct StudioProfileView: View {
                     BuxFormRowDivider()
                     Picker("Business Type", selection: $businessType) {
                         ForEach(BusinessType.allCases) { type in
-                            Text(type.rawValue).tag(type)
+                            Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
                         }
                     }
                     .tint(themeManager.current.accentColor)
@@ -56,13 +56,20 @@ struct StudioProfileView: View {
 
                 BuxFormSection(title: "Global locale") {
                     HStack {
-                        Text("Region & Currency")
+                        BuxCatalogDynamicText(key: "Region & Currency")
                         Spacer()
-                        Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCurrency.id)")
+                        Text(
+                            BuxLocalizedString.format(
+                                "%@ %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                appSettingsManager.selectedCountry.flag,
+                                appSettingsManager.selectedCurrency.id
+                            )
+                        )
                             .buxLabelSecondary()
                     }
                     .buxFormFieldPadding()
-                    Text("Change in Settings → Currency & Region")
+                    BuxCatalogDynamicText(key: "Change in Settings → Currency & Region")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
                         .buxFormFieldPadding()
@@ -73,7 +80,7 @@ struct StudioProfileView: View {
                         party: $party,
                         showRegistrationFields: true
                     )
-                    Text("Shown on invoice FROM block and legal footer.")
+                    BuxCatalogDynamicText(key: "Shown on invoice FROM block and legal footer.")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
                         .buxFormFieldPadding()
@@ -85,7 +92,7 @@ struct StudioProfileView: View {
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     HStack {
-                        Text("Default Hourly Rate")
+                        BuxCatalogDynamicText(key: "Default Hourly Rate")
                         Spacer()
                         TextField("Rate", text: $hourlyRate)
                             .keyboardType(.decimalPad)
@@ -96,7 +103,7 @@ struct StudioProfileView: View {
                 }
             }
         }
-        .navigationTitle("Business Profile")
+        .buxCatalogNavigationTitle("Business Profile")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { loadProfile() }
         .onChange(of: displayName) { _, _ in saveProfile() }

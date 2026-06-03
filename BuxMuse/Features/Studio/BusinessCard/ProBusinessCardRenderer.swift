@@ -766,7 +766,7 @@ struct ProBusinessCardFitPreview: View {
                         VStack(spacing: 4) {
                             Image(systemName: "person.crop.circle.badge.plus")
                                 .font(.system(size: min(frame.width, frame.height) * 0.28, weight: .semibold))
-                            Text("Add photo")
+                            BuxCatalogDynamicText(key: "Add photo")
                                 .font(.system(size: 9, weight: .bold))
                         }
                         .foregroundStyle(.secondary)
@@ -790,7 +790,7 @@ struct ProBusinessCardFitPreview: View {
                     VStack(spacing: 3) {
                         Image(systemName: "briefcase.fill")
                             .font(.system(size: size * 0.22, weight: .semibold))
-                        Text("Add logo")
+                        BuxCatalogDynamicText(key: "Add logo")
                             .font(.system(size: 8, weight: .bold))
                     }
                     .foregroundStyle(.secondary)

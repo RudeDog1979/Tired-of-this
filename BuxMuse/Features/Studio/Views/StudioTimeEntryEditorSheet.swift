@@ -46,7 +46,7 @@ struct StudioTimeEntryEditorSheet: View {
                         .buxFormFieldPadding()
                 }
             }
-            .navigationTitle("Edit time")
+            .buxCatalogNavigationTitle("Edit time")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

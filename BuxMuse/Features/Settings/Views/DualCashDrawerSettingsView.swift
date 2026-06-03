@@ -11,6 +11,7 @@ import SwiftUI
 struct DualCashDrawerSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
     
     @State private var primaryInput = ""
@@ -28,10 +29,10 @@ struct DualCashDrawerSettingsView: View {
             BuxFormSection(title: "Status & Activation") {
                 Toggle(isOn: $store.dualCashDrawerEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Enable Cash Drawer")
+                        BuxCatalogDynamicText(key: "Enable Cash Drawer")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Text("Track physical paper money balances")
+                        BuxCatalogDynamicText(key: "Track physical paper money balances")
                             .font(.system(size: 11, weight: .medium))
                             .buxLabelSecondary()
                     }
@@ -46,7 +47,7 @@ struct DualCashDrawerSettingsView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("Primary Local Currency")
+                                BuxCatalogDynamicText(key: "Primary Local Currency")
                                     .font(.system(size: 12, weight: .bold))
                                     .buxLabelSecondary()
                                 
@@ -62,7 +63,7 @@ struct DualCashDrawerSettingsView: View {
                             Spacer()
                             
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("Secondary Trade Currency")
+                                BuxCatalogDynamicText(key: "Secondary Trade Currency")
                                     .font(.system(size: 12, weight: .bold))
                                     .buxLabelSecondary()
                                 
@@ -83,7 +84,13 @@ struct DualCashDrawerSettingsView: View {
                 BuxFormSection(title: "Seed Physical Cash Balances") {
                     VStack(alignment: .leading, spacing: 14) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Current \(store.primaryLocalCurrency) Cash in Wallet")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Current %@ Cash in Wallet",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    store.primaryLocalCurrency
+                                )
+                            )
                                 .font(.system(size: 12, weight: .bold))
                                 .buxLabelSecondary()
                             
@@ -109,7 +116,13 @@ struct DualCashDrawerSettingsView: View {
                         BuxFormRowDivider()
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Current \(store.secondaryTradingCurrency) Cash in Wallet")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Current %@ Cash in Wallet",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    store.secondaryTradingCurrency
+                                )
+                            )
                                 .font(.system(size: 12, weight: .bold))
                                 .buxLabelSecondary()
                             
@@ -152,11 +165,11 @@ struct DualCashDrawerSettingsView: View {
                 .foregroundColor(.green)
             
             VStack(alignment: .leading, spacing: 3) {
-                Text("Cash Drawer")
+                BuxCatalogDynamicText(key: "Cash Drawer")
                     .font(.system(size: 16, weight: .black, design: .rounded))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 
-                Text("Segregate dynamic physical wallets for informal, spotty internet environments.")
+                BuxCatalogDynamicText(key: "Segregate dynamic physical wallets for informal, spotty internet environments.")
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
             }

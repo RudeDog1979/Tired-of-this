@@ -67,13 +67,25 @@ struct StudioProjectPlannerSection: View {
                     .trim(from: 0, to: CGFloat(snapshot.healthScore) / 100)
                     .stroke(healthColor, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                Text("\(snapshot.healthScore)")
+                Text(
+                    BuxLocalizedString.format(
+                        "%lld%%",
+                        locale: appSettingsManager.interfaceLocale,
+                        snapshot.healthScore
+                    )
+                )
                     .font(.system(size: 18, weight: .bold, design: .rounded))
             }
             .frame(width: 56, height: 56)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Health · \(snapshot.healthLabel)")
+                Text(
+                    BuxLocalizedString.format(
+                        "Health · %@",
+                        locale: appSettingsManager.interfaceLocale,
+                        snapshot.healthLabel
+                    )
+                )
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 if let note = snapshot.underpricingNote {
@@ -81,7 +93,13 @@ struct StudioProjectPlannerSection: View {
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.orange)
                 } else if let predicted = snapshot.predictedHoursToComplete {
-                    Text("~\(String(format: "%.1f", predicted))h to finish at current pace")
+                    Text(
+                        BuxLocalizedString.format(
+                            "~%@h to finish at current pace",
+                            locale: appSettingsManager.interfaceLocale,
+                            String(format: "%.1f", predicted)
+                        )
+                    )
                         .font(.system(size: 11, weight: .medium))
                         .buxLabelSecondary()
                 }
@@ -101,7 +119,7 @@ struct StudioProjectPlannerSection: View {
 
     private var timelineGantt: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Timeline")
+            BuxCatalogDynamicText(key: "Timeline")
                 .font(.system(size: 12, weight: .bold))
                 .buxLabelSecondary()
 
@@ -155,7 +173,7 @@ struct StudioProjectPlannerSection: View {
             .frame(height: 28)
 
             if onRescheduleMilestone != nil, !projectMilestones.isEmpty {
-                Text("Drag a dot on the timeline to reschedule a milestone.")
+                BuxCatalogDynamicText(key: "Drag a dot on the timeline to reschedule a milestone.")
                     .font(.system(size: 10, weight: .medium))
                     .buxLabelSecondary()
             }
@@ -173,12 +191,19 @@ struct StudioProjectPlannerSection: View {
     private var budgetRow: some View {
         let ratio = min(1.2, snapshot.budgetHoursUsed / max(0.01, snapshot.budgetHoursTotal))
         return VStack(alignment: .leading, spacing: 6) {
-            Text("Budget hours")
+            BuxCatalogDynamicText(key: "Budget hours")
                 .font(.system(size: 12, weight: .bold))
                 .buxLabelSecondary()
             ProgressView(value: min(1, ratio))
                 .tint(ratio >= 1 ? .red : accent)
-            Text("\(String(format: "%.1f", snapshot.budgetHoursUsed)) / \(String(format: "%.1f", snapshot.budgetHoursTotal))h")
+            Text(
+                BuxLocalizedString.format(
+                    "%@/%@h",
+                    locale: appSettingsManager.interfaceLocale,
+                    String(format: "%.1f", snapshot.budgetHoursUsed),
+                    String(format: "%.1f", snapshot.budgetHoursTotal)
+                )
+            )
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .buxLabelSecondary()
         }
@@ -186,7 +211,7 @@ struct StudioProjectPlannerSection: View {
 
     private var milestonesList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Milestones")
+            BuxCatalogDynamicText(key: "Milestones")
                 .font(.system(size: 12, weight: .bold))
                 .buxLabelSecondary()
             ForEach(snapshot.milestones.prefix(8)) { milestone in
@@ -200,7 +225,13 @@ struct StudioProjectPlannerSection: View {
                         if let stored = projectMilestones.first(where: { $0.id == milestone.id }),
                            let dep = stored.dependsOnMilestoneId,
                            let parent = projectMilestones.first(where: { $0.id == dep }) {
-                            Text("After \(parent.title)")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "After %@",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    parent.title
+                                )
+                            )
                                 .font(.system(size: 9, weight: .medium))
                                 .foregroundColor(.orange)
                         }
@@ -216,7 +247,7 @@ struct StudioProjectPlannerSection: View {
 
     private var alertsList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Planner alerts")
+            BuxCatalogDynamicText(key: "Planner alerts")
                 .font(.system(size: 12, weight: .bold))
                 .buxLabelSecondary()
             ForEach(snapshot.alerts.prefix(4)) { alert in

@@ -10,6 +10,7 @@ import SwiftUI
 struct StudioDiscoveryCard: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @ObservedObject private var store = SettingsStore.shared
 
@@ -21,10 +22,10 @@ struct StudioDiscoveryCard: View {
                     .foregroundColor(themeManager.current.accentColor)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Self-employed?")
+                    BuxCatalogText.text("Self-employed?")
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text("Turn on Studio for invoices, mileage, and tax estimates — optional, in Settings.")
+                    BuxCatalogText.text("Turn on Studio for invoices, mileage, and tax estimates — optional, in Settings.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
@@ -49,7 +50,7 @@ struct StudioDiscoveryCard: View {
                 store.dismissStudioDiscoveryOffer()
                 navigationCoordinator.openStudioSettings()
             } label: {
-                Text("See Studio in Settings")
+                BuxCatalogText.text("See Studio in Settings")
                     .font(.system(size: 13, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)

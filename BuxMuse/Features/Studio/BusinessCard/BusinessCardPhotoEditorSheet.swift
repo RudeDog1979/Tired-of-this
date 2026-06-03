@@ -58,7 +58,7 @@ struct BusinessCardPhotoEditorSheet: View {
                                 .tint(themeManager.current.accentColor)
                             Image(systemName: "rotate.right").foregroundStyle(Color.white.opacity(0.55))
                         }
-                        Text("Drag to move · pinch or slide to zoom · rotate to straighten")
+                        BuxCatalogDynamicText(key: "Drag to move · pinch or slide to zoom · rotate to straighten")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(Color.white.opacity(0.45))
                     }
@@ -70,7 +70,7 @@ struct BusinessCardPhotoEditorSheet: View {
                 .frame(width: geo.size.width, height: geo.size.height)
             }
             .background(Color.black.opacity(0.92).ignoresSafeArea())
-            .navigationTitle("Edit photo")
+            .buxCatalogNavigationTitle("Edit photo")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(Color.black.opacity(0.92), for: .navigationBar)
@@ -101,7 +101,7 @@ struct BusinessCardPhotoEditorSheet: View {
         let context = ProBusinessCardRenderFactory.makeContext(design: previewDesign, logoData: logoData)
         let fit = min(1, 160 / max(context.size.height, 1))
         return VStack(spacing: 4) {
-            Text("Live preview")
+            BuxCatalogDynamicText(key: "Live preview")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Color.white.opacity(0.65))
             ProBusinessCardRenderer(context: context)

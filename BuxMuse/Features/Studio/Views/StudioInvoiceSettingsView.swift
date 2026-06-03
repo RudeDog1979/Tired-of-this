@@ -10,6 +10,7 @@ import SwiftUI
 struct StudioInvoiceSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var store: StudioStore
 
     @State private var prefix = "INV"
@@ -37,11 +38,17 @@ struct StudioInvoiceSettingsView: View {
                     BuxFormRowDivider()
                     TextField("Pattern", text: $pattern)
                         .buxFormFieldPadding()
-                    Text("Use {PREFIX}, {YEAR}, {SEQ}")
+                    BuxCatalogDynamicText(key: "Use {PREFIX}, {YEAR}, {SEQ}")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
                         .buxFormFieldPadding()
-                    Text("Preview: \(previewNumber)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Preview: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            previewNumber
+                        )
+                    )
                         .font(.system(size: 12, weight: .semibold))
                         .buxFormFieldPadding()
                 }
@@ -49,14 +56,14 @@ struct StudioInvoiceSettingsView: View {
                 BuxFormSection(title: "Design") {
                     Picker("Template", selection: $template) {
                         ForEach(InvoiceTemplate.allCases) { t in
-                            Text(t.rawValue).tag(t)
+                            Text(t.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(t)
                         }
                     }
                     .buxFormFieldPadding()
                     BuxFormRowDivider()
                     Picker("Logo position", selection: $logoPosition) {
                         ForEach(InvoiceLogoPosition.allCases) { p in
-                            Text(p.rawValue).tag(p)
+                            Text(p.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(p)
                         }
                     }
                     .buxFormFieldPadding()
@@ -68,7 +75,7 @@ struct StudioInvoiceSettingsView: View {
                 BuxFormSection(title: "Tax on invoices") {
                     Picker("Tax behavior", selection: $taxBehavior) {
                         ForEach(InvoiceTaxBehavior.allCases) { b in
-                            Text(b.rawValue).tag(b)
+                            Text(b.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(b)
                         }
                     }
                     .buxFormFieldPadding()
@@ -96,7 +103,7 @@ struct StudioInvoiceSettingsView: View {
                     Toggle("Show registration footer on PDF", isOn: $showLegalFooter)
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
-                    Text("Displays company address and registration at the bottom of designed invoices.")
+                    BuxCatalogDynamicText(key: "Displays company address and registration at the bottom of designed invoices.")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
                         .buxFormFieldPadding()
@@ -112,7 +119,7 @@ struct StudioInvoiceSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Invoice Settings")
+        .buxCatalogNavigationTitle("Invoice Settings")
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.studioEnhancedTint, true)
         .toolbar {

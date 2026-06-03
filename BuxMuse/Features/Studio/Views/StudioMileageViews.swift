@@ -53,7 +53,7 @@ struct StudioMileageLogView: View {
                 mileageList
             }
         }
-        .navigationTitle("Mileage Log")
+        .buxCatalogNavigationTitle("Mileage Log")
         .navigationBarTitleDisplayMode(.large)
         .buxRootNavigationChrome()
         .toolbar {
@@ -134,7 +134,7 @@ struct StudioMileageLogView: View {
     private var mileageSummaryCard: some View {
         HStack(spacing: BuxLayout.section) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("BUSINESS TOTAL")
+                BuxCatalogDynamicText(key: "BUSINESS TOTAL")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
                 Text(summary.businessDistanceFormatted)
@@ -143,7 +143,7 @@ struct StudioMileageLogView: View {
             }
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 4) {
-                Text("ALLOWANCE")
+                BuxCatalogDynamicText(key: "ALLOWANCE")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
                 Text(summary.deductionFormatted)
@@ -159,9 +159,9 @@ struct StudioMileageLogView: View {
             Image(systemName: "car.fill")
                 .font(.system(size: 40))
                 .foregroundColor(themeManager.current.accentColor.opacity(0.8))
-            Text("No trips logged yet")
+            BuxCatalogDynamicText(key: "No trips logged yet")
                 .font(.system(size: 16, weight: .semibold))
-            Text("Add business mileage to include allowances in your deduction estimate.")
+            BuxCatalogDynamicText(key: "Add business mileage to include allowances in your deduction estimate.")
                 .font(.system(size: 13))
                 .buxLabelSecondary()
                 .multilineTextAlignment(.center)
@@ -413,7 +413,7 @@ struct MileageEntrySheet: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle(isEditing ? "Edit Trip" : "Log Trip")
+            .buxCatalogNavigationTitle(isEditing ? "Edit Trip" : "Log Trip")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -433,9 +433,9 @@ struct MileageEntrySheet: View {
                             save(includeReturn: true)
                         } label: {
                             VStack(spacing: 2) {
-                                Text("Log same trip back")
+                                BuxCatalogDynamicText(key: "Log same trip back")
                                     .font(.system(size: 15, weight: .semibold))
-                                Text("Adds the drive home (From ↔ To swapped)")
+                                BuxCatalogDynamicText(key: "Adds the drive home (From ↔ To swapped)")
                                     .font(.system(size: 10, weight: .medium))
                                     .foregroundColor(.secondary)
                             }
@@ -494,7 +494,7 @@ struct MileageEntrySheet: View {
             if isCalculatingRoute {
                 HStack(spacing: 8) {
                     ProgressView()
-                    Text("Calculating driving distance…")
+                    BuxCatalogDynamicText(key: "Calculating driving distance…")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                 }
@@ -510,7 +510,7 @@ struct MileageEntrySheet: View {
 
     private var distanceHero: some View {
         VStack(spacing: 8) {
-            Text("DISTANCE")
+            BuxCatalogDynamicText(key: "DISTANCE")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -523,12 +523,18 @@ struct MileageEntrySheet: View {
                     .onChange(of: distanceText) { _, _ in
                         distanceManuallyEdited = true
                     }
-                Text("mi")
+                BuxCatalogDynamicText(key: "mi")
                     .font(.system(size: 20, weight: .semibold))
                     .buxLabelSecondary()
             }
             if purpose == .business, parsedDistance > 0 {
-                Text("Est. allowance: \(estimatedAllowanceFormatted)")
+                Text(
+                    BuxLocalizedString.format(
+                        "Est. allowance: %@",
+                        locale: appSettingsManager.interfaceLocale,
+                        estimatedAllowanceFormatted
+                    )
+                )
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.green)
             }
@@ -562,10 +568,16 @@ struct MileageEntrySheet: View {
                     Image(systemName: "arrow.left.arrow.right")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
-                    Text("There and back")
+                    BuxCatalogDynamicText(key: "There and back")
                         .font(.system(size: 14, weight: .semibold))
                 }
-                Text("Same trip home — adds a second log with From ↔ To swapped (\(formattedReturnDistance) mi each way).")
+                Text(
+                    BuxLocalizedString.format(
+                        "Same trip home — adds a second log with From ↔ To swapped (%@ mi each way).",
+                        locale: appSettingsManager.interfaceLocale,
+                        formattedReturnDistance
+                    )
+                )
                     .font(.system(size: 11))
                     .buxLabelSecondary()
                 if includeReturnJourney, canShowReturnRoutePreview {

@@ -1,0 +1,450 @@
+{
+  "Money Map": {
+    "es-419": "Mapa del dinero",
+    "es-ES": "Mapa del dinero"
+  },
+  "%lld moves · %lld territories": {
+    "es-419": "%lld movimientos · %lld territorios",
+    "es-ES": "%lld movimientos · %lld territorios"
+  },
+  "Categories": {
+    "es-419": "Categorías",
+    "es-ES": "Categorías"
+  },
+  "%lld lanes": {
+    "es-419": "%lld carriles",
+    "es-ES": "%lld carriles"
+  },
+  "Where your money went this month — each lane is a spending category ranked by total.": {
+    "es-419": "A dónde fue tu dinero este mes: cada carril es una categoría de gasto por total.",
+    "es-ES": "A dónde fue tu dinero este mes: cada carril es una categoría de gasto por total."
+  },
+  "Top category": {
+    "es-419": "Categoría principal",
+    "es-ES": "Categoría principal"
+  },
+  "Top share": {
+    "es-419": "Participación principal",
+    "es-ES": "Participación principal"
+  },
+  "Categories tracked": {
+    "es-419": "Categorías registradas",
+    "es-ES": "Categorías registradas"
+  },
+  "Open Expenses →": {
+    "es-419": "Abrir Gastos →",
+    "es-ES": "Abrir Gastos →"
+  },
+  "Cash flow": {
+    "es-419": "Flujo de caja",
+    "es-ES": "Flujo de caja"
+  },
+  "vs last month": {
+    "es-419": "vs mes anterior",
+    "es-ES": "vs mes anterior"
+  },
+  "Spending is cooling compared to last month — a healthier cash-flow lane.": {
+    "es-419": "El gasto se enfría frente al mes anterior: un carril de flujo más sano.",
+    "es-ES": "El gasto se enfría frente al mes anterior: un carril de flujo más sano."
+  },
+  "Spending is running hotter than last month — watch the trend line.": {
+    "es-419": "El gasto va más caliente que el mes anterior: vigila la tendencia.",
+    "es-ES": "El gasto va más caliente que el mes anterior: vigila la tendencia."
+  },
+  "This month": {
+    "es-419": "Este mes",
+    "es-ES": "Este mes"
+  },
+  "Vs last month": {
+    "es-419": "Vs mes anterior",
+    "es-ES": "Vs mes anterior"
+  },
+  "Transactions": {
+    "es-419": "Transacciones",
+    "es-ES": "Transacciones"
+  },
+  "Subscriptions": {
+    "es-419": "Suscripciones",
+    "es-ES": "Suscripciones"
+  },
+  "recurring lanes": {
+    "es-419": "carriles recurrentes",
+    "es-ES": "carriles recurrentes"
+  },
+  "Recurring charges detected this month — subscriptions are their own territory on your map.": {
+    "es-419": "Cargos recurrentes este mes: las suscripciones son su propio territorio en el mapa.",
+    "es-ES": "Cargos recurrentes este mes: las suscripciones son su propio territorio en el mapa."
+  },
+  "Active subs": {
+    "es-419": "Subs activas",
+    "es-ES": "Subs activas"
+  },
+  "Monthly total": {
+    "es-419": "Total mensual",
+    "es-ES": "Total mensual"
+  },
+  "Top sub": {
+    "es-419": "Sub principal",
+    "es-ES": "Sub principal"
+  },
+  "Open Subscription Hub →": {
+    "es-419": "Abrir Centro de suscripciones →",
+    "es-ES": "Abrir Centro de suscripciones →"
+  },
+  "Merchants": {
+    "es-419": "Comercios",
+    "es-ES": "Comercios"
+  },
+  "top spend lane": {
+    "es-419": "carril de mayor gasto",
+    "es-ES": "carril de mayor gasto"
+  },
+  "Pro territory — see which merchants absorb the most spend this month.": {
+    "es-419": "Territorio Pro: qué comercios concentran más gasto este mes.",
+    "es-ES": "Territorio Pro: qué comercios concentran más gasto este mes."
+  },
+  "Top merchant": {
+    "es-419": "Comercio principal",
+    "es-ES": "Comercio principal"
+  },
+  "Share of spend": {
+    "es-419": "Parte del gasto",
+    "es-ES": "Parte del gasto"
+  },
+  "Merchants tracked": {
+    "es-419": "Comercios registrados",
+    "es-ES": "Comercios registrados"
+  },
+  "Review in Expenses →": {
+    "es-419": "Revisar en Gastos →",
+    "es-ES": "Revisar en Gastos →"
+  },
+  "Workspaces": {
+    "es-419": "Workspaces",
+    "es-ES": "Workspaces"
+  },
+  "%lld territories": {
+    "es-419": "%lld territorios",
+    "es-ES": "%lld territorios"
+  },
+  "Side-Hustle Matrix splits spend across gigs, departments, or clients.": {
+    "es-419": "Side-Hustle Matrix reparte el gasto entre gigs, departamentos o clientes.",
+    "es-ES": "Side-Hustle Matrix reparte el gasto entre gigs, departamentos o clientes."
+  },
+  "Leading workspace": {
+    "es-419": "Workspace líder",
+    "es-ES": "Workspace líder"
+  },
+  "Workspaces active": {
+    "es-419": "Workspaces activos",
+    "es-ES": "Workspaces activos"
+  },
+  "Filter": {
+    "es-419": "Filtro",
+    "es-ES": "Filtro"
+  },
+  "All": {
+    "es-419": "Todos",
+    "es-ES": "Todos"
+  },
+  "Studio → Workspaces →": {
+    "es-419": "Studio → Workspaces →",
+    "es-ES": "Studio → Workspaces →"
+  },
+  "Cash drawer": {
+    "es-419": "Caja de efectivo",
+    "es-ES": "Caja de efectivo"
+  },
+  "%lld local": {
+    "es-419": "%lld local",
+    "es-ES": "%lld local"
+  },
+  "Dual Cash Drawer tracks physical local currency alongside your digital ledger.": {
+    "es-419": "Dual Cash Drawer registra efectivo físico junto a tu libro digital.",
+    "es-ES": "Dual Cash Drawer registra efectivo físico junto a tu libro digital."
+  },
+  "Local (%@)": {
+    "es-419": "Local (%@)",
+    "es-ES": "Local (%@)"
+  },
+  "Trading (%@)": {
+    "es-419": "Trading (%@)",
+    "es-ES": "Trading (%@)"
+  },
+  "Status": {
+    "es-419": "Estado",
+    "es-ES": "Estado"
+  },
+  "Active": {
+    "es-419": "Activo",
+    "es-ES": "Activo"
+  },
+  "Off": {
+    "es-419": "Apagado",
+    "es-ES": "Apagado"
+  },
+  "Studio → Cash & Barter →": {
+    "es-419": "Studio → Efectivo y trueque →",
+    "es-ES": "Studio → Efectivo y trueque →"
+  },
+  "Barter": {
+    "es-419": "Trueque",
+    "es-ES": "Trueque"
+  },
+  "trade exchanges": {
+    "es-419": "intercambios",
+    "es-ES": "intercambios"
+  },
+  "Log non-cash trades here — they appear as their own map lane when you record exchanges.": {
+    "es-419": "Registra trueques sin efectivo: aparecen como carril propio al guardarlos.",
+    "es-ES": "Registra trueques sin efectivo: aparecen como carril propio al guardarlos."
+  },
+  "Non-cash exchanges logged separately from cash spend for your records.": {
+    "es-419": "Intercambios sin efectivo, aparte del gasto en efectivo, para tus registros.",
+    "es-ES": "Intercambios sin efectivo, aparte del gasto en efectivo, para tus registros."
+  },
+  "Trades logged": {
+    "es-419": "Trueques registrados",
+    "es-ES": "Trueques registrados"
+  },
+  "Est. value": {
+    "es-419": "Valor est.",
+    "es-ES": "Valor est."
+  },
+  "Add values when logging": {
+    "es-419": "Agrega valores al registrar",
+    "es-ES": "Añade valores al registrar"
+  },
+  "Latest": {
+    "es-419": "Último",
+    "es-ES": "Último"
+  },
+  "Credit & BNPL": {
+    "es-419": "Crédito y BNPL",
+    "es-ES": "Crédito y BNPL"
+  },
+  "%lld tagged": {
+    "es-419": "%lld etiquetados",
+    "es-ES": "%lld etiquetados"
+  },
+  "payment lanes": {
+    "es-419": "carriles de pago",
+    "es-ES": "carriles de pago"
+  },
+  "Tag expenses with payment methods to see credit vs BNPL concentration.": {
+    "es-419": "Etiqueta gastos con método de pago para ver concentración crédito vs BNPL.",
+    "es-ES": "Etiqueta gastos con método de pago para ver concentración crédito vs BNPL."
+  },
+  "Tagged expenses": {
+    "es-419": "Gastos etiquetados",
+    "es-ES": "Gastos etiquetados"
+  },
+  "Credit volume": {
+    "es-419": "Volumen crédito",
+    "es-ES": "Volumen crédito"
+  },
+  "BNPL volume": {
+    "es-419": "Volumen BNPL",
+    "es-ES": "Volumen BNPL"
+  },
+  "Credit & store credit": {
+    "es-419": "Crédito y crédito de tienda",
+    "es-ES": "Crédito y crédito de tienda"
+  },
+  "Buy now, pay later": {
+    "es-419": "Compra ahora, paga después",
+    "es-ES": "Compra ahora, paga después"
+  },
+  "Settings → Payment Sources →": {
+    "es-419": "Ajustes → Fuentes de pago →",
+    "es-ES": "Ajustes → Fuentes de pago →"
+  },
+  "Energy": {
+    "es-419": "Energía",
+    "es-ES": "Energía"
+  },
+  "creative fuel": {
+    "es-419": "combustible creativo",
+    "es-ES": "combustible creativo"
+  },
+  "Creative energy is holding — workload and rest are in a workable balance.": {
+    "es-419": "La energía creativa se sostiene: carga de trabajo y descanso en equilibrio razonable.",
+    "es-ES": "La energía creativa se mantiene: carga de trabajo y descanso en equilibrio razonable."
+  },
+  "Energy is running low — stress expenses and long hours may be draining your fuel.": {
+    "es-419": "La energía está baja: gastos por estrés y jornadas largas pueden vaciarte.",
+    "es-ES": "La energía está baja: gastos por estrés y jornadas largas pueden vaciarte."
+  },
+  "Creative energy": {
+    "es-419": "Energía creativa",
+    "es-ES": "Energía creativa"
+  },
+  "Work hours": {
+    "es-419": "Horas de trabajo",
+    "es-ES": "Horas de trabajo"
+  },
+  "Sleep hours": {
+    "es-419": "Horas de sueño",
+    "es-ES": "Horas de sueño"
+  },
+  "Stress expenses": {
+    "es-419": "Gastos por estrés",
+    "es-ES": "Gastos por estrés"
+  },
+  "Studio → Workload & Energy →": {
+    "es-419": "Studio → Carga y energía →",
+    "es-ES": "Studio → Carga y energía →"
+  },
+  "Scope radar": {
+    "es-419": "Radar de alcance",
+    "es-ES": "Radar de alcance"
+  },
+  "alerts active": {
+    "es-419": "alertas activas",
+    "es-ES": "alertas activas"
+  },
+  "Pro scope guardrails — projects near or over budgeted hours light up on the map.": {
+    "es-419": "Barreras Pro de alcance: proyectos cerca o sobre horas presupuestadas se iluminan en el mapa.",
+    "es-ES": "Barreras Pro de alcance: proyectos cerca o sobre horas presupuestadas se iluminan en el mapa."
+  },
+  "Open Studio → Scope →": {
+    "es-419": "Abrir Studio → Alcance →",
+    "es-ES": "Abrir Studio → Alcance →"
+  },
+  "Top insight": {
+    "es-419": "Insight principal",
+    "es-ES": "Insight principal"
+  },
+  "Signal": {
+    "es-419": "Señal",
+    "es-ES": "Señal"
+  },
+  "Impact / mo": {
+    "es-419": "Impacto / mes",
+    "es-ES": "Impacto / mes"
+  },
+  "Severity": {
+    "es-419": "Severidad",
+    "es-ES": "Severidad"
+  },
+  "Open Insights pill →": {
+    "es-419": "Abrir píldora Insights →",
+    "es-ES": "Abrir píldora Insights →"
+  },
+  "Signals": {
+    "es-419": "Señales",
+    "es-ES": "Señales"
+  },
+  "live strips": {
+    "es-419": "tiras en vivo",
+    "es-ES": "tiras en vivo"
+  },
+  "Live feature strips are pulsing — each one connects a BuxMuse tool to real data.": {
+    "es-419": "Las tiras de funciones están activas: cada una conecta una herramienta BuxMuse con datos reales.",
+    "es-ES": "Las tiras de funciones están activas: cada una conecta una herramienta BuxMuse con datos reales."
+  },
+  "Studio": {
+    "es-419": "Studio",
+    "es-ES": "Studio"
+  },
+  "All workspaces": {
+    "es-419": "Todos los workspaces",
+    "es-ES": "Todos los workspaces"
+  },
+  "Studio workspace spend this month — client work, projects, and creative ops.": {
+    "es-419": "Gasto de workspace en Studio este mes: trabajo con clientes, proyectos y operación creativa.",
+    "es-ES": "Gasto de workspace en Studio este mes: trabajo con clientes, proyectos y operación creativa."
+  },
+  "Month spend": {
+    "es-419": "Gasto del mes",
+    "es-ES": "Gasto del mes"
+  },
+  "Active projects": {
+    "es-419": "Proyectos activos",
+    "es-ES": "Proyectos activos"
+  },
+  "Clients": {
+    "es-419": "Clientes",
+    "es-ES": "Clientes"
+  },
+  "Workspace": {
+    "es-419": "Workspace",
+    "es-ES": "Workspace"
+  },
+  "Open Studio →": {
+    "es-419": "Abrir Studio →",
+    "es-ES": "Abrir Studio →"
+  },
+  "Invoices": {
+    "es-419": "Facturas",
+    "es-ES": "Facturas"
+  },
+  "awaiting payment": {
+    "es-419": "pendientes de pago",
+    "es-ES": "pendientes de pago"
+  },
+  "Open invoices waiting on client payment — cash still in transit.": {
+    "es-419": "Facturas abiertas esperando pago del cliente: efectivo aún en tránsito.",
+    "es-ES": "Facturas abiertas esperando pago del cliente: efectivo aún en tránsito."
+  },
+  "Outstanding": {
+    "es-419": "Pendiente",
+    "es-ES": "Pendiente"
+  },
+  "Open count": {
+    "es-419": "Abiertas",
+    "es-ES": "Abiertas"
+  },
+  "Overdue": {
+    "es-419": "Vencidas",
+    "es-ES": "Vencidas"
+  },
+  "Invoice": {
+    "es-419": "Factura",
+    "es-ES": "Factura"
+  },
+  "Studio → Invoices →": {
+    "es-419": "Studio → Facturas →",
+    "es-ES": "Studio → Facturas →"
+  },
+  "Mileage": {
+    "es-419": "Kilometraje",
+    "es-ES": "Kilometraje"
+  },
+  "rate / unit": {
+    "es-419": "tarifa / unidad",
+    "es-ES": "tarifa / unidad"
+  },
+  "Mileage rate for deductible travel — tied to Studio projects and location logging.": {
+    "es-419": "Tarifa de kilometraje para viajes deducibles, ligada a proyectos Studio y registro de ubicación.",
+    "es-ES": "Tarifa de kilometraje para viajes deducibles, ligada a proyectos Studio y registro de ubicación."
+  },
+  "Rate / unit": {
+    "es-419": "Tarifa / unidad",
+    "es-ES": "Tarifa / unidad"
+  },
+  "mile": {
+    "es-419": "milla",
+    "es-ES": "milla"
+  },
+  "Projects w/ time": {
+    "es-419": "Proyectos con tiempo",
+    "es-ES": "Proyectos con tiempo"
+  },
+  "Studio → Mileage →": {
+    "es-419": "Studio → Kilometraje →",
+    "es-ES": "Studio → Kilometraje →"
+  },
+  "Unassigned": {
+    "es-419": "Sin asignar",
+    "es-ES": "Sin asignar"
+  },
+  "Trade": {
+    "es-419": "Trueque",
+    "es-ES": "Trueque"
+  },
+  "Subscription": {
+    "es-419": "Suscripción",
+    "es-ES": "Suscripción"
+  }
+}

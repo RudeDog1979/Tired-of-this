@@ -30,12 +30,12 @@ struct RecentTransactionsSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
-            Text("Recent transactions")
+            BuxCatalogText.text("Recent transactions")
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             if transactions.isEmpty {
-                Text("No transactions yet. Add an expense to see activity here.")
+                BuxCatalogText.text("No transactions yet. Add an expense to see activity here.")
                     .font(.system(size: 13, weight: .medium))
                     .buxLabelSecondary()
             } else {
@@ -48,7 +48,7 @@ struct RecentTransactionsSectionView: View {
 
             Button(action: onSeeMore) {
                 HStack(spacing: 6) {
-                    Text("See more")
+                    BuxCatalogText.text("See more")
                         .font(.system(size: 14, weight: .semibold))
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .bold))
@@ -71,7 +71,7 @@ struct RecentTransactionsSectionView: View {
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)
 
-                Text(tx.category.displayName)
+                Text(tx.category.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(
                         EmotionalTagAppearance.accent(for: tx.emotion, colorScheme: colorScheme)

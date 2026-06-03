@@ -929,11 +929,11 @@ public final class SettingsStore: ObservableObject {
         resolvedSystemAccent().color(for: colorScheme)
     }
 
-    func resolvedAppearanceSummary(themeManager: ThemeManager) -> String {
+    func resolvedAppearanceSummary(themeManager: ThemeManager, locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
         if brandThemesEnabled {
-            return themeManager.current.name
+            return BuxCatalogLabel.string(themeManager.current.name, locale: locale)
         }
-        return resolvedSystemAccent().displayName
+        return resolvedSystemAccent().localizedDisplayName(locale: locale)
     }
 
     func applyBrandThemesAppearance(to themeManager: ThemeManager) {

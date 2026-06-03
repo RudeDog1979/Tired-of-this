@@ -11,7 +11,7 @@ import Foundation
 public final class MerchantInsightsEngine {
     public init() {}
 
-    public func generateInsights(transactions: [Transaction]) -> [FinancialInsight] {
+    public func generateInsights(transactions: [Transaction], locale: Locale) -> [FinancialInsight] {
         var insights: [FinancialInsight] = []
         guard !transactions.isEmpty else { return [] }
 
@@ -28,20 +28,39 @@ public final class MerchantInsightsEngine {
             if latestAmount > previousAmount * 1.10 {
                 let increase = latestAmount - previousAmount
                 insights.append(FinancialInsight(
-                    title: "Merchant Price Spike",
-                    value: "Price Hike",
-                    description: "You paid more at \(merchant).",
-                    fullExplanation: "Your latest charge of \(InsightMoneyFormat.format(latestAmount)) at \(merchant) is higher than the previous transaction of \(InsightMoneyFormat.format(previousAmount)). This represents a price rise of \(InsightMoneyFormat.format(increase)).",
+                    title: BuxLocalizedString.string("Merchant Price Spike", locale: locale),
+                    value: BuxLocalizedString.string("Price Hike", locale: locale),
+                    description: BuxLocalizedString.format("You paid more at %@.", locale: locale, merchant),
+                    fullExplanation: BuxLocalizedString.format(
+                        "Your latest charge of %@ at %@ is higher than the previous transaction of %@. This represents a price rise of %@.",
+                        locale: locale,
+                        InsightMoneyFormat.format(latestAmount),
+                        merchant,
+                        InsightMoneyFormat.format(previousAmount),
+                        InsightMoneyFormat.format(increase)
+                    ),
                     severity: .medium,
                     category: .merchant,
                     systemIcon: "tag.fill",
                     accentColorName: "orange",
                     suggestedActions: [
-                        "Verify if the price change is due to a plan upgrade or extra tax fees.",
-                        "Consider competitive alternatives or bundling options."
+                        BuxLocalizedString.string(
+                            "Verify if the price change is due to a plan upgrade or extra tax fees.",
+                            locale: locale
+                        ),
+                        BuxLocalizedString.string(
+                            "Consider competitive alternatives or bundling options.",
+                            locale: locale
+                        ),
                     ],
                     impactMonthly: increase,
-                    dataBehind: "Merchant: \(merchant). Current: \(InsightMoneyFormat.format(latestAmount)). Previous: \(InsightMoneyFormat.format(previousAmount))."
+                    dataBehind: BuxLocalizedString.format(
+                        "Merchant: %@. Current: %@. Previous: %@.",
+                        locale: locale,
+                        merchant,
+                        InsightMoneyFormat.format(latestAmount),
+                        InsightMoneyFormat.format(previousAmount)
+                    )
                 ))
             }
 
@@ -49,20 +68,36 @@ public final class MerchantInsightsEngine {
             if !refunds.isEmpty {
                 let refundSum = refunds.reduce(Decimal(0)) { $0 + $1.amount.value }
                 insights.append(FinancialInsight(
-                    title: "Merchant Refund Cleared",
-                    value: "Refund Saved",
-                    description: "A refund from \(merchant) has cleared.",
-                    fullExplanation: "The BuxMuse Brain successfully reconciled a cleared credit/refund of \(InsightMoneyFormat.format(refundSum)) from \(merchant) back into your main wallet.",
+                    title: BuxLocalizedString.string("Merchant Refund Cleared", locale: locale),
+                    value: BuxLocalizedString.string("Refund Saved", locale: locale),
+                    description: BuxLocalizedString.format("A refund from %@ has cleared.", locale: locale, merchant),
+                    fullExplanation: BuxLocalizedString.format(
+                        "The BuxMuse Brain successfully reconciled a cleared credit/refund of %@ from %@ back into your main wallet.",
+                        locale: locale,
+                        InsightMoneyFormat.format(refundSum),
+                        merchant
+                    ),
                     severity: .low,
                     category: .merchant,
                     systemIcon: "arrow.uturn.backward.circle.fill",
                     accentColorName: "green",
                     suggestedActions: [
-                        "Verify that this refund matches your expectations.",
-                        "Re-route this refund into your active savings goals."
+                        BuxLocalizedString.string(
+                            "Verify that this refund matches your expectations.",
+                            locale: locale
+                        ),
+                        BuxLocalizedString.string(
+                            "Re-route this refund into your active savings goals.",
+                            locale: locale
+                        ),
                     ],
                     impactMonthly: refundSum,
-                    dataBehind: "Merchant: \(merchant). Refund: \(InsightMoneyFormat.format(refundSum))."
+                    dataBehind: BuxLocalizedString.format(
+                        "Merchant: %@. Refund: %@.",
+                        locale: locale,
+                        merchant,
+                        InsightMoneyFormat.format(refundSum)
+                    )
                 ))
             }
         }

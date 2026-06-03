@@ -11,10 +11,9 @@ import Foundation
 public final class SpendingInsightsEngine {
     public init() {}
 
-    public func generateInsights(transactions: [Transaction]) -> [FinancialInsight] {
+    public func generateInsights(transactions: [Transaction], locale: Locale) -> [FinancialInsight] {
         var insights: [FinancialInsight] = []
         guard !transactions.isEmpty else { return [] }
-
         let expenses = transactions.filter { $0.category != .income }
         let incomes = transactions.filter { $0.category == .income }
 
@@ -33,20 +32,39 @@ public final class SpendingInsightsEngine {
             if splurgeSum > splurgeBaseline * 1.35 {
                 let pct = InsightMoneyFormat.percentChange(from: splurgeSum / max(splurgeBaseline, 0.01))
                 insights.append(FinancialInsight(
-                    title: "Payday Spending Surge",
-                    value: "Splurge Risk",
-                    description: "You spent more in the 3 days after payday.",
-                    fullExplanation: "Your spending rose by \(pct)% immediately following your last payday. This matches a standard payday splurge bias.",
+                    title: BuxLocalizedString.string("Payday Spending Surge", locale: locale),
+                    value: BuxLocalizedString.string("Splurge Risk", locale: locale),
+                    description: BuxLocalizedString.string(
+                        "You spent more in the 3 days after payday.",
+                        locale: locale
+                    ),
+                    fullExplanation: BuxLocalizedString.format(
+                        "Your spending rose by %@%% immediately following your last payday. This matches a standard payday splurge bias.",
+                        locale: locale,
+                        pct
+                    ),
                     severity: .medium,
                     category: .spending,
                     systemIcon: "creditcard.circle.fill",
                     accentColorName: "orange",
                     suggestedActions: [
-                        "Automate savings transfers on payday morning to 'pay yourself first'.",
-                        "Delay non-essential purchases by 48 hours."
+                        BuxLocalizedString.string(
+                            "Automate savings transfers on payday morning to 'pay yourself first'.",
+                            locale: locale
+                        ),
+                        BuxLocalizedString.string(
+                            "Delay non-essential purchases by 48 hours.",
+                            locale: locale
+                        ),
                     ],
                     impactMonthly: splurgeSum - splurgeBaseline,
-                    dataBehind: "Last Payday: \(Self.isoDay(lastPayday.date)). Spend: \(InsightMoneyFormat.format(splurgeSum)). Baseline: \(InsightMoneyFormat.format(splurgeBaseline))."
+                    dataBehind: BuxLocalizedString.format(
+                        "Last Payday: %@. Spend: %@. Baseline: %@.",
+                        locale: locale,
+                        Self.isoDay(lastPayday.date),
+                        InsightMoneyFormat.format(splurgeSum),
+                        InsightMoneyFormat.format(splurgeBaseline)
+                    )
                 ))
             }
         }
@@ -72,20 +90,39 @@ public final class SpendingInsightsEngine {
 
         if avgSunday < avgOther * 0.5 && avgOther > 0 {
             insights.append(FinancialInsight(
-                title: "Sunday Spend Drops",
-                value: "Low Spend Day",
-                description: "Your spending drops sharply on Sundays.",
-                fullExplanation: "Sundays are your quietest financial days, averaging just \(InsightMoneyFormat.format(avgSunday)) compared to \(InsightMoneyFormat.format(avgOther)) on other days of the week. This is an optimal rest day for your wallet.",
+                title: BuxLocalizedString.string("Sunday Spend Drops", locale: locale),
+                value: BuxLocalizedString.string("Low Spend Day", locale: locale),
+                description: BuxLocalizedString.string(
+                    "Your spending drops sharply on Sundays.",
+                    locale: locale
+                ),
+                fullExplanation: BuxLocalizedString.format(
+                    "Sundays are your quietest financial days, averaging just %@ compared to %@ on other days of the week. This is an optimal rest day for your wallet.",
+                    locale: locale,
+                    InsightMoneyFormat.format(avgSunday),
+                    InsightMoneyFormat.format(avgOther)
+                ),
                 severity: .low,
                 category: .spending,
                 systemIcon: "sun.max.fill",
                 accentColorName: "green",
                 suggestedActions: [
-                    "Declare Sunday a recurring 'No-Spend Day' to build savings momentum.",
-                    "Prep your weekly meals on Sunday to lock in restaurant savings."
+                    BuxLocalizedString.string(
+                        "Declare Sunday a recurring 'No-Spend Day' to build savings momentum.",
+                        locale: locale
+                    ),
+                    BuxLocalizedString.string(
+                        "Prep your weekly meals on Sunday to lock in restaurant savings.",
+                        locale: locale
+                    ),
                 ],
                 impactMonthly: (avgOther - avgSunday) * 4,
-                dataBehind: "Sunday Average: \(InsightMoneyFormat.format(avgSunday)). Daily Average: \(InsightMoneyFormat.format(avgOther))."
+                dataBehind: BuxLocalizedString.format(
+                    "Sunday Average: %@. Daily Average: %@.",
+                    locale: locale,
+                    InsightMoneyFormat.format(avgSunday),
+                    InsightMoneyFormat.format(avgOther)
+                )
             ))
         }
 
@@ -101,20 +138,40 @@ public final class SpendingInsightsEngine {
         if currentWeekSpend > historicalWeekSpend * 1.25 && historicalWeekSpend > 0 {
             let pct = InsightMoneyFormat.percentChange(from: currentWeekSpend / historicalWeekSpend)
             insights.append(FinancialInsight(
-                title: "Weekly Spend Spike",
-                value: "Spike Detected",
-                description: "Spending is up this week compared to last month.",
-                fullExplanation: "You spent \(InsightMoneyFormat.format(currentWeekSpend)) this week, which is \(pct)% higher than your weekly baseline average of \(InsightMoneyFormat.format(historicalWeekSpend)).",
+                title: BuxLocalizedString.string("Weekly Spend Spike", locale: locale),
+                value: BuxLocalizedString.string("Spike Detected", locale: locale),
+                description: BuxLocalizedString.string(
+                    "Spending is up this week compared to last month.",
+                    locale: locale
+                ),
+                fullExplanation: BuxLocalizedString.format(
+                    "You spent %@ this week, which is %@%% higher than your weekly baseline average of %@.",
+                    locale: locale,
+                    InsightMoneyFormat.format(currentWeekSpend),
+                    pct,
+                    InsightMoneyFormat.format(historicalWeekSpend)
+                ),
                 severity: .high,
                 category: .spending,
                 systemIcon: "chart.line.uptrend.xyaxis.circle.fill",
                 accentColorName: "red",
                 suggestedActions: [
-                    "Check your recent transactions for irregular large purchases.",
-                    "Pause active discretionary spending categories for the next 3 days."
+                    BuxLocalizedString.string(
+                        "Check your recent transactions for irregular large purchases.",
+                        locale: locale
+                    ),
+                    BuxLocalizedString.string(
+                        "Pause active discretionary spending categories for the next 3 days.",
+                        locale: locale
+                    ),
                 ],
                 impactMonthly: (currentWeekSpend - historicalWeekSpend) * 4,
-                dataBehind: "Current Week Spend: \(InsightMoneyFormat.format(currentWeekSpend)). Monthly Average Week: \(InsightMoneyFormat.format(historicalWeekSpend))."
+                dataBehind: BuxLocalizedString.format(
+                    "Current Week Spend: %@. Monthly Average Week: %@.",
+                    locale: locale,
+                    InsightMoneyFormat.format(currentWeekSpend),
+                    InsightMoneyFormat.format(historicalWeekSpend)
+                )
             ))
         }
 
@@ -122,20 +179,36 @@ public final class SpendingInsightsEngine {
         let rainyDaySpend = expenses.filter { $0.notes?.lowercased().contains("rain") == true || $0.notes?.lowercased().contains("storm") == true }
         if !rainyDaySpend.isEmpty {
             insights.append(FinancialInsight(
-                title: "Rainy Day Savings",
-                value: "Weather Bias",
-                description: "You spend less during rainy days.",
-                fullExplanation: "When local logs indicate rainy weather notes, your discretionary dining and transport spending drops by over 40% as you stay indoors, showing a strong outdoor spending bias.",
+                title: BuxLocalizedString.string("Rainy Day Savings", locale: locale),
+                value: BuxLocalizedString.string("Weather Bias", locale: locale),
+                description: BuxLocalizedString.string(
+                    "You spend less during rainy days.",
+                    locale: locale
+                ),
+                fullExplanation: BuxLocalizedString.string(
+                    "When local logs indicate rainy weather notes, your discretionary dining and transport spending drops by over 40% as you stay indoors, showing a strong outdoor spending bias.",
+                    locale: locale
+                ),
                 severity: .low,
                 category: .spending,
                 systemIcon: "cloud.rain.fill",
                 accentColorName: "blue",
                 suggestedActions: [
-                    "Use rainy days to review your subscription stack and active budgets.",
-                    "Save cash by avoiding short taxi rides in bad weather."
+                    BuxLocalizedString.string(
+                        "Use rainy days to review your subscription stack and active budgets.",
+                        locale: locale
+                    ),
+                    BuxLocalizedString.string(
+                        "Save cash by avoiding short taxi rides in bad weather.",
+                        locale: locale
+                    ),
                 ],
                 impactMonthly: 30,
-                dataBehind: "Rainy-note transactions count: \(rainyDaySpend.count)."
+                dataBehind: BuxLocalizedString.format(
+                    "Rainy-note transactions count: %lld.",
+                    locale: locale,
+                    rainyDaySpend.count
+                )
             ))
         }
 

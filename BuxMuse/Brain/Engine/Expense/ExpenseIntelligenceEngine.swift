@@ -29,18 +29,24 @@ struct ExpenseIntelligenceEngine {
     static func analyze(
         record: ExpenseRecord,
         allRecords: [ExpenseRecord],
-        activeSubscriptions: [SubscriptionInfo] = []
+        activeSubscriptions: [SubscriptionInfo] = [],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> AnalysisResult {
         let sameMerchant = allRecords.filter {
             MerchantLogoEngine.normalizeMerchantName($0.name) == MerchantLogoEngine.normalizeMerchantName(record.name)
         }.sorted { $0.date < $1.date }
 
         let recurrence = detectRecurrence(record: record, history: sameMerchant)
-        let subscription = detectSubscriptionLike(record: record, history: sameMerchant, subscriptions: activeSubscriptions)
+        let subscription = detectSubscriptionLike(
+            record: record,
+            history: sameMerchant,
+            subscriptions: activeSubscriptions,
+            locale: locale
+        )
         let heatZone = HeatZoneEngine.analyze(record: record, allRecords: allRecords)
         let habit = HabitSignatureEngine.generateSignature(for: record, history: sameMerchant)
         let futureImpact = FutureImpactEngine.project(amount: record.amountValue, currencyCode: record.currencyCode)
-        let emotionSummary = EmotionalTaggingEngine.analyze(emotion: record.emotion)
+        let emotionSummary = EmotionalTaggingEngine.analyze(emotion: record.emotion, locale: locale)
         let contextSummary = ContextTaggingEngine.analyze(context: record.contextTag)
         let microCommitment = MicroCommitmentEngine.generate(for: record)
         let refund = record.isRefund
@@ -49,13 +55,22 @@ struct ExpenseIntelligenceEngine {
         var display = ExpenseIntelligenceDisplay()
         if recurrence.isRecurring, let type = recurrence.recurrenceType {
             let confidence = Int((recurrence.confidence ?? 0) * 100)
-            display.recurrenceSummary = "Repeats \(type) · \(confidence)% confidence"
+            display.recurrenceSummary = BuxLocalizedString.format(
+                "Repeats %@ · %lld%% confidence",
+                locale: locale,
+                localizedRecurrenceType(type, locale: locale),
+                confidence
+            )
             if let next = recurrence.nextDate {
-                display.recurrenceSummary? += " · Next around \(next.formatted(date: .abbreviated, time: .omitted))"
+                display.recurrenceSummary? += BuxLocalizedString.format(
+                    " · Next around %@",
+                    locale: locale,
+                    next.formatted(date: .abbreviated, time: .omitted)
+                )
             }
         }
         if subscription.isLike {
-            display.subscriptionSummary = subscription.message
+            display.subscriptionSummary = localizedSubscriptionMessage(subscription, locale: locale)
         }
         if let heat = heatZone.summary {
             display.heatZoneSummary = heat
@@ -70,16 +85,29 @@ struct ExpenseIntelligenceEngine {
             display.microCommitmentSummary = mc.summary
         }
         if refund {
-            display.refundSummary = "Refund detected — funds returned to your wallet."
+            display.refundSummary = BuxLocalizedString.string(
+                "Refund detected — funds returned to your wallet.",
+                locale: locale
+            )
         }
         if duplicate {
-            display.duplicateSummary = "Possible duplicate charge — review this transaction."
+            display.duplicateSummary = BuxLocalizedString.string(
+                "Possible duplicate charge — review this transaction.",
+                locale: locale
+            )
         }
-        display.categoryInsight = categoryInsight(for: record, allRecords: allRecords)
-        display.merchantInsight = merchantInsight(for: record, history: sameMerchant)
-        display.goalsImpact = "Spending in \(record.transactionCategory.displayName) affects goal pacing."
+        display.categoryInsight = categoryInsight(for: record, allRecords: allRecords, locale: locale)
+        display.merchantInsight = merchantInsight(for: record, history: sameMerchant, locale: locale)
+        display.goalsImpact = BuxLocalizedString.format(
+            "Spending in %@ affects goal pacing.",
+            locale: locale,
+            record.transactionCategory.localizedDisplayName(locale: locale)
+        )
         if subscription.matchesSubscription {
-            display.subscriptionsImpact = "Matches an active subscription pattern in your hub."
+            display.subscriptionsImpact = BuxLocalizedString.string(
+                "Matches an active subscription pattern in your hub.",
+                locale: locale
+            )
         }
 
         return AnalysisResult(
@@ -165,13 +193,18 @@ struct ExpenseIntelligenceEngine {
     private static func detectSubscriptionLike(
         record: ExpenseRecord,
         history: [ExpenseRecord],
-        subscriptions: [SubscriptionInfo]
+        subscriptions: [SubscriptionInfo],
+        locale: Locale
     ) -> SubscriptionDetection {
         let norm = MerchantLogoEngine.normalizeMerchantName(record.name)
         if let match = subscriptions.first(where: { MerchantLogoEngine.normalizeMerchantName($0.merchantName) == norm }) {
             return SubscriptionDetection(
                 isLike: true,
-                message: "Matches your \(match.merchantName) pattern",
+                message: BuxLocalizedString.format(
+                    "Matches your %@ pattern",
+                    locale: locale,
+                    match.merchantName
+                ),
                 matchesSubscription: true
             )
         }
@@ -179,11 +212,16 @@ struct ExpenseIntelligenceEngine {
         if let sub = BillingCycleAIEngine.analyzeSubscription(
             merchantName: record.name,
             transactions: history.map { $0.toTransaction() },
-            category: record.transactionCategory
+            category: record.transactionCategory,
+            locale: locale
         ) {
             return SubscriptionDetection(
                 isLike: true,
-                message: "This looks like a subscription · \(sub.billingCycle.rawValue) cycle",
+                message: BuxLocalizedString.format(
+                    "This looks like a subscription · %@ cycle",
+                    locale: locale,
+                    sub.billingCycle.localizedDisplayName(locale: locale)
+                ),
                 matchesSubscription: false
             )
         }
@@ -197,7 +235,10 @@ struct ExpenseIntelligenceEngine {
             if sameAmount && sameDay {
                 return SubscriptionDetection(
                     isLike: true,
-                    message: "Part of a monthly cycle at this merchant",
+                    message: BuxLocalizedString.string(
+                        "Part of a monthly cycle at this merchant",
+                        locale: locale
+                    ),
                     matchesSubscription: false
                 )
             }
@@ -220,14 +261,47 @@ struct ExpenseIntelligenceEngine {
         }
     }
 
-    private static func categoryInsight(for record: ExpenseRecord, allRecords: [ExpenseRecord]) -> String? {
+    private static func categoryInsight(
+        for record: ExpenseRecord,
+        allRecords: [ExpenseRecord],
+        locale: Locale
+    ) -> String? {
         let count = allRecords.filter { $0.transactionCategory == record.transactionCategory }.count
         guard count >= 3 else { return nil }
-        return "\(record.transactionCategory.displayName) appears often in your recent activity (\(count) times)."
+        return BuxLocalizedString.format(
+            "%@ appears often in your recent activity (%lld times).",
+            locale: locale,
+            record.transactionCategory.localizedDisplayName(locale: locale),
+            count
+        )
     }
 
-    private static func merchantInsight(for record: ExpenseRecord, history: [ExpenseRecord]) -> String? {
+    private static func merchantInsight(
+        for record: ExpenseRecord,
+        history: [ExpenseRecord],
+        locale: Locale
+    ) -> String? {
         guard history.count >= 2 else { return nil }
-        return "You've logged \(history.count) expenses at \(record.name) recently."
+        return BuxLocalizedString.format(
+            "You've logged %lld expenses at %@ recently.",
+            locale: locale,
+            history.count,
+            record.name
+        )
+    }
+
+    private static func localizedRecurrenceType(_ type: String, locale: Locale) -> String {
+        switch type {
+        case "weekly": return BuxLocalizedString.string("weekly", locale: locale)
+        case "bi-weekly": return BuxLocalizedString.string("bi-weekly", locale: locale)
+        case "monthly": return BuxLocalizedString.string("monthly", locale: locale)
+        case "yearly": return BuxLocalizedString.string("yearly", locale: locale)
+        case "irregular": return BuxLocalizedString.string("irregular", locale: locale)
+        default: return type
+        }
+    }
+
+    private static func localizedSubscriptionMessage(_ detection: SubscriptionDetection, locale: Locale) -> String? {
+        detection.message
     }
 }

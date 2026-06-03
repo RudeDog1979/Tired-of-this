@@ -221,14 +221,20 @@ struct MoneyMapFullView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("FULL TERRITORY VIEW")
+                    BuxCatalogText.text("FULL TERRITORY VIEW")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
                         .kerning(0.8)
                     Text(graph.centerValue)
                         .font(.system(size: 30, weight: .black, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text("Spent this month across \(graph.nodes.count) live territories")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Spent this month across %lld live territories",
+                            locale: appSettingsManager.interfaceLocale,
+                            graph.nodes.count
+                        )
+                    )
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 }
@@ -252,7 +258,7 @@ struct MoneyMapFullView: View {
     private var proLegend: some View {
         HStack(spacing: 8) {
             ProFeatureBadge(compact: true)
-            Text("Pro territories show merchants, scope radar, invoices, mileage, and more as you enable Studio tools.")
+            BuxCatalogText.text("Pro territories show merchants, scope radar, invoices, mileage, and more as you enable Studio tools.")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
         }

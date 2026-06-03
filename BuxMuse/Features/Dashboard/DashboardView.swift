@@ -87,17 +87,36 @@ struct DashboardView: View {
                                         VStack(alignment: .leading, spacing: 12) {
                                             HStack {
                                                 VStack(alignment: .leading, spacing: 4) {
-                                                    Text("Active budget: \(budgetName)")
+                                                    Text(
+                                                        BuxLocalizedString.format(
+                                                            "Active budget: %@",
+                                                            locale: appSettingsManager.interfaceLocale,
+                                                            budgetName
+                                                        )
+                                                    )
                                                         .buxSectionLabelStyle(color: themeManager.current.accentColor)
                                                     
-                                                    Text("\(appSettingsManager.format(remaining)) left of \(appSettingsManager.format(limit))")
+                                                    Text(
+                                                        BuxLocalizedString.format(
+                                                            "%@ left of %@",
+                                                            locale: appSettingsManager.interfaceLocale,
+                                                            appSettingsManager.format(remaining),
+                                                            appSettingsManager.format(limit)
+                                                        )
+                                                    )
                                                         .font(.system(size: 16, weight: .bold))
                                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                                 }
                                                 
                                                 Spacer()
                                                 
-                                                Text("\(Int(progress * 100))% spent")
+                                                Text(
+                                                    BuxLocalizedString.format(
+                                                        "%lld%% spent",
+                                                        locale: appSettingsManager.interfaceLocale,
+                                                        Int(progress * 100)
+                                                    )
+                                                )
                                                     .font(.system(size: 12, weight: .bold))
                                                     .foregroundColor(warnBudget ? .red : themeManager.labelSecondary(for: colorScheme))
                                             }
@@ -136,14 +155,20 @@ struct DashboardView: View {
                                             HStack {
                                                 Image(systemName: "chart.pie.fill")
                                                     .foregroundColor(themeManager.current.accentColor)
-                                                Text("No Active Budget Profile")
+                                                BuxCatalogText.text("No Active Budget Profile")
                                                     .font(.system(size: 13, weight: .bold))
                                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                                 Spacer()
                                                 BuxChevron()
                                             }
                                             
-                                            Text("You have enabled \(settingsStore.budgetingMode.rawValue) budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.")
+                                            Text(
+                                                BuxLocalizedString.format(
+                                                    "You have enabled %@ budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.",
+                                                    locale: appSettingsManager.interfaceLocale,
+                                                    settingsStore.budgetingMode.localizedDisplayName(locale: appSettingsManager.interfaceLocale)
+                                                )
+                                            )
                                                 .font(.system(size: 11, weight: .medium))
                                                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                                 .multilineTextAlignment(.leading)
@@ -198,9 +223,15 @@ struct DashboardView: View {
                                         }
                                     }) {
                                         SubscriptionSummaryCardView(
-                                            title: "This Month",
+                                            title: BuxLocalizedString.string("This Month", locale: appSettingsManager.interfaceLocale),
                                             cost: appSettingsManager.format(monthlyTotal),
-                                            subtext: expenseHeader.biggestCategory.map { "Top: \($0)" } ?? "All categories",
+                                            subtext: expenseHeader.biggestCategory.map {
+                                                BuxLocalizedString.format(
+                                                    "Top: %@",
+                                                    locale: appSettingsManager.interfaceLocale,
+                                                    $0
+                                                )
+                                            } ?? BuxLocalizedString.string("All categories", locale: appSettingsManager.interfaceLocale),
                                             trendText: changeTrend,
                                             trendColor: changeColor,
                                             icon: "creditcard.fill",
@@ -225,10 +256,21 @@ struct DashboardView: View {
                                         }
                                     }) {
                                         SubscriptionSummaryCardView(
-                                            title: "Transactions",
-                                            cost: "\(txnCount) This Month",
-                                            subtext: expenseHeader.biggestMerchant.map { "Top: \($0)" } ?? "All merchants",
-                                            trendText: expenseHeader.microInsight ?? "On track",
+                                            title: BuxLocalizedString.string("Transactions", locale: appSettingsManager.interfaceLocale),
+                                            cost: BuxLocalizedString.format(
+                                                "%lld This Month",
+                                                locale: appSettingsManager.interfaceLocale,
+                                                txnCount
+                                            ),
+                                            subtext: expenseHeader.biggestMerchant.map {
+                                                BuxLocalizedString.format(
+                                                    "Top: %@",
+                                                    locale: appSettingsManager.interfaceLocale,
+                                                    $0
+                                                )
+                                            } ?? BuxLocalizedString.string("All merchants", locale: appSettingsManager.interfaceLocale),
+                                            trendText: expenseHeader.microInsight
+                                                ?? BuxLocalizedString.string("On track", locale: appSettingsManager.interfaceLocale),
                                             trendColor: themeManager.current.accentColor,
                                             icon: "list.bullet.rectangle.fill",
                                             iconColor: themeManager.current.accentColor,
@@ -254,7 +296,7 @@ struct DashboardView: View {
                                         HStack {
                                             Image(systemName: "sparkles")
                                                 .foregroundColor(themeManager.current.accentColor)
-                                                Text("No active subscriptions. Tapping quick action opens Subscription Hub.")
+                                                BuxCatalogText.text("No active subscriptions. Tapping quick action opens Subscription Hub.")
                                                 .font(.system(size: 11, weight: .bold))
                                                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                                 .multilineTextAlignment(.center)
@@ -277,7 +319,9 @@ struct DashboardView: View {
                                                 SubscriptionCardView(
                                                     title: sub.merchantName,
                                                     cost: appSettingsManager.format(abs(sub.cost.value)),
-                                                    billingDate: sub.billingCycle.displayName,
+                                                    billingDate: sub.billingCycle.localizedDisplayName(
+                                                        locale: appSettingsManager.interfaceLocale
+                                                    ),
                                                     accentColor: index == 0 ? themeManager.current.accentColor : Color.purple,
                                                     includesDashboardChrome: false
                                                 )
@@ -296,7 +340,7 @@ struct DashboardView: View {
                             } else if navigationCoordinator.activeCategoryPill == "Goals" {
                                 VStack(alignment: .leading, spacing: 16) {
                                     HStack {
-                                        Text("Active savings goals")
+                                        BuxCatalogText.text("Active savings goals")
                                             .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                                         
                                         Spacer()
@@ -307,7 +351,7 @@ struct DashboardView: View {
                                             HStack(spacing: 4) {
                                                 Image(systemName: "plus.circle.fill")
                                                     .font(.system(size: 14, weight: .bold))
-                                                Text("Add Goal")
+                                                BuxCatalogText.text("Add Goal")
                                                     .font(.system(size: 12, weight: .bold))
                                             }
                                             .foregroundColor(themeManager.current.accentColor)
@@ -323,7 +367,7 @@ struct DashboardView: View {
                                                 Image(systemName: "target")
                                                     .font(.system(size: 24))
                                                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                                                Text("No active savings goals yet.")
+                                                BuxCatalogText.text("No active savings goals yet.")
                                                     .font(.system(size: 13, weight: .medium))
                                                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                             }
@@ -387,10 +431,10 @@ struct DashboardView: View {
                                                     .foregroundColor(themeManager.current.accentColor)
                                                 
                                                 VStack(alignment: .leading, spacing: 2) {
-                                                    Text("See your progress")
+                                                    BuxCatalogText.text("See your progress")
                                                         .font(.system(size: 13, weight: .bold))
                                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                                    Text("Get structural forecast and potential acceleration timeline AI insights.")
+                                                    BuxCatalogText.text("Get structural forecast and potential acceleration timeline AI insights.")
                                                         .font(.system(size: 11, weight: .medium))
                                                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                                 }
@@ -680,15 +724,18 @@ private struct DashboardHeroSection: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
-                        let balanceTitle: String = {
+                        let balanceTitle = {
                             switch settingsStore.budgetingMode {
                             case .simple:
-                                return "Remaining budget"
+                                return BuxLocalizedString.string("Remaining budget", locale: appSettingsManager.interfaceLocale)
                             case .envelope, .custom:
                                 if dashSnapshot.activeBudgetName != nil {
-                                    return "Remaining budget"
+                                    return BuxLocalizedString.string("Remaining budget", locale: appSettingsManager.interfaceLocale)
                                 } else {
-                                    return "Total balance (no active budget)"
+                                    return BuxLocalizedString.string(
+                                        "Total balance (no active budget)",
+                                        locale: appSettingsManager.interfaceLocale
+                                    )
                                 }
                             }
                         }()
@@ -736,7 +783,7 @@ private struct DashboardHeroSection: View {
                             }
                         },
                         diameter: heroActionDiameter,
-                        title: "Add expense",
+                        title: "Gasto",
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
                         titleColor: themeManager.labelSecondary(for: colorScheme)
                     ) { isPressed in
@@ -750,7 +797,7 @@ private struct DashboardHeroSection: View {
                     BuxHeroQuickActionButton(
                         action: { activeSheet = .addExpense(.addIncome) },
                         diameter: heroActionDiameter,
-                        title: "Log income",
+                        title: "Ingreso",
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
                         titleColor: themeManager.labelSecondary(for: colorScheme)
                     ) { isPressed in
@@ -923,7 +970,7 @@ struct FabSubmenuItem: View {
             HStack(spacing: 12) {
                 Spacer()
 
-                Text(title)
+                BuxCatalogDynamicText(key: title)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .padding(.horizontal, 12)
@@ -964,7 +1011,7 @@ struct FabSubmenuDivider: View {
     var body: some View {
         HStack(spacing: 12) {
             Spacer()
-            Text(title)
+            BuxCatalogDynamicText(key: title)
                 .buxSectionLabelStyle(color: colorScheme == .dark ? .white.opacity(0.45) : .gray)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)

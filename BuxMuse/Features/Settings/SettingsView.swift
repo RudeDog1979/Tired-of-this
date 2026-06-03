@@ -32,12 +32,16 @@ struct SettingsView: View {
 
 
                         // Generate layout dynamically from SettingsBrain display structs
-                        let appearanceLabel = store.resolvedAppearanceSummary(themeManager: themeManager)
+                        let appearanceLabel = store.resolvedAppearanceSummary(
+                            themeManager: themeManager,
+                            locale: appSettingsManager.interfaceLocale
+                        )
                         let display = SettingsBrain.generateOverview(
                             store: store,
                             currentThemeName: appearanceLabel,
                             activeCurrencyCode: appSettingsManager.selectedCurrency.id,
-                            activeCurrencyFlag: appSettingsManager.selectedCurrency.flag
+                            activeCurrencyFlag: appSettingsManager.selectedCurrency.flag,
+                            interfaceLocale: appSettingsManager.interfaceLocale
                         )
                         
                         ForEach(display.sections) { section in
@@ -126,6 +130,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                .buxInterfaceLocale()
                 .environment(\.settingsEnhancedTint, true)
             }
             .environment(\.settingsEnhancedTint, true)
@@ -237,7 +242,7 @@ struct SettingsRow: View {
                     .foregroundColor(.white)
             }
 
-            Text(label)
+            BuxCatalogText.text(label)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
@@ -249,7 +254,7 @@ struct SettingsRow: View {
             }
 
             if let trailing = trailingText {
-                Text(trailing)
+                BuxCatalogText.text(trailing)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(themeManager.current.accentColor)
                     .padding(.trailing, 4)
@@ -282,10 +287,10 @@ struct AppearanceThemePickerView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Appearance")
+                    BuxCatalogDynamicText(key: "Appearance")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text("Select a creative brand preset")
+                    BuxCatalogDynamicText(key: "Select a creative brand preset")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                 }
@@ -311,7 +316,7 @@ struct AppearanceThemePickerView: View {
                     .padding(.vertical, 8)
                 }
             } else {
-                Text("Turn on Brand Themes in Appearance to choose a preset.")
+                BuxCatalogDynamicText(key: "Turn on Brand Themes in Appearance to choose a preset.")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
@@ -335,6 +340,7 @@ struct AppearanceThemePickerView: View {
 struct ThemeSwatchCard: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var appSettingsManager: AppSettingsManager
     let theme: AppTheme
     let isSelected: Bool
     let onTap: () -> Void
@@ -369,7 +375,7 @@ struct ThemeSwatchCard: View {
                     }
                 }
 
-                Text(theme.name)
+                Text(theme.localizedName(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(isSelected
                         ? themeManager.labelPrimary(for: colorScheme)
@@ -421,10 +427,10 @@ struct CurrencyRegionPickerView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Currency & Region")
+                    BuxCatalogDynamicText(key: "Currency & Region")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text("Choose your preferred regional formatting")
+                    BuxCatalogDynamicText(key: "Choose your preferred regional formatting")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                 }
@@ -469,7 +475,7 @@ struct CurrencyRegionPickerView: View {
                             Image(systemName: "globe")
                                 .font(.system(size: 40))
                                 .foregroundColor(.gray.opacity(0.6))
-                            Text("No currencies found")
+                            BuxCatalogDynamicText(key: "No currencies found")
                                 .font(.system(size: 16, weight: .semibold))
                                 .buxLabelSecondary()
                         }
@@ -504,6 +510,7 @@ struct CurrencyRegionPickerView: View {
 struct CurrencyRowCard: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var appSettingsManager: AppSettingsManager
     let currency: CurrencySetting
     let isSelected: Bool
     let onTap: () -> Void
@@ -518,7 +525,14 @@ struct CurrencyRowCard: View {
                     Text(currency.name)
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text("\(currency.id) (\(currency.symbol))")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%@ (%@)",
+                            locale: appSettingsManager.interfaceLocale,
+                            currency.id,
+                            currency.symbol
+                        )
+                    )
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                 }

@@ -219,7 +219,12 @@ public final class BuxMuseBrain: ObservableObject {
             working.renewalReminderDays = nil
         }
         let subs = financialEngine.activeSubscriptions()
-        let analysis = ExpenseIntelligenceEngine.analyze(record: working, allRecords: all, activeSubscriptions: subs)
+        let analysis = ExpenseIntelligenceEngine.analyze(
+            record: working,
+            allRecords: all,
+            activeSubscriptions: subs,
+            locale: BuxInterfaceLocale.currentInterfaceLocale
+        )
         if !userMarkedRecurring {
             working.isRecurring = analysis.isRecurring
             working.recurrenceType = analysis.recurrenceType
@@ -359,11 +364,17 @@ public final class BuxMuseBrain: ObservableObject {
         _ = try saveExpenseRecord(record)
     }
 
-    func expenseIntelligenceDisplay(for id: UUID) -> ExpenseIntelligenceDisplay {
+    func expenseIntelligenceDisplay(for id: UUID, locale: Locale? = nil) -> ExpenseIntelligenceDisplay {
+        let resolvedLocale = locale ?? BuxInterfaceLocale.currentInterfaceLocale
         guard let record = try? persistence.fetchExpenseRecord(id: id) else { return .empty }
         let all = (try? persistence.fetchAllExpenseRecords()) ?? []
         let subs = financialEngine.activeSubscriptions()
-        return ExpenseIntelligenceEngine.analyze(record: record, allRecords: all, activeSubscriptions: subs).display
+        return ExpenseIntelligenceEngine.analyze(
+            record: record,
+            allRecords: all,
+            activeSubscriptions: subs,
+            locale: resolvedLocale
+        ).display
     }
 
     func categoryId(for category: TransactionCategory) throws -> UUID {
@@ -478,9 +489,10 @@ public final class BuxMuseBrain: ObservableObject {
         let activeBudgetLimit: Decimal
         let activeBudgetSpent: Decimal
         
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         switch budgetingMode {
         case .simple:
-            activeBudgetName = "Simple Monthly Budget"
+            activeBudgetName = BuxLocalizedString.string("Simple Monthly Budget", locale: locale)
             if SettingsStore.shared.autoAdjustBudgetsFromHistory {
                 activeBudgetLimit = Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
             } else {
@@ -517,7 +529,11 @@ public final class BuxMuseBrain: ObservableObject {
             
         case .custom:
             let period = SettingsStore.shared.customBudgetPeriod
-            activeBudgetName = "Custom \(period.rawValue) Budget"
+            activeBudgetName = BuxLocalizedString.format(
+                "Custom %@ Budget",
+                locale: locale,
+                BuxCatalogLabel.string(period.rawValue, locale: locale)
+            )
             activeBudgetLimit = SettingsStore.shared.customBudgetLimit
             
             let startOfPeriod: Date
@@ -685,7 +701,10 @@ public final class BuxMuseBrain: ObservableObject {
         let lastMonthSpent = lastMonthRecords.reduce(0.0) { $0 + abs($1.amountDouble) }
         let change = totalSpent - lastMonthSpent
 
-        let categories = Dictionary(grouping: thisMonthRecords, by: { $0.transactionCategory.displayName })
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
+        let categories = Dictionary(grouping: thisMonthRecords, by: {
+            $0.transactionCategory.localizedDisplayName(locale: locale)
+        })
         let biggestCategory = categories.max(by: { $0.value.reduce(0) { $0 + abs($1.amountDouble) } < $1.value.reduce(0) { $0 + abs($1.amountDouble) } })?.key
 
         let merchants = Dictionary(grouping: thisMonthRecords, by: { $0.merchantName })
@@ -707,7 +726,9 @@ public final class BuxMuseBrain: ObservableObject {
             biggestCategory: biggestCategory,
             biggestMerchant: biggestMerchant,
             sparklinePoints: sparkline,
-            microInsight: change > 0 ? "Spending is up this month" : "Great job keeping costs down"
+            microInsight: change > 0
+                ? BuxLocalizedString.string("Spending is up this month", locale: locale)
+                : BuxLocalizedString.string("Great job keeping costs down", locale: locale)
         )
 
         let timelineGroups = ExpenseTimelineGrouper.group(allRecords)
@@ -717,14 +738,14 @@ public final class BuxMuseBrain: ObservableObject {
             let displayRows = group.records.map { r in
                 ExpenseRowDisplay(
                     id: r.id,
-                    name: r.name,
+                    name: IncomeSourceQuickPick.localizedDisplayName(for: r.name, locale: locale),
                     amount: r.amountDouble,
                     amountFormatted: AppSettingsManager.format(
                         amount: abs(r.amountDouble),
                         currency: AppSettingsManager.currencySetting(for: r.currencyCode)
                     ),
                     date: r.date,
-                    category: r.transactionCategory.displayName,
+                    category: r.transactionCategory.localizedDisplayName(locale: locale),
                     merchant: r.merchantName,
                     heatZone: r.heatZoneBucket,
                     habitSignature: r.habitSignatureId,
@@ -736,8 +757,12 @@ public final class BuxMuseBrain: ObservableObject {
                 )
             }
             sections.append(ExpenseSectionDisplay(
-                title: group.section.rawValue,
-                microInsight: "\(displayRows.count) transactions",
+                title: group.section.catalogLabel(locale: locale),
+                microInsight: BuxLocalizedString.format(
+                    "%lld transactions",
+                    locale: locale,
+                    displayRows.count
+                ),
                 expenses: displayRows
             ))
         }
@@ -751,7 +776,11 @@ public final class BuxMuseBrain: ObservableObject {
             categoryBreakdown: Array(summaryCat.prefix(5)),
             merchantBreakdown: Array(summaryMer.prefix(5)),
             trendPoints: sparkline,
-            prediction: "Trending towards \(AppSettingsManager.format(amount: projected, currency: currency)) this month"
+            prediction: BuxLocalizedString.format(
+                "Trending towards %@ this month",
+                locale: locale,
+                AppSettingsManager.format(amount: projected, currency: currency)
+            )
         )
 
         return ExpenseInteractionDisplay(header: header, sections: sections, summary: summary)

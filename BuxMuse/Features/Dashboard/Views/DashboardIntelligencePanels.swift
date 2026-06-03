@@ -10,6 +10,8 @@ import SwiftUI
 // MARK: - Feature strips (horizontal MAT row)
 
 struct DashboardFeatureInsightStrips: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     let strips: [FeatureInsightStrip]
     var onOpenStudioSettings: (() -> Void)?
 
@@ -18,7 +20,7 @@ struct DashboardFeatureInsightStrips: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Feature intelligence")
+            BuxCatalogText.text("Feature intelligence")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                 .padding(.horizontal, 4)
 
@@ -41,19 +43,19 @@ struct DashboardFeatureInsightStrips: View {
                 Image(systemName: strip.systemIcon)
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(accent(for: strip.accentColorName))
-                Text(strip.title)
+                Text(strip.localizedTitle(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)
             }
 
-            Text(strip.value)
+            Text(strip.localizedValue(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 18, weight: .black, design: .rounded))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
 
-            Text(strip.subtitle)
+            Text(strip.localizedSubtitle(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .lineLimit(2)
@@ -61,7 +63,7 @@ struct DashboardFeatureInsightStrips: View {
 
             if !strip.isFeatureEnabled || !strip.hasData, let cta = strip.ctaLabel {
                 Button(action: { onOpenStudioSettings?() }) {
-                    Text(cta)
+                    Text(BuxInsightCopy.copy(cta, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
                         .lineLimit(2)
@@ -93,6 +95,7 @@ struct DashboardFeatureInsightStrips: View {
 struct DashboardInsightsPanel: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var insightsViewModel: InsightsViewModel
 
     let categorySlideDirection: Int
@@ -120,7 +123,7 @@ struct DashboardInsightsPanel: View {
         let topInsights = Array(insightsViewModel.rankedInsights.prefix(3))
 
         return VStack(alignment: .leading, spacing: 10) {
-            Text("Top insights")
+            BuxCatalogText.text("Top insights")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                 .padding(.horizontal, 4)
 
@@ -141,10 +144,10 @@ struct DashboardInsightsPanel: View {
                 Image(systemName: "sparkles")
                     .font(.system(size: 24))
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                Text("No insights yet.")
+                BuxCatalogText.text("No insights yet.")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                Text("Add expenses to unlock spending insights.")
+                BuxCatalogText.text("Add expenses to unlock spending insights.")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
@@ -166,10 +169,10 @@ struct DashboardInsightsPanel: View {
                     .frame(width: 36)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(insight.title)
+                    Text(insight.localizedTitle(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text(insight.description)
+                    Text(insight.localizedDescription(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                         .lineLimit(2)
@@ -177,7 +180,7 @@ struct DashboardInsightsPanel: View {
 
                 Spacer()
 
-                Text(insight.value)
+                Text(insight.localizedValue(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .black, design: .rounded))
                     .foregroundColor(accent(for: insight.accentColorName))
             }
@@ -225,7 +228,7 @@ struct MoneyMapDashboardPanel: View {
         let tx = financialBridge.engine.allTransactions().count
         let insights = insightsViewModel.rankedInsights.count
         let strips = insightsViewModel.featureStrips.count
-        return "\(tx)-\(insights)-\(strips)-\(settingsStore.studioEnabled)-\(studioStore.projects.count)-\(studioStore.invoices.count)"
+        return "\(tx)-\(insights)-\(strips)-\(settingsStore.studioEnabled)-\(studioStore.projects.count)-\(studioStore.invoices.count)-\(appSettingsManager.selectedCountry.id)"
     }
 
     var body: some View {
@@ -238,9 +241,15 @@ struct MoneyMapDashboardPanel: View {
                         Image(systemName: "map.fill")
                             .font(.system(size: 18, weight: .bold))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Open full Money Map")
+                            BuxCatalogText.text("Open full Money Map")
                                 .font(.system(size: 15, weight: .black))
-                            Text("\(graph.nodes.count) territories · charts · Pro lanes · insights")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "%lld territories · charts · Pro lanes · insights",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    graph.nodes.count
+                                )
+                            )
                                 .font(.system(size: 11, weight: .medium))
                                 .opacity(0.85)
                         }
@@ -295,7 +304,7 @@ struct MoneyMapDashboardPanel: View {
     private func miniPreviewCard(graph: MoneyMapGraph) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Money Map")
+                BuxCatalogText.text("Money Map")
                     .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                 Spacer()
                 if graph.isProEnriched {
@@ -349,13 +358,22 @@ struct StudioIntelligenceSummaryCard: View {
             .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
         let workHours = scopedProjects.flatMap(\.timeEntries).reduce(0.0) { $0 + $1.duration / 3600.0 }
         let burnoutHours = settings.burnoutGuardEnabled ? burnoutEngine.currentStatus.workHours : 0
-        let scopeAlerts = ScopeCreepInsightsEngine.generateInsights(projects: scopedProjects).count
+        let scopeAlerts = ScopeCreepInsightsEngine.generateInsights(
+            projects: scopedProjects,
+            locale: appSettingsManager.interfaceLocale
+        ).count
         let workspaceName = HustleWorkspaceFilter.activeWorkspaceLabel() ?? "All workspaces"
 
         BuxCard(elevation: .card, cornerRadius: 18, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("Studio · \(workspaceName)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Studio · %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            workspaceName
+                        )
+                    )
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Spacer()
@@ -367,18 +385,38 @@ struct StudioIntelligenceSummaryCard: View {
                 }
 
                 HStack(spacing: 16) {
-                    metricColumn(title: "Workspace spend", value: appSettingsManager.format(monthSpend))
+                    metricColumn(titleKey: "Workspace spend", value: appSettingsManager.format(monthSpend))
                     metricColumn(
-                        title: "Tracked hours",
+                        titleKey: "Tracked hours",
                         value: settings.burnoutGuardEnabled
-                            ? "\(String(format: "%.1f", workHours))h / \(String(format: "%.1f", burnoutHours))h"
-                            : String(format: "%.1fh", workHours)
+                            ? BuxLocalizedString.format(
+                                "%.1f h / %.1f h",
+                                locale: appSettingsManager.interfaceLocale,
+                                workHours,
+                                burnoutHours
+                            )
+                            : BuxLocalizedString.format(
+                                "%.1fh",
+                                locale: appSettingsManager.interfaceLocale,
+                                workHours
+                            )
                     )
-                    metricColumn(title: "Energy", value: settings.burnoutGuardEnabled ? "\(Int(burnoutEngine.currentStatus.creativeEnergyPercent))%" : "—")
+                    metricColumn(
+                        titleKey: "Energy",
+                        value: settings.burnoutGuardEnabled ? "\(Int(burnoutEngine.currentStatus.creativeEnergyPercent))%" : "—"
+                    )
                 }
 
                 if settings.burnoutGuardEnabled && settings.antiScopeCreepEnabled {
-                    Text("Workload \(String(format: "%.1f", burnoutHours))h vs project time \(String(format: "%.1f", workHours))h · Scope alerts \(scopeAlerts)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Workload %@h vs project time %@h · Scope alerts %lld",
+                            locale: appSettingsManager.interfaceLocale,
+                            String(format: "%.1f", burnoutHours),
+                            String(format: "%.1f", workHours),
+                            scopeAlerts
+                        )
+                    )
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 }
@@ -386,10 +424,11 @@ struct StudioIntelligenceSummaryCard: View {
         }
     }
 
-    private func metricColumn(title: String, value: String) -> some View {
+    private func metricColumn(titleKey: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title.uppercased())
+            BuxCatalogText.text(titleKey)
                 .font(.system(size: 9, weight: .bold))
+                .textCase(.uppercase)
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(0.4)
             Text(value)

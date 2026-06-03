@@ -21,7 +21,7 @@ struct BudgetSettingsView: View {
             BuxFormSection(title: "Budget method") {
                 Picker("Budgeting Mode", selection: $store.budgetingMode) {
                     ForEach(BudgetingMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
+                        Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                     }
                 }
                 .buxThemedSegmentedPicker()
@@ -30,7 +30,7 @@ struct BudgetSettingsView: View {
                 if store.budgetingMode == .simple {
                     BuxFormRowDivider()
                     HStack {
-                        Text("Monthly Spending Limit")
+                        BuxCatalogDynamicText(key: "Monthly Spending Limit")
                             .font(.system(size: 15, weight: .semibold))
                         Spacer()
                         TextField("Amount", value: $store.simpleBudgetLimit, format: .number)
@@ -44,7 +44,7 @@ struct BudgetSettingsView: View {
                 } else if store.budgetingMode == .custom {
                     BuxFormRowDivider()
                     HStack {
-                        Text("Spending Cap")
+                        BuxCatalogDynamicText(key: "Spending Cap")
                             .font(.system(size: 15, weight: .semibold))
                         Spacer()
                         TextField("Amount", value: $store.customBudgetLimit, format: .number)
@@ -58,7 +58,7 @@ struct BudgetSettingsView: View {
                     BuxFormRowDivider()
                     Picker("Budget Period", selection: $store.customBudgetPeriod) {
                         ForEach(DefaultBudgetPeriod.allCases) { period in
-                            Text(period.rawValue).tag(period)
+                            Text(period.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(period)
                         }
                     }
                     .pickerStyle(.menu)
@@ -68,7 +68,7 @@ struct BudgetSettingsView: View {
                     BuxFormRowDivider()
                     Picker("Default Cycle", selection: $store.defaultBudgetPeriod) {
                         ForEach(DefaultBudgetPeriod.allCases) { period in
-                            Text(period.rawValue).tag(period)
+                            Text(period.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(period)
                         }
                     }
                     .pickerStyle(.menu)
@@ -84,9 +84,9 @@ struct BudgetSettingsView: View {
                 BuxFormRowDivider()
                 Toggle(isOn: $store.autoAdjustBudgetsFromHistory) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Auto-adjust from History")
+                        BuxCatalogDynamicText(key: "Auto-adjust from History")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("BuxMuse Brain will adjust limits based on seasonal spend trends")
+                        BuxCatalogDynamicText(key: "BuxMuse Brain will adjust limits based on seasonal spend trends")
                             .font(.system(size: 11))
                             .buxLabelSecondary()
                     }
@@ -97,7 +97,7 @@ struct BudgetSettingsView: View {
 
             BuxFormSection(title: "Custom envelope profiles") {
                 if store.customBudgetProfiles.isEmpty {
-                    Text("No custom profiles configured.")
+                    BuxCatalogDynamicText(key: "No custom profiles configured.")
                         .font(.system(size: 14))
                         .buxLabelSecondary()
                         .buxFormFieldPadding()
@@ -111,7 +111,7 @@ struct BudgetSettingsView: View {
                                         .font(.system(size: 15, weight: .bold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     if profile.isActive {
-                                        Text("Active")
+                                        BuxCatalogDynamicText(key: "Active")
                                             .font(.system(size: 10, weight: .bold))
                                             .foregroundColor(.white)
                                             .padding(.horizontal, 6)
@@ -120,7 +120,14 @@ struct BudgetSettingsView: View {
                                             .clipShape(Capsule())
                                     }
                                 }
-                                Text("\(profile.categories.count) Categories · Target: \(appSettingsManager.format(profile.targetAmount))")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%lld Categories · Target: %@",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        Int64(profile.categories.count),
+                                        appSettingsManager.format(profile.targetAmount)
+                                    )
+                                )
                                     .font(.system(size: 12))
                                     .buxLabelSecondary()
                             }
@@ -150,7 +157,7 @@ struct BudgetSettingsView: View {
                 Button(action: { showCreator = true }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
-                        Text("Add Custom Envelope Profile")
+                        BuxCatalogDynamicText(key: "Add Custom Envelope Profile")
                     }
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(themeManager.current.accentColor)
@@ -254,7 +261,7 @@ struct BudgetProfileEditorView: View {
 
                     BuxFormSection(title: "Envelope categories") {
                         if profile.categories.isEmpty {
-                            Text("No categories added yet.")
+                            BuxCatalogDynamicText(key: "No categories added yet.")
                                 .font(.system(size: 14))
                                 .buxLabelSecondary()
                                 .buxFormFieldPadding()
@@ -289,7 +296,7 @@ struct BudgetProfileEditorView: View {
                                 .keyboardType(.decimalPad)
                             Spacer()
                             Button(action: addCategory) {
-                                Text("Add")
+                                BuxCatalogDynamicText(key: "Add")
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(themeManager.current.accentColor)
                             }
@@ -300,7 +307,7 @@ struct BudgetProfileEditorView: View {
 
                     BuxFormSection(title: "Summary") {
                         HStack {
-                            Text("Total Budget Limit")
+                            BuxCatalogDynamicText(key: "Total Budget Limit")
                                 .font(.system(size: 15, weight: .bold))
                             Spacer()
                             Text(appSettingsManager.format(profile.targetAmount))

@@ -23,7 +23,7 @@ struct SubscriptionCategoryDetailView: View {
 
             VStack(spacing: BuxLayout.section) {
                 if cachedBreakdown.isEmpty {
-                    Text("No category subscription metrics available.")
+                    BuxCatalogText.text("No category subscription metrics available.")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity)
@@ -52,12 +52,19 @@ struct SubscriptionCategoryDetailView: View {
                                 }
 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(group.category.displayName)
+                                    Text(group.category.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                                         .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         .lineLimit(1)
 
-                                    Text("\(group.subscriptionsCount) Active • \(Int(round(group.proportion)))% of total")
+                                    Text(
+                                        BuxLocalizedString.format(
+                                            "%lld Active • %lld%% of total",
+                                            locale: appSettingsManager.interfaceLocale,
+                                            group.subscriptionsCount,
+                                            Int(round(group.proportion))
+                                        )
+                                    )
                                         .font(.system(size: 11, weight: .semibold))
                                         .foregroundColor(.gray)
                                         .lineLimit(1)

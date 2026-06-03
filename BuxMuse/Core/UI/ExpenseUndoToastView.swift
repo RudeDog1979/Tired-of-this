@@ -27,14 +27,14 @@ struct ExpenseUndoToastView: View {
                             .font(.system(size: 22, weight: .semibold))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
 
-                        Text("Expense deleted")
+                        BuxCatalogDynamicText(key: "Expense deleted")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
                         Button {
                             try? brain.performExpenseUndo()
                         } label: {
-                            Text("Undo")
+                            BuxCatalogDynamicText(key: "Undo")
                                 .font(.system(size: 17, weight: .bold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)

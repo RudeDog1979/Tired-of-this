@@ -55,6 +55,7 @@ struct RootView: View {
                         isPresented: $navigationCoordinator.showStudioUnlockAnimation,
                         onMidpointReveal: { navigationCoordinator.commitStudioUnlock() }
                     )
+                    .environmentObject(appSettingsManager)
                     .transition(.opacity)
                     .zIndex(200)
                 }
@@ -66,6 +67,8 @@ struct RootView: View {
                     navigationCoordinator.selectedTab = .studio
                 }
                 .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environment(\.locale, appSettingsManager.interfaceLocale)
             }
             .onChange(of: navigationCoordinator.showStudioUnlockAnimation) { _, isShowing in
                 if !isShowing {
@@ -74,6 +77,7 @@ struct RootView: View {
             }
             .animation(.spring(response: 0.45, dampingFraction: 0.85, blendDuration: 0), value: navigationCoordinator.showSubscriptionHub)
             .buxRootBrandTheme()
+            .buxInterfaceLocale()
             .sheet(item: $goalsSheetCoordinator.activeSheet) { sheet in
                 switch sheet {
                 case .addGoal:
@@ -129,6 +133,8 @@ struct RootView: View {
                     navigationCoordinator.selectedTab = .home
                 }
             }
+            .environment(\.locale, appSettingsManager.interfaceLocale)
+            .id(appSettingsManager.selectedCountry.id)
     }
 
     private var coreTabView: some View {
@@ -136,13 +142,13 @@ struct RootView: View {
             Tab(value: AppTab.home) {
                 DashboardView(transactionNamespace: transactionNamespace)
             } label: {
-                Label(AppTab.home.nativeTabTitle, systemImage: AppTab.home.nativeTabSymbol)
+                BuxTabBarLabel(titleKey: "Home", systemImage: AppTab.home.nativeTabSymbol)
             }
 
             Tab(value: AppTab.expense) {
                 ExpenseTabView()
             } label: {
-                Label(AppTab.expense.nativeTabTitle, systemImage: AppTab.expense.nativeTabSymbol)
+                BuxTabBarLabel(titleKey: "Expenses", systemImage: AppTab.expense.nativeTabSymbol)
             }
 
             if settingsStore.studioEnabled {
@@ -157,14 +163,14 @@ struct RootView: View {
                         .environmentObject(container.simpleStudioStore)
                         .environmentObject(container.simpleStudioBrain)
                 } label: {
-                    Label(AppTab.studio.nativeTabTitle, systemImage: AppTab.studio.nativeTabSymbol)
+                    BuxTabBarLabel(titleKey: "Studio", systemImage: AppTab.studio.nativeTabSymbol)
                 }
             }
 
             Tab(value: AppTab.settings) {
                 SettingsView()
             } label: {
-                Label(AppTab.settings.nativeTabTitle, systemImage: AppTab.settings.nativeTabSymbol)
+                BuxTabBarLabel(titleKey: "Settings", systemImage: AppTab.settings.nativeTabSymbol)
             }
         }
         .buxNativeTabBarMinimizeOnScroll()

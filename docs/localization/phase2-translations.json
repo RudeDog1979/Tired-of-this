@@ -1,0 +1,610 @@
+{
+  "Add": {
+    "es-419": "Agregar",
+    "es-ES": "Añadir"
+  },
+  "Apply": {
+    "es-419": "Aplicar",
+    "es-ES": "Aplicar"
+  },
+  "Business Card Studio": {
+    "es-419": "Business Card Studio",
+    "es-ES": "Business Card Studio"
+  },
+  "Cancel": {
+    "es-419": "Cancelar",
+    "es-ES": "Cancelar"
+  },
+  "Clear": {
+    "es-419": "Limpiar",
+    "es-ES": "Limpiar"
+  },
+  "Company Logo": {
+    "es-419": "Logo de la empresa",
+    "es-ES": "Logo de la empresa"
+  },
+  "Default Hourly Rate": {
+    "es-419": "Tarifa por hora predeterminada",
+    "es-ES": "Tarifa por hora predeterminada"
+  },
+  "Delete": {
+    "es-419": "Eliminar",
+    "es-ES": "Eliminar"
+  },
+  "Done": {
+    "es-419": "Listo",
+    "es-ES": "Hecho"
+  },
+  "Duplicate": {
+    "es-419": "Duplicar",
+    "es-ES": "Duplicar"
+  },
+  "Edit": {
+    "es-419": "Editar",
+    "es-ES": "Editar"
+  },
+  "Expenses": {
+    "es-419": "Gastos",
+    "es-ES": "Gastos"
+  },
+  "Global locale": {
+    "es-419": "Configuración regional global",
+    "es-ES": "Configuración regional global"
+  },
+  "Invoices": {
+    "es-419": "Facturas",
+    "es-ES": "Facturas"
+  },
+  "Invoicing defaults": {
+    "es-419": "Valores predeterminados de facturación",
+    "es-ES": "Valores predeterminados de facturación"
+  },
+  "Mileage Log": {
+    "es-419": "Registro de millaje",
+    "es-ES": "Registro de kilometraje"
+  },
+  "New Invoice": {
+    "es-419": "Nueva factura",
+    "es-ES": "Nueva factura"
+  },
+  "Note": {
+    "es-419": "Nota",
+    "es-ES": "Nota"
+  },
+  "Notes": {
+    "es-419": "Notas",
+    "es-ES": "Notas"
+  },
+  "Pro Studio": {
+    "es-419": "Pro Studio",
+    "es-ES": "Pro Studio"
+  },
+  "Quick filters": {
+    "es-419": "Filtros rápidos",
+    "es-ES": "Filtros rápidos"
+  },
+  "Region & Currency": {
+    "es-419": "Región y moneda",
+    "es-ES": "Región y moneda"
+  },
+  "Save": {
+    "es-419": "Guardar",
+    "es-ES": "Guardar"
+  },
+  "Scan Receipt": {
+    "es-419": "Escanear recibo",
+    "es-ES": "Escanear ticket"
+  },
+  "Scope & deliverables": {
+    "es-419": "Alcance y entregables",
+    "es-ES": "Alcance y entregables"
+  },
+  "Scope Radar": {
+    "es-419": "Scope Radar",
+    "es-ES": "Scope Radar"
+  },
+  "Select": {
+    "es-419": "Seleccionar",
+    "es-ES": "Seleccionar"
+  },
+  "Settings": {
+    "es-419": "Ajustes",
+    "es-ES": "Ajustes"
+  },
+  "Share": {
+    "es-419": "Compartir",
+    "es-ES": "Compartir"
+  },
+  "Shown on exported invoice PDFs": {
+    "es-419": "Se muestra en PDFs de factura exportados",
+    "es-ES": "Se muestra en PDFs de factura exportados"
+  },
+  "Status": {
+    "es-419": "Estado",
+    "es-ES": "Estado"
+  },
+  "Tax Profile": {
+    "es-419": "Perfil fiscal",
+    "es-ES": "Perfil fiscal"
+  },
+  "Terms & conditions": {
+    "es-419": "Términos y condiciones",
+    "es-ES": "Términos y condiciones"
+  },
+  "Type": {
+    "es-419": "Tipo",
+    "es-ES": "Tipo"
+  },
+  "Upgrade to Pro": {
+    "es-419": "Mejorar a Pro",
+    "es-ES": "Mejorar a Pro"
+  },
+  "Upgrade to Pro Studio": {
+    "es-419": "Actualizar a Pro Studio",
+    "es-ES": "Actualizar a Pro Studio"
+  },
+  "A project is the job you track — fixed price or hourly, time log, expenses, and invoices.": {
+    "es-419": "Un proyecto es el trabajo que sigues — precio fijo o por hora, registro de tiempo, gastos y facturas.",
+    "es-ES": "Un proyecto es el trabajo que sigues — precio fijo o por hora, registro de tiempo, gastos y facturas."
+  },
+  "Add Client": {
+    "es-419": "Agregar cliente",
+    "es-ES": "Añadir cliente"
+  },
+  "Add Project": {
+    "es-419": "Agregar proyecto",
+    "es-ES": "Añadir proyecto"
+  },
+  "Add Line Item": {
+    "es-419": "Agregar línea",
+    "es-ES": "Añadir línea"
+  },
+  "Add Tax Rate": {
+    "es-419": "Agregar tasa de impuesto",
+    "es-ES": "Añadir tasa de impuesto"
+  },
+  "Add client": {
+    "es-419": "Agregar cliente",
+    "es-ES": "Añadir cliente"
+  },
+  "Add line item": {
+    "es-419": "Agregar línea",
+    "es-ES": "Añadir línea"
+  },
+  "Add logo": {
+    "es-419": "Agregar logo",
+    "es-ES": "Añadir logo"
+  },
+  "Add milestone": {
+    "es-419": "Agregar hito",
+    "es-ES": "Añadir hito"
+  },
+  "Add mileage entry": {
+    "es-419": "Agregar entrada de millaje",
+    "es-ES": "Añadir entrada de kilometraje"
+  },
+  "Add overlay tint": {
+    "es-419": "Agregar tinte superpuesto",
+    "es-ES": "Añadir tinte superpuesto"
+  },
+  "Add your photo": {
+    "es-419": "Agrega tu foto",
+    "es-ES": "Añade tu foto"
+  },
+  "Address": {
+    "es-419": "Dirección",
+    "es-ES": "Dirección"
+  },
+  "Adjust": {
+    "es-419": "Ajustar",
+    "es-ES": "Ajustar"
+  },
+  "Advance": {
+    "es-419": "Anticipo",
+    "es-ES": "Anticipo"
+  },
+  "Agreed price": {
+    "es-419": "Precio acordado",
+    "es-ES": "Precio acordado"
+  },
+  "Agreement": {
+    "es-419": "Acuerdo",
+    "es-ES": "Acuerdo"
+  },
+  "Agreement drafts": {
+    "es-419": "Borradores de acuerdo",
+    "es-ES": "Borradores de acuerdo"
+  },
+  "Agreements": {
+    "es-419": "Acuerdos",
+    "es-ES": "Acuerdos"
+  },
+  "Alerts": {
+    "es-419": "Alertas",
+    "es-ES": "Alertas"
+  },
+  "Align": {
+    "es-419": "Alinear",
+    "es-ES": "Alinear"
+  },
+  "All": {
+    "es-419": "Todo",
+    "es-ES": "Todo"
+  },
+  "All templates": {
+    "es-419": "Todas las plantillas",
+    "es-ES": "Todas las plantillas"
+  },
+  "Allow photos": {
+    "es-419": "Permitir fotos",
+    "es-ES": "Permitir fotos"
+  },
+  "Amount": {
+    "es-419": "Monto",
+    "es-ES": "Importe"
+  },
+  "Amount due": {
+    "es-419": "Monto adeudado",
+    "es-ES": "Importe adeudado"
+  },
+  "Annually": {
+    "es-419": "Anual",
+    "es-ES": "Anual"
+  },
+  "Apply preset?": {
+    "es-419": "¿Aplicar preset?",
+    "es-ES": "¿Aplicar preset?"
+  },
+  "Attachment": {
+    "es-419": "Adjunto",
+    "es-ES": "Adjunto"
+  },
+  "Basics": {
+    "es-419": "Básicos",
+    "es-ES": "Básicos"
+  },
+  "Bill to": {
+    "es-419": "Facturar a",
+    "es-ES": "Facturar a"
+  },
+  "Billable hours": {
+    "es-419": "Horas facturables",
+    "es-ES": "Horas facturables"
+  },
+  "Blank card": {
+    "es-419": "Tarjeta en blanco",
+    "es-ES": "Tarjeta en blanco"
+  },
+  "Bold": {
+    "es-419": "Negrita",
+    "es-ES": "Negrita"
+  },
+  "Back of card": {
+    "es-419": "Reverso de la tarjeta",
+    "es-ES": "Reverso de la tarjeta"
+  },
+  "Backward": {
+    "es-419": "Atrás",
+    "es-ES": "Atrás"
+  },
+  "Clients": {
+    "es-419": "Clientes",
+    "es-ES": "Clientes"
+  },
+  "Projects": {
+    "es-419": "Proyectos",
+    "es-ES": "Proyectos"
+  },
+  "Receipts": {
+    "es-419": "Recibos",
+    "es-ES": "Recibos"
+  },
+  "Time entries": {
+    "es-419": "Entradas de tiempo",
+    "es-ES": "Entradas de tiempo"
+  },
+  "Log Time": {
+    "es-419": "Registrar tiempo",
+    "es-ES": "Registrar tiempo"
+  },
+  "Add a client in Studio → Clients before sending this invoice.": {
+    "es-419": "Agrega un cliente en Studio → Clientes antes de enviar esta factura.",
+    "es-ES": "Añade un cliente en Studio → Clientes antes de enviar esta factura."
+  },
+  "Add a project in Studio first": {
+    "es-419": "Agrega un proyecto en Studio primero",
+    "es-ES": "Añade un proyecto en Studio primero"
+  },
+  "Add at least one line item to save this invoice.": {
+    "es-419": "Agrega al menos una línea para guardar esta factura.",
+    "es-ES": "Añade al menos una línea para guardar esta factura."
+  },
+  "Allow photo access to pick backgrounds and portraits for your card.": {
+    "es-419": "Permite acceso a fotos para elegir fondos y retratos para tu tarjeta.",
+    "es-ES": "Permite acceso a fotos para elegir fondos y retratos para tu tarjeta."
+  },
+  "Auto-generated from your name, phone, email & website as a scannable contact card (vCard).": {
+    "es-419": "Generado automáticamente con tu nombre, teléfono, email y web como tarjeta de contacto escaneable (vCard).",
+    "es-ES": "Generado automáticamente con tu nombre, teléfono, email y web como tarjeta de contacto escaneable (vCard)."
+  },
+  "Ask your studio anything": {
+    "es-419": "Pregúntale lo que quieras a tu studio",
+    "es-ES": "Pregúntale lo que quieras a tu studio"
+  },
+  "Bank transfer, WhatsApp payment, platform payout, hardware receipt — all stay on your phone.": {
+    "es-419": "Transferencia, pago por WhatsApp, payout de plataforma, recibo de hardware — todo queda en tu teléfono.",
+    "es-ES": "Transferencia, pago por WhatsApp, payout de plataforma, recibo de hardware — todo queda en tu móvil."
+  },
+  "Active budget: %@": {
+    "es-419": "Presupuesto activo: %@",
+    "es-ES": "Presupuesto activo: %@"
+  },
+  "%@ left of %@": {
+    "es-419": "%1$@ restantes de %2$@",
+    "es-ES": "%1$@ restantes de %2$@"
+  },
+  "%lld%% spent": {
+    "es-419": "%lld%% gastado",
+    "es-ES": "%lld%% gastado"
+  },
+  "You have enabled %@ budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.": {
+    "es-419": "Activaste el modo %@, pero aún no tienes un perfil de presupuesto activo. Toca aquí para configurarlo en Ajustes.",
+    "es-ES": "Activaste el modo %@, pero aún no tienes un perfil de presupuesto activo. Toca aquí para configurarlo en Ajustes."
+  },
+  "%@ typically uses %@.": {
+    "es-419": "%1$@ suele usar %2$@.",
+    "es-ES": "%1$@ suele usar %2$@."
+  },
+  "Pick another workspace above, or add an expense tagged to %@.": {
+    "es-419": "Elige otro espacio arriba, o agrega un gasto etiquetado a %@.",
+    "es-ES": "Elige otro espacio arriba, o añade un gasto etiquetado a %@."
+  },
+  "%lld territories · tap to open full map": {
+    "es-419": "%lld territorios · toca para abrir el mapa completo",
+    "es-ES": "%lld territorios · toca para abrir el mapa completo"
+  },
+  "%lld territories · charts · Pro lanes · insights": {
+    "es-419": "%lld territorios · gráficos · carriles Pro · insights",
+    "es-ES": "%lld territorios · gráficos · carriles Pro · insights"
+  },
+  "Studio · %@": {
+    "es-419": "Studio · %@",
+    "es-ES": "Studio · %@"
+  },
+  "Spent this month across %lld live territories": {
+    "es-419": "Gastado este mes en %lld territorios activos",
+    "es-ES": "Gastado este mes en %lld territorios activos"
+  },
+  "+%lld more · tap for details": {
+    "es-419": "+%lld más · toca para detalles",
+    "es-ES": "+%lld más · toca para detalles"
+  },
+  "Use %@?": {
+    "es-419": "¿Usar %@?",
+    "es-ES": "¿Usar %@?"
+  },
+  "Use %@ currency": {
+    "es-419": "Usar moneda %@",
+    "es-ES": "Usar moneda %@"
+  },
+  "Keep %@": {
+    "es-419": "Mantener %@",
+    "es-ES": "Mantener %@"
+  },
+  "Merge %@ into…": {
+    "es-419": "Fusionar %@ en…",
+    "es-ES": "Fusionar %@ en…"
+  },
+  "Card: %@ — any photo size works.": {
+    "es-419": "Tarjeta: %@ — cualquier tamaño de foto sirve.",
+    "es-ES": "Tarjeta: %@ — cualquier tamaño de foto sirve."
+  },
+  "Fill strength %lld%%": {
+    "es-419": "Intensidad de relleno %lld%%",
+    "es-ES": "Intensidad de relleno %lld%%"
+  },
+  "Layer visibility %lld%%": {
+    "es-419": "Visibilidad de capa %lld%%",
+    "es-ES": "Visibilidad de capa %lld%%"
+  },
+  "%lld%% visible": {
+    "es-419": "%lld%% visible",
+    "es-ES": "%lld%% visible"
+  },
+  "Bux Layers": {
+    "es-419": "Capas Bux",
+    "es-ES": "Capas Bux"
+  },
+  "Bux Background": {
+    "es-419": "Fondo Bux",
+    "es-ES": "Fondo Bux"
+  },
+  "Bux Shapes": {
+    "es-419": "Formas Bux",
+    "es-ES": "Formas Bux"
+  },
+  "Elements": {
+    "es-419": "Elementos",
+    "es-ES": "Elementos"
+  },
+  "Background photo": {
+    "es-419": "Foto de fondo",
+    "es-ES": "Foto de fondo"
+  },
+  "Shape color": {
+    "es-419": "Color de forma",
+    "es-ES": "Color de forma"
+  },
+  "Card size": {
+    "es-419": "Tamaño de tarjeta",
+    "es-ES": "Tamaño de tarjeta"
+  },
+  "Card Studio": {
+    "es-419": "Card Studio",
+    "es-ES": "Card Studio"
+  },
+  "Pinch to resize · Two fingers to rotate · Drag handles for precision": {
+    "es-419": "Pellizca para redimensionar · dos dedos para rotar · arrastra los controles con precisión",
+    "es-ES": "Pellizca para redimensionar · dos dedos para rotar · arrastra los controles con precisión"
+  },
+  "Drag to reposition · pinch or slide to zoom": {
+    "es-419": "Arrastra para reposicionar · pellizca o desliza para zoom",
+    "es-ES": "Arrastra para reposicionar · pellizca o desliza para zoom"
+  },
+  "Selection size": {
+    "es-419": "Tamaño de selección",
+    "es-ES": "Tamaño de selección"
+  },
+  "You do not need a perfect photo size. Choose any image, then pan, zoom, crop to the card, or pick a free region.": {
+    "es-419": "No necesitas un tamaño perfecto. Elige cualquier imagen, luego pan, zoom, recorta a la tarjeta o elige una región libre.",
+    "es-ES": "No necesitas un tamaño perfecto. Elige cualquier imagen, luego pan, zoom, recorta a la tarjeta o elige una región libre."
+  },
+  "Photo opacity": {
+    "es-419": "Opacidad de foto",
+    "es-ES": "Opacidad de foto"
+  },
+  "Hue": {
+    "es-419": "Matiz",
+    "es-ES": "Matiz"
+  },
+  "Solid": {
+    "es-419": "Sólido",
+    "es-ES": "Sólido"
+  },
+  "Preview matches how the shape will look on the card.": {
+    "es-419": "La vista previa coincide con cómo se verá la forma en la tarjeta.",
+    "es-ES": "La vista previa coincide con cómo se verá la forma en la tarjeta."
+  },
+  "Drag the field for saturation and brightness — use Fill strength for transparency.": {
+    "es-419": "Arrastra el campo para saturación y brillo — usa intensidad de relleno para transparencia.",
+    "es-ES": "Arrastra el campo para saturación y brillo — usa intensidad de relleno para transparencia."
+  },
+  "Fades the whole element — text, shape, or photo.": {
+    "es-419": "Desvanece todo el elemento — texto, forma o foto.",
+    "es-ES": "Desvanece todo el elemento — texto, forma o foto."
+  },
+  "Design print-ready cards in minutes — geometric templates, Bux Canvas, photo lab, and export to PDF or vCard.": {
+    "es-419": "Diseña tarjetas listas para imprimir en minutos — plantillas geométricas, Bux Canvas, laboratorio de fotos y exporta a PDF o vCard.",
+    "es-ES": "Diseña tarjetas listas para imprimir en minutos — plantillas geométricas, Bux Canvas, laboratorio de fotos y exporta a PDF o vCard."
+  },
+  "Snap": {
+    "es-419": "Ajuste",
+    "es-ES": "Ajuste"
+  },
+  "New Client": {
+    "es-419": "Nuevo cliente",
+    "es-ES": "Nuevo cliente"
+  },
+  "Due on Receipt": {
+    "es-419": "Al recibir",
+    "es-ES": "Al recibir"
+  },
+  "7 Days": {
+    "es-419": "7 días",
+    "es-ES": "7 días"
+  },
+  "14 Days": {
+    "es-419": "14 días",
+    "es-ES": "14 días"
+  },
+  "30 Days": {
+    "es-419": "30 días",
+    "es-ES": "30 días"
+  },
+  "60 Days": {
+    "es-419": "60 días",
+    "es-ES": "60 días"
+  },
+  "Simple Studio": {
+    "es-419": "Simple Studio",
+    "es-ES": "Simple Studio"
+  },
+  "Mileage log": {
+    "es-419": "Registro de millaje",
+    "es-ES": "Registro de kilometraje"
+  },
+  "Tax reference": {
+    "es-419": "Referencia fiscal",
+    "es-ES": "Referencia fiscal"
+  },
+  "Business card": {
+    "es-419": "Tarjeta de negocio",
+    "es-ES": "Tarjeta de negocio"
+  },
+  "Upgrade": {
+    "es-419": "Mejorar plan",
+    "es-ES": "Mejorar plan"
+  },
+  "Unlock Pro Studio": {
+    "es-419": "Desbloquear Pro Studio",
+    "es-ES": "Desbloquear Pro Studio"
+  },
+  "Add text": {
+    "es-419": "Agregar texto",
+    "es-ES": "Añadir texto"
+  },
+  "Add photo": {
+    "es-419": "Agregar foto",
+    "es-ES": "Añadir foto"
+  },
+  "Export PDF": {
+    "es-419": "Exportar PDF",
+    "es-ES": "Exportar PDF"
+  },
+  "Front": {
+    "es-419": "Frente",
+    "es-ES": "Frente"
+  },
+  "Back": {
+    "es-419": "Reverso",
+    "es-ES": "Reverso"
+  },
+  "QR code": {
+    "es-419": "Código QR",
+    "es-ES": "Código QR"
+  },
+  "Opacity": {
+    "es-419": "Opacidad",
+    "es-ES": "Opacidad"
+  },
+  "Font": {
+    "es-419": "Fuente",
+    "es-ES": "Fuente"
+  },
+  "Color": {
+    "es-419": "Color",
+    "es-ES": "Color"
+  },
+  "Stroke": {
+    "es-419": "Trazo",
+    "es-ES": "Trazo"
+  },
+  "Fill": {
+    "es-419": "Relleno",
+    "es-ES": "Relleno"
+  },
+  "Layers": {
+    "es-419": "Capas",
+    "es-ES": "Capas"
+  },
+  "Background": {
+    "es-419": "Fondo",
+    "es-ES": "Fondo"
+  },
+  "Text": {
+    "es-419": "Texto",
+    "es-ES": "Texto"
+  },
+  "Shapes": {
+    "es-419": "Formas",
+    "es-ES": "Formas"
+  },
+  "Undo": {
+    "es-419": "Deshacer",
+    "es-ES": "Deshacer"
+  },
+  "Redo": {
+    "es-419": "Rehacer",
+    "es-ES": "Rehacer"
+  }
+}

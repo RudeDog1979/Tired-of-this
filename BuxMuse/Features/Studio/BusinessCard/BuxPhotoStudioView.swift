@@ -86,7 +86,7 @@ struct BuxPhotoStudioView: View {
             }
             .background(Color.black.opacity(0.94).ignoresSafeArea())
             .foregroundStyle(.white)
-            .navigationTitle("Bux Photo Lab")
+            .buxCatalogNavigationTitle("Bux Photo Lab")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color.black.opacity(0.92), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -118,7 +118,7 @@ struct BuxPhotoStudioView: View {
         let context = ProBusinessCardRenderFactory.makeContext(design: previewDesign, logoData: logoData)
         let fit = min(1, 130 / max(context.size.height, 1))
         return VStack(spacing: 4) {
-            Text("Live preview")
+            BuxCatalogDynamicText(key: "Live preview")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Color.white.opacity(0.65))
             ProBusinessCardRenderer(context: context)
@@ -216,7 +216,7 @@ struct BuxPhotoStudioView: View {
                     get: { rotation },
                     set: { rotation = $0 }
                 ), range: -180...180)
-                Text("Drag to move · pinch or slide to zoom · rotate to straighten")
+                BuxCatalogDynamicText(key: "Drag to move · pinch or slide to zoom · rotate to straighten")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(Color.white.opacity(0.45))
             }
@@ -226,7 +226,7 @@ struct BuxPhotoStudioView: View {
 
     private var maskPicker: some View {
         HStack(spacing: 8) {
-            Text("Frame")
+            BuxCatalogDynamicText(key: "Frame")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Color.white.opacity(0.65))
             ForEach([CardImageMask.circle, .roundedRect, .none], id: \.self) { option in

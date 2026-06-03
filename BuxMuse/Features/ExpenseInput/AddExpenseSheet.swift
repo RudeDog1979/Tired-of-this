@@ -53,7 +53,7 @@ struct AddExpenseSheet: View {
         mode == .addIncome || viewModel.isIncomeEntry
     }
 
-    private var sheetTitle: String {
+    private var sheetTitleKey: String {
         if viewModel.isEditing {
             return isIncomeMode ? "Edit Income" : "Edit Expense"
         }
@@ -156,8 +156,9 @@ struct AddExpenseSheet: View {
                 .buxDetailScrollChrome()
                 .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle(sheetTitle)
+            .buxCatalogNavigationTitle(sheetTitleKey)
             .navigationBarTitleDisplayMode(.inline)
+            .buxInterfaceLocale()
             .buxThemedPresentation()
             .buxDetailNavigationChrome()
             .onAppear {
@@ -251,10 +252,10 @@ struct AddExpenseSheet: View {
                 .foregroundStyle(incomeAccent)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Money in")
+                BuxCatalogText.text("Money in")
                     .font(.system(size: 17, weight: .black, design: .rounded))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-                Text("Salary, refund, gift, cash — type anything. No shop linking required.")
+                BuxCatalogText.text("Salary, refund, gift, cash — type anything. No shop linking required.")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
@@ -351,12 +352,14 @@ struct AddExpenseSheet: View {
             .environmentObject(brain)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("List icon")
+                BuxCatalogText.text("List icon")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                Text(viewModel.selectedMerchantId == nil
-                     ? "Category icon (or store logo if linked)"
-                     : "Store logo when linked")
+                BuxCatalogDynamicText(
+                    key: viewModel.selectedMerchantId == nil
+                        ? "Category icon (or store logo if linked)"
+                        : "Store logo when linked"
+                )
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
             }
@@ -368,10 +371,10 @@ struct AddExpenseSheet: View {
 
     private var incomeSourceCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            Text("What was this?")
+            BuxCatalogText.text("What was this?")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
-            Text("Your own words — salary, refund, gift, sold something, etc.")
+            BuxCatalogText.text("Your own words — salary, refund, gift, sold something, etc.")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .fixedSize(horizontal: false, vertical: true)
@@ -381,7 +384,11 @@ struct AddExpenseSheet: View {
                     Image(systemName: "text.alignleft")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(incomeAccent)
-                    TextField("e.g. Salary, Amazon refund, gift", text: $viewModel.merchantName)
+                    TextField(
+                        BuxCatalogLabel.string("What was this?", locale: appSettingsManager.interfaceLocale),
+                        text: $viewModel.merchantName,
+                        prompt: Text(BuxCatalogLabel.string("e.g. Salary, Amazon refund, gift", locale: appSettingsManager.interfaceLocale))
+                    )
                         .autocapitalization(.sentences)
                         .disableAutocorrection(true)
                 }
@@ -408,11 +415,11 @@ struct AddExpenseSheet: View {
                 }
             } label: {
                 HStack {
-                    Text("Link store (optional)")
+                    BuxCatalogText.text("Link store (optional)")
                         .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                     Spacer()
                     if viewModel.selectedMerchantId != nil {
-                        Text("Linked")
+                        BuxCatalogText.text("Linked")
                             .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(incomeAccent)
                     }
@@ -423,7 +430,7 @@ struct AddExpenseSheet: View {
             }
             .buttonStyle(.plain)
 
-            Text("Only if you want a shop logo — e.g. Amazon for a refund. Otherwise the category icon shows in your list.")
+            BuxCatalogText.text("Only if you want a shop logo — e.g. Amazon for a refund. Otherwise the category icon shows in your list.")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .fixedSize(horizontal: false, vertical: true)
@@ -433,7 +440,11 @@ struct AddExpenseSheet: View {
                     HStack(spacing: 10) {
                         Image(systemName: "storefront.fill")
                             .foregroundStyle(incomeAccent)
-                        TextField("Search store (Amazon, employer portal…)", text: $viewModel.optionalStoreName)
+                        TextField(
+                            BuxCatalogLabel.string("Link store (optional)", locale: appSettingsManager.interfaceLocale),
+                            text: $viewModel.optionalStoreName,
+                            prompt: Text(BuxCatalogLabel.string("Search store (Amazon, employer portal…)", locale: appSettingsManager.interfaceLocale))
+                        )
                             .autocapitalization(.words)
                             .disableAutocorrection(true)
                     }
@@ -446,8 +457,10 @@ struct AddExpenseSheet: View {
                     }
 
                     if viewModel.selectedMerchantId != nil {
-                        Button("Clear store link") {
+                        Button {
                             viewModel.clearOptionalStoreLink()
+                        } label: {
+                            BuxCatalogDynamicText(key: "Clear store link")
                         }
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.orange)
@@ -461,16 +474,19 @@ struct AddExpenseSheet: View {
     }
 
     private func incomeQuickPickChip(_ pick: IncomeSourceQuickPick) -> some View {
-        let isSelected = viewModel.merchantName == pick.label
+        let isSelected = IncomeSourceQuickPick.matchingStoredLabel(
+            viewModel.merchantName,
+            locale: appSettingsManager.interfaceLocale
+        ) == pick
         return Button {
             withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
-                viewModel.merchantName = pick.label
+                viewModel.merchantName = pick.catalogKey
             }
         } label: {
             HStack(spacing: 5) {
                 Image(systemName: pick.symbol)
                     .font(.system(size: 11, weight: .semibold))
-                Text(pick.label)
+                Text(pick.localizedLabel(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 12, weight: .semibold))
             }
             .foregroundColor(isSelected ? .white : incomeAccent)
@@ -505,7 +521,7 @@ struct AddExpenseSheet: View {
 
     private var merchantCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            Text("Merchant")
+            BuxCatalogText.text("Merchant")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             VStack(alignment: .leading, spacing: BuxLayout.tight) {
@@ -525,7 +541,13 @@ struct AddExpenseSheet: View {
                         HStack(spacing: 8) {
                             Image(systemName: "sparkles")
                                 .font(.system(size: 12, weight: .semibold))
-                            Text("Use \(hint.displayName)?")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Use %@?",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    hint.displayName
+                                )
+                            )
                                 .font(.system(size: 13, weight: .semibold))
                         }
                         .foregroundColor(themeManager.current.accentColor)
@@ -563,7 +585,7 @@ struct AddExpenseSheet: View {
 
     private var subscriptionCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            Text("Subscription")
+            BuxCatalogText.text("Subscription")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             ExpenseSubscriptionFieldsView(
@@ -580,7 +602,7 @@ struct AddExpenseSheet: View {
 
     private var dateCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            Text("Date")
+            BuxCatalogText.text("Date")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             DatePicker("", selection: $viewModel.date, displayedComponents: .date)
@@ -598,7 +620,7 @@ struct AddExpenseSheet: View {
 
     private var workspaceCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            Text("Workspace")
+            BuxCatalogText.text("Workspace")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             HStack {
@@ -606,7 +628,7 @@ struct AddExpenseSheet: View {
                     .foregroundColor(themeManager.current.accentColor)
 
                 Picker("Workspace", selection: workspaceSelection) {
-                    Text("No specific workspace").tag(Optional<UUID>.none)
+                    BuxCatalogText.text("No specific workspace").tag(Optional<UUID>.none)
                     ForEach(HustleManager.shared.hustles.filter { $0.isActive }) { hustle in
                         Text(hustle.name).tag(Optional(hustle.id))
                     }
@@ -630,7 +652,7 @@ struct AddExpenseSheet: View {
 
     private var operationalPaymentCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            Text("Cash & Barter")
+            BuxCatalogText.text("Cash & Barter")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             HStack {
@@ -638,13 +660,27 @@ struct AddExpenseSheet: View {
                     .foregroundColor(viewModel.isBarterExchange ? .orange : themeManager.current.accentColor)
 
                 Picker("Cash & Barter", selection: operationalPaymentSelection) {
-                    Text("Not cash or barter").tag("")
+                    BuxCatalogText.text("Not cash or barter").tag("")
                     if settingsStore.dualCashDrawerEnabled {
-                        Text("Cash (\(settingsStore.primaryLocalCurrency))").tag("Cash (\(settingsStore.primaryLocalCurrency))")
-                        Text("Cash (\(settingsStore.secondaryTradingCurrency))").tag("Cash (\(settingsStore.secondaryTradingCurrency))")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Cash (%@)",
+                                locale: appSettingsManager.interfaceLocale,
+                                settingsStore.primaryLocalCurrency
+                            )
+                        )
+                        .tag("Cash (\(settingsStore.primaryLocalCurrency))")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Cash (%@)",
+                                locale: appSettingsManager.interfaceLocale,
+                                settingsStore.secondaryTradingCurrency
+                            )
+                        )
+                        .tag("Cash (\(settingsStore.secondaryTradingCurrency))")
                     }
                     if settingsStore.barterLoggerEnabled {
-                        Text("Barter / Exchange").tag("Barter")
+                        BuxCatalogText.text("Barter / Exchange").tag("Barter")
                     }
                 }
                 .pickerStyle(.menu)
@@ -691,7 +727,7 @@ struct AddExpenseSheet: View {
                 }
             } label: {
                 HStack {
-                    Text("How did you pay? (optional)")
+                    BuxCatalogText.text("How did you pay? (optional)")
                         .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                     Spacer()
                     if let method = viewModel.paymentMethod,
@@ -759,13 +795,13 @@ struct AddExpenseSheet: View {
             HStack(spacing: 8) {
                 Image(systemName: "arrow.left.arrow.right.circle.fill")
                     .foregroundColor(.orange)
-                Text("Barter Details")
+                BuxCatalogText.text("Barter Details")
                     .buxSectionLabelStyle(color: .orange)
             }
 
             VStack(spacing: BuxLayout.tight) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("GOODS / SERVICES GIVEN")
+                    BuxCatalogText.text("GOODS / SERVICES GIVEN")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .kerning(0.5)
@@ -778,7 +814,7 @@ struct AddExpenseSheet: View {
                 Divider().opacity(0.12)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("GOODS / SERVICES RECEIVED")
+                    BuxCatalogText.text("GOODS / SERVICES RECEIVED")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .kerning(0.5)
@@ -791,7 +827,13 @@ struct AddExpenseSheet: View {
                 Divider().opacity(0.12)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ESTIMATED VALUE (\(appSettingsManager.selectedCurrency.id))")
+                    Text(
+                        BuxLocalizedString.format(
+                            "ESTIMATED VALUE (%@)",
+                            locale: appSettingsManager.interfaceLocale,
+                            appSettingsManager.selectedCurrency.id
+                        )
+                    )
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .kerning(0.5)
@@ -817,7 +859,7 @@ struct AddExpenseSheet: View {
 
     private var emotionalCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            Text("How did this feel?")
+            BuxCatalogText.text("How did this feel?")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             EmotionalTagPickerView(selection: $viewModel.emotionTag)
@@ -867,8 +909,9 @@ struct AddExpenseSheet: View {
                     }
                 }
             }
-            .navigationTitle(title)
+            .buxCatalogNavigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
+            .buxInterfaceLocale()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     BuxToolbarCancelButton { onCancel() }

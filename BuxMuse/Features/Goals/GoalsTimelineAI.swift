@@ -9,10 +9,10 @@
 import Foundation
 
 public struct GoalTimelineScenario: Codable, Equatable, Identifiable {
-    public let id: String // "baseline", "moderate", "aggressive"
+    public let id: String
     public let name: String
     public let projectedDate: Date
-    public let delayRisk: String // "Low", "Medium", "High"
+    public let delayRisk: String
     public let description: String
 }
 
@@ -21,80 +21,82 @@ public struct GoalsTimelineAIResult {
     public let delayRisk: String
     public let accelerationPotentialMonths: Double
     public let scenarios: [GoalTimelineScenario]
-    public let actionableInsight: String // e.g. "If you cancel Netflix, you will reach your goal 1.4 months earlier."
+    public let actionableInsight: String
 }
 
 public final class GoalsTimelineAI {
-    
+
     public init() {}
-    
-    /// Projects exact scenario pathways and what-if acceleration benefits.
+
     public func analyzeTimeline(
         goal: Goal,
         projection: GoalProjection,
         risks: [GoalRisk],
-        opportunities: [GoalOpportunity]
+        opportunities: [GoalOpportunity],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> GoalsTimelineAIResult {
         let remaining = max(0, goal.targetAmount - goal.currentAmount)
         let now = Date()
-        
-        // 1. Determine overall Delay Risk
+
         let delayRisk: String
         let highRisks = risks.filter { $0.severity == "high" }
         if !highRisks.isEmpty {
-            delayRisk = "High"
+            delayRisk = BuxLocalizedString.string("High", locale: locale)
         } else if risks.count >= 2 {
-            delayRisk = "Medium"
+            delayRisk = BuxLocalizedString.string("Medium", locale: locale)
         } else {
-            delayRisk = "Low"
+            delayRisk = BuxLocalizedString.string("Low", locale: locale)
         }
-        
-        // 2. Build Alternative Scenarios
+
         let monthsToExpected = max(0.5, projection.expectedCompletionDate.timeIntervalSinceNow / (30.0 * 86400.0))
-        
-        // Moderate scenario: add standard savings increase or 1.2x pacing
+
         let moderateSavingsRate = projection.recommendedContribution * 1.25
         let moderateMonths = remaining > 0 ? NSDecimalNumber(decimal: remaining / moderateSavingsRate).doubleValue : 0.0
         let moderateDate = now.addingTimeInterval(moderateMonths * 30.0 * 86400.0)
-        
-        // Aggressive scenario: cancel top opportunities, 1.5x pacing
+
         let aggressiveSavingsRate = projection.recommendedContribution * 1.6
         let aggressiveMonths = remaining > 0 ? NSDecimalNumber(decimal: remaining / aggressiveSavingsRate).doubleValue : 0.0
         let aggressiveDate = now.addingTimeInterval(aggressiveMonths * 30.0 * 86400.0)
-        
+
         let scenarios = [
             GoalTimelineScenario(
                 id: "baseline",
-                name: "Current Pace",
+                name: BuxLocalizedString.string("Current Pace", locale: locale),
                 projectedDate: projection.expectedCompletionDate,
                 delayRisk: delayRisk,
-                description: "Maintain your standard deposit speed."
+                description: BuxLocalizedString.string("Maintain your standard deposit speed.", locale: locale)
             ),
             GoalTimelineScenario(
                 id: "moderate",
-                name: "Moderate Trim",
+                name: BuxLocalizedString.string("Moderate Trim", locale: locale),
                 projectedDate: moderateDate,
-                delayRisk: "Low",
-                description: "Reduce groceries and restaurants by 10%."
+                delayRisk: BuxLocalizedString.string("Low", locale: locale),
+                description: BuxLocalizedString.string("Reduce groceries and restaurants by 10%.", locale: locale)
             ),
             GoalTimelineScenario(
                 id: "aggressive",
-                name: "Aggressive Focus",
+                name: BuxLocalizedString.string("Aggressive Focus", locale: locale),
                 projectedDate: aggressiveDate,
-                delayRisk: "Low",
-                description: "Cancel unused memberships & pause non-essential shopping."
-            )
+                delayRisk: BuxLocalizedString.string("Low", locale: locale),
+                description: BuxLocalizedString.string("Cancel unused memberships & pause non-essential shopping.", locale: locale)
+            ),
         ]
-        
-        // 3. Compute acceleration potential in months
+
         let accelerationPotential = max(0.0, monthsToExpected - aggressiveMonths)
-        
-        // 4. Formulate actionable 'what-if' insight
-        var actionableInsight = "Reach your goal faster by setting up a small recurring weekly contribution."
+
+        var actionableInsight = BuxLocalizedString.string(
+            "Reach your goal faster by setting up a small recurring weekly contribution.",
+            locale: locale
+        )
         if let topOpportunity = opportunities.first {
-            actionableInsight = "If you \(topOpportunity.description.lowercased()) \(topOpportunity.benefit.lowercased())"
+            actionableInsight = BuxLocalizedString.format(
+                "If you %@ %@",
+                locale: locale,
+                topOpportunity.description.lowercased(),
+                topOpportunity.benefit.lowercased()
+            )
         }
-        
+
         return GoalsTimelineAIResult(
             expectedCompletionDate: projection.expectedCompletionDate,
             delayRisk: delayRisk,

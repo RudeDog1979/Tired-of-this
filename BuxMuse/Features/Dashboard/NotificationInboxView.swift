@@ -25,7 +25,7 @@ struct NotificationInboxView: View {
                         ContentUnavailableView {
                             Label("No Notifications", systemImage: "bell.slash")
                         } description: {
-                            Text("Budget alerts, renewals, and Studio reminders will appear here.")
+                            BuxCatalogDynamicText(key: "Budget alerts, renewals, and Studio reminders will appear here.")
                         }
                     } else {
                         List {

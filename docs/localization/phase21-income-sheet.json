@@ -1,0 +1,110 @@
+{
+  "Log Income": {
+    "es-419": "Registrar ingreso",
+    "es-ES": "Registrar ingreso"
+  },
+  "Edit Income": {
+    "es-419": "Editar ingreso",
+    "es-ES": "Editar ingreso"
+  },
+  "Edit income": {
+    "es-419": "Editar ingreso",
+    "es-ES": "Editar ingreso"
+  },
+  "Save income": {
+    "es-419": "Guardar ingreso",
+    "es-ES": "Guardar ingreso"
+  },
+  "Salary": {
+    "es-419": "Sueldo",
+    "es-ES": "Sueldo"
+  },
+  "Paycheck": {
+    "es-419": "Cheque de sueldo",
+    "es-ES": "Nómina"
+  },
+  "Refund": {
+    "es-419": "Reembolso",
+    "es-ES": "Reembolso"
+  },
+  "Gift": {
+    "es-419": "Regalo",
+    "es-ES": "Regalo"
+  },
+  "Sold something": {
+    "es-419": "Venta",
+    "es-ES": "Venta"
+  },
+  "Interest": {
+    "es-419": "Intereses",
+    "es-ES": "Intereses"
+  },
+  "Cash received": {
+    "es-419": "Efectivo recibido",
+    "es-ES": "Efectivo recibido"
+  },
+  "Other income": {
+    "es-419": "Otro ingreso",
+    "es-ES": "Otro ingreso"
+  },
+  "Money in": {
+    "es-419": "Dinero que entra",
+    "es-ES": "Dinero que entra"
+  },
+  "Salary, refund, gift, cash — type anything. No shop linking required.": {
+    "es-419": "Sueldo, reembolso, regalo, efectivo — escribí lo que sea. No hace falta vincular tienda.",
+    "es-ES": "Sueldo, reembolso, regalo, efectivo — escribe lo que sea. No hace falta vincular tienda."
+  },
+  "List icon": {
+    "es-419": "Ícono en la lista",
+    "es-ES": "Icono en la lista"
+  },
+  "Category icon (or store logo if linked)": {
+    "es-419": "Ícono de categoría (o logo de tienda si vinculás)",
+    "es-ES": "Icono de categoría (o logo de tienda si vinculas)"
+  },
+  "Store logo when linked": {
+    "es-419": "Logo de tienda cuando está vinculado",
+    "es-ES": "Logo de tienda cuando está vinculado"
+  },
+  "What was this?": {
+    "es-419": "¿Qué fue?",
+    "es-ES": "¿Qué fue?"
+  },
+  "Your own words — salary, refund, gift, sold something, etc.": {
+    "es-419": "Con tus palabras — sueldo, reembolso, regalo, venta, etc.",
+    "es-ES": "Con tus palabras — sueldo, reembolso, regalo, venta, etc."
+  },
+  "e.g. Salary, Amazon refund, gift": {
+    "es-419": "ej. Sueldo, reembolso Amazon, regalo",
+    "es-ES": "ej. Sueldo, reembolso Amazon, regalo"
+  },
+  "Link store (optional)": {
+    "es-419": "Vincular tienda (opcional)",
+    "es-ES": "Vincular tienda (opcional)"
+  },
+  "Linked": {
+    "es-419": "Vinculado",
+    "es-ES": "Vinculado"
+  },
+  "Only if you want a shop logo — e.g. Amazon for a refund. Otherwise the category icon shows in your list.": {
+    "es-419": "Solo si querés el logo de una tienda — ej. Amazon por un reembolso. Si no, se ve el ícono de categoría en la lista.",
+    "es-ES": "Solo si quieres el logo de una tienda — ej. Amazon por un reembolso. Si no, se ve el icono de categoría en la lista."
+  },
+  "Search store (Amazon, employer portal…)": {
+    "es-419": "Buscar tienda (Amazon, portal del empleador…)",
+    "es-ES": "Buscar tienda (Amazon, portal del empleador…)"
+  },
+  "Clear store link": {
+    "es-419": "Quitar vínculo de tienda",
+    "es-ES": "Quitar vínculo de tienda"
+  },
+  "Choose store": {
+    "es-419": "Elegir tienda",
+    "es-ES": "Elegir tienda"
+  },
+  "Add a short label for this income.": {
+    "es-419": "Agregá una etiqueta corta para este ingreso.",
+    "es-ES": "Agrega una etiqueta corta para este ingreso."
+  }
+}

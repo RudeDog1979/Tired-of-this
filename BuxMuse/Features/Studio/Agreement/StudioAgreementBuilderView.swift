@@ -33,7 +33,7 @@ struct StudioAgreementBuilderView: View {
                     }
                 }
             }
-            .navigationTitle("Guided agreement")
+            .buxCatalogNavigationTitle("Guided agreement")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -66,7 +66,7 @@ struct StudioAgreementBuilderView: View {
                 .buxFormFieldPadding()
             BuxFormRowDivider()
             Picker("Client", selection: clientBinding) {
-                Text("None").tag(UUID?.none)
+                BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                 ForEach(store.clients) { client in
                     Text(client.name).tag(Optional(client.id))
                 }
@@ -75,7 +75,7 @@ struct StudioAgreementBuilderView: View {
             .buxFormFieldPadding()
             BuxFormRowDivider()
             Picker("Project", selection: projectBinding) {
-                Text("None").tag(UUID?.none)
+                BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                 ForEach(store.projects) { project in
                     Text(project.name).tag(Optional(project.id))
                 }

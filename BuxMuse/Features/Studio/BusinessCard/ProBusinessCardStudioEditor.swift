@@ -13,6 +13,7 @@ struct ProBusinessCardEditorView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
     @ObservedObject private var settings = SettingsStore.shared
 
@@ -132,7 +133,11 @@ struct ProBusinessCardEditorView: View {
             editorSaveBar
         }
         .buxRootBrandTheme()
-        .navigationTitle(isLandscapeEditing ? "" : (draft?.title ?? "Card Studio"))
+        .navigationTitle(
+            isLandscapeEditing
+                ? ""
+                : (draft?.title ?? BuxCatalogLabel.string("Card Studio", locale: appSettingsManager.interfaceLocale))
+        )
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(isLandscapeEditing ? .hidden : .visible, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
@@ -151,9 +156,9 @@ struct ProBusinessCardEditorView: View {
             }
         } message: {
             if isEphemeralDraft {
-                Text("This card hasn't been saved yet. Discarding will delete it.")
+                BuxCatalogDynamicText(key: "This card hasn't been saved yet. Discarding will delete it.")
             } else {
-                Text("Your edits since opening this card will be lost.")
+                BuxCatalogDynamicText(key: "Your edits since opening this card will be lost.")
             }
         }
         .alert("Use for invoice branding?", isPresented: $showSetPrimaryBrandAlert) {
@@ -166,9 +171,9 @@ struct ProBusinessCardEditorView: View {
             }
         } message: {
             if studioStore.businessCardLibrary.primaryBrandDesignID == designID {
-                Text("Update invoices to match this card’s latest colors and style?")
+                BuxCatalogDynamicText(key: "Update invoices to match this card’s latest colors and style?")
             } else {
-                Text("Invoices can use this card’s colors and style as your business brand.")
+                BuxCatalogDynamicText(key: "Invoices can use this card’s colors and style as your business brand.")
             }
         }
         .onAppear {
@@ -730,7 +735,7 @@ struct ProBusinessCardEditorView: View {
                             syncDraftChanges()
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Aa")
+                                BuxCatalogDynamicText(key: "Aa")
                                     .font(font.font(size: 22, weight: .bold))
                                 Text(font.title)
                                     .font(.system(size: 9, weight: .bold))
@@ -843,7 +848,7 @@ struct ProBusinessCardEditorView: View {
 
     private func logoScaleGlassBar(_ design: ProBusinessCardDesign) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Logo size")
+            BuxCatalogDynamicText(key: "Logo size")
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             HStack(spacing: 8) {
@@ -905,17 +910,17 @@ struct ProBusinessCardEditorView: View {
                 }
                 BuxFormRowDivider()
                 Picker("Font mood", selection: binding(\.style.fontPairing)) {
-                    Text("Modern").tag(ProBusinessCardFontPairing.modern)
-                    Text("Classic").tag(ProBusinessCardFontPairing.classic)
-                    Text("Bold").tag(ProBusinessCardFontPairing.bold)
+                    BuxCatalogDynamicText(key: "Modern").tag(ProBusinessCardFontPairing.modern)
+                    BuxCatalogDynamicText(key: "Classic").tag(ProBusinessCardFontPairing.classic)
+                    BuxCatalogDynamicText(key: "Bold").tag(ProBusinessCardFontPairing.bold)
                 }
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Picker("Border", selection: binding(\.style.borderStyle)) {
-                    Text("None").tag(ProBusinessCardBorderStyle.none)
-                    Text("Thin").tag(ProBusinessCardBorderStyle.thin)
-                    Text("Double").tag(ProBusinessCardBorderStyle.double)
-                    Text("Accent").tag(ProBusinessCardBorderStyle.accent)
+                    BuxCatalogDynamicText(key: "None").tag(ProBusinessCardBorderStyle.none)
+                    BuxCatalogDynamicText(key: "Thin").tag(ProBusinessCardBorderStyle.thin)
+                    BuxCatalogDynamicText(key: "Double").tag(ProBusinessCardBorderStyle.double)
+                    BuxCatalogDynamicText(key: "Accent").tag(ProBusinessCardBorderStyle.accent)
                 }
                 .buxFormFieldPadding()
             }
@@ -926,7 +931,17 @@ struct ProBusinessCardEditorView: View {
         VStack(alignment: .leading, spacing: 6) {
             BuxSectionHeader(title: "Print size")
             Picker("Format", selection: aspectBinding) {
-                ForEach(ProBusinessCardAspect.allCases) { Text("\($0.title) · \($0.detail)").tag($0) }
+                ForEach(ProBusinessCardAspect.allCases) { aspect in
+                    Text(
+                        BuxLocalizedString.format(
+                            "%@ · %@",
+                            locale: BuxInterfaceLocale.currentInterfaceLocale,
+                            aspect.title,
+                            aspect.detail
+                        )
+                    )
+                    .tag(aspect)
+                }
             }
             .pickerStyle(.menu)
         }
@@ -971,7 +986,7 @@ struct ProBusinessCardEditorView: View {
     private func qrInfoSection(_ design: ProBusinessCardDesign) -> some View {
         BuxThemedCardForm {
             BuxFormSection(title: "QR code") {
-                Text("Auto-generated from your name, phone, email & website as a scannable contact card (vCard).")
+                BuxCatalogDynamicText(key: "Auto-generated from your name, phone, email & website as a scannable contact card (vCard).")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
                     .buxFormFieldPadding()
@@ -986,7 +1001,7 @@ struct ProBusinessCardEditorView: View {
                             .frame(width: 72, height: 72)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Scan to save contact")
+                            BuxCatalogDynamicText(key: "Scan to save contact")
                                 .font(.system(size: 12, weight: .semibold))
                             Text(design.content.name.isEmpty ? "Add a name in Text tab" : design.content.name)
                                 .font(.system(size: 11))
@@ -1004,17 +1019,17 @@ struct ProBusinessCardEditorView: View {
         BuxThemedCardForm {
             BuxFormSection(title: "Your photo") {
                 Picker("Size", selection: photoScaleBinding) {
-                    Text("Off").tag(ProBusinessCardPhotoScale.off)
-                    Text("Small").tag(ProBusinessCardPhotoScale.corner)
-                    Text("Medium").tag(ProBusinessCardPhotoScale.medium)
-                    Text("Hero").tag(ProBusinessCardPhotoScale.hero)
+                    BuxCatalogDynamicText(key: "Off").tag(ProBusinessCardPhotoScale.off)
+                    BuxCatalogDynamicText(key: "Small").tag(ProBusinessCardPhotoScale.corner)
+                    BuxCatalogDynamicText(key: "Medium").tag(ProBusinessCardPhotoScale.medium)
+                    BuxCatalogDynamicText(key: "Hero").tag(ProBusinessCardPhotoScale.hero)
                 }
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Picker("Frame", selection: binding(\.style.photoMask)) {
-                    Text("Circle").tag(CardImageMask.circle)
-                    Text("Rounded").tag(CardImageMask.roundedRect)
-                    Text("Square").tag(CardImageMask.none)
+                    BuxCatalogDynamicText(key: "Circle").tag(CardImageMask.circle)
+                    BuxCatalogDynamicText(key: "Rounded").tag(CardImageMask.roundedRect)
+                    BuxCatalogDynamicText(key: "Square").tag(CardImageMask.none)
                 }
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
@@ -1028,9 +1043,9 @@ struct ProBusinessCardEditorView: View {
             }
             BuxFormSection(title: "Business logo") {
                 Picker("Logo frame", selection: binding(\.style.logoMask)) {
-                    Text("Circle").tag(CardImageMask.circle)
-                    Text("Rounded").tag(CardImageMask.roundedRect)
-                    Text("Square").tag(CardImageMask.none)
+                    BuxCatalogDynamicText(key: "Circle").tag(CardImageMask.circle)
+                    BuxCatalogDynamicText(key: "Rounded").tag(CardImageMask.roundedRect)
+                    BuxCatalogDynamicText(key: "Square").tag(CardImageMask.none)
                 }
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
@@ -1141,8 +1156,8 @@ struct ProBusinessCardEditorView: View {
                 TextField("Skills", text: binding(\.content.skills), axis: .vertical).lineLimit(2...4).buxFormFieldPadding()
                 BuxFormRowDivider()
                 Picker("Text align", selection: binding(\.options.textAlignment)) {
-                    Text("Left").tag(ProBusinessCardAlignment.leading)
-                    Text("Center").tag(ProBusinessCardAlignment.center)
+                    BuxCatalogDynamicText(key: "Left").tag(ProBusinessCardAlignment.leading)
+                    BuxCatalogDynamicText(key: "Center").tag(ProBusinessCardAlignment.center)
                 }
                 .buxFormFieldPadding()
             }
@@ -1155,7 +1170,7 @@ struct ProBusinessCardEditorView: View {
         VStack(alignment: .leading, spacing: BuxTokens.section) {
             BuxThemedCardForm {
                 BuxFormSection(title: "Share your card") {
-                    Text("Send via Messages, WhatsApp, Mail, or any app — includes your card image and a scannable contact file.")
+                    BuxCatalogDynamicText(key: "Send via Messages, WhatsApp, Mail, or any app — includes your card image and a scannable contact file.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                         .buxFormFieldPadding()
@@ -1500,7 +1515,14 @@ private struct BusinessCardImmersivePreviewView: View {
                     Button("Close") { dismiss() }
                         .foregroundStyle(.white)
                     Spacer()
-                    Text("\(design.aspect.title) · \(design.template.title)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%@ · %@",
+                            locale: BuxInterfaceLocale.currentInterfaceLocale,
+                            design.aspect.title,
+                            design.template.title
+                        )
+                    )
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white.opacity(0.85))
                     Spacer()

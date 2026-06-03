@@ -1,0 +1,538 @@
+{
+  "%@ Optimization": {
+    "es-419": "Optimización de %@",
+    "es-ES": "Optimización de %@"
+  },
+  "%@ Overspend": {
+    "es-419": "Exceso de gasto en %@",
+    "es-ES": "Sobregasto en %@"
+  },
+  "%@ increased their price.": {
+    "es-419": "%@ subió su precio.",
+    "es-ES": "%@ ha subido su precio."
+  },
+  "%lld expenses this month have no workspace.": {
+    "es-419": "%lld gastos de este mes no tienen espacio de trabajo.",
+    "es-ES": "%lld gastos de este mes no tienen espacio de trabajo."
+  },
+  "%lld tagged expenses used credit or store credit this period.": {
+    "es-419": "%lld gastos etiquetados usaron crédito o crédito de tienda en este periodo.",
+    "es-ES": "%lld gastos etiquetados usaron crédito o crédito de tienda en este periodo."
+  },
+  "/month": {
+    "es-419": "/mes",
+    "es-ES": "/mes"
+  },
+  "A refund from %@ has cleared.": {
+    "es-419": "Un reembolso de %@ se acreditó.",
+    "es-ES": "Un reembolso de %@ se ha abonado."
+  },
+  "Active subscriptions": {
+    "es-419": "Suscripciones activas",
+    "es-ES": "Suscripciones activas"
+  },
+  "Add expenses to unlock spending insights.": {
+    "es-419": "Agrega gastos para desbloquear insights de gasto.",
+    "es-ES": "Añade gastos para desbloquear insights de gasto."
+  },
+  "Adjust": {
+    "es-419": "Ajustar",
+    "es-ES": "Ajustar"
+  },
+  "All lines": {
+    "es-419": "Todas las líneas",
+    "es-ES": "Todas las líneas"
+  },
+  "Applying this insight accelerates this target timeline significantly.": {
+    "es-419": "Aplicar este insight acelera significativamente la línea de tiempo de esta meta.",
+    "es-ES": "Aplicar este insight acelera significativamente la línea de tiempo de este objetivo."
+  },
+  "Barter & Trade": {
+    "es-419": "Trueque e intercambio",
+    "es-ES": "Trueque e intercambio"
+  },
+  "Barter & Trade Activity": {
+    "es-419": "Actividad de trueque e intercambio",
+    "es-ES": "Actividad de trueque e intercambio"
+  },
+  "Billed through Apple App Store (15% markup).": {
+    "es-419": "Facturado a través de Apple App Store (recargo del 15 %%).",
+    "es-ES": "Facturado a través de Apple App Store (recargo del 15 %%)."
+  },
+  "Breakdown": {
+    "es-419": "Desglose",
+    "es-ES": "Desglose"
+  },
+  "Budget impacts if cancelled": {
+    "es-419": "Impacto en el presupuesto si cancelas",
+    "es-ES": "Impacto en el presupuesto si cancelas"
+  },
+  "BuxMuse suggested actions": {
+    "es-419": "Acciones sugeridas por BuxMuse",
+    "es-ES": "Acciones sugeridas por BuxMuse"
+  },
+  "Buy now, pay later active": {
+    "es-419": "Compra ahora y paga después activo",
+    "es-ES": "Compra ahora y paga después activo"
+  },
+  "Cancel unused memberships & pause non-essential shopping.": {
+    "es-419": "Cancela membresías sin uso y pausa compras no esenciales.",
+    "es-ES": "Cancela membresías sin uso y pausa compras no esenciales."
+  },
+  "Cash Drawer": {
+    "es-419": "Caja de efectivo",
+    "es-ES": "Caja de efectivo"
+  },
+  "Cash vs digital split": {
+    "es-419": "División efectivo vs. digital",
+    "es-ES": "División efectivo vs. digital"
+  },
+  "Category breakdown": {
+    "es-419": "Desglose por categoría",
+    "es-ES": "Desglose por categoría"
+  },
+  "Charts, lines, insights & actions": {
+    "es-419": "Gráficos, líneas, insights y acciones",
+    "es-ES": "Gráficos, líneas, insights y acciones"
+  },
+  "Creative Energy": {
+    "es-419": "Energía creativa",
+    "es-ES": "Energía creativa"
+  },
+  "Creative fuel left after workload, sleep, and stress spend.": {
+    "es-419": "Combustible creativo que te queda tras carga de trabajo, sueño y gasto por estrés.",
+    "es-ES": "Combustible creativo que te queda tras carga de trabajo, sueño y gasto por estrés."
+  },
+  "Credit & BNPL": {
+    "es-419": "Crédito y BNPL",
+    "es-ES": "Crédito y BNPL"
+  },
+  "Credit-heavy spending": {
+    "es-419": "Gasto con mucho crédito",
+    "es-ES": "Gasto con mucho crédito"
+  },
+  "Current": {
+    "es-419": "Actual",
+    "es-ES": "Actual"
+  },
+  "Data metrics": {
+    "es-419": "Métricas de datos",
+    "es-ES": "Métricas de datos"
+  },
+  "Delete Goal & Discard savings data": {
+    "es-419": "Eliminar meta y descartar datos de ahorro",
+    "es-ES": "Eliminar meta y descartar datos de ahorro"
+  },
+  "Detected pattern warnings": {
+    "es-419": "Advertencias de patrones detectados",
+    "es-ES": "Advertencias de patrones detectados"
+  },
+  "Detected progress threats": {
+    "es-419": "Amenazas detectadas al progreso",
+    "es-ES": "Amenazas detectadas al progreso"
+  },
+  "Duplicate Charge Found": {
+    "es-419": "Cargo duplicado detectado",
+    "es-ES": "Cargo duplicado detectado"
+  },
+  "Edit Goal": {
+    "es-419": "Editar meta",
+    "es-ES": "Editar meta"
+  },
+  "Enable Studio first": {
+    "es-419": "Activa Studio primero",
+    "es-ES": "Activa Studio primero"
+  },
+  "Enable in Studio → Cash & Barter": {
+    "es-419": "Actívalo en Studio → Efectivo y trueque",
+    "es-ES": "Actívalo en Studio → Efectivo y trueque"
+  },
+  "Enable payment tagging in Settings": {
+    "es-419": "Activa el etiquetado de pagos en Ajustes",
+    "es-ES": "Activa el etiquetado de pagos en Ajustes"
+  },
+  "Energy": {
+    "es-419": "Energía",
+    "es-ES": "Energía"
+  },
+  "Excellent job limiting your %@ budget.": {
+    "es-419": "Excelente trabajo limitando tu presupuesto de %@.",
+    "es-ES": "Excelente trabajo limitando tu presupuesto de %@."
+  },
+  "Explanation": {
+    "es-419": "Explicación",
+    "es-ES": "Explicación"
+  },
+  "Feature intelligence": {
+    "es-419": "Inteligencia de funciones",
+    "es-ES": "Inteligencia de funciones"
+  },
+  "First recorded": {
+    "es-419": "Primera vez registrado",
+    "es-ES": "Primera vez registrado"
+  },
+  "Goal Ahead of Schedule": {
+    "es-419": "Meta adelantada al cronograma",
+    "es-ES": "Meta adelantada al cronograma"
+  },
+  "Goal Details": {
+    "es-419": "Detalles de la meta",
+    "es-ES": "Detalles de la meta"
+  },
+  "Goal Timeline At Risk": {
+    "es-419": "Cronograma de meta en riesgo",
+    "es-ES": "Cronograma de meta en riesgo"
+  },
+  "Goal acceleration effect": {
+    "es-419": "Efecto de aceleración de meta",
+    "es-ES": "Efecto de aceleración de meta"
+  },
+  "Habit Builders:": {
+    "es-419": "Constructores de hábito:",
+    "es-ES": "Constructores de hábito:"
+  },
+  "High Stress Alert": {
+    "es-419": "Alerta de estrés alto",
+    "es-ES": "Alerta de estrés alto"
+  },
+  "Hours & revision guardrails": {
+    "es-419": "Límites de horas y revisiones",
+    "es-ES": "Límites de horas y revisiones"
+  },
+  "How to cancel": {
+    "es-419": "Cómo cancelar",
+    "es-ES": "Cómo cancelar"
+  },
+  "Insight Deep Dive": {
+    "es-419": "Inmersión en el insight",
+    "es-ES": "Profundización del insight"
+  },
+  "Intelligence insights": {
+    "es-419": "Insights de inteligencia",
+    "es-ES": "Insights de inteligencia"
+  },
+  "Large, non-recurring expenses registered recently have temporarily impacted liquid savings.": {
+    "es-419": "Gastos grandes y no recurrentes registrados recientemente han impactado temporalmente el ahorro líquido.",
+    "es-ES": "Gastos grandes y no recurrentes registrados recientemente han impactado temporalmente el ahorro líquido."
+  },
+  "Late Night Transport Surge": {
+    "es-419": "Pico de transporte nocturno",
+    "es-ES": "Pico de transporte nocturno"
+  },
+  "Log Subscription as Cancelled": {
+    "es-419": "Registrar suscripción como cancelada",
+    "es-ES": "Registrar suscripción como cancelada"
+  },
+  "Log non-cash exchanges": {
+    "es-419": "Registrar intercambios sin efectivo",
+    "es-ES": "Registrar intercambios sin efectivo"
+  },
+  "Maintain your standard deposit speed.": {
+    "es-419": "Mantén tu ritmo habitual de depósitos.",
+    "es-ES": "Mantén tu ritmo habitual de depósitos."
+  },
+  "Merchant Price Spike": {
+    "es-419": "Pico de precio del comercio",
+    "es-ES": "Pico de precio del comercio"
+  },
+  "Merchant Refund Cleared": {
+    "es-419": "Reembolso del comercio acreditado",
+    "es-ES": "Reembolso del comercio abonado"
+  },
+  "Metric Details": {
+    "es-419": "Detalles de la métrica",
+    "es-ES": "Detalles de la métrica"
+  },
+  "Money Map": {
+    "es-419": "Money Map",
+    "es-ES": "Money Map"
+  },
+  "Monthly Burn Rate": {
+    "es-419": "Tasa de consumo mensual",
+    "es-ES": "Tasa de consumo mensual"
+  },
+  "Netflix premium has cheaper ad-supported tiers.": {
+    "es-419": "Netflix premium tiene planes con anuncios más baratos.",
+    "es-ES": "Netflix premium tiene planes con anuncios más baratos."
+  },
+  "Night sleep duration": {
+    "es-419": "Duración del sueño nocturno",
+    "es-ES": "Duración del sueño nocturno"
+  },
+  "No category subscription metrics available.": {
+    "es-419": "No hay métricas de suscripción por categoría.",
+    "es-ES": "No hay métricas de suscripción por categoría."
+  },
+  "No insights yet.": {
+    "es-419": "Aún no hay insights.",
+    "es-ES": "Aún no hay insights."
+  },
+  "No pricing or billing risks detected.": {
+    "es-419": "No se detectaron riesgos de precios ni facturación.",
+    "es-ES": "No se detectaron riesgos de precios ni facturación."
+  },
+  "No upcoming renewals scheduled": {
+    "es-419": "No hay renovaciones próximas programadas",
+    "es-ES": "No hay renovaciones próximas programadas"
+  },
+  "Non-cash exchanges logged in BuxMuse.": {
+    "es-419": "Intercambios sin efectivo registrados en BuxMuse.",
+    "es-ES": "Intercambios sin efectivo registrados en BuxMuse."
+  },
+  "Open full Money Map": {
+    "es-419": "Abrir Money Map completo",
+    "es-ES": "Abrir Money Map completo"
+  },
+  "Open full territory detail": {
+    "es-419": "Abrir detalle completo del territorio",
+    "es-ES": "Abrir detalle completo del territorio"
+  },
+  "Open insight detail": {
+    "es-419": "Abrir detalle del insight",
+    "es-ES": "Abrir detalle del insight"
+  },
+  "Overlapping Media Stack": {
+    "es-419": "Pila de medios superpuesta",
+    "es-ES": "Pila de medios superpuesta"
+  },
+  "Overlapping subscriptions detected.": {
+    "es-419": "Suscripciones superpuestas detectadas.",
+    "es-ES": "Suscripciones superpuestas detectadas."
+  },
+  "Payday Spending Surge": {
+    "es-419": "Pico de gasto en día de pago",
+    "es-ES": "Pico de gasto en día de pago"
+  },
+  "Possible double charge for %@.": {
+    "es-419": "Posible cargo duplicado en %@.",
+    "es-ES": "Posible cargo duplicado en %@."
+  },
+  "Predicted Budget Overspend": {
+    "es-419": "Sobregasto de presupuesto previsto",
+    "es-ES": "Sobregasto de presupuesto previsto"
+  },
+  "Price Hike Alert": {
+    "es-419": "Alerta de subida de precio",
+    "es-ES": "Alerta de subida de precio"
+  },
+  "Price history": {
+    "es-419": "Historial de precios",
+    "es-ES": "Historial de precios"
+  },
+  "Projected financial impact": {
+    "es-419": "Impacto financiero proyectado",
+    "es-ES": "Impacto financiero proyectado"
+  },
+  "Rainy Day Savings": {
+    "es-419": "Ahorro para días de lluvia",
+    "es-ES": "Ahorro para días de lluvia"
+  },
+  "Reach your %@ goal sooner.": {
+    "es-419": "Alcanza tu meta de %@ antes.",
+    "es-ES": "Alcanza tu meta de %@ antes."
+  },
+  "Reduce groceries and restaurants by 10%.": {
+    "es-419": "Reduce compras en supermercado y restaurantes un 10%%.",
+    "es-ES": "Reduce compras en supermercado y restaurantes un 10%%."
+  },
+  "Save Money": {
+    "es-419": "Ahorrar",
+    "es-ES": "Ahorrar"
+  },
+  "Savings log": {
+    "es-419": "Registro de ahorros",
+    "es-ES": "Registro de ahorros"
+  },
+  "Savings momentum": {
+    "es-419": "Impulso de ahorro",
+    "es-ES": "Impulso de ahorro"
+  },
+  "Savings velocity scenarios": {
+    "es-419": "Escenarios de velocidad de ahorro",
+    "es-ES": "Escenarios de velocidad de ahorro"
+  },
+  "Scope Radar": {
+    "es-419": "Scope Radar",
+    "es-ES": "Scope Radar"
+  },
+  "Scope budget tight": {
+    "es-419": "Presupuesto de alcance ajustado",
+    "es-ES": "Presupuesto de alcance ajustado"
+  },
+  "Separate gigs or departments": {
+    "es-419": "Separa trabajos o departamentos",
+    "es-ES": "Separa trabajos o departamentos"
+  },
+  "Smart cancellation opportunities": {
+    "es-419": "Oportunidades inteligentes de cancelación",
+    "es-ES": "Oportunidades inteligentes de cancelación"
+  },
+  "Smart savings redirections": {
+    "es-419": "Redirecciones inteligentes de ahorro",
+    "es-ES": "Redirecciones inteligentes de ahorro"
+  },
+  "Spending is up this week compared to last month.": {
+    "es-419": "El gasto de esta semana subió respecto al mes pasado.",
+    "es-ES": "El gasto de esta semana subió respecto al mes pasado."
+  },
+  "Stable Spending Forecast": {
+    "es-419": "Pronóstico de gasto estable",
+    "es-ES": "Pronóstico de gasto estable"
+  },
+  "Subjective stress zone": {
+    "es-419": "Zona de estrés subjetivo",
+    "es-ES": "Zona de estrés subjetivo"
+  },
+  "Subscription Hub": {
+    "es-419": "Centro de suscripciones",
+    "es-ES": "Centro de suscripciones"
+  },
+  "Subscription burn rate": {
+    "es-419": "Tasa de consumo de suscripciones",
+    "es-ES": "Tasa de consumo de suscripciones"
+  },
+  "Subscription redirection": {
+    "es-419": "Redirección de suscripciones",
+    "es-ES": "Redirección de suscripciones"
+  },
+  "Subscription risk analyzer": {
+    "es-419": "Analizador de riesgo de suscripciones",
+    "es-ES": "Analizador de riesgo de suscripciones"
+  },
+  "Suggested Actions:": {
+    "es-419": "Acciones sugeridas:",
+    "es-ES": "Acciones sugeridas:"
+  },
+  "Suggested Alternatives:": {
+    "es-419": "Alternativas sugeridas:",
+    "es-ES": "Alternativas sugeridas:"
+  },
+  "Sunday Spend Drops": {
+    "es-419": "Caída de gasto los domingos",
+    "es-ES": "Caída de gasto los domingos"
+  },
+  "Switch to Sunset Theme": {
+    "es-419": "Cambiar al tema Sunset",
+    "es-ES": "Cambiar al tema Sunset"
+  },
+  "Synced": {
+    "es-419": "Sincronizado",
+    "es-ES": "Sincronizado"
+  },
+  "This Quarter": {
+    "es-419": "Este trimestre",
+    "es-ES": "Este trimestre"
+  },
+  "Timeline risk detected for '%@'.": {
+    "es-419": "Riesgo en el cronograma detectado para '%@'.",
+    "es-ES": "Riesgo en el cronograma detectado para '%@'."
+  },
+  "Top insights": {
+    "es-419": "Principales insights",
+    "es-ES": "Principales insights"
+  },
+  "Tracked hours": {
+    "es-419": "Horas registradas",
+    "es-ES": "Horas registradas"
+  },
+  "Trend": {
+    "es-419": "Tendencia",
+    "es-ES": "Tendencia"
+  },
+  "Unassigned workspace spend": {
+    "es-419": "Gasto sin espacio de trabajo asignado",
+    "es-ES": "Gasto sin espacio de trabajo asignado"
+  },
+  "Upcoming renewals": {
+    "es-419": "Próximas renovaciones",
+    "es-ES": "Próximas renovaciones"
+  },
+  "Weekend Spending Surge": {
+    "es-419": "Pico de gasto en fin de semana",
+    "es-ES": "Pico de gasto en fin de semana"
+  },
+  "Weekly Spend Spike": {
+    "es-419": "Pico de gasto semanal",
+    "es-ES": "Pico de gasto semanal"
+  },
+  "Workspace spend": {
+    "es-419": "Gasto del espacio",
+    "es-ES": "Gasto del espacio"
+  },
+  "Workspaces": {
+    "es-419": "Espacios de trabajo",
+    "es-ES": "Espacios de trabajo"
+  },
+  "You are within your safe historical limits.": {
+    "es-419": "Estás dentro de tus límites históricos seguros.",
+    "es-ES": "Estás dentro de tus límites históricos seguros."
+  },
+  "You have multiple active video subscriptions.": {
+    "es-419": "Tienes varias suscripciones de video activas.",
+    "es-ES": "Tienes varias suscripciones de video activas."
+  },
+  "You haven't logged in to %@ recently.": {
+    "es-419": "No has iniciado sesión en %@ recientemente.",
+    "es-ES": "No has iniciado sesión en %@ recientemente."
+  },
+  "You paid more at %@.": {
+    "es-419": "Pagaste más en %@.",
+    "es-ES": "Pagaste más en %@."
+  },
+  "You spend less during rainy days.": {
+    "es-419": "Gastas menos en días lluviosos.",
+    "es-ES": "Gastas menos en días lluviosos."
+  },
+  "You spend more on weekends.": {
+    "es-419": "Gastas más los fines de semana.",
+    "es-ES": "Gastas más los fines de semana."
+  },
+  "You spent more in the 3 days after payday.": {
+    "es-419": "Gastaste más en los 3 días posteriores al día de pago.",
+    "es-ES": "Gastaste más en los 3 días posteriores al día de pago."
+  },
+  "You spent more on %@ this month.": {
+    "es-419": "Gastaste más en %@ este mes.",
+    "es-ES": "Gastaste más en %@ este mes."
+  },
+  "You're on track to achieve '%@'.": {
+    "es-419": "Vas en camino de lograr '%@'.",
+    "es-ES": "Vas en camino de lograr '%@'."
+  },
+  "You're trending higher than your monthly average.": {
+    "es-419": "Vas por encima de tu promedio mensual.",
+    "es-ES": "Vas por encima de tu promedio mensual."
+  },
+  "Your spending drops sharply on Sundays.": {
+    "es-419": "Tu gasto cae bruscamente los domingos.",
+    "es-ES": "Tu gasto cae bruscamente los domingos."
+  },
+  "Your stress index has breached the 0.85 threshold. We suggest enabling Sunset mode to reduce cognitive overload and ocular strain.": {
+    "es-419": "Tu índice de estrés superó el umbral de 0,85. Te sugerimos activar el modo Sunset para reducir la sobrecarga cognitiva y la fatiga visual.",
+    "es-ES": "Tu índice de estrés superó el umbral de 0,85. Te sugerimos activar el modo Sunset para reducir la sobrecarga cognitiva y la fatiga visual."
+  },
+  "Your subscriptions are fully optimized.": {
+    "es-419": "Tus suscripciones están totalmente optimizadas.",
+    "es-ES": "Tus suscripciones están totalmente optimizadas."
+  },
+  "Your transport spending spikes after 8pm.": {
+    "es-419": "Tu gasto en transporte sube después de las 8 p. m.",
+    "es-ES": "Tu gasto en transporte sube después de las 20:00."
+  },
+  "Zombie Subscription": {
+    "es-419": "Suscripción zombi",
+    "es-ES": "Suscripción zombi"
+  },
+  "Zombie subscription: Unused in 60 days.": {
+    "es-419": "Suscripción zombi: sin uso en 60 días.",
+    "es-ES": "Suscripción zombi: sin uso en 60 días."
+  },
+  "battery": {
+    "es-419": "batería",
+    "es-ES": "batería"
+  },
+  "saved": {
+    "es-419": "ahorrado",
+    "es-ES": "ahorrado"
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "INCOME & DEDUCTIONS (%@)": {
+    "es-419": "INGRESOS Y DEDUCCIONES (%@)",
+    "es-ES": "INGRESOS Y DEDUCCIONES (%@)"
+  },
+  "%@:": {
+    "es-419": "%@:",
+    "es-ES": "%@:"
+  },
+  "Estimated runway based on your %@ monthly burn rate.": {
+    "es-419": "Runway estimado según tu ritmo de gasto mensual de %@.",
+    "es-ES": "Runway estimado según tu ritmo de gasto mensual de %@."
+  },
+  "Save %@": {
+    "es-419": "Ahorra %@",
+    "es-ES": "Ahorra %@"
+  },
+  "%lld countries": {
+    "es-419": "%lld países",
+    "es-ES": "%lld países"
+  },
+  "Updated %@": {
+    "es-419": "Actualizado %@",
+    "es-ES": "Actualizado %@"
+  },
+  "+%lld more · tap for details": {
+    "es-419": "+%lld más · toca para detalles",
+    "es-ES": "+%lld más · toca para detalles"
+  },
+  "+%lld more": {
+    "es-419": "+%lld más",
+    "es-ES": "+%lld más"
+  },
+  "Shown as %@ · %@": {
+    "es-419": "Se muestra como %@ · %@",
+    "es-ES": "Se muestra como %@ · %@"
+  },
+  "Your recurring subscriptions account for roughly %.0f%% of your overall spending. Taking advantage of multi-month prepayments could unlock up to 15%% in annual savings across active plans.": {
+    "es-419": "Tus suscripciones recurrentes representan aprox. %.0f%% de tu gasto total. Pagar varios meses por adelantado puede ahorrarte hasta un 15%% anual en planes activos.",
+    "es-ES": "Tus suscripciones recurrentes representan aprox. %.0f%% de tu gasto total. Pagar varios meses por adelantado puede ahorrarte hasta un 15%% anual en planes activos."
+  },
+  "Total spent (%@)": {
+    "es-419": "Total gastado (%@)",
+    "es-ES": "Total gastado (%@)"
+  },
+  "%lld items": {
+    "es-419": "%lld ítems",
+    "es-ES": "%lld elementos"
+  },
+  "%lld transactions": {
+    "es-419": "%lld transacciones",
+    "es-ES": "%lld transacciones"
+  },
+  "Target: %@": {
+    "es-419": "Meta: %@",
+    "es-ES": "Meta: %@"
+  },
+  "Tax Health · %@ risk": {
+    "es-419": "Salud fiscal · riesgo %@",
+    "es-ES": "Salud fiscal · riesgo %@"
+  },
+  "%@ Portfolio": {
+    "es-419": "Portafolio %@",
+    "es-ES": "Cartera %@"
+  },
+  "Use %@ currency": {
+    "es-419": "Usar moneda %@",
+    "es-ES": "Usar moneda %@"
+  },
+  "Keep %@": {
+    "es-419": "Mantener %@",
+    "es-ES": "Mantener %@"
+  },
+  "%lldh": {
+    "es-419": "%lld h",
+    "es-ES": "%lld h"
+  },
+  "%lld m": {
+    "es-419": "%lld m",
+    "es-ES": "%lld m"
+  },
+  "%lldm": {
+    "es-419": "%lld m",
+    "es-ES": "%lld m"
+  },
+  "Recommended: %@": {
+    "es-419": "Recomendado: %@",
+    "es-ES": "Recomendado: %@"
+  },
+  "Delete %lld": {
+    "es-419": "Eliminar %lld",
+    "es-ES": "Eliminar %lld"
+  },
+  "%@ %@": {
+    "es-419": "%1$@ %2$@",
+    "es-ES": "%1$@ %2$@"
+  },
+  "7 Days": {
+    "es-419": "7 días",
+    "es-ES": "7 días"
+  },
+  "30 Days": {
+    "es-419": "30 días",
+    "es-ES": "30 días"
+  },
+  "90 Days": {
+    "es-419": "90 días",
+    "es-ES": "90 días"
+  },
+  "Log %@ and stop": {
+    "es-419": "Registrar %@ y detener",
+    "es-ES": "Registrar %@ y detener"
+  },
+  "%lld/100": {
+    "es-419": "%lld/100",
+    "es-ES": "%lld/100"
+  },
+  "Not asked yet": {
+    "es-419": "Sin pedir aún",
+    "es-ES": "Sin pedir aún"
+  },
+  "Limited access": {
+    "es-419": "Acceso limitado",
+    "es-ES": "Acceso limitado"
+  },
+  "Full access": {
+    "es-419": "Acceso completo",
+    "es-ES": "Acceso completo"
+  },
+  "Denied": {
+    "es-419": "Denegado",
+    "es-ES": "Denegado"
+  },
+  "Restricted": {
+    "es-419": "Restringido",
+    "es-ES": "Restringido"
+  },
+  "local": {
+    "es-419": "local",
+    "es-ES": "local"
+  },
+  "Risk score: %.0f%%": {
+    "es-419": "Riesgo: %.0f%%",
+    "es-ES": "Riesgo: %.0f%%"
+  },
+  "↑ %.1f%% Increase": {
+    "es-419": "↑ %.1f%% aumento",
+    "es-ES": "↑ %.1f%% aumento"
+  },
+  "↓ %.1f%% Decrease": {
+    "es-419": "↓ %.1f%% baja",
+    "es-ES": "↓ %.1f%% bajada"
+  },
+  "%.1f hrs": {
+    "es-419": "%.1f h",
+    "es-ES": "%.1f h"
+  },
+  "%.0f%%": {
+    "es-419": "%.0f%%",
+    "es-ES": "%.0f%%"
+  },
+  "%+.1f": {
+    "es-419": "%+.1f",
+    "es-ES": "%+.1f"
+  },
+  "%.1fh": {
+    "es-419": "%.1f h",
+    "es-ES": "%.1f h"
+  },
+  "%.1f h / %.1f h": {
+    "es-419": "%.1f h / %.1f h",
+    "es-ES": "%.1f h / %.1f h"
+  },
+  "%lld°": {
+    "es-419": "%lld°",
+    "es-ES": "%lld°"
+  },
+  "+%lld°": {
+    "es-419": "+%lld°",
+    "es-ES": "+%lld°"
+  },
+  "%lld%%": {
+    "es-419": "%lld%%",
+    "es-ES": "%lld%%"
+  }
+}

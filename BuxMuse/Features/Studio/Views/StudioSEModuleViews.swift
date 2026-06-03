@@ -13,6 +13,7 @@ struct StudioIncomeTaxCalculatorView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var studioBrain: StudioBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var body: some View {
         let snapshot = studioBrain.incomeTaxDisplay
@@ -37,19 +38,25 @@ struct StudioIncomeTaxCalculatorView: View {
                 .environment(\.studioEnhancedTint, true)
             }
         }
-        .navigationTitle("Income Tax Calculator")
+        .buxCatalogNavigationTitle("Income Tax Calculator")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private func heroCard(_ snapshot: IncomeTaxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("ESTIMATED ANNUAL TAX")
+            BuxCatalogDynamicText(key: "ESTIMATED ANNUAL TAX")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             Text(snapshot.totalEstimatedTaxFormatted)
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundColor(themeManager.current.accentColor)
-            Text("Effective rate \(snapshot.effectiveRatePercent)% on recorded income")
+            Text(
+                BuxLocalizedString.format(
+                    "Effective rate %lld%% on recorded income",
+                    locale: appSettingsManager.interfaceLocale,
+                    snapshot.effectiveRatePercent
+                )
+            )
                 .font(.system(size: 12))
                 .buxLabelSecondary()
         }
@@ -65,7 +72,7 @@ struct StudioIncomeTaxCalculatorView: View {
             HStack(spacing: 10) {
                 Image(systemName: "slider.horizontal.3")
                     .foregroundColor(.orange)
-                Text("Set your effective income and self-employed tax rates in Tax Profile to enable calculations.")
+                BuxCatalogDynamicText(key: "Set your effective income and self-employed tax rates in Tax Profile to enable calculations.")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 Spacer()
@@ -81,7 +88,7 @@ struct StudioIncomeTaxCalculatorView: View {
 
     private func breakdownCard(_ snapshot: IncomeTaxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("BREAKDOWN")
+            BuxCatalogDynamicText(key: "BREAKDOWN")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             seRow("Gross income", snapshot.totalIncomeFormatted)
@@ -143,7 +150,7 @@ struct StudioQuarterlyTaxView: View {
                     .seCard(colorScheme: colorScheme, themeManager: themeManager)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("QUARTERLY SPLIT")
+                        BuxCatalogDynamicText(key: "QUARTERLY SPLIT")
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
                         seMetric("Income tax", snapshot.incomeTaxFormatted)
@@ -163,7 +170,7 @@ struct StudioQuarterlyTaxView: View {
                 .environment(\.studioEnhancedTint, true)
             }
         }
-        .navigationTitle("Quarterly Tax")
+        .buxCatalogNavigationTitle("Quarterly Tax")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -198,7 +205,7 @@ struct StudioComplianceAssistantView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
                     if !snapshot.warnings.isEmpty {
-                        Text("WARNINGS")
+                        BuxCatalogDynamicText(key: "WARNINGS")
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
                         ForEach(snapshot.warnings) { item in
@@ -221,7 +228,7 @@ struct StudioComplianceAssistantView: View {
                 .environment(\.studioEnhancedTint, true)
             }
         }
-        .navigationTitle(studioHubEmbedded ? "" : "Compliance Assistant")
+        .buxCatalogNavigationTitle(studioHubEmbedded ? "" : "Compliance Assistant")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -259,6 +266,7 @@ struct StudioComplianceAssistantView: View {
 struct StudioDashboardWidget: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @EnvironmentObject private var studioBrain: StudioBrain
 
@@ -274,7 +282,7 @@ struct StudioDashboardWidget: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Label {
-                            Text("Studio")
+                            BuxCatalogDynamicText(key: "Studio")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(themeManager.current.accentColor)
                         } icon: {
@@ -283,7 +291,13 @@ struct StudioDashboardWidget: View {
                                 .frame(width: 18, height: 18)
                         }
                         Spacer()
-                        Text("Runway \(display.runwayMonthsFormatted)")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Runway %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                display.runwayMonthsFormatted
+                            )
+                        )
                             .font(.system(size: 10, weight: .bold))
                             .buxLabelSecondary()
                     }
@@ -310,8 +324,9 @@ struct StudioDashboardWidget: View {
 
     private func widgetMetric(_ title: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title.uppercased())
+            BuxCatalogText.text(title)
                 .font(.system(size: 9, weight: .semibold))
+                .textCase(.uppercase)
                 .buxLabelSecondary()
             Text(value)
                 .font(.system(size: 13, weight: .bold, design: .rounded))

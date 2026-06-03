@@ -127,7 +127,7 @@ struct CardProCanvasView: View {
                     backgroundSelected: $backgroundSelected,
                     onChange: { canvasToolbarDidChange() }
                 )
-                    .navigationTitle("Bux Layers")
+                    .buxCatalogNavigationTitle("Bux Layers")
                     .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showLayerPanel = false } } }
             }
         }
@@ -147,7 +147,7 @@ struct CardProCanvasView: View {
                     },
                     onChange: { snapshotForUndo() }
                 )
-                .navigationTitle("Bux Background")
+                .buxCatalogNavigationTitle("Bux Background")
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showBackgroundEditor = false } } }
             }
         }
@@ -310,7 +310,7 @@ struct CardProCanvasView: View {
             .tint(controlTint)
             .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-            Text("Pinch to resize · Two fingers to rotate · Drag handles for precision")
+            BuxCatalogDynamicText(key: "Pinch to resize · Two fingers to rotate · Drag handles for precision")
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -496,10 +496,16 @@ struct CardProCanvasView: View {
 
     private var backgroundPhotoTools: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Background photo")
+            BuxCatalogDynamicText(key: "Background photo")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(.secondary)
-            Text("Card: \(design.aspect.detail) — any photo size works.")
+            Text(
+                BuxLocalizedString.format(
+                    "Card: %@ — any photo size works.",
+                    locale: BuxInterfaceLocale.currentInterfaceLocale,
+                    design.aspect.detail
+                )
+            )
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
             HStack(spacing: 8) {
@@ -1085,7 +1091,7 @@ struct CardProCanvasView: View {
 
     private func canvasToggleRow(title: String, isOn: Binding<Bool>) -> some View {
         HStack(spacing: 6) {
-            Text(title)
+            BuxCatalogText.text(title)
                 .font(.system(size: 12, weight: .medium))
             Toggle("", isOn: isOn)
                 .labelsHidden()

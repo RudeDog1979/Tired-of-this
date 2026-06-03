@@ -72,7 +72,7 @@ struct TaxStudioHubView: View {
             .contentMargins(.top, BuxLayout.invoicesNavChromeScrollInset, for: .scrollContent)
             .studioThemedListRows()
         }
-        .navigationTitle("Tax Studio")
+        .buxCatalogNavigationTitle("Tax Studio")
         .navigationBarTitleDisplayMode(.large)
         .buxRootNavigationChrome()
         .toolbar {
@@ -176,7 +176,7 @@ struct TaxStudioOverviewView: View {
         taxStudioTabStack {
             if !display.autopilot.isEmpty {
                 VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                    Text("AUTOPILOT")
+                    BuxCatalogDynamicText(key: "AUTOPILOT")
                         .font(.system(size: 11, weight: .bold))
                         .buxLabelSecondary()
                     ForEach(display.autopilot) { item in
@@ -201,7 +201,7 @@ struct TaxStudioOverviewView: View {
 
             if !display.thresholdWarnings.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("THRESHOLDS")
+                    BuxCatalogDynamicText(key: "THRESHOLDS")
                         .font(.system(size: 11, weight: .bold))
                         .buxLabelSecondary()
                     ForEach(display.thresholdWarnings, id: \.self) { w in
@@ -230,11 +230,15 @@ struct TaxStudioOverviewView: View {
 struct TaxStudioMetricCard: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let metric: TaxStudioMetricDisplay
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(metric.title.uppercased())
+            Text(
+                BuxCatalogLabel.string(metric.title, locale: appSettingsManager.interfaceLocale)
+                    .uppercased()
+            )
                 .font(.system(size: 9, weight: .bold))
                 .buxLabelSecondary()
             Text(metric.value)
@@ -242,7 +246,9 @@ struct TaxStudioMetricCard: View {
                 .foregroundColor(themeManager.current.accentColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-            Text(metric.subtitle)
+            Text(
+                BuxCatalogLabel.string(metric.subtitle, locale: appSettingsManager.interfaceLocale)
+            )
                 .font(.system(size: 10, weight: .medium))
                 .buxLabelSecondary()
         }
@@ -287,7 +293,7 @@ struct TaxStudioCalculatorView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-            Text(title)
+            BuxCatalogText.text(title)
                 .font(.system(size: 14, weight: .semibold))
             Spacer()
             Image(systemName: "chevron.right")
@@ -324,6 +330,7 @@ struct TaxStudioForecastView: View {
 struct TaxStudioTimelineView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: TaxStudioDisplay
 
     var body: some View {
@@ -338,10 +345,10 @@ struct TaxStudioTimelineView: View {
                         Text(event.dateLabel)
                             .font(.system(size: 10, weight: .bold))
                             .buxLabelSecondary()
-                        Text(event.title)
+                        BuxCatalogDynamicText(key: event.title)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Text(event.subtitle)
+                        BuxCatalogDynamicText(key: event.subtitle)
                             .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                     }
                     Spacer()
@@ -360,6 +367,7 @@ struct TaxStudioTimelineView: View {
 struct TaxStudioHealthScoreView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: TaxStudioDisplay
 
     private var scoreColor: Color {
@@ -373,10 +381,16 @@ struct TaxStudioHealthScoreView: View {
     var body: some View {
         taxStudioTabStack {
             VStack(spacing: 8) {
-                Text("\(display.health.score)")
+                Text(display.health.score, format: .number)
                     .font(.system(size: 56, weight: .bold, design: .rounded))
                     .foregroundColor(scoreColor)
-                Text("Tax Health · \(display.health.riskLevel) risk")
+                Text(
+                    BuxLocalizedString.format(
+                        "Tax Health · %@ risk",
+                        locale: appSettingsManager.interfaceLocale,
+                        display.health.riskLevel
+                    )
+                )
                     .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
             }
             .frame(maxWidth: .infinity)
@@ -385,9 +399,9 @@ struct TaxStudioHealthScoreView: View {
 
             ForEach(display.health.recommendations) { rec in
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(rec.title)
+                    BuxCatalogDynamicText(key: rec.title)
                         .font(.system(size: 14, weight: .semibold))
-                    Text(rec.body)
+                    BuxCatalogDynamicText(key: rec.body)
                         .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                 }
                 .padding(14)
@@ -396,12 +410,12 @@ struct TaxStudioHealthScoreView: View {
 
             ForEach(display.sanity) { w in
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(w.title)
+                    BuxCatalogDynamicText(key: w.title)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.orange)
-                    Text(w.detail)
+                    BuxCatalogDynamicText(key: w.detail)
                         .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
-                    Text(w.suggestion)
+                    BuxCatalogDynamicText(key: w.suggestion)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(themeManager.current.accentColor)
                 }
@@ -420,6 +434,7 @@ struct TaxStudioHealthScoreView: View {
 struct TaxStudioCoachView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: TaxStudioDisplay
 
     var body: some View {
@@ -429,10 +444,10 @@ struct TaxStudioCoachView: View {
                     Text(card.category.uppercased())
                         .font(.system(size: 9, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
-                    Text(card.title)
+                    BuxCatalogDynamicText(key: card.title)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text(card.body)
+                    BuxCatalogDynamicText(key: card.body)
                         .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
                 }

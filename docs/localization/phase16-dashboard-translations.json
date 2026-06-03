@@ -1,0 +1,78 @@
+{
+  "Top: %@": {
+    "es-419": "Principal: %@",
+    "es-ES": "Principal: %@"
+  },
+  "All categories": {
+    "es-419": "Todas las categorías",
+    "es-ES": "Todas las categorías"
+  },
+  "All merchants": {
+    "es-419": "Todos los comercios",
+    "es-ES": "Todos los comercios"
+  },
+  "%lld This Month": {
+    "es-419": "%lld este mes",
+    "es-ES": "%lld este mes"
+  },
+  "On track": {
+    "es-419": "En buen camino",
+    "es-ES": "En buen camino"
+  },
+  "Est. tax": {
+    "es-419": "Imp. est.",
+    "es-ES": "Imp. est."
+  },
+  "Quarter due": {
+    "es-419": "Trim. a pagar",
+    "es-ES": "Trim. a pagar"
+  },
+  "Rate": {
+    "es-419": "Tasa",
+    "es-ES": "Tasa"
+  },
+  "Expenses": {
+    "es-419": "Gastos",
+    "es-ES": "Gastos"
+  },
+  "Net": {
+    "es-419": "Neto",
+    "es-ES": "Neto"
+  },
+  "Self-employed?": {
+    "es-419": "¿Trabajas por tu cuenta?",
+    "es-ES": "¿Trabajas por tu cuenta?"
+  },
+  "Turn on Studio for invoices, mileage, and tax estimates — optional, in Settings.": {
+    "es-419": "Activa Studio para facturas, kilometraje e impuestos estimados — opcional, en Ajustes.",
+    "es-ES": "Activa Studio para facturas, kilometraje e impuestos estimados — opcional, en Ajustes."
+  },
+  "See Studio in Settings": {
+    "es-419": "Ver Studio en Ajustes",
+    "es-ES": "Ver Studio en Ajustes"
+  },
+  "Dismiss": {
+    "es-419": "Cerrar",
+    "es-ES": "Cerrar"
+  },
+  "Semi-Annual": {
+    "es-419": "Semestral",
+    "es-ES": "Semestral"
+  },
+  "Irregular Pattern": {
+    "es-419": "Patrón irregular",
+    "es-ES": "Patrón irregular"
+  },
+  "28-day": {
+    "es-419": "Cada 28 días",
+    "es-ES": "Cada 28 días"
+  },
+  "30-day": {
+    "es-419": "Cada 30 días",
+    "es-ES": "Cada 30 días"
+  },
+  "31-day": {
+    "es-419": "Cada 31 días",
+    "es-ES": "Cada 31 días"
+  }
+}

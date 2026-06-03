@@ -67,7 +67,7 @@ struct ExpenseTabView: View {
                     }
                 }
             }
-            .navigationTitle("Expenses")
+            .buxCatalogNavigationTitle("Expenses")
             .navigationBarTitleDisplayMode(.large)
             .buxRootNavigationChrome()
             .toolbar { expenseToolbar }
@@ -77,6 +77,7 @@ struct ExpenseTabView: View {
                 isSearchPresented: $navigationCoordinator.isExpenseSearchPresented
             ))
         }
+        .buxInterfaceLocale()
         .environment(\.expensesEnhancedTint, true)
         .buxReportsContainerWidth()
         .onAppear {
@@ -131,6 +132,7 @@ struct ExpenseTabView: View {
                 heatZones: listModel.availableHeatZones
             )
             .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
             .environmentObject(brain)
             .environment(\.expensesEnhancedTint, true)
             .buxThemedSheetContent()
@@ -211,54 +213,85 @@ struct ExpenseTabView: View {
     }
 
     private var expenseFilterMenu: some View {
-        Menu {
-            Section("Quick filters") {
-                Toggle("Recurring only", isOn: $listModel.filters.recurringOnly)
-                Toggle("Subscription-like", isOn: $listModel.filters.subscriptionLikeOnly)
-                Toggle("Refunds only", isOn: $listModel.filters.refundsOnly)
+        let locale = appSettingsManager.interfaceLocale
+        return Menu {
+            Section {
+                Toggle(isOn: $listModel.filters.recurringOnly) {
+                    BuxCatalogText.text("Recurring only")
+                }
+                Toggle(isOn: $listModel.filters.subscriptionLikeOnly) {
+                    BuxCatalogText.text("Subscription-like")
+                }
+                Toggle(isOn: $listModel.filters.refundsOnly) {
+                    BuxCatalogText.text("Refunds only")
+                }
+            } header: {
+                BuxCatalogText.text("Quick filters")
             }
 
             if !listModel.categories.isEmpty {
-                Menu("Category") {
-                    Button("Any category") { listModel.filters.categoryId = nil }
+                Menu {
+                    Button {
+                        listModel.filters.categoryId = nil
+                    } label: {
+                        BuxCatalogText.text("Any category")
+                    }
                     ForEach(listModel.categories) { category in
                         Button(category.name) {
                             listModel.filters.categoryId = category.id
                         }
                     }
+                } label: {
+                    BuxCatalogText.text("Category")
                 }
             }
 
             if !listModel.merchants.isEmpty {
-                Menu("Merchant") {
-                    Button("Any merchant") { listModel.filters.merchantId = nil }
+                Menu {
+                    Button {
+                        listModel.filters.merchantId = nil
+                    } label: {
+                        BuxCatalogText.text("Any merchant")
+                    }
                     ForEach(listModel.merchants.prefix(16)) { merchant in
                         Button(merchant.name) {
                             listModel.filters.merchantId = merchant.id
                         }
                     }
+                } label: {
+                    BuxCatalogText.text("Merchant")
                 }
             }
 
             if !listModel.availableHeatZones.isEmpty {
-                Menu("Heat zone") {
-                    Button("Any zone") { listModel.filters.heatZoneBucket = nil }
+                Menu {
+                    Button {
+                        listModel.filters.heatZoneBucket = nil
+                    } label: {
+                        BuxCatalogText.text("Any zone")
+                    }
                     ForEach(listModel.availableHeatZones, id: \.self) { zone in
-                        Button(zone.replacingOccurrences(of: "_", with: " ")) {
+                        Button(BuxHeatZoneCopy.displayName(for: zone, locale: locale)) {
                             listModel.filters.heatZoneBucket = zone
                         }
                     }
+                } label: {
+                    BuxCatalogText.text("Heat zone")
                 }
             }
 
-            Button("Advanced filters…") {
+            Button {
                 showAdvancedFilters = true
+            } label: {
+                BuxCatalogText.text("Advanced filters…")
             }
 
             if listModel.filters.isActive {
-                Button("Clear filters", role: .destructive) {
+                Button(role: .destructive) {
                     listModel.filters = ExpenseFilterState()
                     listModel.searchScope = .all
+                } label: {
+                    BuxCatalogText.text("Clear filters")
                 }
             }
         } label: {
@@ -268,7 +301,7 @@ struct ExpenseTabView: View {
                     : "line.3.horizontal.decrease.circle"
             )
         }
-        .accessibilityLabel("Filter expenses")
+        .accessibilityLabel(BuxCatalogLabel.string("Filter expenses", locale: locale))
     }
 
     private var emptyStateWithWorkspaceAccess: some View {
@@ -283,7 +316,17 @@ struct ExpenseTabView: View {
                     ContentUnavailableView {
                         Label("No expenses in this workspace", systemImage: "rectangle.3.group")
                     } description: {
-                        Text("Pick another workspace above, or add an expense tagged to \(HustleWorkspaceFilter.activeWorkspaceLabel() ?? "this workspace").")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Pick another workspace above, or add an expense tagged to %@.",
+                                locale: appSettingsManager.interfaceLocale,
+                                HustleWorkspaceFilter.activeWorkspaceLabel()
+                                    ?? BuxLocalizedString.string(
+                                        String.LocalizationValue(stringLiteral: "this workspace"),
+                                        locale: appSettingsManager.interfaceLocale
+                                    )
+                            )
+                        )
                     } actions: {
                         addExpenseButton
                     }
@@ -291,7 +334,7 @@ struct ExpenseTabView: View {
                     ContentUnavailableView {
                         Label("No expenses logged yet", systemImage: "creditcard")
                     } description: {
-                        Text("Your financial details are kept strictly offline and secure inside the BuxMuse Brain.")
+                        BuxCatalogText.text("Your financial details are kept strictly offline and secure inside the BuxMuse Brain.")
                     } actions: {
                         addExpenseButton
                     }
@@ -345,7 +388,10 @@ struct ExpenseTabView: View {
                         }
                     } header: {
                         HStack {
-                            Text(section.title.uppercased())
+                            Text(
+                                BuxCatalogLabel.string(section.title, locale: appSettingsManager.interfaceLocale)
+                                    .uppercased()
+                            )
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
                                 .kerning(1.2)
@@ -476,7 +522,13 @@ private struct ExpenseSearchModifier: ViewModifier {
             ))
             .searchScopes($searchScope) {
                 ForEach(ExpenseSearchScope.allCases) { scope in
-                    Text(scope.title).tag(scope)
+                    Text(
+                        BuxCatalogLabel.string(
+                            scope.title,
+                            locale: BuxInterfaceLocale.currentInterfaceLocale
+                        )
+                    )
+                    .tag(scope)
                 }
             }
     }

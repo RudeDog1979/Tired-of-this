@@ -1,0 +1,270 @@
+{
+  "Settings": {
+    "es-419": "Ajustes",
+    "es-ES": "Ajustes"
+  },
+  "Expenses": {
+    "es-419": "Gastos",
+    "es-ES": "Gastos"
+  },
+  "Home": {
+    "es-419": "Inicio",
+    "es-ES": "Inicio"
+  },
+  "General": {
+    "es-419": "General",
+    "es-ES": "General"
+  },
+  "Finance": {
+    "es-419": "Finanzas",
+    "es-ES": "Finanzas"
+  },
+  "Profile": {
+    "es-419": "Perfil",
+    "es-ES": "Perfil"
+  },
+  "Appearance & Themes": {
+    "es-419": "Apariencia y temas",
+    "es-ES": "Apariencia y temas"
+  },
+  "Currency & Region": {
+    "es-419": "Moneda y región",
+    "es-ES": "Moneda y región"
+  },
+  "Budgets & Custom Budgets": {
+    "es-419": "Presupuestos",
+    "es-ES": "Presupuestos"
+  },
+  "Studio": {
+    "es-419": "Studio",
+    "es-ES": "Studio"
+  },
+  "Notifications": {
+    "es-419": "Notificaciones",
+    "es-ES": "Notificaciones"
+  },
+  "Security & App Lock": {
+    "es-419": "Seguridad y bloqueo",
+    "es-ES": "Seguridad y bloqueo"
+  },
+  "Backup & Restore": {
+    "es-419": "Copia y restauración",
+    "es-ES": "Copia y restauración"
+  },
+  "About": {
+    "es-419": "Acerca de",
+    "es-ES": "Acerca de"
+  },
+  "Expense Intelligence": {
+    "es-419": "Inteligencia de gastos",
+    "es-ES": "Inteligencia de gastos"
+  },
+  "Payment Sources": {
+    "es-419": "Fuentes de pago",
+    "es-ES": "Fuentes de pago"
+  },
+  "Security & Notifications": {
+    "es-419": "Seguridad y notificaciones",
+    "es-ES": "Seguridad y notificaciones"
+  },
+  "System & Privacy": {
+    "es-419": "Sistema y privacidad",
+    "es-ES": "Sistema y privacidad"
+  },
+  "Add expense": {
+    "es-419": "Agregar gasto",
+    "es-ES": "Añadir gasto"
+  },
+  "No expenses logged yet": {
+    "es-419": "Aún no hay gastos",
+    "es-ES": "Aún no hay gastos"
+  },
+  "No expenses in this workspace": {
+    "es-419": "No hay gastos en este espacio",
+    "es-ES": "No hay gastos en este espacio"
+  },
+  "Filter expenses": {
+    "es-419": "Filtrar gastos",
+    "es-ES": "Filtrar gastos"
+  },
+  "Quick filters": {
+    "es-419": "Filtros rápidos",
+    "es-ES": "Filtros rápidos"
+  },
+  "Advanced filters…": {
+    "es-419": "Filtros avanzados…",
+    "es-ES": "Filtros avanzados…"
+  },
+  "Clear filters": {
+    "es-419": "Borrar filtros",
+    "es-ES": "Borrar filtros"
+  },
+  "Categories": {
+    "es-419": "Categorías",
+    "es-ES": "Categorías"
+  },
+  "Filters": {
+    "es-419": "Filtros",
+    "es-ES": "Filtros"
+  },
+  "Add note": {
+    "es-419": "Agregar nota",
+    "es-ES": "Añadir nota"
+  },
+  "Total Spend": {
+    "es-419": "Gasto total",
+    "es-ES": "Gasto total"
+  },
+  "Top Categories": {
+    "es-419": "Principales categorías",
+    "es-ES": "Principales categorías"
+  },
+  "Top Merchants": {
+    "es-419": "Principales comercios",
+    "es-ES": "Principales comercios"
+  },
+  "7-day trend": {
+    "es-419": "Tendencia 7 días",
+    "es-ES": "Tendencia 7 días"
+  },
+  "Cancel": {
+    "es-419": "Cancelar",
+    "es-ES": "Cancelar"
+  },
+  "Save": {
+    "es-419": "Guardar",
+    "es-ES": "Guardar"
+  },
+  "Done": {
+    "es-419": "Listo",
+    "es-ES": "Hecho"
+  },
+  "Delete": {
+    "es-419": "Eliminar",
+    "es-ES": "Eliminar"
+  },
+  "Edit": {
+    "es-419": "Editar",
+    "es-ES": "Editar"
+  },
+  "Country / Region": {
+    "es-419": "País / Región",
+    "es-ES": "País / Región"
+  },
+  "Display currency": {
+    "es-419": "Moneda de visualización",
+    "es-ES": "Moneda de visualización"
+  },
+  "Preferred Currency": {
+    "es-419": "Moneda preferida",
+    "es-ES": "Moneda preferida"
+  },
+  "Your region": {
+    "es-419": "Tu región",
+    "es-ES": "Tu región"
+  },
+  "Regional rules": {
+    "es-419": "Reglas regionales",
+    "es-ES": "Reglas regionales"
+  },
+  "Formatting Preview": {
+    "es-419": "Vista previa de formato",
+    "es-ES": "Vista previa de formato"
+  },
+  "Start of Week": {
+    "es-419": "Inicio de semana",
+    "es-ES": "Inicio de semana"
+  },
+  "No Active Budget Profile": {
+    "es-419": "Sin presupuesto activo",
+    "es-ES": "Sin presupuesto activo"
+  },
+  "Active savings goals": {
+    "es-419": "Metas de ahorro activas",
+    "es-ES": "Metas de ahorro activas"
+  },
+  "Add Goal": {
+    "es-419": "Agregar meta",
+    "es-ES": "Añadir meta"
+  },
+  "Goals": {
+    "es-419": "Metas",
+    "es-ES": "Metas"
+  },
+  "Manage categories": {
+    "es-419": "Administrar categorías",
+    "es-ES": "Gestionar categorías"
+  },
+  "Manage merchants": {
+    "es-419": "Administrar comercios",
+    "es-ES": "Gestionar comercios"
+  },
+  "Merchant": {
+    "es-419": "Comercio",
+    "es-ES": "Comercio"
+  },
+  "Category": {
+    "es-419": "Categoría",
+    "es-ES": "Categoría"
+  },
+  "Date": {
+    "es-419": "Fecha",
+    "es-ES": "Fecha"
+  },
+  "Notes": {
+    "es-419": "Notas",
+    "es-ES": "Notas"
+  },
+  "Subscription": {
+    "es-419": "Suscripción",
+    "es-ES": "Suscripción"
+  },
+  "Money in": {
+    "es-419": "Dinero entrante",
+    "es-ES": "Dinero entrante"
+  },
+  "Recurring only": {
+    "es-419": "Solo recurrentes",
+    "es-ES": "Solo recurrentes"
+  },
+  "Refunds only": {
+    "es-419": "Solo reembolsos",
+    "es-ES": "Solo reembolsos"
+  },
+  "Any category": {
+    "es-419": "Cualquier categoría",
+    "es-ES": "Cualquier categoría"
+  },
+  "Any merchant": {
+    "es-419": "Cualquier comercio",
+    "es-ES": "Cualquier comercio"
+  },
+  "Change category": {
+    "es-419": "Cambiar categoría",
+    "es-ES": "Cambiar categoría"
+  },
+  "Unassigned": {
+    "es-419": "Sin asignar",
+    "es-ES": "Sin asignar"
+  },
+  "Got it": {
+    "es-419": "Entendido",
+    "es-ES": "Entendido"
+  },
+  "Apply": {
+    "es-419": "Aplicar",
+    "es-ES": "Aplicar"
+  },
+  "Clear": {
+    "es-419": "Limpiar",
+    "es-ES": "Limpiar"
+  },
+  "Search country or code...": {
+    "es-419": "Buscar país o código...",
+    "es-ES": "Buscar país o código..."
+  },
+  "Update currency too?": {
+    "es-419": "¿Actualizar moneda también?",
+    "es-ES": "¿Actualizar moneda también?"
+  }
+}

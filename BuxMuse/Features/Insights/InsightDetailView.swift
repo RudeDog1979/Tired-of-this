@@ -45,6 +45,7 @@ struct InsightDetailView: View {
             suggestedActionsSection
         }
         .environment(\.dashboardEnhancedTint, true)
+        .buxInterfaceLocale()
         .buxThemedPresentation()
     }
 
@@ -63,13 +64,13 @@ struct InsightDetailView: View {
             }
 
             VStack(spacing: 6) {
-                Text(insight.title)
+                Text(insight.localizedTitle(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
 
-                Text(insight.description)
+                Text(insight.localizedDescription(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
@@ -81,7 +82,7 @@ struct InsightDetailView: View {
             VStack(alignment: .leading, spacing: BuxLayout.tight + 4) {
                 BuxDetailSectionHeader(title: "Explanation")
 
-                Text(insight.fullExplanation)
+                Text(insight.localizedFullExplanation(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(colorScheme == .dark ? .white.opacity(0.8) : Color(red: 70/255, green: 80/255, blue: 95/255))
                     .lineSpacing(4)
@@ -99,25 +100,23 @@ struct InsightDetailView: View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 4) {
             BuxDetailSectionHeader(title: "Data metrics")
 
-            HStack(alignment: .top, spacing: BuxLayout.section) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Metric Details")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            VStack(alignment: .leading, spacing: BuxLayout.tight + 2) {
+                BuxCatalogText.text("Metric Details")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                    Text(insight.dataBehind)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                        .lineLimit(3)
-                }
+                Text(insight.localizedDataBehind(locale: appSettingsManager.interfaceLocale))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                    .fixedSize(horizontal: false, vertical: true)
 
-                Spacer(minLength: 8)
-
-                Text(insight.value)
+                Text(insight.localizedValue(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundColor(accentColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.85)
             }
             .buxDetailRowCard()
         }
@@ -138,7 +137,7 @@ struct InsightDetailView: View {
 
     private func impactCard(label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label)
+            BuxCatalogText.text(label)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundColor(.gray)
 
@@ -173,12 +172,18 @@ struct InsightDetailView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Impact on '\(goalName)'")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Impact on '%@'",
+                                locale: appSettingsManager.interfaceLocale,
+                                goalName
+                            )
+                        )
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .lineLimit(2)
 
-                        Text("Applying this insight accelerates this target timeline significantly.")
+                        BuxCatalogText.text("Applying this insight accelerates this target timeline significantly.")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                             .lineLimit(3)
@@ -205,7 +210,7 @@ struct InsightDetailView: View {
                             .font(.system(size: 15))
                             .padding(.top, 2)
 
-                        Text(action)
+                        Text(insight.localizedSuggestedAction(action, locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .multilineTextAlignment(.leading)

@@ -17,6 +17,7 @@ struct ExpandableExpenseCard: View {
     @Environment(\.expensesEnhancedTint) private var expensesEnhancedTint
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     private var isExpanded: Bool {
         expandedId == expense.id
@@ -54,7 +55,7 @@ struct ExpandableExpenseCard: View {
                             }
 
                             if expense.isUnassignedWorkspace {
-                                Text("Unassigned")
+                                BuxCatalogText.text("Unassigned")
                                     .font(.system(size: 10, weight: .bold))
                                     .foregroundColor(.orange)
                                     .padding(.horizontal, 6)
@@ -102,7 +103,12 @@ struct ExpandableExpenseCard: View {
                     }
                     if let emotion = expense.emotion, let tag = EmotionalTaggingEngine.tag(for: emotion) {
                         let accent = EmotionalTagAppearance.accent(for: emotion, colorScheme: colorScheme) ?? .pink
-                        insightRow(icon: tag.symbol, title: "Emotion", value: tag.label, color: accent)
+                        insightRow(
+                            icon: tag.symbol,
+                            title: "Emotion",
+                            value: tag.localizedLabel(locale: appSettingsManager.interfaceLocale),
+                            color: accent
+                        )
                     }
                     if let context = expense.context {
                         insightRow(icon: "tag.fill", title: "Context", value: formatEnum(context), color: .purple)
@@ -140,20 +146,24 @@ struct ExpandableExpenseCard: View {
     }
 
     private func insightRow(icon: String, title: String, value: String, color: Color) -> some View {
-        HStack(spacing: 8) {
+        let locale = appSettingsManager.interfaceLocale
+        return HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(color)
-            Text(title)
+            BuxCatalogText.text(title)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(.gray)
             Spacer()
-            Text(value)
+            Text(BuxCatalogLabel.string(value, locale: locale))
                 .font(.system(size: 12, weight: .medium))
         }
     }
 
     private func formatEnum(_ text: String) -> String {
-        text.replacingOccurrences(of: "_", with: " ").capitalized
+        BuxCatalogLabel.string(
+            text.replacingOccurrences(of: "_", with: " ").capitalized,
+            locale: appSettingsManager.interfaceLocale
+        )
     }
 }

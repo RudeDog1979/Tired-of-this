@@ -30,7 +30,7 @@ struct StudioTaxOverviewView: View {
                         taxOverviewContent(snapshot)
                     }
                 }
-                .navigationTitle("Tax Overview")
+                .buxCatalogNavigationTitle("Tax Overview")
                 .navigationBarTitleDisplayMode(.inline)
             }
         }
@@ -79,7 +79,7 @@ struct StudioTaxOverviewView: View {
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             if snapshot.primaryRulesPreview.isEmpty {
-                Text("Open Tax Profile to choose a country preset or enter your rules.")
+                BuxCatalogDynamicText(key: "Open Tax Profile to choose a country preset or enter your rules.")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
             } else {
@@ -105,7 +105,13 @@ struct StudioTaxOverviewView: View {
 
     private func estimatesCard(_ snapshot: TaxSandboxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("INCOME & DEDUCTIONS (\(snapshot.currencyCode))")
+            Text(
+                BuxLocalizedString.format(
+                    "INCOME & DEDUCTIONS (%@)",
+                    locale: appSettingsManager.interfaceLocale,
+                    snapshot.currencyCode
+                )
+            )
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
 
@@ -123,11 +129,25 @@ struct StudioTaxOverviewView: View {
             HStack {
                 metricColumn(title: "EST. TAX", value: snapshot.base.estimatedTaxFormatted, color: .orange)
                 Spacer()
-                metricColumn(title: "EFFECTIVE", value: "\(snapshot.base.effectiveRatePercent)%", color: themeManager.current.accentColor)
+                metricColumn(
+                    title: "EFFECTIVE",
+                    value: BuxLocalizedString.format(
+                        "%lld%%",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int64(snapshot.base.effectiveRatePercent)
+                    ),
+                    color: themeManager.current.accentColor
+                )
             }
 
             HStack {
-                Text("\(snapshot.indirectTaxRegistrationLabel):")
+                Text(
+                    BuxLocalizedString.format(
+                        "%@:",
+                        locale: appSettingsManager.interfaceLocale,
+                        snapshot.indirectTaxRegistrationLabel
+                    )
+                )
                     .font(.system(size: 12))
                     .buxLabelSecondary()
                 Spacer()
@@ -152,7 +172,7 @@ struct StudioTaxOverviewView: View {
 
     private func simulatorSandboxCard(_ snapshot: TaxSandboxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("INTERACTIVE TAX SIMULATOR")
+            BuxCatalogDynamicText(key: "INTERACTIVE TAX SIMULATOR")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
 
@@ -282,7 +302,7 @@ struct StudioCashflowView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("CASH RUNWAY TRAJECTORY")
+                        BuxCatalogDynamicText(key: "CASH RUNWAY TRAJECTORY")
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
 
@@ -290,7 +310,13 @@ struct StudioCashflowView: View {
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(.orange)
 
-                        Text("Estimated runway based on your \(forecast.burnRateFormatted) monthly burn rate.")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Estimated runway based on your %@ monthly burn rate.",
+                                locale: appSettingsManager.interfaceLocale,
+                                forecast.burnRateFormatted
+                            )
+                        )
                             .font(.system(size: 12))
                             .buxLabelSecondary()
                     }
@@ -298,7 +324,7 @@ struct StudioCashflowView: View {
                     .studioThemedCardChrome(cornerRadius: 24)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("SURVIVAL MODE TARGET")
+                        BuxCatalogDynamicText(key: "SURVIVAL MODE TARGET")
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
 
@@ -306,7 +332,7 @@ struct StudioCashflowView: View {
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                             .foregroundColor(themeManager.current.accentColor)
 
-                        Text("Minimum monthly inflow needed to comfortably clear direct costs, tax obligations, and hit standard savings cushions.")
+                        BuxCatalogDynamicText(key: "Minimum monthly inflow needed to comfortably clear direct costs, tax obligations, and hit standard savings cushions.")
                             .font(.system(size: 12))
                             .buxLabelSecondary()
                     }
@@ -318,7 +344,7 @@ struct StudioCashflowView: View {
                 .environment(\.studioEnhancedTint, true)
             }
         }
-        .navigationTitle("Cashflow forecaster")
+        .buxCatalogNavigationTitle("Cashflow forecaster")
     }
 }
 
@@ -341,7 +367,7 @@ struct StudioDeductionsView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("TOTAL ACTIVE WRITE-OFF DEDUCTIONS")
+                        BuxCatalogDynamicText(key: "TOTAL ACTIVE WRITE-OFF DEDUCTIONS")
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
 
@@ -371,12 +397,12 @@ struct StudioDeductionsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .studioThemedCardChrome(cornerRadius: 24)
 
-                    Text("OPTIMIZATION OPPORTUNITIES")
+                    BuxCatalogDynamicText(key: "OPTIMIZATION OPPORTUNITIES")
                         .font(.system(size: 11, weight: .bold))
                         .buxLabelSecondary()
 
                     if snapshot.opportunities.isEmpty {
-                        Text("No deduction opportunities right now.")
+                        BuxCatalogDynamicText(key: "No deduction opportunities right now.")
                             .font(.system(size: 13, weight: .semibold))
                             .buxLabelSecondary()
                             .padding()
@@ -388,7 +414,13 @@ struct StudioDeductionsView: View {
                                         .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     Spacer()
-                                    Text("Save \(opp.savingsFormatted)")
+                                    Text(
+                                        BuxLocalizedString.format(
+                                            "Save %@",
+                                            locale: appSettingsManager.interfaceLocale,
+                                            opp.savingsFormatted
+                                        )
+                                    )
                                         .font(.system(size: 12, weight: .bold))
                                         .foregroundColor(.green)
                                 }
@@ -406,6 +438,6 @@ struct StudioDeductionsView: View {
                 .environment(\.studioEnhancedTint, true)
             }
         }
-        .navigationTitle("Deductions Sandbox")
+        .buxCatalogNavigationTitle("Deductions Sandbox")
     }
 }

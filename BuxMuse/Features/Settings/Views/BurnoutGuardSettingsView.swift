@@ -23,9 +23,9 @@ struct BurnoutGuardSettingsView: View {
             BuxFormSection(title: "Creative Energy widget") {
                 Toggle(isOn: $store.burnoutGuardEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Show on Home dashboard")
+                        BuxCatalogDynamicText(key: "Show on Home dashboard")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Tracks workload, sleep, and stress signals into a Creative Energy score.")
+                        BuxCatalogDynamicText(key: "Tracks workload, sleep, and stress signals into a Creative Energy score.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)
@@ -40,10 +40,16 @@ struct BurnoutGuardSettingsView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
-                                Text("Default sleep hours")
+                                BuxCatalogDynamicText(key: "Default sleep hours")
                                     .font(.system(size: 13, weight: .semibold))
                                 Spacer()
-                                Text(String(format: "%.1f hrs", store.manualSleepHours))
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%.1f hrs",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        store.manualSleepHours
+                                    )
+                                )
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundColor(themeManager.current.accentColor)
                             }
@@ -53,10 +59,16 @@ struct BurnoutGuardSettingsView: View {
 
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
-                                Text("Default stress level")
+                                BuxCatalogDynamicText(key: "Default stress level")
                                     .font(.system(size: 13, weight: .semibold))
                                 Spacer()
-                                Text("\(Int(store.manualStressLevel))/10")
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%lld/10",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        Int64(store.manualStressLevel)
+                                    )
+                                )
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundColor(.orange)
                             }
@@ -72,11 +84,11 @@ struct BurnoutGuardSettingsView: View {
                         Toggle(isOn: healthKitBinding) {
                             VStack(alignment: .leading, spacing: 3) {
                                 HStack(spacing: 6) {
-                                    Text("Sync sleep from HealthKit")
+                                    BuxCatalogDynamicText(key: "Sync sleep from HealthKit")
                                         .font(.system(size: 15, weight: .semibold))
                                     ProFeatureBadge(compact: true)
                                 }
-                                Text("Uses last week's sleep analysis when authorized. Falls back to manual values if unavailable.")
+                                BuxCatalogDynamicText(key: "Uses last week's sleep analysis when authorized. Falls back to manual values if unavailable.")
                                     .font(.system(size: 12, weight: .medium))
                                     .buxLabelSecondary()
                                     .fixedSize(horizontal: false, vertical: true)
@@ -86,7 +98,7 @@ struct BurnoutGuardSettingsView: View {
                         .buxFormFieldPadding()
 
                         if healthKitDenied {
-                            Text("Health access was denied. Enable Sleep in Settings → Health → Data Access, or keep using manual sliders.")
+                            BuxCatalogDynamicText(key: "Health access was denied. Enable Sleep in Settings → Health → Data Access, or keep using manual sliders.")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(.orange)
                                 .buxFormFieldPadding()
@@ -101,11 +113,11 @@ struct BurnoutGuardSettingsView: View {
                                     .foregroundColor(.green)
                                 VStack(alignment: .leading, spacing: 3) {
                                     HStack(spacing: 6) {
-                                        Text("HealthKit sleep sync")
+                                        BuxCatalogDynamicText(key: "HealthKit sleep sync")
                                             .font(.system(size: 15, weight: .bold))
                                         ProFeatureBadge(compact: true)
                                     }
-                                    Text("Upgrade to Pro Studio for automatic sleep scoring from Apple Health.")
+                                    BuxCatalogDynamicText(key: "Upgrade to Pro Studio for automatic sleep scoring from Apple Health.")
                                         .font(.system(size: 12, weight: .medium))
                                         .buxLabelSecondary()
                                         .multilineTextAlignment(.leading)

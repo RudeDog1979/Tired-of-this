@@ -125,6 +125,7 @@ struct SubscriptionHubView: View {
             viewModel.applySnapshot(newSnapshot, settingsManager: appSettingsManager)
         }
         .buxThemedPresentation()
+        .buxInterfaceLocale()
         .ignoresSafeArea(.keyboard)
     }
 
@@ -146,7 +147,13 @@ struct SubscriptionHubView: View {
                         Image(systemName: "waveform.path.ecg")
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.green)
-                        Text("Health: \(viewModel.healthScore)%")
+                        Text(
+                            BuxLocalizedString.format(
+                                "Health: %lld%%",
+                                locale: appSettingsManager.interfaceLocale,
+                                viewModel.healthScore
+                            )
+                        )
                             .font(.system(size: 12, weight: .bold, design: .rounded))
                             .foregroundColor(.green)
                     }
@@ -159,7 +166,7 @@ struct SubscriptionHubView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
 
-                    Text("/month")
+                    BuxCatalogText.text("/month")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
 
@@ -174,12 +181,24 @@ struct SubscriptionHubView: View {
                 if viewModel.totalWeeklyCost.value > 0 || viewModel.totalIrregularCost.value > 0 {
                     HStack(spacing: 12) {
                         if viewModel.totalWeeklyCost.value > 0 {
-                            Text("Weekly subs: \(appSettingsManager.format(viewModel.totalWeeklyCost.value))")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Weekly subs: %@",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    appSettingsManager.format(viewModel.totalWeeklyCost.value)
+                                )
+                            )
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundColor(.gray)
                         }
                         if viewModel.totalIrregularCost.value > 0 {
-                            Text("Irregular: \(appSettingsManager.format(viewModel.totalIrregularCost.value))")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Irregular: %@",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    appSettingsManager.format(viewModel.totalIrregularCost.value)
+                                )
+                            )
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundColor(.gray)
                         }

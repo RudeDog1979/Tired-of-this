@@ -68,6 +68,7 @@ struct MoneyMapCanvasView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var layoutStore = MoneyMapLayoutStore.shared
 
     @State private var mapAppeared = false
@@ -297,7 +298,7 @@ struct MoneyMapCanvasView: View {
     private var mapHeader: some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Your financial landscape")
+                BuxCatalogText.text("Your financial landscape")
                     .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
                 Text(isLandscape ? "Landscape weave · tap territories" : "Tap a territory to explore")
                     .font(.system(size: 11, weight: .medium))
@@ -327,7 +328,13 @@ struct MoneyMapCanvasView: View {
         HStack(spacing: 8) {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
                 .foregroundColor(themeManager.current.accentColor)
-            Text("\(graph.nodes.count) territories · tap to open full map")
+            Text(
+                BuxLocalizedString.format(
+                    "%lld territories · tap to open full map",
+                    locale: appSettingsManager.interfaceLocale,
+                    graph.nodes.count
+                )
+            )
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
         }
@@ -338,7 +345,7 @@ struct MoneyMapCanvasView: View {
         HStack(spacing: 8) {
             Image(systemName: "hand.tap.fill")
                 .foregroundColor(themeManager.current.accentColor)
-            Text("Long-press & drag to weave the web · tap for territory detail")
+            BuxCatalogText.text("Long-press & drag to weave the web · tap for territory detail")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
         }
@@ -502,7 +509,7 @@ struct MoneyMapCanvasView: View {
                 }
             }
             if mode == .full {
-                Text(node.title)
+                Text(node.localizedTitle(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)

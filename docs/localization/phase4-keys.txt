@@ -1,0 +1,134 @@
+%@ Optimization
+%@ Overspend
+%@ increased their price.
+%lld expenses this month have no workspace.
+%lld tagged expenses used credit or store credit this period.
+/month
+A refund from %@ has cleared.
+Active subscriptions
+Add expenses to unlock spending insights.
+Adjust
+All lines
+Applying this insight accelerates this target timeline significantly.
+Barter & Trade
+Barter & Trade Activity
+Billed through Apple App Store (15% markup).
+Breakdown
+Budget impacts if cancelled
+BuxMuse suggested actions
+Buy now, pay later active
+Cancel unused memberships & pause non-essential shopping.
+Cash Drawer
+Cash vs digital split
+Category breakdown
+Charts, lines, insights & actions
+Creative Energy
+Creative fuel left after workload, sleep, and stress spend.
+Credit & BNPL
+Credit-heavy spending
+Current
+Data metrics
+Delete Goal & Discard savings data
+Detected pattern warnings
+Detected progress threats
+Duplicate Charge Found
+Edit Goal
+Enable Studio first
+Enable in Studio → Cash & Barter
+Enable payment tagging in Settings
+Energy
+Excellent job limiting your %@ budget.
+Explanation
+Feature intelligence
+First recorded
+Goal Ahead of Schedule
+Goal Details
+Goal Timeline At Risk
+Goal acceleration effect
+Habit Builders:
+High Stress Alert
+Hours & revision guardrails
+How to cancel
+Insight Deep Dive
+Intelligence insights
+Large, non-recurring expenses registered recently have temporarily impacted liquid savings.
+Late Night Transport Surge
+Log Subscription as Cancelled
+Log non-cash exchanges
+Maintain your standard deposit speed.
+Merchant Price Spike
+Merchant Refund Cleared
+Metric Details
+Money Map
+Monthly Burn Rate
+Netflix premium has cheaper ad-supported tiers.
+Night sleep duration
+No category subscription metrics available.
+No insights yet.
+No pricing or billing risks detected.
+No upcoming renewals scheduled
+Non-cash exchanges logged in BuxMuse.
+Open full Money Map
+Open full territory detail
+Open insight detail
+Overlapping Media Stack
+Overlapping subscriptions detected.
+Payday Spending Surge
+Possible double charge for %@.
+Predicted Budget Overspend
+Price Hike Alert
+Price history
+Projected financial impact
+Rainy Day Savings
+Reach your %@ goal sooner.
+Reduce groceries and restaurants by 10%.
+Save Money
+Savings log
+Savings momentum
+Savings velocity scenarios
+Scope Radar
+Scope budget tight
+Separate gigs or departments
+Smart cancellation opportunities
+Smart savings redirections
+Spending is up this week compared to last month.
+Stable Spending Forecast
+Subjective stress zone
+Subscription Hub
+Subscription burn rate
+Subscription redirection
+Subscription risk analyzer
+Suggested Actions:
+Suggested Alternatives:
+Sunday Spend Drops
+Switch to Sunset Theme
+Synced
+This Quarter
+Timeline risk detected for '%@'.
+Top insights
+Tracked hours
+Trend
+Unassigned workspace spend
+Upcoming renewals
+Weekend Spending Surge
+Weekly Spend Spike
+Workspace spend
+Workspaces
+You are within your safe historical limits.
+You have multiple active video subscriptions.
+You haven't logged in to %@ recently.
+You paid more at %@.
+You spend less during rainy days.
+You spend more on weekends.
+You spent more in the 3 days after payday.
+You spent more on %@ this month.
+You're on track to achieve '%@'.
+You're trending higher than your monthly average.
+Your spending drops sharply on Sundays.
+Your stress index has breached the 0.85 threshold. We suggest enabling Sunset mode to reduce cognitive overload and ocular strain.
+Your subscriptions are fully optimized.
+Your transport spending spikes after 8pm.
+Zombie Subscription
+Zombie subscription: Unused in 60 days.
+battery
+saved

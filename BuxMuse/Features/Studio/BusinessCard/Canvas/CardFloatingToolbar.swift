@@ -284,7 +284,23 @@ struct CardFloatingToolbar: View {
     private func rotateMenu(_ layer: CardCanvasLayer) -> some View {
         glassMenu {
             ForEach([-90, -45, -15, 15, 45, 90], id: \.self) { delta in
-                Button("\(delta > 0 ? "+" : "")\(delta)°") { nudgeRotation(layerID: layer.id, by: Double(delta)) }
+                Button {
+                    nudgeRotation(layerID: layer.id, by: Double(delta))
+                } label: {
+                    Text(
+                        delta > 0
+                            ? BuxLocalizedString.format(
+                                "+%lld°",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                Int64(delta)
+                            )
+                            : BuxLocalizedString.format(
+                                "%lld°",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                Int64(delta)
+                            )
+                    )
+                }
             }
             Divider()
             Button("Reset") { setRotation(layerID: layer.id, degrees: 0) }
@@ -350,12 +366,20 @@ struct CardFloatingToolbar: View {
     private func opacityMenu(layer: CardCanvasLayer) -> some View {
         glassMenu {
             ForEach([1.0, 0.85, 0.7, 0.5, 0.35, 0.2], id: \.self) { value in
-                Button("\(Int(value * 100))%") {
+                Button {
                     guard var l = document.layer(id: layer.id) else { return }
                     l.opacity = value
                     document.updateLayer(l)
                     document.markCustomized()
                     onChange()
+                } label: {
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld%%",
+                            locale: BuxInterfaceLocale.currentInterfaceLocale,
+                            Int64(value * 100)
+                        )
+                    )
                 }
             }
         } label: { toolLabel("Opacity", icon: "circle.lefthalf.filled") }

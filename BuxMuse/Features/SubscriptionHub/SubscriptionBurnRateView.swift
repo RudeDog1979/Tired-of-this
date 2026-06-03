@@ -27,7 +27,7 @@ struct SubscriptionBurnRateView: View {
             VStack(spacing: BuxLayout.section) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Monthly Burn Rate")
+                        BuxCatalogText.text("Monthly Burn Rate")
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(colorScheme == .dark ? .white.opacity(0.6) : Color(red: 100/255, green: 110/255, blue: 130/255))
 
@@ -42,11 +42,17 @@ struct SubscriptionBurnRateView: View {
 
                     if quarterlyIncrease > 0 {
                         VStack(alignment: .trailing, spacing: 4) {
-                            Text("+\(String(format: "%.1f", quarterlyIncrease))%")
+                            Text(
+                                BuxLocalizedString.format(
+                                    "+%.1f%%",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    quarterlyIncrease
+                                )
+                            )
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                 .foregroundColor(.red)
 
-                            Text("This Quarter")
+                            BuxCatalogText.text("This Quarter")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(.gray)
                         }
@@ -102,7 +108,7 @@ struct BurnRateGridItem: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label)
+            BuxCatalogText.text(label)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundColor(.gray)
             Text(value)

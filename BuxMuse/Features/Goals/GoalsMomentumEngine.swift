@@ -10,7 +10,7 @@ import Foundation
 
 public struct GoalMomentumResult {
     public let score: Double // -1.0 to 1.0
-    public let statusDescription: String // "Accelerating", "Slowing Down", "Stalled", "Consistent Momentum"
+    public let statusDescription: String
     public let microActions: [String]
     public let habitActions: [String]
 }
@@ -19,10 +19,10 @@ public final class GoalsMomentumEngine {
 
     public init() {}
 
-    /// Computes momentum and generates customized action cards.
     public func computeMomentum(
         goal: Goal,
-        currencyCode: String = AppSettingsManager.preferredCurrencyCode
+        currencyCode: String = AppSettingsManager.preferredCurrencyCode,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> GoalMomentumResult {
         let contributions = goal.contributions.sorted(by: { $0.date > $1.date })
         let now = Date()
@@ -33,25 +33,26 @@ public final class GoalsMomentumEngine {
             )
         }
 
-        // 1. If no contributions, user is stalled
         guard !contributions.isEmpty else {
             let daysSinceCreated = now.timeIntervalSince(goal.createdAt) / 86400.0
             let score = daysSinceCreated > 14 ? -0.5 : 0.0
+            let status = daysSinceCreated > 14
+                ? BuxLocalizedString.string("Stalled", locale: locale)
+                : BuxLocalizedString.string("Awaiting Kickstart", locale: locale)
             return GoalMomentumResult(
                 score: score,
-                statusDescription: daysSinceCreated > 14 ? "Stalled" : "Awaiting Kickstart",
+                statusDescription: status,
                 microActions: [
-                    "Deposit \(format(10)) today to initialize momentum.",
-                    "Set a calendar reminder for weekly goal updates."
+                    BuxLocalizedString.format("Deposit %@ today to initialize momentum.", locale: locale, format(10)),
+                    BuxLocalizedString.string("Set a calendar reminder for weekly goal updates.", locale: locale),
                 ],
                 habitActions: [
-                    "Form a weekly check-in habit to review cash flow.",
-                    "Match non-essential treats (like coffee) with a goal contribution."
+                    BuxLocalizedString.string("Form a weekly check-in habit to review cash flow.", locale: locale),
+                    BuxLocalizedString.string("Match non-essential treats (like coffee) with a goal contribution.", locale: locale),
                 ]
             )
         }
 
-        // 2. Classify contributions into recent (last 30 days) and previous (30-60 days ago)
         let thirtyDaysAgo = now.addingTimeInterval(-30.0 * 86400.0)
         let sixtyDaysAgo = now.addingTimeInterval(-60.0 * 86400.0)
 
@@ -65,81 +66,77 @@ public final class GoalsMomentumEngine {
         let prevSumDouble = NSDecimalNumber(decimal: prevSum).doubleValue
 
         var score: Double = 0.0
-        var status = "Consistent Momentum"
+        var status = BuxLocalizedString.string("Consistent Momentum", locale: locale)
         var micro: [String] = []
         var habit: [String] = []
 
         if recentSumDouble == 0 && prevSumDouble == 0 {
-            // Stalled for more than 60 days
             score = -0.8
-            status = "Stalled"
+            status = BuxLocalizedString.string("Stalled", locale: locale)
             micro = [
-                "Make a small \(format(5)) micro-contribution to break the dry spell.",
-                "Review your budget to see where cash has been leak-drained."
+                BuxLocalizedString.format("Make a small %@ micro-contribution to break the dry spell.", locale: locale, format(5)),
+                BuxLocalizedString.string("Review your budget to see where cash has been leak-drained.", locale: locale),
             ]
             habit = [
-                "Automate a micro-savings deposit of \(format(1)) per day.",
-                "Link savings goals to positive daily habits."
+                BuxLocalizedString.format("Automate a micro-savings deposit of %@ per day.", locale: locale, format(1)),
+                BuxLocalizedString.string("Link savings goals to positive daily habits.", locale: locale),
             ]
         } else if recentSumDouble > 0 && prevSumDouble == 0 {
-            // User just accelerated or started recently
             score = 0.6
-            status = "Accelerating"
+            status = BuxLocalizedString.string("Accelerating", locale: locale)
             micro = [
-                "Double down! Try to add another \(format(20)) while in this active streak.",
-                "Share your savings milestone with a trusted partner."
+                BuxLocalizedString.format("Double down! Try to add another %@ while in this active streak.", locale: locale, format(20)),
+                BuxLocalizedString.string("Share your savings milestone with a trusted partner.", locale: locale),
             ]
             habit = [
-                "Keep this active momentum high by saving at the beginning of the week.",
-                "Build a 3-week streak of consecutive contributions."
+                BuxLocalizedString.string("Keep this active momentum high by saving at the beginning of the week.", locale: locale),
+                BuxLocalizedString.string("Build a 3-week streak of consecutive contributions.", locale: locale),
             ]
         } else if recentSumDouble == 0 && prevSumDouble > 0 {
-            // Slipped/slowing down
             score = -0.4
-            status = "Slowing Down"
+            status = BuxLocalizedString.string("Slowing Down", locale: locale)
             micro = [
-                "Re-engage today by allocating just \(format(10)) to this goal.",
-                "Audit recent purchases to identify saving leakages."
+                BuxLocalizedString.format("Re-engage today by allocating just %@ to this goal.", locale: locale, format(10)),
+                BuxLocalizedString.string("Audit recent purchases to identify saving leakages.", locale: locale),
             ]
             habit = [
-                "Reschedule savings day to align precisely with your payday.",
-                "Avoid the 'all-or-nothing' mindset: small regular steps outperform large rare steps."
+                BuxLocalizedString.string("Reschedule savings day to align precisely with your payday.", locale: locale),
+                BuxLocalizedString.string("Avoid the 'all-or-nothing' mindset: small regular steps outperform large rare steps.", locale: locale),
             ]
         } else {
-            // Both are positive
             let ratio = recentSumDouble / prevSumDouble
             if ratio > 1.15 {
                 score = min(1.0, 0.5 + (ratio - 1.0))
-                status = "Accelerating"
+                status = BuxLocalizedString.string("Accelerating", locale: locale)
                 micro = [
-                    "Excellent progress! Consider locking in a portion of this month's extra savings.",
-                    "Review if your target date can be pulled forward."
+                    BuxLocalizedString.string("Excellent progress! Consider locking in a portion of this month's extra savings.", locale: locale),
+                    BuxLocalizedString.string("Review if your target date can be pulled forward.", locale: locale),
                 ]
                 habit = [
-                    "Increase your auto-saving amount by 5% to harness your momentum.",
-                    "Reward yourself with a small, free celebration for accelerated pacing."
+                    BuxLocalizedString.string("Increase your auto-saving amount by 5% to harness your momentum.", locale: locale),
+                    BuxLocalizedString.string("Reward yourself with a small, free celebration for accelerated pacing.", locale: locale),
                 ]
             } else if ratio < 0.85 {
                 score = max(-0.6, -0.2 - (1.0 - ratio))
-                status = "Slowing Down"
+                status = BuxLocalizedString.string("Slowing Down", locale: locale)
                 micro = [
-                    "Adjust your milestone targets slightly to feel less pressure.",
-                    "Audit subscriptions to redirect a quick \(format(15)) today."
+                    BuxLocalizedString.string("Adjust your milestone targets slightly to feel less pressure.", locale: locale),
+                    BuxLocalizedString.format("Audit subscriptions to redirect a quick %@ today.", locale: locale, format(15)),
                 ]
                 habit = [
-                    "Try 'zero-spend days' once a week to free up cash.",
-                    "Keep contributions recurring to remove friction."
+                    BuxLocalizedString.string("Try 'zero-spend days' once a week to free up cash.", locale: locale),
+                    BuxLocalizedString.string("Keep contributions recurring to remove friction.", locale: locale),
                 ]
             } else {
                 score = 0.4
-                status = "Consistent Momentum"
+                status = BuxLocalizedString.string("Consistent Momentum", locale: locale)
                 micro = [
-                    "Maintain this excellent, stable velocity with your regular deposit.",
-                    "Confirm your current cash reserves are healthy."
+                    BuxLocalizedString.string("Maintain this excellent, stable velocity with your regular deposit.", locale: locale),
+                    BuxLocalizedString.string("Confirm your current cash reserves are healthy.", locale: locale),
                 ]
                 habit = [
-                    "Establish a permanent auto-contribution so you don't even have to think about it.",
-                    "Maintain the 'pay yourself first' golden rule."
+                    BuxLocalizedString.string("Establish a permanent auto-contribution so you don't even have to think about it.", locale: locale),
+                    BuxLocalizedString.string("Maintain the 'pay yourself first' golden rule.", locale: locale),
                 ]
             }
         }
