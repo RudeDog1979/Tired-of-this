@@ -418,6 +418,14 @@ struct StudioProjectDetailView: View {
         BuxSaveFeedback.success()
     }
 
+    private func rescheduleMilestone(milestoneId: UUID, date: Date, project: StudioProject) {
+        guard var latest = store.project(id: project.id),
+              let index = latest.plannerMilestones.firstIndex(where: { $0.id == milestoneId }) else { return }
+        latest.plannerMilestones[index].dueDate = date
+        latest.plannerMilestones.sort { $0.dueDate < $1.dueDate }
+        store.updateProject(latest)
+    }
+
     private func projectPlannerSnapshot(for project: StudioProject) -> StudioProjectPlannerSnapshot {
         StudioProjectPlannerEngine.snapshot(
             project: project,
@@ -432,8 +440,12 @@ struct StudioProjectDetailView: View {
         if settingsStore.studioMode == .pro {
             StudioProjectPlannerSection(
                 snapshot: projectPlannerSnapshot(for: project),
+                projectMilestones: project.plannerMilestones,
                 customMilestoneCount: project.plannerMilestones.count,
-                onEditMilestones: { showMilestonesEditor = true }
+                onEditMilestones: { showMilestonesEditor = true },
+                onRescheduleMilestone: { milestoneId, date in
+                    rescheduleMilestone(milestoneId: milestoneId, date: date, project: project)
+                }
             )
         }
     }

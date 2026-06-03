@@ -336,17 +336,48 @@ public struct StudioProjectMilestone: Codable, Identifiable, Equatable, Sendable
     public var title: String
     public var dueDate: Date
     public var isCompleted: Bool
+    public var notes: String
+    /// Earlier milestone that must complete before this one (optional).
+    public var dependsOnMilestoneId: UUID?
 
     public init(
         id: UUID = UUID(),
         title: String,
         dueDate: Date,
-        isCompleted: Bool = false
+        isCompleted: Bool = false,
+        notes: String = "",
+        dependsOnMilestoneId: UUID? = nil
     ) {
         self.id = id
         self.title = title
         self.dueDate = dueDate
         self.isCompleted = isCompleted
+        self.notes = notes
+        self.dependsOnMilestoneId = dependsOnMilestoneId
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, dueDate, isCompleted, notes, dependsOnMilestoneId
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        dueDate = try c.decode(Date.self, forKey: .dueDate)
+        isCompleted = try c.decodeIfPresent(Bool.self, forKey: .isCompleted) ?? false
+        notes = try c.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        dependsOnMilestoneId = try c.decodeIfPresent(UUID.self, forKey: .dependsOnMilestoneId)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(title, forKey: .title)
+        try c.encode(dueDate, forKey: .dueDate)
+        try c.encode(isCompleted, forKey: .isCompleted)
+        try c.encode(notes, forKey: .notes)
+        try c.encodeIfPresent(dependsOnMilestoneId, forKey: .dependsOnMilestoneId)
     }
 }
 

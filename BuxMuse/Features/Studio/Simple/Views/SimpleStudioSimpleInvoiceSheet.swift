@@ -285,19 +285,12 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                 linkedEntryId: linkedJobId
             )
             store.addInvoice(invoice)
-            if let jobId = linkedJobId {
-                StudioSyncCoordinator.linkSimpleInvoiceToJob(
-                    invoiceId: invoice.id,
-                    jobEntryId: jobId,
-                    store: store
-                )
-                if let job = store.entry(id: jobId),
-                   let agreement = StudioWorkDealHelpers.agreement(forJob: job, studioStore: studioStore) {
-                    var draft = agreement
-                    draft.linkedInvoiceId = invoice.id
-                    studioStore.upsertAgreementDraft(draft, simpleStore: store)
-                }
-            }
+            StudioSimpleJobInvoiceSync.afterInvoiceCreated(
+                invoice,
+                jobEntryId: linkedJobId,
+                store: store,
+                studioStore: studioStore
+            )
             BuxSaveFeedback.success()
         }
 

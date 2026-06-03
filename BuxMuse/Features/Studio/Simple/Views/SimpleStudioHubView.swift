@@ -40,6 +40,13 @@ struct SimpleStudioHubView: View {
 
     private var display: SimpleStudioHubDisplay { simpleStudioBrain.hubDisplay }
 
+    private var simpleInsights: SimpleStudioInsightsSnapshot {
+        SimpleStudioInsightsEngine.build(
+            entries: simpleStudioStore.entries,
+            currencyFormat: { appSettingsManager.format($0) }
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
@@ -67,6 +74,10 @@ struct SimpleStudioHubView: View {
                         .buxScreenEntrance(index: 1, isVisible: hubAppeared)
 
                         SimpleStudioHeroCard(display: display)
+                            .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+
+                        SimpleStudioInsightsHubSection(snapshot: simpleInsights)
+                            .padding(.horizontal, BuxTokens.marginRegular)
                             .buxScreenEntrance(index: 2, isVisible: hubAppeared)
 
                         SimpleStudioInvoiceSuggestionsSection(

@@ -140,6 +140,21 @@ public enum StudioProjectPlannerEngine {
             health -= 12
         }
 
+        for milestone in project.plannerMilestones where !milestone.isCompleted {
+            if let depId = milestone.dependsOnMilestoneId,
+               let parent = project.plannerMilestones.first(where: { $0.id == depId }),
+               !parent.isCompleted,
+               milestone.dueDate < parent.dueDate {
+                alerts.append(.init(
+                    id: "dep-\(milestone.id.uuidString)",
+                    title: "Dependency order",
+                    detail: "\"\(milestone.title)\" is scheduled before \"\(parent.title)\" completes.",
+                    severity: .warning
+                ))
+                health -= 5
+            }
+        }
+
         if let agreement, agreement.hasClientApprovalProof {
             health += 6
         } else if agreement != nil {

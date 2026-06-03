@@ -77,14 +77,17 @@ struct StudioProjectMilestonesEditorSheet: View {
             }
             .onAppear { reloadFromStore() }
             .sheet(isPresented: $showAddSheet) {
-                StudioProjectMilestoneFormSheet(milestone: nil) { newMilestone in
+                StudioProjectMilestoneFormSheet(milestone: nil, siblingMilestones: milestones) { newMilestone in
                     milestones.append(newMilestone)
                     milestones.sort { $0.dueDate < $1.dueDate }
                 }
                 .environmentObject(themeManager)
             }
             .sheet(item: $editingMilestone) { item in
-                StudioProjectMilestoneFormSheet(milestone: item) { updated in
+                StudioProjectMilestoneFormSheet(
+                    milestone: item,
+                    siblingMilestones: milestones.filter { $0.id != item.id }
+                ) { updated in
                     if let index = milestones.firstIndex(where: { $0.id == updated.id }) {
                         milestones[index] = updated
                         milestones.sort { $0.dueDate < $1.dueDate }
@@ -114,6 +117,18 @@ struct StudioProjectMilestonesEditorSheet: View {
                 Text(milestone.wrappedValue.dueDate.formatted(date: .abbreviated, time: .omitted))
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
+                if let dep = milestone.wrappedValue.dependsOnMilestoneId,
+                   let parent = milestones.first(where: { $0.id == dep }) {
+                    Text("After: \(parent.title)")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.orange)
+                }
+                if !milestone.wrappedValue.notes.isEmpty {
+                    Text(milestone.wrappedValue.notes)
+                        .font(.system(size: 10, weight: .medium))
+                        .buxLabelSecondary()
+                        .lineLimit(2)
+                }
             }
             Spacer()
             Button {
@@ -151,11 +166,14 @@ private struct StudioProjectMilestoneFormSheet: View {
     @EnvironmentObject private var themeManager: ThemeManager
 
     let milestone: StudioProjectMilestone?
+    let siblingMilestones: [StudioProjectMilestone]
     let onSave: (StudioProjectMilestone) -> Void
 
     @State private var title = ""
     @State private var dueDate = Date()
     @State private var isCompleted = false
+    @State private var notes = ""
+    @State private var dependsOnId: UUID?
 
     var body: some View {
         NavigationStack {
@@ -171,6 +189,21 @@ private struct StudioProjectMilestoneFormSheet: View {
                     Toggle("Completed", isOn: $isCompleted)
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    TextField("Notes (optional)", text: $notes, axis: .vertical)
+                        .lineLimit(2...4)
+                        .buxFormFieldPadding()
+                    if !siblingMilestones.isEmpty {
+                        BuxFormRowDivider()
+                        Picker("Depends on", selection: $dependsOnId) {
+                            Text("None").tag(UUID?.none)
+                            ForEach(siblingMilestones.sorted(by: { $0.dueDate < $1.dueDate })) { s in
+                                Text(s.title).tag(Optional(s.id))
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .buxFormFieldPadding()
+                    }
                 }
             }
             .navigationTitle(milestone == nil ? "New milestone" : "Edit milestone")
@@ -185,7 +218,9 @@ private struct StudioProjectMilestoneFormSheet: View {
                             id: milestone?.id ?? UUID(),
                             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                             dueDate: dueDate,
-                            isCompleted: isCompleted
+                            isCompleted: isCompleted,
+                            notes: notes,
+                            dependsOnMilestoneId: dependsOnId
                         )
                         onSave(item)
                         dismiss()
@@ -197,6 +232,8 @@ private struct StudioProjectMilestoneFormSheet: View {
                     title = milestone.title
                     dueDate = milestone.dueDate
                     isCompleted = milestone.isCompleted
+                    notes = milestone.notes
+                    dependsOnId = milestone.dependsOnMilestoneId
                 }
             }
             .buxStudioSheetContent()
@@ -258,14 +295,17 @@ struct StudioProjectMilestonesDraftEditorSheet: View {
                 }
             }
             .sheet(isPresented: $showAddSheet) {
-                StudioProjectMilestoneFormSheet(milestone: nil) { newMilestone in
+                StudioProjectMilestoneFormSheet(milestone: nil, siblingMilestones: milestones) { newMilestone in
                     milestones.append(newMilestone)
                     milestones.sort { $0.dueDate < $1.dueDate }
                 }
                 .environmentObject(themeManager)
             }
             .sheet(item: $editingMilestone) { item in
-                StudioProjectMilestoneFormSheet(milestone: item) { updated in
+                StudioProjectMilestoneFormSheet(
+                    milestone: item,
+                    siblingMilestones: milestones.filter { $0.id != item.id }
+                ) { updated in
                     if let index = milestones.firstIndex(where: { $0.id == updated.id }) {
                         milestones[index] = updated
                         milestones.sort { $0.dueDate < $1.dueDate }

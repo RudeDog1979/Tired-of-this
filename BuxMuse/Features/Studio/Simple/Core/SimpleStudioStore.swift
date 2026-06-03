@@ -106,7 +106,24 @@ public final class SimpleStudioStore: ObservableObject {
         entries[idx] = entry
         upsertCustomer(from: entry)
         refreshCustomerStats(for: entry.customerName)
-        StudioSyncCoordinator.syncLinkedSimpleInvoiceFromJob(job: entry, store: self)
+        save()
+        if entry.kind == .job {
+            StudioSimpleJobInvoiceSync.afterJobUpdated(entry, store: self, studioStore: .shared)
+        }
+    }
+
+    /// Internal replace without triggering job↔invoice sync loops.
+    func replaceEntry(_ entry: SimpleStudioEntry) {
+        guard let idx = entries.firstIndex(where: { $0.id == entry.id }) else { return }
+        entries[idx] = entry
+        upsertCustomer(from: entry)
+        refreshCustomerStats(for: entry.customerName)
+        save()
+    }
+
+    func replaceInvoice(_ invoice: SimpleInvoice) {
+        guard let idx = invoices.firstIndex(where: { $0.id == invoice.id }) else { return }
+        invoices[idx] = invoice
         save()
     }
 
@@ -126,6 +143,9 @@ public final class SimpleStudioStore: ObservableObject {
         entries[idx].paymentStatus = .paid
         refreshCustomerStats(for: entries[idx].customerName)
         save()
+        if entries[idx].kind == .job {
+            StudioSimpleJobInvoiceSync.afterJobMarkedPaid(jobId: id, store: self)
+        }
     }
 
     public func markEntryUnpaid(id: UUID) {
@@ -243,16 +263,15 @@ public final class SimpleStudioStore: ObservableObject {
         guard let idx = invoices.firstIndex(where: { $0.id == invoice.id }) else { return }
         invoices[idx] = invoice
         save()
+        StudioSimpleJobInvoiceSync.afterInvoiceUpdated(invoice, store: self, studioStore: .shared)
     }
 
     public func markInvoicePaid(id: UUID) {
         guard let idx = invoices.firstIndex(where: { $0.id == id }) else { return }
         invoices[idx].status = .paid
         invoices[idx].paidAt = Date()
-        if let entryIdx = entries.firstIndex(where: { $0.linkedInvoiceId == id }) {
-            entries[entryIdx].paymentStatus = .paid
-        }
         save()
+        StudioSimpleJobInvoiceSync.afterInvoiceMarkedPaid(invoiceId: id, store: self)
         StudioSyncCoordinator.markSimpleInvoicePaidCascade(invoiceId: id, store: self)
     }
 

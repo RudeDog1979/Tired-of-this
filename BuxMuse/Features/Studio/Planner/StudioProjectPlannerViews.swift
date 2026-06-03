@@ -11,8 +11,12 @@ struct StudioProjectPlannerSection: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let snapshot: StudioProjectPlannerSnapshot
+    var projectMilestones: [StudioProjectMilestone] = []
     var customMilestoneCount: Int = 0
     var onEditMilestones: (() -> Void)? = nil
+    var onRescheduleMilestone: ((UUID, Date) -> Void)? = nil
+
+    @State private var dragMilestoneId: UUID?
 
     private var accent: Color { themeManager.current.accentColor }
 
@@ -125,9 +129,36 @@ struct StudioProjectPlannerSection: View {
                         .fill(accent)
                         .frame(width: 2, height: 22)
                         .offset(x: width * CGFloat(snapshot.nowProgress) - 1)
+
+                    if onRescheduleMilestone != nil {
+                        ForEach(projectMilestones) { milestone in
+                            let progress = milestone.dueDate.timeIntervalSince(snapshot.timelineStart) / span
+                            let xPos = width * CGFloat(min(1, max(0, progress)))
+                            Circle()
+                                .fill(milestone.isCompleted ? Color.green : accent)
+                                .frame(width: 12, height: 12)
+                                .offset(x: xPos - 6, y: 1)
+                                .gesture(
+                                    DragGesture(minimumDistance: 4)
+                                        .onChanged { value in
+                                            dragMilestoneId = milestone.id
+                                            let fraction = min(1, max(0, Double(value.location.x / width)))
+                                            let date = snapshot.timelineStart.addingTimeInterval(span * fraction)
+                                            onRescheduleMilestone?(milestone.id, date)
+                                        }
+                                        .onEnded { _ in dragMilestoneId = nil }
+                                )
+                        }
+                    }
                 }
             }
-            .frame(height: 22)
+            .frame(height: 28)
+
+            if onRescheduleMilestone != nil, !projectMilestones.isEmpty {
+                Text("Drag a dot on the timeline to reschedule a milestone.")
+                    .font(.system(size: 10, weight: .medium))
+                    .buxLabelSecondary()
+            }
 
             HStack {
                 Text(shortDate(snapshot.timelineStart))
@@ -158,13 +189,22 @@ struct StudioProjectPlannerSection: View {
             Text("Milestones")
                 .font(.system(size: 12, weight: .bold))
                 .buxLabelSecondary()
-            ForEach(snapshot.milestones.prefix(5)) { milestone in
+            ForEach(snapshot.milestones.prefix(8)) { milestone in
                 HStack(spacing: 8) {
                     Image(systemName: milestone.isPast ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 12))
                         .foregroundColor(milestone.isPast ? .green : .secondary)
-                    Text(milestone.title)
-                        .font(.system(size: 12, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(milestone.title)
+                            .font(.system(size: 12, weight: .semibold))
+                        if let stored = projectMilestones.first(where: { $0.id == milestone.id }),
+                           let dep = stored.dependsOnMilestoneId,
+                           let parent = projectMilestones.first(where: { $0.id == dep }) {
+                            Text("After \(parent.title)")
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundColor(.orange)
+                        }
+                    }
                     Spacer()
                     Text(shortDate(milestone.date))
                         .font(.system(size: 10, weight: .medium))
