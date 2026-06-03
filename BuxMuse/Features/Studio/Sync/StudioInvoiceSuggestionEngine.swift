@@ -87,6 +87,34 @@ public struct SimpleInvoiceSuggestion: Identifiable, Equatable, Hashable, Sendab
     }
 }
 
+/// Row in the invoice composer “bill from project” picker for a client.
+public struct ClientProjectInvoicePick: Identifiable, Equatable, Sendable {
+    public let id: UUID
+    public let projectId: UUID
+    public let projectName: String
+    public let statusLabel: String
+    public let subtitle: String
+    public let amount: Decimal
+    public let lineItems: [StudioInvoiceLineItem]
+
+    public init(
+        projectId: UUID,
+        projectName: String,
+        statusLabel: String,
+        subtitle: String,
+        amount: Decimal,
+        lineItems: [StudioInvoiceLineItem]
+    ) {
+        self.id = projectId
+        self.projectId = projectId
+        self.projectName = projectName
+        self.statusLabel = statusLabel
+        self.subtitle = subtitle
+        self.amount = amount
+        self.lineItems = lineItems
+    }
+}
+
 enum StudioInvoiceSuggestionEngine {
 
     // MARK: - Pro
@@ -94,6 +122,82 @@ enum StudioInvoiceSuggestionEngine {
     static func proSuggestions(store: StudioStore) -> [StudioInvoiceSuggestion] {
         store.projects.compactMap { projectSuggestion(project: $0, store: store) }
             .sorted { $0.amount > $1.amount }
+    }
+
+    /// Completed projects for this client — used when picking a job to populate a manual invoice.
+    static func completedProjectPicks(
+        for clientId: UUID,
+        store: StudioStore
+    ) -> [ClientProjectInvoicePick] {
+        store.projects
+            .filter { $0.clientId == clientId && $0.resolvedStatus == .completed }
+            .sorted { ($0.endDate ?? $0.startDate) > ($1.endDate ?? $0.startDate) }
+            .compactMap { project in
+                guard let draft = invoiceDraft(for: project, store: store)
+                    ?? fallbackCompletedProjectDraft(project: project, store: store) else {
+                    return nil
+                }
+                return ClientProjectInvoicePick(
+                    projectId: project.id,
+                    projectName: project.name,
+                    statusLabel: project.resolvedStatus.rawValue,
+                    subtitle: draft.subtitle,
+                    amount: draft.amount,
+                    lineItems: draft.lineItems
+                )
+            }
+    }
+
+    static func invoiceDraft(
+        for project: StudioProject,
+        store: StudioStore
+    ) -> StudioInvoiceSuggestion? {
+        projectSuggestion(project: project, store: store)
+    }
+
+    private static func fallbackCompletedProjectDraft(
+        project: StudioProject,
+        store: StudioStore
+    ) -> StudioInvoiceSuggestion? {
+        guard project.resolvedStatus == .completed else { return nil }
+
+        var lineItems: [StudioInvoiceLineItem] = []
+        if let fixed = project.fixedFee, fixed > 0 {
+            lineItems.append(
+                StudioInvoiceLineItem(
+                    description: "Project — \(project.name)",
+                    quantity: 1,
+                    unitPrice: fixed,
+                    category: "Fixed"
+                )
+            )
+        } else {
+            let analysis = StudioProjectEngine.analyzeProject(project: project, receipts: store.receipts)
+            if let rate = project.hourlyRate, rate > 0, analysis.billableTime > 0 {
+                let hours = analysis.billableTime / 3600.0
+                lineItems.append(
+                    StudioInvoiceLineItem(
+                        description: "Billable time — \(project.name)",
+                        quantity: hours,
+                        unitPrice: rate,
+                        category: "Time"
+                    )
+                )
+            }
+        }
+
+        guard !lineItems.isEmpty else { return nil }
+
+        let amount = lineItems.reduce(Decimal(0)) { $0 + Decimal($1.quantity) * $1.unitPrice }
+        return StudioInvoiceSuggestion(
+            title: project.name,
+            subtitle: "Completed project",
+            amount: amount,
+            lineItems: lineItems,
+            clientId: project.clientId,
+            projectId: project.id,
+            reasons: [.jobBalanceDue]
+        )
     }
 
     private static func projectSuggestion(

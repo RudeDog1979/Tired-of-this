@@ -35,6 +35,7 @@ struct InvoiceDesignerHubView: View {
     @ObservedObject var engine: InvoiceDesignerEngine
 
     @Binding var selectedClientId: UUID
+    @Binding var linkedProjectId: UUID?
     @Binding var invoiceNumber: String
     @Binding var issueDate: Date
     @Binding var dueDate: Date
@@ -77,7 +78,15 @@ struct InvoiceDesignerHubView: View {
             total: engine.totalsDisplay.grandTotal,
             vatRate: engine.taxConfig.rates.first?.percentage,
             taxLabel: engine.taxConfig.localizedLabel,
-            notes: notes
+            notes: notes,
+            projectId: linkedProjectId
+        )
+    }
+
+    private var completedProjectsForClient: [ClientProjectInvoicePick] {
+        StudioInvoiceSuggestionEngine.completedProjectPicks(
+            for: selectedClientId,
+            store: store
         )
     }
 
@@ -241,6 +250,50 @@ struct InvoiceDesignerHubView: View {
 
     // MARK: Invoice Controls (client, items, metadata)
 
+    @ViewBuilder
+    private var billFromProjectSection: some View {
+        designerSection("Bill from completed work") {
+            if completedProjectsForClient.isEmpty {
+                Text("No completed projects for this client. Finish a project in Studio → Projects, or add line items below.")
+                    .font(.system(size: 11, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Picker("Completed project", selection: $linkedProjectId) {
+                    Text("None — add lines manually").tag(nil as UUID?)
+                    ForEach(completedProjectsForClient) { pick in
+                        Text("\(pick.projectName) · \(formatCurrency(pick.amount))")
+                            .tag(Optional.some(pick.projectId))
+                    }
+                }
+                .pickerStyle(.menu)
+
+                if let pick = completedProjectsForClient.first(where: { $0.projectId == linkedProjectId }) {
+                    Text(pick.subtitle)
+                        .font(.system(size: 11, weight: .medium))
+                        .buxLabelSecondary()
+                }
+
+                Text("Choosing a project fills line items and links this invoice to that job.")
+                    .font(.system(size: 10, weight: .medium))
+                    .buxLabelSecondary()
+            }
+        }
+        .onChange(of: linkedProjectId) { _, newId in
+            applyProjectPick(projectId: newId)
+        }
+    }
+
+    private func applyProjectPick(projectId: UUID?) {
+        guard let projectId,
+              let pick = completedProjectsForClient.first(where: { $0.projectId == projectId }) else {
+            return
+        }
+        lineItems = pick.lineItems
+        notes = "Invoice for \(pick.projectName) — \(pick.subtitle)"
+        engine.updateLineItems(lineItems)
+    }
+
     private var invoiceControls: some View {
         VStack(alignment: .leading, spacing: 20) {
             designerSection("Client") {
@@ -260,7 +313,14 @@ struct InvoiceDesignerHubView: View {
                         }
                     }
                     .pickerStyle(.menu)
+                    .onChange(of: selectedClientId) { _, _ in
+                        linkedProjectId = nil
+                    }
                 }
+            }
+
+            if !store.clients.isEmpty {
+                billFromProjectSection
             }
 
             designerSection("Invoice Details") {

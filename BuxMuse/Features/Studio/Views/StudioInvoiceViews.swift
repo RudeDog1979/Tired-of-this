@@ -266,6 +266,7 @@ struct StudioInvoiceEditorView: View {
         InvoiceDesignerHubView(
             engine: designerEngine,
             selectedClientId: $selectedClientId,
+            linkedProjectId: $linkedProjectId,
             invoiceNumber: $invoiceNumber,
             issueDate: $issueDate,
             dueDate: $dueDate,
@@ -324,6 +325,7 @@ struct StudioInvoiceEditorView: View {
         if notes.isEmpty {
             notes = "Suggested: \(prefill.subtitle)"
         }
+        designerEngine.updateLineItems(lineItems)
     }
 
     private func saveInvoice() {
