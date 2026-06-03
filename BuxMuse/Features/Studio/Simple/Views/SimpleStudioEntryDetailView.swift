@@ -192,7 +192,7 @@ struct SimpleStudioEntryDetailView: View {
 
     private func jobInvoiceSuggestion(for entry: SimpleStudioEntry) -> SimpleInvoiceSuggestion? {
         guard entry.kind == .job else { return nil }
-        return StudioInvoiceSuggestionEngine.simpleSuggestions(store: store)
+        return StudioInvoiceSuggestionEngine.simpleSuggestions(store: store, studioStore: studioStore)
             .first { $0.jobId == entry.id }
     }
 

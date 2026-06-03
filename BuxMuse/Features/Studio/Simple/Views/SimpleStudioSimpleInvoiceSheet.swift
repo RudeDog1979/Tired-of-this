@@ -103,7 +103,8 @@ struct SimpleStudioSimpleInvoiceSheet: View {
     private var jobPicks: [SimpleJobInvoicePick] {
         StudioInvoiceSuggestionEngine.billableJobPicks(
             forCustomerName: customerName,
-            store: store
+            store: store,
+            studioStore: studioStore
         )
     }
 

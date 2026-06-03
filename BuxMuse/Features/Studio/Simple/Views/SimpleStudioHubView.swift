@@ -70,7 +70,10 @@ struct SimpleStudioHubView: View {
                             .buxScreenEntrance(index: 2, isVisible: hubAppeared)
 
                         SimpleStudioInvoiceSuggestionsSection(
-                            suggestions: StudioInvoiceSuggestionEngine.simpleSuggestions(store: simpleStudioStore)
+                            suggestions: StudioInvoiceSuggestionEngine.simpleSuggestions(
+                                store: simpleStudioStore,
+                                studioStore: studioStore
+                            )
                         ) { suggestion in
                             invoicePrefill = suggestion
                         }
