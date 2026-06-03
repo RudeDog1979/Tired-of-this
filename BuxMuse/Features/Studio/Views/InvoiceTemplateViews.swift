@@ -105,6 +105,26 @@ private struct InvoiceBrandMotifOverlay: View {
     let config: InvoiceTemplateConfig
 
     var body: some View {
+        ZStack {
+            if config.useCardHeaderPhoto,
+               let path = config.headerPhotoPath,
+               let image = SimpleStudioScanImageStore.load(path: path) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .opacity(0.42)
+                    .clipped()
+            }
+            if let stamps = config.headerStamps, !stamps.isEmpty {
+                InvoiceBrandHeaderStampsOverlay(stamps: stamps)
+            } else {
+                templateMotifLayer
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var templateMotifLayer: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
@@ -778,7 +798,7 @@ public struct MinimalistInvoiceTemplateView: View {
                 Spacer().frame(height: 44)
 
                 ZStack(alignment: .topLeading) {
-                    if context.templateConfig.headerMotif != .none {
+                    if context.templateConfig.showsHeaderDecoration {
                         InvoiceBrandMotifOverlay(config: context.templateConfig)
                             .frame(height: 72)
                     }
@@ -809,7 +829,7 @@ public struct MinimalistInvoiceTemplateView: View {
                     }
                     .padding(.horizontal, A4.margin)
                 }
-                .frame(height: context.templateConfig.headerMotif == .none ? nil : 72, alignment: .bottom)
+                .frame(height: context.templateConfig.showsHeaderDecoration ? 72 : nil, alignment: .bottom)
 
                 Spacer().frame(height: 20)
                 thinRule

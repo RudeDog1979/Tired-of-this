@@ -213,6 +213,15 @@ public struct InvoiceTemplateConfig: Codable, Equatable {
     public var borderStyle: InvoiceBrandBorderStyle
     /// Raw `ProBusinessCardTemplate` id when synced from a card.
     public var sourceCardTemplate: String?
+    /// Decorative shapes exported from the primary card canvas (overrides motif when non-empty).
+    public var headerStamps: [BrandShapeStamp]?
+    /// Optional card background photo path for invoice header band.
+    public var headerPhotoPath: String?
+    public var useCardHeaderPhoto: Bool
+
+    public var showsHeaderDecoration: Bool {
+        headerMotif != .none || !(headerStamps?.isEmpty ?? true) || useCardHeaderPhoto
+    }
 
     public var primaryColor: Color   { Color(hex: primaryColorHex) }
     public var secondaryColor: Color { Color(hex: secondaryColorHex) }
@@ -230,7 +239,10 @@ public struct InvoiceTemplateConfig: Codable, Equatable {
         backgroundStyle: .solid,
         headerMotif: .none,
         borderStyle: .none,
-        sourceCardTemplate: nil
+        sourceCardTemplate: nil,
+        headerStamps: nil,
+        headerPhotoPath: nil,
+        useCardHeaderPhoto: false
     )
 
     public init(
@@ -245,7 +257,10 @@ public struct InvoiceTemplateConfig: Codable, Equatable {
         backgroundStyle: InvoiceBrandBackgroundStyle = .solid,
         headerMotif: InvoiceBrandMotif = .none,
         borderStyle: InvoiceBrandBorderStyle = .none,
-        sourceCardTemplate: String? = nil
+        sourceCardTemplate: String? = nil,
+        headerStamps: [BrandShapeStamp]? = nil,
+        headerPhotoPath: String? = nil,
+        useCardHeaderPhoto: Bool = false
     ) {
         self.style = style
         self.primaryColorHex = primaryColorHex
@@ -259,12 +274,16 @@ public struct InvoiceTemplateConfig: Codable, Equatable {
         self.headerMotif = headerMotif
         self.borderStyle = borderStyle
         self.sourceCardTemplate = sourceCardTemplate
+        self.headerStamps = headerStamps
+        self.headerPhotoPath = headerPhotoPath
+        self.useCardHeaderPhoto = useCardHeaderPhoto
     }
 
     private enum CodingKeys: String, CodingKey {
         case style, primaryColorHex, secondaryColorHex, backgroundColorHex
         case typography, cornerStyle, density, logoPosition
         case backgroundStyle, headerMotif, borderStyle, sourceCardTemplate
+        case headerStamps, headerPhotoPath, useCardHeaderPhoto
     }
 
     public init(from decoder: Decoder) throws {
@@ -281,6 +300,9 @@ public struct InvoiceTemplateConfig: Codable, Equatable {
         headerMotif = try c.decodeIfPresent(InvoiceBrandMotif.self, forKey: .headerMotif) ?? .none
         borderStyle = try c.decodeIfPresent(InvoiceBrandBorderStyle.self, forKey: .borderStyle) ?? .none
         sourceCardTemplate = try c.decodeIfPresent(String.self, forKey: .sourceCardTemplate)
+        headerStamps = try c.decodeIfPresent([BrandShapeStamp].self, forKey: .headerStamps)
+        headerPhotoPath = try c.decodeIfPresent(String.self, forKey: .headerPhotoPath)
+        useCardHeaderPhoto = try c.decodeIfPresent(Bool.self, forKey: .useCardHeaderPhoto) ?? false
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -297,6 +319,9 @@ public struct InvoiceTemplateConfig: Codable, Equatable {
         try c.encode(headerMotif, forKey: .headerMotif)
         try c.encode(borderStyle, forKey: .borderStyle)
         try c.encodeIfPresent(sourceCardTemplate, forKey: .sourceCardTemplate)
+        try c.encodeIfPresent(headerStamps, forKey: .headerStamps)
+        try c.encodeIfPresent(headerPhotoPath, forKey: .headerPhotoPath)
+        try c.encode(useCardHeaderPhoto, forKey: .useCardHeaderPhoto)
     }
 }
 

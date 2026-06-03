@@ -36,6 +36,10 @@ struct CardProCanvasView: View {
     @State private var lastWorkspacePan: CGSize = .zero
     @State private var lastWorkspaceScale: CGFloat = 1
     @State private var showShapePicker = false
+    @State private var pinchOriginScale: Double?
+    @State private var rotateOriginDegrees: Double?
+    @State private var backgroundPhotoFlow: BuxBackgroundPhotoFlow?
+    @State private var didCaptureInitialCanvasUndo = false
     @ObservedObject private var settings = SettingsStore.shared
 
     private var controlTint: Color {
@@ -78,6 +82,8 @@ struct CardProCanvasView: View {
                 )
             },
             onOpenBackgroundEditor: { showBackgroundEditor = true },
+            onPickBackgroundPhoto: { startBackgroundPhotoPick() },
+            onAdjustBackgroundPhoto: { openBackgroundPhotoAdjust() },
             onLayerDuplicated: { selectedID = $0 },
             onLayerDeleted: { selectedID = nil }
         )
@@ -88,7 +94,7 @@ struct CardProCanvasView: View {
             let landscape = geo.size.width > geo.size.height
 
             ZStack {
-                BuxLandingTintBackground()
+                themeManager.screenBackground(for: colorScheme)
                     .ignoresSafeArea()
 
                 if landscape {
@@ -106,7 +112,10 @@ struct CardProCanvasView: View {
         .onAppear {
             design.ensureCanvasDocument()
             CardCanvasSync.syncLogoFromStudio(to: &design, logoData: logoData)
-            if let doc = design.canvasDocument { undoManager.snapshot(doc) }
+            if !didCaptureInitialCanvasUndo, let doc = design.canvasDocument {
+                undoManager.snapshot(doc)
+                didCaptureInitialCanvasUndo = true
+            }
             showSafeZone = design.editorPreferences?.showSafeZone ?? true
             showSnapGuides = design.editorPreferences?.showSnapGuides ?? true
         }
@@ -126,17 +135,15 @@ struct CardProCanvasView: View {
             NavigationStack {
                 CardBackgroundEditor(
                     background: backgroundBinding,
-                    onPickPhoto: { onPickBackgroundPhoto?() },
-                    onOpenFocal: {
+                    brandPalette: design.palette,
+                    cardAspect: design.aspect,
+                    onPickPhoto: { startBackgroundPhotoPick() },
+                    onPhotoPicked: { image in
+                        presentBackgroundPhotoEditor(image: image, closingBackgroundSheet: true)
+                    },
+                    onAdjustPhoto: {
                         showBackgroundEditor = false
-                        guard let img = SimpleStudioScanImageStore.load(path: design.canvasDocument?.background.photoPath) else { return }
-                        focalTarget = .background
-                        focalSession = BuxFocalSession(
-                            target: .background,
-                            image: img,
-                            title: "Bux Background Focal",
-                            cropIsCircle: false
-                        )
+                        openBackgroundPhotoAdjust()
                     },
                     onChange: { snapshotForUndo() }
                 )
@@ -159,12 +166,34 @@ struct CardProCanvasView: View {
                 title: session.title,
                 image: session.image,
                 transform: focalTransformBinding,
-                cropIsCircle: session.cropIsCircle
+                cropIsCircle: session.cropIsCircle,
+                viewportSize: session.viewportSize,
+                viewportCornerRadius: session.viewportCornerRadius
             ) {
                 snapshotForUndo()
             }
             .environmentObject(themeManager)
             .onAppear { focalTarget = session.target }
+        }
+        .fullScreenCover(item: $backgroundPhotoFlow) { flow in
+            BuxCardBackgroundPhotoEditorView(
+                initialAspect: design.aspect,
+                image: flow.image,
+                initialBackground: design.canvasDocument?.background ?? CardBackgroundSpec(
+                    solidHex: design.palette.backgroundHex,
+                    accentHex: design.palette.accentHex
+                ),
+                paperColorHex: design.canvasDocument?.background.solidHex ?? design.palette.backgroundHex,
+                onCommitAspect: { newAspect in
+                    applyCardAspectFromPhotoEditor(newAspect)
+                },
+                onApply: { spec in
+                    applyBackgroundFromPhotoEditor(spec)
+                    snapshotForUndo()
+                    backgroundPhotoFlow = nil
+                }
+            )
+            .environmentObject(themeManager)
         }
         .sheet(isPresented: $showShapePicker) {
             BuxShapePickerSheet(
@@ -217,6 +246,7 @@ struct CardProCanvasView: View {
             layer: selectedLayer,
             backgroundSelected: backgroundSelected,
             document: canvasBinding,
+            brandPalette: design.palette,
             actions: toolbarActions,
             onChange: { canvasToolbarDidChange() }
         )
@@ -246,33 +276,41 @@ struct CardProCanvasView: View {
 
             HStack(spacing: 8) {
                 railButton("Layers", icon: "square.3.layers.3d") { showLayerPanel = true }
-                railButton("Background", icon: "photo.fill.on.rectangle.fill") {
+                railButton(
+                    "Background",
+                    icon: "photo.fill.on.rectangle.fill",
+                    isSelected: backgroundSelected
+                ) {
                     backgroundSelected = true
                     selectedID = nil
                 }
                 railButton("Add text", icon: "text.badge.plus") { addTextLayer() }
                 railButton("Shapes", icon: "triangle.fill") { showShapePicker = true }
             }
-            .buxNativeGlassButtonRowContainer()
-            .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
+            .buxNativeGlassButtonRowContainer(spacing: 8)
 
-            HStack(spacing: 8) {
-                Spacer(minLength: 0)
-                Button("Reset zoom") { resetWorkspaceZoom() }
-                    .font(.system(size: 13, weight: .semibold))
-                    .buxNativeButtonStyle(.secondary)
-                    .foregroundStyle(controlTint)
+            if backgroundSelected {
+                backgroundPhotoTools
+                backgroundColorPanels
             }
 
-            HStack(spacing: 20) {
+            if let layer = selectedLayer {
+                layerColorPanels(layer)
+            }
+
+            HStack(spacing: 16) {
                 canvasToggleRow(title: "Safe zone", isOn: $showSafeZone)
                 canvasToggleRow(title: "Snap", isOn: $showSnapGuides)
+                Button("Reset zoom") { resetWorkspaceZoom() }
+                    .font(.system(size: 12, weight: .semibold))
+                    .buxNativeButtonStyle(.secondary)
+                    .buxActionButtonChrome(role: .secondary, accent: controlTint)
                 Spacer(minLength: 0)
             }
             .tint(controlTint)
             .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-            Text("Tap an element to edit · Exit when done, then Save card in the editor")
+            Text("Pinch to resize · Two fingers to rotate · Drag handles for precision")
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -288,7 +326,7 @@ struct CardProCanvasView: View {
                     .buxNativeButtonStyle(.secondary)
             }
             .buxNativeGlassButtonRowContainer()
-            .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
+            .foregroundStyle(controlTint)
         } trailing: {
             HStack(spacing: 8) {
                 Button { undo() } label: {
@@ -305,7 +343,7 @@ struct CardProCanvasView: View {
                 .disabled(!undoManager.canRedo)
             }
             .buxNativeGlassButtonRowContainer()
-            .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
+            .foregroundStyle(controlTint)
         }
         .background(themeManager.screenBackground(for: colorScheme))
     }
@@ -319,57 +357,75 @@ struct CardProCanvasView: View {
                 (geo.size.height - inset * 2) / cardSize.height,
                 1.4
             )
-            let fittedW = cardSize.width * baseFit * workspaceScale
-            let fittedH = cardSize.height * baseFit * workspaceScale
+            let scale = baseFit * workspaceScale
+            let displayW = cardSize.width * scale
+            let displayH = cardSize.height * scale
             let canPanWorkspace = selectedID == nil && !backgroundSelected
 
-            BusinessCardPreviewVisor {
-                ZStack {
-                    if canPanWorkspace {
-                        Color.clear
-                            .contentShape(Rectangle())
-                            .gesture(workspacePanGesture)
-                            .simultaneousGesture(workspacePinchGesture)
-                    }
+            ZStack {
+                themeManager.screenBackground(for: colorScheme)
 
-                    if showSnapGuides {
-                        snapGuides(width: fittedW, height: fittedH)
-                            .offset(workspacePan)
-                            .allowsHitTesting(false)
-                    }
+                BusinessCardPreviewVisor(style: .canvas) {
+                GeometryReader { visorGeo in
+                    let center = CGPoint(
+                        x: visorGeo.size.width / 2 + workspacePan.width,
+                        y: visorGeo.size.height / 2 + workspacePan.height
+                    )
 
                     ZStack {
-                        if backgroundSelected {
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(themeManager.current.accentColor, lineWidth: 2.5)
-                                .frame(width: cardSize.width, height: cardSize.height)
+                        if canPanWorkspace {
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .gesture(workspacePanGesture)
+                                .simultaneousGesture(workspacePinchGesture)
+                        }
+
+                        if showSnapGuides {
+                            snapGuides(width: displayW, height: displayH)
+                                .position(x: center.x, y: center.y)
                                 .allowsHitTesting(false)
                         }
 
-                        if let ctx = CardCanvasRenderContext.make(design: design, logoData: logoData) {
-                            CardCanvasRenderer(
-                                context: ctx,
-                                selectedLayerID: backgroundSelected ? nil : selectedID,
-                                showSafeZone: showSafeZone,
-                                interactive: false
-                            )
-                            .allowsHitTesting(false)
-                        }
-
-                        canvasInteractionOverlay(cardSize: cardSize)
+                        canvasCardStage(cardSize: cardSize)
+                            .scaleEffect(scale)
+                            .frame(width: displayW, height: displayH)
+                            .position(x: center.x, y: center.y)
                     }
-                    .frame(width: cardSize.width, height: cardSize.height)
-                    .scaleEffect(baseFit * workspaceScale)
-                    .offset(workspacePan)
-                    .frame(width: fittedW, height: fittedH)
-                    .shadow(color: .black.opacity(0.22), radius: 16, y: 8)
+                    .frame(width: visorGeo.size.width, height: visorGeo.size.height)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .environmentObject(themeManager)
+            }
             .padding(BuxTokens.tight)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+    }
+
+    private func canvasCardStage(cardSize: CGSize) -> some View {
+        ZStack {
+            if backgroundSelected {
+                RoundedRectangle(cornerRadius: canvasCardCornerRadius, style: .continuous)
+                    .stroke(themeManager.current.accentColor, lineWidth: 2.5)
+                    .frame(width: cardSize.width, height: cardSize.height)
+                    .allowsHitTesting(false)
+            }
+
+            if let ctx = CardCanvasRenderContext.make(design: design, logoData: logoData) {
+                CardCanvasRenderer(
+                    context: ctx,
+                    selectedLayerID: nil,
+                    showSafeZone: showSafeZone,
+                    interactive: false
+                )
+                .allowsHitTesting(false)
+            }
+
+            canvasInteractionOverlay(cardSize: cardSize)
+        }
+        .frame(width: cardSize.width, height: cardSize.height)
+        .clipShape(RoundedRectangle(cornerRadius: canvasCardCornerRadius, style: .continuous))
+        .coordinateSpace(name: BuxCanvasLayerTransformMath.canvasCoordinateSpaceName)
+        .shadow(color: .black.opacity(0.22), radius: 16, y: 8)
     }
 
     private func canvasInteractionOverlay(cardSize: CGSize) -> some View {
@@ -379,40 +435,312 @@ struct CardProCanvasView: View {
                 .onTapGesture { location in
                     handleCanvasTap(at: location, cardSize: cardSize)
                 }
-                .gesture(layerMoveGesture(cardSize: cardSize))
 
             if let layer = selectedLayer, !layer.isLocked {
                 let frame = layer.transform.frame(in: cardSize)
+                let layerID = layer.id
+
+                Color.clear
+                    .frame(width: frame.width, height: frame.height)
+                    .rotationEffect(.degrees(layer.transform.rotation))
+                    .position(x: frame.midX, y: frame.midY)
+                    .gesture(layerPinchRotateGesture(layerID: layerID))
+
                 BuxCanvasSelectionChrome(
                     frame: frame,
                     accent: themeManager.current.accentColor,
                     rotation: layer.transform.rotation,
-                    onResize: { newSize in applyResize(layerID: layer.id, newSize: newSize, cardSize: cardSize) },
+                    onMove: { applyMove(layerID: layerID, translation: $0, cardSize: cardSize) },
+                    onMoveEnd: { finishMoveGesture() },
+                    onResize: { newSize in applyResize(layerID: layerID, newSize: newSize, cardSize: cardSize) },
                     onResizeEnd: { canvasToolbarDidChange() },
-                    onRotate: { applyRotation(layerID: layer.id, degrees: $0) },
+                    onRotate: { applyRotation(layerID: layerID, degrees: $0) },
                     onRotateEnd: { canvasToolbarDidChange() }
                 )
             }
         }
     }
 
-    private func layerMoveGesture(cardSize: CGSize) -> some Gesture {
-        DragGesture(minimumDistance: 8, coordinateSpace: .local)
-            .onChanged { v in
-                guard let id = selectedID,
-                      var layer = design.canvasDocument?.layer(id: id),
-                      !layer.isLocked else { return }
-                if dragOrigin == nil { dragOrigin = layer.transform }
-                guard let origin = dragOrigin else { return }
-                layer.transform.centerX = clamp(origin.centerX + Double(v.translation.width / cardSize.width))
-                layer.transform.centerY = clamp(origin.centerY + Double(v.translation.height / cardSize.height))
-                mutateCanvas { $0.updateLayer(layer) }
+    private func layerPinchRotateGesture(layerID: UUID) -> some Gesture {
+        SimultaneousGesture(
+            MagnificationGesture()
+                .onChanged { magnification in
+                    guard var layer = design.canvasDocument?.layer(id: layerID), !layer.isLocked else { return }
+                    if pinchOriginScale == nil { pinchOriginScale = layer.transform.scale }
+                    guard let originScale = pinchOriginScale else { return }
+                    layer.transform.scale = BuxCanvasLayerTransformMath.clampScale(originScale * magnification)
+                    mutateCanvas { $0.updateLayer(layer) }
+                }
+                .onEnded { _ in
+                    pinchOriginScale = nil
+                    mutateCanvas { $0.markCustomized() }
+                    canvasToolbarDidChange()
+                },
+            RotateGesture()
+                .onChanged { value in
+                    guard var layer = design.canvasDocument?.layer(id: layerID), !layer.isLocked else { return }
+                    if rotateOriginDegrees == nil { rotateOriginDegrees = layer.transform.rotation }
+                    guard let originDegrees = rotateOriginDegrees else { return }
+                    layer.transform.rotation = BuxCanvasLayerTransformMath.snapRotation(
+                        originDegrees + value.rotation.degrees
+                    )
+                    mutateCanvas { $0.updateLayer(layer) }
+                }
+                .onEnded { _ in
+                    rotateOriginDegrees = nil
+                    mutateCanvas { $0.markCustomized() }
+                    canvasToolbarDidChange()
+                }
+        )
+    }
+
+    private var backgroundPhotoTools: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Background photo")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(.secondary)
+            Text("Card: \(design.aspect.detail) — any photo size works.")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.secondary)
+            HStack(spacing: 8) {
+                Button("Choose photo") { startBackgroundPhotoPick() }
+                    .font(.system(size: 13, weight: .semibold))
+                    .buxNativeButtonStyle(.secondary)
+                    .foregroundStyle(controlTint)
+                if design.canvasDocument?.background.photoPath != nil {
+                    Button("Adjust") { openBackgroundPhotoAdjust() }
+                        .font(.system(size: 13, weight: .semibold))
+                        .buxNativeButtonStyle(.secondary)
+                        .foregroundStyle(controlTint)
+                }
             }
-            .onEnded { _ in
-                dragOrigin = nil
-                mutateCanvas { $0.markCustomized() }
+            .buxNativeGlassButtonRowContainer()
+            .foregroundStyle(controlTint)
+        }
+    }
+
+    private var canvasCardCornerRadius: CGFloat {
+        design.aspect == .squareSocial ? 20 : 14
+    }
+
+    private func startBackgroundPhotoPick() {
+        Task {
+            if BusinessCardPhotoLibraryAccess.currentStatus() == .notDetermined {
+                _ = await BusinessCardPhotoLibraryAccess.requestAccess()
+            }
+            await MainActor.run {
+                GlobalImagePickerCoordinator.shared.present { image in
+                    guard let image else { return }
+                    presentBackgroundPhotoEditor(image: image)
+                }
+            }
+        }
+    }
+
+    private func openBackgroundPhotoAdjust() {
+        if let img = SimpleStudioScanImageStore.load(path: design.canvasDocument?.background.photoPath) {
+            presentBackgroundPhotoEditor(image: img)
+            return
+        }
+        startBackgroundPhotoPick()
+    }
+
+    /// Presents the photo editor full-screen after closing any sheet that would block a second modal.
+    private func presentBackgroundPhotoEditor(image: UIImage, closingBackgroundSheet: Bool = false) {
+        showLayerPanel = false
+        showShapePicker = false
+        if closingBackgroundSheet {
+            showBackgroundEditor = false
+        }
+        photoStudioSession = nil
+        focalSession = nil
+        if closingBackgroundSheet {
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                backgroundPhotoFlow = BuxBackgroundPhotoFlow(image: image)
+            }
+        } else {
+            backgroundPhotoFlow = BuxBackgroundPhotoFlow(image: image)
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundColorPanels: some View {
+        BuxDesignerColorPanel(
+            title: "Card paper",
+            currentHex: design.canvasDocument?.background.solidHex ?? design.palette.backgroundHex,
+            brandPalette: design.palette,
+            layerOpacity: nil
+        ) { hex in
+            mutateCanvas { doc in
+                doc.background.solidHex = hex
+                doc.markCustomized()
+            }
+            design.palette.backgroundHex = hex
+            canvasToolbarDidChange()
+        }
+        .environmentObject(themeManager)
+
+        BuxDesignerColorPanel(
+            title: "Card accent",
+            currentHex: design.canvasDocument?.background.accentHex ?? design.palette.accentHex,
+            brandPalette: design.palette,
+            layerOpacity: nil
+        ) { hex in
+            mutateCanvas { doc in
+                doc.background.accentHex = hex
+                doc.markCustomized()
+            }
+            design.palette.accentHex = hex
+            canvasToolbarDidChange()
+        }
+        .environmentObject(themeManager)
+    }
+
+    @ViewBuilder
+    private func layerColorPanels(_ layer: CardCanvasLayer) -> some View {
+        switch layer.payload {
+        case .text(let payload):
+            BuxDesignerColorPanel(
+                title: "Text color",
+                currentHex: payload.style.colorHex,
+                brandPalette: design.palette,
+                layerOpacity: shapeLayerOpacityBinding(layerID: layer.id)
+            ) { hex in
+                updateTextColor(layerID: layer.id, colorHex: hex)
+            }
+            .environmentObject(themeManager)
+
+        case .shape(let payload):
+            BuxDesignerColorPanel(
+                title: "Shape fill",
+                currentHex: payload.fillHex,
+                brandPalette: design.palette,
+                layerOpacity: shapeLayerOpacityBinding(layerID: layer.id)
+            ) { hex in
+                updateShapeFill(layerID: layer.id, fillHex: hex)
+            }
+            .environmentObject(themeManager)
+
+            BuxDesignerColorPanel(
+                title: "Shape stroke",
+                currentHex: payload.strokeHex ?? design.palette.foregroundHex,
+                brandPalette: design.palette,
+                layerOpacity: nil
+            ) { hex in
+                updateShapeStroke(layerID: layer.id, strokeHex: hex)
+            }
+            .environmentObject(themeManager)
+
+        case .qr(let payload):
+            BuxDesignerColorPanel(
+                title: "QR ink",
+                currentHex: payload.foregroundHex,
+                brandPalette: design.palette,
+                layerOpacity: shapeLayerOpacityBinding(layerID: layer.id)
+            ) { hex in
+                updateQRColors(layerID: layer.id, foregroundHex: hex, backgroundHex: nil)
+            }
+            .environmentObject(themeManager)
+
+            BuxDesignerColorPanel(
+                title: "QR paper",
+                currentHex: payload.backgroundHex,
+                brandPalette: design.palette,
+                layerOpacity: nil
+            ) { hex in
+                updateQRColors(layerID: layer.id, foregroundHex: nil, backgroundHex: hex)
+            }
+            .environmentObject(themeManager)
+
+        case .watermark(let payload):
+            BuxDesignerColorPanel(
+                title: "Watermark",
+                currentHex: payload.colorHex,
+                brandPalette: design.palette,
+                layerOpacity: shapeLayerOpacityBinding(layerID: layer.id)
+            ) { hex in
+                updateWatermarkColor(layerID: layer.id, colorHex: hex)
+            }
+            .environmentObject(themeManager)
+
+        case .image:
+            EmptyView()
+        }
+    }
+
+    private func updateTextColor(layerID: UUID, colorHex: String) {
+        guard var layer = design.canvasDocument?.layer(id: layerID),
+              case .text(var payload) = layer.payload else { return }
+        payload.style.colorHex = colorHex
+        layer.payload = .text(payload)
+        mutateCanvas { $0.updateLayer(layer); $0.markCustomized() }
+        canvasToolbarDidChange()
+    }
+
+    private func updateQRColors(layerID: UUID, foregroundHex: String?, backgroundHex: String?) {
+        guard var layer = design.canvasDocument?.layer(id: layerID),
+              case .qr(var payload) = layer.payload else { return }
+        if let foregroundHex { payload.foregroundHex = foregroundHex }
+        if let backgroundHex { payload.backgroundHex = backgroundHex }
+        layer.payload = .qr(payload)
+        mutateCanvas { $0.updateLayer(layer); $0.markCustomized() }
+        canvasToolbarDidChange()
+    }
+
+    private func updateWatermarkColor(layerID: UUID, colorHex: String) {
+        guard var layer = design.canvasDocument?.layer(id: layerID),
+              case .watermark(var payload) = layer.payload else { return }
+        payload.colorHex = colorHex
+        layer.payload = .watermark(payload)
+        mutateCanvas { $0.updateLayer(layer); $0.markCustomized() }
+        canvasToolbarDidChange()
+    }
+
+    private func updateShapeFill(layerID: UUID, fillHex: String) {
+        guard var layer = design.canvasDocument?.layer(id: layerID),
+              case .shape(var payload) = layer.payload else { return }
+        payload.fillHex = fillHex
+        layer.payload = .shape(payload)
+        mutateCanvas { $0.updateLayer(layer); $0.markCustomized() }
+        canvasToolbarDidChange()
+    }
+
+    private func updateShapeStroke(layerID: UUID, strokeHex: String) {
+        guard var layer = design.canvasDocument?.layer(id: layerID),
+              case .shape(var payload) = layer.payload else { return }
+        payload.strokeHex = strokeHex
+        if payload.strokeWidth < 0.5 { payload.strokeWidth = 1.5 }
+        layer.payload = .shape(payload)
+        mutateCanvas { $0.updateLayer(layer); $0.markCustomized() }
+        canvasToolbarDidChange()
+    }
+
+    private func shapeLayerOpacityBinding(layerID: UUID) -> Binding<Double> {
+        Binding(
+            get: { design.canvasDocument?.layer(id: layerID)?.opacity ?? 1 },
+            set: { value in
+                guard var layer = design.canvasDocument?.layer(id: layerID) else { return }
+                layer.opacity = min(1, max(0.05, value))
+                mutateCanvas { $0.updateLayer(layer); $0.markCustomized() }
                 canvasToolbarDidChange()
             }
+        )
+    }
+
+    private func applyMove(layerID: UUID, translation: CGSize, cardSize: CGSize) {
+        guard var layer = design.canvasDocument?.layer(id: layerID), !layer.isLocked else { return }
+        if dragOrigin == nil { dragOrigin = layer.transform }
+        guard let origin = dragOrigin else { return }
+        layer.transform.centerX = clamp(origin.centerX + Double(translation.width / cardSize.width))
+        layer.transform.centerY = clamp(origin.centerY + Double(translation.height / cardSize.height))
+        mutateCanvas { $0.updateLayer(layer) }
+    }
+
+    private func finishMoveGesture() {
+        dragOrigin = nil
+        mutateCanvas { $0.markCustomized() }
+        canvasToolbarDidChange()
     }
 
     private var workspacePinchGesture: some Gesture {
@@ -467,15 +795,28 @@ struct CardProCanvasView: View {
         lastWorkspacePan = .zero
     }
 
-    private func railButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func railButton(
+        _ title: String,
+        icon: String,
+        isSelected: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
-            VStack(spacing: 3) {
-                Image(systemName: icon).font(.system(size: 14, weight: .semibold))
-                Text(title).font(.system(size: 10, weight: .bold))
+            Label {
+                Text(title)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            } icon: {
+                Image(systemName: icon)
             }
-            .frame(maxWidth: .infinity)
+            .font(.system(size: 11, weight: .bold))
+            .labelStyle(.titleAndIcon)
         }
-        .buxNativeButtonStyle(.secondary)
+        .buxNativeButtonStyle(isSelected ? .primary : .secondary)
+        .buxActionButtonChrome(
+            role: isSelected ? .primary : .secondary,
+            accent: controlTint
+        )
     }
 
     private func inlineTextOverlay(layerID: UUID) -> some View {
@@ -525,7 +866,7 @@ struct CardProCanvasView: View {
 
     private func applyRotation(layerID: UUID, degrees: Double) {
         guard var layer = design.canvasDocument?.layer(id: layerID) else { return }
-        layer.transform.rotation = degrees
+        layer.transform.rotation = BuxCanvasLayerTransformMath.snapRotation(degrees)
         mutateCanvas { $0.updateLayer(layer) }
     }
 
@@ -669,23 +1010,58 @@ struct CardProCanvasView: View {
     private var canvasBinding: Binding<CardCanvasDocument> {
         Binding(
             get: { design.canvasDocument ?? CardCanvasMigrator.migrate(from: design) },
-            set: { design.canvasDocument = $0; design.updatedAt = Date() }
+            set: { newDoc in
+                var updated = design
+                updated.canvasDocument = newDoc
+                updated.updatedAt = Date()
+                design = updated
+            }
         )
     }
 
     private var backgroundBinding: Binding<CardBackgroundSpec> {
         Binding(
-            get: { design.canvasDocument?.background ?? CardBackgroundSpec() },
-            set: {
-                design.canvasDocument?.background = $0
-                design.style.backgroundStyle = $0.style
-                design.style.backgroundPhotoPath = $0.photoPath
-                design.style.backgroundPhotoOpacity = $0.photoOpacity
-                design.palette.backgroundHex = $0.solidHex
-                design.canvasDocument?.markCustomized()
-                design.updatedAt = Date()
+            get: {
+                design.canvasDocument?.background ?? CardBackgroundSpec(
+                    solidHex: design.palette.backgroundHex,
+                    accentHex: design.palette.accentHex
+                )
+            },
+            set: { newValue in
+                applyBackgroundFromPhotoEditor(newValue)
             }
         )
+    }
+
+    /// One write to `design` — nested field assignments on `@Binding` drop `photoPath` (flash then vanish).
+    private func applyBackgroundFromPhotoEditor(_ spec: CardBackgroundSpec) {
+        var updated = design
+        updated.ensureCanvasDocument()
+        guard var doc = updated.canvasDocument else { return }
+        doc.background = spec
+        doc.markCustomized()
+        updated.canvasDocument = doc
+        updated.style.backgroundStyle = spec.style
+        updated.style.backgroundPhotoPath = spec.photoPath
+        updated.style.backgroundPhotoOpacity = spec.photoOpacity
+        updated.palette.backgroundHex = spec.solidHex
+        updated.palette.accentHex = spec.accentHex
+        updated.updatedAt = Date()
+        design = updated
+    }
+
+    private func applyCardAspectFromPhotoEditor(_ newAspect: ProBusinessCardAspect) {
+        guard design.aspect != newAspect else { return }
+        var updated = design
+        updated.aspect = newAspect
+        if var doc = updated.canvasDocument {
+            let size = newAspect.previewSize
+            doc.canvasWidth = Double(size.width)
+            doc.canvasHeight = Double(size.height)
+            updated.canvasDocument = doc
+        }
+        updated.updatedAt = Date()
+        design = updated
     }
 
     private func snapshotForUndo() {

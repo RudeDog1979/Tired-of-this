@@ -29,7 +29,7 @@ enum CardCanvasSync {
         doc.background.accentHex = palette.accentHex
         doc.background.photoPath = design.style.backgroundPhotoPath
         doc.background.photoOpacity = design.style.backgroundPhotoOpacity
-        doc.background.photoTransform = design.style.photoTransform
+        // Background pan/zoom lives on the canvas document only — not style.photoTransform (profile photo).
 
         for idx in doc.layers.indices {
             switch doc.layers[idx].payload {

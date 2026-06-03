@@ -15,6 +15,9 @@ struct BuxPhotoFocalEditorView: View {
     let image: UIImage
     @Binding var transform: ProBusinessCardPhotoTransform
     var cropIsCircle: Bool = false
+    /// When set, the focal window matches card proportions instead of a square.
+    var viewportSize: CGSize? = nil
+    var viewportCornerRadius: CGFloat = 12
     let onDone: () -> Void
 
     @State private var scale: CGFloat = 1
@@ -26,13 +29,13 @@ struct BuxPhotoFocalEditorView: View {
     var body: some View {
         NavigationStack {
             GeometryReader { geo in
-                let viewport = min(geo.size.width - 40, geo.size.height * 0.62, 440)
+                let viewport = resolvedViewport(in: geo.size)
                 VStack(spacing: 16) {
                     ZStack {
                         Color.black.opacity(0.92)
                         focalViewport(size: viewport)
                     }
-                    .frame(height: viewport + 48)
+                    .frame(height: viewport.height + 48)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
 
                     VStack(spacing: 12) {
@@ -65,10 +68,11 @@ struct BuxPhotoFocalEditorView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Apply") {
+                        let vp = viewportSize ?? CGSize(width: 320, height: 320)
                         transform = ProBusinessCardPhotoTransform(
                             zoom: Double(scale),
-                            offsetX: Double(offset.width / 200) * 0.5,
-                            offsetY: Double(offset.height / 200) * 0.5,
+                            offsetX: Double(offset.width / max(1, vp.width)),
+                            offsetY: Double(offset.height / max(1, vp.height)),
                             rotation: rotation
                         )
                         onDone()
@@ -84,38 +88,86 @@ struct BuxPhotoFocalEditorView: View {
             scale = max(1, CGFloat(transform.zoom))
             lastScale = scale
             rotation = transform.rotation
-            offset = CGSize(width: CGFloat(transform.offsetX) * 400, height: CGFloat(transform.offsetY) * 400)
+            let vp = viewportSize ?? CGSize(width: 320, height: 320)
+            offset = CGSize(width: CGFloat(transform.offsetX) * vp.width, height: CGFloat(transform.offsetY) * vp.height)
             lastOffset = offset
         }
     }
 
-    private func focalViewport(size: CGFloat) -> some View {
+    private func resolvedViewport(in geo: CGSize) -> CGSize {
+        if let viewportSize { return viewportSize }
+        let side = min(geo.width - 40, geo.height * 0.62, 440)
+        return CGSize(width: side, height: side)
+    }
+
+    private func focalViewport(size: CGSize) -> some View {
+        BuxPhotoFocalStage(
+            image: image,
+            scale: $scale,
+            rotation: $rotation,
+            offset: $offset,
+            lastScale: $lastScale,
+            lastOffset: $lastOffset,
+            viewportSize: size,
+            cornerRadius: viewportCornerRadius,
+            cropIsCircle: cropIsCircle
+        )
+    }
+}
+
+/// Shared pan / pinch / rotate stage (SwiftUI) — used by focal sheet and background photo editor.
+struct BuxPhotoFocalStage: View {
+    let image: UIImage
+    @Binding var scale: CGFloat
+    @Binding var rotation: Double
+    @Binding var offset: CGSize
+    @Binding var lastScale: CGFloat
+    @Binding var lastOffset: CGSize
+    let viewportSize: CGSize
+    var cornerRadius: CGFloat = 12
+    var cropIsCircle: Bool = false
+    var onGestureEnded: (() -> Void)? = nil
+
+    var body: some View {
         Image(uiImage: image)
             .resizable()
             .scaledToFill()
             .scaleEffect(scale)
             .rotationEffect(.degrees(rotation))
             .offset(offset)
-            .frame(width: size, height: size)
-            .clipShape(cropIsCircle ? AnyShape(Circle()) : AnyShape(RoundedRectangle(cornerRadius: 12)))
+            .frame(width: viewportSize.width, height: viewportSize.height)
+            .clipShape(cropIsCircle ? AnyShape(Circle()) : AnyShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)))
             .overlay {
                 if cropIsCircle {
                     Circle().stroke(Color.white, lineWidth: 2)
                 } else {
-                    RoundedRectangle(cornerRadius: 12).stroke(Color.white, lineWidth: 2)
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(Color.white, lineWidth: 2)
                 }
             }
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture()
                     .onChanged { v in
-                        offset = CGSize(width: lastOffset.width + v.translation.width, height: lastOffset.height + v.translation.height)
+                        offset = CGSize(
+                            width: lastOffset.width + v.translation.width,
+                            height: lastOffset.height + v.translation.height
+                        )
                     }
-                    .onEnded { _ in lastOffset = offset }
+                    .onEnded { _ in
+                        lastOffset = offset
+                        onGestureEnded?()
+                    }
             )
             .simultaneousGesture(
                 MagnificationGesture()
-                    .onChanged { v in scale = min(4, max(1, lastScale * v)) }
-                    .onEnded { _ in lastScale = scale }
+                    .onChanged { v in
+                        scale = min(5, max(1, lastScale * v))
+                    }
+                    .onEnded { _ in
+                        lastScale = scale
+                        onGestureEnded?()
+                    }
             )
     }
 }

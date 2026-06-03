@@ -26,7 +26,7 @@ enum StudioSimpleJobInvoiceSync {
             store: store
         )
         guard let job = store.entry(id: jobEntryId),
-              let invoice = store.invoice(id: invoiceId) else { return }
+              store.invoice(id: invoiceId) != nil else { return }
         syncJobToInvoiceUnlocked(job: job, invoiceId: invoiceId, store: store, studioStore: studioStore)
     }
 

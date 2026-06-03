@@ -95,6 +95,12 @@ enum ProBusinessCardTemplatePresets {
             return ProBusinessCardPalette(accentHex: "#312E81", backgroundHex: "#FFFFFF", foregroundHex: "#1E1B4B")
         case .arcSweep:
             return ProBusinessCardPalette(accentHex: "#A21CAF", backgroundHex: "#FAF5FF", foregroundHex: "#581C87")
+        case .stripeRhythm:
+            return ProBusinessCardPalette(accentHex: "#2563EB", backgroundHex: "#F8FAFC", foregroundHex: "#0F172A")
+        case .atelierCopper:
+            return ProBusinessCardPalette(accentHex: "#B45309", backgroundHex: "#FFFBEB", foregroundHex: "#451A03")
+        case .signalMesh:
+            return ProBusinessCardPalette(accentHex: "#0891B2", backgroundHex: "#FFFFFF", foregroundHex: "#164E63")
         case .photoForward:
             return nil
         }
@@ -178,6 +184,16 @@ enum ProBusinessCardTemplatePresets {
         case .arcSweep:
             style.logoScale = .medium
             style.logoMask = .circle
+        case .stripeRhythm:
+            style.backgroundStyle = .patternLines
+            style.logoScale = .medium
+        case .atelierCopper:
+            style.fontPairing = .classic
+            style.borderStyle = .thin
+            style.logoScale = .large
+        case .signalMesh:
+            style.backgroundStyle = .patternDots
+            style.logoScale = .medium
         case .photoForward:
             break
         }
@@ -338,6 +354,20 @@ enum ProBusinessCardTemplatePresets {
             add("Arc inner", .quarterCircle, cx: 0.06, cy: 0.94, w: 0.32, h: 0.32, opacity: 0.15)
             add("Accent dot", .circle, cx: 0.92, cy: 0.1, w: 0.08, h: 0.08, opacity: 0.5)
             add("Accent bar", .accentBar, cx: 0.88, cy: 0.22, w: 0.18, h: 0.008, opacity: 0.35)
+        case .stripeRhythm:
+            add("Stripe A", .parallelogram, cx: 0.88, cy: 0.14, w: 0.32, h: 0.1, rotation: -18, opacity: 0.35)
+            add("Stripe B", .parallelogram, cx: 0.92, cy: 0.24, w: 0.28, h: 0.08, rotation: -18, opacity: 0.22)
+            add("Stripe C", .parallelogram, cx: 0.84, cy: 0.08, w: 0.24, h: 0.07, rotation: -18, opacity: 0.18)
+            add("Top bar", .accentBar, cx: 0.5, cy: 0.05, w: 0.7, h: 0.01, opacity: 0.4)
+        case .atelierCopper:
+            add("Copper block", .rectangle, cx: 0.08, cy: 0.1, w: 0.16, h: 0.16, opacity: 0.5)
+            add("Copper wedge", .triangleHalf, cx: 0.94, cy: 0.88, w: 0.3, h: 0.3, rotation: 90, opacity: 0.28)
+            add("Rule", .accentBar, fillRole: .foreground, cx: 0.5, cy: 0.92, w: 0.5, h: 0.006, opacity: 0.25)
+        case .signalMesh:
+            add("Mesh H", .accentBar, fillRole: .foreground, cx: 0.5, cy: 0.18, w: 0.85, h: 0.004, opacity: 0.2)
+            add("Mesh V", .accentBar, fillRole: .foreground, cx: 0.82, cy: 0.22, w: 0.004, h: 0.35, opacity: 0.2)
+            add("Node", .hexagon, cx: 0.9, cy: 0.12, w: 0.14, h: 0.14, opacity: 0.35)
+            add("Pulse", .circle, cx: 0.76, cy: 0.1, w: 0.06, h: 0.06, opacity: 0.45)
         case .watermark, .photoForward:
             break
         }
@@ -371,8 +401,10 @@ enum ProBusinessCardTemplatePresets {
             return LayoutSpec(logoCenter: (0.18, 0.2), nameCenter: (0.42, 0.38), contactCenter: (0.42, 0.78))
         case .geometricGrid, .hexAccent, .cornerBlocks:
             return LayoutSpec(logoCenter: (0.2, 0.22), nameCenter: (0.48, 0.32), contactCenter: (0.48, 0.8))
-        case .diagonalBands, .arcSweep:
+        case .diagonalBands, .arcSweep, .stripeRhythm, .signalMesh:
             return LayoutSpec(logoCenter: (0.18, 0.22), nameCenter: (0.42, 0.36), contactCenter: (0.42, 0.78))
+        case .atelierCopper:
+            return LayoutSpec(logoCenter: (0.22, 0.24), nameCenter: (0.5, 0.4), contactCenter: (0.5, 0.76), textAlign: .center)
         case .classic:
             return LayoutSpec(logoCenter: (0.2, 0.2), nameCenter: (0.48, 0.32), contactCenter: (0.48, 0.8), qrCenter: (0.88, 0.85))
         default:

@@ -13,7 +13,12 @@ enum ProBrandIdentityMapper {
         from design: ProBusinessCardDesign,
         logoPosition: InvoiceLogoPosition
     ) -> InvoiceTemplateConfig {
-        InvoiceTemplateConfig(
+        let pack = BrandVisualPackExtractor.extract(from: design)
+        let stamps = pack.headerStamps
+        let useCanvasStamps = design.canvasDocument?.isCustomized == true && !stamps.isEmpty
+        let useHeaderPhoto = pack.background.style == .photo && pack.background.photoPath != nil
+
+        let config = InvoiceTemplateConfig(
             style: invoiceStyle(for: design.template),
             primaryColorHex: design.palette.accentHex,
             secondaryColorHex: design.palette.foregroundHex,
@@ -22,11 +27,15 @@ enum ProBrandIdentityMapper {
             cornerStyle: cornerStyle(for: design),
             density: density(for: design.template),
             logoPosition: resolvedLogoPosition(from: design, fallback: logoPosition),
-            backgroundStyle: backgroundStyle(from: design.style.backgroundStyle),
-            headerMotif: headerMotif(for: design.template),
+            backgroundStyle: backgroundStyle(from: pack.background),
+            headerMotif: useCanvasStamps ? .none : headerMotif(for: design.template),
             borderStyle: borderStyle(from: design.style.borderStyle),
-            sourceCardTemplate: design.template.rawValue
+            sourceCardTemplate: design.template.rawValue,
+            headerStamps: useCanvasStamps ? stamps : nil,
+            headerPhotoPath: useHeaderPhoto ? pack.background.photoPath : nil,
+            useCardHeaderPhoto: useHeaderPhoto
         )
+        return config
     }
 
     // MARK: - Typography
@@ -50,12 +59,13 @@ enum ProBrandIdentityMapper {
 
     private static func invoiceStyle(for template: ProBusinessCardTemplate) -> InvoiceTemplateStyle {
         switch template {
-        case .boldTrade, .neonEdge, .gradientPro, .twoToneSplit, .glassFrost, .stampBadge, .photoForward:
+        case .boldTrade, .neonEdge, .gradientPro, .twoToneSplit, .glassFrost, .stampBadge, .photoForward,
+             .stripeRhythm, .signalMesh:
             return .modern
         case .minimalMono, .lineMinimal, .swissGrid, .geometricGrid, .diagonalBands,
              .cornerBlocks, .splitVertical, .arcSweep, .hexAccent, .circleFrame:
             return .minimalist
-        case .classic, .editorial, .letterpress, .monogram, .logoMark, .watermark, .qrFirst:
+        case .classic, .editorial, .letterpress, .monogram, .logoMark, .watermark, .qrFirst, .atelierCopper:
             return .executive
         }
     }
@@ -84,10 +94,8 @@ enum ProBrandIdentityMapper {
         return fallback
     }
 
-    private static func backgroundStyle(
-        from style: ProBusinessCardBackgroundStyle
-    ) -> InvoiceBrandBackgroundStyle {
-        switch style {
+    private static func backgroundStyle(from background: CardBackgroundSpec) -> InvoiceBrandBackgroundStyle {
+        switch background.style {
         case .solid: return .solid
         case .gradient: return .gradient
         case .patternDots: return .patternDots
@@ -124,6 +132,9 @@ enum ProBrandIdentityMapper {
         case .monogram: return .monogramBand
         case .editorial, .logoMark, .watermark: return .editorialLine
         case .glassFrost, .photoForward, .qrFirst: return .topGradientBand
+        case .stripeRhythm: return .diagonalBands
+        case .atelierCopper: return .cornerBlocks
+        case .signalMesh: return .geometricGrid
         }
     }
 }

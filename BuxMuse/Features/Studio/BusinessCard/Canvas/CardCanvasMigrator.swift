@@ -40,7 +40,7 @@ enum CardCanvasMigrator {
             accentHex: design.palette.accentHex,
             photoPath: design.style.backgroundPhotoPath,
             photoOpacity: design.style.backgroundPhotoOpacity,
-            photoTransform: design.style.photoTransform
+            photoTransform: ProBusinessCardPhotoTransform()
         )
     }
 

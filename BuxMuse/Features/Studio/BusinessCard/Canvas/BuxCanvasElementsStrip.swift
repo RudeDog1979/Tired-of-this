@@ -50,22 +50,27 @@ struct BuxCanvasElementsStrip: View {
                     }
                 }
                 .buxNativeGlassButtonRowContainer()
-                .buxNativeButtonRowChrome(accent: controlTint, role: .secondary)
             }
         }
     }
 
     private func elementChip(title: String, icon: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: icon).font(.system(size: 10, weight: .semibold))
+            Label {
                 Text(title)
-                    .font(.system(size: 10, weight: isSelected ? .bold : .semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
+            } icon: {
+                Image(systemName: icon)
             }
+            .font(.system(size: 11, weight: .bold))
+            .labelStyle(.titleAndIcon)
         }
-        .buxNativeButtonStyle(.secondary)
+        .buxNativeButtonStyle(isSelected ? .primary : .secondary)
+        .buxActionButtonChrome(
+            role: isSelected ? .primary : .secondary,
+            accent: controlTint
+        )
     }
 
     private func icon(for layer: CardCanvasLayer) -> String {

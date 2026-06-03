@@ -94,10 +94,17 @@ struct BuxPhotoEditorSession: Identifiable {
     let image: UIImage
 }
 
+struct BuxBackgroundPhotoFlow: Identifiable {
+    let id = UUID()
+    let image: UIImage
+}
+
 struct BuxFocalSession: Identifiable {
     let id = UUID()
     let target: BuxFocalEditorTarget
     let image: UIImage
     let title: String
     let cropIsCircle: Bool
+    var viewportSize: CGSize? = nil
+    var viewportCornerRadius: CGFloat = 12
 }

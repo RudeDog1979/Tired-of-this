@@ -24,7 +24,7 @@ enum CardCanvasHitTester {
             if skipLocked && layer.isLocked { continue }
             if lockedOnly && !layer.isLocked { continue }
             let frame = layer.transform.frame(in: canvasSize)
-            if frame.contains(CGPoint(x: px, y: py)) {
+            if layer.transform.hitContains(point: CGPoint(x: px, y: py), frame: frame) {
                 return layer.id
             }
         }

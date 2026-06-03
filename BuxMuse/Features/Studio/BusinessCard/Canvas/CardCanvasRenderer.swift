@@ -77,6 +77,10 @@ struct CardCanvasRenderer: View {
         .allowsHitTesting(interactive)
     }
 
+    private var cardMask: some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+    }
+
     @ViewBuilder
     private func layerView(_ layer: CardCanvasLayer) -> some View {
         let frame = layer.transform.frame(in: context.canvasSize)
@@ -94,6 +98,7 @@ struct CardCanvasRenderer: View {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .stroke(context.accent, lineWidth: 2)
                     .frame(width: frame.width, height: frame.height)
+                    .rotationEffect(.degrees(layer.transform.rotation))
                     .position(x: frame.midX, y: frame.midY)
             }
         }
@@ -137,15 +142,15 @@ struct CardCanvasRenderer: View {
             }
         case .photo:
             ZStack {
+                Color(hex: bg.solidHex)
                 if let img = context.backgroundPhoto {
                     backgroundPhotoView(img: img, bg: bg)
-                } else {
-                    Color(hex: bg.solidHex)
                 }
                 if let overlay = bg.overlayHex {
                     Color(hex: overlay).opacity(bg.overlayOpacity)
                 }
             }
+            .mask(cardMask)
         }
     }
 
@@ -160,7 +165,6 @@ struct CardCanvasRenderer: View {
             .rotationEffect(.degrees(t.rotation))
             .offset(x: CGFloat(t.offsetX) * context.canvasSize.width, y: CGFloat(t.offsetY) * context.canvasSize.height)
             .frame(width: context.canvasSize.width, height: context.canvasSize.height)
-            .clipped()
             .opacity(bg.photoOpacity)
             .saturation(bg.saturation)
             .brightness(bg.brightness)
@@ -263,6 +267,7 @@ struct CardCanvasRenderer: View {
         .frame(width: frame.width, height: frame.height)
         .rotationEffect(.degrees(layer.transform.rotation))
         .position(x: frame.midX, y: frame.midY)
+        .clipped(antialiased: true)
     }
 
     @ViewBuilder
@@ -280,13 +285,14 @@ struct CardCanvasRenderer: View {
     }
 
     private func fill(for payload: CardShapePayload) -> AnyShapeStyle {
+        let base = Color(hex: payload.fillHex)
         if payload.useGradient {
             return AnyShapeStyle(LinearGradient(
-                colors: [Color(hex: payload.fillHex), Color(hex: payload.fillHex).opacity(0.45)],
+                colors: [base, base.opacity(0.45)],
                 startPoint: .topLeading, endPoint: .bottomTrailing
             ))
         }
-        return AnyShapeStyle(Color(hex: payload.fillHex).opacity(payload.fillHex == "#00000000" ? 0 : 1))
+        return AnyShapeStyle(base)
     }
 
     private func clipShape(for mask: CardImageMask, cornerRadius: Double, size: CGRect) -> AnyShape {

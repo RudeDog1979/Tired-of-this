@@ -7,13 +7,25 @@
 
 import SwiftUI
 
+enum BusinessCardPreviewVisorStyle {
+    /// Card Studio — accent gradient mat around the preview.
+    case cinema
+    /// Bux Canvas — same cinema mat as Card Studio.
+    case canvas
+}
+
 struct BusinessCardPreviewVisor<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
 
+    var style: BusinessCardPreviewVisorStyle = .cinema
     @ViewBuilder var content: () -> Content
 
     var body: some View {
+        cinemaFrame
+    }
+
+    private var cinemaFrame: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(
@@ -47,7 +59,27 @@ struct BusinessCardPreviewVisor<Content: View>: View {
                 .padding(6)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .shadow(color: themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.12 : 0.07), radius: 8, y: 3)
+        .modifier(BuxCanvasCinemaChrome(style: style, themeManager: themeManager, colorScheme: colorScheme))
+    }
+}
+
+/// Bux Canvas: hard clip + no accent shadow (shadow drew blue outside the rounded cinema). Card Studio unchanged.
+private struct BuxCanvasCinemaChrome: ViewModifier {
+    let style: BusinessCardPreviewVisorStyle
+    let themeManager: ThemeManager
+    let colorScheme: ColorScheme
+
+    func body(content: Content) -> some View {
+        switch style {
+        case .canvas:
+            content.clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        case .cinema:
+            content.shadow(
+                color: themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.12 : 0.07),
+                radius: 8,
+                y: 3
+            )
+        }
     }
 }
 

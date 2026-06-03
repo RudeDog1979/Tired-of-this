@@ -13,6 +13,7 @@ struct CardFloatingToolbar: View {
     let layer: CardCanvasLayer?
     var backgroundSelected: Bool
     @Binding var document: CardCanvasDocument
+    var brandPalette: ProBusinessCardPalette
     var actions: BuxCanvasToolbarActionSet
     var onChange: () -> Void
 
@@ -95,26 +96,41 @@ struct CardFloatingToolbar: View {
 
     private var backgroundTools: some View {
         Group {
+            toolButton("Photo", icon: "photo.on.rectangle.angled") {
+                document.background.style = .photo
+                document.markCustomized()
+                actions.onPickBackgroundPhoto?()
+                onChange()
+            }
+
+            if document.background.photoPath != nil {
+                toolButton("Frame", icon: "arrow.up.left.and.arrow.down.right") {
+                    actions.onAdjustBackgroundPhoto?()
+                }
+            }
+
             glassMenu {
                 ForEach(ProBusinessCardBackgroundStyle.allCases) { style in
                     Button(style.title) {
                         document.background.style = style
                         document.markCustomized()
+                        if style == .photo, document.background.photoPath == nil {
+                            actions.onPickBackgroundPhoto?()
+                        }
                         onChange()
                     }
                 }
             } label: { toolLabel("Style", icon: "square.grid.2x2") }
 
-            colorMenu(current: document.background.solidHex) { hex in
+            designerColorTool(title: "Paper", hex: document.background.solidHex, layerID: nil) { hex in
                 document.background.solidHex = hex
                 document.markCustomized()
                 onChange()
             }
-
-            if document.background.style == .photo {
-                toolButton("Bux Focal", icon: "arrow.up.left.and.arrow.down.right") {
-                    actions.onOpenFocalEditor?(.background)
-                }
+            designerColorTool(title: "Accent", hex: document.background.accentHex, layerID: nil) { hex in
+                document.background.accentHex = hex
+                document.markCustomized()
+                onChange()
             }
 
             toolButton("Bux Adjust", icon: "slider.horizontal.3") {
@@ -132,10 +148,24 @@ struct CardFloatingToolbar: View {
         switch layer.payload {
         case .text(let payload):
             fontMenu(payload: payload, layerID: layer.id)
-            colorMenu(current: payload.style.colorHex) { hex in
+            designerColorTool(title: "Color", hex: payload.style.colorHex, layerID: layer.id) { hex in
                 var p = payload
                 p.style.colorHex = hex
                 updatePayload(layer.id, .text(p))
+            }
+            if payload.style.outlineWidth > 0, let outlineHex = payload.style.outlineColorHex {
+                designerColorTool(title: "Outline", hex: outlineHex, layerID: layer.id) { hex in
+                    var p = payload
+                    p.style.outlineColorHex = hex
+                    updatePayload(layer.id, .text(p))
+                }
+            }
+            if let bgHex = payload.style.backgroundColorHex {
+                designerColorTool(title: "Text BG", hex: bgHex, layerID: layer.id) { hex in
+                    var p = payload
+                    p.style.backgroundColorHex = hex
+                    updatePayload(layer.id, .text(p))
+                }
             }
             alignMenu(payload: payload, layerID: layer.id)
             effectMenu(payload: payload, layerID: layer.id)
@@ -170,6 +200,13 @@ struct CardFloatingToolbar: View {
                     updatePayload(layer.id, .image(p))
                 }
             } label: { toolLabel("Bux Photo", icon: "camera.filters") }
+            if payload.borderWidth > 0, let borderHex = payload.borderColorHex {
+                designerColorTool(title: "Border", hex: borderHex, layerID: layer.id) { hex in
+                    var p = payload
+                    p.borderColorHex = hex
+                    updatePayload(layer.id, .image(p))
+                }
+            }
             opacityMenu(layer: layer)
 
         case .shape(let payload):
@@ -202,19 +239,40 @@ struct CardFloatingToolbar: View {
                     }
                 ))
             } label: { toolLabel("Bux Shape", icon: "triangle.fill") }
-            colorMenu(current: payload.fillHex) { hex in
+            designerColorTool(title: "Fill", hex: payload.fillHex, layerID: layer.id) { hex in
                 var p = payload
                 p.fillHex = hex
                 updatePayload(layer.id, .shape(p))
             }
+            designerColorTool(
+                title: "Stroke",
+                hex: payload.strokeHex ?? brandPalette.foregroundHex,
+                layerID: layer.id
+            ) { hex in
+                var p = payload
+                p.strokeHex = hex
+                if p.strokeWidth < 0.5 { p.strokeWidth = 1.5 }
+                updatePayload(layer.id, .shape(p))
+            }
+            strokeWidthMenu(payload: payload, layerID: layer.id)
             opacityMenu(layer: layer)
 
-        case .qr:
+        case .qr(let payload):
+            designerColorTool(title: "QR ink", hex: payload.foregroundHex, layerID: layer.id) { hex in
+                var p = payload
+                p.foregroundHex = hex
+                updatePayload(layer.id, .qr(p))
+            }
+            designerColorTool(title: "QR paper", hex: payload.backgroundHex, layerID: layer.id) { hex in
+                var p = payload
+                p.backgroundHex = hex
+                updatePayload(layer.id, .qr(p))
+            }
             toolButton("Refresh QR", icon: "arrow.clockwise") { onChange() }
             opacityMenu(layer: layer)
 
         case .watermark(let payload):
-            colorMenu(current: payload.colorHex) { hex in
+            designerColorTool(title: "Color", hex: payload.colorHex, layerID: layer.id) { hex in
                 var p = payload
                 p.colorHex = hex
                 updatePayload(layer.id, .watermark(p))
@@ -303,12 +361,47 @@ struct CardFloatingToolbar: View {
         } label: { toolLabel("Opacity", icon: "circle.lefthalf.filled") }
     }
 
-    private func colorMenu(current: String, onPick: @escaping (String) -> Void) -> some View {
-        glassMenu {
-            ForEach(BuxCanvasColorPresets.all, id: \.self) { color in
-                Button(color) { onPick(color) }
+    private func designerColorTool(
+        title: String,
+        hex: String,
+        layerID: UUID?,
+        onPick: @escaping (String) -> Void
+    ) -> some View {
+        BuxDesignerColorToolbarButton(
+            title: title,
+            hex: hex,
+            brandPalette: brandPalette,
+            layerOpacity: layerID.map { layerOpacityBinding(layerID: $0) },
+            onPick: onPick
+        )
+    }
+
+    private func layerOpacityBinding(layerID: UUID) -> Binding<Double> {
+        Binding(
+            get: { document.layer(id: layerID)?.opacity ?? 1 },
+            set: { value in
+                guard var layer = document.layer(id: layerID) else { return }
+                layer.opacity = min(1, max(0.05, value))
+                document.updateLayer(layer)
+                document.markCustomized()
+                onChange()
             }
-        } label: { toolLabel("Color", icon: "paintpalette.fill") }
+        )
+    }
+
+    private func strokeWidthMenu(payload: CardShapePayload, layerID: UUID) -> some View {
+        glassMenu {
+            ForEach([0.0, 0.5, 1.0, 2.0, 4.0, 6.0], id: \.self) { width in
+                Button(width == 0 ? "No stroke" : String(format: "%.1f pt", width)) {
+                    var p = payload
+                    p.strokeWidth = width
+                    if width > 0, p.strokeHex == nil {
+                        p.strokeHex = brandPalette.foregroundHex
+                    }
+                    updatePayload(layerID, .shape(p))
+                }
+            }
+        } label: { toolLabel("Stroke W", icon: "lineweight") }
     }
 
     private func sizeButtons(layerID: UUID, increase: @escaping () -> Void, decrease: @escaping () -> Void) -> some View {

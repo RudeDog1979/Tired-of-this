@@ -36,6 +36,9 @@ public enum ProBusinessCardTemplate: String, Codable, CaseIterable, Identifiable
     case splitVertical
     case lineMinimal
     case arcSweep
+    case stripeRhythm
+    case atelierCopper
+    case signalMesh
 
     public var id: String { rawValue }
 
@@ -69,6 +72,9 @@ public enum ProBusinessCardTemplate: String, Codable, CaseIterable, Identifiable
         case .splitVertical: return "Split Panel"
         case .lineMinimal: return "Line Stack"
         case .arcSweep: return "Arc Sweep"
+        case .stripeRhythm: return "Stripe Rhythm"
+        case .atelierCopper: return "Atelier Copper"
+        case .signalMesh: return "Signal Mesh"
         }
     }
 
@@ -98,6 +104,9 @@ public enum ProBusinessCardTemplate: String, Codable, CaseIterable, Identifiable
         case .splitVertical: return "Two-panel vertical split"
         case .lineMinimal: return "Swiss line rhythm"
         case .arcSweep: return "Quarter arc flourish"
+        case .stripeRhythm: return "Rhythmic diagonal stripes"
+        case .atelierCopper: return "Warm copper corner blocks"
+        case .signalMesh: return "Technical mesh accents"
         }
     }
 
@@ -127,6 +136,9 @@ public enum ProBusinessCardTemplate: String, Codable, CaseIterable, Identifiable
         case .splitVertical: return "rectangle.split.2x1.fill"
         case .lineMinimal: return "line.3.horizontal"
         case .arcSweep: return "circle.bottomhalf.filled"
+        case .stripeRhythm: return "line.diagonal"
+        case .atelierCopper: return "square.fill.on.square.fill"
+        case .signalMesh: return "network"
         }
     }
 
@@ -140,8 +152,10 @@ public enum ProBusinessCardTemplate: String, Codable, CaseIterable, Identifiable
             return .creative
         case .qrFirst, .logoMark, .photoForward:
             return .digital
-        case .geometricGrid, .diagonalBands, .circleFrame, .hexAccent:
+        case .geometricGrid, .diagonalBands, .circleFrame, .hexAccent, .stripeRhythm, .signalMesh:
             return .geometric
+        case .atelierCopper:
+            return .corporate
         }
     }
 

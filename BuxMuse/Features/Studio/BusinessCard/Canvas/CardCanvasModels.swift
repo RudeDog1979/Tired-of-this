@@ -179,6 +179,19 @@ public struct CardLayerTransform: Codable, Equatable, Sendable {
         return CGRect(x: cx - w / 2, y: cy - h / 2, width: w, height: h)
     }
 
+    /// Hit test in canvas pixel space, accounting for layer rotation.
+    public func hitContains(point: CGPoint, frame: CGRect) -> Bool {
+        let center = CGPoint(x: frame.midX, y: frame.midY)
+        let dx = point.x - center.x
+        let dy = point.y - center.y
+        let r = -rotation * .pi / 180
+        let c = cos(r)
+        let s = sin(r)
+        let localX = dx * c - dy * s
+        let localY = dx * s + dy * c
+        return abs(localX) <= frame.width / 2 && abs(localY) <= frame.height / 2
+    }
+
     public mutating func translate(normalizedDX: Double, normalizedDY: Double) {
         centerX = min(1, max(0, centerX + normalizedDX))
         centerY = min(1, max(0, centerY + normalizedDY))
@@ -515,6 +528,8 @@ public struct BuxCanvasToolbarActionSet {
     var onOpenPhotoLab: ((UUID) -> Void)?
     var onOpenFocalEditor: ((BuxFocalEditorTarget) -> Void)?
     var onOpenBackgroundEditor: (() -> Void)?
+    var onPickBackgroundPhoto: (() -> Void)?
+    var onAdjustBackgroundPhoto: (() -> Void)?
     var onLayerDuplicated: ((UUID) -> Void)?
     var onLayerDeleted: (() -> Void)?
 }

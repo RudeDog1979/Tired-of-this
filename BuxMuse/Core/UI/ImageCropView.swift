@@ -13,6 +13,8 @@ import PhotosUI
 public enum ImageCropShape {
     case circle
     case roundedRectangle(cornerRadius: CGFloat)
+    /// Width ÷ height of the visible crop window (e.g. business card 3.5÷2).
+    case aspectFill(ratio: CGFloat, cornerRadius: CGFloat = 0)
 }
 
 // MARK: - Photo loading
@@ -52,10 +54,22 @@ public struct ImageCropView: View {
 
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
-    @State private var lastOffset: CGSize = .zero
 
     private let viewportSize: CGFloat = 320
     private let cropSize: CGFloat = 260
+
+    private var cropFrameSize: CGSize {
+        switch cropShape {
+        case .aspectFill(let ratio, _):
+            guard ratio > 0 else { return CGSize(width: cropSize, height: cropSize) }
+            if ratio >= 1 {
+                return CGSize(width: cropSize, height: cropSize / ratio)
+            }
+            return CGSize(width: cropSize * ratio, height: cropSize)
+        default:
+            return CGSize(width: cropSize, height: cropSize)
+        }
+    }
 
     public init(
         inputImage: UIImage,
@@ -79,33 +93,12 @@ public struct ImageCropView: View {
                     .foregroundColor(.gray)
                     .padding(.top, 16)
 
-                ZStack {
-                    cropContent
-                    cropOverlay
-                }
-                .frame(width: viewportSize, height: viewportSize)
-                .background(Color.black.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 24))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                ImageCropEditorContent(
+                    inputImage: inputImage,
+                    cropShape: cropShape,
+                    scale: $scale,
+                    offset: $offset
                 )
-
-                VStack(spacing: 8) {
-                    HStack {
-                        Image(systemName: "minus.magnifyingglass")
-                            .foregroundColor(.gray)
-                        Slider(value: $scale, in: 1.0...4.0)
-                            .tint(themeManager.current.accentColor)
-                        Image(systemName: "plus.magnifyingglass")
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.horizontal, 24)
-
-                    Text("Scale: \(String(format: "%.1fx", scale))")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.gray)
-                }
 
                 Spacer()
             }
@@ -118,13 +111,92 @@ public struct ImageCropView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     BuxToolbarConfirmButton(accessibilityLabel: "Apply") {
-                        if let cropped = performCrop() {
+                        if let cropped = ImageCropRenderer.croppedImage(
+                            inputImage: inputImage,
+                            cropShape: cropShape,
+                            scale: scale,
+                            offset: offset
+                        ) {
                             onCrop(cropped)
                         }
                         dismiss()
                     }
                 }
             }
+        }
+    }
+}
+
+// MARK: - Embeddable crop editor (no sheet — for Bux Canvas background)
+
+public struct ImageCropEditorContent: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    public let inputImage: UIImage
+    public let cropShape: ImageCropShape
+    public var viewportSize: CGFloat = 320
+    public var cropSize: CGFloat = 260
+    @Binding public var scale: CGFloat
+    @Binding public var offset: CGSize
+
+    @State private var lastOffset: CGSize = .zero
+
+    public init(
+        inputImage: UIImage,
+        cropShape: ImageCropShape,
+        scale: Binding<CGFloat>,
+        offset: Binding<CGSize>,
+        viewportSize: CGFloat = 320,
+        cropSize: CGFloat = 260
+    ) {
+        self.inputImage = inputImage
+        self.cropShape = cropShape
+        self._scale = scale
+        self._offset = offset
+        self.viewportSize = viewportSize
+        self.cropSize = cropSize
+    }
+
+    private var cropFrameSize: CGSize {
+        switch cropShape {
+        case .aspectFill(let ratio, _):
+            guard ratio > 0 else { return CGSize(width: cropSize, height: cropSize) }
+            if ratio >= 1 {
+                return CGSize(width: cropSize, height: cropSize / ratio)
+            }
+            return CGSize(width: cropSize * ratio, height: cropSize)
+        default:
+            return CGSize(width: cropSize, height: cropSize)
+        }
+    }
+
+    public var body: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                cropContent
+                cropOverlay
+            }
+            .frame(width: viewportSize, height: viewportSize)
+            .background(Color.black.opacity(0.06))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+            )
+
+            HStack {
+                Image(systemName: "minus.magnifyingglass")
+                    .foregroundStyle(.secondary)
+                Slider(value: $scale, in: 1...4)
+                    .tint(themeManager.current.accentColor)
+                Image(systemName: "plus.magnifyingglass")
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 8)
+
+            Text("Scale: \(String(format: "%.1fx", scale))")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -158,11 +230,49 @@ public struct ImageCropView: View {
         case .roundedRectangle(let radius):
             RoundedRectCutoutOverlay(cornerRadius: radius, size: cropSize)
                 .allowsHitTesting(false)
+        case .aspectFill(_, let radius):
+            AspectRectCutoutOverlay(frameSize: cropFrameSize, cornerRadius: radius)
+                .allowsHitTesting(false)
         }
+    }
+}
+
+public enum ImageCropRenderer {
+    private static let viewportSize: CGFloat = 320
+    private static let cropSize: CGFloat = 260
+
+    @MainActor
+    public static func croppedImage(
+        inputImage: UIImage,
+        cropShape: ImageCropShape,
+        scale: CGFloat,
+        offset: CGSize,
+        viewportSize: CGFloat = 320,
+        cropSize: CGFloat = 260
+    ) -> UIImage? {
+        let frame = cropFrameSize(for: cropShape, cropSize: cropSize)
+        return croppedImage(
+            inputImage: inputImage,
+            scale: scale,
+            offset: offset,
+            viewportSize: CGSize(width: viewportSize, height: viewportSize),
+            cropFrameSize: frame,
+            cornerRadius: cornerRadius(for: cropShape, cropFrameWidth: frame.width),
+            exportSize: frame
+        )
     }
 
     @MainActor
-    private func performCrop() -> UIImage? {
+    public static func croppedImage(
+        inputImage: UIImage,
+        scale: CGFloat,
+        offset: CGSize,
+        viewportSize: CGSize,
+        cropFrameSize: CGSize,
+        cornerRadius: CGFloat,
+        exportSize: CGSize,
+        paperColorHex: String? = nil
+    ) -> UIImage? {
         let normalized = inputImage.normalizedImage()
 
         let cropView = ZStack {
@@ -171,20 +281,48 @@ public struct ImageCropView: View {
                 .scaledToFit()
                 .scaleEffect(scale)
                 .offset(offset)
-                .frame(width: viewportSize, height: viewportSize)
+                .frame(width: viewportSize.width, height: viewportSize.height)
         }
-        .frame(width: cropSize, height: cropSize)
+        .frame(width: cropFrameSize.width, height: cropFrameSize.height)
         .clipped()
 
         let renderer = ImageRenderer(content: cropView)
         renderer.scale = 3.0
-        guard let image = renderer.uiImage else { return nil }
+        guard var snippet = renderer.uiImage else { return nil }
 
+        let maskRadius = cornerRadius * (snippet.size.width / max(1, cropFrameSize.width))
+        snippet = snippet.roundedRectMasked(cornerRadius: maskRadius)
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        let paper = paperColorHex.map { UIColor(Color(hex: $0)) } ?? .white
+
+        return UIGraphicsImageRenderer(size: exportSize, format: format).image { _ in
+            paper.setFill()
+            UIRectFill(CGRect(origin: .zero, size: exportSize))
+            snippet.draw(in: CGRect(origin: .zero, size: exportSize))
+        }
+    }
+
+    private static func cornerRadius(for cropShape: ImageCropShape, cropFrameWidth: CGFloat) -> CGFloat {
         switch cropShape {
-        case .circle:
-            return image.circularMasked()
-        case .roundedRectangle(let radius):
-            return image.roundedRectMasked(cornerRadius: radius * 3.0)
+        case .circle: return cropFrameWidth / 2
+        case .roundedRectangle(let radius): return radius
+        case .aspectFill(_, let radius): return radius
+        }
+    }
+
+    private static func cropFrameSize(for cropShape: ImageCropShape, cropSize: CGFloat) -> CGSize {
+        switch cropShape {
+        case .aspectFill(let ratio, _):
+            guard ratio > 0 else { return CGSize(width: cropSize, height: cropSize) }
+            if ratio >= 1 {
+                return CGSize(width: cropSize, height: cropSize / ratio)
+            }
+            return CGSize(width: cropSize * ratio, height: cropSize)
+        default:
+            return CGSize(width: cropSize, height: cropSize)
         }
     }
 }
@@ -330,6 +468,48 @@ struct CircleCutoutOverlay: View {
                 .stroke(Color.white, lineWidth: 2)
                 .frame(width: circleRadius * 2, height: circleRadius * 2)
                 .position(x: size.width / 2, y: size.height / 2)
+        }
+    }
+}
+
+struct AspectRectCutoutOverlay: View {
+    let frameSize: CGSize
+    let cornerRadius: CGFloat
+
+    @ViewBuilder
+    private func strokeFrame(in geometry: GeometryProxy) -> some View {
+        if cornerRadius > 0 {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .stroke(Color.white, lineWidth: 2)
+                .frame(width: frameSize.width, height: frameSize.height)
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+        } else {
+            Rectangle()
+                .stroke(Color.white, lineWidth: 2)
+                .frame(width: frameSize.width, height: frameSize.height)
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+        }
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            let rect = CGRect(
+                x: (geometry.size.width - frameSize.width) / 2,
+                y: (geometry.size.height - frameSize.height) / 2,
+                width: frameSize.width,
+                height: frameSize.height
+            )
+            Path { path in
+                path.addRect(CGRect(origin: .zero, size: geometry.size))
+                if cornerRadius > 0 {
+                    path.addRoundedRect(in: rect, cornerSize: CGSize(width: cornerRadius, height: cornerRadius))
+                } else {
+                    path.addRect(rect)
+                }
+            }
+            .fill(Color.black.opacity(0.65), style: FillStyle(eoFill: true))
+
+            strokeFrame(in: geometry)
         }
     }
 }

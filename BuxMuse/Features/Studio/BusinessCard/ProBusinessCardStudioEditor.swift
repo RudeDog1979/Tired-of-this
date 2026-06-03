@@ -203,11 +203,27 @@ struct ProBusinessCardEditorView: View {
         }
         .sheet(isPresented: $showCropSheet) {
             if let image = backgroundPick {
-                ImageCropView(inputImage: image, cropShape: .roundedRectangle(cornerRadius: 0), title: "Crop background", hint: "Drag to pan · slide to zoom") { cropped in
+                ImageCropView(
+                    inputImage: image,
+                    cropShape: .aspectFill(
+                        ratio: (draft ?? ProBusinessCardDesign(title: "Card")).aspect.aspectRatio,
+                        cornerRadius: 0
+                    ),
+                    title: "Crop background",
+                    hint: "Frame matches your card size. Drag to pan · slide to zoom."
+                ) { cropped in
                     if let path = SimpleStudioScanImageStore.save(cropped, id: UUID()) {
-                        mutateDraft { $0.style.backgroundPhotoPath = path; $0.style.backgroundStyle = .photo }
+                        mutateDraft { d in
+                            d.style.backgroundPhotoPath = path
+                            d.style.backgroundStyle = .photo
+                            d.ensureCanvasDocument()
+                            d.canvasDocument?.background.photoPath = path
+                            d.canvasDocument?.background.style = .photo
+                            d.canvasDocument?.markCustomized()
+                        }
                     }
-                    backgroundPick = nil; syncDraftChanges()
+                    backgroundPick = nil
+                    syncDraftChanges()
                 }
                 .environmentObject(themeManager)
             }
@@ -234,7 +250,7 @@ struct ProBusinessCardEditorView: View {
                 ),
                 logoData: studioStore.profile.logoData,
                 onExit: { exitCanvas() },
-                onPickBackgroundPhoto: { pickTarget = .background }
+                onPickBackgroundPhoto: nil
             )
             .environmentObject(themeManager)
         }
