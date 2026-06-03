@@ -267,7 +267,12 @@ struct StudioAgreementApprovalSection: View {
             BuxFormRowDivider()
             uploadProofBlock
         case .inPerson:
-            EmptyView()
+            BuxFormRowDivider()
+            Text("Scroll to Client signature (in person only) below to capture the client's finger signature on this device.")
+                .font(.system(size: 12, weight: .medium))
+                .buxLabelSecondary()
+                .fixedSize(horizontal: false, vertical: true)
+                .buxFormFieldPadding()
         case nil:
             EmptyView()
         }
@@ -328,6 +333,9 @@ struct StudioAgreementApprovalSection: View {
                 draft.approvalChannel = new
                 if new == .inPerson {
                     draft.clientClearToProceed = false
+                } else if new != nil {
+                    draft.clientSignaturePNG = nil
+                    draft.clientSignedAt = nil
                 }
                 if new == .clearToProceed {
                     draft.signedDocumentPath = nil

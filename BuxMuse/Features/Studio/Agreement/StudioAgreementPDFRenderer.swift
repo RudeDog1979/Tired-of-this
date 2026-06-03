@@ -76,6 +76,9 @@ enum StudioAgreementPDFRenderer {
             section("Payment", body: draft.paymentAmountNotes)
             section("Payment terms", body: draft.paymentTerms)
             section("Timeline", body: draft.timelineNotes)
+            if draft.hasTermsContent {
+                section("Terms & conditions", body: draft.composedTermsAndConditions)
+            }
 
             if !draft.signOffName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 let dateStr = draft.signOffDate.map {
@@ -160,7 +163,7 @@ enum StudioAgreementPDFRenderer {
             y += sigHeight + 40
 
             ensureSpace(40)
-            let footer = draft.isFullySigned
+            let footer = draft.hasClientApprovalProof
                 ? "On-device agreement record · BuxMuse Studio"
                 : "Draft · BuxMuse Studio"
             drawLine(footer, font: metaFont, color: .gray, extraSpacing: 0)

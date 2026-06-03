@@ -853,7 +853,7 @@ public enum StudioAgreementApprovalChannel: String, Codable, CaseIterable, Senda
 
     public var title: String {
         switch self {
-        case .inPerson: "Signed in person (this device)"
+        case .inPerson: "Client signed in person (this device)"
         case .returnedPDF: "Signed PDF sent back to me"
         case .printedScanned: "Printed, signed & scanned"
         case .clearToProceed: "Clear to go ahead (call / message)"
@@ -863,7 +863,7 @@ public enum StudioAgreementApprovalChannel: String, Codable, CaseIterable, Senda
 
     public var shortTitle: String {
         switch self {
-        case .inPerson: "In person"
+        case .inPerson: "Client in person"
         case .returnedPDF: "PDF returned"
         case .printedScanned: "Print & scan"
         case .clearToProceed: "Clear to go"
@@ -910,6 +910,12 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     public var signedDocumentPath: String?
     public var agreementSentAt: Date?
     public var proofRecordedAt: Date?
+    /// Enabled pre-made T&C clause ids (`StudioAgreementTermsLibrary`).
+    public var enabledTermsClauseIds: [String]
+    /// Per-clause edited body overrides keyed by clause id.
+    public var termsClauseOverrides: [String: String]
+    /// User's own terms (appended after selected clauses).
+    public var termsCustomText: String
 
     public init(
         id: UUID = UUID(),
@@ -940,7 +946,10 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         clientClearAt: Date? = nil,
         signedDocumentPath: String? = nil,
         agreementSentAt: Date? = nil,
-        proofRecordedAt: Date? = nil
+        proofRecordedAt: Date? = nil,
+        enabledTermsClauseIds: [String] = [],
+        termsClauseOverrides: [String: String] = [:],
+        termsCustomText: String = ""
     ) {
         self.id = id
         self.title = title
@@ -971,6 +980,9 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         self.signedDocumentPath = signedDocumentPath
         self.agreementSentAt = agreementSentAt
         self.proofRecordedAt = proofRecordedAt
+        self.enabledTermsClauseIds = enabledTermsClauseIds
+        self.termsClauseOverrides = termsClauseOverrides
+        self.termsCustomText = termsCustomText
     }
 
     public var isFullySigned: Bool {
@@ -982,19 +994,27 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         return !signedDocumentPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    public var hasApprovalProof: Bool {
+    public var hasClientApprovalProof: Bool {
         switch approvalChannel {
         case .clearToProceed:
             return clientClearToProceed
         case .returnedPDF, .printedScanned, .externalService:
             return hasUploadedSignedDocument
         case .inPerson:
-            return isFullySigned
+            return clientSignaturePNG != nil
         case nil:
             return clientClearToProceed
                 || hasUploadedSignedDocument
-                || isFullySigned
+                || clientSignaturePNG != nil
         }
+    }
+
+    public var hasProviderSignature: Bool {
+        providerSignaturePNG != nil
+    }
+
+    public var hasApprovalProof: Bool {
+        hasClientApprovalProof
     }
 
     public mutating func refreshAgreementStatus() {
@@ -1035,7 +1055,7 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         case nil:
             if clientClearToProceed { return "Client clear to go" }
             if hasUploadedSignedDocument { return "Signed document attached" }
-            if isFullySigned { return "Signed in person" }
+            if clientSignaturePNG != nil { return "Signed in person" }
             return "Approved"
         }
     }
@@ -1071,6 +1091,9 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         signedDocumentPath = try c.decodeIfPresent(String.self, forKey: .signedDocumentPath)
         agreementSentAt = try c.decodeIfPresent(Date.self, forKey: .agreementSentAt)
         proofRecordedAt = try c.decodeIfPresent(Date.self, forKey: .proofRecordedAt)
+        enabledTermsClauseIds = try c.decodeIfPresent([String].self, forKey: .enabledTermsClauseIds) ?? []
+        termsClauseOverrides = try c.decodeIfPresent([String: String].self, forKey: .termsClauseOverrides) ?? [:]
+        termsCustomText = try c.decodeIfPresent(String.self, forKey: .termsCustomText) ?? ""
         refreshAgreementStatus()
     }
 
@@ -1095,6 +1118,9 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         appendSection("Payment", body: paymentAmountNotes, to: &lines)
         appendSection("Payment terms", body: paymentTerms, to: &lines)
         appendSection("Timeline", body: timelineNotes, to: &lines)
+        if hasTermsContent {
+            appendSection("Terms & conditions", body: composedTermsAndConditions, to: &lines)
+        }
 
         if !signOffName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let dateStr = signOffDate.map {

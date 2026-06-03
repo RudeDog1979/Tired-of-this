@@ -128,6 +128,32 @@ public final class SettingsStore: ObservableObject {
         }
     }
 
+    /// Default T&C clauses enabled for new agreement drafts.
+    @Published public var agreementDefaultEnabledClauseIds: [String] = SettingsStore.loadAgreementDefaultClauseIds() {
+        didSet { SettingsStore.saveAgreementDefaultClauseIds(agreementDefaultEnabledClauseIds) }
+    }
+
+    /// Default custom T&C text appended to new agreement drafts.
+    @Published public var agreementDefaultCustomTerms: String = UserDefaults.standard.string(forKey: "buxmuse.agreement.terms.custom") ?? "" {
+        didSet { UserDefaults.standard.set(agreementDefaultCustomTerms, forKey: "buxmuse.agreement.terms.custom") }
+    }
+
+    private static let agreementDefaultClauseIdsKey = "buxmuse.agreement.terms.defaultIds"
+
+    private static func loadAgreementDefaultClauseIds() -> [String] {
+        guard let data = UserDefaults.standard.data(forKey: agreementDefaultClauseIdsKey),
+              let decoded = try? JSONDecoder().decode([String].self, from: data),
+              !decoded.isEmpty else {
+            return StudioAgreementTermsLibrary.defaultEnabledClauseIds
+        }
+        return decoded
+    }
+
+    private static func saveAgreementDefaultClauseIds(_ ids: [String]) {
+        guard let data = try? JSONEncoder().encode(ids) else { return }
+        UserDefaults.standard.set(data, forKey: agreementDefaultClauseIdsKey)
+    }
+
     // MARK: - Side-Hustle Matrix Settings
     @Published public var sideHustleMatrixEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.sidehustle.enabled") {
         didSet {

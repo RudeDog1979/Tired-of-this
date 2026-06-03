@@ -116,6 +116,7 @@ struct AgreementScratchpadEditorView: View {
     @State private var didSave = false
     @State private var showGuidedBuilder = false
     @State private var showImportSheet = false
+    @State private var showTermsEditor = false
     @State private var signatureRole: AgreementSignatureRole?
     @State private var pdfShareURL: URL?
 
@@ -257,14 +258,34 @@ struct AgreementScratchpadEditorView: View {
                 scratchpadField("Timeline & milestones", text: $draft.timelineNotes)
             }
 
-            if showsInPersonSignatures {
-            BuxFormSection(title: "Signatures (in person)") {
-                signatureRow(
-                    title: "Client",
-                    hasSignature: draft.clientSignaturePNG != nil,
-                    signedAt: draft.clientSignedAt,
-                    action: { signatureRole = .client }
-                )
+            BuxFormSection(title: "Terms & conditions") {
+                Text(termsSummary)
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .buxFormFieldPadding()
+                BuxFormRowDivider()
+                Button { showTermsEditor = true } label: {
+                    HStack {
+                        Image(systemName: "doc.text.fill")
+                        Text("Edit terms & conditions")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .bold))
+                            .buxLabelSecondary()
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(themeManager.current.accentColor)
+                }
+                .buxFormFieldPadding()
+            }
+
+            BuxFormSection(title: "Your signature (worker)") {
+                Text("Sign anytime — included when you export a PDF. Client approval uses the channel you chose above.")
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .buxFormFieldPadding()
                 BuxFormRowDivider()
                 signatureRow(
                     title: draft.providerSignatoryName.isEmpty ? "Your signature" : draft.providerSignatoryName,
@@ -275,17 +296,43 @@ struct AgreementScratchpadEditorView: View {
                 BuxFormRowDivider()
                 TextField("Your name on agreement", text: $draft.providerSignatoryName)
                     .buxFormFieldPadding()
-                if draft.clientSignaturePNG != nil || draft.providerSignaturePNG != nil {
+                if draft.providerSignaturePNG != nil {
                     BuxFormRowDivider()
                     Button(role: .destructive) {
-                        clearAllSignatures()
+                        clearProviderSignature()
                     } label: {
-                        Text("Clear all signatures")
+                        Text("Clear your signature")
                             .font(.system(size: 14, weight: .semibold))
                     }
                     .buxFormFieldPadding()
                 }
             }
+
+            if showsClientInPersonSignature {
+                BuxFormSection(title: "Client signature (in person only)") {
+                    Text("Only when the client is with you. For PDF, text, or print-back approval, use Client approval above — not this pad.")
+                        .font(.system(size: 12, weight: .medium))
+                        .buxLabelSecondary()
+                        .fixedSize(horizontal: false, vertical: true)
+                        .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    signatureRow(
+                        title: draft.signOffName.isEmpty ? "Client" : draft.signOffName,
+                        hasSignature: draft.clientSignaturePNG != nil,
+                        signedAt: draft.clientSignedAt,
+                        action: { signatureRole = .client }
+                    )
+                    if draft.clientSignaturePNG != nil {
+                        BuxFormRowDivider()
+                        Button(role: .destructive) {
+                            clearClientSignature()
+                        } label: {
+                            Text("Clear client signature")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .buxFormFieldPadding()
+                    }
+                }
             }
 
             BuxFormSection(title: "Sign-off note (optional)") {
@@ -355,6 +402,18 @@ struct AgreementScratchpadEditorView: View {
             .environmentObject(store)
             .environmentObject(themeManager)
         }
+        .sheet(isPresented: $showTermsEditor) {
+            StudioAgreementTermsEditorView(
+                enabledClauseIds: $draft.enabledTermsClauseIds,
+                clauseOverrides: $draft.termsClauseOverrides,
+                customText: $draft.termsCustomText,
+                showSaveAsDefaults: true
+            )
+            .environmentObject(themeManager)
+        }
+        .onAppear {
+            draft.applyDefaultTermsFromSettings()
+        }
         .sheet(item: $signatureRole) { role in
             AgreementSignatureCaptureSheet(role: role) { png in
                 applySignature(png, role: role)
@@ -374,9 +433,12 @@ struct AgreementScratchpadEditorView: View {
                 Text(draft.statusDisplayLabel)
                     .font(.system(size: 15, weight: .bold))
                 Spacer()
-                if draft.hasApprovalProof {
+                if draft.hasClientApprovalProof {
                     Image(systemName: "checkmark.seal.fill")
                         .foregroundColor(.green)
+                } else if draft.hasProviderSignature {
+                    Image(systemName: "signature")
+                        .foregroundColor(themeManager.current.accentColor)
                 }
             }
             .buxFormFieldPadding()
@@ -411,8 +473,8 @@ struct AgreementScratchpadEditorView: View {
         return simpleStudioStore.entry(id: id)
     }
 
-    private var showsInPersonSignatures: Bool {
-        draft.approvalChannel == .inPerson || draft.approvalChannel == nil
+    private var showsClientInPersonSignature: Bool {
+        draft.approvalChannel == .inPerson
     }
 
     private var hasMeaningfulContent: Bool {
@@ -426,6 +488,18 @@ struct AgreementScratchpadEditorView: View {
             || draft.providerSignaturePNG != nil
             || draft.hasApprovalProof
             || draft.approvalChannel != nil
+            || draft.hasTermsContent
+    }
+
+    private var termsSummary: String {
+        if !draft.hasTermsContent {
+            return "No terms yet. Add deposits, cancellations, liability, and your own policies."
+        }
+        let count = draft.enabledTermsClauseIds.count
+        let custom = !draft.termsCustomText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        if count == 0, custom { return "Custom terms only" }
+        if custom { return "\(count) clauses + your custom terms" }
+        return "\(count) clause\(count == 1 ? "" : "s") included in PDF & share"
     }
 
     private var shareText: String {
@@ -487,15 +561,21 @@ struct AgreementScratchpadEditorView: View {
             draft.providerSignaturePNG = png
             draft.providerSignedAt = Date()
         }
-        if draft.approvalChannel == nil { draft.approvalChannel = .inPerson }
+        if role == .client, draft.approvalChannel != .inPerson {
+            draft.approvalChannel = .inPerson
+        }
         draft.refreshAgreementStatus()
     }
 
-    private func clearAllSignatures() {
-        draft.clientSignaturePNG = nil
+    private func clearProviderSignature() {
         draft.providerSignaturePNG = nil
-        draft.clientSignedAt = nil
         draft.providerSignedAt = nil
+        draft.refreshAgreementStatus()
+    }
+
+    private func clearClientSignature() {
+        draft.clientSignaturePNG = nil
+        draft.clientSignedAt = nil
         draft.refreshAgreementStatus()
     }
 

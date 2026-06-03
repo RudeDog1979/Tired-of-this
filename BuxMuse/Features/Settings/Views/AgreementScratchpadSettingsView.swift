@@ -62,8 +62,30 @@ struct AgreementScratchpadSettingsView: View {
                     }
 
                     BuxFormRowDivider()
+                    NavigationLink {
+                        StudioAgreementDefaultTermsSettingsView()
+                            .environmentObject(themeManager)
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Default terms & conditions")
+                                    .font(.system(size: 15, weight: .semibold))
+                                Text("Pre-made clauses for new agreements — deposits, cancellations, liability, and more.")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .buxLabelSecondary()
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .bold))
+                                .buxLabelSecondary()
+                        }
+                        .buxFormFieldPadding()
+                    }
+                    BuxFormRowDivider()
                     VStack(alignment: .leading, spacing: 10) {
                         infoRow(icon: "list.bullet.rectangle", color: .indigo, title: "Scope & deliverables", body: "Capture what you're delivering and what's out of scope before work starts.")
+                        Divider().opacity(0.1)
+                        infoRow(icon: "doc.plaintext", color: .purple, title: "Terms & conditions", body: "Pick editable template clauses or write your own — included in PDFs.")
                         Divider().opacity(0.1)
                         infoRow(icon: "signature", color: .green, title: "Client approval", body: "In person, clear to go, attach a signed PDF, or note an external service — stored on your device.")
                         Divider().opacity(0.1)
