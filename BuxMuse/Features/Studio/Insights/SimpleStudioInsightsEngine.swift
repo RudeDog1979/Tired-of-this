@@ -13,25 +13,28 @@ public struct SimpleStudioInsightsSnapshot: Equatable, Sendable {
     public var paidJobCount: Int
     public var rateTip: String?
 
-    public static let empty = SimpleStudioInsightsSnapshot(
-        headline: "Log jobs to see earnings insights.",
-        profitPerJobFormatted: nil,
-        openJobCount: 0,
-        waitingTotalFormatted: nil,
-        paidJobCount: 0,
-        rateTip: nil
-    )
+    public static func empty(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> SimpleStudioInsightsSnapshot {
+        SimpleStudioInsightsSnapshot(
+            headline: SimpleStudioCopy.line("Log jobs to see earnings insights.", locale: locale),
+            profitPerJobFormatted: nil,
+            openJobCount: 0,
+            waitingTotalFormatted: nil,
+            paidJobCount: 0,
+            rateTip: nil
+        )
+    }
 }
 
 public enum SimpleStudioInsightsEngine {
 
     public static func build(
         entries: [SimpleStudioEntry],
-        currencyFormat: (Decimal) -> String
+        currencyFormat: (Decimal) -> String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> SimpleStudioInsightsSnapshot {
         let jobs = entries.filter { $0.kind == .job }
         guard !jobs.isEmpty else {
-            return .empty
+            return .empty(locale: locale)
         }
 
         let paidJobs = jobs.filter { $0.paymentStatus == .paid || $0.isJobFullyPaid }
@@ -49,19 +52,31 @@ public enum SimpleStudioInsightsEngine {
             let earned = SimpleStudioTimePayEngine.earnings(seconds: logged, hourlyRate: rate)
             return earned < rate * 2
         }) {
-            rateTip = "Check rate on \"\(underpriced.jobLabel ?? underpriced.customerName)\" — logged time may be underpriced."
+            rateTip = SimpleStudioCopy.format(
+                "Check rate on \"%@\" — logged time may be underpriced.",
+                locale: locale,
+                underpriced.jobLabel ?? underpriced.customerName
+            )
         } else if openJobs.count >= 3 {
-            rateTip = "\(openJobs.count) jobs still waiting for payment — send a reminder from Waiting."
+            rateTip = SimpleStudioCopy.format(
+                "%lld jobs still waiting for payment — send a reminder from Waiting.",
+                locale: locale,
+                Int64(openJobs.count)
+            )
         }
 
         let headline: String = {
             if paidJobs.count == jobs.count {
-                return "All tracked jobs are paid. Nice work."
+                return SimpleStudioCopy.line("All tracked jobs are paid. Nice work.", locale: locale)
             }
             if waitingTotal > 0 {
-                return "You have money waiting on \(openJobs.count) job(s)."
+                return SimpleStudioCopy.format(
+                    "You have money waiting on %lld job(s).",
+                    locale: locale,
+                    Int64(openJobs.count)
+                )
             }
-            return "Track profit and waiting balances at a glance."
+            return SimpleStudioCopy.line("Track profit and waiting balances at a glance.", locale: locale)
         }()
 
         return SimpleStudioInsightsSnapshot(

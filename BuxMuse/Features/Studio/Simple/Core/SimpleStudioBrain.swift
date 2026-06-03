@@ -43,16 +43,19 @@ public final class SimpleStudioBrain: ObservableObject {
             ? studioStore.profile.displayName
             : studioStore.profile.businessName
         let format: (Decimal) -> String = { [appSettings] in appSettings.format($0) }
+        let locale = appSettings.interfaceLocale
         hubDisplay = SimpleStudioEngine.buildHubDisplay(
             snapshot: store.snapshot,
             businessTitle: title,
             persona: settings.studioPersona,
-            format: format
+            format: format,
+            locale: locale
         )
         myMoneyDisplay = SimpleStudioEngine.buildMyMoneyDisplay(
             snapshot: store.snapshot,
             persona: settings.studioPersona,
-            format: format
+            format: format,
+            locale: locale
         )
     }
 
@@ -90,6 +93,12 @@ public final class SimpleStudioBrain: ObservableObject {
             .store(in: &cancellables)
 
         appSettings.$selectedCurrency
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshAll() }
+            .store(in: &cancellables)
+
+        appSettings.$selectedCountry
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.refreshAll() }

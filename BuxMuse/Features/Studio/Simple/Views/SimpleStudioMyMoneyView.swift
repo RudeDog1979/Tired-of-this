@@ -47,12 +47,12 @@ struct SimpleStudioMyMoneyView: View {
                             selectedSliceID: $selectedSliceID
                         )
 
-                        Text("Tap the chart or a row below to filter")
+                        BuxCatalogText.text("Tap the chart or a row below to filter")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(.secondary)
 
                         if selectedSliceID != nil {
-                            Button("Clear filter") {
+                            Button(BuxCatalogLabel.string("Clear filter", locale: appSettingsManager.interfaceLocale)) {
                                 withAnimation(SimpleStudioDonutChart.selectionAnimation) {
                                     selectedSliceID = nil
                                 }
@@ -111,10 +111,22 @@ struct SimpleStudioMyMoneyView: View {
                                         }
                                         Spacer()
                                         VStack(alignment: .trailing, spacing: 2) {
-                                            Text("Keep \(pocket.keptFormatted)")
+                                            Text(
+                                                BuxLocalizedString.format(
+                                                    "Keep %@",
+                                                    locale: appSettingsManager.interfaceLocale,
+                                                    pocket.keptFormatted
+                                                )
+                                            )
                                                 .font(.system(size: 13, weight: .bold))
                                                 .foregroundColor(.green)
-                                            Text("Agreed \(pocket.agreedFormatted)")
+                                            Text(
+                                                BuxLocalizedString.format(
+                                                    "Agreed %@",
+                                                    locale: appSettingsManager.interfaceLocale,
+                                                    pocket.agreedFormatted
+                                                )
+                                            )
                                                 .font(.system(size: 10, weight: .medium))
                                                 .buxLabelSecondary()
                                         }
@@ -129,15 +141,39 @@ struct SimpleStudioMyMoneyView: View {
                                     }
                                     .frame(height: 8)
                                     HStack {
-                                        Text("Spent \(pocket.spentFormatted)")
+                                        Text(
+                                            BuxLocalizedString.format(
+                                                "Spent %@",
+                                                locale: appSettingsManager.interfaceLocale,
+                                                pocket.spentFormatted
+                                            )
+                                        )
                                         Spacer()
-                                        Text("Paid \(pocket.paidFormatted)")
+                                        Text(
+                                            BuxLocalizedString.format(
+                                                "Paid %@",
+                                                locale: appSettingsManager.interfaceLocale,
+                                                pocket.paidFormatted
+                                            )
+                                        )
                                         Spacer()
-                                        Text("Waiting \(pocket.waitingFormatted)")
+                                        Text(
+                                            BuxLocalizedString.format(
+                                                "Waiting %@",
+                                                locale: appSettingsManager.interfaceLocale,
+                                                pocket.waitingFormatted
+                                            )
+                                        )
                                     }
                                     .font(.system(size: 10, weight: .medium))
                                     .buxLabelSecondary()
-                                    Text("When paid: keep \(pocket.projectedKeptFormatted)")
+                                    Text(
+                                        BuxLocalizedString.format(
+                                            "When paid: keep %@",
+                                            locale: appSettingsManager.interfaceLocale,
+                                            pocket.projectedKeptFormatted
+                                        )
+                                    )
                                         .font(.system(size: 10, weight: .semibold))
                                         .foregroundColor(themeManager.current.accentColor)
                                 }
@@ -152,7 +188,8 @@ struct SimpleStudioMyMoneyView: View {
             .padding(.vertical, BuxTokens.section)
         }
         .background(themeManager.screenBackground(for: colorScheme))
-        .navigationTitle("My money")
+        .buxCatalogNavigationTitle("My money")
+        .buxInterfaceLocale()
         .navigationBarTitleDisplayMode(.large)
         .alert(markPaidAlertTitle, isPresented: $showMarkPaidConfirmation) {
             Button(markPaidConfirmLabel) {
@@ -163,7 +200,7 @@ struct SimpleStudioMyMoneyView: View {
                 }
                 pendingMarkPaidId = nil
             }
-            Button("Cancel", role: .cancel) {
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {
                 pendingMarkPaidId = nil
             }
         } message: {
@@ -247,48 +284,58 @@ struct SimpleStudioMyMoneyView: View {
         .buttonStyle(.plain)
     }
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
     private func filterTitle(for sliceID: String) -> String {
         switch sliceID {
-        case "made": return "Made this month"
-        case "spent": return "Spent this month"
-        case "waiting": return "Waiting on"
-        case "owe": return "You owe"
-        default: return "Filtered"
+        case "made": return SimpleStudioCopy.line("Made this month", locale: locale)
+        case "spent": return SimpleStudioCopy.line("Spent this month", locale: locale)
+        case "waiting": return SimpleStudioCopy.line("Waiting on", locale: locale)
+        case "owe": return SimpleStudioCopy.line("You owe", locale: locale)
+        default: return SimpleStudioCopy.line("Filtered", locale: locale)
         }
     }
 
     private func emptyFilterMessage(for sliceID: String) -> String {
         switch sliceID {
         case "waiting":
-            return "Nothing waiting right now — nice."
+            return SimpleStudioCopy.line("Nothing waiting right now — nice.", locale: locale)
         case "owe":
-            return "You don't owe anyone in your ledger."
+            return SimpleStudioCopy.line("You don't owe anyone in your ledger.", locale: locale)
         case "made":
-            return "No income logged this month yet."
+            return SimpleStudioCopy.line("No income logged this month yet.", locale: locale)
         case "spent":
-            return "No spending logged this month yet."
+            return SimpleStudioCopy.line("No spending logged this month yet.", locale: locale)
         default:
-            return "No matches for this slice."
+            return SimpleStudioCopy.line("No matches for this slice.", locale: locale)
         }
     }
 
     private var markPaidAlertTitle: String {
-        guard let id = pendingMarkPaidId else { return "Mark as paid?" }
-        return display.iOweItems.contains { $0.id == id } ? "Mark as settled?" : "Mark as paid?"
+        guard let id = pendingMarkPaidId else {
+            return SimpleStudioCopy.line("Mark as paid?", locale: locale)
+        }
+        return display.iOweItems.contains { $0.id == id }
+            ? SimpleStudioCopy.line("Mark as settled?", locale: locale)
+            : SimpleStudioCopy.line("Mark as paid?", locale: locale)
     }
 
     private var markPaidConfirmLabel: String {
-        guard let id = pendingMarkPaidId else { return "Mark paid" }
-        return display.iOweItems.contains { $0.id == id } ? "Mark settled" : "Mark paid"
+        guard let id = pendingMarkPaidId else {
+            return SimpleStudioCopy.line("Mark paid", locale: locale)
+        }
+        return display.iOweItems.contains { $0.id == id }
+            ? SimpleStudioCopy.line("Mark settled", locale: locale)
+            : SimpleStudioCopy.line("Mark paid", locale: locale)
     }
 
     private var markPaidAlertMessage: String {
         guard let id = pendingMarkPaidId else {
-            return "This will mark the balance as fully paid."
+            return SimpleStudioCopy.line("This will mark the balance as fully paid.", locale: locale)
         }
         return display.iOweItems.contains { $0.id == id }
-            ? "This clears what you owe them."
-            : "This will mark the balance as fully paid."
+            ? SimpleStudioCopy.line("This clears what you owe them.", locale: locale)
+            : SimpleStudioCopy.line("This will mark the balance as fully paid.", locale: locale)
     }
 
     private func openEntry(for id: UUID) {
@@ -301,7 +348,9 @@ struct SimpleStudioMyMoneyView: View {
 
     private func shareReminder(for item: SimpleWaitingItem) {
         let phone = store.customer(named: item.customerName)?.phone
-        let businessName = studioStore.profile.businessName.isEmpty ? "Your Work" : studioStore.profile.businessName
+        let businessName = studioStore.profile.businessName.isEmpty
+            ? SimpleStudioCopy.line("Your Work", locale: locale)
+            : studioStore.profile.businessName
         SimpleStudioReminderHelper.presentContactOptions(
             SimpleStudioReminderHelper.Payload(
                 customerName: item.customerName,

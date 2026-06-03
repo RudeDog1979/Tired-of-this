@@ -130,7 +130,7 @@ struct SimpleStudioJobQuoteSheet: View {
                                 .padding(.vertical, 10)
 
                                 if payStyle == .onePrice {
-                                    Text("One total price for the job — your work clock only tracks time, not money.")
+                                    BuxCatalogDynamicText(key: "One total price for the job — your work clock only tracks time, not money.")
                                         .font(.system(size: 12, weight: .medium))
                                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                         .padding(.horizontal, BuxTokens.section)
@@ -140,7 +140,7 @@ struct SimpleStudioJobQuoteSheet: View {
                                         .keyboardType(.decimalPad)
                                         .buxFormFieldPadding()
                                 } else {
-                                    Text("You charge per hour — the work clock multiplies hours × your rate.")
+                                    BuxCatalogDynamicText(key: "You charge per hour — the work clock multiplies hours × your rate.")
                                         .font(.system(size: 12, weight: .medium))
                                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                         .padding(.horizontal, BuxTokens.section)
@@ -159,9 +159,9 @@ struct SimpleStudioJobQuoteSheet: View {
                             BuxFormSection(title: "How long should it take?") {
                                 Toggle(isOn: $hasPlannedTime) {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("Set a time for this job")
+                                        BuxCatalogDynamicText(key: "Set a time for this job")
                                             .font(.system(size: 14, weight: .semibold))
-                                        Text("Lock Screen shows a walker moving toward done — clock can stop when time is up.")
+                                        BuxCatalogDynamicText(key: "Lock Screen shows a walker moving toward done — clock can stop when time is up.")
                                             .font(.system(size: 11))
                                             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                     }
@@ -173,12 +173,28 @@ struct SimpleStudioJobQuoteSheet: View {
                                     BuxFormRowDivider()
                                     HStack(spacing: BuxTokens.tight) {
                                         Picker("Hours", selection: $planHours) {
-                                            ForEach(0..<13, id: \.self) { Text("\($0) h").tag($0) }
+                                            ForEach(0..<13, id: \.self) { hour in
+                                                Text(
+                                                    BuxLocalizedString.format(
+                                                        "%lld h",
+                                                        locale: appSettingsManager.interfaceLocale,
+                                                        Int64(hour)
+                                                    )
+                                                )
+                                                .tag(hour)
+                                            }
                                         }
                                         .pickerStyle(.menu)
                                         Picker("Minutes", selection: $planMinutes) {
                                             ForEach(Array(stride(from: 0, through: 55, by: 5)), id: \.self) { m in
-                                                Text("\(m) m").tag(m)
+                                                Text(
+                                                    BuxLocalizedString.format(
+                                                        "%lld m",
+                                                        locale: appSettingsManager.interfaceLocale,
+                                                        Int64(m)
+                                                    )
+                                                )
+                                                .tag(m)
                                             }
                                         }
                                         .pickerStyle(.menu)
@@ -188,14 +204,14 @@ struct SimpleStudioJobQuoteSheet: View {
 
                                     BuxFormRowDivider()
                                     Toggle(isOn: $pauseWhenTimeUp) {
-                                        Text("Stop the clock when time is up")
+                                        BuxCatalogDynamicText(key: "Stop the clock when time is up")
                                             .font(.system(size: 14, weight: .semibold))
                                     }
                                     .padding(.horizontal, BuxTokens.section)
                                     .padding(.vertical, 10)
 
                                     if payStyle == .byTheHour {
-                                        Text("Example: agreed 2 hours at your hourly rate — set 2 h here and the clock pauses at 2 h.")
+                                        BuxCatalogDynamicText(key: "Example: agreed 2 hours at your hourly rate — set 2 h here and the clock pauses at 2 h.")
                                             .font(.system(size: 11, weight: .medium))
                                             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                             .padding(.horizontal, BuxTokens.section)
@@ -207,7 +223,7 @@ struct SimpleStudioJobQuoteSheet: View {
                             BuxFormSection(title: "Payment status") {
                                 Picker("Status", selection: $paymentMode) {
                                     ForEach(SimpleJobPaymentMode.allCases) { mode in
-                                        Text(mode.rawValue).tag(mode)
+                                        Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                                     }
                                 }
                                 .pickerStyle(.segmented)
@@ -280,7 +296,7 @@ struct SimpleStudioJobQuoteSheet: View {
                     .padding(.top, BuxTokens.section)
                 }
             }
-            .navigationTitle(existingJob == nil ? "Quote job" : "Edit job")
+            .buxCatalogNavigationTitle(existingJob == nil ? "Quote job" : "Edit job")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -324,7 +340,7 @@ struct SimpleStudioJobQuoteSheet: View {
     private func calculationCard(_ b: SimpleJobBreakdown) -> some View {
         BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.hero, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: BuxTokens.section) {
-                Text("Job math")
+                BuxCatalogDynamicText(key: "Job math")
                     .font(.system(size: 13, weight: .bold))
                     .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
 
@@ -494,12 +510,12 @@ struct SimpleQuoteCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(businessName)
                         .font(.system(size: 18, weight: .bold))
-                    Text("Job Quote")
+                    BuxCatalogDynamicText(key: "Job Quote")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text("QUOTE")
+                BuxCatalogDynamicText(key: "QUOTE")
                     .font(.system(size: 10, weight: .black))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
@@ -509,7 +525,7 @@ struct SimpleQuoteCardView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("For")
+                BuxCatalogDynamicText(key: "For")
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Text(customerName)
@@ -519,7 +535,7 @@ struct SimpleQuoteCardView: View {
             }
 
             HStack {
-                Text("Agreed price")
+                BuxCatalogDynamicText(key: "Agreed price")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -534,7 +550,7 @@ struct SimpleQuoteCardView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text("Sent via BuxMuse · Not a bank")
+            BuxCatalogDynamicText(key: "Sent via BuxMuse · Not a bank")
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(.tertiary)
         }

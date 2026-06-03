@@ -47,9 +47,18 @@ struct SimpleStudioSearchView: View {
             .padding(.bottom, BuxTokens.sheetBottomClearance)
         }
         .background(themeManager.screenBackground(for: colorScheme))
-        .navigationTitle(isProSearch ? "Pro Search" : "Search")
+        .buxCatalogNavigationTitle(isProSearch ? "Pro Search" : "Search")
         .navigationBarTitleDisplayMode(.large)
-        .searchable(text: $query, prompt: "Who owes me? Jobs for Maria…")
+        .searchable(
+            text: $query,
+            prompt: Text(
+                BuxCatalogLabel.string(
+                    "Who owes me? Jobs for Maria…",
+                    locale: appSettingsManager.interfaceLocale
+                )
+            )
+        )
+        .buxInterfaceLocale()
         .sheet(item: $detailDestination) { destination in
             switch destination {
             case .entry(let id):
@@ -81,7 +90,7 @@ struct SimpleStudioSearchView: View {
 
     private var suggestionsSection: some View {
         VStack(alignment: .leading, spacing: BuxTokens.section) {
-            Text("Try asking like this")
+            BuxCatalogDynamicText(key: "Try asking like this")
                 .font(.system(size: 13, weight: .bold))
                 .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
 
@@ -94,7 +103,7 @@ struct SimpleStudioSearchView: View {
                             Image(systemName: isProSearch ? "sparkles" : "magnifyingglass")
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(themeManager.current.accentColor)
-                            Text(suggestion)
+                            BuxCatalogDynamicText(key: suggestion)
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Spacer()
@@ -115,9 +124,11 @@ struct SimpleStudioSearchView: View {
                 }
             }
 
-            Text(isProSearch
-                ? "Pro Search understands plain questions — people, jobs, invoices, and who still owes you. Works offline."
-                : "Works offline — search people, jobs, invoices, and who still owes you.")
+            BuxCatalogDynamicText(
+                key: isProSearch
+                    ? "Pro Search understands plain questions — people, jobs, invoices, and who still owes you. Works offline."
+                    : "Works offline — search people, jobs, invoices, and who still owes you."
+            )
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
         }
@@ -128,9 +139,9 @@ struct SimpleStudioSearchView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 32, weight: .semibold))
                 .foregroundStyle(.secondary)
-            Text("No matches")
+            BuxCatalogDynamicText(key: "No matches")
                 .font(.system(size: 17, weight: .bold))
-            Text("Try a name, “waiting on payment”, or “jobs this month”.")
+            BuxCatalogDynamicText(key: "Try a name, “waiting on payment”, or “jobs this month”.")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -141,7 +152,13 @@ struct SimpleStudioSearchView: View {
 
     private var resultsSection: some View {
         VStack(alignment: .leading, spacing: BuxTokens.tight) {
-            Text("\(results.count) result\(results.count == 1 ? "" : "s")")
+            Text(
+                BuxLocalizedString.format(
+                    results.count == 1 ? "%lld result" : "%lld results",
+                    locale: appSettingsManager.interfaceLocale,
+                    Int64(results.count)
+                )
+            )
                 .font(.system(size: 12, weight: .bold))
                 .buxLabelSecondary()
 
@@ -177,7 +194,7 @@ struct SimpleStudioSearchView: View {
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.leading)
-                    Text(result.matchReason)
+                    Text(result.localizedMatchReason(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
                 }

@@ -8,6 +8,7 @@ import SwiftUI
 struct SimpleStudioPersonaPickerView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var settings = SettingsStore.shared
 
     var onComplete: () -> Void
@@ -20,10 +21,10 @@ struct SimpleStudioPersonaPickerView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("What kind of work do you do?")
+                            BuxCatalogDynamicText(key: "What kind of work do you do?")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Text("Same app for everyone — this just sets smart defaults. Change anytime in Settings.")
+                            BuxCatalogDynamicText(key: "Same app for everyone — this just sets smart defaults. Change anytime in Settings.")
                                 .font(.system(size: 13, weight: .medium))
                                 .buxLabelSecondary()
                         }
@@ -40,6 +41,7 @@ struct SimpleStudioPersonaPickerView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .buxInterfaceLocale()
         }
     }
 
@@ -61,10 +63,10 @@ struct SimpleStudioPersonaPickerView: View {
                         .foregroundColor(themeManager.current.accentColor)
                 }
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(persona.title)
+                    Text(persona.localizedTitle(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text(persona.subtitle)
+                    Text(persona.localizedSubtitle(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                 }

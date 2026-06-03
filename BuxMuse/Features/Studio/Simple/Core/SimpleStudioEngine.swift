@@ -13,7 +13,8 @@ enum SimpleStudioEngine {
         snapshot: SimpleStudioSnapshot,
         businessTitle: String,
         persona: StudioPersona,
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> SimpleStudioHubDisplay {
         let calendar = Calendar.current
         let now = Date()
@@ -29,28 +30,32 @@ enum SimpleStudioEngine {
         let owe = sumIOwe(entries: snapshot.entries)
 
         return SimpleStudioHubDisplay(
-            businessTitle: businessTitle.isEmpty ? "Your Work" : businessTitle,
+            businessTitle: businessTitle.isEmpty
+                ? SimpleStudioCopy.line("Your Work", locale: locale)
+                : businessTitle,
             todayKeptFormatted: format(todayKept),
             madeFormatted: format(monthMade),
             spentFormatted: format(monthSpent),
             waitingFormatted: format(waiting),
             oweFormatted: format(owe),
-            spentFootnote: spentFootnote(for: persona),
-            waitingItems: buildWaitingItems(snapshot: snapshot, format: format),
-            iOweItems: buildIOweItems(snapshot: snapshot, format: format),
-            recentItems: buildRecentItems(snapshot: snapshot, format: format),
+            spentFootnote: spentFootnote(for: persona, locale: locale),
+            waitingItems: buildWaitingItems(snapshot: snapshot, format: format, locale: locale),
+            iOweItems: buildIOweItems(snapshot: snapshot, format: format, locale: locale),
+            recentItems: buildRecentItems(snapshot: snapshot, format: format, locale: locale),
             monthChartSlices: buildMonthChartSlices(
                 made: monthMade,
                 spent: monthSpent,
                 waiting: waiting,
                 owe: owe,
-                format: format
+                format: format,
+                locale: locale
             ),
             taxTile: buildTaxTile(
                 made: monthMade,
                 spent: monthSpent,
                 persona: persona,
-                format: format
+                format: format,
+                locale: locale
             ),
             isEmpty: snapshot.entries.isEmpty && snapshot.invoices.isEmpty
         )
@@ -59,7 +64,8 @@ enum SimpleStudioEngine {
     static func buildMyMoneyDisplay(
         snapshot: SimpleStudioSnapshot,
         persona: StudioPersona,
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> SimpleMyMoneyDisplay {
         let calendar = Calendar.current
         let now = Date()
@@ -77,12 +83,13 @@ enum SimpleStudioEngine {
                 spent: monthSpent,
                 waiting: waiting,
                 owe: owe,
-                format: format
+                format: format,
+                locale: locale
             ),
-            waitingItems: buildWaitingItems(snapshot: snapshot, format: format),
-            iOweItems: buildIOweItems(snapshot: snapshot, format: format),
-            jobPockets: buildJobPockets(entries: monthEntries, format: format),
-            taxTile: buildTaxTile(made: monthMade, spent: monthSpent, persona: persona, format: format)
+            waitingItems: buildWaitingItems(snapshot: snapshot, format: format, locale: locale),
+            iOweItems: buildIOweItems(snapshot: snapshot, format: format, locale: locale),
+            jobPockets: buildJobPockets(entries: monthEntries, format: format, locale: locale),
+            taxTile: buildTaxTile(made: monthMade, spent: monthSpent, persona: persona, format: format, locale: locale)
         )
     }
 
@@ -137,7 +144,8 @@ enum SimpleStudioEngine {
 
     static func buildWaitingItems(
         snapshot: SimpleStudioSnapshot,
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale
     ) -> [SimpleWaitingItem] {
         var items: [SimpleWaitingItem] = []
 
@@ -155,11 +163,11 @@ enum SimpleStudioEngine {
         }
 
         for entry in snapshot.entries where entry.kind == .owedToMe && entry.paymentStatus != .paid {
-            items.append(waitingItem(for: entry, snapshot: snapshot, format: format))
+            items.append(waitingItem(for: entry, snapshot: snapshot, format: format, locale: locale))
         }
 
         for entry in snapshot.entries where entry.kind == .job && !entry.isJobFullyPaid {
-            items.append(waitingItem(for: entry, snapshot: snapshot, format: format))
+            items.append(waitingItem(for: entry, snapshot: snapshot, format: format, locale: locale))
         }
 
         return items.sorted { $0.daysWaiting > $1.daysWaiting }
@@ -167,17 +175,20 @@ enum SimpleStudioEngine {
 
     static func buildIOweItems(
         snapshot: SimpleStudioSnapshot,
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale
     ) -> [SimpleWaitingItem] {
         snapshot.entries
             .filter { ($0.kind == .iOwe || $0.kind == .lent) && $0.paymentStatus != .paid }
             .map { entry in
                 SimpleWaitingItem(
                     id: entry.id,
-                    customerName: entry.customerName.isEmpty ? "Someone" : entry.customerName,
+                    customerName: entry.customerName.isEmpty
+                        ? SimpleStudioCopy.line("Someone", locale: locale)
+                        : entry.customerName,
                     amount: entry.amount,
                     amountFormatted: format(entry.amount),
-                    jobLabel: entry.jobLabel ?? entry.kind.logTitle,
+                    jobLabel: entry.jobLabel ?? entry.kind.localizedLogTitle(locale: locale),
                     daysWaiting: daysSince(entry.createdAt),
                     advanceBalance: nil,
                     advanceBalanceFormatted: nil
@@ -189,6 +200,7 @@ enum SimpleStudioEngine {
     static func buildRecentItems(
         snapshot: SimpleStudioSnapshot,
         format: (Decimal) -> String,
+        locale: Locale,
         limit: Int = 8
     ) -> [SimpleRecentItem] {
         var rows: [SimpleRecentItem] = []
@@ -197,8 +209,8 @@ enum SimpleStudioEngine {
             let positive = entry.netKept >= 0
             rows.append(SimpleRecentItem(
                 id: entry.id,
-                title: recentTitle(for: entry),
-                subtitle: recentSubtitle(for: entry),
+                title: recentTitle(for: entry, locale: locale),
+                subtitle: recentSubtitle(for: entry, locale: locale),
                 amountFormatted: format(abs(entry.netKept != 0 ? entry.netKept : entry.amount)),
                 isPositive: positive,
                 hasPhoto: entry.sourcePhotoPath != nil,
@@ -210,8 +222,10 @@ enum SimpleStudioEngine {
         for invoice in snapshot.invoices.sorted(by: { $0.createdAt > $1.createdAt }).prefix(max(0, limit - rows.count)) {
             rows.append(SimpleRecentItem(
                 id: invoice.id,
-                title: "Invoice → \(invoice.customerName)",
-                subtitle: invoice.status == .paid ? "Paid" : "Sent · waiting",
+                title: SimpleStudioCopy.format("Invoice → %@", locale: locale, invoice.customerName),
+                subtitle: invoice.status == .paid
+                    ? SimpleStudioCopy.line("Paid", locale: locale)
+                    : SimpleStudioCopy.line("Sent · waiting", locale: locale),
                 amountFormatted: format(invoice.amount),
                 isPositive: true,
                 hasPhoto: false,
@@ -226,19 +240,27 @@ enum SimpleStudioEngine {
     static func waitingItem(
         for entry: SimpleStudioEntry,
         snapshot: SimpleStudioSnapshot,
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale
     ) -> SimpleWaitingItem {
         let due = entry.kind == .job ? entry.jobBalanceDue : entry.amount
         let advance = entry.advanceAmount ?? advanceBalance(for: entry, in: snapshot.entries)
         let label: String = {
             if entry.kind == .job, let agreed = entry.agreedPrice {
-                return "\(entry.jobLabel ?? "Job") · agreed \(format(agreed))"
+                return SimpleStudioCopy.format(
+                    "%@ · agreed %@",
+                    locale: locale,
+                    entry.jobLabel ?? SimpleStudioCopy.line("Job", locale: locale),
+                    format(agreed)
+                )
             }
-            return entry.jobLabel ?? entry.kind.logTitle
+            return entry.jobLabel ?? entry.kind.localizedLogTitle(locale: locale)
         }()
         return SimpleWaitingItem(
             id: entry.id,
-            customerName: entry.customerName.isEmpty ? "Someone" : entry.customerName,
+            customerName: entry.customerName.isEmpty
+                ? SimpleStudioCopy.line("Someone", locale: locale)
+                : entry.customerName,
             amount: due,
             amountFormatted: format(due),
             jobLabel: label,
@@ -250,7 +272,8 @@ enum SimpleStudioEngine {
 
     static func buildJobPockets(
         entries: [SimpleStudioEntry],
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale
     ) -> [SimpleJobPocketDisplay] {
         entries
             .filter { $0.kind == .job }
@@ -265,8 +288,10 @@ enum SimpleStudioEngine {
                 )
                 return SimpleJobPocketDisplay(
                     id: job.id,
-                    customerName: job.customerName.isEmpty ? "Customer" : job.customerName,
-                    jobLabel: job.jobLabel ?? "Job",
+                    customerName: job.customerName.isEmpty
+                        ? SimpleStudioCopy.line("Customer", locale: locale)
+                        : job.customerName,
+                    jobLabel: job.jobLabel ?? SimpleStudioCopy.line("Job", locale: locale),
                     agreedFormatted: format(breakdown.agreed),
                     paidFormatted: format(breakdown.paidSoFar),
                     spentFormatted: format(breakdown.spent),
@@ -283,7 +308,8 @@ enum SimpleStudioEngine {
         spent: Decimal,
         waiting: Decimal,
         owe: Decimal,
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale
     ) -> [SimpleChartSlice] {
         let total = made + spent + waiting + owe
         let totalDouble = max(NSDecimalNumber(decimal: total).doubleValue, 1)
@@ -297,10 +323,10 @@ enum SimpleStudioEngine {
             )
         }
         return [
-            slice(id: "made", label: "Made", value: made),
-            slice(id: "spent", label: "Spent", value: spent),
-            slice(id: "waiting", label: "Waiting", value: waiting),
-            slice(id: "owe", label: "You owe", value: owe)
+            slice(id: "made", label: SimpleStudioCopy.line("Made", locale: locale), value: made),
+            slice(id: "spent", label: SimpleStudioCopy.line("Spent", locale: locale), value: spent),
+            slice(id: "waiting", label: SimpleStudioCopy.line("Waiting", locale: locale), value: waiting),
+            slice(id: "owe", label: SimpleStudioCopy.line("You owe", locale: locale), value: owe)
         ].filter { $0.value > 0 }
     }
 
@@ -308,7 +334,8 @@ enum SimpleStudioEngine {
         made: Decimal,
         spent: Decimal,
         persona: StudioPersona,
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale
     ) -> SimpleTaxTileDisplay {
         let keep = made - spent
         let mightOwe = max(0, keep * Decimal(0.15))
@@ -317,7 +344,7 @@ enum SimpleStudioEngine {
             spent: format(spent),
             keep: format(keep),
             mightOwe: format(mightOwe),
-            coachLine: coachLine(for: persona)
+            coachLine: coachLine(for: persona, locale: locale)
         )
     }
 
@@ -338,49 +365,67 @@ enum SimpleStudioEngine {
         max(0, Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0)
     }
 
-    static func spentFootnote(for persona: StudioPersona) -> String {
+    static func spentFootnote(for persona: StudioPersona, locale: Locale) -> String {
         switch persona {
-        case .tasksAndGigs: return "fees + travel"
-        case .jobsAndRepairs: return "materials + petrol"
-        case .driving: return "fuel + costs"
-        case .shop: return "stock + costs"
-        case .lending: return "loans out"
-        case .other: return "job costs"
+        case .tasksAndGigs: return SimpleStudioCopy.line("fees + travel", locale: locale)
+        case .jobsAndRepairs: return SimpleStudioCopy.line("materials + petrol", locale: locale)
+        case .driving: return SimpleStudioCopy.line("fuel + costs", locale: locale)
+        case .shop: return SimpleStudioCopy.line("stock + costs", locale: locale)
+        case .lending: return SimpleStudioCopy.line("loans out", locale: locale)
+        case .other: return SimpleStudioCopy.line("job costs", locale: locale)
         }
     }
 
-    static func coachLine(for persona: StudioPersona) -> String {
+    static func coachLine(for persona: StudioPersona, locale: Locale) -> String {
         switch persona {
         case .tasksAndGigs:
-            return "Many gig workers set aside a little from each job — this is just a guide."
+            return SimpleStudioCopy.line(
+                "Many gig workers set aside a little from each job — this is just a guide.",
+                locale: locale
+            )
         case .jobsAndRepairs:
-            return "Track materials and petrol so you know what each job really paid."
+            return SimpleStudioCopy.line(
+                "Track materials and petrol so you know what each job really paid.",
+                locale: locale
+            )
         case .driving:
-            return "Fuel adds up — logging trips keeps your real pay honest."
+            return SimpleStudioCopy.line(
+                "Fuel adds up — logging trips keeps your real pay honest.",
+                locale: locale
+            )
         case .shop:
-            return "Know what came in and what went out each day."
+            return SimpleStudioCopy.line(
+                "Know what came in and what went out each day.",
+                locale: locale
+            )
         case .lending:
-            return "Keep hand-to-hand loans clear — for you and them."
+            return SimpleStudioCopy.line(
+                "Keep hand-to-hand loans clear — for you and them.",
+                locale: locale
+            )
         case .other:
-            return "Simple numbers help you plan — not official tax advice."
+            return SimpleStudioCopy.line(
+                "Simple numbers help you plan — not official tax advice.",
+                locale: locale
+            )
         }
     }
 
-    static func recentTitle(for entry: SimpleStudioEntry) -> String {
+    static func recentTitle(for entry: SimpleStudioEntry, locale: Locale) -> String {
         switch entry.kind {
-        case .income: return "Income"
-        case .expense: return "Expense"
-        case .job: return entry.jobLabel ?? "Job"
-        case .advanceReceived: return "Advance"
-        case .owedToMe: return "Waiting on"
-        case .iOwe: return "You owe"
-        case .lent: return "Lent out"
-        case .repaymentReceived: return "Repayment"
+        case .income: return SimpleStudioCopy.line("Income", locale: locale)
+        case .expense: return SimpleStudioCopy.line("Expense", locale: locale)
+        case .job: return entry.jobLabel ?? SimpleStudioCopy.line("Job", locale: locale)
+        case .advanceReceived: return SimpleStudioCopy.line("Advance", locale: locale)
+        case .owedToMe: return SimpleStudioCopy.line("Waiting on", locale: locale)
+        case .iOwe: return SimpleStudioCopy.line("You owe", locale: locale)
+        case .lent: return SimpleStudioCopy.line("Lent out", locale: locale)
+        case .repaymentReceived: return SimpleStudioCopy.line("Repayment", locale: locale)
         }
     }
 
-    static func recentSubtitle(for entry: SimpleStudioEntry) -> String {
+    static func recentSubtitle(for entry: SimpleStudioEntry, locale: Locale) -> String {
         if !entry.customerName.isEmpty { return entry.customerName }
-        return entry.note ?? entry.kind.logTitle
+        return entry.note ?? entry.kind.localizedLogTitle(locale: locale)
     }
 }

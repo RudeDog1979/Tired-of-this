@@ -37,7 +37,12 @@ struct SimpleStudioLogMoneySheet: View {
                     BuxFormSection(title: "Type") {
                         Picker("Type", selection: $kind) {
                             ForEach(logKinds, id: \.self) { k in
-                                Label(k.logTitle, systemImage: k.systemImage).tag(k)
+                                Label {
+                                    Text(k.localizedLogTitle(locale: appSettingsManager.interfaceLocale))
+                                } icon: {
+                                    Image(systemName: k.systemImage)
+                                }
+                                .tag(k)
                             }
                         }
                         .buxFormFieldPadding()
@@ -86,7 +91,9 @@ struct SimpleStudioLogMoneySheet: View {
 
                     if kind == .owedToMe || kind == .job {
                         BuxFormSection {
-                            Toggle("Not paid yet", isOn: $isUnpaid)
+                            Toggle(isOn: $isUnpaid) {
+                                BuxCatalogDynamicText(key: "Not paid yet")
+                            }
                                 .tint(themeManager.current.accentColor)
                                 .buxFormFieldPadding()
                         }
@@ -98,7 +105,8 @@ struct SimpleStudioLogMoneySheet: View {
                     }
                 }
             }
-            .navigationTitle("Log money")
+            .buxCatalogNavigationTitle("Log money")
+            .buxInterfaceLocale()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -147,7 +155,7 @@ struct SimpleStudioLogMoneySheet: View {
 
     private func costField(_ title: String, text: Binding<String>) -> some View {
         HStack {
-            Text(title)
+            BuxCatalogText.text(title)
             Spacer()
             TextField("0", text: text)
                 .keyboardType(.decimalPad)

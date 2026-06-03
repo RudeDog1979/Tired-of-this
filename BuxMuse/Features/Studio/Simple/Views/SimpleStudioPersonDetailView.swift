@@ -45,7 +45,7 @@ struct SimpleStudioPersonDetailView: View {
                     if let customer, customer.outstandingBalance > 0 {
                         BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
                             VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                                Text("Waiting on them")
+                                BuxCatalogDynamicText(key: "Waiting on them")
                                     .font(.system(size: 12, weight: .semibold))
                                     .buxLabelSecondary()
                                 Text(appSettingsManager.format(customer.outstandingBalance))
@@ -117,7 +117,7 @@ struct SimpleStudioPersonDetailView: View {
                 .padding(.top, BuxTokens.section)
             }
         }
-        .navigationTitle("Person")
+        .buxCatalogNavigationTitle("Person")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showJobEditor) {
             SimpleStudioJobQuoteSheet(store: store, existingJob: editingJob)

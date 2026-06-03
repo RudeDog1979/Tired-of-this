@@ -83,7 +83,7 @@ struct SimpleStudioBusinessCardSheet: View {
                                             .font(.system(size: 13, weight: .medium))
                                         }
                                         if photoLoadFailed {
-                                            Text("Couldn't load that photo — try another.")
+                                            BuxCatalogDynamicText(key: "Couldn't load that photo — try another.")
                                                 .font(.system(size: 11, weight: .medium))
                                                 .foregroundStyle(.orange)
                                         }
@@ -163,7 +163,7 @@ struct SimpleStudioBusinessCardSheet: View {
                     .padding(.top, BuxTokens.section)
                 }
             }
-            .navigationTitle("Business card")
+            .buxCatalogNavigationTitle("Business card")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -218,10 +218,10 @@ struct SimpleStudioBusinessCardSheet: View {
                 Image(systemName: "sparkles")
                     .foregroundColor(themeManager.current.accentColor)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Pro card extras")
+                    BuxCatalogDynamicText(key: "Pro card extras")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text("QR code, logo, premium styling & PDF export")
+                    BuxCatalogDynamicText(key: "QR code, logo, premium styling & PDF export")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary)
                 }

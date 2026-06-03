@@ -111,7 +111,7 @@ struct SimpleStudioInvoiceDetailView: View {
                     missingContent(title: "Invoice not found", message: "This invoice may have been removed.")
                 }
             }
-            .navigationTitle("Invoice")
+            .buxCatalogNavigationTitle("Invoice")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

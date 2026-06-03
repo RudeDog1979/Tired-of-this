@@ -99,7 +99,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                     .padding(.bottom, BuxTokens.sheetBottomClearance)
                 }
             }
-            .navigationTitle("Simple invoice")
+            .buxCatalogNavigationTitle("Simple invoice")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -144,9 +144,16 @@ struct SimpleStudioSimpleInvoiceSheet: View {
     private var completedJobPicker: some View {
         if !jobPicks.isEmpty {
             Picker("Bill from job", selection: $selectedJobPickId) {
-                Text("None").tag(UUID?.none)
+                BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                 ForEach(jobPicks) { pick in
-                    Text("\(pick.jobLabel) · \(appSettingsManager.format(pick.amount))")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%@ · %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            pick.jobLabel,
+                            appSettingsManager.format(pick.amount)
+                        )
+                    )
                         .tag(Optional(pick.jobId))
                 }
             }
@@ -331,7 +338,7 @@ struct SimpleInvoiceCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(businessName)
                         .font(.system(size: 18, weight: .bold))
-                    Text("Simple Invoice")
+                    BuxCatalogDynamicText(key: "Simple Invoice")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
@@ -346,7 +353,7 @@ struct SimpleInvoiceCardView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Bill to")
+                BuxCatalogDynamicText(key: "Bill to")
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Text(customerName)
@@ -354,7 +361,7 @@ struct SimpleInvoiceCardView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("For")
+                BuxCatalogDynamicText(key: "For")
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Text(description)
@@ -368,7 +375,7 @@ struct SimpleInvoiceCardView: View {
             }
 
             HStack {
-                Text("Amount due")
+                BuxCatalogDynamicText(key: "Amount due")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -383,7 +390,7 @@ struct SimpleInvoiceCardView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text("Sent via BuxMuse · Not a bank")
+            BuxCatalogDynamicText(key: "Sent via BuxMuse · Not a bank")
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(.tertiary)
         }

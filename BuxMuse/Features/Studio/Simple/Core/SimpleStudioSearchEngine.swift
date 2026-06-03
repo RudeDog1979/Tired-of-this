@@ -84,14 +84,37 @@ enum SimpleStudioSearchEngine {
         var dateRange: ClosedRange<Date>?
 
         let phraseMap: [(phrases: [String], intents: IntentSet, slice: String?)] = [
-            (["who owes me", "owes me", "they owe me", "still waiting", "waiting on", "waiting for", "unpaid", "not paid"], [.waitingOnMe, .unpaid], "waiting"),
-            (["what do i owe", "i owe", "owe them", "debts i owe"], [.iOwe], "owe"),
-            (["paid", "settled", "already paid"], [.paid], nil),
-            (["invoice", "invoices"], [.invoices], nil),
-            (["job", "jobs", "work done"], [.jobs], nil),
-            (["expense", "expenses", "spent", "spending"], [.expenses], "spent"),
-            (["income", "earned", "money in", "made"], [.income], "made"),
-            (["people", "person", "customer", "customers", "contact", "contacts"], [.people], nil)
+            (
+                [
+                    "who owes me", "owes me", "they owe me", "still waiting", "waiting on", "waiting for",
+                    "unpaid", "not paid",
+                    "quien me debe", "quién me debe", "me deben", "esperando pago", "esperando", "sin pagar", "no pagado"
+                ],
+                [.waitingOnMe, .unpaid], "waiting"
+            ),
+            (
+                ["what do i owe", "i owe", "owe them", "debts i owe", "que debo", "qué debo", "debo", "les debo", "deudas"],
+                [.iOwe], "owe"
+            ),
+            (
+                ["paid", "settled", "already paid", "pagado", "saldado", "ya pago", "ya pagó"],
+                [.paid], nil
+            ),
+            (["invoice", "invoices", "factura", "facturas"], [.invoices], nil),
+            (["job", "jobs", "work done", "trabajo", "trabajos", "trabajo hecho"], [.jobs], nil),
+            (
+                ["expense", "expenses", "spent", "spending", "gasto", "gastos", "gaste", "gasté", "en que gaste"],
+                [.expenses], "spent"
+            ),
+            (
+                ["income", "earned", "money in", "made", "ingreso", "ingresos", "gane", "gané", "dinero entrante"],
+                [.income], "made"
+            ),
+            (
+                ["people", "person", "customer", "customers", "contact", "contacts",
+                 "personas", "persona", "cliente", "clientes", "contacto", "contactos"],
+                [.people], nil
+            )
         ]
 
         for rule in phraseMap {
@@ -103,10 +126,10 @@ enum SimpleStudioSearchEngine {
         }
 
         let dateRules: [(phrases: [String], range: ClosedRange<Date>)] = [
-            (["today"], dayRange(for: now, calendar: calendar)),
-            (["this week"], weekRange(containing: now, calendar: calendar)),
-            (["this month"], monthRange(containing: now, calendar: calendar)),
-            (["last month"], previousMonthRange(before: now, calendar: calendar))
+            (["today", "hoy"], dayRange(for: now, calendar: calendar)),
+            (["this week", "esta semana"], weekRange(containing: now, calendar: calendar)),
+            (["this month", "este mes"], monthRange(containing: now, calendar: calendar)),
+            (["last month", "mes pasado", "el mes pasado"], previousMonthRange(before: now, calendar: calendar))
         ]
 
         for rule in dateRules {
@@ -117,7 +140,8 @@ enum SimpleStudioSearchEngine {
         }
 
         let stopWords: Set<String> = [
-            "a", "an", "the", "for", "from", "with", "and", "or", "my", "me", "on", "in", "this", "that", "show", "find", "search"
+            "a", "an", "the", "for", "from", "with", "and", "or", "my", "me", "on", "in", "this", "that", "show", "find", "search",
+            "el", "la", "los", "las", "de", "del", "y", "o", "mi", "en", "que", "esto", "esa", "buscar", "mostrar"
         ]
 
         let nameTokens = working

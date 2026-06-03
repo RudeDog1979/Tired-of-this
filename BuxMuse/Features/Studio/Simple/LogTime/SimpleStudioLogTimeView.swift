@@ -108,7 +108,7 @@ struct SimpleStudioLogTimeView: View {
                 }
                 .buxScrollContentMargins()
             }
-            .navigationTitle("Work clock")
+            .buxCatalogNavigationTitle("Work clock")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -170,10 +170,10 @@ struct SimpleStudioLogTimeView: View {
 
     private var introCard: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Two ways people get paid")
+            BuxCatalogDynamicText(key: "Two ways people get paid")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-            Text("Pick the job below. We'll show whether the clock is just for your records, or whether it counts toward what they owe.")
+            BuxCatalogDynamicText(key: "Pick the job below. We'll show whether the clock is just for your records, or whether it counts toward what they owe.")
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
         }
@@ -184,13 +184,13 @@ struct SimpleStudioLogTimeView: View {
 
     private var jobPicker: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("WHICH JOB?")
+            BuxCatalogDynamicText(key: "WHICH JOB?")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(1)
 
             if jobs.isEmpty {
-                Text("Quote a job first — say if it's one price or paid by the hour.")
+                BuxCatalogDynamicText(key: "Quote a job first — say if it's one price or paid by the hour.")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             } else {
@@ -234,7 +234,7 @@ struct SimpleStudioLogTimeView: View {
 
             if snapshot.stillWaiting > 0 {
                 HStack {
-                    Text("Still waiting")
+                    BuxCatalogDynamicText(key: "Still waiting")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                     Spacer()
@@ -245,7 +245,13 @@ struct SimpleStudioLogTimeView: View {
             }
 
             if snapshot.loggedSeconds > 0, displayElapsed == 0 {
-                Text("Already logged: \(SimpleStudioTimePayEngine.formattedHours(snapshot.loggedSeconds))")
+                Text(
+                    BuxLocalizedString.format(
+                        "Already logged: %@",
+                        locale: appSettingsManager.interfaceLocale,
+                        SimpleStudioTimePayEngine.formattedHours(snapshot.loggedSeconds)
+                    )
+                )
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             }
@@ -272,7 +278,13 @@ struct SimpleStudioLogTimeView: View {
                     Image(systemName: "figure.walk")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(accent)
-                    Text("Planned time: \(label)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Planned time: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            label
+                        )
+                    )
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                 }
@@ -286,7 +298,7 @@ struct SimpleStudioLogTimeView: View {
 
                 if shouldShowPlanExtend {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Need more time?")
+                        BuxCatalogDynamicText(key: "Need more time?")
                             .font(.system(size: 12, weight: .semibold))
                         HStack(spacing: BuxTokens.tight) {
                             BuxActionButton(
@@ -321,15 +333,21 @@ struct SimpleStudioLogTimeView: View {
         case .none:
             EmptyView()
         case .approaching(let minutesLeft):
-            Text("Almost there — about \(minutesLeft) min left on your plan.")
+            Text(
+                BuxLocalizedString.format(
+                    "Almost there — about %lld min left on your plan.",
+                    locale: appSettingsManager.interfaceLocale,
+                    minutesLeft
+                )
+            )
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.orange)
         case .atGoal:
-            Text("Time is up — clock paused. Save your work or add more time.")
+            BuxCatalogDynamicText(key: "Time is up — clock paused. Save your work or add more time.")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(accent)
         case .overtime:
-            Text("You're past the agreed time — add time or save when done.")
+            BuxCatalogDynamicText(key: "You're past the agreed time — add time or save when done.")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.red)
         }
@@ -337,7 +355,7 @@ struct SimpleStudioLogTimeView: View {
 
     private var notesSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("WHAT ARE YOU DOING?")
+            BuxCatalogDynamicText(key: "WHAT ARE YOU DOING?")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(1)

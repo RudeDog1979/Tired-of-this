@@ -1,0 +1,610 @@
+{
+  "Who owes me?": {
+    "es-419": "¿Quién me debe?",
+    "es-ES": "¿Quién me debe?"
+  },
+  "Waiting on payment": {
+    "es-419": "Esperando pago",
+    "es-ES": "Esperando pago"
+  },
+  "What do I owe?": {
+    "es-419": "¿Qué debo?",
+    "es-ES": "¿Qué debo?"
+  },
+  "They owe me": {
+    "es-419": "Me deben",
+    "es-ES": "Me deben"
+  },
+  "Jobs this month": {
+    "es-419": "Trabajos este mes",
+    "es-ES": "Trabajos este mes"
+  },
+  "Invoices waiting": {
+    "es-419": "Facturas pendientes",
+    "es-ES": "Facturas pendientes"
+  },
+  "Expenses this week": {
+    "es-419": "Gastos esta semana",
+    "es-ES": "Gastos esta semana"
+  },
+  "Money in this month": {
+    "es-419": "Dinero entrante este mes",
+    "es-ES": "Dinero entrante este mes"
+  },
+  "What did I spend?": {
+    "es-419": "¿En qué gasté?",
+    "es-ES": "¿En qué gasté?"
+  },
+  "Paid this month": {
+    "es-419": "Pagado este mes",
+    "es-ES": "Pagado este mes"
+  },
+  "Unpaid jobs": {
+    "es-419": "Trabajos sin pagar",
+    "es-ES": "Trabajos sin pagar"
+  },
+  "People I work with": {
+    "es-419": "Personas con las que trabajo",
+    "es-ES": "Personas con las que trabajo"
+  },
+  "Income last month": {
+    "es-419": "Ingresos el mes pasado",
+    "es-ES": "Ingresos el mes pasado"
+  },
+  "Expenses today": {
+    "es-419": "Gastos hoy",
+    "es-ES": "Gastos hoy"
+  },
+  "Find a customer": {
+    "es-419": "Buscar cliente",
+    "es-ES": "Buscar cliente"
+  },
+  "Who paid me?": {
+    "es-419": "¿Quién me pagó?",
+    "es-ES": "¿Quién me pagó?"
+  },
+  "Settled debts": {
+    "es-419": "Deudas saldadas",
+    "es-ES": "Deudas saldadas"
+  },
+  "Work done this week": {
+    "es-419": "Trabajo hecho esta semana",
+    "es-ES": "Trabajo hecho esta semana"
+  },
+  "Who owes me? Jobs for Maria…": {
+    "es-419": "¿Quién me debe? Trabajos de María…",
+    "es-ES": "¿Quién me debe? Trabajos de María…"
+  },
+  "Works offline — search people, jobs, invoices, and who still owes you.": {
+    "es-419": "Funciona sin internet: busca personas, trabajos, facturas y quién te debe.",
+    "es-ES": "Funciona sin internet: busca personas, trabajos, facturas y quién te debe."
+  },
+  "People": {
+    "es-419": "Personas",
+    "es-ES": "Personas"
+  },
+  "Upgrade to Pro": {
+    "es-419": "Pasar a Pro",
+    "es-ES": "Pasar a Pro"
+  },
+  "Work clock": {
+    "es-419": "Reloj de trabajo",
+    "es-ES": "Reloj de trabajo"
+  },
+  "Quote job": {
+    "es-419": "Cotizar trabajo",
+    "es-ES": "Cotizar trabajo"
+  },
+  "Log money": {
+    "es-419": "Registrar dinero",
+    "es-ES": "Registrar dinero"
+  },
+  "Invoice": {
+    "es-419": "Factura",
+    "es-ES": "Factura"
+  },
+  "Business card": {
+    "es-419": "Tarjeta de presentación",
+    "es-ES": "Tarjeta de presentación"
+  },
+  "I owe": {
+    "es-419": "Debo",
+    "es-ES": "Debo"
+  },
+  "Close menu": {
+    "es-419": "Cerrar menú",
+    "es-ES": "Cerrar menú"
+  },
+  "Add": {
+    "es-419": "Agregar",
+    "es-ES": "Agregar"
+  },
+  "Mark as paid?": {
+    "es-419": "¿Marcar como pagado?",
+    "es-ES": "¿Marcar como pagado?"
+  },
+  "Mark as settled?": {
+    "es-419": "¿Marcar como saldado?",
+    "es-ES": "¿Marcar como saldado?"
+  },
+  "Mark paid": {
+    "es-419": "Marcar pagado",
+    "es-ES": "Marcar pagado"
+  },
+  "Mark settled": {
+    "es-419": "Marcar saldado",
+    "es-ES": "Marcar saldado"
+  },
+  "Cancel": {
+    "es-419": "Cancelar",
+    "es-ES": "Cancelar"
+  },
+  "This will mark the balance as fully paid.": {
+    "es-419": "Esto marcará el saldo como pagado por completo.",
+    "es-ES": "Esto marcará el saldo como pagado por completo."
+  },
+  "This clears what you owe them.": {
+    "es-419": "Esto liquida lo que les debes.",
+    "es-ES": "Esto liquida lo que les debes."
+  },
+  "Waiting on": {
+    "es-419": "Esperando",
+    "es-ES": "Esperando"
+  },
+  "Paid": {
+    "es-419": "Pagado",
+    "es-ES": "Pagado"
+  },
+  "Send": {
+    "es-419": "Enviar",
+    "es-ES": "Enviar"
+  },
+  "You owe": {
+    "es-419": "Debes",
+    "es-ES": "Debes"
+  },
+  "Settled": {
+    "es-419": "Saldado",
+    "es-ES": "Saldado"
+  },
+  "Recent": {
+    "es-419": "Reciente",
+    "es-ES": "Reciente"
+  },
+  "Made": {
+    "es-419": "Ingresos",
+    "es-ES": "Ingresos"
+  },
+  "Waiting": {
+    "es-419": "Pendiente",
+    "es-ES": "Pendiente"
+  },
+  "This month": {
+    "es-419": "Este mes",
+    "es-ES": "Este mes"
+  },
+  "Clear filter": {
+    "es-419": "Quitar filtro",
+    "es-ES": "Quitar filtro"
+  },
+  "Job pockets": {
+    "es-419": "Bolsillos por trabajo",
+    "es-ES": "Bolsillos por trabajo"
+  },
+  "Not paid yet": {
+    "es-419": "Aún no pagado",
+    "es-ES": "Aún no pagado"
+  },
+  "Type": {
+    "es-419": "Tipo",
+    "es-ES": "Tipo"
+  },
+  "Amount": {
+    "es-419": "Monto",
+    "es-ES": "Monto"
+  },
+  "Who": {
+    "es-419": "Quién",
+    "es-ES": "Quién"
+  },
+  "Job": {
+    "es-419": "Trabajo",
+    "es-ES": "Trabajo"
+  },
+  "Note": {
+    "es-419": "Nota",
+    "es-ES": "Nota"
+  },
+  "Customer name": {
+    "es-419": "Nombre del cliente",
+    "es-ES": "Nombre del cliente"
+  },
+  "What was it for?": {
+    "es-419": "¿Para qué fue?",
+    "es-ES": "¿Para qué fue?"
+  },
+  "Optional": {
+    "es-419": "Opcional",
+    "es-ES": "Opcional"
+  },
+  "Job costs": {
+    "es-419": "Costos del trabajo",
+    "es-ES": "Costos del trabajo"
+  },
+  "Materials": {
+    "es-419": "Materiales",
+    "es-ES": "Materiales"
+  },
+  "Petrol / gas": {
+    "es-419": "Gasolina",
+    "es-ES": "Gasolina"
+  },
+  "Transport": {
+    "es-419": "Transporte",
+    "es-ES": "Transporte"
+  },
+  "Platform fee": {
+    "es-419": "Comisión de plataforma",
+    "es-ES": "Comisión de plataforma"
+  },
+  "Details": {
+    "es-419": "Detalles",
+    "es-ES": "Detalles"
+  },
+  "Payment": {
+    "es-419": "Pago",
+    "es-ES": "Pago"
+  },
+  "When": {
+    "es-419": "Cuándo",
+    "es-ES": "Cuándo"
+  },
+  "Entry not found": {
+    "es-419": "Entrada no encontrada",
+    "es-ES": "Entrada no encontrada"
+  },
+  "This entry may have been removed.": {
+    "es-419": "Esta entrada pudo haberse eliminado.",
+    "es-ES": "Esta entrada pudo haberse eliminado."
+  },
+  "Tap to add": {
+    "es-419": "Toca para agregar",
+    "es-ES": "Toca para agregar"
+  },
+  "Still waiting": {
+    "es-419": "Aún pendiente",
+    "es-ES": "Aún pendiente"
+  },
+  "Partial": {
+    "es-419": "Parcial",
+    "es-ES": "Parcial"
+  },
+  "Scan failed": {
+    "es-419": "Falló el escaneo",
+    "es-ES": "Falló el escaneo"
+  },
+  "Could not read this image. Try a clearer photo or enter details manually.": {
+    "es-419": "No pudimos leer esta imagen. Prueba una foto más clara o ingresa los datos manualmente.",
+    "es-ES": "No pudimos leer esta imagen. Prueba una foto más clara o ingresa los datos manualmente."
+  },
+  "OK": {
+    "es-419": "OK",
+    "es-ES": "OK"
+  },
+  "Reading photo…": {
+    "es-419": "Leyendo foto…",
+    "es-ES": "Leyendo foto…"
+  },
+  "Take photo": {
+    "es-419": "Tomar foto",
+    "es-ES": "Tomar foto"
+  },
+  "Simulate scan": {
+    "es-419": "Simular escaneo",
+    "es-ES": "Simular escaneo"
+  },
+  "Choose from photos": {
+    "es-419": "Elegir de fotos",
+    "es-ES": "Elegir de fotos"
+  },
+  "Tap to fix": {
+    "es-419": "Toca para corregir",
+    "es-ES": "Toca para corregir"
+  },
+  "Save to ledger": {
+    "es-419": "Guardar en libro",
+    "es-ES": "Guardar en libro"
+  },
+  "Update entry": {
+    "es-419": "Actualizar entrada",
+    "es-ES": "Actualizar entrada"
+  },
+  "What is this?": {
+    "es-419": "¿Qué es esto?",
+    "es-ES": "¿Qué es esto?"
+  },
+  "Customer or merchant": {
+    "es-419": "Cliente o comercio",
+    "es-ES": "Cliente o comercio"
+  },
+  "Job or description": {
+    "es-419": "Trabajo o descripción",
+    "es-ES": "Trabajo o descripción"
+  },
+  "Optional details": {
+    "es-419": "Detalles opcionales",
+    "es-ES": "Detalles opcionales"
+  },
+  "Payment status": {
+    "es-419": "Estado de pago",
+    "es-ES": "Estado de pago"
+  },
+  "Status": {
+    "es-419": "Estado",
+    "es-ES": "Estado"
+  },
+  "We couldn't read text from that image. Try better lighting, a sharper photo, or use Simulate scan to practice.": {
+    "es-419": "No leímos texto en esa imagen. Mejor luz, foto más nítida, o usa Simular escaneo para practicar.",
+    "es-ES": "No leímos texto en esa imagen. Mejor luz, foto más nítida, o usa Simular escaneo para practicar."
+  },
+  "Paid?": {
+    "es-419": "¿Pagado?",
+    "es-ES": "¿Pagado?"
+  },
+  "Customer": {
+    "es-419": "Cliente",
+    "es-ES": "Cliente"
+  },
+  "How do you get paid?": {
+    "es-419": "¿Cómo te pagan?",
+    "es-ES": "¿Cómo te pagan?"
+  },
+  "Pay type": {
+    "es-419": "Tipo de pago",
+    "es-ES": "Tipo de pago"
+  },
+  "How long should it take?": {
+    "es-419": "¿Cuánto debería tardar?",
+    "es-ES": "¿Cuánto debería tardar?"
+  },
+  "Hours": {
+    "es-419": "Horas",
+    "es-ES": "Horas"
+  },
+  "Minutes": {
+    "es-419": "Minutos",
+    "es-ES": "Minutos"
+  },
+  "Save job": {
+    "es-419": "Guardar trabajo",
+    "es-ES": "Guardar trabajo"
+  },
+  "Update job": {
+    "es-419": "Actualizar trabajo",
+    "es-ES": "Actualizar trabajo"
+  },
+  "Send quote": {
+    "es-419": "Enviar cotización",
+    "es-ES": "Enviar cotización"
+  },
+  "Paid so far": {
+    "es-419": "Pagado hasta ahora",
+    "es-ES": "Pagado hasta ahora"
+  },
+  "Advance for materials": {
+    "es-419": "Anticipo de materiales",
+    "es-ES": "Anticipo de materiales"
+  },
+  "Materials purchased": {
+    "es-419": "Materiales comprados",
+    "es-ES": "Materiales comprados"
+  },
+  "Agreed with customer": {
+    "es-419": "Acordado con el cliente",
+    "es-ES": "Acordado con el cliente"
+  },
+  "Spent on job": {
+    "es-419": "Gastado en el trabajo",
+    "es-ES": "Gastado en el trabajo"
+  },
+  "You keep (so far)": {
+    "es-419": "Te quedas (hasta ahora)",
+    "es-ES": "Te quedas (hasta ahora)"
+  },
+  "You'll keep (when paid)": {
+    "es-419": "Te quedarás (al pagar)",
+    "es-ES": "Te quedarás (al pagar)"
+  },
+  "Name": {
+    "es-419": "Nombre",
+    "es-ES": "Nombre"
+  },
+  "Phone / WhatsApp": {
+    "es-419": "Teléfono / WhatsApp",
+    "es-ES": "Teléfono / WhatsApp"
+  },
+  "What is the work?": {
+    "es-419": "¿Cuál es el trabajo?",
+    "es-ES": "¿Cuál es el trabajo?"
+  },
+  "Full price you agreed": {
+    "es-419": "Precio total acordado",
+    "es-ES": "Precio total acordado"
+  },
+  "Your rate per hour": {
+    "es-419": "Tu tarifa por hora",
+    "es-ES": "Tu tarifa por hora"
+  },
+  "Ballpark total (optional)": {
+    "es-419": "Total aproximado (opcional)",
+    "es-ES": "Total aproximado (opcional)"
+  },
+  "Partially paid": {
+    "es-419": "Pagado en parte",
+    "es-ES": "Pagado en parte"
+  },
+  "Paid in full": {
+    "es-419": "Pagado completo",
+    "es-ES": "Pagado completo"
+  },
+  "Tasks & Gigs": {
+    "es-419": "Tareas y changas",
+    "es-ES": "Tareas y changas"
+  },
+  "Jobs & Repairs": {
+    "es-419": "Trabajos y reparaciones",
+    "es-ES": "Trabajos y reparaciones"
+  },
+  "Driving & Delivery": {
+    "es-419": "Manejo y entregas",
+    "es-ES": "Manejo y entregas"
+  },
+  "Shop & Sales": {
+    "es-419": "Tienda y ventas",
+    "es-ES": "Tienda y ventas"
+  },
+  "Lending & Susu": {
+    "es-419": "Préstamos y susu",
+    "es-ES": "Préstamos y susu"
+  },
+  "Other Work": {
+    "es-419": "Otro trabajo",
+    "es-ES": "Otro trabajo"
+  },
+  "Platform jobs, tips, travel": {
+    "es-419": "Trabajos de plataforma, propinas, viajes",
+    "es-ES": "Trabajos de plataforma, propinas, viajes"
+  },
+  "Materials, advances, job sites": {
+    "es-419": "Materiales, anticipos, sitios de trabajo",
+    "es-ES": "Materiales, anticipos, sitios de trabajo"
+  },
+  "Trips, fuel, fares": {
+    "es-419": "Viajes, combustible, tarifas",
+    "es-ES": "Viajes, combustible, tarifas"
+  },
+  "Daily sales and stock": {
+    "es-419": "Ventas diarias e inventario",
+    "es-ES": "Ventas diarias e inventario"
+  },
+  "Track loans and repayments": {
+    "es-419": "Registra préstamos y pagos",
+    "es-ES": "Registra préstamos y pagos"
+  },
+  "General work tracking": {
+    "es-419": "Seguimiento general de trabajo",
+    "es-ES": "Seguimiento general de trabajo"
+  },
+  "Income": {
+    "es-419": "Ingreso",
+    "es-ES": "Ingreso"
+  },
+  "Expense": {
+    "es-419": "Gasto",
+    "es-ES": "Gasto"
+  },
+  "Advance": {
+    "es-419": "Anticipo",
+    "es-ES": "Anticipo"
+  },
+  "Repayment": {
+    "es-419": "Reembolso",
+    "es-ES": "Reembolso"
+  },
+  "I lent": {
+    "es-419": "Presté",
+    "es-ES": "Presté"
+  },
+  "Log jobs to see earnings insights.": {
+    "es-419": "Registra trabajos para ver análisis de ganancias.",
+    "es-ES": "Registra trabajos para ver análisis de ganancias."
+  },
+  "Avg kept / job": {
+    "es-419": "Prom. que te quedas / trabajo",
+    "es-ES": "Prom. que te quedas / trabajo"
+  },
+  "Still owed": {
+    "es-419": "Aún te deben",
+    "es-ES": "Aún te deben"
+  },
+  "%lld paid": {
+    "es-419": "%lld pagados",
+    "es-ES": "%lld pagados"
+  },
+  "%lld open": {
+    "es-419": "%lld abiertos",
+    "es-ES": "%lld abiertos"
+  },
+  "Spent this month": {
+    "es-419": "Gastado este mes",
+    "es-ES": "Gastado este mes"
+  },
+  "Made this month": {
+    "es-419": "Ingresos este mes",
+    "es-ES": "Ingresos este mes"
+  },
+  "Person": {
+    "es-419": "Persona",
+    "es-ES": "Persona"
+  },
+  "All tracked jobs are paid. Nice work.": {
+    "es-419": "Todos los trabajos registrados están pagados. Bien hecho.",
+    "es-ES": "Todos los trabajos registrados están pagados. Bien hecho."
+  },
+  "Track profit and waiting balances at a glance.": {
+    "es-419": "Ve ganancia y saldos pendientes de un vistazo.",
+    "es-ES": "Ve ganancia y saldos pendientes de un vistazo."
+  },
+  "Remove photo": {
+    "es-419": "Quitar foto",
+    "es-ES": "Quitar foto"
+  },
+  "Contact QR code": {
+    "es-419": "Código QR de contacto",
+    "es-ES": "Código QR de contacto"
+  },
+  "Jobs": {
+    "es-419": "Trabajos",
+    "es-ES": "Trabajos"
+  },
+  "Clear filters": {
+    "es-419": "Borrar filtros",
+    "es-ES": "Borrar filtros"
+  },
+  "Check rate on \"%@\" — logged time may be underpriced.": {
+    "es-419": "Revisa la tarifa en \"%@\" — el tiempo registrado puede estar subcotizado.",
+    "es-ES": "Revisa la tarifa en \"%@\" — el tiempo registrado puede estar subcotizado."
+  },
+  "%lld jobs still waiting for payment — send a reminder from Waiting.": {
+    "es-419": "%lld trabajos siguen sin pago — manda un recordatorio desde Pendientes.",
+    "es-ES": "%lld trabajos siguen sin pago — manda un recordatorio desde Pendientes."
+  },
+  "You have money waiting on %lld job(s).": {
+    "es-419": "Tienes plata pendiente en %lld trabajo(s).",
+    "es-ES": "Tienes dinero pendiente en %lld trabajo(s)."
+  },
+  "Filtered": {
+    "es-419": "Filtrado",
+    "es-ES": "Filtrado"
+  },
+  "Nothing waiting right now — nice.": {
+    "es-419": "Nada pendiente ahora — bien.",
+    "es-ES": "Nada pendiente ahora — bien."
+  },
+  "You don't owe anyone in your ledger.": {
+    "es-419": "No le debes a nadie en tu registro.",
+    "es-ES": "No le debes a nadie en tu registro."
+  },
+  "No income logged this month yet.": {
+    "es-419": "Todavía no registraste ingresos este mes.",
+    "es-ES": "Todavía no registraste ingresos este mes."
+  },
+  "No spending logged this month yet.": {
+    "es-419": "Todavía no registraste gastos este mes.",
+    "es-ES": "Todavía no registraste gastos este mes."
+  },
+  "No matches for this slice.": {
+    "es-419": "Nada coincide con este segmento.",
+    "es-ES": "Nada coincide con este segmento."
+  }
+}

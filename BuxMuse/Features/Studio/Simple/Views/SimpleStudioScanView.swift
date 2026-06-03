@@ -48,14 +48,25 @@ struct SimpleStudioScanView: View {
                     .padding(.bottom, BuxTokens.sheetBottomClearance)
                 }
             }
-            .navigationTitle(existingEntry == nil ? "Scan" : "Edit entry")
-            .alert("Scan failed", isPresented: Binding(
+            .buxCatalogNavigationTitle(existingEntry == nil ? "Scan" : "Edit entry")
+            .buxInterfaceLocale()
+            .alert(
+                BuxCatalogLabel.string("Scan failed", locale: appSettingsManager.interfaceLocale),
+                isPresented: Binding(
                 get: { scanErrorMessage != nil },
                 set: { if !$0 { scanErrorMessage = nil } }
             )) {
-                Button("OK", role: .cancel) { scanErrorMessage = nil }
+                Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {
+                    scanErrorMessage = nil
+                }
             } message: {
-                Text(scanErrorMessage ?? "Could not read this image. Try a clearer photo or enter details manually.")
+                Text(
+                    scanErrorMessage
+                        ?? SimpleStudioCopy.line(
+                            "Could not read this image. Try a clearer photo or enter details manually.",
+                            locale: appSettingsManager.interfaceLocale
+                        )
+                )
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -119,11 +130,11 @@ struct SimpleStudioScanView: View {
                         .font(.system(size: 44, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
 
-                    Text("Snap a payment or receipt")
+                    BuxCatalogDynamicText(key: "Snap a payment or receipt")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                    Text("Bank transfer, WhatsApp payment, platform payout, hardware receipt — all stay on your phone.")
+                    BuxCatalogDynamicText(key: "Bank transfer, WhatsApp payment, platform payout, hardware receipt — all stay on your phone.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .multilineTextAlignment(.center)
@@ -243,7 +254,7 @@ struct SimpleStudioScanView: View {
                 HStack(spacing: 6) {
                     Image(systemName: field.systemImage)
                         .font(.system(size: 11, weight: .bold))
-                    Text(field.chipTitle)
+                    Text(field.localizedChipTitle(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 10, weight: .semibold))
                         .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                 }
@@ -266,23 +277,28 @@ struct SimpleStudioScanView: View {
     }
 
     private func chipValue(for field: SimpleScanField) -> String {
+        let locale = appSettingsManager.interfaceLocale
         switch field {
         case .kind:
-            return draft.kind.logTitle
+            return draft.kind.localizedLogTitle(locale: locale)
         case .amount:
-            return draft.amount > 0 ? appSettingsManager.format(draft.amount) : "Tap to add"
+            return draft.amount > 0
+                ? appSettingsManager.format(draft.amount)
+                : SimpleStudioCopy.line("Tap to add", locale: locale)
         case .customer:
-            return draft.customerName.isEmpty ? "Tap to add" : draft.customerName
+            return draft.customerName.isEmpty
+                ? SimpleStudioCopy.line("Tap to add", locale: locale)
+                : draft.customerName
         case .jobLabel:
-            return draft.jobLabel.isEmpty ? "Tap to add" : draft.jobLabel
+            return draft.jobLabel.isEmpty
+                ? SimpleStudioCopy.line("Tap to add", locale: locale)
+                : draft.jobLabel
         case .note:
-            return draft.note.isEmpty ? "Optional" : draft.note
+            return draft.note.isEmpty
+                ? SimpleStudioCopy.line("Optional", locale: locale)
+                : draft.note
         case .payment:
-            switch draft.paymentStatus {
-            case .paid: return "Paid"
-            case .unpaid: return "Still waiting"
-            case .partial: return "Partial"
-            }
+            return draft.paymentStatus.localizedLabel(locale: locale)
         }
     }
 
@@ -309,7 +325,10 @@ struct SimpleStudioScanView: View {
                     draft = parsed
                     showReview = true
                 case .failure:
-                    scanErrorMessage = "We couldn't read text from that image. Try better lighting, a sharper photo, or use Simulate scan to practice."
+                    scanErrorMessage = SimpleStudioCopy.line(
+                        "We couldn't read text from that image. Try better lighting, a sharper photo, or use Simulate scan to practice.",
+                        locale: appSettingsManager.interfaceLocale
+                    )
                 }
             }
         }
@@ -390,7 +409,8 @@ private struct SimpleScanChipEditorSheet: View {
                     editorContent
                 }
             }
-            .navigationTitle(field.chipTitle)
+            .buxCatalogNavigationTitle(field.chipTitle)
+            .buxInterfaceLocale()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -447,9 +467,9 @@ private struct SimpleScanChipEditorSheet: View {
         case .payment:
             BuxFormSection(title: "Payment status") {
                 Picker("Status", selection: $draft.paymentStatus) {
-                    Text("Paid").tag(SimplePaymentStatus.paid)
-                    Text("Partial").tag(SimplePaymentStatus.partial)
-                    Text("Still waiting").tag(SimplePaymentStatus.unpaid)
+                    BuxCatalogDynamicText(key: "Paid").tag(SimplePaymentStatus.paid)
+                    BuxCatalogDynamicText(key: "Partial").tag(SimplePaymentStatus.partial)
+                    BuxCatalogDynamicText(key: "Still waiting").tag(SimplePaymentStatus.unpaid)
                 }
                 .pickerStyle(.segmented)
                 .buxFormFieldPadding()

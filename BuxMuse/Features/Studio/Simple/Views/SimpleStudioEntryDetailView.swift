@@ -54,7 +54,7 @@ struct SimpleStudioEntryDetailView: View {
 
                             BuxThemedCardForm {
                                 BuxFormSection(title: "Details") {
-                                    detailRow("Type", entry.kind.logTitle)
+                                    detailRow("Type", entry.kind.localizedLogTitle(locale: appSettingsManager.interfaceLocale))
                                     BuxFormRowDivider()
                                     detailRow("Amount", appSettingsManager.format(entry.amount))
                                     if !entry.customerName.isEmpty {
@@ -155,10 +155,14 @@ struct SimpleStudioEntryDetailView: View {
                         .padding(.top, BuxTokens.section)
                     }
                 } else {
-                    missingContent(title: "Entry not found", message: "This entry may have been removed.")
+                    missingContent(
+                        titleKey: "Entry not found",
+                        messageKey: "This entry may have been removed."
+                    )
                 }
             }
-            .navigationTitle("Entry")
+            .buxCatalogNavigationTitle("Entry")
+            .buxInterfaceLocale()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -198,7 +202,7 @@ struct SimpleStudioEntryDetailView: View {
 
     private func detailRow(_ label: String, _ value: String) -> some View {
         HStack(alignment: .top) {
-            Text(label)
+            BuxCatalogText.text(label)
                 .font(.system(size: 13, weight: .medium))
                 .buxLabelSecondary()
             Spacer(minLength: 12)
@@ -211,11 +215,7 @@ struct SimpleStudioEntryDetailView: View {
     }
 
     private func paymentLabel(_ status: SimplePaymentStatus) -> String {
-        switch status {
-        case .paid: return "Paid"
-        case .unpaid: return "Still waiting"
-        case .partial: return "Partial"
-        }
+        status.localizedLabel(locale: appSettingsManager.interfaceLocale)
     }
 
     private func formattedDate(_ date: Date) -> String {
@@ -296,14 +296,14 @@ struct SimpleStudioEntryDetailView: View {
         return name.isEmpty ? SettingsStore.shared.resolvedDisplayName : name
     }
 
-    private func missingContent(title: String, message: String) -> some View {
+    private func missingContent(titleKey: String, messageKey: String) -> some View {
         VStack(spacing: BuxTokens.section) {
             Image(systemName: "doc.questionmark")
                 .font(.system(size: 36, weight: .semibold))
                 .foregroundStyle(.secondary)
-            Text(title)
+            BuxCatalogDynamicText(key: titleKey)
                 .font(.system(size: 17, weight: .bold))
-            Text(message)
+            BuxCatalogDynamicText(key: messageKey)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

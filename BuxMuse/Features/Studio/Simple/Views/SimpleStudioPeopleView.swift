@@ -32,9 +32,9 @@ struct SimpleStudioPeopleView: View {
                     Image(systemName: "person.2")
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundStyle(.secondary)
-                    Text("No people yet")
+                    BuxCatalogDynamicText(key: "No people yet")
                         .font(.system(size: 16, weight: .bold))
-                    Text("They appear automatically when you log jobs or send invoices.")
+                    BuxCatalogDynamicText(key: "They appear automatically when you log jobs or send invoices.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -48,9 +48,9 @@ struct SimpleStudioPeopleView: View {
                     Image(systemName: "person.slash")
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundStyle(.secondary)
-                    Text("No people match")
+                    BuxCatalogDynamicText(key: "No people match")
                         .font(.system(size: 16, weight: .bold))
-                    Text("Try another name or phone number.")
+                    BuxCatalogDynamicText(key: "Try another name or phone number.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
@@ -73,7 +73,7 @@ struct SimpleStudioPeopleView: View {
         }
         .scrollContentBackground(.hidden)
         .background(themeManager.screenBackground(for: colorScheme))
-        .navigationTitle("People")
+        .buxCatalogNavigationTitle("People")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $nameFilter, prompt: "Find by name or phone")
     }
@@ -91,18 +91,36 @@ struct SimpleStudioPeopleView: View {
                 }
             }
             if let job = person.lastJobLabel {
-                Text("Last: \(job)")
+                Text(
+                    BuxLocalizedString.format(
+                        "Last: %@",
+                        locale: appSettingsManager.interfaceLocale,
+                        job
+                    )
+                )
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
             }
             HStack {
                 if person.outstandingBalance > 0 {
-                    Text("Waiting: \(appSettingsManager.format(person.outstandingBalance))")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Waiting: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            appSettingsManager.format(person.outstandingBalance)
+                        )
+                    )
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.orange)
                 }
                 if person.totalEarned > 0 {
-                    Text("Total: \(appSettingsManager.format(person.totalEarned))")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Total: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            appSettingsManager.format(person.totalEarned)
+                        )
+                    )
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary)
                 }

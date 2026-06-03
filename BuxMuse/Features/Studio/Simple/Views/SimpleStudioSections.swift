@@ -24,13 +24,13 @@ struct SimpleStudioHeroCard: View {
                         Text(display.businessTitle)
                             .font(.system(size: 18, weight: .bold))
                             .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
-                        Text("Local · Private · On your phone")
+                        BuxCatalogDynamicText(key: "Local · Private · On your phone")
                             .font(.system(size: 11, weight: .medium))
                             .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                     }
                     Spacer(minLength: 0)
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("Today kept")
+                        BuxCatalogDynamicText(key: "Today kept")
                             .font(.system(size: 10, weight: .semibold))
                             .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                         Text(display.todayKeptFormatted)
@@ -64,7 +64,7 @@ struct SimpleStudioMetricTiles: View {
     private func tile(title: String, value: String, subtitle: String? = nil, color: Color) -> some View {
         BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+                BuxCatalogText.text(title)
                     .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
                 Text(value)
                     .font(.system(size: 17, weight: .bold, design: .rounded))
@@ -93,10 +93,10 @@ struct SimpleStudioThisMonthCard: View {
         BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.hero, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: BuxTokens.section) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("This month")
+                    BuxCatalogDynamicText(key: "This month")
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text("Tap to open My money")
+                    BuxCatalogDynamicText(key: "Tap to open My money")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(themeManager.current.accentColor)
                 }
@@ -108,7 +108,7 @@ struct SimpleStudioThisMonthCard: View {
                 )
 
                 if display.monthChartSlices.isEmpty {
-                    Text("Log work to see where your money goes.")
+                    BuxCatalogDynamicText(key: "Log work to see where your money goes.")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.secondary)
                 } else {
@@ -133,7 +133,7 @@ struct SimpleStudioThisMonthCard: View {
                 Circle()
                     .fill(color)
                     .frame(width: 6, height: 6)
-                Text(label)
+                BuxCatalogText.text(label)
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -190,7 +190,7 @@ struct SimpleStudioDonutChart: View {
                 .fill(Color.primary.opacity(0.04))
                 .frame(height: height)
                 .overlay(
-                    Text("Log work to see your month")
+                    BuxCatalogDynamicText(key: "Log work to see your month")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                 )
@@ -358,6 +358,7 @@ struct SimpleStudioChartLegend: View {
 struct SimpleStudioWaitingSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStore: SimpleStudioStore
 
@@ -372,7 +373,7 @@ struct SimpleStudioWaitingSection: View {
 
             if items.isEmpty {
                 BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
-                    Text("Nobody owes you right now — nice.")
+                    BuxCatalogDynamicText(key: "Nobody owes you right now — nice.")
                         .font(.system(size: 13, weight: .medium))
                         .buxLabelSecondary()
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -383,7 +384,9 @@ struct SimpleStudioWaitingSection: View {
                         waitingRow(item)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 if let onMarkPaid {
-                                    Button("Paid") { onMarkPaid(item.id) }
+                                    Button(BuxCatalogLabel.string("Paid", locale: appSettingsManager.interfaceLocale)) {
+                                        onMarkPaid(item.id)
+                                    }
                                         .tint(.green)
                                 }
                             }
@@ -412,7 +415,14 @@ struct SimpleStudioWaitingSection: View {
                 Text(item.customerName)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                Text("\(item.jobLabel) · \(item.daysWaiting)d")
+                Text(
+                    BuxLocalizedString.format(
+                        "%@ · %lldd",
+                        locale: appSettingsManager.interfaceLocale,
+                        item.jobLabel,
+                        item.daysWaiting
+                    )
+                )
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
                 if let chip = agreementChip(for: item) {
@@ -425,7 +435,13 @@ struct SimpleStudioWaitingSection: View {
                         .clipShape(Capsule())
                 }
                 if let advance = item.advanceBalanceFormatted {
-                    Text("Advance left: \(advance)")
+                    Text(
+                        BuxLocalizedString.format(
+                            "Advance left: %@",
+                            locale: appSettingsManager.interfaceLocale,
+                            advance
+                        )
+                    )
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
                 }
@@ -437,12 +453,16 @@ struct SimpleStudioWaitingSection: View {
                     .foregroundColor(.orange)
                 HStack(spacing: 10) {
                     if let onMarkPaid {
-                        Button("Paid") { onMarkPaid(item.id) }
+                        Button(BuxCatalogLabel.string("Paid", locale: appSettingsManager.interfaceLocale)) {
+                            onMarkPaid(item.id)
+                        }
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.green)
                     }
                     if onRemind != nil {
-                        Button("Send") { onRemind?(item) }
+                        Button(BuxCatalogLabel.string("Send", locale: appSettingsManager.interfaceLocale)) {
+                            onRemind?(item)
+                        }
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(themeManager.current.accentColor)
                     }
@@ -474,6 +494,7 @@ struct SimpleStudioWaitingSection: View {
 struct SimpleStudioIOweSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let items: [SimpleWaitingItem]
     var onMarkSettled: ((UUID) -> Void)?
@@ -491,7 +512,9 @@ struct SimpleStudioIOweSection: View {
                         oweRow(item)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 if let onMarkSettled {
-                                    Button("Settled") { onMarkSettled(item.id) }
+                                    Button(BuxCatalogLabel.string("Settled", locale: appSettingsManager.interfaceLocale)) {
+                                        onMarkSettled(item.id)
+                                    }
                                         .tint(.green)
                                 }
                             }
@@ -520,7 +543,14 @@ struct SimpleStudioIOweSection: View {
                 Text(item.customerName)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                Text("\(item.jobLabel) · \(item.daysWaiting)d")
+                Text(
+                    BuxLocalizedString.format(
+                        "%@ · %lldd",
+                        locale: appSettingsManager.interfaceLocale,
+                        item.jobLabel,
+                        item.daysWaiting
+                    )
+                )
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
             }
@@ -530,7 +560,9 @@ struct SimpleStudioIOweSection: View {
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundColor(.red)
                 if let onMarkSettled {
-                    Button("Settled") { onMarkSettled(item.id) }
+                    Button(BuxCatalogLabel.string("Settled", locale: appSettingsManager.interfaceLocale)) {
+                        onMarkSettled(item.id)
+                    }
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(.green)
                 }
@@ -558,7 +590,7 @@ struct SimpleStudioRecentSection: View {
 
             if items.isEmpty {
                 BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
-                    Text("Tap + to scan or log your first job.")
+                    BuxCatalogDynamicText(key: "Tap + to scan or log your first job.")
                         .font(.system(size: 13, weight: .medium))
                         .buxLabelSecondary()
                 }
@@ -654,7 +686,11 @@ struct SimpleStudioTaxSection: View {
                     if let onOpenFullTax {
                         Button(action: onOpenFullTax) {
                             HStack {
-                                Label("Full Tax Studio in Pro", systemImage: "sparkles")
+                                Label {
+                                    BuxCatalogText.text("Full Tax Studio in Pro")
+                                } icon: {
+                                    Image(systemName: "sparkles")
+                                }
                                     .font(.system(size: 13, weight: .bold))
                                 Spacer()
                                 Image(systemName: "arrow.up.right")
@@ -672,7 +708,7 @@ struct SimpleStudioTaxSection: View {
 
     private func taxCell(_ title: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
+            BuxCatalogText.text(title)
                 .font(.system(size: 10, weight: .semibold))
                 .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
             Text(value)
@@ -693,10 +729,10 @@ struct SimpleStudioEmptyState: View {
                 Image(systemName: "camera.viewfinder")
                     .font(.system(size: 32, weight: .semibold))
                     .foregroundColor(themeManager.current.accentColor)
-                Text("Track every job. Every payment.")
+                BuxCatalogDynamicText(key: "Track every job. Every payment.")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                Text("Scan a payment screenshot or log money with + — not a bank, your private ledger.")
+                BuxCatalogDynamicText(key: "Scan a payment screenshot or log money with + — not a bank, your private ledger.")
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
                     .multilineTextAlignment(.center)

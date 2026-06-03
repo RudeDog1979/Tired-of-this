@@ -43,9 +43,12 @@ struct SimpleStudioHubView: View {
     private var simpleInsights: SimpleStudioInsightsSnapshot {
         SimpleStudioInsightsEngine.build(
             entries: simpleStudioStore.entries,
-            currencyFormat: { appSettingsManager.format($0) }
+            currencyFormat: { appSettingsManager.format($0) },
+            locale: appSettingsManager.interfaceLocale
         )
     }
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
 
     var body: some View {
         NavigationStack {
@@ -152,6 +155,7 @@ struct SimpleStudioHubView: View {
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .buxInterfaceLocale()
             .buxRootNavigationChrome()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -162,11 +166,11 @@ struct SimpleStudioHubView: View {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(themeManager.current.accentColor)
                         }
-                        .accessibilityLabel("Search")
+                        .accessibilityLabel(BuxCatalogLabel.string("Search", locale: locale))
 
                         Menu {
-                            Button("People") { showPeople = true }
-                            Button("Upgrade to Pro") {
+                            Button(BuxCatalogLabel.string("People", locale: locale)) { showPeople = true }
+                            Button(BuxCatalogLabel.string("Upgrade to Pro", locale: locale)) {
                                 _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
                                     simpleStore: simpleStudioStore,
                                     studioStore: studioStore,
@@ -221,7 +225,7 @@ struct SimpleStudioHubView: View {
                     }
                     pendingMarkPaidId = nil
                 }
-                Button("Cancel", role: .cancel) {
+                Button(BuxCatalogLabel.string("Cancel", locale: locale), role: .cancel) {
                     pendingMarkPaidId = nil
                 }
             } message: {
@@ -305,37 +309,37 @@ struct SimpleStudioHubView: View {
                 .zIndex(4)
 
             VStack(spacing: 10) {
-                fabItem(title: "Work clock", icon: "stopwatch.fill", delay: 0.01) {
+                fabItem(titleKey: "Work clock", icon: "stopwatch.fill", delay: 0.01) {
                     closeFab { showLogTime = true }
                 }
-                fabItem(title: "Scan", icon: "camera.viewfinder", delay: 0.02) {
+                fabItem(titleKey: "Scan", icon: "camera.viewfinder", delay: 0.02) {
                     closeFab { showScan = true }
                 }
-                fabItem(title: "Quote job", icon: "doc.text.magnifyingglass", delay: 0.04) {
+                fabItem(titleKey: "Quote job", icon: "doc.text.magnifyingglass", delay: 0.04) {
                     closeFab {
                         editingJob = nil
                         showQuoteJob = true
                     }
                 }
-                fabItem(title: "Log money", icon: "banknote.fill", delay: 0.07) {
+                fabItem(titleKey: "Log money", icon: "banknote.fill", delay: 0.07) {
                     closeFab {
                         logMoneyKind = nil
                         showLogMoney = true
                     }
                 }
-                fabItem(title: "Invoice", icon: "doc.text.fill", delay: 0.08) {
+                fabItem(titleKey: "Invoice", icon: "doc.text.fill", delay: 0.08) {
                     closeFab { showInvoice = true }
                 }
-                fabItem(title: "Business card", icon: "person.crop.rectangle.fill", delay: 0.09) {
+                fabItem(titleKey: "Business card", icon: "person.crop.rectangle.fill", delay: 0.09) {
                     closeFab { showBusinessCard = true }
                 }
-                fabItem(title: "They owe me", icon: "person.fill.questionmark", delay: 0.11) {
+                fabItem(titleKey: "They owe me", icon: "person.fill.questionmark", delay: 0.11) {
                     closeFab {
                         logMoneyKind = .owedToMe
                         showLogMoney = true
                     }
                 }
-                fabItem(title: "I owe", icon: "person.fill.xmark", delay: 0.14) {
+                fabItem(titleKey: "I owe", icon: "person.fill.xmark", delay: 0.14) {
                     closeFab {
                         logMoneyKind = .iOwe
                         showLogMoney = true
@@ -365,10 +369,12 @@ struct SimpleStudioHubView: View {
         .padding(.trailing, BuxTokens.marginRegular)
         .padding(.bottom, BuxTokens.section)
         .zIndex(6)
-        .accessibilityLabel(isFabExpanded ? "Close menu" : "Add")
+        .accessibilityLabel(
+            BuxCatalogLabel.string(isFabExpanded ? "Close menu" : "Add", locale: locale)
+        )
     }
 
-    private func fabItem(title: String, icon: String, delay: Double, action: @escaping () -> Void) -> some View {
+    private func fabItem(titleKey: String, icon: String, delay: Double, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
@@ -377,7 +383,7 @@ struct SimpleStudioHubView: View {
                     .background(themeManager.accentWash(for: colorScheme))
                     .foregroundColor(themeManager.current.accentColor)
                     .clipShape(Circle())
-                Text(title)
+                BuxCatalogText.text(titleKey)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 Spacer()
@@ -401,9 +407,9 @@ struct SimpleStudioHubView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(studioTimer.hasActiveSession && studioTimer.session?.isSimpleJobSession == true
                              ? StudioTimerSession.formattedElapsed(studioTimer.displayElapsed, style: .hub)
-                             : "Work clock")
+                             : BuxCatalogLabel.string("Work clock", locale: locale))
                             .font(.system(size: 15, weight: .bold))
-                        Text("Track time — hourly or one-price jobs")
+                        BuxCatalogDynamicText(key: "Track time — hourly or one-price jobs")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                     }
@@ -436,22 +442,30 @@ struct SimpleStudioHubView: View {
     }
 
     private var markPaidAlertTitle: String {
-        guard let id = pendingMarkPaidId else { return "Mark as paid?" }
-        return display.iOweItems.contains { $0.id == id } ? "Mark as settled?" : "Mark as paid?"
+        guard let id = pendingMarkPaidId else {
+            return SimpleStudioCopy.line("Mark as paid?", locale: locale)
+        }
+        return display.iOweItems.contains { $0.id == id }
+            ? SimpleStudioCopy.line("Mark as settled?", locale: locale)
+            : SimpleStudioCopy.line("Mark as paid?", locale: locale)
     }
 
     private var markPaidConfirmLabel: String {
-        guard let id = pendingMarkPaidId else { return "Mark paid" }
-        return display.iOweItems.contains { $0.id == id } ? "Mark settled" : "Mark paid"
+        guard let id = pendingMarkPaidId else {
+            return SimpleStudioCopy.line("Mark paid", locale: locale)
+        }
+        return display.iOweItems.contains { $0.id == id }
+            ? SimpleStudioCopy.line("Mark settled", locale: locale)
+            : SimpleStudioCopy.line("Mark paid", locale: locale)
     }
 
     private var markPaidAlertMessage: String {
         guard let id = pendingMarkPaidId else {
-            return "This will mark the balance as fully paid."
+            return SimpleStudioCopy.line("This will mark the balance as fully paid.", locale: locale)
         }
         return display.iOweItems.contains { $0.id == id }
-            ? "This clears what you owe them."
-            : "This will mark the balance as fully paid."
+            ? SimpleStudioCopy.line("This clears what you owe them.", locale: locale)
+            : SimpleStudioCopy.line("This will mark the balance as fully paid.", locale: locale)
     }
 
     private func openEntry(for id: UUID) {

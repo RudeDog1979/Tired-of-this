@@ -130,7 +130,7 @@ struct StudioProUpsellSheet: View {
             }
             .padding(.top, BuxTokens.section)
             .background(themeManager.screenBackground(for: colorScheme))
-            .navigationTitle("Pro Studio")
+            .buxCatalogNavigationTitle("Pro Studio")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

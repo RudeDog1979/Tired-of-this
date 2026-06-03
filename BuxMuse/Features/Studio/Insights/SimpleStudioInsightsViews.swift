@@ -8,6 +8,7 @@ import SwiftUI
 struct SimpleStudioInsightsHubSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let snapshot: SimpleStudioInsightsSnapshot
 
@@ -15,7 +16,7 @@ struct SimpleStudioInsightsHubSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxTokens.tight) {
-            Text("YOUR NUMBERS")
+            BuxCatalogDynamicText(key: "YOUR NUMBERS")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
 
@@ -26,18 +27,30 @@ struct SimpleStudioInsightsHubSection: View {
 
                 HStack(spacing: 10) {
                     if let profit = snapshot.profitPerJobFormatted {
-                        metricPill(title: "Avg kept / job", value: profit, icon: "chart.bar.fill")
+                        metricPill(titleKey: "Avg kept / job", value: profit, icon: "chart.bar.fill")
                     }
                     if let waiting = snapshot.waitingTotalFormatted {
-                        metricPill(title: "Still owed", value: waiting, icon: "clock.fill")
+                        metricPill(titleKey: "Still owed", value: waiting, icon: "clock.fill")
                     }
                 }
 
                 HStack(spacing: 16) {
-                    Text("\(snapshot.paidJobCount) paid")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld paid",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int64(snapshot.paidJobCount)
+                        )
+                    )
                         .font(.system(size: 11, weight: .semibold))
                         .buxLabelSecondary()
-                    Text("\(snapshot.openJobCount) open")
+                    Text(
+                        BuxLocalizedString.format(
+                            "%lld open",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int64(snapshot.openJobCount)
+                        )
+                    )
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(snapshot.openJobCount > 0 ? .orange : .secondary)
                 }
@@ -53,14 +66,14 @@ struct SimpleStudioInsightsHubSection: View {
         }
     }
 
-    private func metricPill(title: String, value: String, icon: String) -> some View {
+    private func metricPill(titleKey: String, value: String, icon: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Image(systemName: icon)
                 .font(.system(size: 12))
                 .foregroundColor(accent)
             Text(value)
                 .font(.system(size: 15, weight: .bold, design: .rounded))
-            Text(title)
+            BuxCatalogText.text(titleKey)
                 .font(.system(size: 9, weight: .bold))
                 .buxLabelSecondary()
         }

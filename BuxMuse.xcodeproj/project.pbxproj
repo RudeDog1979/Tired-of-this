@@ -254,8 +254,11 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
+				es,
+				"es-419",
+				"es-ES",
 			);
 			mainGroup = E23C9A8C2FB312CE006982E0;
 			minimizedProjectReferenceProxies = 1;
