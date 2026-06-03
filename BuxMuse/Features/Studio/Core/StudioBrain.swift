@@ -589,7 +589,7 @@ public final class StudioBrain: ObservableObject {
         }
 
         return StudioProjectsDisplay(
-            activeCount: projects.count,
+            activeCount: projects.filter { $0.resolvedStatus != .completed }.count,
             overrunRiskCount: overrunCount,
             topProjectName: best?.name,
             topProjectProfitFormatted: best.map { appSettings.format($0.profit) }

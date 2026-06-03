@@ -267,6 +267,10 @@ public final class StudioStore: ObservableObject {
         save()
     }
 
+    public func project(id: UUID) -> StudioProject? {
+        projects.first { $0.id == id }
+    }
+
     public func deleteProject(id: UUID) {
         projects.removeAll { $0.id == id }
         receipts = receipts.map { receipt in

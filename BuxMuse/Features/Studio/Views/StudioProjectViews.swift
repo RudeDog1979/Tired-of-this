@@ -24,7 +24,7 @@ struct StudioProjectsListView: View {
                 projectList
             }
         }
-        .navigationTitle("Projects & Tasks")
+        .navigationTitle("Projects")
         .navigationBarTitleDisplayMode(.large)
         .buxRootNavigationChrome()
         .toolbar {
@@ -37,8 +37,10 @@ struct StudioProjectsListView: View {
             }
         }
         .sheet(isPresented: $showCreateProject) {
-            NewProjectSheet()
+            StudioProjectEditorSheet()
                 .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(store)
                 .buxStudioSheetContent()
         }
     }
@@ -50,9 +52,10 @@ struct StudioProjectsListView: View {
                 let analysis = StudioProjectEngine.analyzeProject(project: project, receipts: store.receipts)
 
                 NavigationLink(
-                    destination: StudioProjectDetailView(project: project)
+                    destination: StudioProjectDetailView(projectId: project.id)
                         .environmentObject(themeManager)
                         .environmentObject(appSettingsManager)
+                        .environmentObject(store)
                 ) {
                     projectRowCard(
                         project: project,
@@ -76,13 +79,29 @@ struct StudioProjectsListView: View {
     ) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(project.name)
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                HStack(spacing: 6) {
+                    Text(project.name)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                    if project.resolvedStatus != .active {
+                        Text(project.resolvedStatus.rawValue)
+                            .font(.system(size: 9, weight: .bold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(statusTint(project.resolvedStatus).opacity(0.15))
+                            .foregroundStyle(statusTint(project.resolvedStatus))
+                            .clipShape(Capsule())
+                    }
+                }
 
                 Text(clientName ?? "Independent Project")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+
+                Text("\(project.billingModeLabel) · \(project.billingAmountLabel(format: appSettingsManager.format))")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                    .lineLimit(1)
             }
 
             Spacer(minLength: 8)
@@ -99,6 +118,14 @@ struct StudioProjectsListView: View {
         }
         .studioThemedListRowCard()
     }
+
+    private func statusTint(_ status: StudioProjectStatus) -> Color {
+        switch status {
+        case .active: return themeManager.current.accentColor
+        case .onHold: return .orange
+        case .completed: return .green
+        }
+    }
     
     private var emptyState: some View {
         VStack(spacing: BuxLayout.section) {
@@ -106,9 +133,14 @@ struct StudioProjectsListView: View {
                 .font(.system(size: 32))
                 .buxLabelSecondary()
             
-            Text("No projects registered yet")
+            Text("No projects yet")
                 .font(.system(size: 14, weight: .semibold))
                 .buxLabelSecondary()
+            Text("A project is the job you track — fixed price or hourly, time log, expenses, and invoices.")
+                .font(.system(size: 12, weight: .medium))
+                .buxLabelSecondary()
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, BuxTokens.marginRegular)
             
             BuxButton(
                 title: "Add Project",
@@ -137,17 +169,23 @@ struct StudioProjectDetailView: View {
     @EnvironmentObject private var store: StudioStore
     @ObservedObject private var settingsStore = SettingsStore.shared
     
-    var project: StudioProject
-    
+    let projectId: UUID
+
     @State private var showAgreementEditor = false
+    @State private var showProjectEditor = false
     @State private var invoicePrefill: StudioInvoiceSuggestion?
-    
+
+    private var project: StudioProject? {
+        store.project(id: projectId)
+    }
+
     private var loggedHours: Double {
-        project.timeEntries.reduce(0.0) { $0 + $1.duration / 3600.0 }
+        project?.timeEntries.reduce(0.0) { $0 + $1.duration / 3600.0 } ?? 0
     }
     
     private var scopeAnalysis: ScopeRadarAnalysis? {
-        guard settingsStore.antiScopeCreepEnabled,
+        guard let project,
+              settingsStore.antiScopeCreepEnabled,
               settingsStore.studioMode == .pro,
               project.budgetedHours > 0 || project.allowedRevisions > 0 else { return nil }
         return ScopeRadarBrain.shared.analyze(
@@ -159,25 +197,38 @@ struct StudioProjectDetailView: View {
     }
     
     var body: some View {
+        Group {
+            if let project {
+                projectDetailContent(project: project)
+            } else {
+                ContentUnavailableView("Project not found", systemImage: "folder")
+            }
+        }
+    }
+
+    private func projectDetailContent(project: StudioProject) -> some View {
         let analysis = StudioProjectEngine.analyzeProject(project: project, receipts: store.receipts)
-        
-        ZStack {
+
+        return ZStack {
             themeManager.screenBackground(for: colorScheme)
                 .ignoresSafeArea()
             
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
+
+                    projectOverviewSection(project: project, analysis: analysis)
+                    projectActionsSection(project: project)
                     
                     if let scope = scopeAnalysis, scope.isAnyAlertActive {
-                        scopeAlertBanner(scope)
+                        scopeAlertBanner(scope, project: project)
                     }
                     
                     if let scope = scopeAnalysis {
-                        scopeRadarSection(scope)
+                        scopeRadarSection(scope, project: project)
                     }
 
                     if settingsStore.agreementScratchpadEnabled, settingsStore.studioMode == .pro {
-                        agreementScratchpadSection
+                        agreementScratchpadSection(project: project)
                     }
                     
                     // Overrun Risk banner
@@ -195,13 +246,13 @@ struct StudioProjectDetailView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
-                    projectInvoiceSuggestionSection
+                    projectInvoiceSuggestionSection(project: project)
 
                     // 1. Margin & Financials Cards
                     financialMarginsSection(analysis: analysis)
                     
                     // 2. Time entries list
-                    timeEntriesSection
+                    timeEntriesSection(project: project)
                     
                     // 3. Project Expenses
                     expensesSection(projectExpenses: analysis.projectedExpenses)
@@ -211,6 +262,21 @@ struct StudioProjectDetailView: View {
             }
         }
         .navigationTitle(project.name)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Edit") {
+                    showProjectEditor = true
+                }
+                .font(.system(size: 15, weight: .semibold))
+            }
+        }
+        .sheet(isPresented: $showProjectEditor) {
+            StudioProjectEditorSheet(existingProject: project)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(store)
+                .buxStudioSheetContent()
+        }
         .fullScreenCover(item: $invoicePrefill) { suggestion in
             StudioInvoiceEditorView(invoiceToEdit: nil, prefillSuggestion: suggestion)
                 .environmentObject(themeManager)
@@ -219,14 +285,134 @@ struct StudioProjectDetailView: View {
         }
     }
 
-    private var projectInvoiceSuggestion: StudioInvoiceSuggestion? {
+    private func projectOverviewSection(
+        project: StudioProject,
+        analysis: (totalTime: TimeInterval, billableTime: TimeInterval, projectedRevenue: Decimal, projectedExpenses: Decimal, projectedProfit: Decimal, effectiveHourlyRate: Decimal, isOverrunRisk: Bool)
+    ) -> some View {
+        let clientName = store.clients.first(where: { $0.id == project.clientId })?.name ?? "No client linked"
+        return VStack(alignment: .leading, spacing: BuxTokens.tight) {
+            Text("PROJECT OVERVIEW")
+                .font(.system(size: 11, weight: .bold))
+                .buxLabelSecondary()
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: project.resolvedStatus.systemImage)
+                        .foregroundStyle(statusColor(project.resolvedStatus))
+                    Text(project.resolvedStatus.rawValue)
+                        .font(.system(size: 14, weight: .bold))
+                    Spacer()
+                    if let end = project.endDate, project.resolvedStatus == .completed {
+                        Text("Ended \(formattedDate(end))")
+                            .font(.system(size: 11, weight: .medium))
+                            .buxLabelSecondary()
+                    }
+                }
+
+                overviewRow("Client", clientName)
+                overviewRow("How you charge", project.billingModeLabel)
+                overviewRow("Contract value", project.billingAmountLabel(format: appSettingsManager.format))
+
+                if let fixed = project.fixedFee, fixed > 0 {
+                    overviewRow(
+                        "Revenue model",
+                        "Fixed \(appSettingsManager.format(fixed)) — time is tracked for margin & scope, not to recalculate the price."
+                    )
+                } else if let rate = project.hourlyRate, rate > 0 {
+                    overviewRow(
+                        "Revenue model",
+                        "\(appSettingsManager.format(rate))/hr × \(String(format: "%.1f", analysis.billableTime / 3600)) billable hrs logged"
+                    )
+                }
+
+                overviewRow("Started", formattedDate(project.startDate))
+                if project.budgetedHours > 0 {
+                    overviewRow("Budgeted hours", String(format: "%.1f h", project.budgetedHours))
+                }
+                if project.allowedRevisions > 0 {
+                    overviewRow("Revisions", "\(project.currentRevisions) of \(project.allowedRevisions) used")
+                }
+                if !project.notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    overviewRow("Notes", project.notes)
+                }
+
+                Text("Time entries below are your task log for this project.")
+                    .font(.system(size: 11, weight: .medium))
+                    .buxLabelSecondary()
+            }
+            .padding(BuxLayout.section)
+            .studioThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private func projectActionsSection(project: StudioProject) -> some View {
+        VStack(spacing: BuxTokens.tight) {
+            if project.resolvedStatus == .completed {
+                BuxButton(
+                    title: "Reopen project",
+                    systemImage: "arrow.uturn.backward.circle",
+                    role: .secondary,
+                    expands: true
+                ) {
+                    reopenProject(project)
+                }
+            } else {
+                BuxButton(
+                    title: "Mark project complete",
+                    systemImage: "checkmark.seal.fill",
+                    role: .primary,
+                    expands: true
+                ) {
+                    markProjectComplete(project)
+                }
+            }
+        }
+    }
+
+    private func overviewRow(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.system(size: 10, weight: .semibold))
+                .buxLabelSecondary()
+            Text(value)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func statusColor(_ status: StudioProjectStatus) -> Color {
+        switch status {
+        case .active: return themeManager.current.accentColor
+        case .onHold: return .orange
+        case .completed: return .green
+        }
+    }
+
+    private func markProjectComplete(_ project: StudioProject) {
+        var updated = project
+        updated.status = .completed
+        updated.endDate = Date()
+        store.updateProject(updated)
+        BuxSaveFeedback.success()
+    }
+
+    private func reopenProject(_ project: StudioProject) {
+        var updated = project
+        updated.status = .active
+        updated.endDate = nil
+        store.updateProject(updated)
+        BuxSaveFeedback.success()
+    }
+
+    private func projectInvoiceSuggestion(for project: StudioProject) -> StudioInvoiceSuggestion? {
         StudioInvoiceSuggestionEngine.proSuggestions(store: store)
             .first { $0.projectId == project.id }
     }
 
     @ViewBuilder
-    private var projectInvoiceSuggestionSection: some View {
-        if let suggestion = projectInvoiceSuggestion {
+    private func projectInvoiceSuggestionSection(project: StudioProject) -> some View {
+        if let suggestion = projectInvoiceSuggestion(for: project) {
             VStack(alignment: .leading, spacing: BuxTokens.tight) {
                 Text("INVOICE SUGGESTION")
                     .font(.system(size: 11, weight: .bold))
@@ -256,7 +442,7 @@ struct StudioProjectDetailView: View {
         }
     }
     
-    private func scopeAlertBanner(_ scope: ScopeRadarAnalysis) -> some View {
+    private func scopeAlertBanner(_ scope: ScopeRadarAnalysis, project: StudioProject) -> some View {
         HStack(spacing: 12) {
             Image(systemName: scope.overallRisk.systemIcon)
                 .foregroundColor(Color(hex: scope.overallRisk.color))
@@ -270,7 +456,7 @@ struct StudioProjectDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     
-    private func scopeRadarSection(_ scope: ScopeRadarAnalysis) -> some View {
+    private func scopeRadarSection(_ scope: ScopeRadarAnalysis, project: StudioProject) -> some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
             HStack(spacing: 6) {
                 Text("SCOPE RADAR")
@@ -313,7 +499,7 @@ struct StudioProjectDetailView: View {
         }
     }
 
-    private var agreementScratchpadSection: some View {
+    private func agreementScratchpadSection(project: StudioProject) -> some View {
         let existing = store.agreementDraft(forProjectId: project.id)
         return VStack(alignment: .leading, spacing: BuxLayout.tight) {
             HStack(spacing: 6) {
@@ -405,7 +591,7 @@ struct StudioProjectDetailView: View {
         .studioThemedCardChrome(cornerRadius: 24)
     }
     
-    private var timeEntriesSection: some View {
+    private func timeEntriesSection(project: StudioProject) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("TIME ENTRIES LOG")
                 .font(.system(size: 11, weight: .bold))
@@ -1016,100 +1202,265 @@ struct ActiveTimeTrackerView: View {
 
 // MARK: - Supporting Sheets
 
-struct NewProjectSheet: View {
+private enum StudioProjectBillingChoice: String, CaseIterable, Identifiable {
+    case hourly = "Hourly"
+    case fixedPrice = "Fixed price"
+    case both = "Both (reference)"
+
+    var id: String { rawValue }
+}
+
+/// Create or edit a Pro Studio project (contract, status, scope budgets).
+struct StudioProjectEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var store: StudioStore
-    
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     @ObservedObject private var settingsStore = SettingsStore.shared
-    
+
+    var existingProject: StudioProject?
+
     @State private var name = ""
     @State private var clientId: UUID = UUID()
+    @State private var status: StudioProjectStatus = .active
+    @State private var billingChoice: StudioProjectBillingChoice = .hourly
     @State private var hourlyRate = ""
     @State private var fixedFee = ""
     @State private var notes = ""
     @State private var budgetedHours = ""
     @State private var allowedRevisions = ""
-    
+    @State private var currentRevisions = ""
+    @State private var startDate = Date()
+    @State private var hasEndDate = false
+    @State private var endDate = Date()
+
+    private var isEditing: Bool { existingProject != nil }
+
+    private var canSave: Bool {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        switch billingChoice {
+        case .hourly:
+            return Decimal(string: hourlyRate) != nil
+        case .fixedPrice:
+            return Decimal(string: fixedFee) != nil
+        case .both:
+            return Decimal(string: hourlyRate) != nil && Decimal(string: fixedFee) != nil
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 themeManager.screenBackground(for: colorScheme)
                     .ignoresSafeArea()
 
-                BuxThemedCardForm {
-                    BuxFormSection(title: "Project Details") {
-                        TextField("Project Name", text: $name)
+                ScrollView(showsIndicators: false) {
+                    BuxThemedCardForm {
+                        BuxFormSection(title: "Project") {
+                            TextField("Project name", text: $name)
+                                .buxFormFieldPadding()
+                            BuxFormRowDivider()
+                            Picker("Client", selection: $clientId) {
+                                if store.clients.isEmpty {
+                                    Text("No client").tag(UUID())
+                                } else {
+                                    ForEach(store.clients) { c in
+                                        Text(c.name).tag(c.id)
+                                    }
+                                }
+                            }
                             .buxFormFieldPadding()
-                        BuxFormRowDivider()
-                        Picker("Client", selection: $clientId) {
-                            if store.clients.isEmpty {
-                                Text("Independent Project").tag(UUID())
-                            } else {
-                                ForEach(store.clients) { c in
-                                    Text(c.name).tag(c.id)
+                            BuxFormRowDivider()
+                            Picker("Status", selection: $status) {
+                                ForEach(StudioProjectStatus.allCases) { s in
+                                    Text(s.rawValue).tag(s)
+                                }
+                            }
+                            .buxFormFieldPadding()
+                        }
+
+                        BuxFormSection(title: "How you charge") {
+                            Picker("Billing", selection: $billingChoice) {
+                                ForEach(StudioProjectBillingChoice.allCases) { choice in
+                                    Text(choice.rawValue).tag(choice)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(.horizontal, BuxTokens.section)
+                            .padding(.vertical, 10)
+
+                            Text(billingHelpText)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                .padding(.horizontal, BuxTokens.section)
+                                .padding(.bottom, 6)
+
+                            if billingChoice == .hourly || billingChoice == .both {
+                                BuxFormRowDivider()
+                                TextField("Hourly rate", text: $hourlyRate)
+                                    .keyboardType(.decimalPad)
+                                    .buxFormFieldPadding()
+                            }
+                            if billingChoice == .fixedPrice || billingChoice == .both {
+                                BuxFormRowDivider()
+                                TextField("Fixed price for whole project", text: $fixedFee)
+                                    .keyboardType(.decimalPad)
+                                    .buxFormFieldPadding()
+                            }
+                        }
+
+                        BuxFormSection(title: "Dates") {
+                            DatePicker("Started", selection: $startDate, displayedComponents: .date)
+                                .buxFormFieldPadding()
+                            BuxFormRowDivider()
+                            Toggle("Set end date", isOn: $hasEndDate)
+                                .padding(.horizontal, BuxTokens.section)
+                                .padding(.vertical, 10)
+                            if hasEndDate {
+                                BuxFormRowDivider()
+                                DatePicker("Ended", selection: $endDate, displayedComponents: .date)
+                                    .buxFormFieldPadding()
+                            }
+                        }
+
+                        BuxFormSection(title: "Notes") {
+                            TextField("Scope, deliverables, reminders…", text: $notes, axis: .vertical)
+                                .lineLimit(2...5)
+                                .buxFormFieldPadding()
+                        }
+
+                        if settingsStore.studioMode == .pro, settingsStore.antiScopeCreepEnabled {
+                            BuxFormSection(title: "Scope Radar") {
+                                TextField("Budgeted hours", text: $budgetedHours)
+                                    .keyboardType(.decimalPad)
+                                    .buxFormFieldPadding()
+                                BuxFormRowDivider()
+                                TextField("Included revisions", text: $allowedRevisions)
+                                    .keyboardType(.numberPad)
+                                    .buxFormFieldPadding()
+                                if isEditing {
+                                    BuxFormRowDivider()
+                                    TextField("Revisions used so far", text: $currentRevisions)
+                                        .keyboardType(.numberPad)
+                                        .buxFormFieldPadding()
                                 }
                             }
                         }
-                        .buxFormFieldPadding()
                     }
-
-                    BuxFormSection(title: "Contract details") {
-                        TextField("Hourly Rate", text: $hourlyRate)
-                            .keyboardType(.decimalPad)
-                            .buxFormFieldPadding()
-                        BuxFormRowDivider()
-                        TextField("Fixed Fee Arrangement (optional)", text: $fixedFee)
-                            .keyboardType(.decimalPad)
-                            .buxFormFieldPadding()
-                    }
-
-                    BuxFormSection(title: "Internal Notes") {
-                        TextField("Notes", text: $notes)
-                            .buxFormFieldPadding()
-                    }
-
-                    if settingsStore.studioMode == .pro, settingsStore.antiScopeCreepEnabled {
-                        BuxFormSection(title: "Scope Radar budgets") {
-                            TextField("Budgeted hours", text: $budgetedHours)
-                                .keyboardType(.decimalPad)
-                                .buxFormFieldPadding()
-                            BuxFormRowDivider()
-                            TextField("Included revisions", text: $allowedRevisions)
-                                .keyboardType(.numberPad)
-                                .buxFormFieldPadding()
-                        }
-                    }
+                    .padding(.bottom, BuxTokens.sheetBottomClearance)
                 }
             }
-            .navigationTitle("New Project")
+            .navigationTitle(isEditing ? "Edit Project" : "New Project")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    BuxToolbarSaveButton(isDirty: !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
-                        let proj = StudioProject(
-                            name: name,
-                            clientId: clientId == UUID() ? nil : clientId,
-                            hourlyRate: Decimal(string: hourlyRate),
-                            fixedFee: Decimal(string: fixedFee),
-                            notes: notes,
-                            hustleId: settingsStore.sideHustleMatrixEnabled
-                                ? HustleManager.shared.selectedHustleId
-                                : nil,
-                            budgetedHours: Double(budgetedHours) ?? 0,
-                            allowedRevisions: Int(allowedRevisions) ?? 0
-                        )
-                        store.addProject(proj)
-                        BuxSaveFeedback.success()
-                        dismiss()
+                    BuxToolbarSaveButton(isDirty: canSave) {
+                        saveProject()
                     }
                 }
             }
+            .onAppear(perform: loadExisting)
             .buxStudioSheetContent()
         }
+    }
+
+    private var billingHelpText: String {
+        switch billingChoice {
+        case .hourly:
+            return "Revenue = hourly rate × billable hours logged on this project."
+        case .fixedPrice:
+            return "Revenue stays the fixed price — still log time to track margin and scope."
+        case .both:
+            return "Revenue uses the fixed price; hourly rate is kept for reference and invoices."
+        }
+    }
+
+    private func loadExisting() {
+        guard let project = existingProject else {
+            if let first = store.clients.first?.id { clientId = first }
+            return
+        }
+        name = project.name
+        clientId = project.clientId ?? (store.clients.first?.id ?? UUID())
+        status = project.resolvedStatus
+        notes = project.notes
+        hourlyRate = project.hourlyRate.map { "\($0)" } ?? ""
+        fixedFee = project.fixedFee.map { "\($0)" } ?? ""
+        budgetedHours = project.budgetedHours > 0 ? "\(project.budgetedHours)" : ""
+        allowedRevisions = project.allowedRevisions > 0 ? "\(project.allowedRevisions)" : ""
+        currentRevisions = project.currentRevisions > 0 ? "\(project.currentRevisions)" : ""
+        startDate = project.startDate
+        if let end = project.endDate {
+            hasEndDate = true
+            endDate = end
+        }
+        if let fixed = project.fixedFee, fixed > 0, let hourly = project.hourlyRate, hourly > 0 {
+            billingChoice = .both
+        } else if let fixed = project.fixedFee, fixed > 0 {
+            billingChoice = .fixedPrice
+        } else {
+            billingChoice = .hourly
+        }
+    }
+
+    private func saveProject() {
+        let hourly: Decimal? = {
+            switch billingChoice {
+            case .hourly, .both: return Decimal(string: hourlyRate)
+            case .fixedPrice: return nil
+            }
+        }()
+        let fixed: Decimal? = {
+            switch billingChoice {
+            case .fixedPrice, .both: return Decimal(string: fixedFee)
+            case .hourly: return nil
+            }
+        }()
+
+        var resolvedEnd: Date? = hasEndDate ? endDate : nil
+        if status == .completed, resolvedEnd == nil {
+            resolvedEnd = Date()
+        }
+
+        if var existing = existingProject {
+            existing.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            existing.clientId = clientId == UUID() || !store.clients.contains(where: { $0.id == clientId }) ? nil : clientId
+            existing.status = status
+            existing.hourlyRate = hourly
+            existing.fixedFee = fixed
+            existing.notes = notes
+            existing.startDate = startDate
+            existing.endDate = resolvedEnd
+            existing.budgetedHours = Double(budgetedHours) ?? existing.budgetedHours
+            existing.allowedRevisions = Int(allowedRevisions) ?? existing.allowedRevisions
+            existing.currentRevisions = Int(currentRevisions) ?? existing.currentRevisions
+            store.updateProject(existing)
+        } else {
+            let proj = StudioProject(
+                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+                clientId: clientId == UUID() || !store.clients.contains(where: { $0.id == clientId }) ? nil : clientId,
+                startDate: startDate,
+                endDate: resolvedEnd,
+                hourlyRate: hourly,
+                fixedFee: fixed,
+                notes: notes,
+                hustleId: settingsStore.sideHustleMatrixEnabled
+                    ? HustleManager.shared.selectedHustleId
+                    : nil,
+                budgetedHours: Double(budgetedHours) ?? 0,
+                allowedRevisions: Int(allowedRevisions) ?? 0,
+                currentRevisions: Int(currentRevisions) ?? 0,
+                status: status
+            )
+            store.addProject(proj)
+        }
+        BuxSaveFeedback.success()
+        dismiss()
     }
 }

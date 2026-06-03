@@ -285,6 +285,22 @@ public struct StudioInvoice: Codable, Identifiable, Equatable {
 
 // MARK: - Projects & Time Tracking
 
+public enum StudioProjectStatus: String, Codable, CaseIterable, Identifiable, Sendable {
+    case active = "Active"
+    case onHold = "On hold"
+    case completed = "Completed"
+
+    public var id: String { rawValue }
+
+    public var systemImage: String {
+        switch self {
+        case .active: return "play.circle.fill"
+        case .onHold: return "pause.circle.fill"
+        case .completed: return "checkmark.circle.fill"
+        }
+    }
+}
+
 public struct StudioTimeEntry: Codable, Identifiable, Hashable, Equatable {
     public var id: UUID
     public var projectId: UUID
@@ -333,7 +349,9 @@ public struct StudioProject: Codable, Identifiable, Equatable {
     public var allowedRevisions: Int
     /// Revisions consumed so far.
     public var currentRevisions: Int
-    
+    /// Lifecycle — active jobs vs completed / paused.
+    public var status: StudioProjectStatus?
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -349,7 +367,8 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         hustleId: UUID? = nil,
         budgetedHours: Double = 0,
         allowedRevisions: Int = 0,
-        currentRevisions: Int = 0
+        currentRevisions: Int = 0,
+        status: StudioProjectStatus? = .active
     ) {
         self.id = id
         self.name = name
@@ -366,12 +385,13 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         self.budgetedHours = budgetedHours
         self.allowedRevisions = allowedRevisions
         self.currentRevisions = currentRevisions
+        self.status = status
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, name, clientId, startDate, endDate, hourlyRate, fixedFee, notes
         case timeEntries, expenseIds, generatedInvoiceIds, hustleId
-        case budgetedHours, allowedRevisions, currentRevisions
+        case budgetedHours, allowedRevisions, currentRevisions, status
     }
 
     public init(from decoder: Decoder) throws {
@@ -391,6 +411,42 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         budgetedHours = try c.decodeIfPresent(Double.self, forKey: .budgetedHours) ?? 0
         allowedRevisions = try c.decodeIfPresent(Int.self, forKey: .allowedRevisions) ?? 0
         currentRevisions = try c.decodeIfPresent(Int.self, forKey: .currentRevisions) ?? 0
+        status = try c.decodeIfPresent(StudioProjectStatus.self, forKey: .status)
+            ?? (endDate != nil ? .completed : .active)
+    }
+}
+
+extension StudioProject {
+    public var resolvedStatus: StudioProjectStatus {
+        status ?? .active
+    }
+
+    public var isFixedPriceProject: Bool {
+        if let fixedFee, fixedFee > 0 { return true }
+        return hourlyRate == nil || hourlyRate == 0
+    }
+
+    public var billingModeLabel: String {
+        if let fixedFee, fixedFee > 0, let hourlyRate, hourlyRate > 0 {
+            return "Fixed + hourly reference"
+        }
+        if let fixedFee, fixedFee > 0 {
+            return "Fixed price project"
+        }
+        if let hourlyRate, hourlyRate > 0 {
+            return "Hourly project"
+        }
+        return "Set billing in Edit"
+    }
+
+    public func billingAmountLabel(format: (Decimal) -> String) -> String {
+        if let fixedFee, fixedFee > 0 {
+            return format(fixedFee)
+        }
+        if let hourlyRate, hourlyRate > 0 {
+            return "\(format(hourlyRate))/hr"
+        }
+        return "—"
     }
 }
 

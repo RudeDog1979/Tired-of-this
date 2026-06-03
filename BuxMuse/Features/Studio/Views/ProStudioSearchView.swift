@@ -68,7 +68,7 @@ struct ProStudioSearchView: View {
         }
         .navigationDestination(item: $projectRouteID) { projectID in
             if let project = studioStore.projects.first(where: { $0.id == projectID }) {
-                StudioProjectDetailView(project: project)
+                StudioProjectDetailView(projectId: project.id)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
