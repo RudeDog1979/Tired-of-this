@@ -52,6 +52,7 @@ struct StudioHubView: View {
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .environmentObject(navigationCoordinator)
             }
         }
     }

@@ -16,6 +16,7 @@ struct StudioTimerAttributes: ActivityAttributes {
         var isPaused: Bool
         var hasEstimate: Bool
         var estimatedDuration: TimeInterval
+        var planBaselineSeconds: TimeInterval
         var progress: Double
         var isOvertime: Bool
         /// Task label from Log Time; nil on older activities — UI falls back to project name.

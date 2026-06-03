@@ -8,7 +8,9 @@
 import Foundation
 
 struct StudioTimerSession: Codable, Equatable {
+    /// Pro: `StudioProject.id`. Simple: `SimpleStudioEntry.id` (job) when `isSimpleJobSession` is true.
     var projectId: UUID
+    var isSimpleJobSession: Bool
     var notes: String
     var isBillable: Bool
     var accumulated: TimeInterval
@@ -17,6 +19,10 @@ struct StudioTimerSession: Codable, Equatable {
     var laps: [TimeInterval]
     var hasJobEstimate: Bool
     var estimatedDuration: TimeInterval
+    /// Logged job time before this session (Simple work clock); 0 for Pro session-only estimates.
+    var planBaselineSeconds: TimeInterval
+    /// When true, timer pauses automatically when tracked time reaches the plan (Simple + Pro).
+    var autoPauseAtPlanEnd: Bool
     var sessionStartedAt: Date
     var estimateLocked: Bool
     var notifiedApproaching: Bool
@@ -24,6 +30,7 @@ struct StudioTimerSession: Codable, Equatable {
 
     init(
         projectId: UUID,
+        isSimpleJobSession: Bool = false,
         notes: String = "",
         isBillable: Bool = true,
         accumulated: TimeInterval = 0,
@@ -32,12 +39,15 @@ struct StudioTimerSession: Codable, Equatable {
         laps: [TimeInterval] = [],
         hasJobEstimate: Bool = false,
         estimatedDuration: TimeInterval = 0,
+        planBaselineSeconds: TimeInterval = 0,
+        autoPauseAtPlanEnd: Bool = true,
         sessionStartedAt: Date = Date(),
         estimateLocked: Bool = false,
         notifiedApproaching: Bool = false,
         notifiedAtGoal: Bool = false
     ) {
         self.projectId = projectId
+        self.isSimpleJobSession = isSimpleJobSession
         self.notes = notes
         self.isBillable = isBillable
         self.accumulated = accumulated
@@ -46,6 +56,8 @@ struct StudioTimerSession: Codable, Equatable {
         self.laps = laps
         self.hasJobEstimate = hasJobEstimate
         self.estimatedDuration = estimatedDuration
+        self.planBaselineSeconds = planBaselineSeconds
+        self.autoPauseAtPlanEnd = autoPauseAtPlanEnd
         self.sessionStartedAt = sessionStartedAt
         self.estimateLocked = estimateLocked
         self.notifiedApproaching = notifiedApproaching
@@ -53,14 +65,15 @@ struct StudioTimerSession: Codable, Equatable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case projectId, notes, isBillable, accumulated, segmentStart, isRunning, laps
-        case hasJobEstimate, estimatedDuration, sessionStartedAt
+        case projectId, isSimpleJobSession, notes, isBillable, accumulated, segmentStart, isRunning, laps
+        case hasJobEstimate, estimatedDuration, planBaselineSeconds, autoPauseAtPlanEnd, sessionStartedAt
         case estimateLocked, notifiedApproaching, notifiedAtGoal
     }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         projectId = try c.decode(UUID.self, forKey: .projectId)
+        isSimpleJobSession = try c.decodeIfPresent(Bool.self, forKey: .isSimpleJobSession) ?? false
         notes = try c.decode(String.self, forKey: .notes)
         isBillable = try c.decode(Bool.self, forKey: .isBillable)
         accumulated = try c.decode(TimeInterval.self, forKey: .accumulated)
@@ -69,6 +82,8 @@ struct StudioTimerSession: Codable, Equatable {
         laps = try c.decode([TimeInterval].self, forKey: .laps)
         hasJobEstimate = try c.decode(Bool.self, forKey: .hasJobEstimate)
         estimatedDuration = try c.decode(TimeInterval.self, forKey: .estimatedDuration)
+        planBaselineSeconds = try c.decodeIfPresent(TimeInterval.self, forKey: .planBaselineSeconds) ?? 0
+        autoPauseAtPlanEnd = try c.decodeIfPresent(Bool.self, forKey: .autoPauseAtPlanEnd) ?? true
         sessionStartedAt = try c.decode(Date.self, forKey: .sessionStartedAt)
         estimateLocked = try c.decodeIfPresent(Bool.self, forKey: .estimateLocked) ?? false
         notifiedApproaching = try c.decodeIfPresent(Bool.self, forKey: .notifiedApproaching) ?? false
@@ -91,17 +106,33 @@ struct StudioTimerSession: Codable, Equatable {
         return max(0, total)
     }
 
+    func trackedElapsed(at date: Date = Date()) -> TimeInterval {
+        StudioWorkClockPlanEngine.trackedElapsed(
+            baseline: planBaselineSeconds,
+            sessionElapsed: elapsed(at: date)
+        )
+    }
+
     func progress(at date: Date = Date()) -> Double {
         guard hasJobEstimate, estimatedDuration > 0 else { return 0 }
-        return elapsed(at: date) / estimatedDuration
+        return StudioWorkClockPlanEngine.progress(
+            baseline: planBaselineSeconds,
+            sessionElapsed: elapsed(at: date),
+            planTotal: estimatedDuration
+        )
     }
 
     var isOvertime: Bool {
-        hasJobEstimate && estimatedDuration > 0 && elapsed() > estimatedDuration
+        guard hasJobEstimate, estimatedDuration > 0 else { return false }
+        return StudioWorkClockPlanEngine.isOvertime(
+            baseline: planBaselineSeconds,
+            sessionElapsed: elapsed(),
+            planTotal: estimatedDuration
+        )
     }
 
     var isUnderEstimate: Bool {
-        hasJobEstimate && estimatedDuration > 0 && elapsed() < estimatedDuration
+        hasJobEstimate && estimatedDuration > 0 && !isOvertime && trackedElapsed() < estimatedDuration
     }
 
     static func formattedDuration(_ interval: TimeInterval) -> String {

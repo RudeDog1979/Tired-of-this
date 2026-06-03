@@ -15,9 +15,12 @@ struct SimpleStudioHubView: View {
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioBrain: SimpleStudioBrain
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @ObservedObject private var settingsStore = SettingsStore.shared
+    @ObservedObject private var studioTimer = StudioTimerController.shared
 
     @State private var hubAppeared = false
+    @State private var showLogTime = false
     @State private var isFabExpanded = false
     @State private var showLogMoney = false
     @State private var logMoneyKind: SimpleEntryKind?
@@ -63,6 +66,9 @@ struct SimpleStudioHubView: View {
                         .buxScreenEntrance(index: 1, isVisible: hubAppeared)
 
                         SimpleStudioHeroCard(display: display)
+                            .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+
+                        simpleLogTimeQuickAction
                             .buxScreenEntrance(index: 2, isVisible: hubAppeared)
 
                         if display.isEmpty {
@@ -166,9 +172,21 @@ struct SimpleStudioHubView: View {
                     .environmentObject(simpleStudioStore)
             }
             .onAppear {
+                studioTimer.attach(simpleStore: simpleStudioStore)
                 simpleStudioBrain.refreshAll()
+                presentLogTimeIfRequested()
                 guard !hubAppeared else { return }
                 withAnimation(BuxMotion.bounce) { hubAppeared = true }
+            }
+            .onChange(of: navigationCoordinator.openStudioLogTimeRequest) { _, _ in
+                presentLogTimeIfRequested()
+            }
+            .sheet(isPresented: $showLogTime) {
+                SimpleStudioLogTimeView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(simpleStudioStore)
+                    .buxStudioSheetContent()
             }
             .alert(markPaidAlertTitle, isPresented: $showMarkPaidConfirmation) {
                 Button(markPaidConfirmLabel) {
@@ -257,6 +275,9 @@ struct SimpleStudioHubView: View {
                 .zIndex(4)
 
             VStack(spacing: 10) {
+                fabItem(title: "Work clock", icon: "stopwatch.fill", delay: 0.01) {
+                    closeFab { showLogTime = true }
+                }
                 fabItem(title: "Scan", icon: "camera.viewfinder", delay: 0.02) {
                     closeFab { showScan = true }
                 }
@@ -337,6 +358,42 @@ struct SimpleStudioHubView: View {
             .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
         }
         .buttonStyle(.plain)
+    }
+
+    private var simpleLogTimeQuickAction: some View {
+        TimelineView(.periodic(from: .now, by: 1.0)) { _ in
+            Button {
+                showLogTime = true
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: studioTimer.isRunning ? "stopwatch.fill" : "stopwatch")
+                        .font(.system(size: 18, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(studioTimer.hasActiveSession && studioTimer.session?.isSimpleJobSession == true
+                             ? StudioTimerSession.formattedElapsed(studioTimer.displayElapsed, style: .hub)
+                             : "Work clock")
+                            .font(.system(size: 15, weight: .bold))
+                        Text("Track time — hourly or one-price jobs")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                }
+                .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                .padding(BuxLayout.section)
+                .background(themeManager.cardFill(for: colorScheme))
+                .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func presentLogTimeIfRequested() {
+        guard navigationCoordinator.consumeStudioLogTimeRequest() else { return }
+        showLogTime = true
     }
 
     private func closeFab(_ action: @escaping () -> Void) {

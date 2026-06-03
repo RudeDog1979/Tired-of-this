@@ -61,6 +61,9 @@ struct SimpleStudioEntryDetailView: View {
                                         BuxFormRowDivider()
                                         detailRow("Payment", paymentLabel(entry.paymentStatus))
                                     }
+                                    if entry.kind == .job {
+                                        jobPayRows(entry)
+                                    }
                                     if let note = entry.note, !note.isEmpty {
                                         BuxFormRowDivider()
                                         detailRow("Note", note)
@@ -197,10 +200,47 @@ struct SimpleStudioEntryDetailView: View {
     }
 
     private func openEditor(for entry: SimpleStudioEntry) {
-        if entry.kind == .job, entry.agreedPrice != nil {
+        if entry.kind == .job {
             showJobEditor = true
         } else {
             showScanEditor = true
+        }
+    }
+
+    @ViewBuilder
+    private func jobPayRows(_ entry: SimpleStudioEntry) -> some View {
+        Group {
+            BuxFormRowDivider()
+            detailRow("Pay type", entry.resolvedPayStyle.plainTitle)
+            if entry.resolvedPayStyle == .byTheHour, let rate = entry.hourlyRate {
+                BuxFormRowDivider()
+                detailRow("Hourly rate", "\(appSettingsManager.format(rate)) / hr")
+            } else if let agreed = entry.agreedPrice {
+                BuxFormRowDivider()
+                detailRow("Agreed price", appSettingsManager.format(agreed))
+            }
+        if let planned = entry.plannedTimeLabel {
+            BuxFormRowDivider()
+            detailRow("Planned time", planned)
+        }
+        if let logged = entry.loggedHoursLabel {
+            BuxFormRowDivider()
+            detailRow("Time on job", logged)
+        }
+            if entry.resolvedPayStyle == .byTheHour,
+               let rate = entry.hourlyRate,
+               rate > 0 {
+                BuxFormRowDivider()
+                detailRow(
+                    "Owed from hours",
+                    appSettingsManager.format(
+                        SimpleStudioTimePayEngine.earnings(
+                            seconds: entry.loggedSeconds ?? 0,
+                            hourlyRate: rate
+                        )
+                    )
+                )
+            }
         }
     }
 

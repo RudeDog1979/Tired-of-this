@@ -32,7 +32,9 @@ struct SimpleStudioJobQuoteSheet: View {
     @State private var customerPhone = ""
     @State private var jobLabel = ""
     @State private var paymentMode: SimpleJobPaymentMode = .waiting
+    @State private var payStyle: SimpleJobPayStyle = .onePrice
     @State private var agreedPriceText = ""
+    @State private var hourlyRateText = ""
     @State private var paidSoFarText = ""
     @State private var advanceText = ""
     @State private var materialsText = ""
@@ -40,6 +42,10 @@ struct SimpleStudioJobQuoteSheet: View {
     @State private var transportText = ""
     @State private var platformFeeText = ""
     @State private var note = ""
+    @State private var hasPlannedTime = false
+    @State private var planHours = 1
+    @State private var planMinutes = 0
+    @State private var pauseWhenTimeUp = true
 
     private var breakdown: SimpleJobBreakdown? {
         draftEntry.jobBreakdown()
@@ -68,6 +74,12 @@ struct SimpleStudioJobQuoteSheet: View {
             transport: decimal(from: transportText),
             advanceAmount: decimal(from: advanceText),
             agreedPrice: decimal(from: agreedPriceText),
+            payStyle: payStyle,
+            hourlyRate: payStyle == .byTheHour ? decimal(from: hourlyRateText) : nil,
+            plannedWorkSeconds: hasPlannedTime
+                ? StudioWorkClockPlanEngine.duration(hours: planHours, minutes: planMinutes)
+                : nil,
+            pauseWhenPlanEnds: hasPlannedTime ? pauseWhenTimeUp : nil,
             createdAt: existingJob?.createdAt ?? Date()
         )
     }
@@ -107,10 +119,89 @@ struct SimpleStudioJobQuoteSheet: View {
                                     .buxFormFieldPadding()
                             }
 
-                            BuxFormSection(title: "Agreed price") {
-                                TextField("Full price customer agreed", text: $agreedPriceText)
-                                    .keyboardType(.decimalPad)
-                                    .buxFormFieldPadding()
+                            BuxFormSection(title: "How do you get paid?") {
+                                Picker("Pay type", selection: $payStyle) {
+                                    ForEach(SimpleJobPayStyle.allCases) { style in
+                                        Text(style.plainTitle).tag(style)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                                .padding(.horizontal, BuxTokens.section)
+                                .padding(.vertical, 10)
+
+                                if payStyle == .onePrice {
+                                    Text("One total price for the job — your work clock only tracks time, not money.")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                        .padding(.horizontal, BuxTokens.section)
+                                        .padding(.bottom, 6)
+                                    BuxFormRowDivider()
+                                    TextField("Full price you agreed", text: $agreedPriceText)
+                                        .keyboardType(.decimalPad)
+                                        .buxFormFieldPadding()
+                                } else {
+                                    Text("You charge per hour — the work clock multiplies hours × your rate.")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                        .padding(.horizontal, BuxTokens.section)
+                                        .padding(.bottom, 6)
+                                    BuxFormRowDivider()
+                                    TextField("Your rate per hour", text: $hourlyRateText)
+                                        .keyboardType(.decimalPad)
+                                        .buxFormFieldPadding()
+                                    BuxFormRowDivider()
+                                    TextField("Ballpark total (optional)", text: $agreedPriceText)
+                                        .keyboardType(.decimalPad)
+                                        .buxFormFieldPadding()
+                                }
+                            }
+
+                            BuxFormSection(title: "How long should it take?") {
+                                Toggle(isOn: $hasPlannedTime) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Set a time for this job")
+                                            .font(.system(size: 14, weight: .semibold))
+                                        Text("Lock Screen shows a walker moving toward done — clock can stop when time is up.")
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                    }
+                                }
+                                .padding(.horizontal, BuxTokens.section)
+                                .padding(.vertical, 10)
+
+                                if hasPlannedTime {
+                                    BuxFormRowDivider()
+                                    HStack(spacing: BuxTokens.tight) {
+                                        Picker("Hours", selection: $planHours) {
+                                            ForEach(0..<13, id: \.self) { Text("\($0) h").tag($0) }
+                                        }
+                                        .pickerStyle(.menu)
+                                        Picker("Minutes", selection: $planMinutes) {
+                                            ForEach(Array(stride(from: 0, through: 55, by: 5)), id: \.self) { m in
+                                                Text("\(m) m").tag(m)
+                                            }
+                                        }
+                                        .pickerStyle(.menu)
+                                    }
+                                    .padding(.horizontal, BuxTokens.section)
+                                    .padding(.bottom, 8)
+
+                                    BuxFormRowDivider()
+                                    Toggle(isOn: $pauseWhenTimeUp) {
+                                        Text("Stop the clock when time is up")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                    .padding(.horizontal, BuxTokens.section)
+                                    .padding(.vertical, 10)
+
+                                    if payStyle == .byTheHour {
+                                        Text("Example: agreed 2 hours at your hourly rate — set 2 h here and the clock pauses at 2 h.")
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                            .padding(.horizontal, BuxTokens.section)
+                                            .padding(.bottom, 8)
+                                    }
+                                }
                             }
 
                             BuxFormSection(title: "Payment status") {
@@ -273,9 +364,15 @@ struct SimpleStudioJobQuoteSheet: View {
     }
 
     private var canSave: Bool {
-        !customerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let hasBasics = !customerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !jobLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && (decimal(from: agreedPriceText) != nil || decimal(from: paidSoFarText) != nil)
+        guard hasBasics else { return false }
+        switch payStyle {
+        case .onePrice:
+            return decimal(from: agreedPriceText) != nil || decimal(from: paidSoFarText) != nil
+        case .byTheHour:
+            return (decimal(from: hourlyRateText) ?? 0) > 0
+        }
     }
 
     private var businessName: String {
@@ -284,8 +381,14 @@ struct SimpleStudioJobQuoteSheet: View {
     }
 
     private var shareMessage: String {
-        let agreed = appSettingsManager.format(decimal(from: agreedPriceText) ?? decimal(from: paidSoFarText) ?? 0)
-        return "Quote for \(jobLabel): \(agreed)"
+        switch payStyle {
+        case .onePrice:
+            let agreed = appSettingsManager.format(decimal(from: agreedPriceText) ?? decimal(from: paidSoFarText) ?? 0)
+            return "Quote for \(jobLabel): \(agreed) total"
+        case .byTheHour:
+            let rate = appSettingsManager.format(decimal(from: hourlyRateText) ?? 0)
+            return "Quote for \(jobLabel): \(rate) per hour"
+        }
     }
 
     private func loadExisting() {
@@ -295,7 +398,18 @@ struct SimpleStudioJobQuoteSheet: View {
             customerPhone = person.phone ?? ""
         }
         jobLabel = job.jobLabel ?? ""
+        payStyle = job.resolvedPayStyle
         agreedPriceText = job.agreedPrice.map { "\($0)" } ?? ""
+        hourlyRateText = job.hourlyRate.map { "\($0)" } ?? ""
+        if let plan = StudioWorkClockPlanEngine.normalizedPlan(job.plannedWorkSeconds) {
+            hasPlannedTime = true
+            let split = StudioWorkClockPlanEngine.split(plan)
+            planHours = max(0, split.hours)
+            planMinutes = split.minutes
+        } else {
+            hasPlannedTime = false
+        }
+        pauseWhenTimeUp = job.resolvedPauseWhenPlanEnds
         paidSoFarText = job.amount > 0 ? "\(job.amount)" : ""
         advanceText = job.advanceAmount.map { "\($0)" } ?? ""
         materialsText = job.materials.map { "\($0)" } ?? ""
@@ -314,6 +428,9 @@ struct SimpleStudioJobQuoteSheet: View {
 
     private func save() {
         let entry = draftEntry
+        if payStyle == .byTheHour, let rate = decimal(from: hourlyRateText) {
+            store.hourlyRateHint = rate
+        }
         if existingJob != nil {
             store.updateEntry(entry)
         } else {

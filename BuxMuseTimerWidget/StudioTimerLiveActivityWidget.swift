@@ -165,6 +165,7 @@ private struct StudioTimerIslandProgressSection: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         )
         let overtime = StudioTimerLiveMetrics.isOvertime(
@@ -173,6 +174,7 @@ private struct StudioTimerIslandProgressSection: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         )
         StudioTimerIslandProgressTrack(progress: progress, isOvertime: overtime)
@@ -254,6 +256,7 @@ private struct StudioTimerIslandEstimateCaption: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         ) {
             return "Overtime"
@@ -264,7 +267,12 @@ private struct StudioTimerIslandEstimateCaption: View {
             isRunning: context.state.isRunning,
             at: date
         )
-        let left = max(0, context.state.estimatedDuration - elapsed)
+        let left = max(
+            0,
+            context.state.estimatedDuration
+                - max(0, context.state.planBaselineSeconds)
+                - elapsed
+        )
         let mins = Int(left) / 60
         if mins >= 60 { return "\(mins / 60)h \(mins % 60)m" }
         return "\(max(1, mins))m left"
@@ -277,6 +285,7 @@ private struct StudioTimerIslandEstimateCaption: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         ) ? .red : .secondary
     }
@@ -307,6 +316,7 @@ private struct StudioTimerLiveProgressSection: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         )
         let overtime = StudioTimerLiveMetrics.isOvertime(
@@ -315,6 +325,7 @@ private struct StudioTimerLiveProgressSection: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         )
         StudioTimerProgressTrack(
@@ -350,6 +361,7 @@ private struct StudioTimerLiveEstimateLabel: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         )
         if overtime { return "Overtime" }
@@ -359,7 +371,12 @@ private struct StudioTimerLiveEstimateLabel: View {
             isRunning: context.state.isRunning,
             at: date
         )
-        let left = max(0, context.state.estimatedDuration - elapsed)
+        let left = max(
+            0,
+            context.state.estimatedDuration
+                - max(0, context.state.planBaselineSeconds)
+                - elapsed
+        )
         let mins = Int(left) / 60
         if mins >= 60 { return "\(mins / 60)h \(mins % 60)m left" }
         return "\(max(1, mins))m left"
@@ -372,6 +389,7 @@ private struct StudioTimerLiveEstimateLabel: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         ) ? .red : .secondary
     }
@@ -438,6 +456,7 @@ private struct StudioTimerLiveLockProgressCaption: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         )
         let overtime = StudioTimerLiveMetrics.isOvertime(
@@ -446,6 +465,7 @@ private struct StudioTimerLiveLockProgressCaption: View {
             isRunning: context.state.isRunning,
             hasEstimate: context.state.hasEstimate,
             estimatedDuration: context.state.estimatedDuration,
+            planBaselineSeconds: context.state.planBaselineSeconds,
             at: date
         )
         HStack {

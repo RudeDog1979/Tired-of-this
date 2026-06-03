@@ -238,6 +238,12 @@ public final class SimpleStudioStore: ObservableObject {
         save()
     }
 
+    public func updateInvoice(_ invoice: SimpleInvoice) {
+        guard let idx = invoices.firstIndex(where: { $0.id == invoice.id }) else { return }
+        invoices[idx] = invoice
+        save()
+    }
+
     public func markInvoicePaid(id: UUID) {
         guard let idx = invoices.firstIndex(where: { $0.id == id }) else { return }
         invoices[idx].status = .paid
@@ -246,6 +252,28 @@ public final class SimpleStudioStore: ObservableObject {
             entries[entryIdx].paymentStatus = .paid
         }
         save()
+        StudioSyncCoordinator.markSimpleInvoicePaidCascade(invoiceId: id, store: self)
+    }
+
+    /// Appends stopwatch time from Simple Studio Log Time onto a job entry.
+    public func appendLoggedTime(jobEntryId: UUID, duration: TimeInterval, sessionNote: String?) {
+        guard duration > 0, var job = entry(id: jobEntryId), job.kind == .job else { return }
+        job.loggedSeconds = (job.loggedSeconds ?? 0) + duration
+        let trimmed = sessionNote?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !trimmed.isEmpty {
+            let stamp = StudioTimerSession.formattedDuration(duration)
+            let line = "Logged \(stamp): \(trimmed)"
+            if let existing = job.note?.trimmingCharacters(in: .whitespacesAndNewlines), !existing.isEmpty {
+                job.note = existing + "\n" + line
+            } else {
+                job.note = line
+            }
+        }
+        updateEntry(job)
+    }
+
+    public var activeJobEntries: [SimpleStudioEntry] {
+        entries.filter { $0.kind == .job }
     }
 
     public func customer(named name: String) -> SimpleCustomerMemory? {

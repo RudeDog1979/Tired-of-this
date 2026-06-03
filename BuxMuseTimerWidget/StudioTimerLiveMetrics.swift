@@ -27,16 +27,18 @@ enum StudioTimerLiveMetrics {
         isRunning: Bool,
         hasEstimate: Bool,
         estimatedDuration: TimeInterval,
+        planBaselineSeconds: TimeInterval = 0,
         at date: Date = Date()
     ) -> Double {
         guard hasEstimate, estimatedDuration > 0 else { return 0 }
-        let elapsed = elapsed(
+        let sessionElapsed = elapsed(
             accumulated: accumulated,
             segmentStart: segmentStart,
             isRunning: isRunning,
             at: date
         )
-        return elapsed / estimatedDuration
+        let tracked = max(0, planBaselineSeconds) + sessionElapsed
+        return tracked / estimatedDuration
     }
 
     static func isOvertime(
@@ -45,14 +47,17 @@ enum StudioTimerLiveMetrics {
         isRunning: Bool,
         hasEstimate: Bool,
         estimatedDuration: TimeInterval,
+        planBaselineSeconds: TimeInterval = 0,
         at date: Date = Date()
     ) -> Bool {
         guard hasEstimate, estimatedDuration > 0 else { return false }
-        return elapsed(
+        let sessionElapsed = elapsed(
             accumulated: accumulated,
             segmentStart: segmentStart,
             isRunning: isRunning,
             at: date
-        ) > estimatedDuration
+        )
+        let tracked = max(0, planBaselineSeconds) + sessionElapsed
+        return tracked > estimatedDuration
     }
 }

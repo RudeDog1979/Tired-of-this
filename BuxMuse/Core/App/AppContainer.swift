@@ -39,7 +39,7 @@ final class AppContainer: ObservableObject {
 
         let settingsStore = SettingsStore.shared
         settingsStore.applyBrandThemesAppearance(to: themeManager)
-        StudioTimerController.shared.attach(store: studioStore)
+        StudioTimerController.shared.attach(studioStore: studioStore, simpleStore: simpleStudioStore)
         StudioTimerDisplayMonitor.shared.start()
         StudioTimerController.shared.refreshLiveActivity()
         studioBrain = StudioBrain(

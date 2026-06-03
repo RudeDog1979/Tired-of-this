@@ -209,16 +209,33 @@ public final class StudioStore: ObservableObject {
 
     public func addInvoice(_ invoice: StudioInvoice) {
         invoices.append(invoice)
+        StudioSyncCoordinator.registerInvoiceProjectLink(invoice, store: self)
         save()
     }
 
     public func updateInvoice(_ invoice: StudioInvoice) {
         guard let index = invoices.firstIndex(where: { $0.id == invoice.id }) else { return }
+        let previous = invoices[index]
         invoices[index] = invoice
+        if previous.projectId != invoice.projectId {
+            StudioSyncCoordinator.unregisterInvoiceProjectLink(
+                invoiceId: invoice.id,
+                projectId: previous.projectId,
+                store: self
+            )
+        }
+        StudioSyncCoordinator.registerInvoiceProjectLink(invoice, store: self)
         save()
     }
 
     public func deleteInvoice(id: UUID) {
+        if let removed = invoices.first(where: { $0.id == id }) {
+            StudioSyncCoordinator.unregisterInvoiceProjectLink(
+                invoiceId: id,
+                projectId: removed.projectId,
+                store: self
+            )
+        }
         invoices.removeAll { $0.id == id }
         save()
     }

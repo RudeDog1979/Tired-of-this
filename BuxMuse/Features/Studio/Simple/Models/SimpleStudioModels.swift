@@ -158,8 +158,18 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
     public var advanceAmount: Decimal?
     /// Full price agreed with the customer (quote).
     public var agreedPrice: Decimal?
+    /// One price for whole job vs paid by the hour (Simple work clock).
+    public var payStyle: SimpleJobPayStyle?
+    /// Hourly rate when `payStyle` is `.byTheHour`.
+    public var hourlyRate: Decimal?
     public var linkedJobId: UUID?
     public var linkedInvoiceId: UUID?
+    /// Stopwatch time logged against this job (Simple Studio Log Time).
+    public var loggedSeconds: TimeInterval?
+    /// Customer-agreed time for the job (lock-screen walker + optional auto-pause).
+    public var plannedWorkSeconds: TimeInterval?
+    /// Pause the work clock when planned time is reached (default on).
+    public var pauseWhenPlanEnds: Bool?
     public var sourcePhotoPath: String?
     public var createdAt: Date
 
@@ -179,8 +189,13 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
         transport: Decimal? = nil,
         advanceAmount: Decimal? = nil,
         agreedPrice: Decimal? = nil,
+        payStyle: SimpleJobPayStyle? = nil,
+        hourlyRate: Decimal? = nil,
         linkedJobId: UUID? = nil,
         linkedInvoiceId: UUID? = nil,
+        loggedSeconds: TimeInterval? = nil,
+        plannedWorkSeconds: TimeInterval? = nil,
+        pauseWhenPlanEnds: Bool? = nil,
         sourcePhotoPath: String? = nil,
         createdAt: Date = Date()
     ) {
@@ -199,8 +214,13 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
         self.transport = transport
         self.advanceAmount = advanceAmount
         self.agreedPrice = agreedPrice
+        self.payStyle = payStyle
+        self.hourlyRate = hourlyRate
         self.linkedJobId = linkedJobId
         self.linkedInvoiceId = linkedInvoiceId
+        self.loggedSeconds = loggedSeconds
+        self.plannedWorkSeconds = plannedWorkSeconds
+        self.pauseWhenPlanEnds = pauseWhenPlanEnds
         self.sourcePhotoPath = sourcePhotoPath
         self.createdAt = createdAt
     }
@@ -215,6 +235,10 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
     /// Amount still owed when a full agreed price exists.
     public var jobBalanceDue: Decimal {
         guard kind == .job else { return 0 }
+        if resolvedPayStyle == .byTheHour, let rate = hourlyRate, rate > 0 {
+            let earned = SimpleStudioTimePayEngine.earnings(seconds: loggedSeconds ?? 0, hourlyRate: rate)
+            return max(0, earned - paidSoFar)
+        }
         if let agreed = agreedPrice {
             return max(0, agreed - paidSoFar)
         }
@@ -236,7 +260,12 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
     /// Profit if the customer pays the full agreed amount.
     public var projectedKept: Decimal {
         guard kind == .job else { return netKept }
-        let revenue = agreedPrice ?? paidSoFar
+        let revenue: Decimal = {
+            if resolvedPayStyle == .byTheHour, let rate = hourlyRate, rate > 0 {
+                return SimpleStudioTimePayEngine.earnings(seconds: loggedSeconds ?? 0, hourlyRate: rate)
+            }
+            return agreedPrice ?? paidSoFar
+        }()
         return revenue + (tip ?? 0) - jobCosts
     }
 

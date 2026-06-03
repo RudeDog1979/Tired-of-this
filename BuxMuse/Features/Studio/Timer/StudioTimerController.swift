@@ -17,6 +17,7 @@ final class StudioTimerController: ObservableObject {
 
     private let fileName = "studio_timer_session.json"
     private var store: StudioStore?
+    private var simpleStore: SimpleStudioStore?
     private var notesLiveActivitySyncTask: Task<Void, Never>?
     private static let approachingThreshold = 0.90
 
@@ -29,6 +30,32 @@ final class StudioTimerController: ObservableObject {
         self.store = store
         syncLiveActivity()
         evaluateJobMilestones()
+    }
+
+    func attach(simpleStore: SimpleStudioStore) {
+        self.simpleStore = simpleStore
+        syncLiveActivity()
+    }
+
+    func attach(studioStore: StudioStore, simpleStore: SimpleStudioStore) {
+        self.store = studioStore
+        self.simpleStore = simpleStore
+        syncLiveActivity()
+        evaluateJobMilestones()
+    }
+
+    private func resolvedDisplayName() -> String {
+        guard let session else { return "Studio" }
+        if session.isSimpleJobSession {
+            if let job = simpleStore?.entry(id: session.projectId) {
+                let label = job.jobLabel?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                if !label.isEmpty { return label }
+                let customer = job.customerName.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !customer.isEmpty { return customer }
+            }
+            return "Job"
+        }
+        return store?.projects.first(where: { $0.id == session.projectId })?.name ?? "Studio"
     }
 
     var hasActiveSession: Bool {
@@ -51,12 +78,35 @@ final class StudioTimerController: ObservableObject {
         session
     }
 
+    func startOrResume(simpleJobId: UUID, simpleStore: SimpleStudioStore) {
+        self.simpleStore = simpleStore
+        startOrResumeTarget(
+            targetId: simpleJobId,
+            isSimpleJob: true,
+            studioStore: store
+        )
+    }
+
     func startOrResume(projectId: UUID, store: StudioStore) {
         self.store = store
+        startOrResumeTarget(
+            targetId: projectId,
+            isSimpleJob: false,
+            studioStore: store
+        )
+    }
+
+    private func startOrResumeTarget(
+        targetId: UUID,
+        isSimpleJob: Bool,
+        studioStore: StudioStore?
+    ) {
+        if let studioStore { self.store = studioStore }
         let now = Date()
         var didStart = false
 
-        if var existing = session, existing.projectId == projectId {
+        if var existing = session, existing.projectId == targetId, existing.isSimpleJobSession == isSimpleJob {
+            if isSimpleJob { mergeSimpleJobPlan(into: &existing, jobId: targetId) }
             if !existing.isRunning {
                 existing.segmentStart = now
                 existing.isRunning = true
@@ -68,7 +118,7 @@ final class StudioTimerController: ObservableObject {
                 didStart = true
             }
             syncLiveActivity()
-            if didStart { evaluateJobMilestones() }
+            evaluateJobMilestones()
             StudioTimerDisplayMonitor.shared.handleTimerRunningStateChanged()
             return
         }
@@ -90,16 +140,45 @@ final class StudioTimerController: ObservableObject {
             return
         }
 
-        session = StudioTimerSession(
-            projectId: projectId,
+        var fresh = StudioTimerSession(
+            projectId: targetId,
+            isSimpleJobSession: isSimpleJob,
             segmentStart: now,
             isRunning: true,
             sessionStartedAt: now
         )
+        if isSimpleJob {
+            mergeSimpleJobPlan(into: &fresh, jobId: targetId)
+        }
+        session = fresh
         persist()
         syncLiveActivity()
         evaluateJobMilestones()
         StudioTimerDisplayMonitor.shared.handleTimerRunningStateChanged()
+    }
+
+    /// Applies quoted planned time from a Simple job (walker on Lock Screen, optional auto-pause).
+    private func mergeSimpleJobPlan(into session: inout StudioTimerSession, jobId: UUID) {
+        guard session.isSimpleJobSession,
+              !session.estimateLocked,
+              let job = simpleStore?.entry(id: jobId),
+              job.kind == .job,
+              let plan = StudioWorkClockPlanEngine.normalizedPlan(job.plannedWorkSeconds) else { return }
+        session.hasJobEstimate = true
+        session.estimatedDuration = plan
+        session.planBaselineSeconds = job.loggedSeconds ?? 0
+        session.autoPauseAtPlanEnd = job.resolvedPauseWhenPlanEnds
+    }
+
+    func refreshSimpleJobPlanFromStore() {
+        guard var current = session,
+              current.isSimpleJobSession,
+              !current.estimateLocked else { return }
+        mergeSimpleJobPlan(into: &current, jobId: current.projectId)
+        session = current
+        persist()
+        syncLiveActivity()
+        evaluateJobMilestones()
     }
 
     func pause() {
@@ -116,7 +195,7 @@ final class StudioTimerController: ObservableObject {
 
     func toggleRunning(projectId: UUID, store: StudioStore) {
         self.store = store
-        if session == nil || session?.projectId != projectId {
+        if session == nil || session?.projectId != projectId || session?.isSimpleJobSession == true {
             startOrResume(projectId: projectId, store: store)
             return
         }
@@ -124,6 +203,19 @@ final class StudioTimerController: ObservableObject {
             pause()
         } else {
             startOrResume(projectId: projectId, store: store)
+        }
+    }
+
+    func toggleRunning(simpleJobId: UUID, simpleStore: SimpleStudioStore) {
+        self.simpleStore = simpleStore
+        if session == nil || session?.projectId != simpleJobId || session?.isSimpleJobSession != true {
+            startOrResume(simpleJobId: simpleJobId, simpleStore: simpleStore)
+            return
+        }
+        if session?.isRunning == true {
+            pause()
+        } else {
+            startOrResume(simpleJobId: simpleJobId, simpleStore: simpleStore)
         }
     }
 
@@ -172,21 +264,37 @@ final class StudioTimerController: ObservableObject {
     }
 
     func updateProjectId(_ id: UUID) {
-        guard var current = session else { return }
+        guard var current = session, !current.isSimpleJobSession else { return }
         current.projectId = id
         session = current
         persist()
         syncLiveActivity()
     }
 
-    func setJobEstimate(enabled: Bool, duration: TimeInterval) {
+    func updateSimpleJobId(_ id: UUID) {
+        guard var current = session, current.isSimpleJobSession else { return }
+        current.projectId = id
+        mergeSimpleJobPlan(into: &current, jobId: id)
+        session = current
+        persist()
+        syncLiveActivity()
+        evaluateJobMilestones()
+    }
+
+    func setJobEstimate(enabled: Bool, duration: TimeInterval, autoPauseAtEnd: Bool? = nil) {
         guard var current = session else { return }
         guard !current.estimateLocked else { return }
         current.hasJobEstimate = enabled
-        current.estimatedDuration = enabled ? max(60, duration) : 0
+        current.estimatedDuration = enabled ? max(StudioWorkClockPlanEngine.minimumPlanSeconds, duration) : 0
         if !enabled {
+            current.planBaselineSeconds = 0
             current.notifiedApproaching = false
             current.notifiedAtGoal = false
+        } else if !current.isSimpleJobSession {
+            current.planBaselineSeconds = 0
+        }
+        if let autoPauseAtEnd {
+            current.autoPauseAtPlanEnd = autoPauseAtEnd
         }
         session = current
         persist()
@@ -261,17 +369,26 @@ final class StudioTimerController: ObservableObject {
     func evaluateJobMilestones() {
         guard var current = session,
               current.hasJobEstimate,
-              current.estimateLocked,
               current.estimatedDuration > 0 else {
+            jobAlert = .none
+            return
+        }
+
+        let planActive = current.isSimpleJobSession || current.estimateLocked
+        guard planActive else {
             jobAlert = .none
             return
         }
 
         let now = Date()
         let progress = current.progress(at: now)
-        let elapsed = current.elapsed(at: now)
-        let remaining = max(0, current.estimatedDuration - elapsed)
-        let projectName = store?.projects.first(where: { $0.id == current.projectId })?.name ?? "Studio"
+        let remaining = StudioWorkClockPlanEngine.remaining(
+            baseline: current.planBaselineSeconds,
+            sessionElapsed: current.elapsed(at: now),
+            planTotal: current.estimatedDuration
+        )
+
+        let projectName = resolvedDisplayName()
         let jobName = StudioTimerLiveActivityManager.displayJobName(notes: current.notes, projectName: projectName)
 
         if progress >= Self.approachingThreshold, !current.notifiedApproaching {
@@ -299,11 +416,57 @@ final class StudioTimerController: ObservableObject {
         } else {
             jobAlert = .none
         }
+
+        if progress >= 1.0,
+           session?.isRunning == true,
+           session?.autoPauseAtPlanEnd == true {
+            pause()
+            syncLiveActivity(force: true)
+            jobAlert = .atGoal
+        }
+    }
+
+    @discardableResult
+    func logToActiveTarget(studioStore: StudioStore?, simpleStore: SimpleStudioStore?) -> Bool {
+        guard let current = session else { return false }
+        if current.isSimpleJobSession {
+            guard let simpleStore else { return false }
+            return logToSimpleJob(simpleStore: simpleStore)
+        }
+        guard let studioStore else { return false }
+        return logToProject(store: studioStore)
+    }
+
+    @discardableResult
+    func logToSimpleJob(simpleStore: SimpleStudioStore) -> Bool {
+        guard var current = session, current.isSimpleJobSession else { return false }
+        if current.isRunning, let segmentStart = current.segmentStart {
+            current.accumulated += Date().timeIntervalSince(segmentStart)
+            current.segmentStart = nil
+            current.isRunning = false
+        }
+
+        let duration = current.elapsed()
+        guard duration > 0 else { return false }
+
+        simpleStore.appendLoggedTime(
+            jobEntryId: current.projectId,
+            duration: duration,
+            sessionNote: current.notes
+        )
+
+        session = nil
+        jobAlert = .none
+        persist()
+        StudioTimerLiveActivityManager.endAll()
+        StudioTimerNotificationScheduler.cancelAll()
+        StudioTimerDisplayMonitor.shared.handleTimerRunningStateChanged()
+        return true
     }
 
     @discardableResult
     func logToProject(store: StudioStore) -> Bool {
-        guard var current = session else { return false }
+        guard var current = session, !current.isSimpleJobSession else { return false }
         if current.isRunning, let segmentStart = current.segmentStart {
             current.accumulated += Date().timeIntervalSince(segmentStart)
             current.segmentStart = nil
@@ -342,6 +505,11 @@ final class StudioTimerController: ObservableObject {
         logToProject(store: store)
     }
 
+    @discardableResult
+    func finishEarly(simpleStore: SimpleStudioStore) -> Bool {
+        logToSimpleJob(simpleStore: simpleStore)
+    }
+
     func refreshLiveActivity() {
         evaluateJobMilestones()
         syncLiveActivity(force: false)
@@ -350,8 +518,7 @@ final class StudioTimerController: ObservableObject {
     /// Catch up Live Activity UI after unlock / foreground (smooth jump to true elapsed & progress).
     func syncLiveActivityOnForeground() {
         evaluateJobMilestones()
-        let name = store?.projects.first(where: { $0.id == session?.projectId })?.name ?? "Studio"
-        StudioTimerLiveActivityManager.syncOnForeground(session: session, projectName: name)
+        StudioTimerLiveActivityManager.syncOnForeground(session: session, projectName: resolvedDisplayName())
     }
 
     private func scheduleDebouncedLiveActivitySync() {
@@ -405,7 +572,10 @@ final class StudioTimerController: ObservableObject {
     }
 
     private func syncLiveActivity(force: Bool = false) {
-        let name = store?.projects.first(where: { $0.id == session?.projectId })?.name ?? "Studio"
-        StudioTimerLiveActivityManager.sync(session: session, projectName: name, force: force)
+        StudioTimerLiveActivityManager.sync(
+            session: session,
+            projectName: resolvedDisplayName(),
+            force: force
+        )
     }
 }

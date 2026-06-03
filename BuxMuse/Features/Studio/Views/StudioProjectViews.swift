@@ -446,6 +446,7 @@ struct ActiveTimeTrackerView: View {
     @State private var hasJobEstimate = false
     @State private var estimateHours = 1
     @State private var estimateMinutes = 0
+    @State private var autoPauseAtPlanEnd = true
     @State private var showFinishEarlyConfirm = false
     @FocusState private var notesFieldFocused: Bool
 
@@ -542,7 +543,7 @@ struct ActiveTimeTrackerView: View {
                     dismissNotesKeyboard()
                 }
             )
-            .navigationTitle("Log Time")
+            .navigationTitle("Work clock")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -593,15 +594,19 @@ struct ActiveTimeTrackerView: View {
             }
             .onChange(of: hasJobEstimate) { _, enabled in
                 guard !estimateLocked else { return }
-                timer.setJobEstimate(enabled: enabled, duration: estimateDuration)
+                timer.setJobEstimate(enabled: enabled, duration: estimateDuration, autoPauseAtEnd: autoPauseAtPlanEnd)
             }
             .onChange(of: estimateHours) { _, _ in
                 guard !estimateLocked else { return }
-                timer.setJobEstimate(enabled: hasJobEstimate, duration: estimateDuration)
+                timer.setJobEstimate(enabled: hasJobEstimate, duration: estimateDuration, autoPauseAtEnd: autoPauseAtPlanEnd)
             }
             .onChange(of: estimateMinutes) { _, _ in
                 guard !estimateLocked else { return }
-                timer.setJobEstimate(enabled: hasJobEstimate, duration: estimateDuration)
+                timer.setJobEstimate(enabled: hasJobEstimate, duration: estimateDuration, autoPauseAtEnd: autoPauseAtPlanEnd)
+            }
+            .onChange(of: autoPauseAtPlanEnd) { _, value in
+                guard !estimateLocked else { return }
+                timer.setJobEstimate(enabled: hasJobEstimate, duration: estimateDuration, autoPauseAtEnd: value)
             }
             .confirmationDialog(
                 "Finished early?",
@@ -725,141 +730,65 @@ struct ActiveTimeTrackerView: View {
     }
 
     private var jobEstimateSection: some View {
-        VStack(alignment: .leading, spacing: BuxTokens.tight) {
-            Toggle(isOn: $hasJobEstimate) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Estimated job time")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-                    Text("Shows progress on Lock Screen and Dynamic Island")
-                        .font(.system(size: 11))
-                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                }
-            }
-            .disabled(estimateLocked)
-
-            if !StudioTimerLiveActivityManager.isSupported {
-                Text("Turn on Live Activities for BuxMuse in Settings → BuxMuse.")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.orange)
-            }
-
-            if showEstimateStartHint {
-                Text("Press Start to lock your estimate and show progress on the Lock Screen and Dynamic Island.")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-            }
-
-            if hasJobEstimate {
-                if estimateLocked {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Goal")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                            Text(lockedGoalLabel)
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
-                                .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-                        }
-                        Spacer()
-                        if !isRunning {
-                            Button("Edit estimate") {
-                                timer.unlockEstimateForEditing()
-                            }
-                            .font(.system(size: 12, weight: .semibold))
-                        }
-                    }
-                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                } else {
-                    HStack(spacing: BuxTokens.tight) {
-                        Picker("Hours", selection: $estimateHours) {
-                            ForEach(0..<13, id: \.self) { Text("\($0)h").tag($0) }
-                        }
-                        .pickerStyle(.menu)
-
-                        Picker("Minutes", selection: $estimateMinutes) {
-                            ForEach(Array(stride(from: 0, through: 55, by: 5)), id: \.self) { m in
-                                Text("\(m)m").tag(m)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                    }
-                    .disabled(estimateLocked)
-                    .opacity(estimateLocked ? 0.45 : 1)
-                }
-
-                jobAlertBanner
-
-                if shouldShowExtendTime {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Need more time?")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-                        HStack(spacing: BuxTokens.tight) {
-                            BuxActionButton(
-                                title: "+30m",
-                                systemImage: "plus",
-                                role: .secondary,
-                                accent: accent,
-                                expands: true,
-                                action: { timer.extendEstimate(by: 30 * 60) }
-                            )
-                            BuxActionButton(
-                                title: "+1h",
-                                systemImage: "plus",
-                                role: .secondary,
-                                accent: accent,
-                                expands: true,
-                                action: { timer.extendEstimate(by: 3600) }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        .padding(BuxLayout.section)
-        .studioThemedCardChrome(cornerRadius: 14)
-        .padding(.horizontal, BuxLayout.marginHorizontal)
+        StudioWorkClockPlanSection(
+            copy: .pro,
+            accent: accent,
+            hasPlan: $hasJobEstimate,
+            planHours: $estimateHours,
+            planMinutes: $estimateMinutes,
+            autoPauseAtEnd: $autoPauseAtPlanEnd,
+            planLocked: estimateLocked,
+            timerRunning: isRunning,
+            lockedPlanLabel: lockedGoalLabel,
+            showStartHint: showEstimateStartHint,
+            showExtendControls: shouldShowExtendTime,
+            jobAlert: timer.jobAlert,
+            alertTitle: proWorkClockAlertTitle,
+            alertMessage: proWorkClockAlertMessage,
+            onUnlockPlan: { timer.unlockEstimateForEditing() },
+            onExtend30m: { timer.extendEstimate(by: 30 * 60) },
+            onExtend1h: { timer.extendEstimate(by: 3600) },
+            budgetShortcutLabel: budgetedHoursShortcutLabel,
+            onApplyBudgetShortcut: applyBudgetedHoursShortcut
+        )
     }
 
-    @ViewBuilder
-    private var jobAlertBanner: some View {
-        switch timer.jobAlert {
-        case .none:
-            EmptyView()
+    private var budgetedHoursShortcutLabel: String? {
+        guard let project = store.projects.first(where: { $0.id == resolvedProjectId }),
+              project.budgetedHours > 0 else { return nil }
+        let duration = StudioTimerSession.formattedDuration(project.budgetedHours * 3600)
+        return "Use project budget (\(duration))"
+    }
+
+    private func applyBudgetedHoursShortcut() {
+        guard let project = store.projects.first(where: { $0.id == resolvedProjectId }),
+              project.budgetedHours > 0 else { return }
+        hasJobEstimate = true
+        let split = StudioWorkClockPlanEngine.split(project.budgetedHours * 3600)
+        estimateHours = split.hours
+        estimateMinutes = split.minutes
+        timer.setJobEstimate(enabled: true, duration: estimateDuration, autoPauseAtEnd: autoPauseAtPlanEnd)
+    }
+
+    private func proWorkClockAlertTitle(_ alert: StudioTimerJobAlert) -> String {
+        switch alert {
+        case .none: return ""
+        case .approaching: return "Almost at your estimate"
+        case .atGoal: return "Estimate reached"
+        case .overtime: return "Overtime"
+        }
+    }
+
+    private func proWorkClockAlertMessage(_ alert: StudioTimerJobAlert) -> String {
+        switch alert {
+        case .none: return ""
         case .approaching(let minutesLeft):
-            jobAlertChip(
-                title: "Almost at your estimate",
-                message: "About \(minutesLeft) min left on this job.",
-                tint: .orange
-            )
+            return "About \(minutesLeft) min left on this job."
         case .atGoal:
-            jobAlertChip(
-                title: "Estimate reached",
-                message: "Still working? Add time below or finish when done.",
-                tint: accent
-            )
+            return "Still working? Add time below or finish when done."
         case .overtime:
-            jobAlertChip(
-                title: "Overtime",
-                message: "You're past the goal — extend or finish when done.",
-                tint: .red
-            )
+            return "You're past the goal — extend or finish when done."
         }
-    }
-
-    private func jobAlertChip(title: String, message: String, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(tint)
-            Text(message)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(10)
-        .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
     @ViewBuilder
@@ -948,9 +877,10 @@ struct ActiveTimeTrackerView: View {
             isBillable = existing.isBillable
             laps = existing.laps
             hasJobEstimate = existing.hasJobEstimate
-            let totalMins = Int(existing.estimatedDuration / 60)
-            estimateHours = max(0, totalMins / 60)
-            estimateMinutes = totalMins % 60
+            let split = StudioWorkClockPlanEngine.split(existing.estimatedDuration)
+            estimateHours = split.hours
+            estimateMinutes = split.minutes
+            autoPauseAtPlanEnd = existing.autoPauseAtPlanEnd
             if store.projects.contains(where: { $0.id == existing.projectId }) {
                 selectedProjectId = existing.projectId
             }
@@ -999,6 +929,7 @@ struct ActiveTimeTrackerView: View {
         hasJobEstimate = false
         estimateHours = 1
         estimateMinutes = 0
+        autoPauseAtPlanEnd = true
         displayElapsed = 0
     }
 

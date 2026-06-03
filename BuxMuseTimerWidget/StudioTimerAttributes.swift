@@ -16,6 +16,7 @@ struct StudioTimerAttributes: ActivityAttributes {
         var isPaused: Bool
         var hasEstimate: Bool
         var estimatedDuration: TimeInterval
+        var planBaselineSeconds: TimeInterval
         var progress: Double
         var isOvertime: Bool
         var jobName: String?

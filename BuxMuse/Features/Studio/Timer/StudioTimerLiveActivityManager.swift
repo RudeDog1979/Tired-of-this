@@ -56,6 +56,7 @@ enum StudioTimerLiveActivityManager {
             isPaused: !session.isRunning && session.accumulated > 0,
             hasEstimate: session.hasJobEstimate,
             estimatedDuration: session.estimatedDuration,
+            planBaselineSeconds: session.planBaselineSeconds,
             progress: session.progress(at: now),
             isOvertime: session.isOvertime,
             jobName: jobName
@@ -100,8 +101,11 @@ enum StudioTimerLiveActivityManager {
         guard session.isRunning else { return nil }
 
         if session.hasJobEstimate, session.estimatedDuration > 0 {
-            let elapsed = session.elapsed(at: now)
-            let remaining = session.estimatedDuration - elapsed
+            let remaining = StudioWorkClockPlanEngine.remaining(
+                baseline: session.planBaselineSeconds,
+                sessionElapsed: session.elapsed(at: now),
+                planTotal: session.estimatedDuration
+            )
             if remaining > 1 {
                 return now.addingTimeInterval(remaining)
             }
