@@ -30,6 +30,7 @@ struct StudioHubView: View {
     @State private var navigateToDeductions = false
     @State private var navigateToMileage = false
     @State private var navigateToAgreements = false
+    @State private var navigateToInsights = false
     @State private var taxHubInitialTab: TaxStudioTab = .overview
 
     @State private var showNewInvoice = false
@@ -43,6 +44,17 @@ struct StudioHubView: View {
 
     private var display: StudioHubDisplay {
         studioBrain.hubDisplay
+    }
+
+    private var studioInsightsSnapshot: StudioInsightsSnapshot {
+        StudioInsightsEngine.build(
+            projects: store.projects,
+            invoices: store.invoices,
+            receipts: store.receipts,
+            simpleEntries: simpleStudioStore.entries,
+            profile: store.profile,
+            currencyFormat: { appSettingsManager.format($0) }
+        )
     }
 
     var body: some View {
@@ -112,6 +124,13 @@ struct StudioHubView: View {
                         ) { suggestion in
                             proInvoicePrefill = suggestion
                         }
+                        .padding(.horizontal, BuxTokens.marginRegular)
+                        .buxScreenEntrance(index: 5, isVisible: hubAppeared)
+
+                        StudioInsightsHubSection(
+                            snapshot: studioInsightsSnapshot,
+                            onOpenDashboard: { navigateToInsights = true }
+                        )
                         .padding(.horizontal, BuxTokens.marginRegular)
                         .buxScreenEntrance(index: 5, isVisible: hubAppeared)
 
@@ -250,6 +269,14 @@ struct StudioHubView: View {
                     .environmentObject(simpleStudioStore)
                     .environment(\.studioEnhancedTint, true)
             }
+            .navigationDestination(isPresented: $navigateToInsights) {
+                StudioInsightsDashboardView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(store)
+                    .environmentObject(simpleStudioStore)
+                    .environment(\.studioEnhancedTint, true)
+            }
             .navigationDestination(isPresented: $navigateToReceipts) {
                 StudioReceiptsListView()
                     .environmentObject(themeManager)
@@ -357,6 +384,8 @@ struct StudioHubView: View {
                     navRow(title: "Projects", icon: "folder.fill", color: .purple) { navigateToProjects = true }
                     studioRowDivider
                     navRow(title: "Agreements", icon: "signature", color: .indigo) { navigateToAgreements = true }
+                    studioRowDivider
+                    navRow(title: "Studio Insights", icon: "chart.bar.xaxis", color: .mint) { navigateToInsights = true }
                     studioRowDivider
                     navRow(title: "Tax Studio", icon: "percent", color: .red) { openTaxHub(.overview) }
                     studioRowDivider

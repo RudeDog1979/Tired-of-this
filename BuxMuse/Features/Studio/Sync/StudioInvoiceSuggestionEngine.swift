@@ -282,6 +282,15 @@ enum StudioInvoiceSuggestionEngine {
             )
         }
 
+        if !lineItems.isEmpty {
+            StudioAgreementInvoiceLines.applyAgreementContext(
+                lineItems: &lineItems,
+                project: project,
+                agreement: agreement,
+                profile: store.profile
+            )
+        }
+
         guard !lineItems.isEmpty else { return nil }
 
         let subtotal = lineItems.reduce(Decimal(0)) { $0 + Decimal($1.quantity) * $1.unitPrice }
@@ -337,11 +346,12 @@ enum StudioInvoiceSuggestionEngine {
     /// Jobs ready to bill for a customer (mirrors Pro completed-project picker).
     static func billableJobPicks(
         forCustomerName name: String,
-        store: SimpleStudioStore
+        store: SimpleStudioStore,
+        studioStore: StudioStore
     ) -> [SimpleJobInvoicePick] {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
-        return simpleSuggestions(store: store)
+        return simpleSuggestions(store: store, studioStore: studioStore)
             .filter { $0.customerName.caseInsensitiveCompare(trimmed) == .orderedSame }
             .map {
                 SimpleJobInvoicePick(
@@ -355,7 +365,7 @@ enum StudioInvoiceSuggestionEngine {
 
     static func simpleSuggestions(
         store: SimpleStudioStore,
-        studioStore: StudioStore = .shared
+        studioStore: StudioStore
     ) -> [SimpleInvoiceSuggestion] {
         store.entries
             .filter { $0.kind == .job }

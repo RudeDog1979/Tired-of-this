@@ -325,6 +325,22 @@ struct StudioInvoiceEditorView: View {
         if notes.isEmpty {
             notes = "Suggested: \(prefill.subtitle)"
         }
+        if let projectId = prefill.projectId,
+           let project = store.project(id: projectId) {
+            let agreement = store.agreementDraft(forProjectId: projectId)
+            let client = store.clients.first { $0.id == project.clientId }
+            let days = StudioAgreementInvoiceLines.paymentTermsDays(
+                agreement: agreement,
+                profile: store.profile,
+                client: client
+            )
+            if days > 0 {
+                dueDate = Calendar.current.date(byAdding: .day, value: days, to: issueDate) ?? dueDate
+            }
+            if let suffix = StudioAgreementInvoiceLines.invoiceNotesSuffix(agreement: agreement) {
+                notes = notes.isEmpty ? suffix : "\(notes)\n\(suffix)"
+            }
+        }
         designerEngine.updateLineItems(lineItems)
     }
 

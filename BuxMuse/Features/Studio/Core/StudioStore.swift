@@ -240,6 +240,13 @@ public final class StudioStore: ObservableObject {
             )
         }
         StudioSyncCoordinator.registerInvoiceProjectLink(invoice, store: self)
+        if previous.status != .paid, invoice.status == .paid {
+            StudioSyncCoordinator.markProInvoicePaidCascade(
+                invoice: invoice,
+                studioStore: self,
+                simpleStore: .shared
+            )
+        }
         save()
     }
 

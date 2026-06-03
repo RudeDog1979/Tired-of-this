@@ -106,6 +106,7 @@ public final class SimpleStudioStore: ObservableObject {
         entries[idx] = entry
         upsertCustomer(from: entry)
         refreshCustomerStats(for: entry.customerName)
+        StudioSyncCoordinator.syncLinkedSimpleInvoiceFromJob(job: entry, store: self)
         save()
     }
 

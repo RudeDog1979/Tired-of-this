@@ -239,7 +239,8 @@ struct AgreementScratchpadEditorView: View {
 
             StudioAgreementApprovalSection(
                 draft: $draft,
-                workAlreadyStarted: workAlreadyStarted
+                workAlreadyStarted: workAlreadyStarted,
+                onExportAgreementPDF: exportPDF
             )
 
             BuxFormSection(title: "Scope & deliverables") {

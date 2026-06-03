@@ -60,6 +60,69 @@ enum StudioSyncCoordinator {
         }
     }
 
+    /// When a linked Simple job changes, keep the open invoice amount/description aligned.
+    static func syncLinkedSimpleInvoiceFromJob(
+        job: SimpleStudioEntry,
+        store: SimpleStudioStore
+    ) {
+        guard job.kind == .job,
+              let invoiceId = job.linkedInvoiceId,
+              var invoice = store.invoice(id: invoiceId),
+              invoice.status != .paid else { return }
+        let label = job.jobLabel?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !label.isEmpty { invoice.jobDescription = label }
+        let due = job.jobBalanceDue
+        if due > 0 { invoice.amount = due }
+        store.updateInvoice(invoice)
+    }
+
+    /// Pro: marking invoice paid completes project + refreshes agreement bookkeeping.
+    static func markProInvoicePaidCascade(
+        invoice: StudioInvoice,
+        studioStore: StudioStore,
+        simpleStore: SimpleStudioStore
+    ) {
+        guard invoice.status == .paid else { return }
+
+        if let projectId = invoice.projectId,
+           var project = studioStore.projects.first(where: { $0.id == projectId }) {
+            if project.resolvedStatus != .completed {
+                project.status = .completed
+                if project.endDate == nil { project.endDate = Date() }
+                studioStore.updateProject(project)
+            }
+        }
+
+        if var draft = studioStore.agreementDrafts.first(where: { $0.linkedInvoiceId == invoice.id }) {
+            draft.linkedInvoiceId = invoice.id
+            if draft.projectId == nil { draft.projectId = invoice.projectId }
+            if draft.clientId == nil { draft.clientId = invoice.clientId }
+            alignAgreementDraft(&draft, store: studioStore)
+            studioStore.upsertAgreementDraft(draft, simpleStore: simpleStore)
+            linkAgreementToJob(draft: draft, simpleStore: simpleStore)
+        } else if let projectId = invoice.projectId,
+                  var draft = studioStore.agreementDraft(forProjectId: projectId) {
+            draft.linkedInvoiceId = invoice.id
+            alignAgreementDraft(&draft, store: studioStore)
+            studioStore.upsertAgreementDraft(draft, simpleStore: simpleStore)
+        }
+    }
+
+    /// Pro: push invoice line totals back to linked project billing context (additive metadata only).
+    static func refreshProInvoiceLinks(
+        invoice: StudioInvoice,
+        studioStore: StudioStore,
+        simpleStore: SimpleStudioStore
+    ) {
+        registerInvoiceProjectLink(invoice, store: studioStore)
+        if var draft = studioStore.agreementDrafts.first(where: { $0.linkedInvoiceId == invoice.id }) {
+            if draft.projectId == nil { draft.projectId = invoice.projectId }
+            if draft.clientId == nil { draft.clientId = invoice.clientId }
+            alignAgreementDraft(&draft, store: studioStore)
+            studioStore.upsertAgreementDraft(draft, simpleStore: simpleStore)
+        }
+    }
+
     // MARK: - Agreement ↔ project / client
 
     /// Aligns agreement links with project client and optional invoice reference.

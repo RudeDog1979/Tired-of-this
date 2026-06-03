@@ -157,6 +157,7 @@ struct StudioAgreementApprovalSection: View {
     @Binding var draft: AgreementDraft
     var workAlreadyStarted: Bool
     var onMarkSent: (() -> Void)?
+    var onExportAgreementPDF: (() -> Void)?
 
     @State private var showPrivacy = false
     @State private var showFileImporter = false
@@ -263,6 +264,15 @@ struct StudioAgreementApprovalSection: View {
                         .foregroundColor(themeManager.current.accentColor)
                 }
                 .buxFormFieldPadding()
+                if let onExportAgreementPDF {
+                    BuxFormRowDivider()
+                    Button(action: onExportAgreementPDF) {
+                        Label("Export PDF for external signing", systemImage: "square.and.arrow.up")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.current.accentColor)
+                    }
+                    .buxFormFieldPadding()
+                }
             }
             BuxFormRowDivider()
             uploadProofBlock

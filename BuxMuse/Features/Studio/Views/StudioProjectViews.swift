@@ -222,6 +222,7 @@ struct StudioProjectDetailView: View {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
 
                     projectOverviewSection(project: project, analysis: analysis)
+                    projectPlannerSection(project: project)
                     projectActionsSection(project: project)
                     
                     if let scope = scopeAnalysis, scope.isAnyAlertActive {
@@ -408,6 +409,22 @@ struct StudioProjectDetailView: View {
         updated.endDate = nil
         store.updateProject(updated)
         BuxSaveFeedback.success()
+    }
+
+    private func projectPlannerSnapshot(for project: StudioProject) -> StudioProjectPlannerSnapshot {
+        StudioProjectPlannerEngine.snapshot(
+            project: project,
+            receipts: store.receipts,
+            agreement: store.agreementDraft(forProjectId: project.id),
+            profile: store.profile
+        )
+    }
+
+    @ViewBuilder
+    private func projectPlannerSection(project: StudioProject) -> some View {
+        if settingsStore.studioMode == .pro {
+            StudioProjectPlannerSection(snapshot: projectPlannerSnapshot(for: project))
+        }
     }
 
     private func projectInvoiceSuggestion(for project: StudioProject) -> StudioInvoiceSuggestion? {
