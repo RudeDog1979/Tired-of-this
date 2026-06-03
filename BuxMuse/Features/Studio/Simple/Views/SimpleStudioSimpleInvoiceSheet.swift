@@ -14,7 +14,9 @@ struct SimpleStudioSimpleInvoiceSheet: View {
     @EnvironmentObject private var studioStore: StudioStore
 
     @ObservedObject var store: SimpleStudioStore
+    var prefill: SimpleInvoiceSuggestion?
 
+    @State private var linkedJobId: UUID?
     @State private var customerName = ""
     @State private var amountText = ""
     @State private var jobDescription = ""
@@ -91,7 +93,16 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                 }
             }
             .buxStudioSheetContent()
+            .onAppear { applyPrefillIfNeeded() }
         }
+    }
+
+    private func applyPrefillIfNeeded() {
+        guard let prefill else { return }
+        linkedJobId = prefill.jobId
+        customerName = prefill.customerName
+        amountText = "\(prefill.amount)"
+        jobDescription = prefill.jobDescription
     }
 
     @ViewBuilder
@@ -164,9 +175,17 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                 amount: amount,
                 jobDescription: jobDescription.isEmpty ? "Work" : jobDescription,
                 status: .sent,
-                sharedAt: Date()
+                sharedAt: Date(),
+                linkedEntryId: linkedJobId
             )
             store.addInvoice(invoice)
+            if let jobId = linkedJobId {
+                StudioSyncCoordinator.linkSimpleInvoiceToJob(
+                    invoiceId: invoice.id,
+                    jobEntryId: jobId,
+                    store: store
+                )
+            }
             BuxSaveFeedback.success()
         }
 

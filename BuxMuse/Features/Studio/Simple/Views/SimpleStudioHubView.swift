@@ -26,6 +26,7 @@ struct SimpleStudioHubView: View {
     @State private var logMoneyKind: SimpleEntryKind?
     @State private var showScan = false
     @State private var showInvoice = false
+    @State private var invoicePrefill: SimpleInvoiceSuggestion?
     @State private var showBusinessCard = false
     @State private var showQuoteJob = false
     @State private var editingJob: SimpleStudioEntry?
@@ -67,6 +68,14 @@ struct SimpleStudioHubView: View {
 
                         SimpleStudioHeroCard(display: display)
                             .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+
+                        SimpleStudioInvoiceSuggestionsSection(
+                            suggestions: StudioInvoiceSuggestionEngine.simpleSuggestions(store: simpleStudioStore)
+                        ) { suggestion in
+                            invoicePrefill = suggestion
+                        }
+                        .padding(.horizontal, BuxTokens.marginRegular)
+                        .buxScreenEntrance(index: 2, isVisible: hubAppeared)
 
                         simpleLogTimeQuickAction
                             .buxScreenEntrance(index: 2, isVisible: hubAppeared)
@@ -237,6 +246,12 @@ struct SimpleStudioHubView: View {
             }
             .sheet(isPresented: $showInvoice) {
                 SimpleStudioSimpleInvoiceSheet(store: simpleStudioStore)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+            }
+            .sheet(item: $invoicePrefill) { prefill in
+                SimpleStudioSimpleInvoiceSheet(store: simpleStudioStore, prefill: prefill)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)

@@ -140,6 +140,7 @@ struct StudioProjectDetailView: View {
     var project: StudioProject
     
     @State private var showAgreementEditor = false
+    @State private var invoicePrefill: StudioInvoiceSuggestion?
     
     private var loggedHours: Double {
         project.timeEntries.reduce(0.0) { $0 + $1.duration / 3600.0 }
@@ -194,6 +195,8 @@ struct StudioProjectDetailView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
+                    projectInvoiceSuggestionSection
+
                     // 1. Margin & Financials Cards
                     financialMarginsSection(analysis: analysis)
                     
@@ -208,6 +211,49 @@ struct StudioProjectDetailView: View {
             }
         }
         .navigationTitle(project.name)
+        .fullScreenCover(item: $invoicePrefill) { suggestion in
+            StudioInvoiceEditorView(invoiceToEdit: nil, prefillSuggestion: suggestion)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(store)
+        }
+    }
+
+    private var projectInvoiceSuggestion: StudioInvoiceSuggestion? {
+        StudioInvoiceSuggestionEngine.proSuggestions(store: store)
+            .first { $0.projectId == project.id }
+    }
+
+    @ViewBuilder
+    private var projectInvoiceSuggestionSection: some View {
+        if let suggestion = projectInvoiceSuggestion {
+            VStack(alignment: .leading, spacing: BuxTokens.tight) {
+                Text("INVOICE SUGGESTION")
+                    .font(.system(size: 11, weight: .bold))
+                    .buxLabelSecondary()
+                Button {
+                    invoicePrefill = suggestion
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Create invoice from this project")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                            Text(suggestion.subtitle)
+                                .font(.system(size: 12, weight: .medium))
+                                .buxLabelSecondary()
+                        }
+                        Spacer()
+                        Text(appSettingsManager.format(suggestion.amount))
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(themeManager.current.accentColor)
+                    }
+                    .padding(BuxLayout.section)
+                    .studioThemedCardChrome(cornerRadius: 16)
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
     
     private func scopeAlertBanner(_ scope: ScopeRadarAnalysis) -> some View {

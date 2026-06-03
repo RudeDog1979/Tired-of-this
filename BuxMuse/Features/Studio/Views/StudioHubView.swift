@@ -32,6 +32,7 @@ struct StudioHubView: View {
     @State private var taxHubInitialTab: TaxStudioTab = .overview
 
     @State private var showNewInvoice = false
+    @State private var proInvoicePrefill: StudioInvoiceSuggestion?
     @State private var showNewClient = false
     @State private var showScanReceipt = false
     @State private var showTimeTracker = false
@@ -105,6 +106,14 @@ struct StudioHubView: View {
                         quickActionsSection
                             .buxScreenEntrance(index: 5, isVisible: hubAppeared)
 
+                        StudioProInvoiceSuggestionsSection(
+                            suggestions: StudioInvoiceSuggestionEngine.proSuggestions(store: store)
+                        ) { suggestion in
+                            proInvoicePrefill = suggestion
+                        }
+                        .padding(.horizontal, BuxTokens.marginRegular)
+                        .buxScreenEntrance(index: 5, isVisible: hubAppeared)
+
                         StudioInvoicesSection(display: display.invoicesSummary) { navigateToInvoices = true }
                             .buxScreenEntrance(index: 6, isVisible: hubAppeared)
                         StudioClientsSection(clients: display.topClients) { navigateToClients = true }
@@ -176,6 +185,12 @@ struct StudioHubView: View {
             }
             .fullScreenCover(isPresented: $showNewInvoice) {
                 StudioInvoiceEditorView(invoiceToEdit: nil)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(store)
+            }
+            .fullScreenCover(item: $proInvoicePrefill) { suggestion in
+                StudioInvoiceEditorView(invoiceToEdit: nil, prefillSuggestion: suggestion)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)

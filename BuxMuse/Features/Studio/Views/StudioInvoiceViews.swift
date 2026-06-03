@@ -16,6 +16,7 @@ struct StudioInvoicesListView: View {
     @EnvironmentObject private var store: StudioStore
 
     @State private var showEditor = false
+    @State private var prefillSuggestion: StudioInvoiceSuggestion?
     @State private var searchText = ""
     @State private var isInvoiceSearchPresented = false
     @State private var statusFilter: InvoiceStatus?
@@ -60,10 +61,31 @@ struct StudioInvoicesListView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(store)
         }
+        .fullScreenCover(item: $prefillSuggestion) { suggestion in
+            StudioInvoiceEditorView(invoiceToEdit: nil, prefillSuggestion: suggestion)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(store)
+        }
+    }
+
+    private var proSuggestions: [StudioInvoiceSuggestion] {
+        StudioInvoiceSuggestionEngine.proSuggestions(store: store)
     }
 
     private var invoiceList: some View {
         List {
+            if !proSuggestions.isEmpty {
+                Section {
+                    StudioProInvoiceSuggestionsSection(suggestions: proSuggestions) { suggestion in
+                        prefillSuggestion = suggestion
+                    }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
+            }
+
             Section {
                 invoiceFilterBar
                     .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
@@ -215,8 +237,10 @@ struct StudioInvoiceEditorView: View {
     @EnvironmentObject private var store: StudioStore
 
     var invoiceToEdit: StudioInvoice?
+    var prefillSuggestion: StudioInvoiceSuggestion?
 
     @State private var selectedClientId: UUID = UUID()
+    @State private var linkedProjectId: UUID?
     @State private var invoiceNumber = ""
     @State private var issueDate = Date()
     @State private var dueDate = Date().addingTimeInterval(14 * 24 * 3600)
@@ -280,9 +304,25 @@ struct StudioInvoiceEditorView: View {
             status = inv.status
             notes = inv.notes
             lineItems = inv.lineItems
+            linkedProjectId = inv.projectId
         } else {
             selectedClientId = store.clients.first?.id ?? UUID()
             invoiceNumber = store.nextInvoiceNumber()
+            if let prefill = prefillSuggestion {
+                applyPrefill(prefill)
+            }
+        }
+    }
+
+    private func applyPrefill(_ prefill: StudioInvoiceSuggestion) {
+        if let clientId = prefill.clientId,
+           store.clients.contains(where: { $0.id == clientId }) {
+            selectedClientId = clientId
+        }
+        linkedProjectId = prefill.projectId
+        lineItems = prefill.lineItems
+        if notes.isEmpty {
+            notes = "Suggested: \(prefill.subtitle)"
         }
     }
 
@@ -316,6 +356,7 @@ struct StudioInvoiceEditorView: View {
             vatRate: primaryRate,
             taxLabel: label,
             notes: notes,
+            projectId: invoiceToEdit?.projectId ?? linkedProjectId,
             designerSnapshot: snapshot
         )
 

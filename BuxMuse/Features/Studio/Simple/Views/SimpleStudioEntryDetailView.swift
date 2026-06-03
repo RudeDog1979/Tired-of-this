@@ -19,6 +19,7 @@ struct SimpleStudioEntryDetailView: View {
 
     @State private var showScanEditor = false
     @State private var showJobEditor = false
+    @State private var invoicePrefill: SimpleInvoiceSuggestion?
 
     private var entry: SimpleStudioEntry? {
         store.entry(id: entryId)
@@ -74,6 +75,18 @@ struct SimpleStudioEntryDetailView: View {
                             }
 
                             if showsWaitingActions(for: entry) {
+                                if let suggestion = jobInvoiceSuggestion(for: entry) {
+                                    BuxButton(
+                                        title: "Invoice \(appSettingsManager.format(suggestion.amount))",
+                                        systemImage: "doc.text.fill",
+                                        role: .primary,
+                                        expands: true
+                                    ) {
+                                        invoicePrefill = suggestion
+                                    }
+                                    .padding(.horizontal, BuxTokens.marginRegular)
+                                }
+
                                 BuxButton(
                                     title: "Send",
                                     systemImage: "paperplane.fill",
@@ -161,7 +174,19 @@ struct SimpleStudioEntryDetailView: View {
                         .environmentObject(StudioStore.shared)
                 }
             }
+            .sheet(item: $invoicePrefill) { prefill in
+                SimpleStudioSimpleInvoiceSheet(store: store, prefill: prefill)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+            }
         }
+    }
+
+    private func jobInvoiceSuggestion(for entry: SimpleStudioEntry) -> SimpleInvoiceSuggestion? {
+        guard entry.kind == .job else { return nil }
+        return StudioInvoiceSuggestionEngine.simpleSuggestions(store: store)
+            .first { $0.jobId == entry.id }
     }
 
     private func detailRow(_ label: String, _ value: String) -> some View {
