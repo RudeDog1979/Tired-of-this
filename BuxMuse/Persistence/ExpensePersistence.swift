@@ -127,14 +127,20 @@ extension PersistenceController {
 
     func upsertExpenseRecord(_ record: ExpenseRecord, merchantSelection: MerchantSelection? = nil) throws -> ExpenseRecord {
         try seedExpenseCatalogIfNeeded()
-        let merchant = try resolveMerchant(for: record, selection: merchantSelection)
         var saved = record
-        saved.merchantId = merchant.id
-        if saved.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            saved.merchantName = merchant.name
-        }
-        if saved.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            saved.name = saved.merchantName
+        if let merchant = try resolveMerchantIfNeeded(for: record, selection: merchantSelection) {
+            saved.merchantId = merchant.id
+            if saved.transactionCategory == .income {
+                // Keep the user label in `name`; persist brand string for logos (matches dashboard lookup).
+                saved.merchantName = merchant.name
+            } else if saved.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                saved.merchantName = merchant.name
+            }
+            if saved.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                saved.name = saved.merchantName
+            }
+        } else {
+            saved.merchantId = record.merchantId
         }
 
         if saved.categoryId == nil {
@@ -303,11 +309,22 @@ extension PersistenceController {
     // MARK: - Merchants
 
     func resolveMerchant(for record: ExpenseRecord, selection: MerchantSelection?) throws -> ExpenseMerchantRecord {
+        if let merchant = try resolveMerchantIfNeeded(for: record, selection: selection) {
+            return merchant
+        }
+        return try upsertMerchant(forName: record.merchantName)
+    }
+
+    /// Links a store only when explicitly chosen. Income labels (Salary, Refund, …) do not auto-create merchants.
+    func resolveMerchantIfNeeded(for record: ExpenseRecord, selection: MerchantSelection?) throws -> ExpenseMerchantRecord? {
         if let selection {
             return try resolveMerchant(selection: selection)
         }
         if let merchantId = record.merchantId, let existing = try fetchMerchantRecord(id: merchantId) {
-            return try touchMerchant(existing, displayName: record.merchantName)
+            return try touchMerchant(existing, displayName: existing.name)
+        }
+        if record.transactionCategory == .income {
+            return nil
         }
         return try upsertMerchant(forName: record.merchantName)
     }

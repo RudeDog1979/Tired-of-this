@@ -7,6 +7,7 @@ import SwiftUI
 
 struct ExpandableExpenseCard: View {
     let expense: ExpenseRowDisplay
+    let record: ExpenseRecord
 
     @Binding var expandedId: UUID?
     var onOpenDetail: (() -> Void)? = nil
@@ -15,6 +16,7 @@ struct ExpandableExpenseCard: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.expensesEnhancedTint) private var expensesEnhancedTint
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var brain: BuxMuseBrain
 
     private var isExpanded: Bool {
         expandedId == expense.id
@@ -37,7 +39,8 @@ struct ExpandableExpenseCard: View {
                     }
                 } label: {
                     HStack(spacing: 14) {
-                        AsyncMerchantLogoView(merchantName: expense.name, size: 44)
+                        ExpenseLedgerAvatarView(record: record, size: 44)
+                            .environmentObject(brain)
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text(expense.name)

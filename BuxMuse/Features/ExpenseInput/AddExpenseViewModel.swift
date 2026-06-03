@@ -34,6 +34,10 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published private var pendingMerchantSelection: MerchantSelection?
     @Published public var merchantDisambiguator = ""
     @Published public var showMerchantPickSheet = false
+    /// Optional store link when logging income (Amazon refund, employer portal, etc.).
+    @Published public var optionalStoreName = ""
+    @Published var incomeStoreCandidates: [MerchantCandidate] = []
+    @Published public var showIncomeStorePickSheet = false
     @Published public var saveError: String?
     @Published public var actionNotice: String?
     @Published public var smartHint: String?
@@ -57,6 +61,8 @@ public final class AddExpenseViewModel: ObservableObject {
     private var categoryIdBeforeSubscription: UUID?
 
     public var isEditing: Bool { editingId != nil }
+    /// Logging income (Home → Log income), not an outflow expense.
+    public let isIncomeEntry: Bool
 
     public var needsDisambiguatorLabel: Bool {
         brain.merchantBrain.needsDisambiguatorLabel(
@@ -69,6 +75,8 @@ public final class AddExpenseViewModel: ObservableObject {
         self.brain = brain
         self.settingsManager = settingsManager
         self.editingId = editing?.id
+        self.isIncomeEntry = presetCategory == .income
+            || (editing?.category == .income)
 
         if let tx = editing {
             merchantName = tx.merchantName
@@ -112,10 +120,57 @@ public final class AddExpenseViewModel: ObservableObject {
             paymentMethod = nil
         }
 
-        refreshMerchantSuggestions(resetSelection: true)
+        if isIncomeEntry {
+            refreshOptionalStoreSuggestions(resetSelection: true)
+        } else {
+            refreshMerchantSuggestions(resetSelection: true)
+        }
+    }
+
+    public func refreshOptionalStoreSuggestions(resetSelection: Bool) {
+        candidates = []
+        mergeHintCandidate = nil
+        smartHint = nil
+
+        let clean = optionalStoreName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if clean.isEmpty {
+            incomeStoreCandidates = []
+            if resetSelection {
+                clearOptionalStoreLink()
+            }
+            return
+        }
+
+        let records = (try? brain.fetchAllExpenseRecords()) ?? []
+        incomeStoreCandidates = brain.merchantBrain.candidates(for: clean, expenseRecords: records)
+
+        if resetSelection {
+            selectedCandidateId = nil
+            pendingMerchantSelection = nil
+            selectedMerchantId = nil
+        }
+    }
+
+    public func clearOptionalStoreLink() {
+        optionalStoreName = ""
+        incomeStoreCandidates = []
+        selectedMerchantId = nil
+        selectedCandidateId = nil
+        pendingMerchantSelection = nil
+    }
+
+    func selectOptionalStoreCandidate(_ candidate: MerchantCandidate) {
+        optionalStoreName = candidate.historyLabel ?? candidate.displayName
+        selectedCandidateId = candidate.id
+        selectedMerchantId = candidate.merchantId
+        pendingMerchantSelection = brain.merchantBrain.selection(from: candidate)
+        incomeStoreCandidates = []
+        showIncomeStorePickSheet = false
     }
 
     public func refreshMerchantSuggestions(resetSelection: Bool) {
+        if isIncomeEntry { return }
+
         let records = (try? brain.fetchAllExpenseRecords()) ?? []
         let cleanName = merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -254,29 +309,54 @@ public final class AddExpenseViewModel: ObservableObject {
         saveError = nil
         let cleanName = merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanName.isEmpty else {
-            saveError = "Enter a merchant name."
+            saveError = isIncomeEntry ? "Add a short label for this income." : "Enter a merchant name."
             return false
         }
 
-        let pickCandidates = brain.merchantBrain.candidates(
-            for: cleanName,
-            expenseRecords: (try? brain.fetchAllExpenseRecords()) ?? []
-        )
-        let mustPick = brain.merchantBrain.isAmbiguous(
-            query: cleanName,
-            candidates: pickCandidates,
-            selectedCandidateId: selectedCandidateId,
-            selectedMerchantId: selectedMerchantId
-        ) || (
-            selectedCandidateId == nil
-                && selectedMerchantId == nil
-                && brain.merchantBrain.shouldOfferExplicitPick(for: cleanName, candidates: pickCandidates)
-        )
-        if mustPick {
-            candidates = pickCandidates
-            showMerchantPickSheet = true
-            saveError = "Choose which merchant name to use."
-            return false
+        if isIncomeEntry {
+            let storeQuery = optionalStoreName.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !storeQuery.isEmpty {
+                let pickCandidates = incomeStoreCandidates.isEmpty
+                    ? brain.merchantBrain.candidates(for: storeQuery, expenseRecords: (try? brain.fetchAllExpenseRecords()) ?? [])
+                    : incomeStoreCandidates
+                let mustPick = brain.merchantBrain.isAmbiguous(
+                    query: storeQuery,
+                    candidates: pickCandidates,
+                    selectedCandidateId: selectedCandidateId,
+                    selectedMerchantId: selectedMerchantId
+                ) || (
+                    selectedCandidateId == nil
+                        && selectedMerchantId == nil
+                        && brain.merchantBrain.shouldOfferExplicitPick(for: storeQuery, candidates: pickCandidates)
+                )
+                if mustPick {
+                    incomeStoreCandidates = pickCandidates
+                    showIncomeStorePickSheet = true
+                    saveError = "Choose which store to link (optional)."
+                    return false
+                }
+            }
+        } else {
+            let pickCandidates = brain.merchantBrain.candidates(
+                for: cleanName,
+                expenseRecords: (try? brain.fetchAllExpenseRecords()) ?? []
+            )
+            let mustPick = brain.merchantBrain.isAmbiguous(
+                query: cleanName,
+                candidates: pickCandidates,
+                selectedCandidateId: selectedCandidateId,
+                selectedMerchantId: selectedMerchantId
+            ) || (
+                selectedCandidateId == nil
+                    && selectedMerchantId == nil
+                    && brain.merchantBrain.shouldOfferExplicitPick(for: cleanName, candidates: pickCandidates)
+            )
+            if mustPick {
+                candidates = pickCandidates
+                showMerchantPickSheet = true
+                saveError = "Choose which merchant name to use."
+                return false
+            }
         }
 
         if isSubscription && isTrial && trialEndDate <= Date() {
@@ -290,7 +370,8 @@ public final class AddExpenseViewModel: ObservableObject {
             return false
         }
         let decimalValue = Decimal(doubleVal)
-        let finalValue = selectedCategory == .income ? abs(decimalValue) : -abs(decimalValue)
+        let treatsAsIncome = isIncomeEntry || selectedCategory == .income
+        let finalValue = treatsAsIncome ? abs(decimalValue) : -abs(decimalValue)
         let amount = MoneyAmount(value: finalValue, currencyCode: settingsManager.selectedCurrency.id)
 
         // Adjust Cash Drawer Balances if needed
@@ -344,7 +425,7 @@ public final class AddExpenseViewModel: ObservableObject {
             trialEndDate: isSubscription && isTrial ? trialEndDate : nil,
             renewalReminderDays: isSubscription ? renewalReminderDays : nil,
             categoryRaw: isSubscription ? TransactionCategory.subscriptions.rawValue : selectedCategory.rawValue,
-            merchantName: cleanName,
+            merchantName: persistedMerchantNameField(label: cleanName),
             hustleId: resolvedHustleIdForSave(),
             paymentMethod: normalizedPaymentMethod(),
             isBarterExchange: isBarterExchange,
@@ -354,7 +435,7 @@ public final class AddExpenseViewModel: ObservableObject {
         )
 
         if let editingId, let existing = try? brain.fetchExpenseRecord(id: editingId) {
-            record.merchantId = selectedMerchantId ?? existing.merchantId
+            record.merchantId = selectedMerchantId ?? (isIncomeEntry ? nil : existing.merchantId)
             record.createdAt = existing.createdAt
         }
 
@@ -372,7 +453,13 @@ public final class AddExpenseViewModel: ObservableObject {
                 : Calendar.current.date(byAdding: .month, value: 1, to: subscriptionStartDate)
         }
 
-        let selection = buildMerchantSelection(for: cleanName)
+        let selection: MerchantSelection? = {
+            if isIncomeEntry {
+                guard selectedMerchantId != nil || pendingMerchantSelection != nil else { return nil }
+                return buildIncomeStoreSelection()
+            }
+            return buildMerchantSelection(for: cleanName)
+        }()
 
         do {
             _ = try brain.saveExpenseRecord(record, merchantSelection: selection)
@@ -408,6 +495,10 @@ public final class AddExpenseViewModel: ObservableObject {
         selectedCategory = record.transactionCategory
         selectedCategoryId = record.categoryId
         selectedMerchantId = record.merchantId
+        if isIncomeEntry, record.merchantId != nil {
+            let merchants = (try? brain.fetchAllMerchantRecords()) ?? []
+            optionalStoreName = merchants.first(where: { $0.id == record.merchantId })?.name ?? ""
+        }
         date = record.date
         notes = record.notes ?? ""
         let absAmount = abs(record.amountValue)
@@ -422,6 +513,36 @@ public final class AddExpenseViewModel: ObservableObject {
         emotionTag = record.emotion ?? ""
     }
 
+    /// `name` stays the user label; `merchantName` holds the linked store brand for logos when applicable.
+    private func persistedMerchantNameField(label: String) -> String {
+        guard isIncomeEntry, selectedMerchantId != nil else { return label }
+        let store = optionalStoreName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !store.isEmpty { return store }
+        if let id = selectedMerchantId,
+           let merchant = try? brain.fetchMerchantRecord(id: id) {
+            return merchant.name
+        }
+        return label
+    }
+
+    private func buildIncomeStoreSelection() -> MerchantSelection? {
+        if let selection = pendingMerchantSelection {
+            return selection
+        }
+        let store = optionalStoreName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !store.isEmpty else { return nil }
+        if let selectedMerchantId,
+           let merchant = try? brain.fetchMerchantRecord(id: selectedMerchantId) {
+            return MerchantSelection(
+                merchantId: merchant.id,
+                displayName: merchant.name,
+                disambiguator: merchant.disambiguator.isEmpty ? nil : merchant.disambiguator,
+                createNew: false
+            )
+        }
+        return MerchantSelection(displayName: store, createNew: false, historyLabel: store)
+    }
+
     private func buildMerchantSelection(for cleanName: String) -> MerchantSelection? {
         if var selection = pendingMerchantSelection {
             if needsDisambiguatorLabel {
@@ -434,7 +555,7 @@ public final class AddExpenseViewModel: ObservableObject {
         }
 
         if let selectedMerchantId,
-           let merchant = try? brain.fetchAllMerchantRecords().first(where: { $0.id == selectedMerchantId }) {
+           let merchant = try? brain.fetchMerchantRecord(id: selectedMerchantId) {
             return MerchantSelection(
                 merchantId: merchant.id,
                 displayName: cleanName,

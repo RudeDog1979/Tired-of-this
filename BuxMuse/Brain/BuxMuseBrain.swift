@@ -395,6 +395,22 @@ public final class BuxMuseBrain: ObservableObject {
         try persistence.fetchAllMerchantRecords()
     }
 
+    func fetchMerchantRecord(id: UUID) throws -> ExpenseMerchantRecord? {
+        try persistence.fetchMerchantRecord(id: id)
+    }
+
+    /// Store/brand string for `AsyncMerchantLogoView` (optional income store link, expenses with merchant).
+    func merchantLogoName(for record: ExpenseRecord) -> String? {
+        guard let merchantId = record.merchantId else { return nil }
+        if let merchant = try? persistence.fetchMerchantRecord(id: merchantId) {
+            return merchant.name
+        }
+        let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let label = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !store.isEmpty, store.caseInsensitiveCompare(label) != .orderedSame else { return nil }
+        return store
+    }
+
     func updateMerchant(_ record: ExpenseMerchantRecord) throws {
         try persistence.updateMerchant(record)
     }

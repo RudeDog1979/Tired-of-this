@@ -15,6 +15,7 @@ struct RecentTransactionsSectionView: View {
     @Environment(\.dashboardEnhancedTint) private var dashboardEnhancedTint
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var brain: BuxMuseBrain
 
     let transactions: [DashboardRecentTransaction]
     let onSeeMore: () -> Void
@@ -62,7 +63,7 @@ struct RecentTransactionsSectionView: View {
 
     private func recentRow(for tx: DashboardRecentTransaction) -> some View {
         HStack(spacing: 14) {
-            AsyncMerchantLogoView(merchantName: tx.merchantName, size: 40)
+            AsyncMerchantLogoView(merchantName: dashboardLogoName(for: tx), size: 40)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(tx.merchantName)
@@ -97,6 +98,14 @@ struct RecentTransactionsSectionView: View {
             cardColor: cardColor,
             cardStroke: cardStroke
         ))
+    }
+
+    private func dashboardLogoName(for tx: DashboardRecentTransaction) -> String {
+        if let record = (try? brain.fetchExpenseRecord(id: tx.id)),
+           let linked = brain.merchantLogoName(for: record) {
+            return linked
+        }
+        return tx.merchantName
     }
 }
 

@@ -61,7 +61,7 @@ struct ExpenseTabView: View {
 
                 Group {
                     if allRecords.isEmpty {
-                        emptyState
+                        emptyStateWithWorkspaceAccess
                     } else {
                         unifiedExpenseList
                     }
@@ -99,6 +99,12 @@ struct ExpenseTabView: View {
             refreshExpenseListDisplay()
         }
         .onChange(of: appSettingsManager.selectedCurrency.id) { _, _ in
+            refreshExpenseListDisplay()
+        }
+        .onChange(of: HustleManager.shared.selectedHustleId) { _, _ in
+            refreshExpenseListDisplay()
+        }
+        .onChange(of: SettingsStore.shared.sideHustleMatrixEnabled) { _, _ in
             refreshExpenseListDisplay()
         }
         .sheet(item: $activeSheet) { mode in
@@ -265,22 +271,49 @@ struct ExpenseTabView: View {
         .accessibilityLabel("Filter expenses")
     }
 
-    private var emptyState: some View {
-        ContentUnavailableView {
-            Label("No expenses logged yet", systemImage: "creditcard")
-        } description: {
-            Text("Your financial details are kept strictly offline and secure inside the BuxMuse Brain.")
-        } actions: {
-            BuxButton(
-                title: "Add expense",
-                systemImage: "plus.circle.fill",
-                role: .primary,
-                size: .regular
-            ) {
-                activeSheet = .add
+    private var emptyStateWithWorkspaceAccess: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
+                if SettingsStore.shared.sideHustleMatrixEnabled {
+                    HustleSelectorBar()
+                        .padding(.bottom, 4)
+                }
+
+                if HustleWorkspaceFilter.isFilteringActive {
+                    ContentUnavailableView {
+                        Label("No expenses in this workspace", systemImage: "rectangle.3.group")
+                    } description: {
+                        Text("Pick another workspace above, or add an expense tagged to \(HustleWorkspaceFilter.activeWorkspaceLabel() ?? "this workspace").")
+                    } actions: {
+                        addExpenseButton
+                    }
+                } else {
+                    ContentUnavailableView {
+                        Label("No expenses logged yet", systemImage: "creditcard")
+                    } description: {
+                        Text("Your financial details are kept strictly offline and secure inside the BuxMuse Brain.")
+                    } actions: {
+                        addExpenseButton
+                    }
+                }
             }
+            .padding(.vertical, 8)
         }
+        .scrollDismissesKeyboard(.interactively)
+        .buxScrollContentMargins()
+        .buxRootScrollEdgeChrome()
         .buxStaggeredReveal(index: 0, isVisible: listAppeared)
+    }
+
+    private var addExpenseButton: some View {
+        BuxButton(
+            title: "Add expense",
+            systemImage: "plus.circle.fill",
+            role: .primary,
+            size: .regular
+        ) {
+            activeSheet = .add
+        }
     }
 
     private var unifiedExpenseList: some View {
@@ -338,6 +371,7 @@ struct ExpenseTabView: View {
     private func expenseRowContent(expense: ExpenseRowDisplay, record: ExpenseRecord) -> some View {
         ExpandableExpenseCard(
             expense: expense,
+            record: record,
             expandedId: $expandedExpenseId,
             onOpenDetail: {
                 withAnimation(.buxSnap) {
@@ -350,6 +384,7 @@ struct ExpenseTabView: View {
             }
         }
         .environmentObject(themeManager)
+        .environmentObject(brain)
         .padding(expenseListRowInsets)
         .contextMenu {
             Button {

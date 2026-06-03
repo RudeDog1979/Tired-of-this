@@ -22,6 +22,7 @@ struct AddExpenseSheet: View {
     @State private var moodCrossfadeTask: Task<Void, Never>?
     @State private var actionNoticeDismissTask: Task<Void, Never>?
     @State private var showOptionalPaymentSection = false
+    @State private var showOptionalIncomeStore = false
     @State private var paymentSourceQuery = ""
 
     @ObservedObject private var settingsStore = SettingsStore.shared
@@ -48,17 +49,31 @@ struct AddExpenseSheet: View {
         ))
     }
 
-    private var sheetTitle: String {
-        if viewModel.isEditing { return "Edit Expense" }
-        return mode == .addIncome ? "Log Income" : "Add Expense"
+    private var isIncomeMode: Bool {
+        mode == .addIncome || viewModel.isIncomeEntry
     }
+
+    private var sheetTitle: String {
+        if viewModel.isEditing {
+            return isIncomeMode ? "Edit Income" : "Edit Expense"
+        }
+        return isIncomeMode ? "Log Income" : "Add Expense"
+    }
+
+    private var incomeAccent: Color { .mint }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
 
-                if !moodBackdropTag.isEmpty || moodBackdropOpacity > 0.01 {
+                if isIncomeMode {
+                    incomeBackdropWash
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                }
+
+                if !isIncomeMode, !moodBackdropTag.isEmpty || moodBackdropOpacity > 0.01 {
                     expenseSheetMoodWash(for: moodBackdropTag)
                         .ignoresSafeArea()
                         .opacity(moodBackdropOpacity)
@@ -69,36 +84,54 @@ struct AddExpenseSheet: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: BuxLayout.section) {
+                        if isIncomeMode {
+                            incomeIntroCard
+                            incomeAvatarPreview
+                        }
+
                         amountCard
-                        merchantCard
-                        categoryCard
+
+                        if isIncomeMode {
+                            incomeSourceCard
+                            incomeCategoryCard
+                            incomeOptionalStoreCard
+                        } else {
+                            merchantCard
+                            categoryCard
+                        }
 
                         if settingsStore.sideHustleMatrixEnabled {
                             workspaceCard
                         }
 
-                        if showOperationalPaymentCard {
+                        if !isIncomeMode, showOperationalPaymentCard {
                             operationalPaymentCard
                         }
 
-                        if !viewModel.isSubscription, settingsStore.paymentSourceTrackingEnabled {
+                        if !isIncomeMode, !viewModel.isSubscription, settingsStore.paymentSourceTrackingEnabled {
                             optionalPaymentSourceCard
                         }
 
-                        if viewModel.isBarterExchange {
+                        if !isIncomeMode, viewModel.isBarterExchange {
                             barterDetailsCard
                         }
 
-                        if viewModel.isEditing {
+                        if viewModel.isEditing, !isIncomeMode {
                             editActionsSection
                         }
 
-                        subscriptionCard
+                        if !isIncomeMode {
+                            subscriptionCard
+                        }
+
                         dateCard
                         notesCard
-                        emotionalCard
 
-                        if let hint = viewModel.smartHint {
+                        if !isIncomeMode {
+                            emotionalCard
+                        }
+
+                        if !isIncomeMode, let hint = viewModel.smartHint {
                             Text(hint)
                                 .font(.system(size: 13, weight: .medium))
                                 .buxLabelSecondary()
@@ -128,9 +161,12 @@ struct AddExpenseSheet: View {
             .buxThemedPresentation()
             .buxDetailNavigationChrome()
             .onAppear {
-                syncMoodBackdrop(to: viewModel.emotionTag, animated: false)
+                if !isIncomeMode {
+                    syncMoodBackdrop(to: viewModel.emotionTag, animated: false)
+                }
             }
             .onChange(of: viewModel.emotionTag) { _, newTag in
+                guard !isIncomeMode else { return }
                 syncMoodBackdrop(to: newTag, animated: true)
             }
             .onDisappear {
@@ -152,7 +188,9 @@ struct AddExpenseSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     BuxToolbarConfirmButton(
-                        accessibilityLabel: viewModel.isEditing ? "Update" : "Save",
+                        accessibilityLabel: viewModel.isEditing
+                            ? "Update"
+                            : (isIncomeMode ? "Save income" : "Save"),
                         isEnabled: !viewModel.amountString.isEmpty
                             && !viewModel.merchantName.trimmingCharacters(in: .whitespaces).isEmpty
                     ) {
@@ -165,6 +203,14 @@ struct AddExpenseSheet: View {
             .sheet(isPresented: $viewModel.showMerchantPickSheet) {
                 merchantPickSheet
                     .buxThemedSheetContent()
+            }
+            .sheet(isPresented: $viewModel.showIncomeStorePickSheet) {
+                incomeStorePickSheet
+                    .buxThemedSheetContent()
+            }
+            .onChange(of: viewModel.optionalStoreName) { _, _ in
+                guard isIncomeMode else { return }
+                viewModel.refreshOptionalStoreSuggestions(resetSelection: false)
             }
             .overlay(alignment: .bottom) {
                 if let notice = viewModel.actionNotice {
@@ -182,6 +228,46 @@ struct AddExpenseSheet: View {
                         .allowsHitTesting(false)
                 }
             }
+            .tint(isIncomeMode ? incomeAccent : themeManager.current.accentColor)
+        }
+    }
+
+    private var incomeBackdropWash: some View {
+        LinearGradient(
+            colors: [
+                incomeAccent.opacity(colorScheme == .dark ? 0.22 : 0.14),
+                incomeAccent.opacity(colorScheme == .dark ? 0.06 : 0.04),
+                .clear
+            ],
+            startPoint: .top,
+            endPoint: .center
+        )
+    }
+
+    private var incomeIntroCard: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: "arrow.down.circle.fill")
+                .font(.system(size: 32, weight: .semibold))
+                .foregroundStyle(incomeAccent)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Money in")
+                    .font(.system(size: 17, weight: .black, design: .rounded))
+                    .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                Text("Salary, refund, gift, cash — type anything. No shop linking required.")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(BuxLayout.section)
+        .background {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(incomeAccent.opacity(colorScheme == .dark ? 0.14 : 0.1))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(incomeAccent.opacity(0.28), lineWidth: 1)
+                }
         }
     }
 
@@ -244,9 +330,177 @@ struct AddExpenseSheet: View {
     // MARK: - Form sections
 
     private var amountCard: some View {
-        AmountField(amountString: $viewModel.amountString)
-            .environmentObject(themeManager)
-            .environmentObject(appSettingsManager)
+        AmountField(
+            amountString: $viewModel.amountString,
+            kind: isIncomeMode ? .income : .expense
+        )
+        .environmentObject(themeManager)
+        .environmentObject(appSettingsManager)
+    }
+
+    private var incomeAvatarPreview: some View {
+        HStack(spacing: 14) {
+            IncomeLedgerAvatarPreview(
+                label: viewModel.merchantName,
+                linkedStoreName: viewModel.optionalStoreName,
+                merchantId: viewModel.selectedMerchantId,
+                categoryId: viewModel.selectedCategoryId,
+                categoryRaw: viewModel.selectedCategory.rawValue,
+                size: 52
+            )
+            .environmentObject(brain)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("List icon")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                Text(viewModel.selectedMerchantId == nil
+                     ? "Category icon (or store logo if linked)"
+                     : "Store logo when linked")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+            }
+            Spacer()
+        }
+        .padding(BuxLayout.section)
+        .background(incomeFieldChrome)
+    }
+
+    private var incomeSourceCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Text("What was this?")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            Text("Your own words — salary, refund, gift, sold something, etc.")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 10) {
+                    Image(systemName: "text.alignleft")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(incomeAccent)
+                    TextField("e.g. Salary, Amazon refund, gift", text: $viewModel.merchantName)
+                        .autocapitalization(.sentences)
+                        .disableAutocorrection(true)
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(IncomeSourceQuickPick.allCases) { pick in
+                            incomeQuickPickChip(pick)
+                        }
+                    }
+                    .padding(.horizontal, 2)
+                }
+            }
+            .padding(BuxLayout.section)
+            .background(incomeFieldChrome)
+        }
+    }
+
+    private var incomeOptionalStoreCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Button {
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                    showOptionalIncomeStore.toggle()
+                }
+            } label: {
+                HStack {
+                    Text("Link store (optional)")
+                        .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+                    Spacer()
+                    if viewModel.selectedMerchantId != nil {
+                        Text("Linked")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(incomeAccent)
+                    }
+                    Image(systemName: showOptionalIncomeStore ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                }
+            }
+            .buttonStyle(.plain)
+
+            Text("Only if you want a shop logo — e.g. Amazon for a refund. Otherwise the category icon shows in your list.")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                .fixedSize(horizontal: false, vertical: true)
+
+            if showOptionalIncomeStore {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "storefront.fill")
+                            .foregroundStyle(incomeAccent)
+                        TextField("Search store (Amazon, employer portal…)", text: $viewModel.optionalStoreName)
+                            .autocapitalization(.words)
+                            .disableAutocorrection(true)
+                    }
+
+                    if !viewModel.incomeStoreCandidates.isEmpty {
+                        MerchantAutocompleteView(candidates: viewModel.incomeStoreCandidates) { candidate in
+                            viewModel.selectOptionalStoreCandidate(candidate)
+                        }
+                        .environmentObject(themeManager)
+                    }
+
+                    if viewModel.selectedMerchantId != nil {
+                        Button("Clear store link") {
+                            viewModel.clearOptionalStoreLink()
+                        }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.orange)
+                    }
+                }
+                .padding(.top, 4)
+            }
+        }
+        .padding(BuxLayout.section)
+        .background(incomeFieldChrome)
+    }
+
+    private func incomeQuickPickChip(_ pick: IncomeSourceQuickPick) -> some View {
+        let isSelected = viewModel.merchantName == pick.label
+        return Button {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) {
+                viewModel.merchantName = pick.label
+            }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: pick.symbol)
+                    .font(.system(size: 11, weight: .semibold))
+                Text(pick.label)
+                    .font(.system(size: 12, weight: .semibold))
+            }
+            .foregroundColor(isSelected ? .white : incomeAccent)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background {
+                Capsule()
+                    .fill(isSelected ? incomeAccent : incomeAccent.opacity(0.12))
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var incomeCategoryCard: some View {
+        ExpenseCategoryPickerView(
+            selectedCategoryId: $viewModel.selectedCategoryId,
+            selectedCategory: $viewModel.selectedCategory,
+            includesIncome: true,
+            incomeOnly: true
+        )
+        .environmentObject(brain)
+    }
+
+    private var incomeFieldChrome: some View {
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .fill(themeManager.cardFill(for: colorScheme))
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(incomeAccent.opacity(0.22), lineWidth: 1)
+            }
     }
 
     private var merchantCard: some View {
@@ -302,7 +556,7 @@ struct AddExpenseSheet: View {
             selectedCategoryId: $viewModel.selectedCategoryId,
             selectedCategory: $viewModel.selectedCategory,
             emphasizeOnAppear: mode == .addWithCategoryFocus,
-            includesIncome: mode == .addIncome
+            includesIncome: false
         )
         .environmentObject(brain)
     }
@@ -574,12 +828,34 @@ struct AddExpenseSheet: View {
     }
 
     private var merchantPickSheet: some View {
+        merchantPickSheetContent(
+            candidates: viewModel.candidates,
+            title: "Choose merchant",
+            onSelect: { viewModel.selectCandidate($0); viewModel.showMerchantPickSheet = false },
+            onCancel: { viewModel.showMerchantPickSheet = false }
+        )
+    }
+
+    private var incomeStorePickSheet: some View {
+        merchantPickSheetContent(
+            candidates: viewModel.incomeStoreCandidates,
+            title: "Choose store",
+            onSelect: { viewModel.selectOptionalStoreCandidate($0) },
+            onCancel: { viewModel.showIncomeStorePickSheet = false }
+        )
+    }
+
+    private func merchantPickSheetContent(
+        candidates: [MerchantCandidate],
+        title: String,
+        onSelect: @escaping (MerchantCandidate) -> Void,
+        onCancel: @escaping () -> Void
+    ) -> some View {
         NavigationStack {
             List {
-                ForEach(viewModel.candidates.filter { $0.matchKind != .newMerchant }) { candidate in
+                ForEach(candidates.filter { $0.matchKind != .newMerchant }) { candidate in
                     Button {
-                        viewModel.selectCandidate(candidate)
-                        viewModel.showMerchantPickSheet = false
+                        onSelect(candidate)
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(candidate.displayName)
@@ -591,11 +867,11 @@ struct AddExpenseSheet: View {
                     }
                 }
             }
-            .navigationTitle("Choose merchant")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    BuxToolbarCancelButton { viewModel.showMerchantPickSheet = false }
+                    BuxToolbarCancelButton { onCancel() }
                 }
             }
         }

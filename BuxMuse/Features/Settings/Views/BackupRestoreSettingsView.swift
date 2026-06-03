@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
 
 private enum ArchiveOperation {
@@ -57,7 +58,9 @@ struct BackupRestoreSettingsView: View {
     @State private var progressPulse = false
     @State private var includeRecoveryKey = true
     @State private var showRecoveryKeySheet = false
+    @State private var showBackupFileShareSheet = false
     @State private var issuedRecoveryKey: String?
+    @State private var recoveryKeyPendingAfterShare: String?
     @State private var recoveryKeyAcknowledged = false
 
     private var passwordsMatch: Bool {
@@ -166,8 +169,8 @@ struct BackupRestoreSettingsView: View {
                 .buxFormFieldPadding()
             }
         }
-        .overlay {
-            if isWorking, let operation {
+        .fullScreenCover(isPresented: $isWorking) {
+            if let operation {
                 ArchiveProgressOverlay(
                     operation: operation,
                     step: activeStep,
@@ -175,7 +178,7 @@ struct BackupRestoreSettingsView: View {
                     accent: themeManager.current.accentColor,
                     pulse: progressPulse
                 )
-                .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                .interactiveDismissDisabled()
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isWorking)
@@ -184,6 +187,14 @@ struct BackupRestoreSettingsView: View {
         }
         .sheet(isPresented: $showRecoveryKeySheet) {
             recoveryKeySheet
+        }
+        .sheet(isPresented: $showBackupFileShareSheet) {
+            if let url = archiveURL {
+                BackupArchiveShareSheet(url: url) {
+                    showBackupFileShareSheet = false
+                    presentRecoveryKeyIfNeeded()
+                }
+            }
         }
         .fileImporter(
             isPresented: $showRestoreImporter,
@@ -213,7 +224,7 @@ struct BackupRestoreSettingsView: View {
         }
         .onChange(of: isWorking) { _, working in
             if working {
-                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                withAnimation(.easeInOut(duration: 1.35).repeatForever(autoreverses: true)) {
                     progressPulse = true
                 }
             } else {
@@ -445,17 +456,29 @@ struct BackupRestoreSettingsView: View {
     }
 
     private func reportProgress(_ step: BuxMuseArchiveStep, _ value: Double) {
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
+        withAnimation(.easeInOut(duration: 0.95)) {
             activeStep = step
             stepProgress = value
         }
+    }
+
+    private func dwell(at step: BuxMuseArchiveStep, progress: Double, context: ArchiveProgressContext) async throws {
+        reportProgress(step, progress)
+        try await Task.sleep(for: ArchiveProgressPacing.dwell(for: step, context: context))
     }
 
     private func performBackup(password: String) {
         isWorking = true
         operation = .backup
         errorMessage = nil
-        reportProgress(.collecting, 0.08)
+
+        let includesStudio = store.studioEnabled && store.includeStudioDataInExports
+        var context = ArchiveProgressContext(
+            transactionCount: 0,
+            goalCount: goalsViewModel.goals.count,
+            includesStudio: includesStudio,
+            archiveByteCount: 0
+        )
 
         Task { @MainActor in
             defer {
@@ -466,35 +489,37 @@ struct BackupRestoreSettingsView: View {
             }
 
             do {
-                try await Task.sleep(for: .milliseconds(180))
-                reportProgress(.packaging, 0.28)
+                try await dwell(at: .collecting, progress: 0.06, context: context)
 
                 let txs = financialBridge.engine.allTransactions()
+                context.transactionCount = txs.count
+
+                try await dwell(at: .packaging, progress: 0.22, context: context)
+
                 let payload = try BuxMuseArchiveService.buildPayload(
                     settings: store,
                     hustles: HustleManager.shared.hustles,
                     selectedHustleId: HustleManager.shared.selectedHustleId,
                     transactions: txs,
                     goals: goalsViewModel.goals,
-                    studioSnapshot: store.studioEnabled && store.includeStudioDataInExports
-                        ? studioStore.currentSnapshot()
-                        : nil,
-                    simpleSnapshot: store.studioEnabled && store.includeStudioDataInExports
-                        ? simpleStudioStore.snapshot
-                        : nil
+                    studioSnapshot: includesStudio ? studioStore.currentSnapshot() : nil,
+                    simpleSnapshot: includesStudio ? simpleStudioStore.snapshot : nil
                 )
 
-                try await Task.sleep(for: .milliseconds(120))
-                reportProgress(.encrypting, 0.58)
+                try await dwell(at: .packaging, progress: 0.36, context: context)
+
+                reportProgress(.encrypting, 0.42)
                 let result = try BuxMuseArchiveService.encrypt(
                     payload,
                     password: password,
                     includeRecoveryKey: includeRecoveryKey
                 )
                 let encrypted = result.archiveData
+                context.archiveByteCount = encrypted.count
 
-                try await Task.sleep(for: .milliseconds(120))
-                reportProgress(.writing, 0.82)
+                try await dwell(at: .encrypting, progress: 0.68, context: context)
+
+                reportProgress(.writing, 0.74)
                 let formatter = ISO8601DateFormatter()
                 formatter.formatOptions = [.withFullDate, .withTime]
                 let stamp = formatter.string(from: Date()).replacingOccurrences(of: ":", with: "-")
@@ -502,8 +527,8 @@ struct BackupRestoreSettingsView: View {
                     .appendingPathComponent("BuxMuse-backup-\(stamp).buxmuse")
                 try encrypted.write(to: fileURL, options: .atomic)
 
-                reportProgress(.finalize, 1.0)
-                try await Task.sleep(for: .milliseconds(350))
+                try await dwell(at: .writing, progress: 0.88, context: context)
+                try await dwell(at: .finalize, progress: 1.0, context: context)
 
                 archiveURL = fileURL
                 store.lastExportDate = Date()
@@ -514,15 +539,20 @@ struct BackupRestoreSettingsView: View {
                 showBackupPassword = false
                 showConfirmPassword = false
 
-                if let key = result.recoveryKey {
-                    issuedRecoveryKey = key
-                    recoveryKeyAcknowledged = false
-                    showRecoveryKeySheet = true
-                }
+                recoveryKeyPendingAfterShare = result.recoveryKey
+                showBackupFileShareSheet = true
             } catch {
                 errorMessage = error.localizedDescription
             }
         }
+    }
+
+    private func presentRecoveryKeyIfNeeded() {
+        guard let key = recoveryKeyPendingAfterShare else { return }
+        recoveryKeyPendingAfterShare = nil
+        issuedRecoveryKey = key
+        recoveryKeyAcknowledged = false
+        showRecoveryKeySheet = true
     }
 
     private func importAndRestore(from url: URL) {
@@ -544,12 +574,18 @@ struct BackupRestoreSettingsView: View {
                 let accessed = url.startAccessingSecurityScopedResource()
                 defer { if accessed { url.stopAccessingSecurityScopedResource() } }
 
-                try await Task.sleep(for: .milliseconds(150))
-                let data = try Data(contentsOf: url)
-                reportProgress(.validate, 0.12)
-                let payload = try BuxMuseArchiveService.decrypt(data, secret: restorePassword)
+                var context = ArchiveProgressContext(transactionCount: 0, goalCount: 0, includesStudio: false)
+                try await dwell(at: .validate, progress: 0.1, context: context)
 
-                try BuxMuseArchiveService.restore(
+                let data = try Data(contentsOf: url)
+                try await dwell(at: .validate, progress: 0.18, context: context)
+
+                let payload = try BuxMuseArchiveService.decrypt(data, secret: restorePassword)
+                context.transactionCount = payload.manifest.transactionCount
+                context.goalCount = payload.manifest.goalCount
+                context.includesStudio = payload.manifest.includesStudio
+
+                try await BuxMuseArchiveService.restore(
                     payload,
                     settings: store,
                     studioStore: studioStore,
@@ -558,10 +594,10 @@ struct BackupRestoreSettingsView: View {
                     brain: brain,
                     onStep: { step, progress in
                         reportProgress(step, progress)
-                    }
+                    },
+                    paceSteps: true
                 )
-                reportProgress(.finalize, 1.0)
-                try await Task.sleep(for: .milliseconds(400))
+                try await dwell(at: .finalize, progress: 1.0, context: context)
                 restorePassword = ""
                 showRestorePassword = false
                 showRestoreSuccess = true
@@ -572,7 +608,43 @@ struct BackupRestoreSettingsView: View {
     }
 }
 
-// MARK: - Progress overlay
+// MARK: - Progress pacing (UI dwell — real work may finish faster; we never rush the meter)
+
+private struct ArchiveProgressContext {
+    var transactionCount: Int
+    var goalCount: Int
+    var includesStudio: Bool
+    var archiveByteCount: Int = 0
+}
+
+private enum ArchiveProgressPacing {
+    /// How long each step stays on screen. Scales gently with how much data is in the archive.
+    static func dwell(for step: BuxMuseArchiveStep, context: ArchiveProgressContext) -> Duration {
+        let itemLoad = Double(context.transactionCount + context.goalCount)
+        let sizeLoad = Double(context.archiveByteCount) / 400_000
+        let volume = min(3.5, itemLoad * 0.04 + sizeLoad)
+        let studio = context.includesStudio ? 0.55 : 0
+
+        let baseSeconds: Double
+        switch step {
+        case .collecting: baseSeconds = 1.05
+        case .packaging: baseSeconds = 1.35
+        case .encrypting: baseSeconds = 1.55
+        case .writing: baseSeconds = 1.0
+        case .validate: baseSeconds = 0.95
+        case .settings: baseSeconds = 0.85
+        case .expenses: baseSeconds = 1.15
+        case .goals: baseSeconds = 0.9
+        case .studio: baseSeconds = 1.05
+        case .finalize: baseSeconds = 1.15
+        }
+
+        let scaled = baseSeconds + volume * 0.4 + studio * 0.2
+        return .milliseconds(Int(scaled * 1000))
+    }
+}
+
+// MARK: - Progress screen (fullscreen canvas, single card — no dimmed “overlay” layer)
 
 private struct ArchiveProgressOverlay: View {
     let operation: ArchiveOperation
@@ -583,8 +655,7 @@ private struct ArchiveProgressOverlay: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.42)
-                .ignoresSafeArea()
+            EncryptionMatrixBackground(accent: accent)
 
             VStack(spacing: 22) {
                 ZStack {
@@ -596,12 +667,13 @@ private struct ArchiveProgressOverlay: View {
                         .stroke(accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                         .frame(width: 88, height: 88)
                         .rotationEffect(.degrees(-90))
-                        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: progress)
+                        .animation(.easeInOut(duration: 0.95), value: progress)
 
                     Image(systemName: operation.systemImage)
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(accent)
-                        .scaleEffect(pulse ? 1.06 : 0.94)
+                        .scaleEffect(pulse ? 1.05 : 0.96)
+                        .animation(.easeInOut(duration: 1.35).repeatForever(autoreverses: true), value: pulse)
                 }
 
                 VStack(spacing: 8) {
@@ -612,25 +684,48 @@ private struct ArchiveProgressOverlay: View {
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.secondary)
                             .contentTransition(.numericText())
-                            .animation(.easeInOut(duration: 0.25), value: step)
+                            .animation(.easeInOut(duration: 0.35), value: step)
                     }
                     ProgressView(value: progress)
                         .tint(accent)
                         .frame(width: 220)
+                        .animation(.easeInOut(duration: 0.95), value: progress)
                     Text("\(Int(progress * 100))%")
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
+                        .contentTransition(.numericText())
+                        .animation(.easeInOut(duration: 0.35), value: progress)
                 }
                 .multilineTextAlignment(.center)
             }
-            .padding(28)
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .shadow(color: .black.opacity(0.2), radius: 24, y: 12)
-            .padding(.horizontal, 32)
+            .padding(32)
+            .frame(maxWidth: 340)
+            .background {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(.regularMaterial)
+                    .shadow(color: .black.opacity(0.22), radius: 28, y: 14)
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(operation.title). \(step?.rawValue ?? ""). \(Int(progress * 100)) percent.")
     }
+}
+
+// MARK: - Native share sheet (Mail, Files, AirDrop, …)
+
+private struct BackupArchiveShareSheet: UIViewControllerRepresentable {
+    let url: URL
+    let onComplete: () -> Void
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        controller.completionWithItemsHandler = { _, _, _, _ in
+            DispatchQueue.main.async(execute: onComplete)
+        }
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

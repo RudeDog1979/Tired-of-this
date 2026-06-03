@@ -18,6 +18,8 @@ struct ExpenseCategoryPickerView: View {
     var emphasizeOnAppear: Bool = false
     /// When false, Income is hidden from the expense picker (still available when logging income).
     var includesIncome: Bool = false
+    /// Income sheet: only Income (+ custom tags), not expense categories.
+    var incomeOnly: Bool = false
 
     @State private var categories: [ExpenseCategoryRecord] = []
     @State private var showCreateCategory = false
@@ -80,16 +82,19 @@ struct ExpenseCategoryPickerView: View {
                 ForEach(categories) { cat in
                     glassCategoryChip(cat)
                 }
-                glassNewCategoryChip
+                if !incomeOnly {
+                    glassNewCategoryChip
+                }
             }
-            .buxNativeGlassButtonRowContainer(spacing: 8)
             .buxNativeButtonRowChrome(accent: accent, role: .secondary)
         } else {
             HStack(spacing: 8) {
                 ForEach(categories) { cat in
                     legacyCategoryChip(cat)
                 }
-                legacyNewCategoryChip
+                if !incomeOnly {
+                    legacyNewCategoryChip
+                }
             }
         }
     }
@@ -108,7 +113,7 @@ struct ExpenseCategoryPickerView: View {
                     .font(.system(size: 13, weight: isSelected ? .bold : .semibold))
             }
         }
-        .buxNativeButtonStyle(.secondary)
+        .buxNativeButtonStyle(isSelected ? .primary : .secondary, controlSize: .small)
     }
 
     private var glassNewCategoryChip: some View {
@@ -122,7 +127,7 @@ struct ExpenseCategoryPickerView: View {
                     .font(.system(size: 13, weight: .semibold))
             }
         }
-        .buxNativeButtonStyle(.secondary)
+        .buxNativeButtonStyle(.secondary, controlSize: .small)
     }
 
     private func legacyCategoryChip(_ cat: ExpenseCategoryRecord) -> some View {
@@ -205,12 +210,20 @@ struct ExpenseCategoryPickerView: View {
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
 
         var merged = system + custom
-        if !includesIncome {
+        if incomeOnly {
+            merged = merged.filter {
+                $0.systemCategoryRaw == TransactionCategory.income.rawValue || $0.isCustom
+            }
+        } else if !includesIncome {
             merged.removeAll { $0.systemCategoryRaw == TransactionCategory.income.rawValue }
         }
         categories = merged
 
-        if selectedCategoryId == nil,
+        if incomeOnly,
+           selectedCategoryId == nil,
+           let income = categories.first(where: { $0.systemCategoryRaw == TransactionCategory.income.rawValue }) {
+            select(income)
+        } else if selectedCategoryId == nil,
            let match = categories.first(where: { $0.systemCategoryRaw == selectedCategory.rawValue }) {
             selectedCategoryId = match.id
         } else if let selectedCategoryId,

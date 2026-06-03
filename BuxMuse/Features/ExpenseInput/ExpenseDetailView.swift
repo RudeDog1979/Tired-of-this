@@ -171,7 +171,8 @@ struct ExpenseDetailView: View {
             }
 
             VStack(spacing: 16) {
-                AsyncMerchantLogoView(merchantName: viewModel.record.name, size: 56)
+                ExpenseLedgerAvatarView(record: viewModel.record, size: 56)
+                    .environmentObject(brain)
                     .shadow(radius: 4)
 
                 VStack(spacing: 4) {

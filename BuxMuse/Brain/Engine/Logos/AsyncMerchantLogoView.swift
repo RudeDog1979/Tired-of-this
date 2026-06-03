@@ -52,8 +52,10 @@ public struct AsyncMerchantLogoView: View {
             }
         }
         .frame(width: size, height: size)
-        .onAppear { if !SettingsStore.shared.dataGuardModeEnabled { loadLogo() } }
-        .onChange(of: merchantName) { _, _ in if !SettingsStore.shared.dataGuardModeEnabled { loadLogo() } }
+        .task(id: merchantName) {
+            guard !SettingsStore.shared.dataGuardModeEnabled else { return }
+            loadLogo()
+        }
     }
 
     /// Premium monogram avatar rendered locally — no network, no data cost.

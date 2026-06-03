@@ -177,25 +177,37 @@ public enum BuxMuseArchiveService {
         simpleStudioStore: SimpleStudioStore,
         persistence: PersistenceController,
         brain: BuxMuseBrain,
-        onStep: ((BuxMuseArchiveStep, Double) -> Void)? = nil
-    ) throws {
-        onStep?(.validate, 0.1)
+        onStep: ((BuxMuseArchiveStep, Double) -> Void)? = nil,
+        paceSteps: Bool = false
+    ) async throws {
+        let context = ArchiveRestorePacingContext(
+            transactionCount: payload.manifest.transactionCount,
+            goalCount: payload.manifest.goalCount,
+            includesStudio: payload.manifest.includesStudio
+        )
 
-        onStep?(.settings, 0.2)
+        func beat(_ step: BuxMuseArchiveStep, _ progress: Double) async throws {
+            onStep?(step, progress)
+            if paceSteps {
+                try await Task.sleep(for: ArchiveRestorePacing.dwell(for: step, context: context))
+            }
+        }
+
+        try await beat(.settings, 0.22)
         try settings.importArchiveSettingsData(payload.settingsData)
         settings.importFeatureFlagsFromArchive(payload.featureFlags)
         HustleManager.shared.replaceAll(payload.hustles, selectedId: payload.selectedHustleId)
 
-        onStep?(.expenses, 0.4)
+        try await beat(.expenses, 0.42)
         try persistence.purgeExpensesAndGoals()
         for tx in payload.transactions {
             _ = try brain.saveExpense(tx)
         }
 
-        onStep?(.goals, 0.65)
+        try await beat(.goals, 0.62)
         try persistence.replaceAllGoals(payload.goals)
 
-        onStep?(.studio, 0.85)
+        try await beat(.studio, 0.82)
         if let studio = payload.studioSnapshot {
             studioStore.apply(studio)
         }
@@ -203,7 +215,6 @@ public enum BuxMuseArchiveService {
             simpleStudioStore.apply(simple)
         }
 
-        onStep?(.finalize, 1.0)
         brain.refreshExpenses()
         settings.save()
     }
@@ -296,5 +307,31 @@ public enum BuxMuseArchiveService {
     private static func readUInt16(_ data: Data, offset: Int) -> UInt16 {
         let slice = data.subdata(in: offset..<(offset + 2))
         return slice.withUnsafeBytes { $0.load(as: UInt16.self).bigEndian }
+    }
+}
+
+// MARK: - Restore UI pacing (shown while restore runs)
+
+private struct ArchiveRestorePacingContext {
+    let transactionCount: Int
+    let goalCount: Int
+    let includesStudio: Bool
+}
+
+private enum ArchiveRestorePacing {
+    static func dwell(for step: BuxMuseArchiveStep, context: ArchiveRestorePacingContext) -> Duration {
+        let volume = min(3.0, Double(context.transactionCount + context.goalCount) * 0.035)
+        let studio = context.includesStudio ? 0.5 : 0
+
+        let baseSeconds: Double
+        switch step {
+        case .settings: baseSeconds = 0.8
+        case .expenses: baseSeconds = 1.1
+        case .goals: baseSeconds = 0.85
+        case .studio: baseSeconds = 0.95
+        default: baseSeconds = 0.7
+        }
+
+        return .milliseconds(Int((baseSeconds + volume * 0.35 + studio * 0.15) * 1000))
     }
 }
