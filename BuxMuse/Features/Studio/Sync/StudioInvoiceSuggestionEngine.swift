@@ -378,7 +378,17 @@ enum StudioInvoiceSuggestionEngine {
         store: SimpleStudioStore,
         studioStore: StudioStore? = nil
     ) -> SimpleInvoiceSuggestion? {
-        let balance = job.jobBalanceDue
+        let agreement = studioStore.flatMap { StudioWorkDealHelpers.agreement(forJob: job, studioStore: $0) }
+        let client = studioStore?.clients.first(where: {
+            $0.name.caseInsensitiveCompare(job.customerName) == .orderedSame
+        })
+        let draft = StudioAgreementInvoiceLines.simpleInvoiceDraft(
+            job: job,
+            agreement: agreement,
+            profile: studioStore?.profile ?? StudioProfile(),
+            client: client
+        )
+        let balance = draft.amount > 0 ? draft.amount : job.jobBalanceDue
         guard balance > 0 else { return nil }
 
         if let linkedId = job.linkedInvoiceId,
@@ -390,29 +400,29 @@ enum StudioInvoiceSuggestionEngine {
         var reasons: [StudioInvoiceSuggestionReason] = [.jobBalanceDue]
         var subtitle = "Customer still owes you"
 
+        let effectiveRate = StudioAgreementInvoiceLines.simpleHourlyRate(
+            job: job,
+            agreement: agreement,
+            profile: studioStore?.profile ?? StudioProfile()
+        )
         if job.resolvedPayStyle == .byTheHour,
-           let rate = job.hourlyRate,
-           rate > 0,
+           effectiveRate > 0,
            let logged = job.loggedSeconds,
            logged > 0 {
             reasons.append(.hourlyLoggedTime)
             let hours = SimpleStudioTimePayEngine.formattedHours(logged)
-            subtitle = "\(hours) logged at \(rate)/hr"
+            subtitle = "\(hours) logged at \(effectiveRate)/hr"
         }
 
-        if let studioStore,
-           StudioWorkDealHelpers.agreement(forJob: job, studioStore: studioStore) != nil {
+        if agreement != nil {
             reasons.append(.agreementLinked)
-            subtitle += " · agreement on file"
+            subtitle += draft.usedAgreement ? " · per agreement" : " · agreement on file"
         }
-
-        let label = job.jobLabel?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let description = label.isEmpty ? "Work completed" : label
 
         return SimpleInvoiceSuggestion(
             jobId: job.id,
             customerName: job.customerName,
-            jobDescription: description,
+            jobDescription: draft.jobDescription,
             amount: balance,
             subtitle: subtitle,
             reasons: reasons

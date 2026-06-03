@@ -195,6 +195,10 @@ public enum StudioProjectPlannerEngine {
     ) -> (start: Date, end: Date, segments: [StudioPlannerTimelineSegment]) {
         let start = project.startDate
         var end = project.endDate ?? Date().addingTimeInterval(14 * 86_400)
+        if let latestMilestone = project.plannerMilestones.map(\.dueDate).max(),
+           latestMilestone > end {
+            end = latestMilestone
+        }
         if project.budgetedHours > 0, loggedHours > 0 {
             let daysUsed = max(1, Date().timeIntervalSince(start) / 86_400)
             let hoursPerDay = loggedHours / daysUsed
@@ -230,7 +234,22 @@ public enum StudioProjectPlannerEngine {
             )
         }
 
-        if !project.plannedDeliverables.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        for milestone in project.plannerMilestones.sorted(by: { $0.dueDate < $1.dueDate }) {
+            let day: TimeInterval = 86_400
+            let segStart = milestone.dueDate.addingTimeInterval(-day / 2)
+            segments.append(
+                StudioPlannerTimelineSegment(
+                    id: milestone.id,
+                    label: milestone.title,
+                    start: segStart,
+                    end: segStart.addingTimeInterval(day),
+                    kind: .milestone
+                )
+            )
+        }
+
+        if project.plannerMilestones.isEmpty,
+           !project.plannedDeliverables.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let mid = start.addingTimeInterval(end.timeIntervalSince(start) * 0.55)
             segments.append(
                 StudioPlannerTimelineSegment(
@@ -248,6 +267,19 @@ public enum StudioProjectPlannerEngine {
 
     private static func buildMilestones(project: StudioProject) -> [StudioPlannerMilestone] {
         let now = Date()
+        if !project.plannerMilestones.isEmpty {
+            return project.plannerMilestones
+                .sorted { $0.dueDate < $1.dueDate }
+                .map { milestone in
+                    StudioPlannerMilestone(
+                        id: milestone.id,
+                        title: milestone.title,
+                        date: milestone.dueDate,
+                        isPast: milestone.isCompleted || milestone.dueDate < now
+                    )
+                }
+        }
+
         var items: [StudioPlannerMilestone] = [
             .init(id: UUID(), title: "Kickoff", date: project.startDate, isPast: project.startDate < now)
         ]

@@ -11,6 +11,8 @@ struct StudioProjectPlannerSection: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let snapshot: StudioProjectPlannerSnapshot
+    var customMilestoneCount: Int = 0
+    var onEditMilestones: (() -> Void)? = nil
 
     private var accent: Color { themeManager.current.accentColor }
 
@@ -21,6 +23,12 @@ struct StudioProjectPlannerSection: View {
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 ProFeatureBadge(compact: true)
+                Spacer()
+                if let onEditMilestones {
+                    Button("Milestones", action: onEditMilestones)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(accent)
+                }
             }
 
             VStack(alignment: .leading, spacing: 14) {
@@ -31,6 +39,11 @@ struct StudioProjectPlannerSection: View {
                 }
                 if !snapshot.milestones.isEmpty {
                     milestonesList
+                } else if customMilestoneCount == 0, let onEditMilestones {
+                    Button(action: onEditMilestones) {
+                        Label("Add planner milestones", systemImage: "plus.circle")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
                 }
                 if !snapshot.alerts.isEmpty {
                     alertsList

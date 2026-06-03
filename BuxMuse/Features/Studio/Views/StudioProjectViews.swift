@@ -179,6 +179,7 @@ struct StudioProjectDetailView: View {
     @State private var invoicePrefill: StudioInvoiceSuggestion?
     @State private var editingTimeEntry: StudioTimeEntry?
     @State private var timeEntryPendingDelete: StudioTimeEntry?
+    @State private var showMilestonesEditor = false
 
     private var project: StudioProject? {
         store.project(id: projectId)
@@ -280,6 +281,12 @@ struct StudioProjectDetailView: View {
             StudioProjectEditorSheet(existingProject: project)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .environmentObject(store)
+                .buxStudioSheetContent()
+        }
+        .sheet(isPresented: $showMilestonesEditor) {
+            StudioProjectMilestonesEditorSheet(projectId: projectId)
+                .environmentObject(themeManager)
                 .environmentObject(store)
                 .buxStudioSheetContent()
         }
@@ -423,7 +430,11 @@ struct StudioProjectDetailView: View {
     @ViewBuilder
     private func projectPlannerSection(project: StudioProject) -> some View {
         if settingsStore.studioMode == .pro {
-            StudioProjectPlannerSection(snapshot: projectPlannerSnapshot(for: project))
+            StudioProjectPlannerSection(
+                snapshot: projectPlannerSnapshot(for: project),
+                customMilestoneCount: project.plannerMilestones.count,
+                onEditMilestones: { showMilestonesEditor = true }
+            )
         }
     }
 
@@ -1308,6 +1319,8 @@ struct StudioProjectEditorSheet: View {
     @State private var startDate = Date()
     @State private var hasEndDate = false
     @State private var endDate = Date()
+    @State private var plannerMilestones: [StudioProjectMilestone] = []
+    @State private var showMilestonesEditor = false
 
     private var isEditing: Bool { existingProject != nil }
 
@@ -1415,6 +1428,22 @@ struct StudioProjectEditorSheet: View {
                                 .buxFormFieldPadding()
                         }
 
+                        if settingsStore.studioMode == .pro {
+                            BuxFormSection(title: "Planner milestones") {
+                                HStack {
+                                    Text(plannerMilestones.isEmpty
+                                        ? "None — planner uses auto dates"
+                                        : "\(plannerMilestones.count) milestone(s)")
+                                        .font(.system(size: 14, weight: .medium))
+                                    Spacer()
+                                    Button("Manage") { showMilestonesEditor = true }
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(themeManager.current.accentColor)
+                                }
+                                .buxFormFieldPadding()
+                            }
+                        }
+
                         BuxFormSection(title: "Internal notes") {
                             TextField("Reminders, links, private notes…", text: $notes, axis: .vertical)
                                 .lineLimit(2...5)
@@ -1455,6 +1484,16 @@ struct StudioProjectEditorSheet: View {
                 }
             }
             .onAppear(perform: loadExisting)
+            .sheet(isPresented: $showMilestonesEditor) {
+                if let projectId = existingProject?.id {
+                    StudioProjectMilestonesEditorSheet(projectId: projectId)
+                        .environmentObject(themeManager)
+                        .environmentObject(store)
+                } else {
+                    StudioProjectMilestonesDraftEditorSheet(milestones: $plannerMilestones)
+                        .environmentObject(themeManager)
+                }
+            }
             .buxStudioSheetContent()
         }
     }
@@ -1481,6 +1520,7 @@ struct StudioProjectEditorSheet: View {
         notes = project.notes
         plannedScope = project.plannedScope
         plannedDeliverables = project.plannedDeliverables
+        plannerMilestones = project.plannerMilestones
         hourlyRate = project.hourlyRate.map { "\($0)" } ?? ""
         fixedFee = project.fixedFee.map { "\($0)" } ?? ""
         budgetedHours = project.budgetedHours > 0 ? "\(project.budgetedHours)" : ""
@@ -1528,6 +1568,7 @@ struct StudioProjectEditorSheet: View {
             existing.notes = notes
             existing.plannedScope = plannedScope
             existing.plannedDeliverables = plannedDeliverables
+            existing.plannerMilestones = plannerMilestones
             existing.startDate = startDate
             existing.endDate = resolvedEnd
             existing.budgetedHours = Double(budgetedHours) ?? existing.budgetedHours
@@ -1551,7 +1592,8 @@ struct StudioProjectEditorSheet: View {
                 budgetedHours: Double(budgetedHours) ?? 0,
                 allowedRevisions: Int(allowedRevisions) ?? 0,
                 currentRevisions: Int(currentRevisions) ?? 0,
-                status: status
+                status: status,
+                plannerMilestones: plannerMilestones
             )
             store.addProject(proj)
         }

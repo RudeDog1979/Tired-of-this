@@ -23,6 +23,12 @@ struct SimpleStudioSimpleInvoiceSheet: View {
     @State private var jobDescription = ""
     @State private var note = ""
     @State private var dueDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+    @State private var agreementAppliedHint: String?
+
+    private var selectedJob: SimpleStudioEntry? {
+        guard let linkedJobId else { return nil }
+        return store.entry(id: linkedJobId)
+    }
 
     var body: some View {
         NavigationStack {
@@ -31,6 +37,11 @@ struct SimpleStudioSimpleInvoiceSheet: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: BuxTokens.block) {
+                        if let agreementAppliedHint {
+                            agreementHintBanner(agreementAppliedHint)
+                                .padding(.horizontal, BuxTokens.marginRegular)
+                        }
+
                         BuxThemedCardForm {
                             BuxFormSection(title: "Invoice") {
                                 TextField("Customer", text: $customerName)
@@ -96,8 +107,29 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                 }
             }
             .buxStudioSheetContent()
-            .onAppear { applyPrefillIfNeeded() }
+            .onAppear {
+                applyPrefillIfNeeded()
+                applyAgreementContextIfNeeded()
+            }
+            .onChange(of: selectedJobPickId) { _, _ in
+                applyAgreementContextIfNeeded()
+            }
         }
+    }
+
+    private func agreementHintBanner(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "signature")
+                .foregroundColor(themeManager.current.accentColor)
+            Text(text)
+                .font(.system(size: 12, weight: .semibold))
+                .buxLabelSecondary()
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(themeManager.current.accentColor.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private var jobPicks: [SimpleJobInvoicePick] {
@@ -126,6 +158,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                 linkedJobId = pick.jobId
                 amountText = "\(pick.amount)"
                 jobDescription = pick.jobLabel
+                applyAgreementContextIfNeeded()
             }
         }
     }
@@ -137,6 +170,45 @@ struct SimpleStudioSimpleInvoiceSheet: View {
         customerName = prefill.customerName
         amountText = "\(prefill.amount)"
         jobDescription = prefill.jobDescription
+        applyAgreementContextIfNeeded()
+    }
+
+    private func applyAgreementContextIfNeeded() {
+        guard let job = selectedJob else {
+            agreementAppliedHint = nil
+            return
+        }
+        let agreement = StudioWorkDealHelpers.agreement(forJob: job, studioStore: studioStore)
+        let client = studioStore.clients.first(where: {
+            $0.name.caseInsensitiveCompare(job.customerName) == .orderedSame
+        })
+        let draft = StudioAgreementInvoiceLines.simpleInvoiceDraft(
+            job: job,
+            agreement: agreement,
+            profile: studioStore.profile,
+            client: client
+        )
+        if draft.amount > 0 {
+            amountText = "\(draft.amount)"
+        }
+        jobDescription = draft.jobDescription
+        if draft.paymentTermsDays > 0 {
+            dueDate = Calendar.current.date(
+                byAdding: .day,
+                value: draft.paymentTermsDays,
+                to: Date()
+            ) ?? dueDate
+        }
+        if let suffix = draft.noteSuffix {
+            if note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                note = suffix
+            } else if !note.contains(suffix) {
+                note += "\n" + suffix
+            }
+        }
+        agreementAppliedHint = draft.usedAgreement
+            ? "Amount and due date follow your linked agreement."
+            : nil
     }
 
     @ViewBuilder
@@ -219,6 +291,12 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                     jobEntryId: jobId,
                     store: store
                 )
+                if let job = store.entry(id: jobId),
+                   let agreement = StudioWorkDealHelpers.agreement(forJob: job, studioStore: studioStore) {
+                    var draft = agreement
+                    draft.linkedInvoiceId = invoice.id
+                    studioStore.upsertAgreementDraft(draft, simpleStore: store)
+                }
             }
             BuxSaveFeedback.success()
         }

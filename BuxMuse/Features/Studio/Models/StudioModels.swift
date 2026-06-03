@@ -330,6 +330,26 @@ public struct StudioTimeEntry: Codable, Identifiable, Hashable, Equatable {
     }
 }
 
+/// User-defined planner milestone persisted on a Pro project.
+public struct StudioProjectMilestone: Codable, Identifiable, Equatable, Sendable {
+    public var id: UUID
+    public var title: String
+    public var dueDate: Date
+    public var isCompleted: Bool
+
+    public init(
+        id: UUID = UUID(),
+        title: String,
+        dueDate: Date,
+        isCompleted: Bool = false
+    ) {
+        self.id = id
+        self.title = title
+        self.dueDate = dueDate
+        self.isCompleted = isCompleted
+    }
+}
+
 public struct StudioProject: Codable, Identifiable, Equatable {
     public var id: UUID
     public var name: String
@@ -354,6 +374,8 @@ public struct StudioProject: Codable, Identifiable, Equatable {
     public var currentRevisions: Int
     /// Lifecycle — active jobs vs completed / paused.
     public var status: StudioProjectStatus?
+    /// Planner milestones (Gantt / checklist). Empty = auto-generated defaults in planner UI.
+    public var plannerMilestones: [StudioProjectMilestone]
 
     public init(
         id: UUID = UUID(),
@@ -373,7 +395,8 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         budgetedHours: Double = 0,
         allowedRevisions: Int = 0,
         currentRevisions: Int = 0,
-        status: StudioProjectStatus? = .active
+        status: StudioProjectStatus? = .active,
+        plannerMilestones: [StudioProjectMilestone] = []
     ) {
         self.id = id
         self.name = name
@@ -393,13 +416,14 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         self.allowedRevisions = allowedRevisions
         self.currentRevisions = currentRevisions
         self.status = status
+        self.plannerMilestones = plannerMilestones
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, name, clientId, startDate, endDate, hourlyRate, fixedFee, notes
         case plannedScope, plannedDeliverables
         case timeEntries, expenseIds, generatedInvoiceIds, hustleId
-        case budgetedHours, allowedRevisions, currentRevisions, status
+        case budgetedHours, allowedRevisions, currentRevisions, status, plannerMilestones
     }
 
     public init(from decoder: Decoder) throws {
@@ -423,6 +447,7 @@ public struct StudioProject: Codable, Identifiable, Equatable {
         currentRevisions = try c.decodeIfPresent(Int.self, forKey: .currentRevisions) ?? 0
         status = try c.decodeIfPresent(StudioProjectStatus.self, forKey: .status)
             ?? (endDate != nil ? .completed : .active)
+        plannerMilestones = try c.decodeIfPresent([StudioProjectMilestone].self, forKey: .plannerMilestones) ?? []
     }
 }
 
