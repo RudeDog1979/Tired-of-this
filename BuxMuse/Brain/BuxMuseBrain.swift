@@ -119,8 +119,20 @@ public final class BuxMuseBrain: ObservableObject {
                 activeCategory: prefs.activeCategoryPill,
                 isBalanceVisible: prefs.isBalanceVisible
             )
-            if let currency = AppSettingsManager.availableCurrencies.first(where: { $0.id == prefs.currencyCode }) {
+            // Fresh SwiftData prefs default to USD — keep AppSettings (device region) instead.
+            if prefs.currencyCode == appSettings.selectedCurrency.id,
+               let currency = AppSettingsManager.availableCurrencies.first(where: { $0.id == prefs.currencyCode }) {
                 appSettings.applyCurrency(currency, persist: false)
+            } else if prefs.currencyCode != "USD",
+                      let currency = AppSettingsManager.availableCurrencies.first(where: { $0.id == prefs.currencyCode }) {
+                appSettings.applyCurrency(currency, persist: false)
+            } else {
+                try? persistence.savePreferences(
+                    selectedTab: .home,
+                    currencyCode: appSettings.selectedCurrency.id,
+                    isBalanceVisible: prefs.isBalanceVisible,
+                    activeCategoryPill: prefs.activeCategoryPill
+                )
             }
 
             SettingsStore.shared.applyBrandThemesAppearance(to: themeManager)

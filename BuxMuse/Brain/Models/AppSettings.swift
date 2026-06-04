@@ -193,6 +193,8 @@ public final class AppSettingsManager: ObservableObject {
     ]
     
     public init() {
+        let isFirstRegionalSetup = UserDefaults.standard.string(forKey: countryKey) == nil
+
         let resolvedCountry: CountrySetting
         if let storedCountryId = UserDefaults.standard.string(forKey: countryKey),
            let matchedCountry = CountryCatalog.country(for: storedCountryId) {
@@ -205,17 +207,34 @@ public final class AppSettingsManager: ObservableObject {
         self.selectedCountry = resolvedCountry
 
         let defaultCurrencyCode = resolvedCountry.defaultCurrencyCode
-        if let storedId = UserDefaults.standard.string(forKey: currencyKey),
-           let matched = Self.availableCurrencies.first(where: { $0.id == storedId }) {
-            self.selectedCurrency = matched
-        } else if let suggested = Self.availableCurrencies.first(where: { $0.id == defaultCurrencyCode }) {
-            self.selectedCurrency = suggested
-            UserDefaults.standard.set(suggested.id, forKey: currencyKey)
+        let resolvedCurrency: CurrencySetting
+        let resolvedLanguage: AppInterfaceLanguage
+
+        if isFirstRegionalSetup {
+            // First boot: country, currency, and UI language follow the device region.
+            if let suggested = Self.availableCurrencies.first(where: { $0.id == defaultCurrencyCode }) {
+                resolvedCurrency = suggested
+            } else {
+                resolvedCurrency = Self.availableCurrencies.first(where: { $0.id == "USD" }) ?? Self.availableCurrencies[0]
+            }
+            UserDefaults.standard.set(resolvedCurrency.id, forKey: currencyKey)
+            resolvedLanguage = AppInterfaceLanguage.migratedDefault(forCountryID: resolvedCountry.id)
+            BuxInterfaceLocale.persistInterfaceLanguage(resolvedLanguage)
         } else {
-            self.selectedCurrency = Self.availableCurrencies.first(where: { $0.id == "USD" }) ?? Self.availableCurrencies[0]
+            if let storedId = UserDefaults.standard.string(forKey: currencyKey),
+               let matched = Self.availableCurrencies.first(where: { $0.id == storedId }) {
+                resolvedCurrency = matched
+            } else if let suggested = Self.availableCurrencies.first(where: { $0.id == defaultCurrencyCode }) {
+                resolvedCurrency = suggested
+                UserDefaults.standard.set(suggested.id, forKey: currencyKey)
+            } else {
+                resolvedCurrency = Self.availableCurrencies.first(where: { $0.id == "USD" }) ?? Self.availableCurrencies[0]
+            }
+            resolvedLanguage = BuxInterfaceLocale.currentInterfaceLanguage(forCountryID: resolvedCountry.id)
         }
 
-        self.interfaceLanguage = BuxInterfaceLocale.currentInterfaceLanguage(forCountryID: resolvedCountry.id)
+        self.selectedCurrency = resolvedCurrency
+        self.interfaceLanguage = resolvedLanguage
     }
 
     public func updateInterfaceLanguage(_ language: AppInterfaceLanguage) {

@@ -46,8 +46,9 @@ public enum CountryCatalog {
     private static var countryRegions: [Locale.Region] {
         if #available(iOS 26, *) {
             return Locale.Region.isoRegions(ofCategory: .territory)
+                .filter { $0.identifier.count == 2 }
         }
-        return Locale.Region.isoRegions.filter { $0.subRegions.isEmpty }
+        return Locale.Region.isoRegions.filter { $0.identifier.count == 2 }
     }
 
     public static func country(for isoCode: String) -> CountrySetting? {
@@ -64,12 +65,59 @@ public enum CountryCatalog {
         }
     }
 
+    private static func normalizeRegionCode(_ raw: String) -> String {
+        switch raw.uppercased() {
+        case "UK": return "GB"
+        default: return raw.uppercased()
+        }
+    }
+
+    /// Device region (Settings → General → Region), with iOS 18-safe fallbacks.
+    public static func deviceRegionCode() -> String {
+        var candidates: [String] = []
+        for locale in [Locale.autoupdatingCurrent, Locale.current] {
+            if #available(iOS 16, *) {
+                if let id = locale.region?.identifier, !id.isEmpty {
+                    candidates.append(id)
+                }
+                if let id = locale.language.region?.identifier, !id.isEmpty {
+                    candidates.append(id)
+                }
+            }
+            if let code = (locale as NSLocale).object(forKey: .countryCode) as? String, !code.isEmpty {
+                candidates.append(code)
+            }
+        }
+        for raw in candidates {
+            let code = normalizeRegionCode(raw)
+            if code.count == 2, country(for: code) != nil {
+                return code
+            }
+        }
+        if let first = candidates.first {
+            return normalizeRegionCode(first)
+        }
+        return "US"
+    }
+
     public static func detectedFromDevice() -> CountrySetting {
-        if let region = Locale.current.region,
-           let match = country(for: region.identifier) {
+        let code = normalizeRegionCode(deviceRegionCode())
+        if let match = country(for: code) {
             return match
         }
-        return country(for: "US") ?? allCountries[0]
+        return synthesizedCountry(for: code) ?? country(for: "US") ?? allCountries[0]
+    }
+
+    /// When ISO catalog omits a device region (edge cases), still honor region + currency.
+    private static func synthesizedCountry(for code: String) -> CountrySetting? {
+        guard code.count == 2 else { return nil }
+        return CountrySetting(
+            id: code,
+            name: displayLocale.localizedString(forRegionCode: code) ?? code,
+            flag: flagEmoji(for: code),
+            defaultCurrencyCode: defaultCurrencyCode(for: code),
+            localeIdentifier: "en_\(code)"
+        )
     }
 
     public static func flagEmoji(for countryCode: String) -> String {

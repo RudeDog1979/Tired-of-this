@@ -243,6 +243,11 @@ final class AppContainer: ObservableObject {
     private func migrateLegacyFreelanceLocale() {
         let migrationKey = "studio_locale_migrated_v1"
         guard !UserDefaults.standard.bool(forKey: migrationKey) else { return }
+        // Factory Studio defaults are US/USD — must not override device region on first boot.
+        guard studioStore.didLoadPersistedSnapshot else {
+            UserDefaults.standard.set(true, forKey: migrationKey)
+            return
+        }
 
         let legacyProfile = studioStore.profile
         if let country = CountryCatalog.country(for: legacyProfile.countryCode),

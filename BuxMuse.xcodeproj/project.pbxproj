@@ -49,6 +49,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E23CAP012FB312D1006982E2 /* BuxMuse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BuxMuse.entitlements; sourceTree = "<group>"; };
+		E23CAP022FB312D1006982E2 /* BuxMuseTimerWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BuxMuseTimerWidget.entitlements; sourceTree = "<group>"; };
 		E23C9A952FB312CE006982E0 /* BuxMuse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BuxMuse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E23C9AA72FB312CF006982E0 /* BuxMuseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuxMuseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E23C9AB12FB312CF006982E0 /* BuxMuseUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuxMuseUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,6 +115,8 @@
 		E23C9A8C2FB312CE006982E0 = {
 			isa = PBXGroup;
 			children = (
+				E23CAP012FB312D1006982E2 /* BuxMuse.entitlements */,
+				E23CAP022FB312D1006982E2 /* BuxMuseTimerWidget.entitlements */,
 				E23C9A972FB312CE006982E0 /* BuxMuse */,
 				E23C9B022FB312D0006982E1 /* BuxMuseTimerWidget */,
 				E23C9AAA2FB312CF006982E0 /* BuxMuseTests */,
@@ -238,6 +242,14 @@
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					E23C9A942FB312CE006982E0 = {
+						CreatedOnToolsVersion = 26.4.1;
+						SystemCapabilities = {
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
+						};
+					};
+					E23C9B032FB312D0006982E1 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
 					E23C9AA62FB312CF006982E0 = {
@@ -483,6 +495,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = BuxMuse.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
@@ -524,6 +537,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = BuxMuse.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
@@ -647,6 +661,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = BuxMuseTimerWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
@@ -675,6 +690,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = BuxMuseTimerWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8J85UK6P84;

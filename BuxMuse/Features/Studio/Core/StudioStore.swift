@@ -26,6 +26,8 @@ public final class StudioStore: ObservableObject {
 
     private let saveQueue = DispatchQueue(label: "com.buxmuse.freelance.save", qos: .utility)
     private var isLoaded = false
+    /// True when `studio_hub.json` (or legacy path) was loaded — false for factory empty defaults.
+    public private(set) var didLoadPersistedSnapshot = false
 
     private init() {
         loadStore()
@@ -82,6 +84,7 @@ public final class StudioStore: ObservableObject {
                 let data = try Data(contentsOf: url)
                 let snapshot = try JSONDecoder().decode(StudioSnapshot.self, from: data)
                 apply(snapshot)
+                didLoadPersistedSnapshot = true
                 isLoaded = true
                 if url != storeURL {
                     save()
@@ -93,6 +96,7 @@ public final class StudioStore: ObservableObject {
         }
 
         applyEmptyDefaults()
+        didLoadPersistedSnapshot = false
         isLoaded = true
     }
 
