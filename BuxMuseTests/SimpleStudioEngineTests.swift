@@ -44,7 +44,7 @@ final class SimpleStudioEngineTests: XCTestCase {
             )
         ]
         let snapshot = SimpleStudioSnapshot(entries: entries)
-        let items = SimpleStudioEngine.buildWaitingItems(snapshot: snapshot, format: { "\($0)" })
+        let items = SimpleStudioEngine.buildWaitingItems(snapshot: snapshot, format: { "\($0)" }, locale: Locale(identifier: "en_US"))
         XCTAssertEqual(items.count, 1)
         XCTAssertEqual(items.first?.customerName, "Marcus")
     }
@@ -74,7 +74,8 @@ final class SimpleStudioEngineTests: XCTestCase {
         ]
         let items = SimpleStudioEngine.buildIOweItems(
             snapshot: SimpleStudioSnapshot(entries: entries),
-            format: { "\($0)" }
+            format: { "\($0)" },
+            locale: Locale(identifier: "en_US")
         )
         XCTAssertEqual(items.count, 2)
         XCTAssertTrue(items.contains { $0.customerName == "Supplier" })

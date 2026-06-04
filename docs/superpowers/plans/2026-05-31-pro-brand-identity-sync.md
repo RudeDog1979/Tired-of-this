@@ -35,7 +35,7 @@
 - Modify: `BuxMuse/Features/Studio/Core/StudioSEEngines.swift`
 - Test: `BuxMuseTests/ProBusinessCardModelsTests.swift`
 
-- [ ] **Step 1: Write failing test for library primary decode**
+- [x] **Step 1: Write failing test for library primary decode**
 
 ```swift
 func testBusinessCardLibraryDecodesWithoutPrimaryBrandID() throws {
@@ -51,13 +51,13 @@ func testInvoiceSettingsDecodesBrandSyncDefaults() throws {
 }
 ```
 
-- [ ] **Step 2: Run tests**
+- [x] **Step 2: Run tests**
 
 Run: `xcodebuild test -scheme BuxMuse -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BuxMuseTests/ProBusinessCardModelsTests 2>&1 | tail -20`
 
 Expected: FAIL — missing properties
 
-- [ ] **Step 3: Add properties**
+- [x] **Step 3: Add properties**
 
 `ProBusinessCardLibrary`:
 ```swift
@@ -82,9 +82,9 @@ public var brandSyncSourceUpdatedAt: Date? = nil
 
 Same Codable pattern with backward-compatible decode.
 
-- [ ] **Step 4: Run tests — expect PASS**
+- [x] **Step 4: Run tests — expect PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add BuxMuse/Features/Studio/BusinessCard/ProBusinessCardModels.swift \
@@ -102,7 +102,7 @@ git commit -m "feat(studio): add primary brand card and invoice sync settings"
 - Create: `BuxMuseTests/ProBrandIdentityMapperTests.swift`
 - Modify: `BuxMuse.xcodeproj/project.pbxproj` (add files to target)
 
-- [ ] **Step 1: Write failing mapper tests**
+- [x] **Step 1: Write failing mapper tests**
 
 ```swift
 import XCTest
@@ -143,9 +143,9 @@ final class ProBrandIdentityMapperTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL**
+- [x] **Step 2: Run tests — expect FAIL**
 
-- [ ] **Step 3: Implement mapper**
+- [x] **Step 3: Implement mapper**
 
 ```swift
 enum ProBrandIdentityMapper {
@@ -203,9 +203,9 @@ enum ProBrandIdentityMapper {
 }
 ```
 
-- [ ] **Step 4: Run tests — expect PASS**
+- [x] **Step 4: Run tests — expect PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add BuxMuse/Features/Studio/Core/ProBrandIdentityMapper.swift \
@@ -223,7 +223,7 @@ git commit -m "feat(studio): map business card design to invoice template config
 - Modify: `BuxMuse/Features/Studio/Core/StudioStore.swift`
 - Test: extend `BuxMuseTests/ProBrandIdentityMapperTests.swift`
 
-- [ ] **Step 1: Write failing sync test**
+- [x] **Step 1: Write failing sync test**
 
 Use in-memory or test helper to build `StudioStore` state, or test engine in isolation:
 
@@ -264,9 +264,9 @@ func testSyncSkippedWhenUnlinked() {
 }
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL**
+- [x] **Step 2: Run tests — expect FAIL**
 
-- [ ] **Step 3: Implement sync engine**
+- [x] **Step 3: Implement sync engine**
 
 ```swift
 enum ProBrandSyncEngine {
@@ -299,7 +299,7 @@ enum ProBrandSyncEngine {
 }
 ```
 
-- [ ] **Step 4: Wire StudioStore**
+- [x] **Step 4: Wire StudioStore**
 
 Add methods:
 
@@ -356,9 +356,9 @@ businessCardLibrary.primaryBrandDesignID = businessCardLibrary.savedDesigns.firs
 syncInvoiceBrandFromPrimaryCard(force: false)
 ```
 
-- [ ] **Step 5: Run tests — expect PASS**
+- [x] **Step 5: Run tests — expect PASS**
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add BuxMuse/Features/Studio/Core/ProBrandSyncEngine.swift \
@@ -376,7 +376,7 @@ git commit -m "feat(studio): sync invoice defaults from primary business card"
 - Modify: `BuxMuse/Features/Studio/BusinessCard/ProBusinessCardStudioView.swift`
 - Find and modify: `BusinessCardYourDesignsLibraryView` (or designs grid cell component)
 
-- [ ] **Step 1: Add star button on saved design tiles**
+- [x] **Step 1: Add star button on saved design tiles**
 
 On each non-draft tile in designs grid / library:
 - Filled star when `design.id == library.primaryBrandDesignID`
@@ -386,13 +386,13 @@ On each non-draft tile in designs grid / library:
 
 Show caption “Invoice brand” under primary tile only.
 
-- [ ] **Step 2: Manual QA**
+- [x] **Step 2: Manual QA**
 
 1. Open Business Card Studio → saved designs
 2. Star design B → design A loses star
 3. Relaunch app → primary persists
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add BuxMuse/Features/Studio/BusinessCard/ProBusinessCardStudioView.swift
@@ -409,7 +409,7 @@ git commit -m "feat(studio): mark primary business card for invoice branding"
 - Modify: `BuxMuse/Features/Studio/Views/InvoiceDesignerHubView.swift`
 - Modify: `BuxMuse/Features/Studio/Views/StudioInvoiceViews.swift` (pass store actions if needed)
 
-- [ ] **Step 1: Add brand sync banner above template style picker**
+- [x] **Step 1: Add brand sync banner above template style picker**
 
 When Pro mode and primary card exists:
 
@@ -456,18 +456,18 @@ Insert at top of `brandingControls`.
 
 When user edits colors manually while synced, optionally auto-unlink on first manual change (simplest: unlink on any `templateConfig` mutation in branding tab — use `onChange` of style/colors). **Recommendation:** auto-unlink when user changes any branding control while synced.
 
-- [ ] **Step 2: Wire engine refresh after sync**
+- [x] **Step 2: Wire engine refresh after sync**
 
 Ensure `StudioInvoiceEditorView` passes updated `defaultTemplateConfig` into engine on sync (banner callback above).
 
-- [ ] **Step 3: Manual QA**
+- [x] **Step 3: Manual QA**
 
 1. Set primary card with red accent
 2. New invoice → Branding shows red + “Matching …”
 3. Customize only → change color → card edit does not revert invoice
 4. Sync from card → colors match card again
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add BuxMuse/Features/Studio/Views/InvoiceDesignerHubView.swift
@@ -481,15 +481,15 @@ git commit -m "feat(studio): invoice designer brand sync banner and controls"
 **Files:**
 - Verify: Simple Studio paths untouched
 
-- [ ] **Step 1: Confirm Simple invoice sheet has no new imports**
+- [x] **Step 1: Confirm Simple invoice sheet has no new imports**
 
-- [ ] **Step 2: Run full unit tests**
+- [x] **Step 2: Run full unit tests**
 
 Run: `xcodebuild test -scheme BuxMuse -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BuxMuseTests 2>&1 | tail -30`
 
 Expected: All tests PASS
 
-- [ ] **Step 3: Commit any fixes**
+- [x] **Step 3: Commit any fixes**
 
 ```bash
 git commit -m "test(studio): pro brand identity sync regression fixes"

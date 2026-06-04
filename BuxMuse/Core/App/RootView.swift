@@ -70,6 +70,20 @@ struct RootView: View {
                 .environmentObject(appSettingsManager)
                 .environment(\.locale, appSettingsManager.interfaceLocale)
             }
+            .fullScreenCover(isPresented: Binding(
+                get: { !settingsStore.hasCompletedOnboarding },
+                set: { isCompleted in
+                    if isCompleted {
+                        settingsStore.hasCompletedOnboarding = true
+                        settingsStore.save()
+                    }
+                }
+            )) {
+                OnboardingWizardView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .buxThemedSheetContent()
+            }
             .onChange(of: navigationCoordinator.showStudioUnlockAnimation) { _, isShowing in
                 if !isShowing {
                     navigationCoordinator.finishStudioUnlockPresentation()

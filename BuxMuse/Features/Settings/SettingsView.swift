@@ -19,6 +19,7 @@ struct SettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
     @State private var settingsPath = NavigationPath()
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
+    @State private var showOnboardingReplay = false
 
     var body: some View {
         NavigationStack(path: $settingsPath) {
@@ -60,6 +61,27 @@ struct SettingsView: View {
                                 }
                                 .settingsThemedCardChrome(cornerRadius: 20)
                             }
+                        }
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            BuxSectionHeader(title: "Guides & Help")
+                                .padding(.leading, 4)
+
+                            VStack(spacing: 0) {
+                                Button {
+                                    showOnboardingReplay = true
+                                } label: {
+                                    SettingsRow(
+                                        icon: "sparkles",
+                                        label: "Replay Onboarding Guide",
+                                        color: themeManager.current.accentColor,
+                                        trailingText: nil,
+                                        showsProBadge: false
+                                    )
+                                }
+                                .buttonStyle(BuxMicroShrinkStyle())
+                            }
+                            .settingsThemedCardChrome(cornerRadius: 20)
                         }
 
                         Spacer(minLength: BuxTokens.tight)
@@ -141,6 +163,12 @@ struct SettingsView: View {
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
                     .environmentObject(simpleStudioStore)
+            }
+            .sheet(isPresented: $showOnboardingReplay) {
+                OnboardingWizardView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .buxThemedSheetContent()
             }
         }
     }

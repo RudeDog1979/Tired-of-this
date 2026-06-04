@@ -560,7 +560,7 @@ struct DashboardView: View {
                             FabSubmenuDivider(title: "Studio", delay: 0.10)
 
                             FabSubmenuItem(title: "Scan Receipt", icon: "camera.fill", delay: 0.12) {
-                                closeFabAnd { activeSheet = .scanReceipt }
+                                closeFabAnd { activeSheet = .addExpense(.addWithAutoScan) }
                             }
                             FabSubmenuItem(title: "New Invoice", icon: "plus.rectangle.fill.on.folder.fill", delay: 0.16) {
                                 closeFabAnd { showQuickNewInvoice = true }

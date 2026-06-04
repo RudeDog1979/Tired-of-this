@@ -7,6 +7,8 @@
 //
 
 import SwiftUI
+import Vision
+import VisionKit
 
 struct AddExpenseSheet: View {
     @Environment(\.colorScheme) var colorScheme
@@ -24,6 +26,8 @@ struct AddExpenseSheet: View {
     @State private var showOptionalPaymentSection = false
     @State private var showOptionalIncomeStore = false
     @State private var paymentSourceQuery = ""
+    @State private var showScanner = false
+    @State private var isScanning = false
 
     @ObservedObject private var settingsStore = SettingsStore.shared
 
@@ -41,11 +45,13 @@ struct AddExpenseSheet: View {
             default: return nil
             }
         }()
+        let autoScan = (mode == .addWithAutoScan)
         _viewModel = StateObject(wrappedValue: AddExpenseViewModel(
             brain: brain,
             settingsManager: settingsManager,
             editing: editing,
-            presetCategory: preset
+            presetCategory: preset,
+            autoScan: autoScan
         ))
     }
 
@@ -87,6 +93,38 @@ struct AddExpenseSheet: View {
                         if isIncomeMode {
                             incomeIntroCard
                             incomeAvatarPreview
+                        }
+
+                        if !isIncomeMode, !viewModel.isEditing {
+                            Button(action: {
+                                if VNDocumentCameraViewController.isSupported {
+                                    showScanner = true
+                                } else {
+                                    simulateOcrScan()
+                                }
+                            }) {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "doc.text.viewfinder")
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(themeManager.current.accentColor)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        BuxCatalogText.text("Scan paper receipt")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                        BuxCatalogText.text("Fills merchant, amount, date & notes automatically")
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                }
+                                .padding(BuxLayout.section)
+                                .expensesThemedCardChrome(cornerRadius: 18)
+                            }
+                            .buttonStyle(BuxMicroShrinkStyle())
                         }
 
                         amountCard
@@ -169,6 +207,16 @@ struct AddExpenseSheet: View {
                 if !isIncomeMode {
                     syncMoodBackdrop(to: viewModel.emotionTag, animated: false)
                 }
+                if viewModel.shouldAutoTriggerScanner {
+                    viewModel.shouldAutoTriggerScanner = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        if VNDocumentCameraViewController.isSupported {
+                            showScanner = true
+                        } else {
+                            simulateOcrScan()
+                        }
+                    }
+                }
             }
             .onChange(of: viewModel.emotionTag) { _, newTag in
                 guard !isIncomeMode else { return }
@@ -190,6 +238,21 @@ struct AddExpenseSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     BuxToolbarCancelButton { dismiss() }
+                }
+                if !isIncomeMode, !viewModel.isEditing {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: {
+                            if VNDocumentCameraViewController.isSupported {
+                                showScanner = true
+                            } else {
+                                simulateOcrScan()
+                            }
+                        }) {
+                            Image(systemName: "doc.text.viewfinder")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(themeManager.current.accentColor)
+                        }
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     BuxToolbarConfirmButton(
@@ -233,7 +296,80 @@ struct AddExpenseSheet: View {
                         .allowsHitTesting(false)
                 }
             }
+            .sheet(isPresented: $showScanner) {
+                DocumentScannerView(
+                    onFinish: { img in
+                        showScanner = false
+                        processCapturedImage(img)
+                    },
+                    onCancel: {
+                        showScanner = false
+                    },
+                    onError: { err in
+                        showScanner = false
+                        print("OCR camera scan error: \(err)")
+                        simulateOcrScan()
+                    }
+                )
+                .presentationDragIndicator(.hidden)
+            }
+            .overlay {
+                if isScanning {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .overlay {
+                            VStack(spacing: 16) {
+                                ProgressView()
+                                    .controlSize(.large)
+                                    .tint(.white)
+                                Text("Parsing receipt details...")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .transition(.opacity)
+                        .zIndex(100)
+                }
+            }
+            .animation(.easeInOut, value: isScanning)
             .tint(isIncomeMode ? incomeAccent : themeManager.current.accentColor)
+        }
+    }
+
+    private func processCapturedImage(_ img: UIImage) {
+        isScanning = true
+        
+        StudioReceiptEngine.parseReceipt(image: img, currencySymbol: appSettingsManager.selectedCurrency.symbol) { result in
+            DispatchQueue.main.async {
+                isScanning = false
+                
+                switch result {
+                case .success(let data):
+                    viewModel.prefillFromScan(
+                        merchant: data.merchant,
+                        amount: data.amount,
+                        date: data.date,
+                        details: data.details
+                    )
+                case .failure(let error):
+                    print("OCR receipt parse failed: \(error)")
+                    viewModel.saveError = "Failed to parse receipt. Please enter details manually."
+                }
+            }
+        }
+    }
+
+    private func simulateOcrScan() {
+        isScanning = true
+        let sym = appSettingsManager.selectedCurrency.symbol
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            isScanning = false
+            viewModel.prefillFromScan(
+                merchant: "Apple Store Fifth Ave",
+                amount: 2999.00,
+                date: Date(),
+                details: "• Apple MacBook Pro 16\" (\(sym)2699.00)\n• USB-C Multiport Adapter (\(sym)30.00)\n• AppleCare+ Protection Plan (\(sym)270.00)"
+            )
         }
     }
 

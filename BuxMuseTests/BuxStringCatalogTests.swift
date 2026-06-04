@@ -20,7 +20,11 @@ final class BuxStringCatalogTests: XCTestCase {
     }
 
     func testArgentinaCountryMapsToEs419() {
-        let locale = BuxInterfaceLocale.locale(forCountryID: "AR")
+        guard let country = CountryCatalog.country(for: "AR") else {
+            XCTFail("Could not load country setting for AR")
+            return
+        }
+        let locale = BuxInterfaceLocale.locale(for: country)
         XCTAssertEqual(BuxStringCatalog.resourceTag(for: locale), "es-419")
         XCTAssertEqual(BuxStringCatalog.localized("Custom", locale: locale), "Personalizado")
     }

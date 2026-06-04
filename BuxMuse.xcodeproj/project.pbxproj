@@ -49,12 +49,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		E23CAP012FB312D1006982E2 /* BuxMuse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BuxMuse.entitlements; sourceTree = "<group>"; };
-		E23CAP022FB312D1006982E2 /* BuxMuseTimerWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BuxMuseTimerWidget.entitlements; sourceTree = "<group>"; };
 		E23C9A952FB312CE006982E0 /* BuxMuse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BuxMuse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E23C9AA72FB312CF006982E0 /* BuxMuseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuxMuseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E23C9AB12FB312CF006982E0 /* BuxMuseUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuxMuseUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E23C9B012FB312D0006982E1 /* BuxMuseTimerWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BuxMuseTimerWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E23CAP012FB312D1006982E2 /* BuxMuse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BuxMuse.entitlements; sourceTree = "<group>"; };
+		E23CAP022FB312D1006982E2 /* BuxMuseTimerWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BuxMuseTimerWidget.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -249,9 +249,6 @@
 							};
 						};
 					};
-					E23C9B032FB312D0006982E1 = {
-						CreatedOnToolsVersion = 26.4.1;
-					};
 					E23C9AA62FB312CF006982E0 = {
 						CreatedOnToolsVersion = 26.4.1;
 						TestTargetID = E23C9A942FB312CE006982E0;
@@ -259,6 +256,9 @@
 					E23C9AB02FB312CF006982E0 = {
 						CreatedOnToolsVersion = 26.4.1;
 						TestTargetID = E23C9A942FB312CE006982E0;
+					};
+					E23C9B032FB312D0006982E1 = {
+						CreatedOnToolsVersion = 26.4.1;
 					};
 				};
 			};

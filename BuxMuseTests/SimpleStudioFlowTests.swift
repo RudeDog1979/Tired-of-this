@@ -59,7 +59,8 @@ final class SimpleStudioFlowTests: XCTestCase {
             spent: 0,
             waiting: 50,
             owe: 0,
-            format: format
+            format: format,
+            locale: Locale(identifier: "en_US")
         )
 
         XCTAssertEqual(slices.count, 2)

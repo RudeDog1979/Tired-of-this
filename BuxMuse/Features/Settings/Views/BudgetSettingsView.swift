@@ -27,9 +27,54 @@ struct BudgetSettingsView: View {
                 .buxThemedSegmentedPicker()
                 .buxFormFieldPadding()
 
-                if store.budgetingMode == .simple {
+                if store.budgetingMode == .custom {
                     BuxFormRowDivider()
-                    Picker("Budget period", selection: $store.simpleBudgetCycle) {
+                    HStack {
+                        BuxCatalogDynamicText(key: "Spending Cap")
+                            .font(.system(size: 15, weight: .semibold))
+                        Spacer()
+                        TextField("Amount", value: $store.customBudgetLimit, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .foregroundColor(themeManager.current.accentColor)
+                            .font(.system(size: 16, weight: .bold))
+                            .frame(width: 120)
+                    }
+                    .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    Picker("Budget Period", selection: $store.customBudgetPeriod) {
+                        ForEach(DefaultBudgetPeriod.allCases) { period in
+                            Text(period.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(period)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+                } else if store.budgetingMode == .envelope {
+                    BuxFormRowDivider()
+                    Picker("Default Cycle", selection: $store.defaultBudgetPeriod) {
+                        ForEach(DefaultBudgetPeriod.allCases) { period in
+                            Text(period.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(period)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+                }
+            }
+
+            if store.budgetingMode == .simple {
+                BuxFormSection(title: "Income & payday profile") {
+                    Picker("Income Source", selection: $store.incomeFundingSource) {
+                        ForEach(IncomeFundingSource.allCases) { source in
+                            Text(source.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(source)
+                        }
+                    }
+                    .buxThemedSegmentedPicker()
+                    .buxFormFieldPadding()
+
+                    BuxFormRowDivider()
+                    Picker("Payday Schedule", selection: $store.simpleBudgetCycle) {
                         ForEach(SimpleBudgetCycle.allCases) { cycle in
                             Text(cycle.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(cycle)
                         }
@@ -62,45 +107,13 @@ struct BudgetSettingsView: View {
                             .frame(width: 120)
                     }
                     .buxFormFieldPadding()
+
                     BuxFormRowDivider()
-                    BuxCatalogDynamicText(key: "Expenses count toward the current period from your chosen start date—not only from the 1st of the calendar month.")
+                    BuxCatalogDynamicText(key: "Your simple budget tracks expenses starting on your pay cycle—allowing you to measure spending relative to when your income arrives, rather than just the calendar month.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
                         .buxFormFieldPadding()
-                } else if store.budgetingMode == .custom {
-                    BuxFormRowDivider()
-                    HStack {
-                        BuxCatalogDynamicText(key: "Spending Cap")
-                            .font(.system(size: 15, weight: .semibold))
-                        Spacer()
-                        TextField("Amount", value: $store.customBudgetLimit, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .foregroundColor(themeManager.current.accentColor)
-                            .font(.system(size: 16, weight: .bold))
-                            .frame(width: 120)
-                    }
-                    .buxFormFieldPadding()
-                    BuxFormRowDivider()
-                    Picker("Budget Period", selection: $store.customBudgetPeriod) {
-                        ForEach(DefaultBudgetPeriod.allCases) { period in
-                            Text(period.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(period)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .tint(themeManager.current.accentColor)
-                    .buxFormFieldPadding()
-                } else {
-                    BuxFormRowDivider()
-                    Picker("Default Cycle", selection: $store.defaultBudgetPeriod) {
-                        ForEach(DefaultBudgetPeriod.allCases) { period in
-                            Text(period.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(period)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .tint(themeManager.current.accentColor)
-                    .buxFormFieldPadding()
                 }
             }
 
@@ -232,6 +245,7 @@ struct BudgetSettingsView: View {
         .onChange(of: store.simpleBudgetLimit) { _, _ in store.save() }
         .onChange(of: store.simpleBudgetCycle) { _, _ in store.save() }
         .onChange(of: store.simpleBudgetPeriodAnchor) { _, _ in store.save() }
+        .onChange(of: store.incomeFundingSource) { _, _ in store.save() }
         .onChange(of: store.customBudgetLimit) { _, _ in store.save() }
         .onChange(of: store.customBudgetPeriod) { _, _ in store.save() }
     }

@@ -72,6 +72,7 @@ public final class SettingsStore: ObservableObject {
     @Published public var simpleBudgetLimit: Decimal = 1000
     @Published public var simpleBudgetCycle: SimpleBudgetCycle = .monthFirst
     @Published public var simpleBudgetPeriodAnchor: Date = Date()
+    @Published public var incomeFundingSource: IncomeFundingSource = .salary
     @Published public var customBudgetLimit: Decimal = 50
     @Published public var customBudgetPeriod: DefaultBudgetPeriod = .weekly
     
@@ -269,6 +270,9 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Developer Options
     @Published public var enableDebugOverlay: Bool = false
     @Published public var showPerformanceMetrics: Bool = false
+    
+    // MARK: - Onboarding Settings
+    @Published public var hasCompletedOnboarding: Bool = false
 
     // MARK: - Invoice payment (Settings → Studio invoices)
     @Published public var autoDetectInvoiceBankAccountType: Bool = true
@@ -373,6 +377,7 @@ public final class SettingsStore: ObservableObject {
         let simpleBudgetLimit: Decimal?
         let simpleBudgetCycle: SimpleBudgetCycle?
         let simpleBudgetPeriodAnchor: Date?
+        let incomeFundingSource: IncomeFundingSource?
         let customBudgetLimit: Decimal?
         let customBudgetPeriod: DefaultBudgetPeriod?
         
@@ -411,6 +416,7 @@ public final class SettingsStore: ObservableObject {
         
         let enableDebugOverlay: Bool
         let showPerformanceMetrics: Bool
+        let hasCompletedOnboarding: Bool?
 
         enum CodingKeys: String, CodingKey {
             case firstName, lastName, userDisplayName, profileAvatarData, preferredNameStyle
@@ -418,7 +424,7 @@ public final class SettingsStore: ObservableObject {
             case solarContrastModeEnabled
             case weekStartDay, budgetingMode, defaultBudgetPeriod
             case showBudgetWarnings, autoAdjustBudgetsFromHistory, customBudgetProfiles
-            case simpleBudgetLimit, simpleBudgetCycle, simpleBudgetPeriodAnchor
+            case simpleBudgetLimit, simpleBudgetCycle, simpleBudgetPeriodAnchor, incomeFundingSource
             case customBudgetLimit, customBudgetPeriod
             case studioEnabled, freelanceEnabled
             case studioProfileId, freelanceProfileId
@@ -430,7 +436,7 @@ public final class SettingsStore: ObservableObject {
             case burnoutGuardEnabled, healthKitSyncEnabled, manualSleepHours, manualStressLevel
             case biometricLockEnabled, requireBiometricOnLaunch, lockAfterInactivityMinutes
             case privacyBlurInAppSwitching, cancelledSubscriptionMerchants
-            case allowLocalBackups, autoBackupFrequency
+            case allowLocalBackups, autoBackupFrequency, hasCompletedOnboarding
             case includeStudioDataInExports, includeFreelanceDataInExports
             case includeAnalyticsInExports, lastExportDate
             case enableDebugOverlay, showPerformanceMetrics
@@ -481,6 +487,7 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .simpleBudgetLimit)
             simpleBudgetCycle = try c.decodeIfPresent(SimpleBudgetCycle.self, forKey: .simpleBudgetCycle)
             simpleBudgetPeriodAnchor = try c.decodeIfPresent(Date.self, forKey: .simpleBudgetPeriodAnchor)
+            incomeFundingSource = try c.decodeIfPresent(IncomeFundingSource.self, forKey: .incomeFundingSource)
             customBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .customBudgetLimit)
             customBudgetPeriod = try c.decodeIfPresent(DefaultBudgetPeriod.self, forKey: .customBudgetPeriod)
             studioEnabled = try c.decodeIfPresent(Bool.self, forKey: .studioEnabled)
@@ -518,6 +525,7 @@ public final class SettingsStore: ObservableObject {
             lastExportDate = try c.decodeIfPresent(Date.self, forKey: .lastExportDate)
             enableDebugOverlay = try c.decode(Bool.self, forKey: .enableDebugOverlay)
             showPerformanceMetrics = try c.decode(Bool.self, forKey: .showPerformanceMetrics)
+            hasCompletedOnboarding = try c.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding)
         }
 
         init(
@@ -542,6 +550,7 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetLimit: Decimal?,
             simpleBudgetCycle: SimpleBudgetCycle?,
             simpleBudgetPeriodAnchor: Date?,
+            incomeFundingSource: IncomeFundingSource?,
             customBudgetLimit: Decimal?,
             customBudgetPeriod: DefaultBudgetPeriod?,
             studioEnabled: Bool,
@@ -574,7 +583,8 @@ public final class SettingsStore: ObservableObject {
             includeAnalyticsInExports: Bool,
             lastExportDate: Date?,
             enableDebugOverlay: Bool,
-            showPerformanceMetrics: Bool
+            showPerformanceMetrics: Bool,
+            hasCompletedOnboarding: Bool?
         ) {
             self.firstName = firstName
             self.lastName = lastName
@@ -597,6 +607,7 @@ public final class SettingsStore: ObservableObject {
             self.simpleBudgetLimit = simpleBudgetLimit
             self.simpleBudgetCycle = simpleBudgetCycle
             self.simpleBudgetPeriodAnchor = simpleBudgetPeriodAnchor
+            self.incomeFundingSource = incomeFundingSource
             self.customBudgetLimit = customBudgetLimit
             self.customBudgetPeriod = customBudgetPeriod
             self.studioEnabled = studioEnabled
@@ -630,6 +641,7 @@ public final class SettingsStore: ObservableObject {
             self.lastExportDate = lastExportDate
             self.enableDebugOverlay = enableDebugOverlay
             self.showPerformanceMetrics = showPerformanceMetrics
+            self.hasCompletedOnboarding = hasCompletedOnboarding
         }
 
         func encode(to encoder: Encoder) throws {
@@ -655,6 +667,7 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(simpleBudgetLimit, forKey: .simpleBudgetLimit)
             try c.encodeIfPresent(simpleBudgetCycle, forKey: .simpleBudgetCycle)
             try c.encodeIfPresent(simpleBudgetPeriodAnchor, forKey: .simpleBudgetPeriodAnchor)
+            try c.encodeIfPresent(incomeFundingSource, forKey: .incomeFundingSource)
             try c.encodeIfPresent(customBudgetLimit, forKey: .customBudgetLimit)
             try c.encodeIfPresent(customBudgetPeriod, forKey: .customBudgetPeriod)
             try c.encode(studioEnabled, forKey: .studioEnabled)
@@ -688,6 +701,7 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(lastExportDate, forKey: .lastExportDate)
             try c.encode(enableDebugOverlay, forKey: .enableDebugOverlay)
             try c.encode(showPerformanceMetrics, forKey: .showPerformanceMetrics)
+            try c.encodeIfPresent(hasCompletedOnboarding, forKey: .hasCompletedOnboarding)
         }
     }
     
@@ -737,6 +751,7 @@ public final class SettingsStore: ObservableObject {
                 self.simpleBudgetLimit = payload.simpleBudgetLimit ?? 1000
                 self.simpleBudgetCycle = payload.simpleBudgetCycle ?? .monthFirst
                 self.simpleBudgetPeriodAnchor = payload.simpleBudgetPeriodAnchor ?? Date()
+                self.incomeFundingSource = payload.incomeFundingSource ?? .salary
                 self.customBudgetLimit = payload.customBudgetLimit ?? 50
                 self.customBudgetPeriod = payload.customBudgetPeriod ?? .weekly
                 
@@ -776,6 +791,7 @@ public final class SettingsStore: ObservableObject {
                 
                 self.enableDebugOverlay = payload.enableDebugOverlay
                 self.showPerformanceMetrics = payload.showPerformanceMetrics
+                self.hasCompletedOnboarding = payload.hasCompletedOnboarding ?? true
 
                 loadInvoicePaymentPreferences()
                 loadMileagePreferences()
@@ -828,8 +844,10 @@ public final class SettingsStore: ObservableObject {
         self.simpleBudgetLimit = 1000
         self.simpleBudgetCycle = .monthFirst
         self.simpleBudgetPeriodAnchor = Date()
+        self.incomeFundingSource = .salary
         self.customBudgetLimit = 50
         self.customBudgetPeriod = .weekly
+        self.hasCompletedOnboarding = false
         loadInvoicePaymentPreferences()
         loadMileagePreferences()
         loadStudioDiscoveryPreference()
@@ -913,6 +931,7 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetLimit: simpleBudgetLimit,
             simpleBudgetCycle: simpleBudgetCycle,
             simpleBudgetPeriodAnchor: simpleBudgetPeriodAnchor,
+            incomeFundingSource: incomeFundingSource,
             customBudgetLimit: customBudgetLimit,
             customBudgetPeriod: customBudgetPeriod,
             studioEnabled: studioEnabled,
@@ -945,7 +964,8 @@ public final class SettingsStore: ObservableObject {
             includeAnalyticsInExports: includeAnalyticsInExports,
             lastExportDate: lastExportDate,
             enableDebugOverlay: enableDebugOverlay,
-            showPerformanceMetrics: showPerformanceMetrics
+            showPerformanceMetrics: showPerformanceMetrics,
+            hasCompletedOnboarding: hasCompletedOnboarding
         )
         
         do {

@@ -44,6 +44,21 @@ public enum DefaultBudgetPeriod: String, Codable, CaseIterable, Identifiable {
     public var id: String { rawValue }
 }
 
+public enum IncomeFundingSource: String, Codable, CaseIterable, Identifiable {
+    case salary = "Salary"
+    case other = "Other"
+    
+    public var id: String { rawValue }
+    
+    public func localizedDisplayName(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
+        BuxCatalogLabel.string(rawValue, locale: locale)
+    }
+    
+    public func catalogLabel(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
+        localizedDisplayName(locale: locale)
+    }
+}
+
 /// Simple-budget spend window (independent of calendar month when using mid-month / pay cycles).
 public enum SimpleBudgetCycle: String, Codable, CaseIterable, Identifiable {
     case monthFirst = "Month starts on the 1st"
@@ -59,6 +74,23 @@ public enum SimpleBudgetCycle: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .biweekly, .custom: return true
         default: return false
+        }
+    }
+
+    public func catalogLabel(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
+        switch self {
+        case .monthFirst:
+            return BuxCatalogLabel.string("Monthly (1st)", locale: locale)
+        case .monthFifteenth:
+            return BuxCatalogLabel.string("Monthly (15th)", locale: locale)
+        case .monthThirtieth:
+            return BuxCatalogLabel.string("Monthly (30th)", locale: locale)
+        case .weekly:
+            return BuxCatalogLabel.string("Weekly", locale: locale)
+        case .biweekly:
+            return BuxCatalogLabel.string("Bi-weekly", locale: locale)
+        case .custom:
+            return BuxCatalogLabel.string("Custom Date", locale: locale)
         }
     }
 }

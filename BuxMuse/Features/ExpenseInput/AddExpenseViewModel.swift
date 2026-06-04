@@ -46,6 +46,7 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published public var saveError: String?
     @Published public var actionNotice: String?
     @Published public var smartHint: String?
+    @Published public var shouldAutoTriggerScanner = false
 
     @Published public var isSubscription = false
     @Published public var isRecurring = false
@@ -76,12 +77,13 @@ public final class AddExpenseViewModel: ObservableObject {
         )
     }
 
-    public init(brain: BuxMuseBrain, settingsManager: AppSettingsManager, editing: Transaction? = nil, presetCategory: TransactionCategory? = nil) {
+    public init(brain: BuxMuseBrain, settingsManager: AppSettingsManager, editing: Transaction? = nil, presetCategory: TransactionCategory? = nil, autoScan: Bool = false) {
         self.brain = brain
         self.settingsManager = settingsManager
         self.editingId = editing?.id
         self.isIncomeEntry = presetCategory == .income
             || (editing?.category == .income)
+        self.shouldAutoTriggerScanner = autoScan
 
         if let tx = editing {
             merchantName = tx.merchantName
@@ -132,6 +134,17 @@ public final class AddExpenseViewModel: ObservableObject {
             let hasMerchant = !merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             isMerchantFieldExpanded = !(hasMerchant && editing != nil)
         }
+    }
+
+    public func prefillFromScan(merchant: String, amount: Decimal, date: Date, details: String?) {
+        let absAmount = abs(amount)
+        self.amountString = String(format: "%.2f", NSDecimalNumber(decimal: absAmount).doubleValue)
+        self.merchantName = merchant
+        self.date = date
+        if let details = details, !details.isEmpty {
+            self.notes = details
+        }
+        refreshMerchantSuggestions(resetSelection: true)
     }
 
     public func expandMerchantFieldForEditing() {

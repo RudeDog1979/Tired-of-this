@@ -134,4 +134,53 @@ final class ExpenseInputTests: XCTestCase {
         let refetched = try XCTUnwrap(try brain.fetchExpenseRecord(id: records[0].id))
         XCTAssertEqual(refetched.emotion, "joy")
     }
+
+    func testReceiptParserUKDatePriorityAndDetailsFormatting() {
+        let lines = [
+            "Tesco Superstore",
+            "Sourdough Bread £2.20",
+            "Organic Milk £1.50",
+            "Total £3.70",
+            "VAT 20% £0.62",
+            "Date: 04/06/2026"
+        ]
+        
+        let result = StudioReceiptEngine.parseHeuristics(from: lines, currencySymbol: "£")
+        
+        XCTAssertEqual(result.merchant, "Tesco Superstore")
+        XCTAssertEqual(result.amount, 3.70)
+        
+        // Assert UK Date dd/MM/yyyy
+        let calendar = Calendar.current
+        let year = calendar.component(.year, from: result.date)
+        let month = calendar.component(.month, from: result.date)
+        let day = calendar.component(.day, from: result.date)
+        
+        XCTAssertEqual(year, 2026)
+        XCTAssertEqual(month, 6)
+        XCTAssertEqual(day, 4)
+        
+        // Assert Details Formatting
+        let expectedDetails = "• Sourdough Bread (£2.20)\n• Organic Milk (£1.50)"
+        XCTAssertEqual(result.details, expectedDetails)
+    }
+
+    func testReceiptParserDetailsFormattingWithUSD() {
+        let lines = [
+            "Whole Foods",
+            "Avocados $4.50",
+            "Almond Milk $3.29",
+            "Total $7.79",
+            "Date: 06/04/2026"
+        ]
+        
+        let result = StudioReceiptEngine.parseHeuristics(from: lines, currencySymbol: "$")
+        
+        XCTAssertEqual(result.merchant, "Whole Foods")
+        XCTAssertEqual(result.amount, 7.79)
+        
+        // Assert Details Formatting with USD symbol
+        let expectedDetails = "• Avocados ($4.50)\n• Almond Milk ($3.29)"
+        XCTAssertEqual(result.details, expectedDetails)
+    }
 }

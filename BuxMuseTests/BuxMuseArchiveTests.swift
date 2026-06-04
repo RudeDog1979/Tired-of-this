@@ -135,4 +135,90 @@ final class BuxMuseArchiveTests: XCTestCase {
         let garbage = Data("NOTANARCHIVE".utf8)
         XCTAssertThrowsError(try BuxMuseArchiveService.decrypt(garbage, password: "any"))
     }
+
+    func testSettingsStoreIncomeFundingSourceBackwardsCompatibility() throws {
+        let settings = SettingsStore.shared
+        
+        // 1. Reset and set a known name and non-default incomeFundingSource value
+        settings.resetAllData()
+        settings.firstName = "Legacy"
+        settings.incomeFundingSource = .other
+        settings.save()
+        
+        // 2. Export settings data to JSON
+        guard let data = settings.exportArchiveSettingsData() else {
+            XCTFail("Failed to export settings data")
+            return
+        }
+        
+        // 3. Deserialize JSON to dictionary, remove the "incomeFundingSource" key, and re-serialize to JSON
+        guard var jsonDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            XCTFail("Failed to parse settings JSON to dictionary")
+            return
+        }
+        
+        XCTAssertNotNil(jsonDict["incomeFundingSource"])
+        jsonDict.removeValue(forKey: "incomeFundingSource")
+        
+        let legacyJSON = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+        
+        // 4. Import the legacy JSON (which is missing the "incomeFundingSource" key)
+        try settings.importArchiveSettingsData(legacyJSON)
+        
+        // 5. Verify it loaded successfully and defaulted incomeFundingSource to .salary
+        XCTAssertEqual(settings.firstName, "Legacy")
+        XCTAssertEqual(settings.incomeFundingSource, .salary)
+    }
+
+    func testSettingsStoreOnboardingBackwardsCompatibility() throws {
+        let settings = SettingsStore.shared
+        
+        // 1. Reset and set hasCompletedOnboarding to true
+        settings.resetAllData()
+        settings.firstName = "OnboardingLegacy"
+        settings.hasCompletedOnboarding = true
+        settings.save()
+        
+        // 2. Export settings data to JSON
+        guard let data = settings.exportArchiveSettingsData() else {
+            XCTFail("Failed to export settings data")
+            return
+        }
+        
+        // 3. Deserialize JSON to dictionary, remove the "hasCompletedOnboarding" key, and re-serialize to JSON
+        guard var jsonDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            XCTFail("Failed to parse settings JSON to dictionary")
+            return
+        }
+        
+        XCTAssertNotNil(jsonDict["hasCompletedOnboarding"])
+        jsonDict.removeValue(forKey: "hasCompletedOnboarding")
+        
+        let legacyJSON = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+        
+        // 4. Import the legacy JSON (missing key)
+        try settings.importArchiveSettingsData(legacyJSON)
+        
+        // 5. Verify it loaded successfully and defaulted hasCompletedOnboarding to true (so legacy users aren't forced to onboard)
+        XCTAssertEqual(settings.firstName, "OnboardingLegacy")
+        XCTAssertEqual(settings.hasCompletedOnboarding, true)
+        
+        // 6. Test a fresh seeder defaults to false
+        settings.resetAllData()
+        XCTAssertEqual(settings.hasCompletedOnboarding, false)
+    }
+
+    func testBackupNotificationSchedulerReschedule() async {
+        // 1. Reschedule with .off
+        await BackupNotificationScheduler.reschedule(frequency: .off)
+        
+        // 2. Reschedule with .daily
+        await BackupNotificationScheduler.reschedule(frequency: .daily)
+        
+        // 3. Verify it does not crash and the settings properties align
+        let settings = SettingsStore.shared
+        settings.autoBackupFrequency = .daily
+        XCTAssertEqual(settings.autoBackupFrequency, .daily)
+    }
 }
+

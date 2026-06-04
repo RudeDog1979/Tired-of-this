@@ -23,7 +23,7 @@ private enum ArchiveOperation {
     var systemImage: String {
         switch self {
         case .backup: return "lock.doc.fill"
-        case .restore: return "arrow.counterclockwise.doc.fill"
+        case .restore: return "arrow.down.doc.fill" // Swapped to a valid symbol!
         }
     }
 }
@@ -151,24 +151,24 @@ struct BackupRestoreSettingsView: View {
                     .buxFormFieldPadding()
 
                 Text("Use your backup password, or paste the BM-XXXX recovery key you saved when creating the backup.")
-                    .font(.system(size: 11, weight: .medium))
-                    .buxLabelSecondary()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .buxFormFieldPadding()
+                         .font(.system(size: 11, weight: .medium))
+                         .buxLabelSecondary()
+                         .fixedSize(horizontal: false, vertical: true)
+                         .buxFormFieldPadding()
 
-                BuxFormRowDivider()
-                Button(action: { showRestoreImporter = true }) {
-                    HStack {
-                        Image(systemName: "arrow.counterclockwise.doc.fill")
-                        BuxCatalogDynamicText(key: "Choose backup to restore")
-                    }
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(restoreSecretReady ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
-                }
-                .disabled(!restoreSecretReady || isWorking)
-                .buxFormFieldPadding()
-            }
-        }
+                     BuxFormRowDivider()
+                     Button(action: { showRestoreImporter = true }) {
+                         HStack {
+                             Image(systemName: "arrow.down.doc.fill")
+                             BuxCatalogDynamicText(key: "Choose backup to restore")
+                         }
+                         .font(.system(size: 15, weight: .bold))
+                         .foregroundColor(restoreSecretReady ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
+                     }
+                     .disabled(!restoreSecretReady || isWorking)
+                     .buxFormFieldPadding()
+                 }
+             }
         .fullScreenCover(isPresented: $isWorking) {
             if let operation {
                 ArchiveProgressOverlay(

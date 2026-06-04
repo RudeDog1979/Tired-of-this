@@ -211,6 +211,21 @@ public final class StudioReceiptEngine {
         image: UIImage,
         completion: @escaping (Result<(merchant: String, amount: Decimal, date: Date, vat: Decimal?), Error>) -> Void
     ) {
+        parseReceipt(image: image, currencySymbol: "£") { result in
+            switch result {
+            case .success(let tuple):
+                completion(.success((tuple.merchant, tuple.amount, tuple.date, tuple.vat)))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    public static func parseReceipt(
+        image: UIImage,
+        currencySymbol: String = "£",
+        completion: @escaping (Result<(merchant: String, amount: Decimal, date: Date, vat: Decimal?, details: String?), Error>) -> Void
+    ) {
         guard let cgImage = image.cgImage else {
             completion(.failure(NSError(domain: "StudioReceiptEngine", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid CGImage"])))
             return
@@ -235,8 +250,8 @@ public final class StudioReceiptEngine {
             }
             
             // Local parsing heuristics
-            let (merchant, amount, date, vat) = parseHeuristics(from: allLines)
-            completion(.success((merchant, amount, date, vat)))
+            let (merchant, amount, date, vat, details) = parseHeuristics(from: allLines, currencySymbol: currencySymbol)
+            completion(.success((merchant, amount, date, vat, details)))
         }
         
         request.recognitionLevel = .accurate
@@ -251,15 +266,36 @@ public final class StudioReceiptEngine {
         }
     }
     
-    private static func parseHeuristics(from lines: [String]) -> (merchant: String, amount: Decimal, date: Date, vat: Decimal?) {
+    static func parseHeuristics(from lines: [String], currencySymbol: String = "£") -> (merchant: String, amount: Decimal, date: Date, vat: Decimal?, details: String?) {
         var merchant = "Unknown Merchant"
         var amount: Decimal = 0
         var date = Date()
         var vatAmount: Decimal? = nil
+        var details: String? = nil
         
         // 1. Merchant Heuristic (usually first 1-2 lines)
-        if let first = lines.first, first.count > 2 {
-            merchant = first
+        let noiseWords = [
+            "tax", "invoice", "receipt", "welcome", "thank", "you", "vat", "phone", "tel:", "tel ",
+            "shop", "store", "sale", "cash", "credit", "debit", "card", "transaction"
+        ]
+        
+        for line in lines {
+            let lower = line.lowercased()
+            let isPhone = lower.contains("tel") || lower.contains("phone") || lower.range(of: #"\d{3,}[-\s]\d{3,}"#, options: .regularExpression) != nil
+            let isAddress = lower.contains("street") || lower.contains("road") || lower.contains("ave") || lower.contains("st.") || lower.contains("rd.") || lower.contains("lane") || lower.contains("postal") || lower.contains("zip")
+            
+            let lineWords = lower.split(whereSeparator: { !$0.isLetter }).map(String.init)
+            let isNoise = noiseWords.contains { noise in
+                if noise.contains(" ") || noise.contains(":") {
+                    return lower.contains(noise)
+                }
+                return lineWords.contains(noise)
+            }
+            
+            if !line.isEmpty && line.count > 2 && !isPhone && !isAddress && !isNoise {
+                merchant = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                break
+            }
         }
         
         // RegEx matching variables
@@ -270,11 +306,16 @@ public final class StudioReceiptEngine {
         let dateRegex = try? NSRegularExpression(pattern: datePattern)
         
         var foundAmounts: [Decimal] = []
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MM/dd/yyyy"
+        var parsedLineItems: [String] = []
         
         for line in lines {
-            let cleanLine = line.replacingOccurrences(of: "$", with: "").replacingOccurrences(of: "USD", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let cleanLine = line.replacingOccurrences(of: "$", with: "")
+                                .replacingOccurrences(of: "USD", with: "")
+                                .replacingOccurrences(of: "£", with: "")
+                                .replacingOccurrences(of: "GBP", with: "")
+                                .replacingOccurrences(of: "€", with: "")
+                                .replacingOccurrences(of: "EUR", with: "")
+                                .trimmingCharacters(in: .whitespacesAndNewlines)
             
             // Check Date
             if let match = dateRegex?.firstMatch(in: line, options: [], range: NSRange(location: 0, length: line.utf16.count)) {
@@ -285,10 +326,12 @@ public final class StudioReceiptEngine {
             
             // Find Decimal Values
             let range = NSRange(location: 0, length: cleanLine.utf16.count)
+            var lineAmounts: [Decimal] = []
             amountRegex?.enumerateMatches(in: cleanLine, options: [], range: range) { match, _, _ in
                 if let match = match, let matchRange = Range(match.range, in: cleanLine) {
                     let numStr = cleanLine[matchRange].replacingOccurrences(of: ",", with: ".")
                     if let decimal = Decimal(string: String(numStr)) {
+                        lineAmounts.append(decimal)
                         foundAmounts.append(decimal)
                     }
                 }
@@ -296,25 +339,81 @@ public final class StudioReceiptEngine {
             
             // Check VAT keyword
             if line.lowercased().contains("vat") || line.lowercased().contains("tax") {
-                if let match = amountRegex?.firstMatch(in: cleanLine, options: [], range: NSRange(location: 0, length: cleanLine.utf16.count)) {
-                    if let range = Range(match.range, in: cleanLine) {
-                        let numStr = cleanLine[range].replacingOccurrences(of: ",", with: ".")
-                        vatAmount = Decimal(string: String(numStr))
+                if let firstAmt = lineAmounts.first {
+                    vatAmount = firstAmt
+                }
+            }
+            
+            // Line Item Heuristic
+            let lowerLine = line.lowercased()
+            let isTotalLine = lowerLine.contains("total") || lowerLine.contains("subtotal") || lowerLine.contains("amount due") || lowerLine.contains("balance")
+            let isPaymentInfo = lowerLine.contains("card") || lowerLine.contains("visa") || lowerLine.contains("mastercard") || lowerLine.contains("amex") || lowerLine.contains("cash") || lowerLine.contains("change")
+            let isVatOrTax = lowerLine.contains("vat") || lowerLine.contains("tax")
+            
+            if let price = lineAmounts.last, !isTotalLine, !isPaymentInfo, !isVatOrTax, lineAmounts.count <= 2 {
+                var textPart = line
+                if let priceMatch = amountRegex?.firstMatch(in: line, options: [], range: NSRange(location: 0, length: line.utf16.count)) {
+                    if let priceRange = Range(priceMatch.range, in: line) {
+                        textPart.removeSubrange(priceRange)
                     }
+                }
+                
+                textPart = textPart.replacingOccurrences(of: "£", with: "")
+                                   .replacingOccurrences(of: "€", with: "")
+                                   .replacingOccurrences(of: "$", with: "")
+                                   .replacingOccurrences(of: currencySymbol, with: "")
+                                   .replacingOccurrences(of: "*", with: "")
+                                   .trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                if textPart.count > 2 && textPart.range(of: #"[a-zA-Z]{2,}"#, options: .regularExpression) != nil {
+                    let formattedPrice = String(format: "%.2f", NSDecimalNumber(decimal: price).doubleValue)
+                    parsedLineItems.append("• \(textPart) (\(currencySymbol)\(formattedPrice))")
                 }
             }
         }
         
-        // Total Amount: usually the highest parsed decimal value on the ticket
-        if let maxVal = foundAmounts.max() {
+        // Total Amount
+        var totalAmount: Decimal? = nil
+        for line in lines {
+            let lowerLine = line.lowercased()
+            if lowerLine.contains("total") || lowerLine.contains("amount due") || lowerLine.contains("total payment") {
+                let cleanLine = line.replacingOccurrences(of: "$", with: "")
+                                    .replacingOccurrences(of: "USD", with: "")
+                                    .replacingOccurrences(of: "£", with: "")
+                                    .replacingOccurrences(of: "GBP", with: "")
+                                    .replacingOccurrences(of: "€", with: "")
+                                    .replacingOccurrences(of: "EUR", with: "")
+                                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                let range = NSRange(location: 0, length: cleanLine.utf16.count)
+                var lineAmounts: [Decimal] = []
+                amountRegex?.enumerateMatches(in: cleanLine, options: [], range: range) { match, _, _ in
+                    if let match = match, let matchRange = Range(match.range, in: cleanLine) {
+                        let numStr = cleanLine[matchRange].replacingOccurrences(of: ",", with: ".")
+                        if let decimal = Decimal(string: String(numStr)) {
+                            lineAmounts.append(decimal)
+                        }
+                    }
+                }
+                if let maxLineAmt = lineAmounts.max() {
+                    totalAmount = maxLineAmt
+                    break
+                }
+            }
+        }
+        
+        if let maxVal = totalAmount ?? foundAmounts.max() {
             amount = maxVal
         }
         
-        return (merchant, amount, date, vatAmount)
+        if !parsedLineItems.isEmpty {
+            details = parsedLineItems.joined(separator: "\n")
+        }
+        
+        return (merchant, amount, date, vatAmount, details)
     }
     
     private static func parseDateString(_ str: String) -> Date? {
-        let formats = ["MM/dd/yyyy", "dd/MM/yyyy", "MM-dd-yyyy", "yyyy/MM/dd", "MM/dd/yy"]
+        let formats = ["dd/MM/yyyy", "dd-MM-yyyy", "dd/MM/yy", "MM/dd/yyyy", "MM-dd-yyyy", "yyyy/MM/dd", "MM/dd/yy"]
         let formatter = DateFormatter()
         for format in formats {
             formatter.dateFormat = format
