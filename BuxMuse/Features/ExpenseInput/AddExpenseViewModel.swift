@@ -16,11 +16,16 @@ public final class AddExpenseViewModel: ObservableObject {
 
     @Published public var merchantName = "" {
         didSet {
+            guard !skipMerchantSuggestionRefresh else { return }
             if merchantName != oldValue {
                 refreshMerchantSuggestions(resetSelection: false)
             }
         }
     }
+
+    /// After picking a merchant, collapse the field until the user taps to edit again.
+    @Published public var isMerchantFieldExpanded = true
+    private var skipMerchantSuggestionRefresh = false
 
     @Published public var amountString = ""
     @Published public var selectedCategory: TransactionCategory = .other
@@ -124,7 +129,19 @@ public final class AddExpenseViewModel: ObservableObject {
             refreshOptionalStoreSuggestions(resetSelection: true)
         } else {
             refreshMerchantSuggestions(resetSelection: true)
+            let hasMerchant = !merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            isMerchantFieldExpanded = !(hasMerchant && editing != nil)
         }
+    }
+
+    public func expandMerchantFieldForEditing() {
+        isMerchantFieldExpanded = true
+    }
+
+    public func collapseMerchantFieldAfterSelection() {
+        isMerchantFieldExpanded = false
+        candidates = []
+        mergeHintCandidate = nil
     }
 
     public func refreshOptionalStoreSuggestions(resetSelection: Bool) {
@@ -204,7 +221,9 @@ public final class AddExpenseViewModel: ObservableObject {
     }
 
     func selectCandidate(_ candidate: MerchantCandidate) {
+        skipMerchantSuggestionRefresh = true
         merchantName = candidate.historyLabel ?? candidate.displayName
+        skipMerchantSuggestionRefresh = false
         selectedCandidateId = candidate.id
         selectedMerchantId = candidate.merchantId
         var selection = brain.merchantBrain.selection(from: candidate)
@@ -213,9 +232,8 @@ public final class AddExpenseViewModel: ObservableObject {
             selection.disambiguator = trimmedLabel
         }
         pendingMerchantSelection = selection
-        candidates = []
-        mergeHintCandidate = nil
         showMerchantPickSheet = false
+        collapseMerchantFieldAfterSelection()
 
         if candidate.matchKind != .newMerchant {
             applySmartDefaults(for: candidate)
@@ -455,6 +473,12 @@ public final class AddExpenseViewModel: ObservableObject {
                 : Calendar.current.date(byAdding: .month, value: 1, to: subscriptionStartDate)
         }
 
+        if isRecurring, !isSubscription {
+            record.isRecurring = true
+            record.recurrenceType = "monthly"
+            record.recurrenceConfidence = 0.9
+        }
+
         let selection: MerchantSelection? = {
             if isIncomeEntry {
                 guard selectedMerchantId != nil || pendingMerchantSelection != nil else { return nil }
@@ -530,6 +554,16 @@ public final class AddExpenseViewModel: ObservableObject {
     private func buildIncomeStoreSelection() -> MerchantSelection? {
         if let selection = pendingMerchantSelection {
             return selection
+        }
+        if let selectedMerchantId,
+           let merchant = try? brain.fetchMerchantRecord(id: selectedMerchantId),
+           !merchant.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return MerchantSelection(
+                merchantId: merchant.id,
+                displayName: merchant.name,
+                disambiguator: merchant.disambiguator.isEmpty ? nil : merchant.disambiguator,
+                createNew: false
+            )
         }
         let store = optionalStoreName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !store.isEmpty else { return nil }

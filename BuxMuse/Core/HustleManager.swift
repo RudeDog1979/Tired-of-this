@@ -32,6 +32,7 @@ public final class HustleManager: ObservableObject {
     
     private let storeKey = "buxmuse.sidehustles.list"
     private let activeHustleKey = "buxmuse.sidehustles.selectedId"
+    private static let sideHustleMatrixEnabledKey = "buxmuse.sidehustle.enabled"
     
     private init() {
         loadHustles()
@@ -45,7 +46,7 @@ public final class HustleManager: ObservableObject {
             self.hustles = []
         }
 
-        if SettingsStore.shared.sideHustleMatrixEnabled,
+        if UserDefaults.standard.bool(forKey: Self.sideHustleMatrixEnabledKey),
            let idStr = UserDefaults.standard.string(forKey: activeHustleKey),
            let uuid = UUID(uuidString: idStr),
            hustles.contains(where: { $0.id == uuid }) {

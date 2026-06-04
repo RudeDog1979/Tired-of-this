@@ -22,6 +22,22 @@ public struct AsyncMerchantLogoView: View {
     }
 
     public var body: some View {
+        Group {
+            if trimmedMerchantName.isEmpty {
+                emptyPlaceholder
+            } else {
+                logoContent
+            }
+        }
+        .frame(width: size, height: size)
+    }
+
+    private var trimmedMerchantName: String {
+        merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    @ViewBuilder
+    private var logoContent: some View {
         ZStack {
             // Data Guard: render text monogram instead of any logo network call
             if SettingsStore.shared.dataGuardModeEnabled {
@@ -51,10 +67,20 @@ public struct AsyncMerchantLogoView: View {
                 .transition(.opacity)
             }
         }
-        .frame(width: size, height: size)
-        .task(id: merchantName) {
+        .task(id: trimmedMerchantName) {
             guard !SettingsStore.shared.dataGuardModeEnabled else { return }
             loadLogo()
+        }
+    }
+
+    private var emptyPlaceholder: some View {
+        ZStack {
+            Circle()
+                .fill(Color.gray.opacity(0.12))
+                .frame(width: size, height: size)
+            Image(systemName: "building.2.crop.circle")
+                .font(.system(size: size * 0.4, weight: .bold))
+                .foregroundColor(.gray)
         }
     }
 
@@ -96,7 +122,7 @@ public struct AsyncMerchantLogoView: View {
         image = nil
         loadedOpacity = 0
 
-        guard let plan = MerchantLogoEngine.fetchPlan(for: merchantName) else { return }
+        guard let plan = MerchantLogoEngine.fetchPlan(for: trimmedMerchantName) else { return }
 
         if let cached = LightweightLogoCache.shared.getImage(forKey: plan.cacheKey) {
             image = cached
@@ -117,7 +143,7 @@ public struct AsyncMerchantLogoView: View {
     }
 
     private var fallbackSymbol: String {
-        let normalized = MerchantLogoEngine.normalizeMerchantName(merchantName)
+        let normalized = MerchantLogoEngine.normalizeMerchantName(trimmedMerchantName)
         if normalized.contains("biedronka") || normalized.contains("lidl") || normalized.contains("aldi")
             || normalized.contains("tesco") || normalized.contains("asda") || normalized.contains("sainsbury")
             || normalized.contains("carrefour") || normalized.contains("kaufland") || normalized.contains("zabka") {

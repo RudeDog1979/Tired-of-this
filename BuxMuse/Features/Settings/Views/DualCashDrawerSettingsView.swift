@@ -148,7 +148,7 @@ struct DualCashDrawerSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Dual-Cash Drawer")
+        .buxCatalogNavigationTitle("Dual-Cash Drawer")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             primaryInput = store.primaryLocalCurrency

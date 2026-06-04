@@ -30,7 +30,10 @@ public final class LocalFinancialIntelligenceEngine: FinancialIntelligenceEngine
     }
 
     public func loadTransactions(_ loaded: [Transaction]) {
-        transactions = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
+        transactions = Dictionary(
+            loaded.map { ($0.id, $0) },
+            uniquingKeysWith: { _, newer in newer }
+        )
         queueBackgroundRecalculations()
     }
     

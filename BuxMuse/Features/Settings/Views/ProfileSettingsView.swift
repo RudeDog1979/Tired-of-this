@@ -79,7 +79,7 @@ struct ProfileSettingsView: View {
                 .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Profile")
+        .buxCatalogNavigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             firstName = store.firstName ?? ""

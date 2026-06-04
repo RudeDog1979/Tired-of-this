@@ -100,7 +100,7 @@ struct AboutSettingsView: View {
             }
             .buxScrollContentMargins()
             .buxSoftScrollChrome()
-        .navigationTitle("About")
+        .buxCatalogNavigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.enableDebugOverlay) { _, _ in store.save() }
         .onChange(of: store.showPerformanceMetrics) { _, _ in store.save() }

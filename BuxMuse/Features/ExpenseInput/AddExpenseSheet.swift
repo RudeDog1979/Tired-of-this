@@ -124,6 +124,10 @@ struct AddExpenseSheet: View {
                             subscriptionCard
                         }
 
+                        if !isIncomeMode, !viewModel.isEditing {
+                            recurringCard
+                        }
+
                         dateCard
                         notesCard
 
@@ -525,49 +529,106 @@ struct AddExpenseSheet: View {
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             VStack(alignment: .leading, spacing: BuxLayout.tight) {
-                HStack(spacing: 10) {
-                    if !viewModel.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        AsyncMerchantLogoView(merchantName: viewModel.merchantName, size: 28)
-                    }
-                    TextField("Merchant name", text: $viewModel.merchantName)
-                        .autocapitalization(.words)
-                        .disableAutocorrection(true)
-                }
-
-                if let hint = viewModel.mergeHintCandidate,
-                   viewModel.selectedCandidateId == nil,
-                   viewModel.candidates.filter({ $0.matchKind != .newMerchant && $0.matchKind != .aliasVariant }).count <= 1 {
-                    Button(action: { viewModel.applyMergeHint() }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "sparkles")
-                                .font(.system(size: 12, weight: .semibold))
-                            Text(
-                                BuxLocalizedString.format(
-                                    "Use %@?",
-                                    locale: appSettingsManager.interfaceLocale,
-                                    hint.displayName
-                                )
-                            )
-                                .font(.system(size: 13, weight: .semibold))
-                        }
-                        .foregroundColor(themeManager.current.accentColor)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                if viewModel.needsDisambiguatorLabel {
-                    TextField("Label (e.g. Food, Clothes)", text: $viewModel.merchantDisambiguator)
-                        .font(.system(size: 14, weight: .medium))
-                }
-
-                if !viewModel.candidates.isEmpty {
-                    MerchantAutocompleteView(candidates: viewModel.candidates) { candidate in
-                        viewModel.selectCandidate(candidate)
-                    }
-                    .environmentObject(themeManager)
-                    .transition(.buxScaleReveal)
+                if viewModel.isMerchantFieldExpanded {
+                    merchantEditorContent
+                } else {
+                    merchantCollapsedRow
                 }
             }
+            .padding(BuxLayout.section)
+            .expensesThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var merchantCollapsedRow: some View {
+        Button {
+            viewModel.expandMerchantFieldForEditing()
+        } label: {
+            HStack(spacing: 10) {
+                if !viewModel.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    AsyncMerchantLogoView(merchantName: viewModel.merchantName, size: 32)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(viewModel.merchantName)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        .lineLimit(1)
+                    BuxCatalogText.text("Tap to change merchant")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                }
+                Spacer()
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var merchantEditorContent: some View {
+        HStack(spacing: 10) {
+            if !viewModel.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                AsyncMerchantLogoView(merchantName: viewModel.merchantName, size: 28)
+            }
+            TextField("Merchant name", text: $viewModel.merchantName)
+                .autocapitalization(.words)
+                .disableAutocorrection(true)
+        }
+
+        if let hint = viewModel.mergeHintCandidate,
+           viewModel.selectedCandidateId == nil,
+           viewModel.candidates.filter({ $0.matchKind != .newMerchant && $0.matchKind != .aliasVariant }).count <= 1 {
+            Button(action: { viewModel.applyMergeHint() }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text(
+                        BuxLocalizedString.format(
+                            "Use %@?",
+                            locale: appSettingsManager.interfaceLocale,
+                            hint.displayName
+                        )
+                    )
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .foregroundColor(themeManager.current.accentColor)
+            }
+            .buttonStyle(.plain)
+        }
+
+        if viewModel.needsDisambiguatorLabel {
+            TextField("Label (e.g. Food, Clothes)", text: $viewModel.merchantDisambiguator)
+                .font(.system(size: 14, weight: .medium))
+        }
+
+        if viewModel.isMerchantFieldExpanded, !viewModel.candidates.isEmpty {
+            MerchantAutocompleteView(candidates: viewModel.candidates) { candidate in
+                viewModel.selectCandidate(candidate)
+            }
+            .environmentObject(themeManager)
+            .transition(.buxScaleReveal)
+        }
+    }
+
+    private var recurringCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            BuxCatalogText.text("Recurring")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            Toggle(isOn: $viewModel.isRecurring) {
+                VStack(alignment: .leading, spacing: 4) {
+                    BuxCatalogText.text("Repeats regularly")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                    BuxCatalogText.text("Rent, utilities, subscriptions you pay outside the subscription toggle.")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .tint(themeManager.current.accentColor)
             .padding(BuxLayout.section)
             .expensesThemedCardChrome(cornerRadius: 20)
         }

@@ -66,10 +66,11 @@ struct SettingsView: View {
                     }
                     .padding(.top, BuxTokens.tight)
                 }
+                .id(appSettingsManager.interfaceLanguage.rawValue)
                 .buxRootTabScrollChrome()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .navigationTitle("Settings")
+            .buxCatalogNavigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .buxRootNavigationChrome()
             .onChange(of: navigationCoordinator.openStudioSettingsRequest) { _, requested in

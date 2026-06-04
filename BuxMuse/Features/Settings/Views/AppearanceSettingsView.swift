@@ -182,7 +182,7 @@ struct AppearanceSettingsView: View {
             }
             .buxScrollContentMargins()
             .buxSoftScrollChrome()
-        .navigationTitle("Appearance")
+        .buxCatalogNavigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             store.applyBrandThemesAppearance(to: themeManager)

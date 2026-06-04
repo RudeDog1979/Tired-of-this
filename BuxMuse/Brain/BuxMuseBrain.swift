@@ -102,6 +102,11 @@ public final class BuxMuseBrain: ObservableObject {
     func hydrateFromPersistence(appSettings: AppSettingsManager, themeManager: ThemeManager, navigation: NavigationCoordinator) {
         do {
             try persistence.seedExpenseCatalogIfNeeded()
+        } catch {
+            print("Expense catalog seed failed: \(error)")
+        }
+
+        do {
             let transactions = try persistence.fetchAllExpenses()
             loadTransactionsIntoEngine(transactions)
 
@@ -123,6 +128,7 @@ public final class BuxMuseBrain: ObservableObject {
             _ = try? persistence.fetchInsightMetadata()
         } catch {
             print("Brain hydration error: \(error)")
+            loadTransactionsIntoEngine([])
         }
 
         reloadExpenseRecordsFromStore()
@@ -134,14 +140,32 @@ public final class BuxMuseBrain: ObservableObject {
     }
 
     private func loadTransactionsIntoEngine(_ transactions: [Transaction]) {
+        let deduped = Self.deduplicatedTransactions(transactions)
         if let engine18 = financialBridge.engine as? LocalFinancialIntelligenceEngine18 {
-            engine18.loadTransactions(transactions)
+            engine18.loadTransactions(deduped)
         }
         if #available(iOS 26, *) {
             if let engine26 = financialBridge.engine as? LocalFinancialIntelligenceEngine {
-                engine26.loadTransactions(transactions)
+                engine26.loadTransactions(deduped)
             }
         }
+    }
+
+    /// Last row wins when the store contains duplicate expense IDs (avoids launch trap from `uniqueKeysWithValues`).
+    private static func deduplicatedTransactions(_ transactions: [Transaction]) -> [Transaction] {
+        Dictionary(
+            transactions.map { ($0.id, $0) },
+            uniquingKeysWith: { _, newer in newer }
+        )
+        .values
+        .sorted { $0.date > $1.date }
+    }
+
+    private static func recordsByID(_ records: [ExpenseRecord]) -> [UUID: ExpenseRecord] {
+        Dictionary(
+            records.map { ($0.id, $0) },
+            uniquingKeysWith: { _, newer in newer }
+        )
     }
 
     // MARK: - Expenses (immediate SwiftData — no debounce)
@@ -414,7 +438,9 @@ public final class BuxMuseBrain: ObservableObject {
     func merchantLogoName(for record: ExpenseRecord) -> String? {
         guard let merchantId = record.merchantId else { return nil }
         if let merchant = try? persistence.fetchMerchantRecord(id: merchantId) {
-            return merchant.name
+            let linked = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !linked.isEmpty else { return nil }
+            return linked
         }
         let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
         let label = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -456,7 +482,7 @@ public final class BuxMuseBrain: ObservableObject {
     private func rebuildSnapshots() {
         let txs = financialBridge.engine.allTransactions().sorted { $0.date > $1.date }
         let expenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
-        let recordsById = Dictionary(uniqueKeysWithValues: expenseRecords.map { ($0.id, $0) })
+        let recordsById = Self.recordsByID(expenseRecords)
         let recent = Array(txs.prefix(5)).map { tx in
             let record = recordsById[tx.id]
             let emotion = record?.emotion
@@ -481,8 +507,14 @@ public final class BuxMuseBrain: ObservableObject {
         
         let calendar = Self.budgetCalendar()
         let now = Date()
+        let budgetPeriod = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: .fromSettings,
+            now: now,
+            calendar: calendar
+        )
+        let simplePeriodTxs = txs.filter { $0.date >= budgetPeriod.start && $0.date < budgetPeriod.end }
         let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
-        let thisMonthTxs = txs.filter { $0.date >= startOfMonth }
+        let calendarMonthTxs = txs.filter { $0.date >= startOfMonth }
         
         let budgetingMode = SettingsStore.shared.budgetingMode
         let activeBudgetName: String?
@@ -492,13 +524,17 @@ public final class BuxMuseBrain: ObservableObject {
         let locale = BuxInterfaceLocale.currentInterfaceLocale
         switch budgetingMode {
         case .simple:
-            activeBudgetName = BuxLocalizedString.string("Simple Monthly Budget", locale: locale)
+            activeBudgetName = BuxLocalizedString.format(
+                "Simple budget · %@",
+                locale: locale,
+                SettingsStore.shared.simpleBudgetCycle.catalogLabel(locale: locale)
+            )
             if SettingsStore.shared.autoAdjustBudgetsFromHistory {
                 activeBudgetLimit = Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
             } else {
                 activeBudgetLimit = SettingsStore.shared.simpleBudgetLimit
             }
-            activeBudgetSpent = thisMonthTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+            activeBudgetSpent = simplePeriodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
             
         case .envelope:
             let activeProfile = SettingsStore.shared.customBudgetProfiles.first(where: { $0.isActive })
@@ -507,12 +543,12 @@ public final class BuxMuseBrain: ObservableObject {
 
             let categoryRecords = (try? persistence.fetchAllCategoryRecords()) ?? []
             let expenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
-            let recordsById = Dictionary(uniqueKeysWithValues: expenseRecords.map { ($0.id, $0) })
+            let recordsById = Self.recordsByID(expenseRecords)
 
             var spent: Decimal = 0
             if let activeProfile {
                 for category in activeProfile.categories {
-                    let categorySpent = thisMonthTxs
+                    let categorySpent = calendarMonthTxs
                         .filter { tx in
                             Self.transactionMatchesEnvelopeCategory(
                                 tx,
@@ -545,8 +581,8 @@ public final class BuxMuseBrain: ObservableObject {
             case .custom: // Treat custom as daily pacing
                 startOfPeriod = calendar.startOfDay(for: now)
             }
-            let periodTxs = txs.filter { $0.date >= startOfPeriod }
-            activeBudgetSpent = periodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+            let customPeriodTxs = txs.filter { $0.date >= startOfPeriod }
+            activeBudgetSpent = customPeriodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
         }
 
         let hubSnapshot = SubscriptionHubSnapshot(

@@ -378,6 +378,8 @@ extension View {
 ///
 /// Uses zero-duration long-press for immediate visual feedback per SwiftUI interactive-button patterns.
 struct BuxHeroQuickActionButton<Icon: View>: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     let action: () -> Void
     let diameter: CGFloat
     let title: String
@@ -431,7 +433,9 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
                 action()
             }
         )
-        .accessibilityLabel(title)
+        .accessibilityLabel(
+            BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale)
+        )
         .accessibilityAddTraits(.isButton)
     }
 }

@@ -40,7 +40,7 @@ struct MileageSettingsView: View {
                     .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Mileage Log")
+        .buxCatalogNavigationTitle("Mileage Log")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.autoLocationForMileage) { _, _ in store.save() }
         .onChange(of: store.mileageRatePerUnitValue) { _, _ in store.save() }

@@ -783,7 +783,7 @@ private struct DashboardHeroSection: View {
                             }
                         },
                         diameter: heroActionDiameter,
-                        title: "Gasto",
+                        title: "Expense",
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
                         titleColor: themeManager.labelSecondary(for: colorScheme)
                     ) { isPressed in
@@ -797,7 +797,7 @@ private struct DashboardHeroSection: View {
                     BuxHeroQuickActionButton(
                         action: { activeSheet = .addExpense(.addIncome) },
                         diameter: heroActionDiameter,
-                        title: "Ingreso",
+                        title: "Income",
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
                         titleColor: themeManager.labelSecondary(for: colorScheme)
                     ) { isPressed in

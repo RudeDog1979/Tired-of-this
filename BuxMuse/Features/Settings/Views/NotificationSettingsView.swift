@@ -77,7 +77,7 @@ struct NotificationSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Notifications")
+        .buxCatalogNavigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.settingsEnhancedTint, true)
         .onChange(of: store.notificationsEnabled) { _, _ in store.save() }

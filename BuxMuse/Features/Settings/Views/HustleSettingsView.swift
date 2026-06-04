@@ -158,7 +158,7 @@ struct HustleSettingsView: View {
             }
             }
         }
-        .navigationTitle("Workspaces")
+        .buxCatalogNavigationTitle("Workspaces")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $proUpsellFeature) { feature in
             StudioProUpsellSheet(feature: feature)

@@ -29,8 +29,29 @@ struct BudgetSettingsView: View {
 
                 if store.budgetingMode == .simple {
                     BuxFormRowDivider()
+                    Picker("Budget period", selection: $store.simpleBudgetCycle) {
+                        ForEach(SimpleBudgetCycle.allCases) { cycle in
+                            Text(cycle.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(cycle)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+
+                    if store.simpleBudgetCycle.needsAnchorDate {
+                        BuxFormRowDivider()
+                        DatePicker(
+                            "Period starts on",
+                            selection: $store.simpleBudgetPeriodAnchor,
+                            displayedComponents: .date
+                        )
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
+                    }
+
+                    BuxFormRowDivider()
                     HStack {
-                        BuxCatalogDynamicText(key: "Monthly Spending Limit")
+                        BuxCatalogDynamicText(key: "Spending limit this period")
                             .font(.system(size: 15, weight: .semibold))
                         Spacer()
                         TextField("Amount", value: $store.simpleBudgetLimit, format: .number)
@@ -41,6 +62,12 @@ struct BudgetSettingsView: View {
                             .frame(width: 120)
                     }
                     .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    BuxCatalogDynamicText(key: "Expenses count toward the current period from your chosen start date—not only from the 1st of the calendar month.")
+                        .font(.system(size: 12, weight: .medium))
+                        .buxLabelSecondary()
+                        .fixedSize(horizontal: false, vertical: true)
+                        .buxFormFieldPadding()
                 } else if store.budgetingMode == .custom {
                     BuxFormRowDivider()
                     HStack {
@@ -165,7 +192,7 @@ struct BudgetSettingsView: View {
                 .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Budgets")
+        .buxCatalogNavigationTitle("Budgets")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $editingProfile) { profile in
             BudgetProfileEditorView(profile: profile) { updatedProfile in
@@ -203,6 +230,8 @@ struct BudgetSettingsView: View {
         .onChange(of: store.showBudgetWarnings) { _, _ in store.save() }
         .onChange(of: store.autoAdjustBudgetsFromHistory) { _, _ in store.save() }
         .onChange(of: store.simpleBudgetLimit) { _, _ in store.save() }
+        .onChange(of: store.simpleBudgetCycle) { _, _ in store.save() }
+        .onChange(of: store.simpleBudgetPeriodAnchor) { _, _ in store.save() }
         .onChange(of: store.customBudgetLimit) { _, _ in store.save() }
         .onChange(of: store.customBudgetPeriod) { _, _ in store.save() }
     }

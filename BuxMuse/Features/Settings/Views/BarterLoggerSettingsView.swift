@@ -58,7 +58,7 @@ struct BarterLoggerSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Barter & Trade Logger")
+        .buxCatalogNavigationTitle("Barter & Trade Logger")
         .navigationBarTitleDisplayMode(.inline)
     }
 

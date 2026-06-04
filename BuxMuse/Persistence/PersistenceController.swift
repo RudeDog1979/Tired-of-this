@@ -249,6 +249,18 @@ public final class PersistenceController: ObservableObject {
         goals.forEach { context.delete($0) }
         try context.save()
     }
+
+    /// Wipes user financial rows and merchant links (keeps system category seeds).
+    func purgeAllUserFinancialData() throws {
+        try purgeExpensesAndGoals()
+        let merchants = try context.fetch(FetchDescriptor<MerchantEntity>())
+        merchants.forEach { context.delete($0) }
+        let categories = try context.fetch(FetchDescriptor<CategoryEntity>())
+        for category in categories where category.isCustom {
+            context.delete(category)
+        }
+        try context.save()
+    }
 }
 
 // MARK: - AppTab persistence

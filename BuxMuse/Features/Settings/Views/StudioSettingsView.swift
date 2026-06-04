@@ -239,7 +239,7 @@ struct StudioSettingsView: View {
                 studioToolsSection
             }
         }
-        .navigationTitle("Studio")
+        .buxCatalogNavigationTitle("Studio")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { loadStudioProfile() }
         .onChange(of: store.studioEnabled) { _, isEnabled in

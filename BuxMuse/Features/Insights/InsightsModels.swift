@@ -103,7 +103,9 @@ public enum InsightMoneyFormat {
         )
     }
 
-    public static func percentChange(from ratio: Decimal) -> Int {
-        Int((Double(truncating: (ratio - 1) as NSDecimalNumber)) * 100)
+    /// String for `%@%%` format segments (passing `Int` with `%@` traps / EXC_BAD_ACCESS in `String(format:)`).
+    public static func percentChange(from ratio: Decimal) -> String {
+        let value = Int((Double(truncating: (ratio - 1) as NSDecimalNumber)) * 100)
+        return String(value)
     }
 }

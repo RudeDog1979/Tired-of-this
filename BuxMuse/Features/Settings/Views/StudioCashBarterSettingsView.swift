@@ -56,7 +56,7 @@ struct StudioCashBarterSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Cash & Barter")
+        .buxCatalogNavigationTitle("Cash & Barter")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

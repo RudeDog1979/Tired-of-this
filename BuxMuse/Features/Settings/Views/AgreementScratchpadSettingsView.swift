@@ -95,7 +95,7 @@ struct AgreementScratchpadSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Agreement Scratchpad")
+        .buxCatalogNavigationTitle("Agreement Scratchpad")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.agreementScratchpadEnabled) { _, _ in store.save() }
     }

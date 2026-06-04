@@ -23,6 +23,7 @@ struct DataSettingsView: View {
 
     @State private var showResetDialog = false
     @State private var showSuccessAlert = false
+    @State private var showLogoCacheClearedAlert = false
     @State private var exportURL: URL? = nil
 
     var body: some View {
@@ -68,6 +69,19 @@ struct DataSettingsView: View {
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
                     .buxFormFieldPadding()
+                BuxFormRowDivider()
+                Button {
+                    LightweightLogoCache.shared.clearCacheSynchronously()
+                    showLogoCacheClearedAlert = true
+                } label: {
+                    HStack {
+                        Image(systemName: "photo.on.rectangle.angled")
+                        BuxCatalogDynamicText(key: "Clear merchant logo cache")
+                    }
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(themeManager.current.accentColor)
+                }
+                .buxFormFieldPadding()
             }
 
             BuxFormSection(title: "Export compliance") {
@@ -123,12 +137,17 @@ struct DataSettingsView: View {
                 .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Backup & Restore")
+        .buxCatalogNavigationTitle("Backup & Restore")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Database Reset Complete", isPresented: $showSuccessAlert) {
             Button("OK", role: .cancel) {}
         } message: {
-            BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. All private database entries are deleted.")
+            BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, merchants, and cached logos are removed.")
+        }
+        .alert("Logo cache cleared", isPresented: $showLogoCacheClearedAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            BuxCatalogDynamicText(key: "Merchant favicons will download again the next time you view them.")
         }
         .confirmationDialog("WARNING: Delete All Data?", isPresented: $showResetDialog, titleVisibility: .visible) {
             Button("Confirm Complete Purge", role: .destructive) {
@@ -136,7 +155,7 @@ struct DataSettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            BuxCatalogDynamicText(key: "This action is completely offline and irreversible. It will wipe all expenses, Studio records, secure passcodes, and reset everything.")
+            BuxCatalogDynamicText(key: "This action is completely offline and irreversible. It will wipe all expenses, merchants, logo cache, Studio records, secure passcodes, and reset settings.")
         }
         .onChange(of: store.allowLocalBackups) { _, _ in store.save() }
         .onChange(of: store.autoBackupFrequency) { _, _ in store.save() }
@@ -224,9 +243,11 @@ struct DataSettingsView: View {
 
     private func performFullPurge() {
         store.resetAllData()
+        LightweightLogoCache.shared.clearCacheSynchronously()
 
         do {
-            try persistence.purgeExpensesAndGoals()
+            try persistence.purgeAllUserFinancialData()
+            try persistence.seedExpenseCatalogIfNeeded()
             studioStore.resetAllData()
             simpleStudioStore.resetAllData()
             brain.refreshExpenses()

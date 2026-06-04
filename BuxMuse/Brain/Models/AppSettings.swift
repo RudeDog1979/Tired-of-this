@@ -29,6 +29,7 @@ public struct CurrencySetting: Identifiable, Equatable {
 public final class AppSettingsManager: ObservableObject {
     @Published public var selectedCurrency: CurrencySetting
     @Published public var selectedCountry: CountrySetting
+    @Published public var interfaceLanguage: AppInterfaceLanguage
     private let currencyKey = "selected_currency_id"
     private let countryKey = "selected_country_id"
     
@@ -213,6 +214,15 @@ public final class AppSettingsManager: ObservableObject {
         } else {
             self.selectedCurrency = Self.availableCurrencies.first(where: { $0.id == "USD" }) ?? Self.availableCurrencies[0]
         }
+
+        self.interfaceLanguage = BuxInterfaceLocale.currentInterfaceLanguage(forCountryID: resolvedCountry.id)
+    }
+
+    public func updateInterfaceLanguage(_ language: AppInterfaceLanguage) {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+            interfaceLanguage = language
+        }
+        BuxInterfaceLocale.persistInterfaceLanguage(language)
     }
     
     public func updateCurrency(_ currency: CurrencySetting) {
@@ -240,9 +250,9 @@ public final class AppSettingsManager: ObservableObject {
         }
     }
 
-    /// UI string-catalog locale driven by **Settings → Country/Region**, not the device language.
+    /// UI string-catalog locale driven by **Settings → App language**, not device language or country alone.
     public var interfaceLocale: Locale {
-        BuxInterfaceLocale.locale(for: selectedCountry)
+        interfaceLanguage.locale
     }
     
     /// Returns a pre-configured NumberFormatter for currency formatting

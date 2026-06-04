@@ -30,7 +30,7 @@ struct RegionCurrencySettingsView: View {
                         Text(
                             BuxLocalizedString.format(
                                 "%@ %@",
-                                locale: uiLocale,
+                                locale: appSettingsManager.interfaceLocale,
                                 appSettingsManager.selectedCountry.flag,
                                 appSettingsManager.selectedCountry.id
                             )
@@ -60,7 +60,7 @@ struct RegionCurrencySettingsView: View {
                         Text(
                             BuxLocalizedString.format(
                                 "%@ %@",
-                                locale: uiLocale,
+                                locale: appSettingsManager.interfaceLocale,
                                 appSettingsManager.selectedCurrency.flag,
                                 appSettingsManager.selectedCurrency.id
                             )
@@ -97,26 +97,28 @@ struct RegionCurrencySettingsView: View {
                 .buxFormFieldPadding()
             }
 
-            BuxFormSection(title: localized("Locale policy")) {
-                HStack {
-                    Text(localized("App language"))
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Spacer()
-                    appLanguageValueLabel
-                        .font(.system(size: 14, weight: .medium))
-                        .buxLabelSecondary()
+            BuxFormSection(title: "App language") {
+                Picker(selection: interfaceLanguageBinding) {
+                    ForEach(AppInterfaceLanguage.allCases) { language in
+                        Text(language.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(language)
+                    }
+                } label: {
+                    BuxCatalogText.text("App language")
                 }
+                .pickerStyle(.menu)
+                .tint(themeManager.current.accentColor)
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
-                Text(localized("App language follows your selected country—not your iPhone language. Spanish (Latin America) for most Spanish-speaking countries; Spanish (Spain) when country is Spain; English otherwise. Country and currency still apply across BuxMuse for numbers, tax, and invoices."))
+                BuxCatalogDynamicText(key: "Choose UI language independently of country. Example: United Kingdom region with Spanish UI. Currency formatting still follows your preferred currency above.")
                     .font(.system(size: 11))
                     .buxLabelSecondary()
                     .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
                     .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Currency & Region")
+        .id(appSettingsManager.interfaceLanguage.rawValue)
+        .buxCatalogNavigationTitle("Currency & Region")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showCountrySheet) {
             CountryPickerView { country in
@@ -154,9 +156,9 @@ struct RegionCurrencySettingsView: View {
                 Text(
                     BuxLocalizedString.format(
                         "Use %@ currency",
-                        locale: uiLocale,
+                        locale: appSettingsManager.interfaceLocale,
                         pendingCountry?.defaultCurrencyCode
-                            ?? BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "local"), locale: uiLocale)
+                            ?? BuxCatalogLabel.string("local", locale: appSettingsManager.interfaceLocale)
                     )
                 )
             }
@@ -169,7 +171,7 @@ struct RegionCurrencySettingsView: View {
                 Text(
                     BuxLocalizedString.format(
                         "Keep %@",
-                        locale: uiLocale,
+                        locale: appSettingsManager.interfaceLocale,
                         appSettingsManager.selectedCurrency.id
                     )
                 )
@@ -181,29 +183,22 @@ struct RegionCurrencySettingsView: View {
             Text(
                 BuxLocalizedString.format(
                     "%@ typically uses %@.",
-                    locale: uiLocale,
-                    pendingCountry?.name ?? localized("This country"),
-                    pendingCountry?.defaultCurrencyCode ?? localized("a local currency")
+                    locale: appSettingsManager.interfaceLocale,
+                    pendingCountry?.name ?? BuxCatalogLabel.string("This country", locale: appSettingsManager.interfaceLocale),
+                    pendingCountry?.defaultCurrencyCode ?? BuxCatalogLabel.string("a local currency", locale: appSettingsManager.interfaceLocale)
                 )
             )
         }
         .onChange(of: store.weekStartDay) { _, _ in store.save() }
     }
 
-    private var uiLocale: Locale { appSettingsManager.interfaceLocale }
-
-    private func localized(_ key: String) -> String {
-        BuxStringCatalog.localized(key, locale: uiLocale)
+    private var interfaceLanguageBinding: Binding<AppInterfaceLanguage> {
+        Binding(
+            get: { appSettingsManager.interfaceLanguage },
+            set: { appSettingsManager.updateInterfaceLanguage($0) }
+        )
     }
 
-    @ViewBuilder
-    private var appLanguageValueLabel: some View {
-        switch BuxInterfaceLocale.kind(for: appSettingsManager.selectedCountry) {
-        case .english: BuxCatalogText.text("English")
-        case .latinAmericanSpanish: BuxCatalogText.text("Spanish (Latin America)")
-        case .spainSpanish: BuxCatalogText.text("Spanish (Spain)")
-        }
-    }
 }
 
 // MARK: - Country picker sheet

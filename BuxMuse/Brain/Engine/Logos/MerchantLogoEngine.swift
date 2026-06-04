@@ -8,6 +8,7 @@
 
 import Foundation
 import Combine
+import CryptoKit
 import ImageIO
 #if canImport(UIKit)
 import UIKit
@@ -257,92 +258,114 @@ public struct MerchantLogoEngine {
 // MARK: - Local Cache Manager
 public final class LightweightLogoCache: ObservableObject {
     public static let shared = LightweightLogoCache()
-    
+
     private var memoryCache = NSCache<NSString, UIImage>()
     private var lruList: [String] = []
     private let maxMemoryCount = 50
     private let maxDiskSize: Int = 10 * 1024 * 1024 // 10 MB
-    
+    /// All memory + disk + LRU mutations run on one queue (fixes EXC_BAD_ACCESS from concurrent `lruList` access).
+    private let cacheQueue = DispatchQueue(label: "com.buxmuse.app.merchant-logo-cache")
+
     private init() {
         memoryCache.countLimit = maxMemoryCount
+        removeLegacySharedLogoArtifacts()
     }
-    
+
     private var diskCacheDirectory: URL {
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
-        let dir = paths[0].appendingPathComponent("BuxMuseMerchantLogosV4")
+        let dir = paths[0].appendingPathComponent("BuxMuseMerchantLogosV5")
         if !FileManager.default.fileExists(atPath: dir.path) {
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
         }
         return dir
     }
-    
+
     public func getImage(forKey key: String) -> UIImage? {
-        let nsKey = key as NSString
-        
-        // 1. Check memory cache
-        if let memoryImage = memoryCache.object(forKey: nsKey) {
-            touchLRU(key)
-            return memoryImage
+        cacheQueue.sync {
+            let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmedKey.isEmpty else { return nil }
+            let nsKey = trimmedKey as NSString
+
+            if let memoryImage = memoryCache.object(forKey: nsKey) {
+                touchLRU(trimmedKey)
+                return memoryImage
+            }
+
+            let fileURL = diskCacheDirectory.appendingPathComponent(trimmedKey.cacheFilename())
+            if let fileData = try? Data(contentsOf: fileURL),
+               let diskImage = UIImage(data: fileData) {
+                memoryCache.setObject(diskImage, forKey: nsKey)
+                touchLRU(trimmedKey)
+                return diskImage
+            }
+            return nil
         }
-        
-        // 2. Check disk cache
-        let fileURL = diskCacheDirectory.appendingPathComponent(key.sanitizedFilename())
-        if let fileData = try? Data(contentsOf: fileURL),
-           let diskImage = UIImage(data: fileData) {
-            // Put back in memory cache
-            memoryCache.setObject(diskImage, forKey: nsKey)
-            touchLRU(key)
-            return diskImage
-        }
-        
-        return nil
     }
-    
+
     public func saveImage(_ image: UIImage, forKey key: String) {
-        let nsKey = key as NSString
-        
-        // 1. Save to memory cache
-        memoryCache.setObject(image, forKey: nsKey)
-        touchLRU(key)
-        
-        // 2. Save to disk cache in background
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            guard let self = self else { return }
-            let fileURL = self.diskCacheDirectory.appendingPathComponent(key.sanitizedFilename())
+        cacheQueue.async { [weak self] in
+            guard let self else { return }
+            let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmedKey.isEmpty else { return }
+            let nsKey = trimmedKey as NSString
+
+            self.memoryCache.setObject(image, forKey: nsKey)
+            self.touchLRU(trimmedKey)
+
+            let fileURL = self.diskCacheDirectory.appendingPathComponent(trimmedKey.cacheFilename())
             if let imageData = image.pngData() {
                 try? imageData.write(to: fileURL)
                 self.pruneDiskCacheIfNeeded()
             }
         }
     }
-    
+
     private func touchLRU(_ key: String) {
         if let idx = lruList.firstIndex(of: key) {
             lruList.remove(at: idx)
         }
         lruList.append(key)
-        
         if lruList.count > maxMemoryCount {
             let removedKey = lruList.removeFirst()
             memoryCache.removeObject(forKey: removedKey as NSString)
         }
     }
-    
+
     public func clearCache() {
-        memoryCache.removeAllObjects()
-        lruList.removeAll()
-        let files = try? FileManager.default.contentsOfDirectory(at: diskCacheDirectory, includingPropertiesForKeys: nil)
-        files?.forEach { try? FileManager.default.removeItem(at: $0) }
+        clearCacheSynchronously()
     }
-    
+
+    /// Used during Settings → Delete all data so stale favicons cannot survive a reset.
+    public func clearCacheSynchronously() {
+        cacheQueue.sync {
+            memoryCache.removeAllObjects()
+            lruList.removeAll()
+            removeAllLogoCacheDirectories()
+        }
+    }
+
+    private func removeAllLogoCacheDirectories() {
+        let manager = FileManager.default
+        guard let caches = manager.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
+        for folder in ["BuxMuseMerchantLogos", "BuxMuseMerchantLogosV3", "BuxMuseMerchantLogosV4", "BuxMuseMerchantLogosV5"] {
+            let dir = caches.appendingPathComponent(folder, isDirectory: true)
+            if manager.fileExists(atPath: dir.path) {
+                try? manager.removeItem(at: dir)
+            }
+        }
+    }
+
     private func pruneDiskCacheIfNeeded() {
         let dir = diskCacheDirectory
         let manager = FileManager.default
-        guard let files = try? manager.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey]) else { return }
-        
+        guard let files = try? manager.contentsOfDirectory(
+            at: dir,
+            includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey]
+        ) else { return }
+
         var fileInfos: [(url: URL, size: Int, date: Date)] = []
         var totalSize = 0
-        
+
         for file in files {
             let values = try? file.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
             let size = values?.fileSize ?? 0
@@ -350,27 +373,35 @@ public final class LightweightLogoCache: ObservableObject {
             fileInfos.append((url: file, size: size, date: date))
             totalSize += size
         }
-        
-        // Evict if total size exceeds 10 MB limit
+
         if totalSize > maxDiskSize {
-            // Sort by modification date (oldest first)
             fileInfos.sort(by: { $0.date < $1.date })
-            
             for file in fileInfos {
-                if totalSize <= Int(Double(maxDiskSize) * 0.8) {
-                    break
-                }
+                if totalSize <= Int(Double(maxDiskSize) * 0.8) { break }
                 try? manager.removeItem(at: file.url)
                 totalSize -= file.size
             }
+        }
+    }
+
+    /// Older builds wrote every empty-key logo to `merchant.png`, which made unrelated merchants share one image.
+    private func removeLegacySharedLogoArtifacts() {
+        let manager = FileManager.default
+        let caches = manager.urls(for: .cachesDirectory, in: .userDomainMask).first
+        guard let caches else { return }
+        for folder in ["BuxMuseMerchantLogosV4", "BuxMuseMerchantLogosV3", "BuxMuseMerchantLogos"] {
+            let legacy = caches.appendingPathComponent(folder).appendingPathComponent("merchant.png")
+            try? manager.removeItem(at: legacy)
         }
     }
 }
 
 // MARK: - Helpers
 extension String {
-    fileprivate func sanitizedFilename() -> String {
-        return self.components(separatedBy: CharacterSet.alphanumerics.inverted).joined() + ".png"
+    fileprivate func cacheFilename() -> String {
+        let digest = SHA256.hash(data: Data(utf8))
+        let hex = digest.map { String(format: "%02x", $0) }.joined()
+        return hex + ".png"
     }
 }
 

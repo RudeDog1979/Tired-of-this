@@ -310,7 +310,7 @@ struct BackupRestoreSettingsView: View {
                 }
                 .padding(BuxTokens.marginRegular)
             }
-            .navigationTitle("Before you backup")
+            .buxCatalogNavigationTitle("Before you backup")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -396,7 +396,7 @@ struct BackupRestoreSettingsView: View {
                 }
                 .padding(BuxTokens.marginRegular)
             }
-            .navigationTitle("Recovery key")
+            .buxCatalogNavigationTitle("Recovery key")
             .navigationBarTitleDisplayMode(.inline)
             .interactiveDismissDisabled(!recoveryKeyAcknowledged)
             .buxThemedSheetContent()

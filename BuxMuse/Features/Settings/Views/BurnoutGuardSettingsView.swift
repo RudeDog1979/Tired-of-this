@@ -134,7 +134,7 @@ struct BurnoutGuardSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Creative Energy")
+        .buxCatalogNavigationTitle("Creative Energy")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.burnoutGuardEnabled) { _, _ in store.save() }
         .onChange(of: store.manualSleepHours) { _, _ in store.save() }

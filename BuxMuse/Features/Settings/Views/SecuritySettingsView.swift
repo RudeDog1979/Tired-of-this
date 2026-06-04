@@ -113,7 +113,7 @@ struct SecuritySettingsView: View {
                 .buxFormFieldPadding()
             }
         }
-        .navigationTitle("Security & Privacy")
+        .buxCatalogNavigationTitle("Security & Privacy")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPasscodeSetup) {
             PasscodeSetupSheet { pin in

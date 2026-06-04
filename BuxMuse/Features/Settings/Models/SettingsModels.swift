@@ -44,6 +44,25 @@ public enum DefaultBudgetPeriod: String, Codable, CaseIterable, Identifiable {
     public var id: String { rawValue }
 }
 
+/// Simple-budget spend window (independent of calendar month when using mid-month / pay cycles).
+public enum SimpleBudgetCycle: String, Codable, CaseIterable, Identifiable {
+    case monthFirst = "Month starts on the 1st"
+    case monthFifteenth = "Month starts on the 15th"
+    case monthThirtieth = "Month starts on the 30th"
+    case weekly = "Weekly"
+    case biweekly = "Every two weeks"
+    case custom = "Custom start date"
+
+    public var id: String { rawValue }
+
+    public var needsAnchorDate: Bool {
+        switch self {
+        case .biweekly, .custom: return true
+        default: return false
+        }
+    }
+}
+
 public enum AutoBackupFrequency: String, Codable, CaseIterable, Identifiable {
     case off = "Off"
     case daily = "Daily"

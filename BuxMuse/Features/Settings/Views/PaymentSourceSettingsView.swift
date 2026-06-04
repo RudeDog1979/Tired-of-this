@@ -54,7 +54,7 @@ struct PaymentSourceSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Payment Sources")
+        .buxCatalogNavigationTitle("Payment Sources")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

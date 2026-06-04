@@ -85,7 +85,12 @@ struct ExpenseLedgerAvatarView: View {
     }
 
     private var linkedStoreDisplayName: String? {
-        brain.merchantLogoName(for: record)
+        guard let name = brain.merchantLogoName(for: record)?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+              !name.isEmpty else {
+            return nil
+        }
+        return name
     }
 
     private var categoryAvatar: some View {

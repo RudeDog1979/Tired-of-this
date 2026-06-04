@@ -49,7 +49,7 @@ struct ScopeCreepRadarSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Scope Creep Radar")
+        .buxCatalogNavigationTitle("Scope Creep Radar")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.antiScopeCreepEnabled) { _, _ in store.save() }
     }

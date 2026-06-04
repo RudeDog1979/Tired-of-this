@@ -230,6 +230,14 @@ final class AppContainer: ObservableObject {
                 )
             }
             .store(in: &cancellables)
+
+        appSettingsManager.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.brain.scheduleSnapshotRefresh()
+                self?.insightsViewModel.recalculate()
+            }
+            .store(in: &cancellables)
     }
 
     private func migrateLegacyFreelanceLocale() {

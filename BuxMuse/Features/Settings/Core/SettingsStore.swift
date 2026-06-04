@@ -45,7 +45,7 @@ public final class SettingsStore: ObservableObject {
     @Published public var accentColorId: String = AppTheme.buxDefault.name
     @Published public var neutralAccentId: String = BuxSystemAccent.systemBlue.rawValue
     @Published public var useGlassmorphism: Bool = true
-    @Published public var brandThemesEnabled: Bool = true
+    @Published public var brandThemesEnabled: Bool = false
     @Published public var landingBackdropEnabled: Bool = {
         if UserDefaults.standard.object(forKey: "buxmuse.landingBackdrop.enabled") == nil {
             return true
@@ -53,6 +53,7 @@ public final class SettingsStore: ObservableObject {
         return UserDefaults.standard.bool(forKey: "buxmuse.landingBackdrop.enabled")
     }() {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(landingBackdropEnabled, forKey: "buxmuse.landingBackdrop.enabled")
         }
     }
@@ -69,6 +70,8 @@ public final class SettingsStore: ObservableObject {
     @Published public var autoAdjustBudgetsFromHistory: Bool = false
     @Published public var customBudgetProfiles: [CustomBudgetProfile] = []
     @Published public var simpleBudgetLimit: Decimal = 1000
+    @Published public var simpleBudgetCycle: SimpleBudgetCycle = .monthFirst
+    @Published public var simpleBudgetPeriodAnchor: Date = Date()
     @Published public var customBudgetLimit: Decimal = 50
     @Published public var customBudgetPeriod: DefaultBudgetPeriod = .weekly
     
@@ -103,6 +106,7 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Data Guard Mode Settings
     @Published public var dataGuardModeEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.dataguard.enabled") {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(dataGuardModeEnabled, forKey: "buxmuse.dataguard.enabled")
         }
     }
@@ -110,6 +114,7 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Barter Logger Settings
     @Published public var barterLoggerEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.barter.enabled") {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(barterLoggerEnabled, forKey: "buxmuse.barter.enabled")
         }
     }
@@ -117,6 +122,7 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Anti-Scope Creep Settings
     @Published public var antiScopeCreepEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.scopecreep.enabled") {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(antiScopeCreepEnabled, forKey: "buxmuse.scopecreep.enabled")
         }
     }
@@ -124,27 +130,46 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Agreement Scratchpad Settings
     @Published public var agreementScratchpadEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.agreementscratchpad.enabled") {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(agreementScratchpadEnabled, forKey: "buxmuse.agreementscratchpad.enabled")
         }
     }
 
     /// Default T&C clauses enabled for new agreement drafts.
-    @Published public var agreementDefaultEnabledClauseIds: [String] = SettingsStore.loadAgreementDefaultClauseIds() {
-        didSet { SettingsStore.saveAgreementDefaultClauseIds(agreementDefaultEnabledClauseIds) }
+    @Published public var agreementDefaultEnabledClauseIds: [String] = [] {
+        didSet {
+            guard isLoaded else { return }
+            SettingsStore.saveAgreementDefaultClauseIds(agreementDefaultEnabledClauseIds)
+        }
     }
 
     /// Default custom T&C text appended to new agreement drafts.
     @Published public var agreementDefaultCustomTerms: String = UserDefaults.standard.string(forKey: "buxmuse.agreement.terms.custom") ?? "" {
-        didSet { UserDefaults.standard.set(agreementDefaultCustomTerms, forKey: "buxmuse.agreement.terms.custom") }
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(agreementDefaultCustomTerms, forKey: "buxmuse.agreement.terms.custom")
+        }
     }
 
     private static let agreementDefaultClauseIdsKey = "buxmuse.agreement.terms.defaultIds"
+
+    /// Essential pack ids — keep aligned with `StudioAgreementTermsLibrary.clauseIds(for: .essential)`.
+    private static let fallbackEssentialAgreementClauseIds: [String] = [
+        "deposit", "payment-due", "cancellation-client", "scope-changes", "liability"
+    ]
+
+    private static func defaultAgreementClauseIds() -> [String] {
+        if #available(iOS 26, *) {
+            return StudioAgreementTermsLibrary.defaultEnabledClauseIds
+        }
+        return fallbackEssentialAgreementClauseIds
+    }
 
     private static func loadAgreementDefaultClauseIds() -> [String] {
         guard let data = UserDefaults.standard.data(forKey: agreementDefaultClauseIdsKey),
               let decoded = try? JSONDecoder().decode([String].self, from: data),
               !decoded.isEmpty else {
-            return StudioAgreementTermsLibrary.defaultEnabledClauseIds
+            return defaultAgreementClauseIds()
         }
         return decoded
     }
@@ -157,6 +182,7 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Side-Hustle Matrix Settings
     @Published public var sideHustleMatrixEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.sidehustle.enabled") {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(sideHustleMatrixEnabled, forKey: "buxmuse.sidehustle.enabled")
             if !sideHustleMatrixEnabled {
                 HustleManager.shared.selectHustle(nil)
@@ -172,6 +198,7 @@ public final class SettingsStore: ObservableObject {
         return UserDefaults.standard.bool(forKey: "buxmuse.sidehustle.showUnassigned")
     }() {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(showUnassignedExpensesInWorkspace, forKey: "buxmuse.sidehustle.showUnassigned")
         }
     }
@@ -184,6 +211,7 @@ public final class SettingsStore: ObservableObject {
         return UserDefaults.standard.bool(forKey: "buxmuse.paymentsource.enabled")
     }() {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(paymentSourceTrackingEnabled, forKey: "buxmuse.paymentsource.enabled")
         }
     }
@@ -191,30 +219,35 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Dual-Cash Drawer Settings
     @Published public var dualCashDrawerEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.cashdrawer.enabled") {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(dualCashDrawerEnabled, forKey: "buxmuse.cashdrawer.enabled")
         }
     }
     
     @Published public var primaryLocalCurrency: String = UserDefaults.standard.string(forKey: "buxmuse.cashdrawer.primaryCurrency") ?? "USD" {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(primaryLocalCurrency, forKey: "buxmuse.cashdrawer.primaryCurrency")
         }
     }
     
     @Published public var secondaryTradingCurrency: String = UserDefaults.standard.string(forKey: "buxmuse.cashdrawer.secondaryCurrency") ?? "DOP" {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(secondaryTradingCurrency, forKey: "buxmuse.cashdrawer.secondaryCurrency")
         }
     }
     
     @Published public var cashLocalBalanceValue: Double = UserDefaults.standard.double(forKey: "buxmuse.cashdrawer.localBalance") {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(cashLocalBalanceValue, forKey: "buxmuse.cashdrawer.localBalance")
         }
     }
     
     @Published public var cashSecondaryBalanceValue: Double = UserDefaults.standard.double(forKey: "buxmuse.cashdrawer.secondaryBalance") {
         didSet {
+            guard isLoaded else { return }
             UserDefaults.standard.set(cashSecondaryBalanceValue, forKey: "buxmuse.cashdrawer.secondaryBalance")
         }
     }
@@ -338,6 +371,8 @@ public final class SettingsStore: ObservableObject {
         let autoAdjustBudgetsFromHistory: Bool
         let customBudgetProfiles: [CustomBudgetProfile]
         let simpleBudgetLimit: Decimal?
+        let simpleBudgetCycle: SimpleBudgetCycle?
+        let simpleBudgetPeriodAnchor: Date?
         let customBudgetLimit: Decimal?
         let customBudgetPeriod: DefaultBudgetPeriod?
         
@@ -383,7 +418,8 @@ public final class SettingsStore: ObservableObject {
             case solarContrastModeEnabled
             case weekStartDay, budgetingMode, defaultBudgetPeriod
             case showBudgetWarnings, autoAdjustBudgetsFromHistory, customBudgetProfiles
-            case simpleBudgetLimit, customBudgetLimit, customBudgetPeriod
+            case simpleBudgetLimit, simpleBudgetCycle, simpleBudgetPeriodAnchor
+            case customBudgetLimit, customBudgetPeriod
             case studioEnabled, freelanceEnabled
             case studioProfileId, freelanceProfileId
             case studioMode, studioPersona, studioPersonaConfigured
@@ -443,6 +479,8 @@ public final class SettingsStore: ObservableObject {
             autoAdjustBudgetsFromHistory = try c.decode(Bool.self, forKey: .autoAdjustBudgetsFromHistory)
             customBudgetProfiles = try c.decode([CustomBudgetProfile].self, forKey: .customBudgetProfiles)
             simpleBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .simpleBudgetLimit)
+            simpleBudgetCycle = try c.decodeIfPresent(SimpleBudgetCycle.self, forKey: .simpleBudgetCycle)
+            simpleBudgetPeriodAnchor = try c.decodeIfPresent(Date.self, forKey: .simpleBudgetPeriodAnchor)
             customBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .customBudgetLimit)
             customBudgetPeriod = try c.decodeIfPresent(DefaultBudgetPeriod.self, forKey: .customBudgetPeriod)
             studioEnabled = try c.decodeIfPresent(Bool.self, forKey: .studioEnabled)
@@ -502,6 +540,8 @@ public final class SettingsStore: ObservableObject {
             autoAdjustBudgetsFromHistory: Bool,
             customBudgetProfiles: [CustomBudgetProfile],
             simpleBudgetLimit: Decimal?,
+            simpleBudgetCycle: SimpleBudgetCycle?,
+            simpleBudgetPeriodAnchor: Date?,
             customBudgetLimit: Decimal?,
             customBudgetPeriod: DefaultBudgetPeriod?,
             studioEnabled: Bool,
@@ -555,6 +595,8 @@ public final class SettingsStore: ObservableObject {
             self.autoAdjustBudgetsFromHistory = autoAdjustBudgetsFromHistory
             self.customBudgetProfiles = customBudgetProfiles
             self.simpleBudgetLimit = simpleBudgetLimit
+            self.simpleBudgetCycle = simpleBudgetCycle
+            self.simpleBudgetPeriodAnchor = simpleBudgetPeriodAnchor
             self.customBudgetLimit = customBudgetLimit
             self.customBudgetPeriod = customBudgetPeriod
             self.studioEnabled = studioEnabled
@@ -611,6 +653,8 @@ public final class SettingsStore: ObservableObject {
             try c.encode(autoAdjustBudgetsFromHistory, forKey: .autoAdjustBudgetsFromHistory)
             try c.encode(customBudgetProfiles, forKey: .customBudgetProfiles)
             try c.encodeIfPresent(simpleBudgetLimit, forKey: .simpleBudgetLimit)
+            try c.encodeIfPresent(simpleBudgetCycle, forKey: .simpleBudgetCycle)
+            try c.encodeIfPresent(simpleBudgetPeriodAnchor, forKey: .simpleBudgetPeriodAnchor)
             try c.encodeIfPresent(customBudgetLimit, forKey: .customBudgetLimit)
             try c.encodeIfPresent(customBudgetPeriod, forKey: .customBudgetPeriod)
             try c.encode(studioEnabled, forKey: .studioEnabled)
@@ -679,7 +723,7 @@ public final class SettingsStore: ObservableObject {
                 self.accentColorId = Self.normalizeAccentColorId(payload.accentColorId)
                 self.neutralAccentId = payload.neutralAccentId ?? BuxSystemAccent.systemBlue.rawValue
                 self.useGlassmorphism = payload.useGlassmorphism
-                self.brandThemesEnabled = payload.brandThemesEnabled ?? true
+                self.brandThemesEnabled = payload.brandThemesEnabled ?? false
                 self.reducedMotion = payload.reducedMotion
                 self.solarContrastModeEnabled = payload.solarContrastModeEnabled ?? false
                 
@@ -691,6 +735,8 @@ public final class SettingsStore: ObservableObject {
                 self.autoAdjustBudgetsFromHistory = payload.autoAdjustBudgetsFromHistory
                 self.customBudgetProfiles = payload.customBudgetProfiles.filter { $0.name != "Standard Essentials" }
                 self.simpleBudgetLimit = payload.simpleBudgetLimit ?? 1000
+                self.simpleBudgetCycle = payload.simpleBudgetCycle ?? .monthFirst
+                self.simpleBudgetPeriodAnchor = payload.simpleBudgetPeriodAnchor ?? Date()
                 self.customBudgetLimit = payload.customBudgetLimit ?? 50
                 self.customBudgetPeriod = payload.customBudgetPeriod ?? .weekly
                 
@@ -734,6 +780,7 @@ public final class SettingsStore: ObservableObject {
                 loadInvoicePaymentPreferences()
                 loadMileagePreferences()
                 loadStudioDiscoveryPreference()
+                loadAgreementPreferences()
                 
                 self.isLoaded = true
                 print("SettingsStore: successfully loaded settings.")
@@ -753,6 +800,10 @@ public final class SettingsStore: ObservableObject {
         self.lastName = nil
         self.themeMode = .system
         self.solarContrastModeEnabled = false
+        self.brandThemesEnabled = false
+        self.landingBackdropEnabled = true
+        UserDefaults.standard.set(true, forKey: "buxmuse.landingBackdrop.enabled")
+        self.useGlassmorphism = true
         self.accentColorId = AppTheme.buxDefault.name
         self.neutralAccentId = BuxSystemAccent.systemBlue.rawValue
         self.weekStartDay = .monday
@@ -775,12 +826,22 @@ public final class SettingsStore: ObservableObject {
         self.cashSecondaryBalanceValue = 0.0
         self.customBudgetProfiles = []
         self.simpleBudgetLimit = 1000
+        self.simpleBudgetCycle = .monthFirst
+        self.simpleBudgetPeriodAnchor = Date()
         self.customBudgetLimit = 50
         self.customBudgetPeriod = .weekly
         loadInvoicePaymentPreferences()
         loadMileagePreferences()
         loadStudioDiscoveryPreference()
+        loadAgreementPreferences()
         save()
+    }
+
+    private func loadAgreementPreferences() {
+        agreementDefaultEnabledClauseIds = Self.loadAgreementDefaultClauseIds()
+        if let custom = UserDefaults.standard.string(forKey: "buxmuse.agreement.terms.custom") {
+            agreementDefaultCustomTerms = custom
+        }
     }
 
     private static let studioDiscoveryDismissedKey = "studio_discovery_offer_dismissed"
@@ -850,6 +911,8 @@ public final class SettingsStore: ObservableObject {
             autoAdjustBudgetsFromHistory: autoAdjustBudgetsFromHistory,
             customBudgetProfiles: customBudgetProfiles,
             simpleBudgetLimit: simpleBudgetLimit,
+            simpleBudgetCycle: simpleBudgetCycle,
+            simpleBudgetPeriodAnchor: simpleBudgetPeriodAnchor,
             customBudgetLimit: customBudgetLimit,
             customBudgetPeriod: customBudgetPeriod,
             studioEnabled: studioEnabled,

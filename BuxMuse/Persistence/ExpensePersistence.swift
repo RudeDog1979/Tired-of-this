@@ -23,6 +23,32 @@ extension PersistenceController {
 
         try syncMissingSystemCategoriesIfNeeded()
         try migrateLegacyExpenseRowsIfNeeded()
+        try sanitizeMerchantEntitiesIfNeeded()
+    }
+
+    /// Removes blank merchant rows and clears broken store links so list avatars do not trap the UI.
+    private func sanitizeMerchantEntitiesIfNeeded() throws {
+        let merchants = try context.fetch(FetchDescriptor<MerchantEntity>())
+        var deletedIDs = Set<UUID>()
+        for entity in merchants {
+            let name = entity.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let normalized = entity.normalizedName.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard name.isEmpty, normalized.isEmpty else { continue }
+            deletedIDs.insert(entity.id)
+            context.delete(entity)
+        }
+        guard !deletedIDs.isEmpty else { return }
+
+        let expenses = try context.fetch(FetchDescriptor<ExpenseEntity>())
+        var changed = false
+        for expense in expenses where expense.merchantId.map({ deletedIDs.contains($0) }) == true {
+            expense.merchantId = nil
+            expense.updatedAt = Date()
+            changed = true
+        }
+        if changed || !deletedIDs.isEmpty {
+            try context.save()
+        }
     }
 
     private func makeSystemCategoryEntity(
@@ -132,7 +158,8 @@ extension PersistenceController {
             saved.merchantId = merchant.id
             if saved.transactionCategory == .income {
                 // Keep the user label in `name`; persist brand string for logos (matches dashboard lookup).
-                saved.merchantName = merchant.name
+                let brand = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                saved.merchantName = brand.isEmpty ? saved.name : brand
             } else if saved.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 saved.merchantName = merchant.name
             }
@@ -326,7 +353,11 @@ extension PersistenceController {
         if record.transactionCategory == .income {
             return nil
         }
-        return try upsertMerchant(forName: record.merchantName)
+        let merchantLabel = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let nameLabel = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let label = merchantLabel.isEmpty ? nameLabel : merchantLabel
+        guard !label.isEmpty else { return nil }
+        return try upsertMerchant(forName: label)
     }
 
     func resolveMerchant(selection: MerchantSelection) throws -> ExpenseMerchantRecord {
@@ -334,6 +365,9 @@ extension PersistenceController {
         let disambiguator = selection.disambiguator?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
         if let merchantId = selection.merchantId, var existing = try fetchMerchantRecord(id: merchantId) {
+            if displayName.isEmpty {
+                return try touchMerchant(existing, displayName: existing.name)
+            }
             existing.name = selection.historyLabel ?? displayName
             return try touchMerchant(existing, displayName: existing.name)
         }
@@ -373,9 +407,12 @@ extension PersistenceController {
 
     private func touchMerchant(_ merchant: ExpenseMerchantRecord, displayName: String) throws -> ExpenseMerchantRecord {
         guard let entity = try fetchMerchantEntity(id: merchant.id) else { return merchant }
-        entity.name = displayName
+        let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        entity.name = trimmed.isEmpty ? merchant.name : trimmed
         entity.lastSeenAt = Date()
-        if entity.logoURL == nil, let domain = MerchantLogoEngine.resolveDomain(for: displayName) {
+        if entity.logoURL == nil,
+           !trimmed.isEmpty,
+           let domain = MerchantLogoEngine.resolveDomain(for: trimmed) {
             entity.logoURL = MerchantLogoEngine.googleFaviconURL(for: domain)
         }
         try context.save()
@@ -383,13 +420,21 @@ extension PersistenceController {
     }
 
     private func createMerchant(name: String, normalized: String, disambiguator: String) throws -> ExpenseMerchantRecord {
-        let domain = MerchantLogoEngine.resolveDomain(for: name)
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !normalized.isEmpty else {
+            throw NSError(
+                domain: "ExpensePersistence",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Merchant name is required."]
+            )
+        }
+        let domain = MerchantLogoEngine.resolveDomain(for: trimmed)
         let entity = MerchantEntity(
             normalizedName: normalized,
-            name: name,
+            name: trimmed,
             disambiguator: disambiguator,
             logoURL: domain.map { MerchantLogoEngine.googleFaviconURL(for: $0) },
-            cluster: MerchantIntelligence.normalize(name)
+            cluster: MerchantIntelligence.normalize(trimmed)
         )
         context.insert(entity)
         try context.save()
