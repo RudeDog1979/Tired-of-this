@@ -20,7 +20,7 @@ struct BurnoutGuardSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
-            BuxFormSection(title: "Creative Energy widget") {
+            BuxFormSection(title: "Creative energy widget") {
                 Toggle(isOn: $store.burnoutGuardEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
                         BuxCatalogDynamicText(key: "Show on Home dashboard")
@@ -134,7 +134,7 @@ struct BurnoutGuardSettingsView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Creative Energy")
+        .buxCatalogNavigationTitle("Creative energy")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.burnoutGuardEnabled) { _, _ in store.save() }
         .onChange(of: store.manualSleepHours) { _, _ in store.save() }

@@ -37,6 +37,7 @@ struct BackupRestoreSettingsView: View {
     @EnvironmentObject private var goalsViewModel: GoalsViewModel
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @ObservedObject private var store = SettingsStore.shared
 
@@ -139,6 +140,78 @@ struct BackupRestoreSettingsView: View {
                 }
             }
 
+            BuxFormSection(title: "Backup reminders") {
+                Toggle(isOn: Binding(
+                    get: { store.autoBackupFrequency != .off },
+                    set: { isOn in
+                        let newFreq: AutoBackupFrequency = isOn ? .weekly : .off
+                        store.autoBackupFrequency = newFreq
+                        store.save()
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        Task {
+                            await BackupNotificationScheduler.reschedule(frequency: newFreq)
+                        }
+                    }
+                )) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        BuxCatalogDynamicText(key: "Enable backup reminders")
+                            .font(.system(size: 15, weight: .semibold))
+                        BuxCatalogDynamicText(key: "Get local notification alerts to secure your offline data.")
+                            .font(.system(size: 12, weight: .medium))
+                            .buxLabelSecondary()
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .tint(themeManager.current.accentColor)
+                .buxFormFieldPadding()
+
+                if store.autoBackupFrequency != .off {
+                    BuxFormRowDivider()
+                    Picker("Reminder frequency", selection: Binding(
+                        get: { store.autoBackupFrequency },
+                        set: { newValue in
+                            store.autoBackupFrequency = newValue
+                            store.save()
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            Task {
+                                await BackupNotificationScheduler.reschedule(frequency: newValue)
+                            }
+                        }
+                    )) {
+                        Text("Weekly").tag(AutoBackupFrequency.weekly)
+                        Text("Monthly").tag(AutoBackupFrequency.monthly)
+                        Text("Custom").tag(AutoBackupFrequency.custom)
+                    }
+                    .pickerStyle(.segmented)
+                    .tint(themeManager.current.accentColor)
+                    .buxFormFieldPadding()
+
+                    if store.autoBackupFrequency == .custom {
+                        BuxFormRowDivider()
+                        HStack {
+                            Text("Remind me every")
+                                .font(.system(size: 14, weight: .semibold))
+                            Spacer()
+                            Stepper(value: Binding(
+                                get: { store.customBackupIntervalDays },
+                                set: { newValue in
+                                    store.customBackupIntervalDays = max(1, min(30, newValue))
+                                    store.save()
+                                    Task {
+                                        await BackupNotificationScheduler.reschedule(frequency: .custom)
+                                    }
+                                }
+                            ), in: 1...30) {
+                                Text("\(store.customBackupIntervalDays) ") + Text(store.customBackupIntervalDays == 1 ? "day" : "days")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(themeManager.current.accentColor)
+                            }
+                        }
+                        .buxFormFieldPadding()
+                    }
+                }
+            }
+
             BuxFormSection(title: "Restore backup") {
                 BuxCatalogDynamicText(key: "Restoring replaces local expenses, goals, workspaces, and Studio records on this device.")
                     .font(.system(size: 13, weight: .medium))
@@ -209,18 +282,18 @@ struct BackupRestoreSettingsView: View {
                 errorMessage = error.localizedDescription
             }
         }
-        .alert("Restore complete", isPresented: $showRestoreSuccess) {
-            Button("OK", role: .cancel) {}
+        .alert(BuxCatalogLabel.string("Restore complete", locale: appSettingsManager.interfaceLocale), isPresented: $showRestoreSuccess) {
+            Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
             BuxCatalogDynamicText(key: "Your BuxMuse data was restored from the encrypted archive.")
         }
-        .alert("Backup error", isPresented: Binding(
+        .alert(BuxCatalogLabel.string("Backup error", locale: appSettingsManager.interfaceLocale), isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )) {
-            Button("OK", role: .cancel) {}
+            Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
-            Text(errorMessage ?? "Unknown error")
+            Text(errorMessage ?? BuxCatalogLabel.string("Unknown error", locale: appSettingsManager.interfaceLocale))
         }
         .onChange(of: isWorking) { _, working in
             if working {
@@ -301,7 +374,7 @@ struct BackupRestoreSettingsView: View {
                     }
                     .disabled(isWorking)
 
-                    Button("Cancel") {
+                    Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) {
                         showBackupSecuritySheet = false
                     }
                     .font(.system(size: 15, weight: .semibold))
@@ -422,15 +495,16 @@ struct BackupRestoreSettingsView: View {
     }
 
     private func passwordField(_ placeholder: String, text: Binding<String>, isVisible: Binding<Bool>) -> some View {
-        HStack(spacing: 10) {
+        let localizedPlaceholder = BuxCatalogLabel.string(placeholder, locale: appSettingsManager.interfaceLocale)
+        return HStack(spacing: 10) {
             Group {
                 if isVisible.wrappedValue {
-                    TextField(placeholder, text: text)
+                    TextField(localizedPlaceholder, text: text)
                         .textContentType(.password)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
                 } else {
-                    SecureField(placeholder, text: text)
+                    SecureField(localizedPlaceholder, text: text)
                         .textContentType(.password)
                 }
             }

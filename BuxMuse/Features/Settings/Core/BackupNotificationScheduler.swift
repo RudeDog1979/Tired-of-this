@@ -43,12 +43,13 @@ public final class BackupNotificationScheduler {
         
         let interval: TimeInterval
         switch frequency {
-        case .daily:
-            interval = 86400
         case .weekly:
             interval = 604800
         case .monthly:
             interval = 2592000
+        case .custom:
+            let days = await MainActor.run { SettingsStore.shared.customBackupIntervalDays }
+            interval = TimeInterval(days * 86400)
         default:
             return
         }

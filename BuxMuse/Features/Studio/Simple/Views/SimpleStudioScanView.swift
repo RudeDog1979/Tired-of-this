@@ -79,7 +79,9 @@ struct SimpleStudioScanView: View {
                     }
                 }
             }
-            .buxStudioSheetContent()
+            .buxRootNavigationChrome()
+            .buxInterfaceLocale()
+            .buxMeshSheetPresentation()
             .sheet(isPresented: $showCameraSheet) {
                 DocumentScannerView(
                     onFinish: { img in
@@ -423,7 +425,9 @@ private struct SimpleScanChipEditorSheet: View {
                     }
                 }
             }
-            .buxStudioSheetContent()
+            .buxRootNavigationChrome()
+            .buxInterfaceLocale()
+            .buxMeshSheetPresentation()
             .onAppear(perform: load)
         }
     }

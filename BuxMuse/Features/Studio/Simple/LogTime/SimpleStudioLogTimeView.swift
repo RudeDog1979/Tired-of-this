@@ -428,10 +428,17 @@ struct SimpleStudioLogTimeView: View {
 
     private func jobPickerLabel(_ job: SimpleStudioEntry) -> String {
         let label = job.jobLabel?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let style = job.resolvedPayStyle == .byTheHour ? " · hourly" : ""
-        if !label.isEmpty { return label + style }
-        let customer = job.customerName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return (customer.isEmpty ? "Job" : customer) + style
+        let isHourly = job.resolvedPayStyle == .byTheHour
+        let suffix = isHourly ? " " + SimpleStudioCopy.line("· hourly") : ""
+        
+        let baseName: String
+        if !label.isEmpty {
+            baseName = label
+        } else {
+            let customer = job.customerName.trimmingCharacters(in: .whitespacesAndNewlines)
+            baseName = customer.isEmpty ? SimpleStudioCopy.line("Job") : customer
+        }
+        return baseName + suffix
     }
 
     private func hydrateFromSession() {

@@ -79,7 +79,7 @@ struct AppearanceSettingsView: View {
                         VStack(spacing: 0) {
                             Toggle(isOn: $store.brandThemesEnabled) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "Brand Themes")
+                                    BuxCatalogDynamicText(key: "Brand themes")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     BuxCatalogDynamicText(key: "Full themed surfaces and presets — off uses standard iOS light/dark")
@@ -94,14 +94,16 @@ struct AppearanceSettingsView: View {
 
                             // Theme mode selector
                             HStack {
-                                BuxCatalogDynamicText(key: "Display Mode")
+                                BuxCatalogDynamicText(key: "Display mode")
                                     .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 Spacer()
-                                Picker("Display Mode", selection: $store.themeMode) {
+                                Picker(selection: $store.themeMode) {
                                     ForEach(ThemeMode.allCases) { mode in
                                         Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                                     }
+                                } label: {
+                                    Text(BuxCatalogLabel.string("Display mode", locale: appSettingsManager.interfaceLocale))
                                 }
                                 .pickerStyle(.menu)
                             }
@@ -133,9 +135,9 @@ struct AppearanceSettingsView: View {
                                     BuxCatalogDynamicText(key: "Glass navigation chrome")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Text(store.brandThemesEnabled
+                                    Text(BuxCatalogLabel.string(store.brandThemesEnabled
                                          ? "Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)"
-                                         : "Liquid Glass tab bar and icon buttons (cards stay neutral)")
+                                         : "Liquid Glass tab bar and icon buttons (cards stay neutral)", locale: appSettingsManager.interfaceLocale))
                                         .font(.system(size: 11))
                                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                                 }
@@ -148,7 +150,7 @@ struct AppearanceSettingsView: View {
                             // Reduced Motion Toggle
                             Toggle(isOn: $store.reducedMotion) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "Reduced Motion")
+                                    BuxCatalogDynamicText(key: "Reduced motion")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     BuxCatalogDynamicText(key: "Simplify transition animations for comfort")
@@ -164,7 +166,7 @@ struct AppearanceSettingsView: View {
                             // Solar Contrast Mode Toggle
                             Toggle(isOn: $store.solarContrastModeEnabled) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "Solar Contrast Mode")
+                                    BuxCatalogDynamicText(key: "Solar contrast mode")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     BuxCatalogDynamicText(key: "Optimize contrast and text weight for direct tropical sunlight")
@@ -174,6 +176,62 @@ struct AppearanceSettingsView: View {
                             }
                             .padding(.horizontal, BuxLayout.section)
                             .padding(.vertical, 12)
+                        }
+                        .settingsThemedCardChrome(cornerRadius: 20)
+                        .padding(.horizontal, 20)
+                    }
+
+                    // Dashboard Greeting Settings
+                    VStack(alignment: .leading, spacing: 12) {
+                        BuxSectionHeader(title: "Dashboard greeting")
+                            .padding(.horizontal, 20)
+                        
+                        VStack(spacing: 0) {
+                            Toggle(isOn: $store.greetingHeaderEnabled) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    BuxCatalogDynamicText(key: "Show greeting header on dashboard")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                }
+                            }
+                            .padding(.horizontal, BuxLayout.section)
+                            .padding(.vertical, 12)
+
+                            if store.greetingHeaderEnabled {
+                                Divider().opacity(0.08)
+
+                                Toggle(isOn: $store.greetingShowIcon) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        BuxCatalogDynamicText(key: "Show greeting icon")
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                        BuxCatalogDynamicText(key: "Show animated time icon beside text")
+                                            .font(.system(size: 11))
+                                            .buxLabelSecondary()
+                                    }
+                                }
+                                .padding(.horizontal, BuxLayout.section)
+                                .padding(.vertical, 12)
+
+                                Divider().opacity(0.08)
+
+                                HStack {
+                                    BuxCatalogDynamicText(key: "Greeting style")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                    Spacer()
+                                    Picker(selection: $store.greetingFontStyle) {
+                                        ForEach(GreetingFontStyle.allCases) { style in
+                                            Text(style.localizedDisplayName(locale: appSettingsManager.interfaceLocale)).tag(style)
+                                        }
+                                    } label: {
+                                        Text(BuxCatalogLabel.string("Greeting style", locale: appSettingsManager.interfaceLocale))
+                                    }
+                                    .pickerStyle(.menu)
+                                }
+                                .padding(.horizontal, BuxLayout.section)
+                                .padding(.vertical, 14)
+                            }
                         }
                         .settingsThemedCardChrome(cornerRadius: 20)
                         .padding(.horizontal, 20)
@@ -200,6 +258,9 @@ struct AppearanceSettingsView: View {
             store.save()
         }
         .onChange(of: store.landingBackdropEnabled) { _, _ in store.save() }
+        .onChange(of: store.greetingHeaderEnabled) { _, _ in store.save() }
+        .onChange(of: store.greetingShowIcon) { _, _ in store.save() }
+        .onChange(of: store.greetingFontStyle) { _, _ in store.save() }
     }
 }
 

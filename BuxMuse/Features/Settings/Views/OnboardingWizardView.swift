@@ -23,65 +23,68 @@ struct OnboardingWizardView: View {
     @State private var orbitAngle: Double = 0
 
     var body: some View {
-        ZStack {
-            BuxLandingTintBackground()
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // Top header bar with dynamic buttons
-                headerBar
+                VStack(spacing: 0) {
+                    // Top header bar with dynamic buttons
+                    headerBar
 
-                // Paging Cards Container
-                TabView(selection: $currentTab) {
-                    welcomeCard.tag(0)
-                    setupCard.tag(1)
-                    studioCard.tag(2)
-                    backupCard.tag(3)
-                    tutorialCard.tag(4)
+                    // Paging Cards Container
+                    TabView(selection: $currentTab) {
+                        welcomeCard.tag(0)
+                        setupCard.tag(1)
+                        studioCard.tag(2)
+                        backupCard.tag(3)
+                        tutorialCard.tag(4)
+                    }
+                    .tabViewStyle(.page(indexDisplayMode: .always))
+                    .animation(.spring(response: 0.45, dampingFraction: 0.82), value: currentTab)
+
+                    // Navigation controls
+                    footerBar
                 }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .animation(.spring(response: 0.45, dampingFraction: 0.82), value: currentTab)
-
-                // Navigation controls
-                footerBar
             }
-        }
-        .task {
-            // Wait for sheet presentation to finish so user actually SEES the animation
-            try? await Task.sleep(nanoseconds: 400_000_000) // 0.4s
-            withAnimation(.spring(response: 0.7, dampingFraction: 0.5)) {
-                logoDidAppear = true
+            .toolbar(.hidden, for: .navigationBar)
+            .task {
+                // Wait for sheet presentation to finish so user actually SEES the animation
+                try? await Task.sleep(nanoseconds: 400_000_000) // 0.4s
+                withAnimation(.spring(response: 0.7, dampingFraction: 0.5)) {
+                    logoDidAppear = true
+                }
+                
+                // After entrance settles, start floating
+                try? await Task.sleep(nanoseconds: 800_000_000) // 0.8s
+                withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+                    logoFloating = true
+                }
+                
+                // Add a tiny micro-pause to stop SwiftUI from merging the 3.0s and 150s animations together
+                try? await Task.sleep(nanoseconds: 50_000_000) // 0.05s
+                
+                // Start orbiting icons — slow continuous rotation
+                withAnimation(.linear(duration: 150).repeatForever(autoreverses: false)) {
+                    orbitAngle = 360
+                }
             }
-            
-            // After entrance settles, start floating
-            try? await Task.sleep(nanoseconds: 800_000_000) // 0.8s
-            withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
-                logoFloating = true
-            }
-            
-            // Add a tiny micro-pause to stop SwiftUI from merging the 3.0s and 150s animations together
-            try? await Task.sleep(nanoseconds: 50_000_000) // 0.05s
-            
-            // Start orbiting icons — slow continuous rotation
-            withAnimation(.linear(duration: 150).repeatForever(autoreverses: false)) {
-                orbitAngle = 360
-            }
-        }
-        .sheet(isPresented: $showCountrySheet) {
-            CountryPickerView { country in
-                appSettingsManager.updateCountry(country, suggestCurrency: true)
-            }
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.visible)
-            .environment(\.settingsEnhancedTint, true)
-            .buxThemedSheetContent()
-        }
-        .sheet(isPresented: $showCurrencySheet) {
-            CurrencyRegionPickerView()
+            .sheet(isPresented: $showCountrySheet) {
+                CountryPickerView { country in
+                    appSettingsManager.updateCountry(country, suggestCurrency: true)
+                }
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
                 .environment(\.settingsEnhancedTint, true)
                 .buxThemedSheetContent()
+            }
+            .sheet(isPresented: $showCurrencySheet) {
+                CurrencyRegionPickerView()
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+                    .environment(\.settingsEnhancedTint, true)
+                    .buxThemedSheetContent()
+            }
         }
     }
 
@@ -190,7 +193,7 @@ struct OnboardingWizardView: View {
                 .padding(.top, 20)
 
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("BuxMuse is built for everyone — from everyday spenders tracking their grocery budget, to self-employed professionals managing invoices and taxes. Private, 100% on-device, zero sign-in required.")
+                    Text(BuxCatalogLabel.string("BuxMuse is built for everyone — from everyday spenders tracking their grocery budget, to self-employed professionals managing invoices and taxes. Private, 100% on-device, zero sign-in required.", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 14))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .lineSpacing(4)
@@ -212,6 +215,7 @@ struct OnboardingWizardView: View {
             }
             .padding(.bottom, 24)
         }
+        .buxScrollEdgeMask(edges: .top, size: 28)
     }
 
     // MARK: - Slide 2: Setup
@@ -291,7 +295,7 @@ struct OnboardingWizardView: View {
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                             
-                            TextField("Limit", value: Binding(
+                            TextField(BuxCatalogLabel.string("Limit", locale: appSettingsManager.interfaceLocale), value: Binding(
                                 // If the value is 0, return nil so the text field can be completely empty
                                 get: { store.simpleBudgetLimit == 0 ? nil : store.simpleBudgetLimit },
                                 // If the user clears the field (nil), safely save 0 to the store
@@ -308,7 +312,7 @@ struct OnboardingWizardView: View {
                             .toolbar {
                                 ToolbarItemGroup(placement: .keyboard) {
                                     Spacer()
-                                    Button("Done") {
+                                    Button(BuxCatalogLabel.string("Done", locale: appSettingsManager.interfaceLocale)) {
                                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                     }
                                     .font(.system(size: 16, weight: .bold))
@@ -337,6 +341,7 @@ struct OnboardingWizardView: View {
                 .padding(.horizontal, BuxLayout.marginHorizontal + 4)
             }
         }
+        .buxScrollEdgeMask(edges: .top, size: 28)
     }
 
     // MARK: - Slide 3: Studio Mode
@@ -373,7 +378,7 @@ struct OnboardingWizardView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
-                        Text("Simple Studio")
+                        Text(BuxCatalogLabel.string("Simple Studio", locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.secondary)
                     }
@@ -384,7 +389,7 @@ struct OnboardingWizardView: View {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 12))
                             .foregroundColor(.white)
-                        Text("Pro Studio")
+                        Text(BuxCatalogLabel.string("Pro Studio", locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.white)
                     }
@@ -421,7 +426,7 @@ struct OnboardingWizardView: View {
                     Image(systemName: "gearshape.fill")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
-                    Text("Activate Studio in Settings → Studio. Choose Simple or unlock Pro Studio.")
+                    Text(BuxCatalogLabel.string("Activate Studio in Settings → Studio. Choose Simple or unlock Pro Studio.", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
@@ -438,6 +443,7 @@ struct OnboardingWizardView: View {
             }
             .padding(.bottom, 24)
         }
+        .buxScrollEdgeMask(edges: .top, size: 28)
     }
 
     // MARK: - Slide 4: Backup & Privacy
@@ -456,7 +462,7 @@ struct OnboardingWizardView: View {
                         BuxCatalogText.text("Enable Backup Reminders")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Text("Get local alerts to safeguard your ledger")
+                        Text(BuxCatalogLabel.string("Get local alerts to safeguard your ledger", locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 12))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     }
@@ -483,11 +489,11 @@ struct OnboardingWizardView: View {
                 // Frequency Picker (Only visible if reminders are enabled)
                 if store.autoBackupFrequency != .off {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Reminder Frequency")
+                        Text(BuxCatalogLabel.string("Reminder Frequency", locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         
-                        Picker("Frequency", selection: Binding(
+                        Picker(selection: Binding(
                             get: { store.autoBackupFrequency },
                             set: { newValue in
                                 store.autoBackupFrequency = newValue
@@ -500,11 +506,37 @@ struct OnboardingWizardView: View {
                         )) {
                             ForEach(AutoBackupFrequency.allCases) { freq in
                                 if freq != .off {
-                                    Text(freq.rawValue).tag(freq)
+                                    Text(BuxCatalogLabel.string(freq.rawValue, locale: appSettingsManager.interfaceLocale)).tag(freq)
                                 }
                             }
+                        } label: {
+                            Text(BuxCatalogLabel.string("Frequency", locale: appSettingsManager.interfaceLocale))
                         }
                         .pickerStyle(.segmented)
+
+                        if store.autoBackupFrequency == .custom {
+                            HStack {
+                                Text(BuxCatalogLabel.string("Remind me every", locale: appSettingsManager.interfaceLocale))
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                Spacer()
+                                Stepper(value: Binding(
+                                    get: { store.customBackupIntervalDays },
+                                    set: { newValue in
+                                        store.customBackupIntervalDays = max(1, min(30, newValue))
+                                        store.save()
+                                        Task {
+                                            await BackupNotificationScheduler.reschedule(frequency: .custom)
+                                        }
+                                    }
+                                ), in: 1...30) {
+                                    Text("\(store.customBackupIntervalDays) ") + Text(BuxCatalogLabel.string(store.customBackupIntervalDays == 1 ? "day" : "days", locale: appSettingsManager.interfaceLocale))
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(themeManager.current.accentColor)
+                                }
+                            }
+                            .padding(.top, 4)
+                        }
                     }
                     .padding(12)
                     .background(Color.black.opacity(colorScheme == .dark ? 0.15 : 0.02))
@@ -521,7 +553,7 @@ struct OnboardingWizardView: View {
                         BuxCatalogText.text("Encrypted Backups")
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Text("When you back up, your settings and ledger files are securely encrypted. Only BuxMuse can read them back.")
+                        Text(BuxCatalogLabel.string("When you back up, your settings and ledger files are securely encrypted. Only BuxMuse can read them back.", locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 12))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                             .lineSpacing(2)
@@ -596,6 +628,7 @@ struct OnboardingWizardView: View {
             }
             .padding(.bottom, 24)
         }
+        .buxScrollEdgeMask(edges: .top, size: 28)
     }
 
     // MARK: - Helper Views & Builders
@@ -634,7 +667,7 @@ struct OnboardingWizardView: View {
                 .padding(.top, 20)
 
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(description)
+                    Text(BuxCatalogLabel.string(description, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 14))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .lineSpacing(4)
@@ -649,6 +682,7 @@ struct OnboardingWizardView: View {
             }
             .padding(.bottom, 24)
         }
+        .buxScrollEdgeMask(edges: .top, size: 28)
     }
 
     private func bulletRow(icon: String, text: String) -> some View {
@@ -659,7 +693,7 @@ struct OnboardingWizardView: View {
                 .frame(width: 18, height: 18)
                 .padding(.top, 1)
 
-            Text(text)
+            Text(BuxCatalogLabel.string(text, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .fixedSize(horizontal: false, vertical: true)
@@ -697,16 +731,16 @@ struct OnboardingWizardView: View {
     // Kept for any future use; replaced in studioCard with studioFeatureRow
     private func comparisonRow(feature: String, simple: String, pro: String, proHighlight: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(feature)
+            Text(BuxCatalogLabel.string(feature, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             HStack(alignment: .top, spacing: 8) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Simple Studio")
+                    Text(BuxCatalogLabel.string("Simple Studio", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                    Text(simple)
+                    Text(BuxCatalogLabel.string(simple, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 12))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
@@ -715,14 +749,14 @@ struct OnboardingWizardView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
-                        Text("Pro Studio")
+                        Text(BuxCatalogLabel.string("Pro Studio", locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(proHighlight ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
                         Image(systemName: "crown.fill")
                             .font(.system(size: 8))
                             .foregroundColor(themeManager.current.accentColor)
                     }
-                    Text(pro)
+                    Text(BuxCatalogLabel.string(pro, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
@@ -742,20 +776,20 @@ struct OnboardingWizardView: View {
                     .frame(width: 20)
 
                 // Feature name
-                Text(feature)
+                Text(BuxCatalogLabel.string(feature, locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 // Simple value
-                Text(simple)
+                Text(BuxCatalogLabel.string(simple, locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 90, alignment: .center)
 
                 // Pro value
-                Text(pro)
+                Text(BuxCatalogLabel.string(pro, locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(Color.indigo)
                     .multilineTextAlignment(.center)
@@ -792,7 +826,7 @@ struct OnboardingWizardView: View {
                 BuxCatalogText.text(headline)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                Text(bodyText)
+                Text(BuxCatalogLabel.string(bodyText, locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 12))
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     .lineSpacing(3)

@@ -212,7 +212,7 @@ struct StudioTaxReferenceView: View {
 
     private var registrationSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BuxCatalogDynamicText(key: "INDIRECT TAX STATUS")
+            BuxCatalogDynamicText(key: "Indirect tax status")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
@@ -234,7 +234,7 @@ struct StudioTaxReferenceView: View {
 
     private var paymentScheduleSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BuxCatalogDynamicText(key: "TAX PAYMENT SCHEDULE")
+            BuxCatalogDynamicText(key: "Tax payment schedule")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
@@ -253,7 +253,7 @@ struct StudioTaxReferenceView: View {
 
     private var presetDropdownSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BuxCatalogDynamicText(key: "SUGGESTED TAX PRESET")
+            BuxCatalogDynamicText(key: "Suggested tax preset")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
@@ -310,7 +310,7 @@ struct StudioTaxReferenceView: View {
 
     private var incomeTypeSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BuxCatalogDynamicText(key: "HOW YOU EARN")
+            BuxCatalogDynamicText(key: "How you earn")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
@@ -346,27 +346,27 @@ struct StudioTaxReferenceView: View {
 
     private var editableFieldsSection: some View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
-            BuxCatalogDynamicText(key: "YOUR TAX RULES")
+            BuxCatalogDynamicText(key: "Your tax rules")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
 
-            editorField(title: "Income Tax", text: $customIncomeTax, minHeight: 100)
-            editorField(title: "Self-Employed Tax", text: $customSelfEmployedTax, minHeight: 100)
-            editorField(title: "Indirect Tax", text: $customIndirectTax, minHeight: 80)
+            editorField(title: "Income tax", text: $customIncomeTax, minHeight: 100)
+            editorField(title: "Self-employed tax", text: $customSelfEmployedTax, minHeight: 100)
+            editorField(title: "Indirect tax", text: $customIndirectTax, minHeight: 80)
             editorField(title: "Notes", text: $customNotes, minHeight: 100)
         }
     }
 
     private var effectiveRatesSection: some View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
-            BuxCatalogDynamicText(key: "EFFECTIVE TAX RATES (FOR CALCULATOR)")
+            BuxCatalogDynamicText(key: "Effective tax rates (for calculator)")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
 
             VStack(alignment: .leading, spacing: 8) {
-                BuxCatalogDynamicText(key: "INCOME TAX RATE %")
+                BuxCatalogDynamicText(key: "Income tax rate %")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
                 TextField("e.g. 22", text: $estimatedIncomeRate)
@@ -379,7 +379,7 @@ struct StudioTaxReferenceView: View {
             .referenceCard
 
             VStack(alignment: .leading, spacing: 8) {
-                BuxCatalogDynamicText(key: "SELF-EMPLOYED TAX RATE %")
+                BuxCatalogDynamicText(key: "Self-employed tax rate %")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
                 TextField("e.g. 15.3", text: $estimatedSERate)
@@ -395,7 +395,7 @@ struct StudioTaxReferenceView: View {
             .referenceCard
 
             VStack(alignment: .leading, spacing: 8) {
-                BuxCatalogDynamicText(key: "INDIRECT TAX RATE % (VAT/GST)")
+                BuxCatalogDynamicText(key: "Indirect tax rate % (VAT/GST)")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
                 TextField("e.g. 20", text: $estimatedIndirectRate)
@@ -467,7 +467,7 @@ struct StudioTaxReferenceView: View {
 
     private func editorField(title: String, text: Binding<String>, minHeight: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased())
+            Text(title)
                 .font(.system(size: 10, weight: .bold))
                 .buxLabelSecondary()
             TextEditor(text: text)
@@ -570,7 +570,7 @@ struct TaxPresetReviewSheet: View {
 
     private func presetBlock(_ title: String, _ text: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title.uppercased())
+            Text(title)
                 .font(.system(size: 10, weight: .bold))
                 .buxLabelSecondary()
             Text(text)

@@ -97,9 +97,9 @@ public enum SimpleBudgetCycle: String, Codable, CaseIterable, Identifiable {
 
 public enum AutoBackupFrequency: String, Codable, CaseIterable, Identifiable {
     case off = "Off"
-    case daily = "Daily"
     case weekly = "Weekly"
     case monthly = "Monthly"
+    case custom = "Custom"
     
     public var id: String { rawValue }
 
@@ -107,9 +107,9 @@ public enum AutoBackupFrequency: String, Codable, CaseIterable, Identifiable {
     public var backupInterval: TimeInterval {
         switch self {
         case .off: return 0
-        case .daily: return 86_400
         case .weekly: return 604_800
         case .monthly: return 2_592_000
+        case .custom: return 259_200 // default 3 days
         }
     }
 }
@@ -180,3 +180,15 @@ public struct CustomBudgetProfile: Codable, Identifiable, Equatable, Hashable {
         self.rolloverEnabled = rolloverEnabled
     }
 }
+
+public enum GreetingFontStyle: String, Codable, CaseIterable, Identifiable {
+    case playful = "Playful"
+    case professional = "Professional"
+    
+    public var id: String { rawValue }
+
+    public func localizedDisplayName(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
+        BuxCatalogLabel.string(rawValue, locale: locale)
+    }
+}
+

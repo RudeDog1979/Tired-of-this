@@ -44,7 +44,7 @@ struct StudioSettingsView: View {
             BuxFormSection(title: "Studio") {
                 Toggle(isOn: studioToggleBinding) {
                     VStack(alignment: .leading, spacing: 2) {
-                        BuxCatalogDynamicText(key: "Show Studio Tab")
+                        BuxCatalogDynamicText(key: "Show Studio tab")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         BuxCatalogDynamicText(key: "Simple work ledger or full Pro tools")
@@ -58,9 +58,11 @@ struct StudioSettingsView: View {
 
             if store.studioEnabled {
                 BuxFormSection(title: "Studio mode") {
-                    Picker("Mode", selection: $store.studioMode) {
+                    Picker(selection: $store.studioMode) {
                         BuxCatalogDynamicText(key: "Simple Studio").tag(StudioMode.simple)
                         BuxCatalogDynamicText(key: "Pro Studio").tag(StudioMode.pro)
+                    } label: {
+                        Text(BuxCatalogLabel.string("Mode", locale: appSettingsManager.interfaceLocale))
                     }
                     .buxThemedSegmentedPicker()
                     .buxFormFieldPadding()
@@ -89,7 +91,7 @@ struct StudioSettingsView: View {
                                 .background(themeManager.labelSecondary(for: colorScheme).opacity(0.12))
                                 .clipShape(Capsule())
                         }
-                        Text(store.studioMode.subtitle)
+                        Text(BuxCatalogLabel.string(store.studioMode.subtitle, locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 11, weight: .medium))
                             .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)
@@ -98,10 +100,12 @@ struct StudioSettingsView: View {
                 }
 
                 BuxFormSection(title: "Work type") {
-                    Picker("Persona", selection: $store.studioPersona) {
+                    Picker(selection: $store.studioPersona) {
                         ForEach(StudioPersona.allCases) { persona in
-                            Text(persona.title).tag(persona)
+                            Text(BuxCatalogLabel.string(persona.title, locale: appSettingsManager.interfaceLocale)).tag(persona)
                         }
+                    } label: {
+                        Text(BuxCatalogLabel.string("Persona", locale: appSettingsManager.interfaceLocale))
                     }
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
@@ -141,11 +145,11 @@ struct StudioSettingsView: View {
 
                 BuxFormSection(title: "Business profile") {
                     PhotoPickCropRow(
-                        title: "Company Logo",
-                        subtitle: "Shown on exported invoice PDFs",
+                        title: BuxCatalogLabel.string("Company Logo", locale: appSettingsManager.interfaceLocale),
+                        subtitle: BuxCatalogLabel.string("Shown on exported invoice PDFs", locale: appSettingsManager.interfaceLocale),
                         imageData: logoData,
                         cropShape: .roundedRectangle(cornerRadius: 12),
-                        cropTitle: "Crop Logo",
+                        cropTitle: BuxCatalogLabel.string("Crop Logo", locale: appSettingsManager.interfaceLocale),
                         previewSize: 64,
                         previewCornerRadius: 12
                     ) { data in
@@ -154,16 +158,18 @@ struct StudioSettingsView: View {
                     }
                     .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Full Name", text: $displayName)
+                    TextField(BuxCatalogLabel.string("Full Name", locale: appSettingsManager.interfaceLocale), text: $displayName)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Business Name", text: $businessName)
+                    TextField(BuxCatalogLabel.string("Business Name", locale: appSettingsManager.interfaceLocale), text: $businessName)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Picker("Business Type", selection: $businessType) {
+                    Picker(selection: $businessType) {
                         ForEach(BusinessType.allCases) { type in
                             Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
                         }
+                    } label: {
+                        Text(BuxCatalogLabel.string("Business Type", locale: appSettingsManager.interfaceLocale))
                     }
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
@@ -174,7 +180,7 @@ struct StudioSettingsView: View {
                         RegionCurrencySettingsView()
                     } label: {
                         HStack {
-                            BuxCatalogDynamicText(key: "Region & Currency")
+                            BuxCatalogDynamicText(key: "Region & currency")
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Spacer()
                             Text(
@@ -202,7 +208,7 @@ struct StudioSettingsView: View {
                             .environmentObject(studioStore)
                     } label: {
                         HStack {
-                            BuxCatalogDynamicText(key: "Tax Profile")
+                            BuxCatalogDynamicText(key: "Tax profile")
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Spacer()
                             if studioStore.taxProfile.isTaxProfileConfigured {
@@ -221,14 +227,23 @@ struct StudioSettingsView: View {
                 }
 
                 BuxFormSection(title: "Invoicing defaults") {
-                    Stepper("Payment Terms: \(paymentTerms) Days", value: $paymentTerms, in: 0...120, step: 1)
+                    Stepper(
+                        BuxLocalizedString.format(
+                            "Payment Terms: %lld Days",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int64(paymentTerms)
+                        ),
+                        value: $paymentTerms,
+                        in: 0...120,
+                        step: 1
+                    )
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     HStack {
-                        BuxCatalogDynamicText(key: "Default Hourly Rate")
+                        BuxCatalogDynamicText(key: "Default hourly rate")
                         Spacer()
-                        TextField("Rate", text: $hourlyRate)
+                        TextField(BuxCatalogLabel.string("Rate", locale: appSettingsManager.interfaceLocale), text: $hourlyRate)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
@@ -266,12 +281,18 @@ struct StudioSettingsView: View {
                     .environmentObject(simpleStudioStore)
             }
             BuxFormRowDivider()
-            studioToolLink(title: "Cash & Barter", subtitle: cashBarterSubtitle, icon: "banknote.fill") {
+            studioToolLink(title: "Cash & barter", subtitle: cashBarterSubtitle, icon: "banknote.fill") {
                 StudioCashBarterSettingsView()
                     .environmentObject(themeManager)
             }
             BuxFormRowDivider()
-            studioToolLink(title: "Workload & Energy", subtitle: store.burnoutGuardEnabled ? "On" : "Off", icon: "bolt.heart.fill") {
+            studioToolLink(
+                title: "Workload & energy",
+                subtitle: store.burnoutGuardEnabled
+                    ? BuxCatalogLabel.string("On", locale: appSettingsManager.interfaceLocale)
+                    : BuxCatalogLabel.string("Off", locale: appSettingsManager.interfaceLocale),
+                icon: "bolt.heart.fill"
+            ) {
                 BurnoutGuardSettingsView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
@@ -279,21 +300,39 @@ struct StudioSettingsView: View {
                     .environmentObject(simpleStudioStore)
             }
             BuxFormRowDivider()
-            studioToolLink(title: "Invoice Payment", subtitle: invoicePaymentSubtitle, icon: "building.columns.fill") {
+            studioToolLink(title: "Invoice payment", subtitle: invoicePaymentSubtitle, icon: "building.columns.fill") {
                 InvoicePaymentSettingsView()
             }
             BuxFormRowDivider()
-            studioToolLink(title: "Mileage Log", subtitle: store.autoLocationForMileage ? "On" : "Off", icon: "car.fill") {
+            studioToolLink(
+                title: "Mileage log",
+                subtitle: store.autoLocationForMileage
+                    ? BuxCatalogLabel.string("On", locale: appSettingsManager.interfaceLocale)
+                    : BuxCatalogLabel.string("Off", locale: appSettingsManager.interfaceLocale),
+                icon: "car.fill"
+            ) {
                 MileageSettingsView()
             }
             if store.studioMode == .pro {
                 BuxFormRowDivider()
-                studioToolLink(title: "Scope Radar", subtitle: store.antiScopeCreepEnabled ? "On" : "Off", icon: "scope") {
+                studioToolLink(
+                    title: "Scope radar",
+                    subtitle: store.antiScopeCreepEnabled
+                        ? BuxCatalogLabel.string("On", locale: appSettingsManager.interfaceLocale)
+                        : BuxCatalogLabel.string("Off", locale: appSettingsManager.interfaceLocale),
+                    icon: "scope"
+                ) {
                     ScopeCreepRadarSettingsView()
                         .environmentObject(themeManager)
                 }
                 BuxFormRowDivider()
-                studioToolLink(title: "Agreement Scratchpad", subtitle: store.agreementScratchpadEnabled ? "On" : "Off", icon: "doc.text.fill") {
+                studioToolLink(
+                    title: "Agreement scratchpad",
+                    subtitle: store.agreementScratchpadEnabled
+                        ? BuxCatalogLabel.string("On", locale: appSettingsManager.interfaceLocale)
+                        : BuxCatalogLabel.string("Off", locale: appSettingsManager.interfaceLocale),
+                    icon: "doc.text.fill"
+                ) {
                     AgreementScratchpadSettingsView()
                         .environmentObject(themeManager)
                 }
@@ -302,20 +341,24 @@ struct StudioSettingsView: View {
     }
 
     private var workspaceSubtitle: String {
-        guard store.sideHustleMatrixEnabled else { return "Off" }
-        return store.studioMode == .pro ? "On · Unlimited" : "On · Up to 3"
+        guard store.sideHustleMatrixEnabled else { return BuxCatalogLabel.string("Off", locale: appSettingsManager.interfaceLocale) }
+        return store.studioMode == .pro
+            ? BuxCatalogLabel.string("On · Unlimited", locale: appSettingsManager.interfaceLocale)
+            : BuxCatalogLabel.string("On · Up to 3", locale: appSettingsManager.interfaceLocale)
     }
 
     private var cashBarterSubtitle: String {
         let parts = [
-            store.dualCashDrawerEnabled ? "Cash on" : nil,
-            store.barterLoggerEnabled ? "Barter on" : nil
+            store.dualCashDrawerEnabled ? BuxCatalogLabel.string("Cash on", locale: appSettingsManager.interfaceLocale) : nil,
+            store.barterLoggerEnabled ? BuxCatalogLabel.string("Barter on", locale: appSettingsManager.interfaceLocale) : nil
         ].compactMap { $0 }
-        return parts.isEmpty ? "Off" : parts.joined(separator: " · ")
+        return parts.isEmpty ? BuxCatalogLabel.string("Off", locale: appSettingsManager.interfaceLocale) : parts.joined(separator: " · ")
     }
 
     private var invoicePaymentSubtitle: String {
-        store.autoDetectInvoiceBankAccountType ? "Auto" : (store.invoiceBankAccountTypeOverride?.displayName ?? "Manual")
+        store.autoDetectInvoiceBankAccountType
+            ? BuxCatalogLabel.string("Auto", locale: appSettingsManager.interfaceLocale)
+            : (store.invoiceBankAccountTypeOverride?.displayName ?? BuxCatalogLabel.string("Manual", locale: appSettingsManager.interfaceLocale))
     }
 
     private func studioToolLink<Destination: View>(
@@ -333,7 +376,7 @@ struct StudioSettingsView: View {
                     .foregroundColor(themeManager.current.accentColor)
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
+                    Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     Text(subtitle)

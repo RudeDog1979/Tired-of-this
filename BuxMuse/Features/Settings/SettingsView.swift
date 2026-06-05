@@ -64,7 +64,7 @@ struct SettingsView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 12) {
-                            BuxSectionHeader(title: "Guides & Help")
+                            BuxSectionHeader(title: "Guides & help")
                                 .padding(.leading, 4)
 
                             VStack(spacing: 0) {
@@ -73,7 +73,7 @@ struct SettingsView: View {
                                 } label: {
                                     SettingsRow(
                                         icon: "sparkles",
-                                        label: "Replay Onboarding Guide",
+                                        label: "Replay onboarding guide",
                                         color: themeManager.current.accentColor,
                                         trailingText: nil,
                                         showsProBadge: false
@@ -95,6 +95,7 @@ struct SettingsView: View {
             .buxCatalogNavigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .buxRootNavigationChrome()
+            .environment(\.isSettingsContext, true)
             .onChange(of: navigationCoordinator.openStudioSettingsRequest) { _, requested in
                 guard requested else { return }
                 settingsPath.append(SettingsDestinationType.studio)
@@ -218,6 +219,7 @@ private struct SettingsDrillInBackdrop<Content: View>: View {
             content()
         }
         .buxPushedNavigationChrome()
+        .environment(\.isSettingsContext, true)
     }
 }
 
@@ -456,7 +458,7 @@ struct CurrencyRegionPickerView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    BuxCatalogDynamicText(key: "Currency & Region")
+                    BuxCatalogDynamicText(key: "Currency & region")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     BuxCatalogDynamicText(key: "Choose your preferred regional formatting")

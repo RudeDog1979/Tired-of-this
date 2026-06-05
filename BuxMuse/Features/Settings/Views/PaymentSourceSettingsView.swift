@@ -17,7 +17,7 @@ struct PaymentSourceSettingsView: View {
             BuxFormSection(title: "Payment source tracking") {
                 Toggle(isOn: $store.paymentSourceTrackingEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        BuxCatalogDynamicText(key: "Enable on Add Expense")
+                        BuxCatalogDynamicText(key: "Enable on add expense")
                             .font(.system(size: 15, weight: .semibold))
                         BuxCatalogDynamicText(key: "Optional searchable tags (Visa, PayPal, Klarna, etc.) power credit and BNPL insights. Off by default — simple logging stays clean.")
                             .font(.system(size: 12, weight: .medium))
@@ -54,7 +54,7 @@ struct PaymentSourceSettingsView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Payment Sources")
+        .buxCatalogNavigationTitle("Payment sources")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

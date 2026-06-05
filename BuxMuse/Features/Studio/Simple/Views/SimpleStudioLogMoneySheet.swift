@@ -131,7 +131,8 @@ struct SimpleStudioLogMoneySheet: View {
                     .background(.ultraThinMaterial)
                 }
             }
-            .buxStudioSheetContent()
+            .buxRootNavigationChrome()
+            .buxMeshSheetPresentation()
             .onAppear {
                 if let initialKind { kind = initialKind }
             }

@@ -11,6 +11,7 @@ import LocalAuthentication
 struct SecuritySettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
     
     @State private var showPasscodeSetup = false
@@ -53,15 +54,19 @@ struct SecuritySettingsView: View {
 
                 if store.biometricLockEnabled {
                     BuxFormRowDivider()
-                    Toggle("Require Lock on App Launch", isOn: $store.requireBiometricOnLaunch)
+                    Toggle(isOn: $store.requireBiometricOnLaunch) {
+                        Text(BuxCatalogLabel.string("Require lock on app launch", locale: appSettingsManager.interfaceLocale))
+                    }
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Picker("Lock After Inactivity", selection: $store.lockAfterInactivityMinutes) {
+                    Picker(selection: $store.lockAfterInactivityMinutes) {
                         BuxCatalogDynamicText(key: "Immediately").tag(0)
-                        BuxCatalogDynamicText(key: "1 Minute").tag(1)
-                        BuxCatalogDynamicText(key: "5 Minutes").tag(5)
-                        BuxCatalogDynamicText(key: "15 Minutes").tag(15)
+                        BuxCatalogDynamicText(key: "1 minute").tag(1)
+                        BuxCatalogDynamicText(key: "5 minutes").tag(5)
+                        BuxCatalogDynamicText(key: "15 minutes").tag(15)
+                    } label: {
+                        Text(BuxCatalogLabel.string("Lock after inactivity", locale: appSettingsManager.interfaceLocale))
                     }
                     .pickerStyle(.menu)
                     .tint(themeManager.current.accentColor)
@@ -72,7 +77,7 @@ struct SecuritySettingsView: View {
             BuxFormSection(title: "PIN passcode") {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        BuxCatalogDynamicText(key: "Secure App Passcode")
+                        BuxCatalogDynamicText(key: "Secure app passcode")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         BuxCatalogDynamicText(key: "Numeric secondary passcode backup")
@@ -82,8 +87,10 @@ struct SecuritySettingsView: View {
                     Spacer()
 
                     if store.hasAppPasscode {
-                        Button("Disable PIN", role: .destructive) {
+                        Button(role: .destructive) {
                             showPasscodeClearConfirmation = true
+                        } label: {
+                            Text(BuxCatalogLabel.string("Disable PIN", locale: appSettingsManager.interfaceLocale))
                         }
                         .font(.system(size: 14, weight: .bold))
                         .buttonStyle(.plain)
@@ -102,7 +109,7 @@ struct SecuritySettingsView: View {
             BuxFormSection(title: "Privacy shield") {
                 Toggle(isOn: $store.privacyBlurInAppSwitching) {
                     VStack(alignment: .leading, spacing: 2) {
-                        BuxCatalogDynamicText(key: "Blur in App Switcher")
+                        BuxCatalogDynamicText(key: "Blur in app switcher")
                             .font(.system(size: 15, weight: .semibold))
                         BuxCatalogDynamicText(key: "Hides your financial sheets when toggling tasks")
                             .font(.system(size: 11))
@@ -113,7 +120,7 @@ struct SecuritySettingsView: View {
                 .buxFormFieldPadding()
             }
         }
-        .buxCatalogNavigationTitle("Security & Privacy")
+        .buxCatalogNavigationTitle("Security & privacy")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPasscodeSetup) {
             PasscodeSetupSheet { pin in
@@ -123,19 +130,19 @@ struct SecuritySettingsView: View {
             .environment(\.settingsEnhancedTint, true)
             .buxThemedSheetContent()
         }
-        .confirmationDialog("Disable PIN Code?", isPresented: $showPasscodeClearConfirmation, titleVisibility: .visible) {
-            Button("Remove Passcode", role: .destructive) {
+        .confirmationDialog(BuxCatalogLabel.string("Disable PIN Code?", locale: appSettingsManager.interfaceLocale), isPresented: $showPasscodeClearConfirmation, titleVisibility: .visible) {
+            Button(BuxCatalogLabel.string("Remove Passcode", locale: appSettingsManager.interfaceLocale), role: .destructive) {
                 store.clearPasscode()
                 store.save()
             }
-            Button("Cancel", role: .cancel) {}
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
             BuxCatalogDynamicText(key: "This will delete your local generic password from Apple Keychain.")
         }
         .onChange(of: store.requireBiometricOnLaunch) { _, _ in store.save() }
         .onChange(of: store.lockAfterInactivityMinutes) { _, _ in store.save() }
         .onChange(of: store.privacyBlurInAppSwitching) { _, _ in store.save() }
-        .alert("Security Lock Error", isPresented: Binding(
+        .alert(BuxCatalogLabel.string("Security Lock Error", locale: appSettingsManager.interfaceLocale), isPresented: Binding(
             get: { biometricErrorMsg != nil },
             set: { isShown in
                 if !isShown {
@@ -143,7 +150,7 @@ struct SecuritySettingsView: View {
                 }
             }
         )) {
-            Button("OK", role: .cancel) {}
+            Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
             if let error = biometricErrorMsg {
                 Text(error)
@@ -158,7 +165,7 @@ struct SecuritySettingsView: View {
         var error: NSError?
         
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            let reason = "Authenticate to unlock BuxMuse security"
+            let reason = BuxCatalogLabel.string("Authenticate to unlock BuxMuse security", locale: appSettingsManager.interfaceLocale)
             context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
                 DispatchQueue.main.async {
                     if let authError = authenticationError {
@@ -169,7 +176,7 @@ struct SecuritySettingsView: View {
             }
         } else {
             DispatchQueue.main.async {
-                self.biometricErrorMsg = error?.localizedDescription ?? "Face ID or Touch ID is not supported or not enrolled on this device. Please verify your iOS Settings."
+                self.biometricErrorMsg = error?.localizedDescription ?? BuxCatalogLabel.string("Face ID or Touch ID is not supported or not enrolled on this device. Please verify your iOS Settings.", locale: appSettingsManager.interfaceLocale)
                 completion(false)
             }
         }
@@ -182,6 +189,7 @@ struct PasscodeSetupSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     
     let onSave: (String) -> Void
     
@@ -196,7 +204,7 @@ struct PasscodeSetupSheet: View {
                 Spacer()
                 
                 VStack(spacing: 12) {
-                    Text(passcodeStep == 1 ? "Enter a 4-Digit Passcode" : "Confirm your Passcode")
+                    Text(BuxCatalogLabel.string(passcodeStep == 1 ? "Enter a 4-Digit Passcode" : "Confirm your Passcode", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
@@ -309,7 +317,7 @@ struct PasscodeSetupSheet: View {
                             self.confirmedPIN = ""
                             self.enteredPIN = ""
                             self.passcodeStep = 1
-                            self.errorMsg = "PINs do not match. Try again."
+                            self.errorMsg = BuxCatalogLabel.string("PINs do not match. Try again.", locale: appSettingsManager.interfaceLocale)
                         }
                     }
                 }

@@ -7,7 +7,21 @@
 
 import SwiftUI
 
+// MARK: - Settings Context Environment Key
+
+private struct IsSettingsContextKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var isSettingsContext: Bool {
+        get { self[IsSettingsContextKey.self] }
+        set { self[IsSettingsContextKey.self] = newValue }
+    }
+}
+
 // MARK: - Form scaffold backdrop
+
 
 struct BuxFormScaffold<Content: View>: View {
     @ViewBuilder var content: () -> Content
@@ -124,11 +138,12 @@ private struct BuxFormListMarginsModifier: ViewModifier {
 
 struct BuxFormSectionLabel: View {
     let title: String
+    @Environment(\.isSettingsContext) private var isSettingsContext
 
     var body: some View {
         BuxCatalogText.text(title)
             .font(.system(size: 11, weight: .bold))
-            .textCase(.uppercase)
+            .textCase(isSettingsContext ? nil : .uppercase)
             .buxLabelSecondary()
             .frame(maxWidth: .infinity, alignment: .leading)
     }

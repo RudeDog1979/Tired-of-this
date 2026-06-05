@@ -59,8 +59,10 @@ struct SimpleStudioHubView: View {
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
                         SimpleStudioHeader()
-                            .padding(.horizontal, BuxTokens.marginRegular)
                             .buxScreenEntrance(index: 0, isVisible: hubAppeared)
+
+                        simpleQuickActions
+                            .buxScreenEntrance(index: 1, isVisible: hubAppeared)
 
                         NavigationLink {
                             SimpleStudioMyMoneyView(
@@ -74,14 +76,13 @@ struct SimpleStudioHubView: View {
                             SimpleStudioThisMonthCard(display: display)
                         }
                         .buttonStyle(.plain)
-                        .buxScreenEntrance(index: 1, isVisible: hubAppeared)
+                        .buxScreenEntrance(index: 2, isVisible: hubAppeared)
 
                         SimpleStudioHeroCard(display: display)
-                            .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+                            .buxScreenEntrance(index: 3, isVisible: hubAppeared)
 
                         SimpleStudioInsightsHubSection(snapshot: simpleInsights)
-                            .padding(.horizontal, BuxTokens.marginRegular)
-                            .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+                            .buxScreenEntrance(index: 3, isVisible: hubAppeared)
 
                         SimpleStudioInvoiceSuggestionsSection(
                             suggestions: StudioInvoiceSuggestionEngine.simpleSuggestions(
@@ -91,11 +92,10 @@ struct SimpleStudioHubView: View {
                         ) { suggestion in
                             invoicePrefill = suggestion
                         }
-                        .padding(.horizontal, BuxTokens.marginRegular)
-                        .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+                        .buxScreenEntrance(index: 3, isVisible: hubAppeared)
 
                         simpleLogTimeQuickAction
-                            .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+                            .buxScreenEntrance(index: 3, isVisible: hubAppeared)
 
                         if display.isEmpty {
                             SimpleStudioEmptyState()
@@ -147,7 +147,6 @@ struct SimpleStudioHubView: View {
                         Spacer().frame(height: 100)
                     }
                     .padding(.top, BuxTokens.tight)
-                    .padding(.horizontal, BuxTokens.marginRegular)
                 }
                 .buxRootTabScrollChrome()
 
@@ -298,62 +297,62 @@ struct SimpleStudioHubView: View {
 
     @ViewBuilder
     private var fabLayer: some View {
-        if isFabExpanded {
-            Color.black.opacity(0.35)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
-                        isFabExpanded = false
-                    }
-                }
-                .zIndex(4)
+        // Backdrop — always in the hierarchy, opacity-driven for smooth fade
+        Color.black.opacity(isFabExpanded ? 0.35 : 0)
+            .ignoresSafeArea()
+            .allowsHitTesting(isFabExpanded)
+            .onTapGesture { closeFabAnimated() }
+            .animation(.easeInOut(duration: 0.22), value: isFabExpanded)
+            .zIndex(4)
 
-            VStack(spacing: 10) {
-                fabItem(titleKey: "Work clock", icon: "stopwatch.fill", delay: 0.01) {
-                    closeFab { showLogTime = true }
-                }
-                fabItem(titleKey: "Scan", icon: "camera.viewfinder", delay: 0.02) {
-                    closeFab { showScan = true }
-                }
-                fabItem(titleKey: "Quote job", icon: "doc.text.magnifyingglass", delay: 0.04) {
-                    closeFab {
-                        editingJob = nil
-                        showQuoteJob = true
-                    }
-                }
-                fabItem(titleKey: "Log money", icon: "banknote.fill", delay: 0.07) {
-                    closeFab {
-                        logMoneyKind = nil
-                        showLogMoney = true
-                    }
-                }
-                fabItem(titleKey: "Invoice", icon: "doc.text.fill", delay: 0.08) {
-                    closeFab { showInvoice = true }
-                }
-                fabItem(titleKey: "Business card", icon: "person.crop.rectangle.fill", delay: 0.09) {
-                    closeFab { showBusinessCard = true }
-                }
-                fabItem(titleKey: "They owe me", icon: "person.fill.questionmark", delay: 0.11) {
-                    closeFab {
-                        logMoneyKind = .owedToMe
-                        showLogMoney = true
-                    }
-                }
-                fabItem(titleKey: "I owe", icon: "person.fill.xmark", delay: 0.14) {
-                    closeFab {
-                        logMoneyKind = .iOwe
-                        showLogMoney = true
-                    }
+        // Menu items — always in hierarchy, animated with scale + opacity + slide
+        VStack(spacing: 10) {
+            fabItem(titleKey: "Work clock", icon: "stopwatch.fill", index: 0) {
+                closeFab { showLogTime = true }
+            }
+            fabItem(titleKey: "Scan", icon: "camera.viewfinder", index: 1) {
+                closeFab { showScan = true }
+            }
+            fabItem(titleKey: "Quote job", icon: "doc.text.magnifyingglass", index: 2) {
+                closeFab {
+                    editingJob = nil
+                    showQuoteJob = true
                 }
             }
-            .padding(.horizontal, BuxTokens.marginRegular)
-            .padding(.bottom, 88)
-            .zIndex(5)
+            fabItem(titleKey: "Log money", icon: "banknote.fill", index: 3) {
+                closeFab {
+                    logMoneyKind = nil
+                    showLogMoney = true
+                }
+            }
+            fabItem(titleKey: "Invoice", icon: "doc.text.fill", index: 4) {
+                closeFab { showInvoice = true }
+            }
+            fabItem(titleKey: "Business card", icon: "person.crop.rectangle.fill", index: 5) {
+                closeFab { showBusinessCard = true }
+            }
+            fabItem(titleKey: "They owe me", icon: "person.fill.questionmark", index: 6) {
+                closeFab {
+                    logMoneyKind = .owedToMe
+                    showLogMoney = true
+                }
+            }
+            fabItem(titleKey: "I owe", icon: "person.fill.xmark", index: 7) {
+                closeFab {
+                    logMoneyKind = .iOwe
+                    showLogMoney = true
+                }
+            }
         }
+        .padding(.horizontal, BuxTokens.marginRegular)
+        .padding(.bottom, 88)
+        .allowsHitTesting(isFabExpanded)
+        .zIndex(5)
 
+        // FAB button
         Button {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            withAnimation(.spring(response: 0.38, dampingFraction: 0.72)) {
                 isFabExpanded.toggle()
             }
         } label: {
@@ -365,6 +364,7 @@ struct SimpleStudioHubView: View {
                 .clipShape(Circle())
                 .shadow(color: themeManager.current.accentColor.opacity(0.35), radius: 8, y: 4)
                 .rotationEffect(.degrees(isFabExpanded ? 45 : 0))
+                .animation(.spring(response: 0.38, dampingFraction: 0.72), value: isFabExpanded)
         }
         .padding(.trailing, BuxTokens.marginRegular)
         .padding(.bottom, BuxTokens.section)
@@ -374,8 +374,18 @@ struct SimpleStudioHubView: View {
         )
     }
 
-    private func fabItem(titleKey: String, icon: String, delay: Double, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+    private func fabItem(titleKey: String, icon: String, index: Int, action: @escaping () -> Void) -> some View {
+        let totalItems = 8
+        // Open: items slide in bottom-to-top (highest index = lowest item = first to appear)
+        // Close: all collapse together quickly
+        let openDelay  = Double(totalItems - 1 - index) * 0.030   // 0…0.21s stagger on open
+        let closeDelay = Double(index) * 0.012                     // 0…0.084s stagger on close (much faster)
+        let delay = isFabExpanded ? openDelay : closeDelay
+        let spring: Animation = isFabExpanded
+            ? .spring(response: 0.44, dampingFraction: 0.78).delay(delay)
+            : .spring(response: 0.28, dampingFraction: 0.90).delay(delay)
+
+        return Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
@@ -394,6 +404,10 @@ struct SimpleStudioHubView: View {
             .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
         }
         .buttonStyle(.plain)
+        .opacity(isFabExpanded ? 1 : 0)
+        .scaleEffect(isFabExpanded ? 1 : 0.82, anchor: .bottomTrailing)
+        .offset(y: isFabExpanded ? 0 : 18)
+        .animation(spring, value: isFabExpanded)
     }
 
     private var simpleLogTimeQuickAction: some View {
@@ -427,16 +441,62 @@ struct SimpleStudioHubView: View {
         }
     }
 
+    private var simpleQuickActions: some View {
+        HStack(spacing: BuxTokens.tight) {
+            BuxQuickActionButton(
+                title: "Invoice",
+                systemImage: "doc.text.fill",
+                role: .primary
+            ) { showInvoice = true }
+
+            BuxQuickActionButton(
+                title: "Scan",
+                systemImage: "camera.viewfinder",
+                role: .primary
+            ) { showScan = true }
+
+            BuxQuickActionButton(
+                title: "Quote job",
+                systemImage: "doc.text.magnifyingglass",
+                role: .primary
+            ) {
+                editingJob = nil
+                showQuoteJob = true
+            }
+
+            BuxQuickActionButton(
+                title: "Log money",
+                systemImage: "banknote.fill",
+                role: .primary
+            ) {
+                logMoneyKind = nil
+                showLogMoney = true
+            }
+        }
+        .buxNativeGlassButtonRowContainer(spacing: BuxTokens.tight)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
+    }
+
     private func presentLogTimeIfRequested() {
         guard navigationCoordinator.consumeStudioLogTimeRequest() else { return }
         showLogTime = true
     }
 
-    private func closeFab(_ action: @escaping () -> Void) {
-        withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+    private func closeFabAnimated() {
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.90)) {
             isFabExpanded = false
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+    }
+
+    private func closeFab(_ action: @escaping () -> Void) {
+        // Use the fast close spring — same as closeFabAnimated
+        // Items stagger close in ~0.084s (7 × 12ms) + spring settles in ~0.28s ≈ 0.36s total.
+        // Fire the sheet at 0.30s: items are visually gone, spring is nearly settled,
+        // giving the sheet a clean stage with no animation fighting.
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.90)) {
+            isFabExpanded = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.30) {
             action()
         }
     }

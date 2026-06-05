@@ -15,12 +15,13 @@ struct BarterLoggerSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
-            BuxFormSection(title: "Barter & Trade Logger") {
+            BuxFormSection(title: "Barter & trade logger") {
                 Toggle(isOn: $store.barterLoggerEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        BuxCatalogDynamicText(key: "Enable Barter Logger")
+                        BuxCatalogDynamicText(key: "Enable barter logger")
                             .font(.system(size: 15, weight: .semibold))
-                        Text("Unlocks \"Barter / Exchange\" payment method in every transaction. Log skill swaps, trade deals, and non-cash exchanges.")
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        BuxCatalogDynamicText(key: "Unlocks \"Barter / Exchange\" payment method in every transaction. Log skill swaps, trade deals, and non-cash exchanges.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
                             .fixedSize(horizontal: false, vertical: true)
@@ -58,7 +59,7 @@ struct BarterLoggerSettingsView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Barter & Trade Logger")
+        .buxCatalogNavigationTitle("Barter & trade logger")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -69,9 +70,9 @@ struct BarterLoggerSettingsView: View {
                 .foregroundColor(color)
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                BuxCatalogText.text(title)
                     .font(.system(size: 13, weight: .bold))
-                Text(body)
+                BuxCatalogText.text(body)
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)

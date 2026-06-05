@@ -287,7 +287,12 @@ final class LocalBackupCoordinator {
         pendingWork?.cancel()
         let settings = SettingsStore.shared
         guard settings.allowLocalBackups else { return }
-        let interval = settings.autoBackupFrequency.backupInterval
+        let interval: TimeInterval
+        if settings.autoBackupFrequency == .custom {
+            interval = TimeInterval(settings.customBackupIntervalDays) * 86_400
+        } else {
+            interval = settings.autoBackupFrequency.backupInterval
+        }
         guard interval > 0 else { return }
 
         let work = DispatchWorkItem { [weak self] in

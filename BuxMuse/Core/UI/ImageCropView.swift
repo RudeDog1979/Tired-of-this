@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Photos
 import PhotosUI
 
 // MARK: - Crop shape
@@ -588,16 +589,107 @@ public class GlobalImagePickerCoordinator: NSObject, PHPickerViewControllerDeleg
         }
 
         self.onImagePicked = onPicked
-
+        let topmostVC = topViewController(from: rootVC)
+        
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        
+        if status == .notDetermined {
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { newStatus in
+                DispatchQueue.main.async {
+                    if newStatus == .authorized || newStatus == .limited {
+                        self.presentPicker(from: topmostVC)
+                    } else if newStatus == .denied || newStatus == .restricted {
+                        self.showDeniedAlert(from: topmostVC)
+                    } else {
+                        onPicked(nil)
+                    }
+                }
+            }
+        } else if status == .limited {
+            showLimitedAccessPrompt(from: topmostVC, onPicked: onPicked)
+        } else if status == .denied || status == .restricted {
+            showDeniedAlert(from: topmostVC)
+        } else {
+            presentPicker(from: topmostVC)
+        }
+    }
+    
+    private func presentPicker(from vc: UIViewController) {
         var config = PHPickerConfiguration(photoLibrary: .shared())
         config.filter = .images
         config.selectionLimit = 1
 
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = self
+        vc.present(picker, animated: true)
+    }
+    
+    private func showLimitedAccessPrompt(from vc: UIViewController, onPicked: @escaping (UIImage?) -> Void) {
+        let alert = UIAlertController(
+            title: BuxLocalizedString.string("Photo Library Access", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            message: BuxLocalizedString.string("BuxMuse has access to a limited selection of your photos. You can choose from your currently selected photos, select more photos from your library, or enable full access in Settings.", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            preferredStyle: .actionSheet
+        )
 
-        // Present from the topmost controller to avoid SwiftUI nested sheet blank bugs.
-        topViewController(from: rootVC).present(picker, animated: true)
+        alert.addAction(UIAlertAction(
+            title: BuxLocalizedString.string("Browse Selected Photos", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            style: .default
+        ) { _ in
+            self.presentPicker(from: vc)
+        })
+
+        alert.addAction(UIAlertAction(
+            title: BuxLocalizedString.string("Select More Photos...", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            style: .default
+        ) { _ in
+            PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: vc)
+        })
+
+        alert.addAction(UIAlertAction(
+            title: BuxLocalizedString.string("Open Settings", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            style: .default
+        ) { _ in
+            BusinessCardPhotoLibraryAccess.openSettings()
+        })
+
+        alert.addAction(UIAlertAction(
+            title: BuxLocalizedString.string("Cancel", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            style: .cancel
+        ) { _ in
+            onPicked(nil)
+        })
+        
+        if let popoverController = alert.popoverPresentationController {
+            popoverController.sourceView = vc.view
+            popoverController.sourceRect = CGRect(x: vc.view.bounds.midX, y: vc.view.bounds.midY, width: 0, height: 0)
+            popoverController.permittedArrowDirections = []
+        }
+
+        vc.present(alert, animated: true)
+    }
+
+    private func showDeniedAlert(from vc: UIViewController) {
+        let alert = UIAlertController(
+            title: BuxLocalizedString.string("Photo Library Access Denied", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            message: BuxLocalizedString.string("Please allow photo library access in System Settings to select an image.", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(
+            title: BuxLocalizedString.string("Settings", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            style: .default
+        ) { _ in
+            BusinessCardPhotoLibraryAccess.openSettings()
+        })
+
+        alert.addAction(UIAlertAction(
+            title: BuxLocalizedString.string("Cancel", locale: BuxInterfaceLocale.currentInterfaceLocale),
+            style: .cancel
+        ) { _ in
+            self.onImagePicked?(nil)
+        })
+
+        vc.present(alert, animated: true)
     }
 
     private func topViewController(from controller: UIViewController) -> UIViewController {

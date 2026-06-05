@@ -25,33 +25,103 @@ struct DataSettingsView: View {
     @State private var showSuccessAlert = false
     @State private var showLogoCacheClearedAlert = false
     @State private var exportURL: URL? = nil
+    @State private var photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
 
     var body: some View {
         BuxThemedCardForm {
             BackupRestoreSettingsView()
 
+            BuxFormSection(title: "Photo access settings") {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        BuxCatalogDynamicText(key: "Photo library access")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        BuxCatalogDynamicText(key: "Select how many photos BuxMuse can access in system settings.")
+                            .font(.system(size: 12, weight: .medium))
+                            .buxLabelSecondary()
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                }
+                .buxFormFieldPadding()
+
+                BuxFormRowDivider()
+
+                Button {
+                    BusinessCardPhotoLibraryAccess.openSettings()
+                } label: {
+                    HStack {
+                        Image(systemName: photoStatus == .limited ? "photo.badge.checkmark" : "photo.on.rectangle.angled")
+                            .foregroundColor(themeManager.current.accentColor)
+                        Text(
+                            BuxLocalizedString.format(
+                                "Photos: %@",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                photoStatus.label
+                            )
+                        )
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        Spacer()
+                        BuxCatalogDynamicText(key: "Manage photo access")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(themeManager.current.accentColor)
+                        Image(systemName: "arrow.up.forward.app.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(themeManager.current.accentColor)
+                    }
+                }
+                .buxFormFieldPadding()
+            }
+
             BuxFormSection(title: "Sandbox backup") {
-                Toggle("Allow Local Backups", isOn: $store.allowLocalBackups)
+                Toggle(isOn: $store.allowLocalBackups) {
+                    Text(BuxCatalogLabel.string("Allow Local Backups", locale: appSettingsManager.interfaceLocale))
+                }
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
 
                 if store.allowLocalBackups {
                     BuxFormRowDivider()
-                    Picker("Backup Frequency", selection: $store.autoBackupFrequency) {
+                    Picker(selection: $store.autoBackupFrequency) {
                         ForEach(AutoBackupFrequency.allCases) { freq in
                             Text(freq.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(freq)
                         }
+                    } label: {
+                        Text(BuxCatalogLabel.string("Backup Frequency", locale: appSettingsManager.interfaceLocale))
                     }
                     .pickerStyle(.menu)
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
+
+                    if store.autoBackupFrequency == .custom {
+                        BuxFormRowDivider()
+                        HStack {
+                            Text(BuxCatalogLabel.string("Backup every", locale: appSettingsManager.interfaceLocale))
+                                .font(.system(size: 15, weight: .semibold))
+                            Spacer()
+                            Stepper(value: Binding(
+                                get: { store.customBackupIntervalDays },
+                                set: { newValue in
+                                    store.customBackupIntervalDays = max(1, min(30, newValue))
+                                    store.save()
+                                }
+                            ), in: 1...30) {
+                                Text("\(store.customBackupIntervalDays) ") + Text(BuxCatalogLabel.string(store.customBackupIntervalDays == 1 ? "day" : "days", locale: appSettingsManager.interfaceLocale))
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(themeManager.current.accentColor)
+                            }
+                        }
+                        .buxFormFieldPadding()
+                    }
                 }
             }
 
-            BuxFormSection(title: "Data Guard Mode") {
+            BuxFormSection(title: "Data Guard mode") {
                 Toggle(isOn: $store.dataGuardModeEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
-                        BuxCatalogDynamicText(key: "Data Guard Mode")
+                        BuxCatalogDynamicText(key: "Data Guard mode")
                             .font(.system(size: 15, weight: .semibold))
                         BuxCatalogDynamicText(key: "Blocks all outbound merchant logo requests. Renders local monogram avatars. Zero data cost when on prepaid mobile.")
                             .font(.system(size: 12, weight: .medium))
@@ -85,11 +155,15 @@ struct DataSettingsView: View {
             }
 
             BuxFormSection(title: "Export compliance") {
-                Toggle("Include Studio Data", isOn: $store.includeStudioDataInExports)
+                Toggle(isOn: $store.includeStudioDataInExports) {
+                    Text(BuxCatalogLabel.string("Include Studio data", locale: appSettingsManager.interfaceLocale))
+                }
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
-                Toggle("Include Local Performance Metadata", isOn: $store.includeAnalyticsInExports)
+                Toggle(isOn: $store.includeAnalyticsInExports) {
+                    Text(BuxCatalogLabel.string("Include local performance metadata", locale: appSettingsManager.interfaceLocale))
+                }
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
 
@@ -98,7 +172,7 @@ struct DataSettingsView: View {
                     ShareLink(item: url) {
                         HStack {
                             Image(systemName: "square.and.arrow.up.fill")
-                            BuxCatalogDynamicText(key: "Save JSON Backup Archive")
+                            BuxCatalogDynamicText(key: "Save JSON backup archive")
                         }
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
@@ -109,7 +183,7 @@ struct DataSettingsView: View {
                     Button(action: generateJSONDump) {
                         HStack {
                             Image(systemName: "doc.text.magnifyingglass")
-                            BuxCatalogDynamicText(key: "Compile JSON Data Export")
+                            BuxCatalogDynamicText(key: "Compile JSON data export")
                         }
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(themeManager.current.accentColor)
@@ -120,7 +194,7 @@ struct DataSettingsView: View {
                 if let lastExport = store.lastExportDate {
                     BuxFormRowDivider()
                     HStack {
-                        BuxCatalogDynamicText(key: "Last Compiled")
+                        BuxCatalogDynamicText(key: "Last compiled")
                         Spacer()
                         Text(lastExport, style: .date)
                             .buxLabelSecondary()
@@ -137,23 +211,23 @@ struct DataSettingsView: View {
                 .buxFormFieldPadding()
             }
         }
-        .buxCatalogNavigationTitle("Backup & Restore")
+        .buxCatalogNavigationTitle("Backup & restore")
         .navigationBarTitleDisplayMode(.inline)
-        .alert("Database Reset Complete", isPresented: $showSuccessAlert) {
-            Button("OK", role: .cancel) {}
+        .alert(BuxCatalogLabel.string("Database Reset Complete", locale: appSettingsManager.interfaceLocale), isPresented: $showSuccessAlert) {
+            Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
             BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, merchants, and cached logos are removed.")
         }
-        .alert("Logo cache cleared", isPresented: $showLogoCacheClearedAlert) {
-            Button("OK", role: .cancel) {}
+        .alert(BuxCatalogLabel.string("Logo cache cleared", locale: appSettingsManager.interfaceLocale), isPresented: $showLogoCacheClearedAlert) {
+            Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
             BuxCatalogDynamicText(key: "Merchant favicons will download again the next time you view them.")
         }
-        .confirmationDialog("WARNING: Delete All Data?", isPresented: $showResetDialog, titleVisibility: .visible) {
-            Button("Confirm Complete Purge", role: .destructive) {
+        .confirmationDialog(BuxCatalogLabel.string("WARNING: Delete All Data?", locale: appSettingsManager.interfaceLocale), isPresented: $showResetDialog, titleVisibility: .visible) {
+            Button(BuxCatalogLabel.string("Confirm Complete Purge", locale: appSettingsManager.interfaceLocale), role: .destructive) {
                 performFullPurge()
             }
-            Button("Cancel", role: .cancel) {}
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
             BuxCatalogDynamicText(key: "This action is completely offline and irreversible. It will wipe all expenses, merchants, logo cache, Studio records, secure passcodes, and reset settings.")
         }
@@ -161,6 +235,12 @@ struct DataSettingsView: View {
         .onChange(of: store.autoBackupFrequency) { _, _ in store.save() }
         .onChange(of: store.includeStudioDataInExports) { _, _ in store.save() }
         .onChange(of: store.includeAnalyticsInExports) { _, _ in store.save() }
+        .onAppear {
+            photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
+        }
     }
 
     // MARK: - Export Logic

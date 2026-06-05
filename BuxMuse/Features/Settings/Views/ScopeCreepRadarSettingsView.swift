@@ -15,7 +15,7 @@ struct ScopeCreepRadarSettingsView: View {
     var body: some View {
         BuxThemedCardForm {
             ProFeatureHeader(
-                title: "Scope Creep Radar",
+                title: "Scope creep radar",
                 subtitle: "Monitor hours and revision budgets on Studio projects. Get in-app alerts and ready-to-send scope change notices.",
                 systemImage: "scope",
                 tint: .red
@@ -24,8 +24,9 @@ struct ScopeCreepRadarSettingsView: View {
             BuxFormSection(title: "Status") {
                 Toggle(isOn: $store.antiScopeCreepEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        BuxCatalogDynamicText(key: "Enable Scope Radar")
+                        BuxCatalogDynamicText(key: "Enable scope radar")
                             .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         BuxCatalogDynamicText(key: "Shows scope status on Pro Studio projects with budgeted hours and revision limits.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
@@ -49,7 +50,7 @@ struct ScopeCreepRadarSettingsView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Scope Creep Radar")
+        .buxCatalogNavigationTitle("Scope creep radar")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.antiScopeCreepEnabled) { _, _ in store.save() }
     }
@@ -61,9 +62,9 @@ struct ScopeCreepRadarSettingsView: View {
                 .foregroundColor(color)
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                BuxCatalogText.text(title)
                     .font(.system(size: 13, weight: .bold))
-                Text(body)
+                BuxCatalogText.text(body)
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)

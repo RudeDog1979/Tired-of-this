@@ -170,7 +170,9 @@ struct SimpleStudioBusinessCardSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
             }
-            .buxStudioSheetContent()
+            .buxRootNavigationChrome()
+            .buxInterfaceLocale()
+            .buxMeshSheetPresentation()
             .onAppear(perform: loadSavedCard)
             .onChange(of: showNativePicker) { _, show in
                 guard show else { return }

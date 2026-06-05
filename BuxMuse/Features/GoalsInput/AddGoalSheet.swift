@@ -35,6 +35,7 @@ struct AddGoalSheet: View {
                     if let suggestions = brainSuggestions {
                         BuxFormSection {
                             brainRecommendationRow(suggestions)
+                                .buxFormFieldPadding()
                         }
                     }
 

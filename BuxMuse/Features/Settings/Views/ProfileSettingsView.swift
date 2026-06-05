@@ -21,6 +21,7 @@ struct ProfileSettingsView: View {
     @State private var showCropSheet = false
     @State private var showNativePicker = false
     @State private var loadFailed = false
+    @State private var photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
 
     var body: some View {
         BuxThemedCardForm {
@@ -32,7 +33,7 @@ struct ProfileSettingsView: View {
                     .buttonStyle(.plain)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        BuxCatalogDynamicText(key: "Profile Photo")
+                        BuxCatalogDynamicText(key: "Profile photo")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         BuxCatalogDynamicText(key: "Saved locally on your device.")
@@ -67,6 +68,50 @@ struct ProfileSettingsView: View {
                 .buxFormFieldPadding()
             }
 
+            BuxFormSection(title: "Photo access settings") {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        BuxCatalogDynamicText(key: "Photo library access")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        BuxCatalogDynamicText(key: "Select how many photos BuxMuse can access in system settings.")
+                            .font(.system(size: 12, weight: .medium))
+                            .buxLabelSecondary()
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                }
+                .buxFormFieldPadding()
+
+                BuxFormRowDivider()
+
+                Button {
+                    BusinessCardPhotoLibraryAccess.openSettings()
+                } label: {
+                    HStack {
+                        Image(systemName: photoStatus == .limited ? "photo.badge.checkmark" : "photo.on.rectangle.angled")
+                            .foregroundColor(themeManager.current.accentColor)
+                        Text(
+                            BuxLocalizedString.format(
+                                "Photos: %@",
+                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                photoStatus.label
+                            )
+                        )
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        Spacer()
+                        BuxCatalogDynamicText(key: "Manage photo access")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(themeManager.current.accentColor)
+                        Image(systemName: "arrow.up.forward.app.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(themeManager.current.accentColor)
+                    }
+                }
+                .buxFormFieldPadding()
+            }
+
             BuxFormSection {
                 Button.buxDestructive("Reset to Defaults") {
                     firstName = ""
@@ -86,10 +131,14 @@ struct ProfileSettingsView: View {
             lastName = store.lastName ?? ""
             preferredNameStyle = store.preferredNameStyle
             selectedAvatarData = store.profileAvatarData
+            photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
         }
         .onChange(of: firstName) { _, _ in saveProfile() }
         .onChange(of: lastName) { _, _ in saveProfile() }
         .onChange(of: preferredNameStyle) { _, _ in saveProfile() }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
+        }
         .onChange(of: showNativePicker) { _, show in
             guard show else { return }
             GlobalImagePickerCoordinator.shared.present { image in

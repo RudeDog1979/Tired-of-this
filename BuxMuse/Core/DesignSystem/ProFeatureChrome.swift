@@ -82,12 +82,12 @@ struct ProFeatureHeader: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
-                    Text(title)
+                    BuxCatalogText.text(title)
                         .font(.system(size: 16, weight: .black, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     ProFeatureBadge(compact: true)
                 }
-                Text(subtitle)
+                BuxCatalogText.text(subtitle)
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)

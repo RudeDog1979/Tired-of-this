@@ -10,6 +10,7 @@ import SwiftUI
 struct NotificationSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
@@ -20,7 +21,7 @@ struct NotificationSettingsView: View {
                 BuxFormSection(title: "Switchboard") {
                     Toggle(isOn: $store.notificationsEnabled) {
                         VStack(alignment: .leading, spacing: 2) {
-                            BuxCatalogDynamicText(key: "Enable Notifications")
+                            BuxCatalogDynamicText(key: "Enable notifications")
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             BuxCatalogDynamicText(key: "Receive timely financial alerts and insights")
@@ -34,19 +35,27 @@ struct NotificationSettingsView: View {
 
                 if store.notificationsEnabled {
                     BuxFormSection(title: "Alerts & radar") {
-                        Toggle("Budget Threshold Warnings", isOn: $store.budgetAlertsEnabled)
+                        Toggle(isOn: $store.budgetAlertsEnabled) {
+                            Text(BuxCatalogLabel.string("Budget threshold warnings", locale: appSettingsManager.interfaceLocale))
+                        }
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        Toggle("Upcoming Bill Reminders", isOn: $store.billRemindersEnabled)
+                        Toggle(isOn: $store.billRemindersEnabled) {
+                            Text(BuxCatalogLabel.string("Upcoming bill reminders", locale: appSettingsManager.interfaceLocale))
+                        }
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        Toggle("Invoice Status Updates", isOn: $store.studioInvoiceRemindersEnabled)
+                        Toggle(isOn: $store.studioInvoiceRemindersEnabled) {
+                            Text(BuxCatalogLabel.string("Invoice status updates", locale: appSettingsManager.interfaceLocale))
+                        }
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        Toggle("Estimated Tax Reminders", isOn: $store.taxDeadlineRemindersEnabled)
+                        Toggle(isOn: $store.taxDeadlineRemindersEnabled) {
+                            Text(BuxCatalogLabel.string("Estimated tax reminders", locale: appSettingsManager.interfaceLocale))
+                        }
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                     }
@@ -54,7 +63,7 @@ struct NotificationSettingsView: View {
                     BuxFormSection(title: "Daily digest") {
                         Toggle(isOn: $store.dailySummaryEnabled) {
                             VStack(alignment: .leading, spacing: 2) {
-                                BuxCatalogDynamicText(key: "Daily Financial Summary")
+                                BuxCatalogDynamicText(key: "Daily financial summary")
                                     .font(.system(size: 15, weight: .semibold))
                                 BuxCatalogDynamicText(key: "A compact overview of today's spend & active goals")
                                     .font(.system(size: 11))
@@ -66,11 +75,21 @@ struct NotificationSettingsView: View {
                     }
 
                     BuxFormSection(title: "Quiet hours") {
-                        DatePicker("Silence Starts", selection: quietHoursStartBinding, displayedComponents: .hourAndMinute)
+                        DatePicker(
+                            selection: quietHoursStartBinding,
+                            displayedComponents: .hourAndMinute
+                        ) {
+                            Text(BuxCatalogLabel.string("Silence starts", locale: appSettingsManager.interfaceLocale))
+                        }
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        DatePicker("Silence Ends", selection: quietHoursEndBinding, displayedComponents: .hourAndMinute)
+                        DatePicker(
+                            selection: quietHoursEndBinding,
+                            displayedComponents: .hourAndMinute
+                        ) {
+                            Text(BuxCatalogLabel.string("Silence ends", locale: appSettingsManager.interfaceLocale))
+                        }
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                     }

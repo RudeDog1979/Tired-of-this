@@ -18,24 +18,24 @@ public enum SimpleJobPayStyle: String, Codable, CaseIterable, Identifiable, Send
 
     public var chipTitle: String {
         switch self {
-        case .onePrice: return "One price"
-        case .byTheHour: return "By the hour"
+        case .onePrice: return SimpleStudioCopy.line("One price")
+        case .byTheHour: return SimpleStudioCopy.line("By the hour")
         }
     }
 
     public var plainTitle: String {
         switch self {
-        case .onePrice: return "One price for the whole job"
-        case .byTheHour: return "Paid by the hour"
+        case .onePrice: return SimpleStudioCopy.line("One price for the whole job")
+        case .byTheHour: return SimpleStudioCopy.line("Paid by the hour")
         }
     }
 
     public var clockSubtitle: String {
         switch self {
         case .onePrice:
-            return "Track your time — it does not change what you agreed."
+            return SimpleStudioCopy.line("Track your time — it does not change what you agreed.")
         case .byTheHour:
-            return "The clock figures out what they owe from your hourly rate."
+            return SimpleStudioCopy.line("The clock figures out what they owe from your hourly rate.")
         }
     }
 }
@@ -81,6 +81,8 @@ enum SimpleStudioTimePayEngine {
         let total = logged + max(0, sessionSeconds)
         let paid = job.paidSoFar
 
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
+
         switch style {
         case .onePrice:
             let agreed = job.agreedPrice ?? job.amount
@@ -88,11 +90,24 @@ enum SimpleStudioTimePayEngine {
             let headline = formatMoney(agreed)
             let detail: String
             if sessionSeconds > 0 {
-                detail = "You agreed \(formatMoney(agreed)) for this job. Even if you only work \(sessionLabel), they still owe the full agreed price."
+                detail = String(
+                    format: SimpleStudioCopy.line("You agreed %@ for this job. Even if you only work %@, they still owe the full agreed price.", locale: locale),
+                    locale: locale,
+                    formatMoney(agreed),
+                    sessionLabel
+                )
             } else if logged > 0 {
-                detail = "You agreed \(formatMoney(agreed)). Time logged is for your records — it does not reduce or increase the price."
+                detail = String(
+                    format: SimpleStudioCopy.line("You agreed %@. Time logged is for your records — it does not reduce or increase the price.", locale: locale),
+                    locale: locale,
+                    formatMoney(agreed)
+                )
             } else {
-                detail = "You agreed \(formatMoney(agreed)) for the whole job. Use the clock to remember how long you spent."
+                detail = String(
+                    format: SimpleStudioCopy.line("You agreed %@ for the whole job. Use the clock to remember how long you spent.", locale: locale),
+                    locale: locale,
+                    formatMoney(agreed)
+                )
             }
             return WorkClockSnapshot(
                 style: style,
@@ -107,7 +122,11 @@ enum SimpleStudioTimePayEngine {
                 fixedAgreed: agreed,
                 headline: headline,
                 detail: detail,
-                saveButtonHint: "Save time on this job (price stays \(formatMoney(agreed)))"
+                saveButtonHint: String(
+                    format: SimpleStudioCopy.line("Save time on this job (price stays %@)", locale: locale),
+                    locale: locale,
+                    formatMoney(agreed)
+                )
             )
 
         case .byTheHour:
@@ -116,14 +135,32 @@ enum SimpleStudioTimePayEngine {
             let sessionEarned = earnings(seconds: sessionSeconds, hourlyRate: rate)
             let hoursLabel = formattedHours(total)
             let headline = formatMoney(totalEarned)
-            var detail = "At \(formatMoney(rate)) per hour, \(hoursLabel) of work = \(formatMoney(totalEarned))."
+            var detail = String(
+                format: SimpleStudioCopy.line("At %@ per hour, %@ of work = %@.", locale: locale),
+                locale: locale,
+                formatMoney(rate),
+                hoursLabel,
+                formatMoney(totalEarned)
+            )
             if let cap = job.agreedPrice, cap > 0, totalEarned > cap {
-                detail += " (Your ballpark quote was \(formatMoney(cap)) — check with the customer if hours ran over.)"
+                detail += " " + String(
+                    format: SimpleStudioCopy.line("(Your ballpark quote was %@ — check with the customer if hours ran over.)", locale: locale),
+                    locale: locale,
+                    formatMoney(cap)
+                )
             } else if let cap = job.agreedPrice, cap > 0 {
-                detail += " Ballpark quote was \(formatMoney(cap))."
+                detail += " " + String(
+                    format: SimpleStudioCopy.line("Ballpark quote was %@.", locale: locale),
+                    locale: locale,
+                    formatMoney(cap)
+                )
             }
             if sessionSeconds > 0 {
-                detail += " This session adds about \(formatMoney(sessionEarned))."
+                detail += " " + String(
+                    format: SimpleStudioCopy.line("This session adds about %@.", locale: locale),
+                    locale: locale,
+                    formatMoney(sessionEarned)
+                )
             }
             return WorkClockSnapshot(
                 style: style,
@@ -139,8 +176,13 @@ enum SimpleStudioTimePayEngine {
                 headline: headline,
                 detail: detail,
                 saveButtonHint: sessionSeconds > 0
-                    ? "Save \(StudioTimerSession.formattedDuration(sessionSeconds)) (~\(formatMoney(sessionEarned)))"
-                    : "Save time to this job"
+                    ? String(
+                        format: SimpleStudioCopy.line("Save %@ (~%@)", locale: locale),
+                        locale: locale,
+                        StudioTimerSession.formattedDuration(sessionSeconds),
+                        formatMoney(sessionEarned)
+                    )
+                    : SimpleStudioCopy.line("Save time to this job", locale: locale)
             )
         }
     }
@@ -149,10 +191,30 @@ enum SimpleStudioTimePayEngine {
         let total = max(0, Int(seconds))
         let hours = total / 3600
         let mins = (total % 3600) / 60
-        if hours > 0, mins > 0 { return "\(hours) h \(mins) m" }
-        if hours > 0 { return "\(hours) h" }
-        if mins > 0 { return "\(mins) m" }
-        return "0 m"
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
+        if hours > 0, mins > 0 {
+            return String(
+                format: SimpleStudioCopy.line("%ld h %ld m", locale: locale),
+                locale: locale,
+                hours,
+                mins
+            )
+        }
+        if hours > 0 {
+            return String(
+                format: SimpleStudioCopy.line("%ld h", locale: locale),
+                locale: locale,
+                hours
+            )
+        }
+        if mins > 0 {
+            return String(
+                format: SimpleStudioCopy.line("%ld m", locale: locale),
+                locale: locale,
+                mins
+            )
+        }
+        return SimpleStudioCopy.line("0 m", locale: locale)
     }
 }
 

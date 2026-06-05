@@ -263,6 +263,7 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Data Settings
     @Published public var allowLocalBackups: Bool = true
     @Published public var autoBackupFrequency: AutoBackupFrequency = .weekly
+    @Published public var customBackupIntervalDays: Int = 3
     @Published public var includeStudioDataInExports: Bool = true
     @Published public var includeAnalyticsInExports: Bool = false
     @Published public var lastExportDate: Date? = nil
@@ -270,6 +271,11 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Developer Options
     @Published public var enableDebugOverlay: Bool = false
     @Published public var showPerformanceMetrics: Bool = false
+    
+    // MARK: - Dashboard Greeting Settings
+    @Published public var greetingHeaderEnabled: Bool = true
+    @Published public var greetingShowIcon: Bool = true
+    @Published public var greetingFontStyle: GreetingFontStyle = .playful
     
     // MARK: - Onboarding Settings
     @Published public var hasCompletedOnboarding: Bool = false
@@ -410,6 +416,7 @@ public final class SettingsStore: ObservableObject {
         
         let allowLocalBackups: Bool
         let autoBackupFrequency: AutoBackupFrequency
+        let customBackupIntervalDays: Int?
         let includeStudioDataInExports: Bool
         let includeAnalyticsInExports: Bool
         let lastExportDate: Date?
@@ -417,6 +424,10 @@ public final class SettingsStore: ObservableObject {
         let enableDebugOverlay: Bool
         let showPerformanceMetrics: Bool
         let hasCompletedOnboarding: Bool?
+        
+        let greetingHeaderEnabled: Bool?
+        let greetingShowIcon: Bool?
+        let greetingFontStyle: GreetingFontStyle?
 
         enum CodingKeys: String, CodingKey {
             case firstName, lastName, userDisplayName, profileAvatarData, preferredNameStyle
@@ -436,10 +447,11 @@ public final class SettingsStore: ObservableObject {
             case burnoutGuardEnabled, healthKitSyncEnabled, manualSleepHours, manualStressLevel
             case biometricLockEnabled, requireBiometricOnLaunch, lockAfterInactivityMinutes
             case privacyBlurInAppSwitching, cancelledSubscriptionMerchants
-            case allowLocalBackups, autoBackupFrequency, hasCompletedOnboarding
+            case allowLocalBackups, autoBackupFrequency, customBackupIntervalDays, hasCompletedOnboarding
             case includeStudioDataInExports, includeFreelanceDataInExports
             case includeAnalyticsInExports, lastExportDate
             case enableDebugOverlay, showPerformanceMetrics
+            case greetingHeaderEnabled, greetingShowIcon, greetingFontStyle
         }
 
         init(from decoder: Decoder) throws {
@@ -519,6 +531,7 @@ public final class SettingsStore: ObservableObject {
             cancelledSubscriptionMerchants = try c.decodeIfPresent([String].self, forKey: .cancelledSubscriptionMerchants)
             allowLocalBackups = try c.decode(Bool.self, forKey: .allowLocalBackups)
             autoBackupFrequency = try c.decode(AutoBackupFrequency.self, forKey: .autoBackupFrequency)
+            customBackupIntervalDays = try c.decodeIfPresent(Int.self, forKey: .customBackupIntervalDays) ?? 3
             includeStudioDataInExports = try c.decodeIfPresent(Bool.self, forKey: .includeStudioDataInExports)
                 ?? c.decodeIfPresent(Bool.self, forKey: .includeFreelanceDataInExports) ?? true
             includeAnalyticsInExports = try c.decode(Bool.self, forKey: .includeAnalyticsInExports)
@@ -526,6 +539,9 @@ public final class SettingsStore: ObservableObject {
             enableDebugOverlay = try c.decode(Bool.self, forKey: .enableDebugOverlay)
             showPerformanceMetrics = try c.decode(Bool.self, forKey: .showPerformanceMetrics)
             hasCompletedOnboarding = try c.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding)
+            greetingHeaderEnabled = try c.decodeIfPresent(Bool.self, forKey: .greetingHeaderEnabled)
+            greetingShowIcon = try c.decodeIfPresent(Bool.self, forKey: .greetingShowIcon)
+            greetingFontStyle = try c.decodeIfPresent(GreetingFontStyle.self, forKey: .greetingFontStyle)
         }
 
         init(
@@ -579,12 +595,16 @@ public final class SettingsStore: ObservableObject {
             cancelledSubscriptionMerchants: [String]?,
             allowLocalBackups: Bool,
             autoBackupFrequency: AutoBackupFrequency,
+            customBackupIntervalDays: Int?,
             includeStudioDataInExports: Bool,
             includeAnalyticsInExports: Bool,
             lastExportDate: Date?,
             enableDebugOverlay: Bool,
             showPerformanceMetrics: Bool,
-            hasCompletedOnboarding: Bool?
+            hasCompletedOnboarding: Bool?,
+            greetingHeaderEnabled: Bool?,
+            greetingShowIcon: Bool?,
+            greetingFontStyle: GreetingFontStyle?
         ) {
             self.firstName = firstName
             self.lastName = lastName
@@ -636,12 +656,16 @@ public final class SettingsStore: ObservableObject {
             self.cancelledSubscriptionMerchants = cancelledSubscriptionMerchants
             self.allowLocalBackups = allowLocalBackups
             self.autoBackupFrequency = autoBackupFrequency
+            self.customBackupIntervalDays = customBackupIntervalDays
             self.includeStudioDataInExports = includeStudioDataInExports
             self.includeAnalyticsInExports = includeAnalyticsInExports
             self.lastExportDate = lastExportDate
             self.enableDebugOverlay = enableDebugOverlay
             self.showPerformanceMetrics = showPerformanceMetrics
             self.hasCompletedOnboarding = hasCompletedOnboarding
+            self.greetingHeaderEnabled = greetingHeaderEnabled ?? true
+            self.greetingShowIcon = greetingShowIcon ?? true
+            self.greetingFontStyle = greetingFontStyle ?? .playful
         }
 
         func encode(to encoder: Encoder) throws {
@@ -696,12 +720,16 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(cancelledSubscriptionMerchants, forKey: .cancelledSubscriptionMerchants)
             try c.encode(allowLocalBackups, forKey: .allowLocalBackups)
             try c.encode(autoBackupFrequency, forKey: .autoBackupFrequency)
+            try c.encode(customBackupIntervalDays, forKey: .customBackupIntervalDays)
             try c.encode(includeStudioDataInExports, forKey: .includeStudioDataInExports)
             try c.encode(includeAnalyticsInExports, forKey: .includeAnalyticsInExports)
             try c.encodeIfPresent(lastExportDate, forKey: .lastExportDate)
             try c.encode(enableDebugOverlay, forKey: .enableDebugOverlay)
             try c.encode(showPerformanceMetrics, forKey: .showPerformanceMetrics)
             try c.encodeIfPresent(hasCompletedOnboarding, forKey: .hasCompletedOnboarding)
+            try c.encodeIfPresent(greetingHeaderEnabled, forKey: .greetingHeaderEnabled)
+            try c.encodeIfPresent(greetingShowIcon, forKey: .greetingShowIcon)
+            try c.encodeIfPresent(greetingFontStyle, forKey: .greetingFontStyle)
         }
     }
     
@@ -785,6 +813,7 @@ public final class SettingsStore: ObservableObject {
                 
                 self.allowLocalBackups = payload.allowLocalBackups
                 self.autoBackupFrequency = payload.autoBackupFrequency
+                self.customBackupIntervalDays = payload.customBackupIntervalDays ?? 3
                 self.includeStudioDataInExports = payload.includeStudioDataInExports
                 self.includeAnalyticsInExports = payload.includeAnalyticsInExports
                 self.lastExportDate = payload.lastExportDate
@@ -792,6 +821,9 @@ public final class SettingsStore: ObservableObject {
                 self.enableDebugOverlay = payload.enableDebugOverlay
                 self.showPerformanceMetrics = payload.showPerformanceMetrics
                 self.hasCompletedOnboarding = payload.hasCompletedOnboarding ?? true
+                self.greetingHeaderEnabled = payload.greetingHeaderEnabled ?? true
+                self.greetingShowIcon = payload.greetingShowIcon ?? true
+                self.greetingFontStyle = payload.greetingFontStyle ?? .playful
 
                 loadInvoicePaymentPreferences()
                 loadMileagePreferences()
@@ -847,7 +879,11 @@ public final class SettingsStore: ObservableObject {
         self.incomeFundingSource = .salary
         self.customBudgetLimit = 50
         self.customBudgetPeriod = .weekly
+        self.customBackupIntervalDays = 3
         self.hasCompletedOnboarding = false
+        self.greetingHeaderEnabled = true
+        self.greetingShowIcon = true
+        self.greetingFontStyle = .playful
         loadInvoicePaymentPreferences()
         loadMileagePreferences()
         loadStudioDiscoveryPreference()
@@ -960,12 +996,16 @@ public final class SettingsStore: ObservableObject {
             cancelledSubscriptionMerchants: cancelledSubscriptionMerchants,
             allowLocalBackups: allowLocalBackups,
             autoBackupFrequency: autoBackupFrequency,
+            customBackupIntervalDays: customBackupIntervalDays,
             includeStudioDataInExports: includeStudioDataInExports,
             includeAnalyticsInExports: includeAnalyticsInExports,
             lastExportDate: lastExportDate,
             enableDebugOverlay: enableDebugOverlay,
             showPerformanceMetrics: showPerformanceMetrics,
-            hasCompletedOnboarding: hasCompletedOnboarding
+            hasCompletedOnboarding: hasCompletedOnboarding,
+            greetingHeaderEnabled: greetingHeaderEnabled,
+            greetingShowIcon: greetingShowIcon,
+            greetingFontStyle: greetingFontStyle
         )
         
         do {

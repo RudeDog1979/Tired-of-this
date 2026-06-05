@@ -16,7 +16,7 @@ struct AgreementScratchpadSettingsView: View {
     var body: some View {
         BuxThemedCardForm {
             ProFeatureHeader(
-                title: "Agreement Scratchpad",
+                title: "Agreement scratchpad",
                 subtitle: "Draft scope bullets, deliverables, and sign-off notes for clients — stored locally on your device.",
                 systemImage: "doc.text.fill",
                 tint: Color(hex: "#5856D6")
@@ -25,8 +25,9 @@ struct AgreementScratchpadSettingsView: View {
             BuxFormSection(title: "Status") {
                 Toggle(isOn: $store.agreementScratchpadEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 3) {
-                        BuxCatalogDynamicText(key: "Enable Agreement Scratchpad")
+                        BuxCatalogDynamicText(key: "Enable agreement scratchpad")
                             .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         BuxCatalogDynamicText(key: "Unlocks agreement drafts linked to Studio clients and projects.")
                             .font(.system(size: 12, weight: .medium))
                             .buxLabelSecondary()
@@ -95,7 +96,7 @@ struct AgreementScratchpadSettingsView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Agreement Scratchpad")
+        .buxCatalogNavigationTitle("Agreement scratchpad")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.agreementScratchpadEnabled) { _, _ in store.save() }
     }
@@ -107,9 +108,9 @@ struct AgreementScratchpadSettingsView: View {
                 .foregroundColor(color)
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                BuxCatalogText.text(title)
                     .font(.system(size: 13, weight: .bold))
-                Text(body)
+                BuxCatalogText.text(body)
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)

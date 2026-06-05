@@ -106,7 +106,9 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
             }
-            .buxStudioSheetContent()
+            .buxRootNavigationChrome()
+            .buxInterfaceLocale()
+            .buxMeshSheetPresentation()
             .onAppear {
                 applyPrefillIfNeeded()
                 applyAgreementContextIfNeeded()
@@ -270,7 +272,8 @@ struct SimpleStudioSimpleInvoiceSheet: View {
             isPaid: false,
             accent: themeManager.current.accentColor,
             dueDateLabel: "Due \(formattedDueDate)",
-            note: note.isEmpty ? nil : note
+            note: note.isEmpty ? nil : note,
+            locale: appSettingsManager.interfaceLocale
         )
     }
 
@@ -331,6 +334,7 @@ struct SimpleInvoiceCardView: View {
     let accent: Color
     var dueDateLabel: String? = nil
     var note: String? = nil
+    var locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -338,7 +342,7 @@ struct SimpleInvoiceCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(businessName)
                         .font(.system(size: 18, weight: .bold))
-                    BuxCatalogDynamicText(key: "Simple Invoice")
+                    Text(BuxCatalogText.string("Simple Invoice", locale: locale))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
@@ -353,7 +357,7 @@ struct SimpleInvoiceCardView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                BuxCatalogDynamicText(key: "Bill to")
+                Text(BuxCatalogText.string("Bill to", locale: locale))
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Text(customerName)
@@ -361,7 +365,7 @@ struct SimpleInvoiceCardView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                BuxCatalogDynamicText(key: "For")
+                Text(BuxCatalogText.string("For", locale: locale))
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Text(description)
@@ -375,7 +379,7 @@ struct SimpleInvoiceCardView: View {
             }
 
             HStack {
-                BuxCatalogDynamicText(key: "Amount due")
+                Text(BuxCatalogText.string("Amount due", locale: locale))
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -390,7 +394,7 @@ struct SimpleInvoiceCardView: View {
                     .foregroundStyle(.secondary)
             }
 
-            BuxCatalogDynamicText(key: "Sent via BuxMuse · Not a bank")
+            Text(BuxCatalogText.string("Sent via BuxMuse · Not a bank", locale: locale))
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(.tertiary)
         }

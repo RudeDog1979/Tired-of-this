@@ -23,7 +23,7 @@ struct RegionCurrencySettingsView: View {
             BuxFormSection(title: "Your region") {
                 Button(action: { showCountrySheet = true }) {
                     HStack {
-                        BuxCatalogDynamicText(key: "Country / Region")
+                        BuxCatalogDynamicText(key: "Country / region")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         Spacer()
@@ -53,7 +53,7 @@ struct RegionCurrencySettingsView: View {
             BuxFormSection(title: "Display currency") {
                 Button(action: { showCurrencySheet = true }) {
                     HStack {
-                        BuxCatalogDynamicText(key: "Preferred Currency")
+                        BuxCatalogDynamicText(key: "Preferred currency")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         Spacer()
@@ -76,7 +76,7 @@ struct RegionCurrencySettingsView: View {
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
                 HStack {
-                    BuxCatalogDynamicText(key: "Formatting Preview")
+                    BuxCatalogDynamicText(key: "Formatting preview")
                         .font(.system(size: 15, weight: .semibold))
                     Spacer()
                     Text(appSettingsManager.format(Decimal(12345.67)))
@@ -87,10 +87,12 @@ struct RegionCurrencySettingsView: View {
             }
 
             BuxFormSection(title: "Regional rules") {
-                Picker("Start of Week", selection: $store.weekStartDay) {
+                Picker(selection: $store.weekStartDay) {
                     ForEach(WeekStartDay.allCases) { day in
                         Text(day.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(day)
                     }
+                } label: {
+                    Text(BuxCatalogLabel.string("Start of week", locale: appSettingsManager.interfaceLocale))
                 }
                 .pickerStyle(.menu)
                 .tint(themeManager.current.accentColor)
@@ -118,7 +120,7 @@ struct RegionCurrencySettingsView: View {
             }
         }
         .id(appSettingsManager.interfaceLanguage.rawValue)
-        .buxCatalogNavigationTitle("Currency & Region")
+        .buxCatalogNavigationTitle("Currency & region")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showCountrySheet) {
             CountryPickerView { country in
@@ -143,7 +145,7 @@ struct RegionCurrencySettingsView: View {
                 .buxThemedSheetContent()
         }
         .confirmationDialog(
-            "Update currency too?",
+            BuxCatalogLabel.string("Update currency too?", locale: appSettingsManager.interfaceLocale),
             isPresented: $showCurrencySuggestion,
             titleVisibility: .visible
         ) {
@@ -176,7 +178,7 @@ struct RegionCurrencySettingsView: View {
                     )
                 )
             }
-            Button("Cancel", role: .cancel) {
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {
                 pendingCountry = nil
             }
         } message: {
@@ -220,7 +222,7 @@ struct CountryPickerView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    BuxCatalogDynamicText(key: "Country / Region")
+                    BuxCatalogDynamicText(key: "Country / region")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     BuxCatalogDynamicText(key: "Used for tax presets, formatting, and regional defaults")
@@ -237,7 +239,7 @@ struct CountryPickerView: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .buxLabelSecondary()
-                TextField("Search country or code...", text: $searchText)
+                TextField(BuxCatalogLabel.string("Search country or code...", locale: appSettingsManager.interfaceLocale), text: $searchText)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
                 if !searchText.isEmpty {

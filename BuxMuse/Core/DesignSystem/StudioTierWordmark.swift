@@ -105,7 +105,7 @@ struct StudioTierWordmark: View {
     }
 }
 
-/// Simple Studio page header — plain “Simple”, no Studio wordmark.
+/// Simple Studio page header — "Simple" + Signature-S gradient "Studio" wordmark.
 struct SimpleStudioHeader: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
@@ -113,9 +113,17 @@ struct SimpleStudioHeader: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            BuxCatalogDynamicText(key: "Simple")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                Text("Simple ")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                Text("S")
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                    .foregroundStyle(simpleStudioSGradient)
+                BuxCatalogDynamicText(key: "tudio")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            }
             BuxCatalogDynamicText(key: "Track jobs, advances, and who owes you — free.")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
@@ -123,5 +131,16 @@ struct SimpleStudioHeader: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(BuxCatalogLabel.string("Simple Studio", locale: appSettingsManager.interfaceLocale))
+    }
+
+    private var simpleStudioSGradient: LinearGradient {
+        LinearGradient(
+            colors: [
+                themeManager.current.accentColor,
+                themeManager.current.accentColor.opacity(0.5)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 }

@@ -14,14 +14,14 @@ struct StudioCashBarterSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
-            BuxFormSection(title: "Dual-Cash Drawer") {
+            BuxFormSection(title: "Dual-cash drawer") {
                 NavigationLink {
                     DualCashDrawerSettingsView()
                         .environmentObject(themeManager)
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            BuxCatalogDynamicText(key: "Cash Drawer")
+                            BuxCatalogDynamicText(key: "Cash drawer")
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text(store.dualCashDrawerEnabled ? "On" : "Off")
@@ -35,14 +35,14 @@ struct StudioCashBarterSettingsView: View {
                 }
             }
 
-            BuxFormSection(title: "Barter & Trade") {
+            BuxFormSection(title: "Barter & trade") {
                 NavigationLink {
                     BarterLoggerSettingsView()
                         .environmentObject(themeManager)
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            BuxCatalogDynamicText(key: "Barter Logger")
+                            BuxCatalogDynamicText(key: "Barter logger")
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text(store.barterLoggerEnabled ? "On" : "Off")
@@ -56,7 +56,7 @@ struct StudioCashBarterSettingsView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Cash & Barter")
+        .buxCatalogNavigationTitle("Cash & barter")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

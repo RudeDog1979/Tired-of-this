@@ -96,7 +96,7 @@ struct HustleSettingsView: View {
             if hustleManager.canAddHustle() {
                 BuxFormSection(title: "Add a new gig workspace") {
                     VStack(alignment: .leading, spacing: 14) {
-                        TextField("Workspace Name (e.g. Design Studio, Consulting)", text: $newHustleName)
+                        TextField(BuxCatalogLabel.string("Workspace Name (e.g. Design Studio, Consulting)", locale: appSettingsManager.interfaceLocale), text: $newHustleName)
                             .font(.system(size: 15, weight: .semibold))
                             .tint(themeManager.current.accentColor)
                             .textFieldStyle(.plain)
@@ -104,7 +104,7 @@ struct HustleSettingsView: View {
                         Divider().opacity(0.1)
                         
                         VStack(alignment: .leading, spacing: 8) {
-                            BuxCatalogDynamicText(key: "Brand Color")
+                            BuxCatalogDynamicText(key: "Brand color")
                                 .font(.system(size: 12, weight: .bold))
                                 .buxLabelSecondary()
                             
@@ -136,7 +136,7 @@ struct HustleSettingsView: View {
                             HStack {
                                 Spacer()
                                 Image(systemName: "plus.circle.fill")
-                                BuxCatalogDynamicText(key: "Create Workspace")
+                                BuxCatalogDynamicText(key: "Create workspace")
                                 Spacer()
                             }
                             .font(.system(size: 14, weight: .bold))
@@ -199,7 +199,7 @@ struct HustleSettingsView: View {
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
                 } else {
-                    Text(hustle.isActive ? "Active" : "Archived")
+                    Text(BuxCatalogLabel.string(hustle.isActive ? "Active" : "Archived", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 11, weight: .medium))
                         .buxLabelSecondary()
                 }
@@ -255,14 +255,14 @@ struct HustleSettingsView: View {
             
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
-                    BuxCatalogDynamicText(key: "Gig Spaces")
+                    BuxCatalogDynamicText(key: "Gig spaces")
                         .font(.system(size: 16, weight: .black, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     
                     if store.studioMode == .pro {
                         ProFeatureBadge(compact: true)
                     } else {
-                        Text("FREE")
+                        Text(BuxCatalogLabel.string("FREE", locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 10, weight: .heavy, design: .rounded))
                             .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                             .padding(.horizontal, 6)
@@ -272,7 +272,7 @@ struct HustleSettingsView: View {
                     }
                 }
                 
-                Text(store.studioMode == .pro ? "Unlimited multi-gig workspaces unlocked" : "Active workspace ledger cap: 3 gigs")
+                Text(BuxCatalogLabel.string(store.studioMode == .pro ? "Unlimited multi-gig workspaces unlocked" : "Active workspace ledger cap: 3 gigs", locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
             }

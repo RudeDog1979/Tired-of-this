@@ -58,6 +58,10 @@ struct DashboardView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxTokens.block) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {
+                        if settingsStore.greetingHeaderEnabled {
+                            DashboardGreetingHeader()
+                        }
+
                         DashboardHeroSection(
                             dashSnapshot: dashSnapshot,
                             heroLayoutScale: heroLayoutScale,
@@ -1024,6 +1028,175 @@ struct FabSubmenuDivider: View {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.75).delay(delay)) {
                 animateIn = true
             }
+        }
+    }
+}
+
+// MARK: - Dashboard Dynamic Time Greeting Header
+
+struct DashboardGreetingHeader: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @ObservedObject private var settingsStore = SettingsStore.shared
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private var timeOfDayGreeting: String {
+        let hour = userCalendar.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:
+            return BuxCatalogLabel.string("Good morning", locale: locale)
+        case 12..<18:
+            return BuxCatalogLabel.string("Good afternoon", locale: locale)
+        case 18..<22:
+            return BuxCatalogLabel.string("Good evening", locale: locale)
+        default:
+            return BuxCatalogLabel.string("Good night", locale: locale)
+        }
+    }
+
+    private var greetingIconInfo: (systemName: String, colors: [Color]) {
+        let hour = userCalendar.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:
+            return ("sunrise.fill", [.orange, .yellow])
+        case 12..<18:
+            return ("sun.max.fill", [.orange, .red])
+        case 18..<22:
+            return ("moon.stars.fill", [.indigo, .purple])
+        default:
+            return ("sparkles", [.blue, .purple])
+        }
+    }
+
+    private var formattedDate: String {
+        Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(locale))
+    }
+
+    private var userCalendar: Calendar {
+        var cal = Calendar.current
+        cal.locale = locale
+        return cal
+    }
+
+    private var greetingFirstName: String {
+        if let f = settingsStore.firstName?.trimmingCharacters(in: .whitespacesAndNewlines), !f.isEmpty {
+            return f
+        }
+        let name = settingsStore.resolvedDisplayName
+        return name.components(separatedBy: .whitespacesAndNewlines).first ?? "User"
+    }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 14) {
+            let iconInfo = greetingIconInfo
+            
+            // Premium dynamic symbol using iOS 18 / iOS 26 effects
+            if settingsStore.greetingShowIcon {
+                BuxPulsingSymbol(systemName: iconInfo.systemName, colors: iconInfo.colors)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                // Greeting text: "Good morning, User" (First Name Only)
+                let firstName = greetingFirstName
+                
+                if settingsStore.greetingFontStyle == .playful {
+                    Text("\(timeOfDayGreeting), \(firstName)")
+                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [
+                                    themeManager.labelPrimary(for: colorScheme),
+                                    themeManager.current.accentColor
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                } else {
+                    // Professional Style: system default, semibold, solid primary label color
+                    Text("\(timeOfDayGreeting), \(firstName)")
+                        .font(.system(size: 21, weight: .semibold, design: .default))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                }
+                
+                // Secondary date text: "Friday, June 5"
+                Text(formattedDate)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal, 4)
+        .padding(.bottom, 4)
+        .offset(y: navigationCoordinator.isScreenLoaded ? 0 : -20)
+        .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
+        .animation(.spring(response: 0.55, dampingFraction: 0.8).delay(0.02), value: navigationCoordinator.isScreenLoaded)
+    }
+}
+
+struct BuxPulsingSymbol: View {
+    let systemName: String
+    let colors: [Color]
+
+    var body: some View {
+        if #available(iOS 26.0, *) {
+            // Future iOS 26 path - use cutting-edge features. Falls back to iOS 18 behavior.
+            ios18SymbolView()
+        } else {
+            ios18SymbolView()
+        }
+    }
+
+    @ViewBuilder
+    private func ios18SymbolView() -> some View {
+        if systemName == "sun.max.fill" {
+            Image(systemName: systemName)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: colors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .symbolEffect(.rotate, options: .repeat(3))
+        } else if systemName == "sunrise.fill" {
+            Image(systemName: systemName)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: colors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .symbolEffect(.wiggle, options: .repeat(3))
+        } else if systemName == "moon.stars.fill" {
+            Image(systemName: systemName)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: colors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .symbolEffect(.breathe, options: .repeat(3))
+        } else {
+            Image(systemName: systemName)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: colors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .symbolEffect(.pulse, options: .repeat(3))
         }
     }
 }

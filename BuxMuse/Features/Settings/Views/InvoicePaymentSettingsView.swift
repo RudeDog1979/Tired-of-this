@@ -36,7 +36,7 @@ struct InvoicePaymentSettingsView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Invoice Payment")
+        .buxCatalogNavigationTitle("Invoice payment")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: store.autoDetectInvoiceBankAccountType) { _, _ in store.save() }
         .onChange(of: store.invoiceBankAccountTypeOverride) { _, _ in store.save() }

@@ -10,10 +10,18 @@ import SwiftUI
 struct AboutSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
     
     private var bgColor: Color {
         themeManager.screenBackground(for: colorScheme)
+    }
+
+    private var appVersionString: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        let format = BuxCatalogLabel.string("Version %@ (Build %@)", locale: appSettingsManager.interfaceLocale)
+        return String(format: format, version, build)
     }
 
     var body: some View {
@@ -37,12 +45,12 @@ struct AboutSettingsView: View {
                             BuxCatalogDynamicText(key: "BuxMuse")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            BuxCatalogDynamicText(key: "Your Premium Offline Co-pilot")
+                            BuxCatalogDynamicText(key: "Your premium offline co-pilot")
                                 .font(.system(size: 13, weight: .semibold))
                                 .buxLabelSecondary()
                         }
                         
-                        BuxCatalogDynamicText(key: "Version 1.0.0 (Build 26)")
+                        Text(appVersionString)
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.gray.opacity(0.7))
                     }
@@ -82,15 +90,19 @@ struct AboutSettingsView: View {
                             .padding(.horizontal, 20)
                         
                         VStack(spacing: 0) {
-                            Toggle("Enable Debug Diagnostics Overlay", isOn: $store.enableDebugOverlay)
-                                .padding(.horizontal, BuxLayout.section)
-                                .padding(.vertical, 12)
+                            Toggle(isOn: $store.enableDebugOverlay) {
+                                Text(BuxCatalogLabel.string("Enable debug diagnostics overlay", locale: appSettingsManager.interfaceLocale))
+                            }
+                            .padding(.horizontal, BuxLayout.section)
+                            .padding(.vertical, 12)
                             
                             Divider().opacity(0.08)
                             
-                            Toggle("Show FPS & Cache Latency", isOn: $store.showPerformanceMetrics)
-                                .padding(.horizontal, BuxLayout.section)
-                                .padding(.vertical, 12)
+                            Toggle(isOn: $store.showPerformanceMetrics) {
+                                Text(BuxCatalogLabel.string("Show FPS & cache latency", locale: appSettingsManager.interfaceLocale))
+                            }
+                            .padding(.horizontal, BuxLayout.section)
+                            .padding(.vertical, 12)
                         }
                         .settingsThemedCardChrome(cornerRadius: 20)
                         .padding(.horizontal, 20)

@@ -105,22 +105,22 @@ struct SimpleStudioJobQuoteSheet: View {
                     VStack(spacing: BuxTokens.block) {
                         BuxThemedCardForm {
                             BuxFormSection(title: "Customer") {
-                                TextField("Name", text: $customerName)
+                                TextField(BuxCatalogLabel.string("Name", locale: appSettingsManager.interfaceLocale), text: $customerName)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                TextField("Phone / WhatsApp", text: $customerPhone)
+                                TextField(BuxCatalogLabel.string("Phone / WhatsApp", locale: appSettingsManager.interfaceLocale), text: $customerPhone)
                                     .keyboardType(.phonePad)
                                     .buxFormFieldPadding()
                                 customerChips
                             }
 
                             BuxFormSection(title: "Job") {
-                                TextField("What is the work?", text: $jobLabel)
+                                TextField(BuxCatalogLabel.string("What is the work?", locale: appSettingsManager.interfaceLocale), text: $jobLabel)
                                     .buxFormFieldPadding()
                             }
 
                             BuxFormSection(title: "How do you get paid?") {
-                                Picker("Pay type", selection: $payStyle) {
+                                Picker(BuxCatalogLabel.string("Pay type", locale: appSettingsManager.interfaceLocale), selection: $payStyle) {
                                     ForEach(SimpleJobPayStyle.allCases) { style in
                                         Text(style.plainTitle).tag(style)
                                     }
@@ -136,7 +136,7 @@ struct SimpleStudioJobQuoteSheet: View {
                                         .padding(.horizontal, BuxTokens.section)
                                         .padding(.bottom, 6)
                                     BuxFormRowDivider()
-                                    TextField("Full price you agreed", text: $agreedPriceText)
+                                    TextField(BuxCatalogLabel.string("Full price you agreed", locale: appSettingsManager.interfaceLocale), text: $agreedPriceText)
                                         .keyboardType(.decimalPad)
                                         .buxFormFieldPadding()
                                 } else {
@@ -146,11 +146,11 @@ struct SimpleStudioJobQuoteSheet: View {
                                         .padding(.horizontal, BuxTokens.section)
                                         .padding(.bottom, 6)
                                     BuxFormRowDivider()
-                                    TextField("Your rate per hour", text: $hourlyRateText)
+                                    TextField(BuxCatalogLabel.string("Your rate per hour", locale: appSettingsManager.interfaceLocale), text: $hourlyRateText)
                                         .keyboardType(.decimalPad)
                                         .buxFormFieldPadding()
                                     BuxFormRowDivider()
-                                    TextField("Ballpark total (optional)", text: $agreedPriceText)
+                                    TextField(BuxCatalogLabel.string("Ballpark total (optional)", locale: appSettingsManager.interfaceLocale), text: $agreedPriceText)
                                         .keyboardType(.decimalPad)
                                         .buxFormFieldPadding()
                                 }
@@ -172,7 +172,7 @@ struct SimpleStudioJobQuoteSheet: View {
                                 if hasPlannedTime {
                                     BuxFormRowDivider()
                                     HStack(spacing: BuxTokens.tight) {
-                                        Picker("Hours", selection: $planHours) {
+                                        Picker(BuxCatalogLabel.string("Hours", locale: appSettingsManager.interfaceLocale), selection: $planHours) {
                                             ForEach(0..<13, id: \.self) { hour in
                                                 Text(
                                                     BuxLocalizedString.format(
@@ -185,7 +185,7 @@ struct SimpleStudioJobQuoteSheet: View {
                                             }
                                         }
                                         .pickerStyle(.menu)
-                                        Picker("Minutes", selection: $planMinutes) {
+                                        Picker(BuxCatalogLabel.string("Minutes", locale: appSettingsManager.interfaceLocale), selection: $planMinutes) {
                                             ForEach(Array(stride(from: 0, through: 55, by: 5)), id: \.self) { m in
                                                 Text(
                                                     BuxLocalizedString.format(
@@ -220,8 +220,8 @@ struct SimpleStudioJobQuoteSheet: View {
                                 }
                             }
 
-                            BuxFormSection(title: "Payment status") {
-                                Picker("Status", selection: $paymentMode) {
+                            BuxFormSection(title: BuxCatalogLabel.string("Payment status", locale: appSettingsManager.interfaceLocale)) {
+                                Picker(BuxCatalogLabel.string("Status", locale: appSettingsManager.interfaceLocale), selection: $paymentMode) {
                                     ForEach(SimpleJobPaymentMode.allCases) { mode in
                                         Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                                     }
@@ -259,7 +259,7 @@ struct SimpleStudioJobQuoteSheet: View {
                             }
 
                             BuxFormSection(title: "Note") {
-                                TextField("Optional", text: $note)
+                                TextField(BuxCatalogLabel.string("Optional", locale: appSettingsManager.interfaceLocale), text: $note)
                                     .buxFormFieldPadding()
                             }
                         }
@@ -303,7 +303,9 @@ struct SimpleStudioJobQuoteSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
             }
-            .buxStudioSheetContent()
+            .buxRootNavigationChrome()
+            .buxInterfaceLocale()
+            .buxMeshSheetPresentation()
             .onAppear(perform: loadExisting)
         }
     }
@@ -357,7 +359,7 @@ struct SimpleStudioJobQuoteSheet: View {
 
     private func calcRow(_ title: String, _ value: String, accent: Color, bold: Bool = false) -> some View {
         HStack {
-            Text(title)
+            Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 12, weight: bold ? .bold : .medium))
                 .buxLabelSecondary()
             Spacer()
@@ -369,7 +371,7 @@ struct SimpleStudioJobQuoteSheet: View {
 
     private func costRow(_ title: String, text: Binding<String>) -> some View {
         HStack {
-            Text(title)
+            Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
             Spacer()
             TextField("0", text: text)
                 .keyboardType(.decimalPad)
@@ -400,10 +402,20 @@ struct SimpleStudioJobQuoteSheet: View {
         switch payStyle {
         case .onePrice:
             let agreed = appSettingsManager.format(decimal(from: agreedPriceText) ?? decimal(from: paidSoFarText) ?? 0)
-            return "Quote for \(jobLabel): \(agreed) total"
+            return BuxLocalizedString.format(
+                "Quote for %@: %@ total",
+                locale: appSettingsManager.interfaceLocale,
+                jobLabel,
+                agreed
+            )
         case .byTheHour:
             let rate = appSettingsManager.format(decimal(from: hourlyRateText) ?? 0)
-            return "Quote for \(jobLabel): \(rate) per hour"
+            return BuxLocalizedString.format(
+                "Quote for %@: %@ per hour",
+                locale: appSettingsManager.interfaceLocale,
+                jobLabel,
+                rate
+            )
         }
     }
 
@@ -461,7 +473,12 @@ struct SimpleStudioJobQuoteSheet: View {
 
     private func sendQuote() {
         let agreed = appSettingsManager.format(decimal(from: agreedPriceText) ?? 0)
-        let message = "Quote for \(jobLabel): \(agreed)"
+        let message = BuxLocalizedString.format(
+            "Quote for %@: %@",
+            locale: appSettingsManager.interfaceLocale,
+            jobLabel,
+            agreed
+        )
         let card = SimpleQuoteCardView(
             businessName: businessName,
             customerName: customerName,
@@ -480,7 +497,7 @@ struct SimpleStudioJobQuoteSheet: View {
         let phone = customerPhone.isEmpty ? store.customer(named: customerName)?.phone : customerPhone
         SimpleStudioContactActions.present(
             SimpleStudioContactActions.Options(
-                sheetTitle: "Send quote",
+                sheetTitle: BuxCatalogLabel.string("Send quote", locale: appSettingsManager.interfaceLocale),
                 message: message,
                 recipientPhone: phone,
                 shareItems: items

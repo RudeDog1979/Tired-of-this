@@ -26,10 +26,10 @@ struct DualCashDrawerSettingsView: View {
             cashDrawerTierBanner
             
             // Section 2: Main Activation toggle
-            BuxFormSection(title: "Status & Activation") {
+            BuxFormSection(title: "Status & activation") {
                 Toggle(isOn: $store.dualCashDrawerEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
                     VStack(alignment: .leading, spacing: 2) {
-                        BuxCatalogDynamicText(key: "Enable Cash Drawer")
+                        BuxCatalogDynamicText(key: "Enable cash drawer")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         BuxCatalogDynamicText(key: "Track physical paper money balances")
@@ -43,11 +43,11 @@ struct DualCashDrawerSettingsView: View {
             
             if store.dualCashDrawerEnabled {
                 // Section 3: Currency Setup
-                BuxFormSection(title: "Currency Configuration") {
+                BuxFormSection(title: "Currency configuration") {
                     VStack(alignment: .leading, spacing: 14) {
                         HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 6) {
-                                BuxCatalogDynamicText(key: "Primary Local Currency")
+                                BuxCatalogDynamicText(key: "Primary local currency")
                                     .font(.system(size: 12, weight: .bold))
                                     .buxLabelSecondary()
                                 
@@ -63,7 +63,7 @@ struct DualCashDrawerSettingsView: View {
                             Spacer()
                             
                             VStack(alignment: .leading, spacing: 6) {
-                                BuxCatalogDynamicText(key: "Secondary Trade Currency")
+                                BuxCatalogDynamicText(key: "Secondary trade currency")
                                     .font(.system(size: 12, weight: .bold))
                                     .buxLabelSecondary()
                                 
@@ -81,7 +81,7 @@ struct DualCashDrawerSettingsView: View {
                 }
                 
                 // Section 4: Seed Drawer Balances
-                BuxFormSection(title: "Seed Physical Cash Balances") {
+                BuxFormSection(title: "Seed physical cash balances") {
                     VStack(alignment: .leading, spacing: 14) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(
@@ -148,7 +148,7 @@ struct DualCashDrawerSettingsView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Dual-Cash Drawer")
+        .buxCatalogNavigationTitle("Dual-cash drawer")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             primaryInput = store.primaryLocalCurrency
@@ -165,7 +165,7 @@ struct DualCashDrawerSettingsView: View {
                 .foregroundColor(.green)
             
             VStack(alignment: .leading, spacing: 3) {
-                BuxCatalogDynamicText(key: "Cash Drawer")
+                BuxCatalogDynamicText(key: "Cash drawer")
                     .font(.system(size: 16, weight: .black, design: .rounded))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 
