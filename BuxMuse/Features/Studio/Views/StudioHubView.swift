@@ -40,6 +40,7 @@ struct StudioHubView: View {
     @State private var showTimeTracker = false
     @State private var showProSearch = false
     @State private var showBusinessCardStudio = false
+    @State private var navigateToInvoiceArchive = false
     @State private var hubAppeared = false
 
     private var display: StudioHubDisplay {
@@ -326,6 +327,14 @@ struct StudioHubView: View {
                     .environmentObject(studioBrain)
                     .environment(\.studioEnhancedTint, true)
             }
+            .navigationDestination(isPresented: $navigateToInvoiceArchive) {
+                StudioInvoiceArchiveView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(store)
+                    .environmentObject(simpleStudioStore)
+                    .environment(\.studioEnhancedTint, true)
+            }
             .navigationDestination(isPresented: $showBusinessCardStudio) {
                 ProBusinessCardStudioView()
                     .environmentObject(themeManager)
@@ -409,6 +418,10 @@ struct StudioHubView: View {
                     navRow(title: "Mileage Log", icon: "car.fill", color: .cyan) { navigateToMileage = true }
                     studioRowDivider
                     navRow(title: "Deductions", icon: "lightbulb.fill", color: .yellow) { navigateToDeductions = true }
+                    studioRowDivider
+                    navRow(title: "Backup invoices", icon: "doc.text.image.fill", color: .brown) {
+                        navigateToInvoiceArchive = true
+                    }
                 }
             }
         }

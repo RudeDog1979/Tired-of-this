@@ -5521,6 +5521,17 @@
         }
       }
     },
+    "Adds Pro receipt images and Simple scan photos from this device." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrega imágenes de recibos de Pro y fotos de escaneos de Simple de este dispositivo."
+          }
+        }
+      }
+    },
     "Adds the drive home (From ↔ To swapped)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6434,6 +6445,17 @@
         }
       }
     },
+    "All invoices will be included." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se incluirán todas las facturas."
+          }
+        }
+      }
+    },
     "All lines" : {
       "comment" : "A label for the breakdown of a node's total.",
       "extractionState" : "stale",
@@ -7335,6 +7357,29 @@
         }
       }
     },
+    "Archive ready" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo listo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo listo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivo listo"
+          }
+        }
+      }
+    },
     "Archived" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8178,6 +8223,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frecuencia de copia de seguridad"
+          }
+        }
+      }
+    },
+    "Backup invoices" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Respaldar facturas"
           }
         }
       }
@@ -10101,6 +10157,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Monta una racha de 3 semanas con aportes consecutivos."
+          }
+        }
+      }
+    },
+    "Building archive…" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creando archivo…"
           }
         }
       }
@@ -13700,19 +13767,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cerca"
+            "value" : "Cerrar"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cerca"
+            "value" : "Cerrar"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cerca"
+            "value" : "Cerrar"
           }
         }
       }
@@ -15100,6 +15167,17 @@
         }
       }
     },
+    "Create invoices in Simple or Pro Studio, then export PDF and PNG backups here. You can also include receipt photos when you export." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea facturas en Simple o Pro Studio y exporta respaldos PDF y PNG aquí. También puedes incluir fotos de recibos al exportar."
+          }
+        }
+      }
+    },
     "Create project" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15167,6 +15245,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Crear espacio de trabajo"
+          }
+        }
+      }
+    },
+    "Create ZIP" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear ZIP"
           }
         }
       }
@@ -17589,6 +17678,17 @@
         }
       }
     },
+    "Delete invoices?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar facturas?"
+          }
+        }
+      }
+    },
     "Delete selected designs?" : {
       "localizations" : {
         "es" : {
@@ -19347,6 +19447,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "p. ej. Ahorro semanal"
+          }
+        }
+      }
+    },
+    "Each invoice is exported as PDF and PNG. Use Share to save to Files, iCloud, or send to yourself." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada factura se exporta en PDF y PNG. Usa Compartir para guardar en Archivos, iCloud o enviártela."
           }
         }
       }
@@ -22282,6 +22393,17 @@
         }
       }
     },
+    "Export" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar"
+          }
+        }
+      }
+    },
     "Export & share" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -22374,6 +22496,28 @@
         }
       }
     },
+    "Export invoices (PDF + PNG) and optional receipt photos from Studio → Tools → Backup invoices." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporta facturas (PDF + PNG) y fotos de recibos opcionales desde Studio → Herramientas → Respaldar facturas."
+          }
+        }
+      }
+    },
+    "Export options" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones de exportación"
+          }
+        }
+      }
+    },
     "Export PDF" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -22416,6 +22560,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exportar PDF (hecho para imprimir)"
+          }
+        }
+      }
+    },
+    "Export PDF + PNG backups on this device. Add receipt photos only if you want them." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporta respaldos PDF y PNG en este dispositivo. Agrega fotos de recibos solo si las quieres."
           }
         }
       }
@@ -22484,6 +22639,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exportar imagen PNG"
+          }
+        }
+      }
+    },
+    "Export receipt photos only" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar solo fotos de recibos"
+          }
+        }
+      }
+    },
+    "Export selected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar seleccionadas"
+          }
+        }
+      }
+    },
+    "Exports stay on this device until you share them. Each invoice includes PDF and PNG. Optionally add receipt and scan photos to the same ZIP." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las exportaciones permanecen en este dispositivo hasta que las compartas. Cada factura incluye PDF y PNG. Opcionalmente agrega fotos de recibos y escaneos al mismo ZIP."
           }
         }
       }
@@ -27201,6 +27389,17 @@
         }
       }
     },
+    "Include receipt photos" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir fotos de recibos"
+          }
+        }
+      }
+    },
     "Include Studio data" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -28611,6 +28810,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Las facturas pueden utilizar los colores y el estilo de esta tarjeta como marca comercial."
+          }
+        }
+      }
+    },
+    "Invoices selected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturas seleccionadas"
           }
         }
       }
@@ -30399,7 +30609,7 @@
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vinculado"
+            "value" : "Vinculada"
           }
         },
         "es-ES" : {
@@ -35930,6 +36140,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aún no se han registrado facturas"
+          }
+        }
+      }
+    },
+    "No invoices to include." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay facturas para incluir."
+          }
+        }
+      }
+    },
+    "No invoices yet" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay facturas"
           }
         }
       }
@@ -41729,6 +41961,17 @@
         }
       }
     },
+    "Pro" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro"
+          }
+        }
+      }
+    },
     "PRO" : {
       "comment" : "A label displayed as a badge on the Business Card Studio header.",
       "isCommentAutoGenerated" : true,
@@ -43841,6 +44084,17 @@
         }
       }
     },
+    "Ready" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo"
+          }
+        }
+      }
+    },
     "READY TO INVOICE" : {
       "comment" : "A heading for the list of jobs that are ready to be invoiced.",
       "extractionState" : "stale",
@@ -44933,6 +45187,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quitar suscripción"
+          }
+        }
+      }
+    },
+    "Removes the selected Simple or Pro copies only. Linked invoices in the other tier stay on this device." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina solo las copias seleccionadas de Simple o Pro. Las facturas vinculadas en el otro nivel permanecen en este dispositivo."
           }
         }
       }
@@ -48389,6 +48654,28 @@
         }
       }
     },
+    "Select all" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleccionar todo"
+          }
+        }
+      }
+    },
+    "Select at least one invoice or include receipt photos to export." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona al menos una factura o incluye fotos de recibos para exportar."
+          }
+        }
+      }
+    },
     "SELECT CASH DRAWER" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -48458,6 +48745,29 @@
         }
       }
     },
+    "Select invoices to include, or turn on receipt photos." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona facturas para incluir o activa fotos de recibos."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona facturas para incluir o activa fotos de recibos."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona facturas para incluir o activa fotos de recibos."
+          }
+        }
+      }
+    },
     "Select More Photos..." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -48500,6 +48810,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seleccionado"
+          }
+        }
+      }
+    },
+    "Selected invoices will be removed from this device. This cannot be undone." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las facturas seleccionadas se eliminarán de este dispositivo. Esto no se puede deshacer."
           }
         }
       }
@@ -49825,6 +50146,17 @@
         }
       }
     },
+    "Share archive" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir archivo"
+          }
+        }
+      }
+    },
     "Share attached file" : {
       "localizations" : {
         "es" : {
@@ -50977,7 +51309,7 @@
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sencillo"
+            "value" : "Simple"
           }
         },
         "es-ES" : {
@@ -56987,6 +57319,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Es posible que esta factura haya sido eliminada."
+          }
+        }
+      }
+    },
+    "This invoice will be removed from Pro Studio on this device. A linked Simple copy stays if one exists." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta factura se eliminará de Pro Studio en este dispositivo. Una copia vinculada en Simple permanece si existe."
           }
         }
       }
@@ -65334,6 +65677,17 @@
         }
       }
     },
+    "Your invoice vault" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu bóveda de facturas"
+          }
+        }
+      }
+    },
     "Your latest charge of %@ at %@ is higher than the previous transaction of %@. This represents a price rise of %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -66049,6 +66403,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu trabajo"
+          }
+        }
+      }
+    },
+    "Your ZIP is ready to share." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu ZIP está listo para compartir."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu ZIP está listo para compartir."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu ZIP está listo para compartir."
           }
         }
       }

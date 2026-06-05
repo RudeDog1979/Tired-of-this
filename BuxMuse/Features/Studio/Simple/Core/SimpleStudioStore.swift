@@ -275,6 +275,20 @@ public final class SimpleStudioStore: ObservableObject {
         StudioSyncCoordinator.markSimpleInvoicePaidCascade(invoiceId: id, store: self)
     }
 
+    /// Removes a Simple invoice and unlinks related entries. Does not delete a linked Pro copy (Option A).
+    public func deleteInvoice(id: UUID) {
+        unlinkAndRemoveEntries(forDeletedInvoice: id)
+        invoices.removeAll { $0.id == id }
+        save()
+    }
+
+    func unlinkAndRemoveEntries(forDeletedInvoice invoiceId: UUID) {
+        entries.removeAll { $0.linkedInvoiceId == invoiceId && $0.kind == .owedToMe }
+        for idx in entries.indices where entries[idx].linkedInvoiceId == invoiceId {
+            entries[idx].linkedInvoiceId = nil
+        }
+    }
+
     /// Appends stopwatch time from Simple Studio Log Time onto a job entry.
     public func appendLoggedTime(jobEntryId: UUID, duration: TimeInterval, sessionNote: String?) {
         guard duration > 0, var job = entry(id: jobEntryId), job.kind == .job else { return }

@@ -36,6 +36,7 @@ struct SimpleStudioHubView: View {
     @State private var detailDestination: SimpleStudioDetailDestination?
     @State private var navigateMyMoney = false
     @State private var showSearch = false
+    @State private var navigateToInvoiceArchive = false
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
 
     private var display: SimpleStudioHubDisplay { simpleStudioBrain.hubDisplay }
@@ -144,6 +145,9 @@ struct SimpleStudioHubView: View {
                         }
                             .buxScreenEntrance(index: 8, isVisible: hubAppeared)
 
+                        simpleToolsSection
+                            .buxScreenEntrance(index: 9, isVisible: hubAppeared)
+
                         Spacer().frame(height: 100)
                     }
                     .padding(.top, BuxTokens.tight)
@@ -189,6 +193,13 @@ struct SimpleStudioHubView: View {
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
+            }
+            .navigationDestination(isPresented: $navigateToInvoiceArchive) {
+                StudioInvoiceArchiveView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+                    .environmentObject(simpleStudioStore)
             }
             .sheet(item: $proUpsellFeature) { feature in
                 StudioProUpsellSheet(feature: feature)
@@ -499,6 +510,52 @@ struct SimpleStudioHubView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.30) {
             action()
         }
+    }
+
+    private var simpleToolsSection: some View {
+        VStack(alignment: .leading, spacing: BuxTokens.tight) {
+            BuxSectionHeader(title: "Tools")
+
+            BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: 0) {
+                BuxCardButton(action: { navigateToInvoiceArchive = true }) {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: BuxTokens.tight, style: .continuous)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.brown.opacity(0.16),
+                                            themeManager.current.accentColor.opacity(0.12)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 32, height: 32)
+                            Image(systemName: "doc.text.image.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [.brown, themeManager.current.accentColor],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        }
+                        BuxCatalogText.text("Backup invoices")
+                            .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme).opacity(0.6))
+                    }
+                    .padding(.horizontal, BuxTokens.section)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                }
+            }
+        }
+        .padding(.horizontal, BuxTokens.marginRegular)
     }
 
     private var markPaidAlertTitle: String {

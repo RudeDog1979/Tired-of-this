@@ -25,6 +25,7 @@ struct DataSettingsView: View {
     @State private var showSuccessAlert = false
     @State private var showLogoCacheClearedAlert = false
     @State private var exportURL: URL? = nil
+    @State private var storageBreakdown = BuxStorageBreakdown.empty
     @State private var photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
 
     var body: some View {
@@ -118,6 +119,68 @@ struct DataSettingsView: View {
                 }
             }
 
+            BuxFormSection(title: "Storage") {
+                BuxCatalogDynamicText(key: "All sizes are calculated on this device. BuxMuse never uploads your files.")
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .buxFormFieldPadding()
+
+                storageRow(
+                    "Receipts & scans",
+                    BuxStorageAuditEngine.formattedByteCount(storageBreakdown.receiptsAndScansBytes),
+                    detail: "\(storageBreakdown.receiptImageCount + storageBreakdown.scanImageCount) images"
+                )
+                BuxFormRowDivider()
+                storageRow(
+                    "Merchant logos",
+                    BuxStorageAuditEngine.formattedByteCount(storageBreakdown.merchantLogosBytes)
+                )
+                BuxFormRowDivider()
+                storageRow(
+                    "Database",
+                    BuxStorageAuditEngine.formattedByteCount(storageBreakdown.databaseBytes)
+                )
+                BuxFormRowDivider()
+                storageRow(
+                    "Silent backups",
+                    BuxStorageAuditEngine.formattedByteCount(storageBreakdown.silentBackupsBytes)
+                )
+                BuxFormRowDivider()
+                storageRow(
+                    "Settings",
+                    BuxStorageAuditEngine.formattedByteCount(storageBreakdown.settingsBytes)
+                )
+                BuxFormRowDivider()
+                storageRow(
+                    "Total (tracked)",
+                    BuxStorageAuditEngine.formattedByteCount(storageBreakdown.totalBytes),
+                    emphasized: true
+                )
+
+                BuxFormRowDivider()
+
+                BuxCatalogDynamicText(
+                    key: "Export invoices (PDF + PNG) and optional receipt photos from Studio → Tools → Backup invoices."
+                )
+                .font(.system(size: 12, weight: .medium))
+                .buxLabelSecondary()
+                .fixedSize(horizontal: false, vertical: true)
+                .buxFormFieldPadding()
+
+                Button {
+                    refreshStorageBreakdown()
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                        BuxCatalogDynamicText(key: "Refresh storage sizes")
+                    }
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                }
+                .buxFormFieldPadding()
+            }
+
             BuxFormSection(title: "Data Guard mode") {
                 Toggle(isOn: $store.dataGuardModeEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -143,6 +206,7 @@ struct DataSettingsView: View {
                 Button {
                     LightweightLogoCache.shared.clearCacheSynchronously()
                     showLogoCacheClearedAlert = true
+                    refreshStorageBreakdown()
                 } label: {
                     HStack {
                         Image(systemName: "photo.on.rectangle.angled")
@@ -237,10 +301,36 @@ struct DataSettingsView: View {
         .onChange(of: store.includeAnalyticsInExports) { _, _ in store.save() }
         .onAppear {
             photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
+            refreshStorageBreakdown()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
         }
+    }
+
+    // MARK: - Storage
+
+    private func storageRow(_ label: String, _ value: String, detail: String? = nil, emphasized: Bool = false) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            BuxCatalogDynamicText(key: label)
+                .font(.system(size: 15, weight: emphasized ? .bold : .semibold))
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 15, weight: emphasized ? .bold : .semibold, design: .rounded))
+                    .foregroundColor(emphasized ? themeManager.current.accentColor : themeManager.labelPrimary(for: colorScheme))
+                if let detail {
+                    Text(detail)
+                        .font(.system(size: 11, weight: .medium))
+                        .buxLabelSecondary()
+                }
+            }
+        }
+        .buxFormFieldPadding()
+    }
+
+    private func refreshStorageBreakdown() {
+        storageBreakdown = BuxStorageAuditEngine.audit()
     }
 
     // MARK: - Export Logic

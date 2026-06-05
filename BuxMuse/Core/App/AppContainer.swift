@@ -102,6 +102,9 @@ final class AppContainer: ObservableObject {
             studioStore: studioStore,
             simpleStudioStore: simpleStudioStore
         )
+        Task {
+            await BackupNotificationScheduler.reschedule(frequency: settingsStore.autoBackupFrequency)
+        }
     }
 
     func scheduleEngagementRefresh() {

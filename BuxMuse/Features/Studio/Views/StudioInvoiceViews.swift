@@ -20,6 +20,7 @@ struct StudioInvoicesListView: View {
     @State private var searchText = ""
     @State private var isInvoiceSearchPresented = false
     @State private var statusFilter: InvoiceStatus?
+    @State private var pendingDeleteOffsets: IndexSet?
 
     private var filteredInvoices: [StudioInvoice] {
         store.invoices.filter { inv in
@@ -67,6 +68,26 @@ struct StudioInvoicesListView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(store)
         }
+        .confirmationDialog(
+            BuxCatalogLabel.string("Delete invoice?", locale: appSettingsManager.interfaceLocale),
+            isPresented: Binding(
+                get: { pendingDeleteOffsets != nil },
+                set: { if !$0 { pendingDeleteOffsets = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                if let offsets = pendingDeleteOffsets {
+                    deleteInvoice(at: offsets)
+                }
+                pendingDeleteOffsets = nil
+            }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {
+                pendingDeleteOffsets = nil
+            }
+        } message: {
+            BuxCatalogDynamicText(key: "This invoice will be removed from Pro Studio on this device. A linked Simple copy stays if one exists.")
+        }
     }
 
     private var proSuggestions: [StudioInvoiceSuggestion] {
@@ -105,7 +126,9 @@ struct StudioInvoicesListView: View {
                 }
                 .studioThemedListRowChrome()
             }
-            .onDelete(perform: deleteInvoice)
+            .onDelete { offsets in
+                pendingDeleteOffsets = offsets
+            }
         }
         .contentMargins(.top, BuxLayout.invoicesNavChromeScrollInset, for: .scrollContent)
         .studioThemedListRows()

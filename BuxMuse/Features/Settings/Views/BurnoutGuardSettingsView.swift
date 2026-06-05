@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BurnoutGuardSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
@@ -17,6 +18,7 @@ struct BurnoutGuardSettingsView: View {
 
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
     @State private var healthKitDenied = false
+    @State private var showHealthConsentSheet = false
 
     var body: some View {
         BuxThemedCardForm {
@@ -97,11 +99,29 @@ struct BurnoutGuardSettingsView: View {
                         .tint(.green)
                         .buxFormFieldPadding()
 
+                        BuxCatalogDynamicText(key: "Sleep data is read on this iPhone only. BuxMuse has no servers — we never receive your Health information.")
+                            .font(.system(size: 11, weight: .medium))
+                            .buxLabelSecondary()
+                            .fixedSize(horizontal: false, vertical: true)
+                            .buxFormFieldPadding()
+
                         if healthKitDenied {
                             BuxCatalogDynamicText(key: "Health access was denied. Enable Sleep in Settings → Health → Data Access, or keep using manual sliders.")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(.orange)
                                 .buxFormFieldPadding()
+
+                            Button {
+                                openHealthSettings()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "heart.text.square")
+                                    BuxCatalogDynamicText(key: "Open Health settings")
+                                }
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(themeManager.current.accentColor)
+                            }
+                            .buxFormFieldPadding()
                         }
                     } else {
                         Button {
@@ -139,6 +159,15 @@ struct BurnoutGuardSettingsView: View {
         .onChange(of: store.burnoutGuardEnabled) { _, _ in store.save() }
         .onChange(of: store.manualSleepHours) { _, _ in store.save() }
         .onChange(of: store.manualStressLevel) { _, _ in store.save() }
+        .sheet(isPresented: $showHealthConsentSheet) {
+            HealthKitConsentSheet {
+                store.hasAcknowledgedHealthKitDisclaimer = true
+                store.save()
+                requestHealthKitAuthorization()
+            }
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
+        }
         .sheet(item: $proUpsellFeature) { feature in
             StudioProUpsellSheet(feature: feature)
                 .environmentObject(themeManager)
@@ -153,24 +182,41 @@ struct BurnoutGuardSettingsView: View {
             get: { store.healthKitSyncEnabled },
             set: { newValue in
                 if newValue {
-                    Task {
-                        let ok = await BurnoutEngine.shared.requestHealthKitAuthorization()
-                        await MainActor.run {
-                            if ok {
-                                store.healthKitSyncEnabled = true
-                                healthKitDenied = false
-                            } else {
-                                store.healthKitSyncEnabled = false
-                                healthKitDenied = true
-                            }
-                            store.save()
-                        }
+                    if store.hasAcknowledgedHealthKitDisclaimer {
+                        requestHealthKitAuthorization()
+                    } else {
+                        showHealthConsentSheet = true
                     }
                 } else {
                     store.healthKitSyncEnabled = false
+                    healthKitDenied = false
                     store.save()
                 }
             }
         )
+    }
+
+    private func requestHealthKitAuthorization() {
+        Task {
+            let ok = await BurnoutEngine.shared.requestHealthKitAuthorization()
+            await MainActor.run {
+                if ok {
+                    store.healthKitSyncEnabled = true
+                    healthKitDenied = false
+                } else {
+                    store.healthKitSyncEnabled = false
+                    healthKitDenied = true
+                }
+                store.save()
+            }
+        }
+    }
+
+    private func openHealthSettings() {
+        if let healthURL = URL(string: "x-apple-health://") {
+            openURL(healthURL)
+        } else if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+            openURL(settingsURL)
+        }
     }
 }
