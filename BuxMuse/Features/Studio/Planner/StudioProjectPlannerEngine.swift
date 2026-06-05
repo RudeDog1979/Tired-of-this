@@ -63,7 +63,8 @@ public enum StudioProjectPlannerEngine {
         project: StudioProject,
         receipts: [StudioReceipt],
         agreement: AgreementDraft?,
-        profile: StudioProfile
+        profile: StudioProfile,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> StudioProjectPlannerSnapshot {
         let analysis = StudioProjectEngine.analyzeProject(project: project, receipts: receipts)
         let loggedHours = analysis.totalTime / 3600.0
@@ -78,16 +79,25 @@ public enum StudioProjectPlannerEngine {
             if ratio >= 1.0 {
                 alerts.append(.init(
                     id: "scope",
-                    title: "Scope creep",
-                    detail: "\(String(format: "%.1f", loggedHours - project.budgetedHours))h over the \(String(format: "%.1f", project.budgetedHours))h budget.",
+                    title: StudioPlannerL10n.line("Scope creep", locale: locale),
+                    detail: StudioPlannerL10n.format(
+                        "%.1fh over the %.1fh budget.",
+                        locale: locale,
+                        loggedHours - project.budgetedHours,
+                        project.budgetedHours
+                    ),
                     severity: .critical
                 ))
                 health -= 28
             } else if ratio >= 0.9 {
                 alerts.append(.init(
                     id: "scope-warn",
-                    title: "Scope budget tight",
-                    detail: "\(String(format: "%.1f", max(0, project.budgetedHours - loggedHours)))h left in scope.",
+                    title: StudioPlannerL10n.line("Scope budget tight", locale: locale),
+                    detail: StudioPlannerL10n.format(
+                        "%.1fh left in scope.",
+                        locale: locale,
+                        max(0, project.budgetedHours - loggedHours)
+                    ),
                     severity: .warning
                 ))
                 health -= 12
@@ -97,8 +107,12 @@ public enum StudioProjectPlannerEngine {
         if project.allowedRevisions > 0, project.currentRevisions > project.allowedRevisions {
             alerts.append(.init(
                 id: "revisions",
-                title: "Extra revisions",
-                detail: "\(project.currentRevisions - project.allowedRevisions) revision(s) beyond agreement.",
+                title: StudioPlannerL10n.line("Extra revisions", locale: locale),
+                detail: StudioPlannerL10n.format(
+                    "%lld revision(s) beyond agreement.",
+                    locale: locale,
+                    Int64(project.currentRevisions - project.allowedRevisions)
+                ),
                 severity: .warning
             ))
             health -= 10
@@ -107,8 +121,12 @@ public enum StudioProjectPlannerEngine {
         if loggedHours >= 2, nonBillableHours / loggedHours >= 0.2 {
             alerts.append(.init(
                 id: "leakage",
-                title: "Time leakage",
-                detail: "\(String(format: "%.1f", nonBillableHours))h logged as non-billable — check if that time should be invoiced.",
+                title: StudioPlannerL10n.line("Time leakage", locale: locale),
+                detail: StudioPlannerL10n.format(
+                    "%.1fh logged as non-billable — check if that time should be invoiced.",
+                    locale: locale,
+                    nonBillableHours
+                ),
                 severity: .warning
             ))
             health -= 14
@@ -117,8 +135,11 @@ public enum StudioProjectPlannerEngine {
         if analysis.isOverrunRisk {
             alerts.append(.init(
                 id: "overrun",
-                title: "Fixed-fee overrun",
-                detail: "Hours on a fixed project are high relative to fee — effective rate may be dropping.",
+                title: StudioPlannerL10n.line("Fixed-fee overrun", locale: locale),
+                detail: StudioPlannerL10n.line(
+                    "Hours on a fixed project are high relative to fee — effective rate may be dropping.",
+                    locale: locale
+                ),
                 severity: .warning
             ))
             health -= 10
@@ -130,10 +151,15 @@ public enum StudioProjectPlannerEngine {
            analysis.effectiveHourlyRate > 0,
            analysis.effectiveHourlyRate < defaultRate * Decimal(0.85) {
             isUnderpriced = true
-            underpricingNote = "Effective \(analysis.effectiveHourlyRate)/hr is below your default \(defaultRate)/hr."
+            underpricingNote = StudioPlannerL10n.format(
+                "Effective %@/hr is below your default %@/hr.",
+                locale: locale,
+                "\(analysis.effectiveHourlyRate)",
+                "\(defaultRate)"
+            )
             alerts.append(.init(
                 id: "rate",
-                title: "Underpricing signal",
+                title: StudioPlannerL10n.line("Underpricing signal", locale: locale),
                 detail: underpricingNote!,
                 severity: .warning
             ))
@@ -147,8 +173,13 @@ public enum StudioProjectPlannerEngine {
                milestone.dueDate < parent.dueDate {
                 alerts.append(.init(
                     id: "dep-\(milestone.id.uuidString)",
-                    title: "Dependency order",
-                    detail: "\"\(milestone.title)\" is scheduled before \"\(parent.title)\" completes.",
+                    title: StudioPlannerL10n.line("Dependency order", locale: locale),
+                    detail: StudioPlannerL10n.format(
+                        "\"%@\" is scheduled before \"%@\" completes.",
+                        locale: locale,
+                        milestone.title,
+                        parent.title
+                    ),
                     severity: .warning
                 ))
                 health -= 5
@@ -160,8 +191,11 @@ public enum StudioProjectPlannerEngine {
         } else if agreement != nil {
             alerts.append(.init(
                 id: "approval",
-                title: "Client approval pending",
-                detail: "Agreement exists but client proof is not recorded yet.",
+                title: StudioPlannerL10n.line("Client approval pending", locale: locale),
+                detail: StudioPlannerL10n.line(
+                    "Agreement exists but client proof is not recorded yet.",
+                    locale: locale
+                ),
                 severity: .info
             ))
             health -= 4
@@ -172,19 +206,12 @@ public enum StudioProjectPlannerEngine {
             return project.budgetedHours - loggedHours
         }()
 
-        let timeline = buildTimeline(project: project, loggedHours: loggedHours, predictedExtra: predictedHours)
-        let milestones = buildMilestones(project: project)
+        let timeline = buildTimeline(project: project, loggedHours: loggedHours, predictedExtra: predictedHours, locale: locale)
+        let milestones = buildMilestones(project: project, locale: locale)
         let progress = progressAlongTimeline(now: Date(), start: timeline.start, end: timeline.end)
 
         let score = Int(min(100, max(0, health.rounded())))
-        let label: String = {
-            switch score {
-            case 80...: return "Healthy"
-            case 60..<80: return "Watch"
-            case 40..<60: return "At risk"
-            default: return "Critical"
-            }
-        }()
+        let label = healthLabel(for: score, locale: locale)
 
         return StudioProjectPlannerSnapshot(
             healthScore: score,
@@ -203,10 +230,21 @@ public enum StudioProjectPlannerEngine {
         )
     }
 
+    private static func healthLabel(for score: Int, locale: Locale) -> String {
+        let key: String = switch score {
+        case 80...: "Healthy"
+        case 60..<80: "Watch"
+        case 40..<60: "At risk"
+        default: "Critical"
+        }
+        return StudioPlannerL10n.line(key, locale: locale)
+    }
+
     private static func buildTimeline(
         project: StudioProject,
         loggedHours: Double,
-        predictedExtra: Double?
+        predictedExtra: Double?,
+        locale: Locale
     ) -> (start: Date, end: Date, segments: [StudioPlannerTimelineSegment]) {
         let start = project.startDate
         var end = project.endDate ?? Date().addingTimeInterval(14 * 86_400)
@@ -230,7 +268,7 @@ public enum StudioProjectPlannerEngine {
             segments.append(
                 StudioPlannerTimelineSegment(
                     id: UUID(),
-                    label: "Elapsed",
+                    label: StudioPlannerL10n.line("Elapsed", locale: locale),
                     start: start,
                     end: elapsedEnd,
                     kind: .elapsed
@@ -241,7 +279,7 @@ public enum StudioProjectPlannerEngine {
             segments.append(
                 StudioPlannerTimelineSegment(
                     id: UUID(),
-                    label: "Planned",
+                    label: StudioPlannerL10n.line("Planned", locale: locale),
                     start: elapsedEnd,
                     end: end,
                     kind: .planned
@@ -269,7 +307,7 @@ public enum StudioProjectPlannerEngine {
             segments.append(
                 StudioPlannerTimelineSegment(
                     id: UUID(),
-                    label: "Deliverables",
+                    label: StudioPlannerL10n.line("Deliverables", locale: locale),
                     start: mid,
                     end: mid.addingTimeInterval(86_400),
                     kind: .milestone
@@ -280,7 +318,7 @@ public enum StudioProjectPlannerEngine {
         return (start, end, segments)
     }
 
-    private static func buildMilestones(project: StudioProject) -> [StudioPlannerMilestone] {
+    private static func buildMilestones(project: StudioProject, locale: Locale) -> [StudioPlannerMilestone] {
         let now = Date()
         if !project.plannerMilestones.isEmpty {
             return project.plannerMilestones
@@ -296,17 +334,37 @@ public enum StudioProjectPlannerEngine {
         }
 
         var items: [StudioPlannerMilestone] = [
-            .init(id: UUID(), title: "Kickoff", date: project.startDate, isPast: project.startDate < now)
+            .init(
+                id: UUID(),
+                title: StudioPlannerL10n.line("Kickoff", locale: locale),
+                date: project.startDate,
+                isPast: project.startDate < now
+            )
         ]
         if project.budgetedHours > 0 {
             let mid = project.startDate.addingTimeInterval(7 * 86_400)
-            items.append(.init(id: UUID(), title: "Scope checkpoint", date: mid, isPast: mid < now))
+            items.append(.init(
+                id: UUID(),
+                title: StudioPlannerL10n.line("Scope checkpoint", locale: locale),
+                date: mid,
+                isPast: mid < now
+            ))
         }
         if let end = project.endDate {
-            items.append(.init(id: UUID(), title: "Delivery", date: end, isPast: end < now))
+            items.append(.init(
+                id: UUID(),
+                title: StudioPlannerL10n.line("Delivery", locale: locale),
+                date: end,
+                isPast: end < now
+            ))
         } else if project.budgetedHours > 0 {
             let est = project.startDate.addingTimeInterval(Double(project.budgetedHours) * 3_600)
-            items.append(.init(id: UUID(), title: "Target delivery", date: est, isPast: est < now))
+            items.append(.init(
+                id: UUID(),
+                title: StudioPlannerL10n.line("Target delivery", locale: locale),
+                date: est,
+                isPast: est < now
+            ))
         }
         let deliverable = project.plannedDeliverables.trimmingCharacters(in: .whitespacesAndNewlines)
         if !deliverable.isEmpty {

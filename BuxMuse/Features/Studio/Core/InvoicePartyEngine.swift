@@ -162,7 +162,8 @@ public enum InvoicePartyEngine {
     public static func legalFooter(
         issuer: InvoicePartyDetails,
         settings: StudioInvoiceSettings,
-        taxProfile: StudioTaxProfile
+        taxProfile: StudioTaxProfile,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> InvoiceLegalFooterDisplay {
         guard settings.showLegalFooter else { return .hidden }
 
@@ -182,9 +183,9 @@ public enum InvoicePartyEngine {
         }
         if settings.showTaxID {
             if !issuer.taxRegistrationNumber.isEmpty {
-                lines.append("\(IndirectTaxLabelResolver.registrationLabel(for: taxProfile)): \(issuer.taxRegistrationNumber)")
+                lines.append("\(IndirectTaxLabelResolver.registrationLabel(for: taxProfile, locale: locale)): \(issuer.taxRegistrationNumber)")
             } else if taxProfile.vatRegistered {
-                lines.append("\(IndirectTaxLabelResolver.registrationLabel(for: taxProfile)): —")
+                lines.append("\(IndirectTaxLabelResolver.registrationLabel(for: taxProfile, locale: locale)): —")
             }
         }
         if !issuer.countryCode.isEmpty {

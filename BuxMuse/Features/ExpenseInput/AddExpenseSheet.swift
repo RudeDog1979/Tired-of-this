@@ -68,6 +68,12 @@ struct AddExpenseSheet: View {
 
     private var incomeAccent: Color { .mint }
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -353,7 +359,7 @@ struct AddExpenseSheet: View {
                     )
                 case .failure(let error):
                     print("OCR receipt parse failed: \(error)")
-                    viewModel.saveError = "Failed to parse receipt. Please enter details manually."
+                    viewModel.saveError = loc("Failed to parse receipt. Please enter details manually.")
                 }
             }
         }
@@ -419,20 +425,20 @@ struct AddExpenseSheet: View {
             brain.offerExpenseUndo(snapshot)
             dismiss()
         } catch {
-            viewModel.saveError = "Could not delete expense."
+            viewModel.saveError = loc("Could not delete expense.")
         }
     }
 
     private var editActionsSection: some View {
         VStack(spacing: 12) {
             editPrimaryAction(
-                viewModel.isSubscription ? "Remove subscription" : "Convert to subscription",
+                viewModel.isSubscription ? loc("Remove subscription") : loc("Convert to subscription"),
                 icon: viewModel.isSubscription ? "xmark.circle" : "arrow.triangle.2.circlepath"
             ) {
                 viewModel.convertToSubscription()
             }
             editPrimaryAction(
-                viewModel.isRecurring ? "Remove recurring" : "Mark as recurring",
+                viewModel.isRecurring ? loc("Remove recurring") : loc("Mark as recurring"),
                 icon: viewModel.isRecurring ? "xmark.circle" : "calendar.badge.clock"
             ) {
                 viewModel.markRecurring()
@@ -708,7 +714,7 @@ struct AddExpenseSheet: View {
             if !viewModel.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 AsyncMerchantLogoView(merchantName: viewModel.merchantName, size: 28)
             }
-            TextField("Merchant name", text: $viewModel.merchantName)
+            TextField(loc("Merchant name"), text: $viewModel.merchantName)
                 .autocapitalization(.words)
                 .disableAutocorrection(true)
         }
@@ -735,7 +741,7 @@ struct AddExpenseSheet: View {
         }
 
         if viewModel.needsDisambiguatorLabel {
-            TextField("Label (e.g. Food, Clothes)", text: $viewModel.merchantDisambiguator)
+            TextField(loc("Label (e.g. Food, Clothes)"), text: $viewModel.merchantDisambiguator)
                 .font(.system(size: 14, weight: .medium))
         }
 
@@ -824,7 +830,7 @@ struct AddExpenseSheet: View {
                 Image(systemName: "briefcase.fill")
                     .foregroundColor(themeManager.current.accentColor)
 
-                Picker("Workspace", selection: workspaceSelection) {
+                Picker(loc("Workspace"), selection: workspaceSelection) {
                     BuxCatalogText.text("No specific workspace").tag(Optional<UUID>.none)
                     ForEach(HustleManager.shared.hustles.filter { $0.isActive }) { hustle in
                         Text(hustle.name).tag(Optional(hustle.id))
@@ -856,7 +862,7 @@ struct AddExpenseSheet: View {
                 Image(systemName: viewModel.isBarterExchange ? "arrow.left.arrow.right" : "banknote.fill")
                     .foregroundColor(viewModel.isBarterExchange ? .orange : themeManager.current.accentColor)
 
-                Picker("Cash & Barter", selection: operationalPaymentSelection) {
+                Picker(loc("Cash & Barter"), selection: operationalPaymentSelection) {
                     BuxCatalogText.text("Not cash or barter").tag("")
                     if settingsStore.dualCashDrawerEnabled {
                         Text(
@@ -944,7 +950,7 @@ struct AddExpenseSheet: View {
 
             if showOptionalPaymentSection {
                 VStack(alignment: .leading, spacing: 10) {
-                    TextField("Search Visa, PayPal, Klarna…", text: $paymentSourceQuery)
+                    TextField(loc("Search Visa, PayPal, Klarna…"), text: $paymentSourceQuery)
                         .font(.system(size: 14, weight: .medium))
                         .textFieldStyle(.roundedBorder)
 
@@ -973,7 +979,7 @@ struct AddExpenseSheet: View {
                     if viewModel.paymentMethod != nil,
                        viewModel.paymentMethod != "Barter",
                        !(viewModel.paymentMethod?.hasPrefix("Cash (") ?? false) {
-                        Button("Clear payment source") {
+                        Button(loc("Clear payment source")) {
                             viewModel.paymentMethod = nil
                         }
                         .font(.system(size: 12, weight: .semibold))
@@ -1002,7 +1008,7 @@ struct AddExpenseSheet: View {
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .kerning(0.5)
-                    TextField("What did you give? (e.g. web design)", text: $viewModel.barterGoodsGiven, axis: .vertical)
+                    TextField(loc("What did you give? (e.g. web design)"), text: $viewModel.barterGoodsGiven, axis: .vertical)
                         .lineLimit(1...3)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -1015,7 +1021,7 @@ struct AddExpenseSheet: View {
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .kerning(0.5)
-                    TextField("What did you receive? (e.g. boat repairs)", text: $viewModel.barterGoodsReceived, axis: .vertical)
+                    TextField(loc("What did you receive? (e.g. boat repairs)"), text: $viewModel.barterGoodsReceived, axis: .vertical)
                         .lineLimit(1...3)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -1034,7 +1040,7 @@ struct AddExpenseSheet: View {
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .kerning(0.5)
-                    TextField("Estimated monetary value", text: $viewModel.barterEstimatedValue)
+                    TextField(loc("Estimated monetary value"), text: $viewModel.barterEstimatedValue)
                         .keyboardType(.decimalPad)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundColor(.orange)
@@ -1047,7 +1053,7 @@ struct AddExpenseSheet: View {
 
     private var notesCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            TextField("Notes (optional)", text: $viewModel.notes, axis: .vertical)
+            TextField(loc("Notes (optional)"), text: $viewModel.notes, axis: .vertical)
                 .lineLimit(2...5)
         }
         .padding(BuxLayout.section)

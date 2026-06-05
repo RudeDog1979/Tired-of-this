@@ -13,8 +13,13 @@ enum StudioAgreementPDFRenderer {
         draft: AgreementDraft,
         clientName: String?,
         projectName: String?,
-        providerName: String?
+        providerName: String?,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> Data? {
+        func L(_ key: String) -> String {
+            BuxCatalogLabel.string(key, locale: locale)
+        }
+
         let pageWidth: CGFloat = 612
         let pageHeight: CGFloat = 792
         let margin: CGFloat = 48
@@ -56,10 +61,16 @@ enum StudioAgreementPDFRenderer {
 
             drawLine(draft.title, font: titleFont, extraSpacing: 10)
             var meta: [String] = []
-            if let clientName, !clientName.isEmpty { meta.append("Client: \(clientName)") }
-            if let projectName, !projectName.isEmpty { meta.append("Project: \(projectName)") }
-            if let providerName, !providerName.isEmpty { meta.append("Provider: \(providerName)") }
-            meta.append("Status: \(draft.statusDisplayLabel)")
+            if let clientName, !clientName.isEmpty {
+                meta.append("\(L("Client")): \(clientName)")
+            }
+            if let projectName, !projectName.isEmpty {
+                meta.append("\(L("Project")): \(projectName)")
+            }
+            if let providerName, !providerName.isEmpty {
+                meta.append("\(L("Provider")): \(providerName)")
+            }
+            meta.append("\(L("Status")): \(L(draft.statusDisplayLabel))")
             drawLine(meta.joined(separator: " · "), font: metaFont, color: .darkGray, extraSpacing: 16)
 
             func section(_ heading: String, body: String) {
@@ -70,25 +81,30 @@ enum StudioAgreementPDFRenderer {
                 drawLine(trimmed, font: bodyFont, extraSpacing: 14)
             }
 
-            section("Scope", body: draft.scopeBullets)
-            section("Deliverables", body: draft.deliverables)
-            section("Out of scope", body: draft.outOfScope)
-            section("Payment", body: draft.paymentAmountNotes)
-            section("Payment terms", body: draft.paymentTerms)
-            section("Timeline", body: draft.timelineNotes)
+            section(L("Scope"), body: draft.scopeBullets)
+            section(L("Deliverables"), body: draft.deliverables)
+            section(L("Out of scope"), body: draft.outOfScope)
+            section(L("Payment"), body: draft.paymentAmountNotes)
+            section(L("Payment terms"), body: draft.paymentTerms)
+            section(L("Timeline"), body: draft.timelineNotes)
             if draft.hasTermsContent {
-                section("Terms & conditions", body: draft.composedTermsAndConditions)
+                section(
+                    L("Terms & conditions"),
+                    body: draft.composedTermsAndConditions(locale: locale)
+                )
             }
 
             if !draft.signOffName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                let dateStr = draft.signOffDate.map {
-                    DateFormatter.localizedString(from: $0, dateStyle: .medium, timeStyle: .none)
-                } ?? "—"
-                section("Approval", body: "\(draft.signOffName) · \(dateStr)")
+                let f = DateFormatter()
+                f.locale = locale
+                f.dateStyle = .medium
+                f.timeStyle = .none
+                let dateStr = draft.signOffDate.map { f.string(from: $0) } ?? "—"
+                section(L("Approval"), body: "\(draft.signOffName) · \(dateStr)")
             }
 
             ensureSpace(200)
-            drawLine("Signatures", font: headingFont, color: .darkGray, extraSpacing: 12)
+            drawLine(L("Signatures"), font: headingFont, color: .darkGray, extraSpacing: 12)
 
             let sigWidth = (contentWidth - 16) / 2
             let sigHeight: CGFloat = 72
@@ -117,7 +133,7 @@ enum StudioAgreementPDFRenderer {
                     )
                     image.draw(in: CGRect(origin: origin, size: size))
                 } else {
-                    let placeholder = "Not signed"
+                    let placeholder = L("Not signed")
                     let attrs: [NSAttributedString.Key: Any] = [
                         .font: UIFont.italicSystemFont(ofSize: 10),
                         .foregroundColor: UIColor.gray
@@ -148,12 +164,12 @@ enum StudioAgreementPDFRenderer {
             }
 
             drawSignatureBlock(
-                label: "Client",
+                label: L("Client"),
                 png: draft.clientSignaturePNG,
                 signedAt: draft.clientSignedAt,
                 x: margin
             )
-            let providerLabel = draft.providerSignatoryName.isEmpty ? "Provider" : draft.providerSignatoryName
+            let providerLabel = draft.providerSignatoryName.isEmpty ? L("Provider") : draft.providerSignatoryName
             drawSignatureBlock(
                 label: providerLabel,
                 png: draft.providerSignaturePNG,
@@ -164,8 +180,8 @@ enum StudioAgreementPDFRenderer {
 
             ensureSpace(40)
             let footer = draft.hasClientApprovalProof
-                ? "On-device agreement record · BuxMuse Studio"
-                : "Draft · BuxMuse Studio"
+                ? L("On-device agreement record · BuxMuse Studio")
+                : L("Draft · BuxMuse Studio")
             drawLine(footer, font: metaFont, color: .gray, extraSpacing: 0)
         }
     }

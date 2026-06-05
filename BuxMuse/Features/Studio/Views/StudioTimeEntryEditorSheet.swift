@@ -9,6 +9,7 @@ struct StudioTimeEntryEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let projectId: UUID
     let entryId: UUID
@@ -17,6 +18,12 @@ struct StudioTimeEntryEditorSheet: View {
     @State private var isBillable: Bool = true
     @State private var startTime: Date = Date()
     @State private var endTime: Date = Date()
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
 
     init(projectId: UUID, entry: StudioTimeEntry) {
         self.projectId = projectId
@@ -31,18 +38,18 @@ struct StudioTimeEntryEditorSheet: View {
         NavigationStack {
             BuxThemedCardForm {
                 BuxFormSection(title: "Time entry") {
-                    TextField("Notes", text: $notes, axis: .vertical)
+                    TextField(loc("Notes"), text: $notes, axis: .vertical)
                         .lineLimit(2...4)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Toggle("Billable", isOn: $isBillable)
+                    Toggle(loc("Billable"), isOn: $isBillable)
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    DatePicker("Start", selection: $startTime)
+                    DatePicker(loc("Start"), selection: $startTime)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    DatePicker("End", selection: $endTime)
+                    DatePicker(loc("End"), selection: $endTime)
                         .buxFormFieldPadding()
                 }
             }

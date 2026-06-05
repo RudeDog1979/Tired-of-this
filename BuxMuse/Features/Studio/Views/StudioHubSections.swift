@@ -192,6 +192,8 @@ struct StudioInvoicesSection: View {
                             Text(display.totalOutstandingFormatted)
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
                         Spacer()
                         VStack(alignment: .trailing, spacing: 4) {
@@ -200,6 +202,8 @@ struct StudioInvoicesSection: View {
                             Text(display.totalPaidFormatted)
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .foregroundColor(.green)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
                     }
                     if let name = display.nextDueClientName, let date = display.nextDueDate {
@@ -293,13 +297,24 @@ struct StudioClientsSection: View {
 struct StudioTaxSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: StudioTaxDisplay
     var onTap: () -> Void
 
     var body: some View {
-        StudioSectionShell(title: "Tax Studio") {
+        StudioSectionShell(title: "Tax studio") {
             BuxCardButton(action: onTap) {
                 VStack(alignment: .leading, spacing: BuxTokens.tight) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        BuxCatalogDynamicText(key: "Estimated tax")
+                            .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
+                        Spacer(minLength: 8)
+                        Text(display.estimatedTaxFormatted)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundStyle(.orange)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
                     row("Gross", display.grossIncomeFormatted)
                     row("After deductions", display.netIncomeFormatted)
                     if !display.primaryRulesPreview.isEmpty {
@@ -323,13 +338,18 @@ struct StudioTaxSection: View {
     }
 
     private func row(_ label: String, _ value: String) -> some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             BuxCatalogText.text(label)
                 .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
-            Spacer()
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .layoutPriority(1)
+                .multilineTextAlignment(.trailing)
         }
     }
 }
@@ -337,6 +357,7 @@ struct StudioTaxSection: View {
 struct StudioCashflowSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: StudioCashflowDisplay
     var onTap: () -> Void
 
@@ -348,7 +369,16 @@ struct StudioCashflowSection: View {
                     row("Required income", display.survivalIncomeFormatted)
                     row("30-day inflow", display.projectedInflowFormatted)
                     if display.survivalModeActive {
-                        Label(display.survivalMessage, systemImage: "exclamationmark.triangle.fill")
+                        Label {
+                            Text(
+                                BuxCatalogLabel.string(
+                                    display.survivalMessage,
+                                    locale: appSettingsManager.interfaceLocale
+                                )
+                            )
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                        }
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(.orange)
                     }
@@ -359,12 +389,18 @@ struct StudioCashflowSection: View {
     }
 
     private func row(_ label: String, _ value: String) -> some View {
-        HStack {
-            BuxCatalogText.text(label).buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
-            Spacer()
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            BuxCatalogText.text(label)
+                .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .layoutPriority(1)
+                .multilineTextAlignment(.trailing)
         }
     }
 }
@@ -595,7 +631,7 @@ struct TaxReferenceDisclaimerNote: View {
             Image(systemName: "info.circle.fill")
                 .font(.system(size: 12))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-            Text(TaxReferenceCopy.disclaimer)
+            BuxCatalogDynamicText(key: TaxReferenceCopy.disclaimer)
                 .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                 .fixedSize(horizontal: false, vertical: true)
         }

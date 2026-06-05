@@ -37,16 +37,27 @@ public enum TaxPresetLoader {
         allCountries.map { ($0.isoCode, $0.name) }
     }
 
-    /// Filters countries by name, ISO code, region, or alias (e.g. UK → GB).
-    public static func filteredCountries(matching query: String) -> [TaxInfo] {
-        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty { return allCountries }
-
-        let q = trimmed.lowercased()
-        return allCountries.filter { matchesSearch(query: q, info: $0) }
+    public static func countriesSorted(for locale: Locale) -> [TaxInfo] {
+        allCountries.sorted {
+            TaxCountryDisplayName.displayName(for: $0, locale: locale)
+                .localizedStandardCompare(
+                    TaxCountryDisplayName.displayName(for: $1, locale: locale)
+                ) == .orderedAscending
+        }
     }
 
-    private static func matchesSearch(query: String, info: TaxInfo) -> Bool {
+    /// Filters countries by localized name, English name, ISO code, region, or alias (e.g. UK → GB).
+    public static func filteredCountries(matching query: String, locale: Locale = Locale(identifier: "en")) -> [TaxInfo] {
+        let sorted = countriesSorted(for: locale)
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return sorted }
+
+        let q = trimmed.lowercased()
+        return sorted.filter { matchesSearch(query: q, info: $0, locale: locale) }
+    }
+
+    private static func matchesSearch(query: String, info: TaxInfo, locale: Locale) -> Bool {
+        if TaxCountryDisplayName.displayName(for: info, locale: locale).lowercased().contains(query) { return true }
         if info.name.lowercased().contains(query) { return true }
         if info.isoCode.lowercased().contains(query) { return true }
         if let region = info.region?.lowercased(), region.contains(query) { return true }

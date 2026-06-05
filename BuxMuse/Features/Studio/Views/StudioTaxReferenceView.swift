@@ -35,31 +35,28 @@ struct StudioTaxReferenceView: View {
     /// Selected in country picker; promoted to `presetToReview` after picker dismisses.
     @State private var stagingPreset: TaxInfo?
     @State private var presetToReview: TaxInfo?
+    @State private var savedPresetSummaryText: String?
 
     private var registrationToggleLabel: String {
         var draft = store.taxProfile
         draft.customIndirectTax = customIndirectTax.isEmpty ? nil : customIndirectTax
-        return IndirectTaxLabelResolver.registrationLabel(for: draft)
+        return IndirectTaxLabelResolver.registrationLabel(for: draft, locale: appSettingsManager.interfaceLocale)
     }
 
     private var savedCountryLabel: String {
         if selectedPresetCode.isEmpty {
-            return "Custom profile (no preset)"
+            return BuxCatalogLabel.string("Custom profile (no preset)", locale: appSettingsManager.interfaceLocale)
         }
         if let preset = TaxPresetLoader.preset(for: selectedPresetCode) {
-            return "\(preset.name) (\(preset.isoCode))"
+            return TaxCountryDisplayName.pickerLabel(for: preset, locale: appSettingsManager.interfaceLocale)
         }
         return selectedPresetCode
     }
 
-    private var savedPresetSummary: String? {
-        guard !selectedPresetCode.isEmpty,
-              let preset = TaxPresetLoader.preset(for: selectedPresetCode) else { return nil }
-        return preset.presetLineSummary
-    }
-
     private var catalogUpdatedLabel: String? {
-        appDataManager.taxManagerRef.catalogUpdatedAt.map { "Reference updated \($0)" }
+        appDataManager.taxManagerRef.catalogUpdatedAt.map {
+            BuxLocalizedString.format("Reference updated %@", locale: appSettingsManager.interfaceLocale, $0)
+        }
     }
 
     private var currentDraft: TaxProfileDraft {
@@ -96,7 +93,7 @@ struct StudioTaxReferenceView: View {
                         taxProfileContent
                     }
                 }
-                .buxCatalogNavigationTitle("Tax Profile")
+                .buxCatalogNavigationTitle("Tax profile")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -123,6 +120,16 @@ struct StudioTaxReferenceView: View {
         .task {
             await TaxPresetLoader.ensureCatalogLoaded()
             catalogReady = true
+            await refreshSavedPresetSummary()
+        }
+        .onChange(of: selectedPresetCode) { _, _ in
+            Task { await refreshSavedPresetSummary() }
+        }
+        .onChange(of: appDataManager.taxManagerRef.catalogUpdatedAt) { _, _ in
+            Task { await refreshSavedPresetSummary() }
+        }
+        .onChange(of: appSettingsManager.interfaceLocale.identifier) { _, _ in
+            Task { await refreshSavedPresetSummary() }
         }
         .sheet(isPresented: $showCountryPicker, onDismiss: {
             guard let staged = stagingPreset else { return }
@@ -136,13 +143,15 @@ struct StudioTaxReferenceView: View {
             .buxStudioSheetContent()
         }
         .sheet(item: $presetToReview) { preset in
-            TaxPresetReviewSheet(preset: preset) {
-                applyPreset(preset)
+            TaxPresetReviewSheet(preset: preset) { localized in
+                applyPreset(localized)
                 presetToReview = nil
+                Task { await refreshSavedPresetSummary() }
             } onCancel: {
                 presetToReview = nil
             }
             .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
             .environment(\.studioEnhancedTint, true)
             .buxStudioSheetContent()
         }
@@ -239,7 +248,7 @@ struct StudioTaxReferenceView: View {
                 .buxLabelSecondary()
                 .kerning(0.8)
 
-            Picker("Payment schedule", selection: $paymentSchedule) {
+            Picker(BuxCatalogLabel.string("Payment schedule", locale: appSettingsManager.interfaceLocale), selection: $paymentSchedule) {
                 BuxCatalogDynamicText(key: "Monthly").tag("monthly")
                 BuxCatalogDynamicText(key: "Quarterly").tag("quarterly")
                 BuxCatalogDynamicText(key: "Annually").tag("annually")
@@ -258,6 +267,9 @@ struct StudioTaxReferenceView: View {
                 .buxLabelSecondary()
                 .kerning(0.8)
 
+            TaxTranslationPackNoticeBanner()
+                .environmentObject(appSettingsManager)
+
             Button {
                 pickerSearchQuery = ""
                 showCountryPicker = true
@@ -271,8 +283,8 @@ struct StudioTaxReferenceView: View {
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             .multilineTextAlignment(.leading)
-                        if let savedPresetSummary {
-                            Text(savedPresetSummary)
+                        if let savedPresetSummaryText {
+                            Text(savedPresetSummaryText)
                                 .font(.system(size: 11, weight: .medium))
                                 .buxLabelSecondary()
                                 .multilineTextAlignment(.leading)
@@ -315,7 +327,7 @@ struct StudioTaxReferenceView: View {
                 .buxLabelSecondary()
                 .kerning(0.8)
 
-            Picker("Income type", selection: $taxIncomeType) {
+            Picker(BuxCatalogLabel.string("Income type", locale: appSettingsManager.interfaceLocale), selection: $taxIncomeType) {
                 ForEach(TaxIncomeType.allCases) { type in
                     Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
                 }
@@ -323,7 +335,7 @@ struct StudioTaxReferenceView: View {
             .pickerStyle(.segmented)
             .buxThemedSegmentedPicker()
 
-            Text(taxIncomeType.summaryLabel)
+            Text(taxIncomeType.catalogSummaryLabel(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 11, weight: .medium))
                 .buxLabelSecondary()
         }
@@ -351,10 +363,10 @@ struct StudioTaxReferenceView: View {
                 .buxLabelSecondary()
                 .kerning(0.8)
 
-            editorField(title: "Income tax", text: $customIncomeTax, minHeight: 100)
-            editorField(title: "Self-employed tax", text: $customSelfEmployedTax, minHeight: 100)
-            editorField(title: "Indirect tax", text: $customIndirectTax, minHeight: 80)
-            editorField(title: "Notes", text: $customNotes, minHeight: 100)
+            editorField(title: BuxCatalogLabel.string("Income tax", locale: appSettingsManager.interfaceLocale), text: $customIncomeTax, minHeight: 100)
+            editorField(title: BuxCatalogLabel.string("Self-employed tax", locale: appSettingsManager.interfaceLocale), text: $customSelfEmployedTax, minHeight: 100)
+            editorField(title: BuxCatalogLabel.string("Indirect tax", locale: appSettingsManager.interfaceLocale), text: $customIndirectTax, minHeight: 80)
+            editorField(title: BuxCatalogLabel.string("Notes", locale: appSettingsManager.interfaceLocale), text: $customNotes, minHeight: 100)
         }
     }
 
@@ -369,7 +381,7 @@ struct StudioTaxReferenceView: View {
                 BuxCatalogDynamicText(key: "Income tax rate %")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
-                TextField("e.g. 22", text: $estimatedIncomeRate)
+                TextField(BuxCatalogLabel.string("e.g. 22", locale: appSettingsManager.interfaceLocale), text: $estimatedIncomeRate)
                     .keyboardType(.decimalPad)
                     .padding(10)
                     .buxThemedInputPlate(cornerRadius: 12)
@@ -382,7 +394,7 @@ struct StudioTaxReferenceView: View {
                 BuxCatalogDynamicText(key: "Self-employed tax rate %")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
-                TextField("e.g. 15.3", text: $estimatedSERate)
+                TextField(BuxCatalogLabel.string("e.g. 15.3", locale: appSettingsManager.interfaceLocale), text: $estimatedSERate)
                     .keyboardType(.decimalPad)
                     .padding(10)
                     .buxThemedInputPlate(cornerRadius: 12)
@@ -398,7 +410,7 @@ struct StudioTaxReferenceView: View {
                 BuxCatalogDynamicText(key: "Indirect tax rate % (VAT/GST)")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
-                TextField("e.g. 20", text: $estimatedIndirectRate)
+                TextField(BuxCatalogLabel.string("e.g. 20", locale: appSettingsManager.interfaceLocale), text: $estimatedIndirectRate)
                     .keyboardType(.decimalPad)
                     .padding(10)
                     .buxThemedInputPlate(cornerRadius: 12)
@@ -435,6 +447,20 @@ struct StudioTaxReferenceView: View {
         customNotes = preset.notes
     }
 
+    private func refreshSavedPresetSummary() async {
+        guard !selectedPresetCode.isEmpty,
+              let preset = TaxPresetLoader.preset(for: selectedPresetCode) else {
+            savedPresetSummaryText = nil
+            return
+        }
+        let result = await TaxPresetLocalizationSupport.localized(
+            preset,
+            catalogUpdatedAt: appDataManager.taxManagerRef.catalogUpdatedAt,
+            interfaceLocale: appSettingsManager.interfaceLocale
+        )
+        savedPresetSummaryText = result.preset.presetLineSummary
+    }
+
     private func saveProfile() {
         var profile = store.taxProfile
         profile.selectedTaxCountry = selectedPresetCode.isEmpty ? nil : selectedPresetCode
@@ -453,7 +479,9 @@ struct StudioTaxReferenceView: View {
         lastSavedDraft = currentDraft
         BuxSaveFeedback.success()
 
-        let countryPart = selectedPresetCode.isEmpty ? "Custom profile" : savedCountryLabel
+        let countryPart = selectedPresetCode.isEmpty
+            ? BuxCatalogLabel.string("Custom profile", locale: appSettingsManager.interfaceLocale)
+            : savedCountryLabel
         saveBanner = BuxLocalizedString.format(
             "Saved · %@ · %@ · %@",
             locale: appSettingsManager.interfaceLocale,
@@ -511,10 +539,26 @@ struct TaxPresetReviewSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @ObservedObject private var taxManager = TaxManager.shared
 
     let preset: TaxInfo
-    let onConfirm: () -> Void
+    let onConfirm: (TaxInfo) -> Void
     let onCancel: () -> Void
+
+    @State private var displayPreset: TaxInfo
+    @State private var isTranslating = false
+    @State private var showEnglishBadge = false
+
+    init(
+        preset: TaxInfo,
+        onConfirm: @escaping (TaxInfo) -> Void,
+        onCancel: @escaping () -> Void
+    ) {
+        self.preset = preset
+        self.onConfirm = onConfirm
+        self.onCancel = onCancel
+        _displayPreset = State(initialValue: preset)
+    }
 
     var body: some View {
         NavigationStack {
@@ -527,26 +571,74 @@ struct TaxPresetReviewSheet: View {
                             BuxLocalizedString.format(
                                 "Review %@ preset",
                                 locale: appSettingsManager.interfaceLocale,
-                                preset.name
+                                TaxCountryDisplayName.displayName(
+                                    for: preset,
+                                    locale: appSettingsManager.interfaceLocale
+                                )
                             )
                         )
                             .font(.system(size: 18, weight: .bold))
+
+                        TaxTranslationPackNoticeBanner()
+                            .environmentObject(appSettingsManager)
 
                         BuxCatalogDynamicText(key: "This fills your tax rule text fields only — effective rate percentages stay under your control.")
                             .font(.system(size: 12))
                             .buxLabelSecondary()
 
-                        presetBlock("Income tax", preset.income_tax)
-                        presetBlock("Self-employed tax", preset.self_employed_tax)
-                        presetBlock("Indirect tax", preset.vat)
-                        if !preset.notes.isEmpty {
-                            presetBlock("Notes", preset.notes)
+                        if isTranslating {
+                            ProgressView()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.vertical, 8)
+                        }
+
+                        presetBlock(
+                            BuxCatalogLabel.string("Income tax", locale: appSettingsManager.interfaceLocale),
+                            displayPreset.income_tax
+                        )
+                        presetBlock(
+                            BuxCatalogLabel.string("Self-employed tax", locale: appSettingsManager.interfaceLocale),
+                            displayPreset.self_employed_tax
+                        )
+                        presetBlock(
+                            BuxCatalogLabel.string("Indirect tax", locale: appSettingsManager.interfaceLocale),
+                            displayPreset.vat
+                        )
+                        if !displayPreset.notes.isEmpty {
+                            presetBlock(
+                                BuxCatalogLabel.string("Notes", locale: appSettingsManager.interfaceLocale),
+                                displayPreset.notes
+                            )
                         }
 
                         TaxReferenceDisclaimerNote()
                     }
                     .padding(BuxLayout.marginHorizontal)
                 }
+            }
+            .background {
+                TaxTranslationSessionBridgeView()
+            }
+            .task(id: translationTaskKey) {
+                isTranslating = TaxPresetTranslator.translationTargetTag(
+                    for: appSettingsManager.interfaceLocale
+                ) != nil
+                let result = await TaxPresetLocalizationSupport.localized(
+                    preset,
+                    catalogUpdatedAt: taxManager.catalogUpdatedAt,
+                    interfaceLocale: appSettingsManager.interfaceLocale
+                )
+                displayPreset = result.preset
+                let packInstalled = await TaxTranslationUX.isLanguagePackInstalled(
+                    for: appSettingsManager.interfaceLocale
+                )
+                showEnglishBadge = TaxTranslationUX.shouldShowEnglishBadge(
+                    source: preset,
+                    displayed: result.preset,
+                    packInstalled: packInstalled,
+                    interfaceLocale: appSettingsManager.interfaceLocale
+                )
+                isTranslating = false
             }
             .buxCatalogNavigationTitle("Apply preset?")
             .navigationBarTitleDisplayMode(.inline)
@@ -559,7 +651,7 @@ struct TaxPresetReviewSheet: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     BuxToolbarConfirmButton(accessibilityLabel: "Apply") {
-                        onConfirm()
+                        onConfirm(displayPreset)
                         dismiss()
                     }
                 }
@@ -568,11 +660,25 @@ struct TaxPresetReviewSheet: View {
         }
     }
 
+    private var translationTaskKey: String {
+        TaxPresetLocalizationSupport.taskKey(
+            preset: preset,
+            catalogUpdatedAt: taxManager.catalogUpdatedAt,
+            locale: appSettingsManager.interfaceLocale
+        )
+    }
+
     private func presetBlock(_ title: String, _ text: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.system(size: 10, weight: .bold))
-                .buxLabelSecondary()
+            HStack(alignment: .center, spacing: 6) {
+                Text(title)
+                    .font(.system(size: 10, weight: .bold))
+                    .buxLabelSecondary()
+                if showEnglishBadge, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    TaxEnglishFallbackBadge()
+                        .environmentObject(appSettingsManager)
+                }
+            }
             Text(text)
                 .font(.system(size: 13))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))

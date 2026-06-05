@@ -21,7 +21,8 @@ final class BuxNotificationInboxEngine {
         studioInvoices: [StudioInvoice],
         taxDeadlineDays: Int?,
         tipsHistory: [HistoricalTipRecord],
-        currencyFormatter: (Decimal) -> String
+        currencyFormatter: (Decimal) -> String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> NotificationInboxDisplay {
         guard settings.notificationsEnabled else {
             return NotificationInboxDisplay(items: [], unreadCount: 0)
@@ -50,8 +51,14 @@ final class BuxNotificationInboxEngine {
                 if ratio >= 0.9 {
                     items.append(AppNotificationItem(
                         id: "budget-warning-\(budgetName)",
-                        title: "Budget nearly exhausted",
-                        message: "\(budgetName): \(currencyFormatter(spent)) spent of \(currencyFormatter(limit)).",
+                        title: line("Budget nearly exhausted", locale: locale),
+                        message: format(
+                            "%@: %@ spent of %@.",
+                            locale: locale,
+                            budgetName,
+                            currencyFormatter(spent),
+                            currencyFormatter(limit)
+                        ),
                         date: now,
                         category: .budget,
                         isRead: false,
@@ -68,8 +75,13 @@ final class BuxNotificationInboxEngine {
                     if days <= 7 {
                         items.append(AppNotificationItem(
                             id: "bill-\(record.id.uuidString)",
-                            title: record.isTrial ? "Trial ending soon" : "Upcoming renewal",
-                            message: "\(record.name) — due in \(days) day(s).",
+                            title: line(record.isTrial ? "Trial ending soon" : "Upcoming renewal", locale: locale),
+                            message: format(
+                                "%@ — due in %lld day(s).",
+                                locale: locale,
+                                record.name,
+                                Int64(days)
+                            ),
                             date: next,
                             category: .bill,
                             isRead: false,
@@ -93,22 +105,26 @@ final class BuxNotificationInboxEngine {
             let todayCount = expenseRecords.filter { $0.date >= todayStart }.count
 
             var parts: [String] = []
-            parts.append("Today's spend: \(currencyFormatter(todaySpend))")
+            parts.append(format("Today's spend: %@", locale: locale, currencyFormatter(todaySpend)))
             if todayCount > 0 {
-                parts.append("\(todayCount) transaction(s) logged")
+                parts.append(format("%lld transaction(s) logged", locale: locale, Int64(todayCount)))
             }
             if dashSnapshot.subscriptionCount > 0 {
-                parts.append("\(dashSnapshot.subscriptionCount) active subscription(s)")
+                parts.append(format("%lld active subscription(s)", locale: locale, Int64(dashSnapshot.subscriptionCount)))
             }
             if let budgetName = dashSnapshot.activeBudgetName, dashSnapshot.activeBudgetLimit > 0 {
-                parts.append(
-                    "\(budgetName): \(currencyFormatter(dashSnapshot.activeBudgetSpent)) of \(currencyFormatter(dashSnapshot.activeBudgetLimit))"
-                )
+                parts.append(format(
+                    "%@: %@ of %@",
+                    locale: locale,
+                    budgetName,
+                    currencyFormatter(dashSnapshot.activeBudgetSpent),
+                    currencyFormatter(dashSnapshot.activeBudgetLimit)
+                ))
             }
 
             items.append(AppNotificationItem(
                 id: "daily-summary-\(dayKey)",
-                title: "Daily Financial Summary",
+                title: line("Daily Financial Summary", locale: locale),
                 message: parts.joined(separator: " · "),
                 date: now,
                 category: .digest,
@@ -132,11 +148,19 @@ final class BuxNotificationInboxEngine {
 
             if settings.studioInvoiceRemindersEnabled {
                 for invoice in studioInvoices where invoice.status == .sent || invoice.status == .overdue {
-                    let title = invoice.status == .overdue ? "Invoice overdue" : "Invoice due soon"
+                    let title = line(
+                        invoice.status == .overdue ? "Invoice overdue" : "Invoice due soon",
+                        locale: locale
+                    )
                     items.append(AppNotificationItem(
                         id: "invoice-\(invoice.id.uuidString)",
                         title: title,
-                        message: "Invoice #\(invoice.invoiceNumber) — due \(formattedDate(invoice.dueDate)).",
+                        message: format(
+                            "Invoice #%@ — due %@.",
+                            locale: locale,
+                            invoice.invoiceNumber,
+                            formattedDate(invoice.dueDate, locale: locale)
+                        ),
                         date: invoice.dueDate,
                         category: .invoice,
                         isRead: false,
@@ -148,8 +172,12 @@ final class BuxNotificationInboxEngine {
             if settings.taxDeadlineRemindersEnabled, let days = taxDeadlineDays, days <= 30 {
                 items.append(AppNotificationItem(
                     id: "tax-deadline-\(days)",
-                    title: "Tax deadline approaching",
-                    message: "\(days) day(s) until your next scheduled tax payment.",
+                    title: line("Tax deadline approaching", locale: locale),
+                    message: format(
+                        "%lld day(s) until your next scheduled tax payment.",
+                        locale: locale,
+                        Int64(days)
+                    ),
                     date: now,
                     category: .tax,
                     isRead: false,
@@ -222,11 +250,20 @@ final class BuxNotificationInboxEngine {
 
     // MARK: - Private
 
-    private func formattedDate(_ date: Date) -> String {
+    private func formattedDate(_ date: Date, locale: Locale) -> String {
         let f = DateFormatter()
+        f.locale = locale
         f.dateStyle = .medium
         f.timeStyle = .none
         return f.string(from: date)
+    }
+
+    private func line(_ key: String, locale: Locale) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
+    private func format(_ key: String, locale: Locale, _ arguments: CVarArg...) -> String {
+        BuxLocalizedString.format(key, locale: locale, arguments)
     }
 
     private func managedNotificationId(_ itemId: String) -> String {

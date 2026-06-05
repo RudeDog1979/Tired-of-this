@@ -14,6 +14,12 @@ public final class AddExpenseViewModel: ObservableObject {
     private let settingsManager: AppSettingsManager
     private let editingId: UUID?
 
+    private var locale: Locale { settingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     @Published public var merchantName = "" {
         didSet {
             guard !skipMerchantSuggestionRefresh else { return }
@@ -274,16 +280,16 @@ public final class AddExpenseViewModel: ObservableObject {
                 categoryBeforeSubscription = nil
                 categoryIdBeforeSubscription = nil
                 reloadEditingRecord()
-                actionNotice = "Subscription removed."
+                actionNotice = loc("Subscription removed.")
             } else {
                 categoryBeforeSubscription = selectedCategory
                 categoryIdBeforeSubscription = selectedCategoryId
                 try brain.convertExpenseToSubscription(id: editingId)
                 reloadEditingRecord()
-                actionNotice = "Converted to subscription. Start date uses the expense date."
+                actionNotice = loc("Converted to subscription. Start date uses the expense date.")
             }
         } catch {
-            saveError = isSubscription ? "Could not remove subscription." : "Could not convert to subscription."
+            saveError = isSubscription ? loc("Could not remove subscription.") : loc("Could not convert to subscription.")
         }
     }
 
@@ -295,14 +301,14 @@ public final class AddExpenseViewModel: ObservableObject {
             if isRecurring {
                 try brain.unmarkExpenseRecurring(id: editingId)
                 reloadEditingRecord()
-                actionNotice = "Recurring removed."
+                actionNotice = loc("Recurring removed.")
             } else {
                 try brain.markExpenseRecurring(id: editingId, type: type)
                 reloadEditingRecord()
-                actionNotice = "Marked as recurring monthly. Expense date stays the same."
+                actionNotice = loc("Marked as recurring monthly. Expense date stays the same.")
             }
         } catch {
-            saveError = isRecurring ? "Could not remove recurring." : "Could not mark as recurring."
+            saveError = isRecurring ? loc("Could not remove recurring.") : loc("Could not mark as recurring.")
         }
     }
 
@@ -316,7 +322,7 @@ public final class AddExpenseViewModel: ObservableObject {
         do {
             try brain.restoreExpenseRecord(record)
         } catch {
-            saveError = "Could not restore expense."
+            saveError = loc("Could not restore expense.")
         }
     }
 
@@ -365,7 +371,7 @@ public final class AddExpenseViewModel: ObservableObject {
                 if mustPick {
                     incomeStoreCandidates = pickCandidates
                     showIncomeStorePickSheet = true
-                    saveError = "Choose which store to link (optional)."
+                    saveError = loc("Choose which store to link (optional).")
                     return false
                 }
             }
@@ -387,19 +393,19 @@ public final class AddExpenseViewModel: ObservableObject {
             if mustPick {
                 candidates = pickCandidates
                 showMerchantPickSheet = true
-                saveError = "Choose which merchant name to use."
+                saveError = loc("Choose which merchant name to use.")
                 return false
             }
         }
 
         if isSubscription && isTrial && trialEndDate <= Date() {
-            saveError = "Trial end date must be in the future."
+            saveError = loc("Trial end date must be in the future.")
             return false
         }
 
         let cleanedAmountStr = amountString.replacingOccurrences(of: ",", with: ".")
         guard let doubleVal = Double(cleanedAmountStr) else {
-            saveError = "Enter a valid amount."
+            saveError = loc("Enter a valid amount.")
             return false
         }
         let decimalValue = Decimal(doubleVal)
@@ -504,7 +510,7 @@ public final class AddExpenseViewModel: ObservableObject {
             _ = try brain.saveExpenseRecord(record, merchantSelection: selection)
             return true
         } catch {
-            saveError = "Could not save. Try again."
+            saveError = loc("Could not save. Try again.")
             print("Expense save failed: \(error)")
             return false
         }

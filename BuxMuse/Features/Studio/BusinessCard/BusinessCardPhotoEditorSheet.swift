@@ -11,6 +11,7 @@ struct BusinessCardPhotoEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let design: ProBusinessCardDesign
     let logoData: Data?
@@ -41,7 +42,7 @@ struct BusinessCardPhotoEditorSheet: View {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                     .onAppear { cropSize = viewport }
 
-                    Toggle("Alignment guides", isOn: $showGuides)
+                    Toggle(BusinessCardL10n.line("Alignment guides", locale: appSettingsManager.interfaceLocale), isOn: $showGuides)
                         .font(.system(size: 13, weight: .medium))
                         .padding(.horizontal)
 

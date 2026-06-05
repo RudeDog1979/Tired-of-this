@@ -28,6 +28,12 @@ struct SimpleStudioLogMoneySheet: View {
     @State private var platformFeeText = ""
     @State private var isUnpaid = false
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -35,7 +41,7 @@ struct SimpleStudioLogMoneySheet: View {
 
                 BuxThemedCardForm {
                     BuxFormSection(title: "Type") {
-                        Picker("Type", selection: $kind) {
+                        Picker(loc("Type"), selection: $kind) {
                             ForEach(logKinds, id: \.self) { k in
                                 Label {
                                     Text(k.localizedLogTitle(locale: appSettingsManager.interfaceLocale))

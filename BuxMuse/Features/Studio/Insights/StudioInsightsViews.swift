@@ -21,9 +21,13 @@ struct StudioInsightsHubSection: View {
                     .buxLabelSecondary()
                 Spacer()
                 if onOpenDashboard != nil {
-                    Button("See all") { onOpenDashboard?() }
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                    Button {
+                        onOpenDashboard?()
+                    } label: {
+                        BuxCatalogText.text("See all")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(themeManager.current.accentColor)
+                    }
                 }
             }
 
@@ -34,14 +38,22 @@ struct StudioInsightsHubSection: View {
 
                 if snapshot.scopeAlerts > 0 {
                     insightChip(
-                        "Scope alerts: \(snapshot.scopeAlerts)",
+                        BuxLocalizedString.format(
+                            "Scope alerts: %lld",
+                            locale: appSettingsManager.interfaceLocale,
+                            Int64(snapshot.scopeAlerts)
+                        ),
                         icon: "scope",
                         color: .orange
                     )
                 }
                 if snapshot.timeLeakageHours >= 1 {
                     insightChip(
-                        "Time leakage: \(String(format: "%.1f", snapshot.timeLeakageHours))h non-billable",
+                        BuxLocalizedString.format(
+                            "Time leakage: %.1fh non-billable",
+                            locale: appSettingsManager.interfaceLocale,
+                            snapshot.timeLeakageHours
+                        ),
                         icon: "drop.triangle",
                         color: .blue
                     )
@@ -114,6 +126,7 @@ struct StudioInsightsDashboardView: View {
             receipts: store.receipts,
             simpleEntries: simpleStudioStore.entries,
             profile: store.profile,
+            locale: appSettingsManager.interfaceLocale,
             currencyFormat: { appSettingsManager.format($0) }
         )
     }
@@ -127,7 +140,7 @@ struct StudioInsightsDashboardView: View {
 
                 if let tip = snapshot.rateOptimizerTip {
                     BuxThemedCardForm {
-                        BuxFormSection(title: "Rate optimizer") {
+                        BuxFormSection(title: BuxCatalogLabel.string("Rate optimizer", locale: appSettingsManager.interfaceLocale)) {
                             Text(tip)
                                 .font(.system(size: 13, weight: .medium))
                                 .buxFormFieldPadding()

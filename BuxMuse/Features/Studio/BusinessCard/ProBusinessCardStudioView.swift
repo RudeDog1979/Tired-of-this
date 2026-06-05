@@ -68,14 +68,19 @@ struct ProBusinessCardStudioView: View {
             studioStore.ensureBusinessCardLibrary(simpleCard: simpleStudioStore.businessCard)
             featuredTemplate = studioStore.businessCardLibrary.savedDesigns.first?.template ?? .logoMark
         }
-        .alert("Delete this design?", isPresented: $showDeleteConfirm) {
-            Button("Delete", role: .destructive) {
+        .alert(
+            BuxCatalogLabel.string("Delete this design?", locale: appSettingsManager.interfaceLocale),
+            isPresented: $showDeleteConfirm
+        ) {
+            Button(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), role: .destructive) {
                 if let id = pendingDeleteID {
                     studioStore.deleteBusinessCardDesign(id: id)
                 }
                 pendingDeleteID = nil
             }
-            Button("Cancel", role: .cancel) { pendingDeleteID = nil }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {
+                pendingDeleteID = nil
+            }
         }
     }
 
@@ -99,11 +104,20 @@ struct ProBusinessCardStudioView: View {
                 }
 
                 HStack(spacing: 10) {
-                    BuxButton(title: "New from template", systemImage: "sparkles", expands: true) {
+                    BuxButton(
+                        title: BusinessCardL10n.line("New from template", locale: appSettingsManager.interfaceLocale),
+                        systemImage: "sparkles",
+                        expands: true
+                    ) {
                         let design = studioStore.addBusinessCardDesign(title: featuredTemplate.title, template: featuredTemplate)
                         openEditor(designID: design.id)
                     }
-                    BuxButton(title: "Blank card", systemImage: "plus", role: .secondary, expands: true) {
+                    BuxButton(
+                        title: BusinessCardL10n.line("Blank card", locale: appSettingsManager.interfaceLocale),
+                        systemImage: "plus",
+                        role: .secondary,
+                        expands: true
+                    ) {
                         let design = studioStore.addBusinessCardDesign(title: "New card", template: .minimalMono)
                         openEditor(designID: design.id)
                     }
@@ -181,8 +195,8 @@ struct ProBusinessCardStudioView: View {
             BusinessCardStudioRibbon(
                 title: "Your designs",
                 subtitle: sortedDesigns.isEmpty
-                    ? "Start from a template above"
-                    : "\(sortedDesigns.count) saved",
+                    ? BusinessCardL10n.line("Start from a template above", locale: appSettingsManager.interfaceLocale)
+                    : BusinessCardL10n.format("%lld saved", locale: appSettingsManager.interfaceLocale, Int64(sortedDesigns.count)),
                 systemImage: "rectangle.stack.fill"
             )
             .environmentObject(themeManager)
@@ -359,22 +373,30 @@ struct BusinessCardYourDesignsLibraryView: View {
                 }
             }
         }
-        .alert("Delete this design?", isPresented: Binding(
-            get: { showDeleteConfirm && !isSelecting && pendingDeleteID != nil },
-            set: { if !$0 { pendingDeleteID = nil } }
-        )) {
-            Button("Delete", role: .destructive) {
+        .alert(
+            BuxCatalogLabel.string("Delete this design?", locale: appSettingsManager.interfaceLocale),
+            isPresented: Binding(
+                get: { showDeleteConfirm && !isSelecting && pendingDeleteID != nil },
+                set: { if !$0 { pendingDeleteID = nil } }
+            )
+        ) {
+            Button(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), role: .destructive) {
                 if let id = pendingDeleteID {
                     studioStore.deleteBusinessCardDesign(id: id)
                 }
                 pendingDeleteID = nil
             }
-            Button("Cancel", role: .cancel) { pendingDeleteID = nil }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {
+                pendingDeleteID = nil
+            }
         }
-        .alert("Delete selected designs?", isPresented: Binding(
-            get: { showDeleteConfirm && isSelecting },
-            set: { if !$0 { showDeleteConfirm = false } }
-        )) {
+        .alert(
+            BuxCatalogLabel.string("Delete selected designs?", locale: appSettingsManager.interfaceLocale),
+            isPresented: Binding(
+                get: { showDeleteConfirm && isSelecting },
+                set: { if !$0 { showDeleteConfirm = false } }
+            )
+        ) {
             Button(role: .destructive) {
                 studioStore.deleteBusinessCardDesigns(ids: selectedIDs)
                 selectedIDs = []
@@ -389,7 +411,9 @@ struct BusinessCardYourDesignsLibraryView: View {
                     )
                 )
             }
-            Button("Cancel", role: .cancel) { showDeleteConfirm = false }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {
+                showDeleteConfirm = false
+            }
         } message: {
             BuxCatalogDynamicText(key: "This permanently removes the selected cards from Your designs.")
         }

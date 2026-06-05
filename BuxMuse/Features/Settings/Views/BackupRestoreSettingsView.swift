@@ -13,11 +13,15 @@ private enum ArchiveOperation {
     case backup
     case restore
 
-    var title: String {
+    var titleKey: String {
         switch self {
         case .backup: return "Creating backup"
         case .restore: return "Restoring backup"
         }
+    }
+
+    func title(locale: Locale) -> String {
+        BuxCatalogLabel.string(titleKey, locale: locale)
     }
 
     var systemImage: String {
@@ -167,7 +171,7 @@ struct BackupRestoreSettingsView: View {
 
                 if store.autoBackupFrequency != .off {
                     BuxFormRowDivider()
-                    Picker("Reminder frequency", selection: Binding(
+                    Picker(BuxCatalogLabel.string("Reminder frequency", locale: appSettingsManager.interfaceLocale), selection: Binding(
                         get: { store.autoBackupFrequency },
                         set: { newValue in
                             store.autoBackupFrequency = newValue
@@ -178,9 +182,9 @@ struct BackupRestoreSettingsView: View {
                             }
                         }
                     )) {
-                        Text("Weekly").tag(AutoBackupFrequency.weekly)
-                        Text("Monthly").tag(AutoBackupFrequency.monthly)
-                        Text("Custom").tag(AutoBackupFrequency.custom)
+                        BuxCatalogText.text("Weekly").tag(AutoBackupFrequency.weekly)
+                        BuxCatalogText.text("Monthly").tag(AutoBackupFrequency.monthly)
+                        BuxCatalogText.text("Custom").tag(AutoBackupFrequency.custom)
                     }
                     .pickerStyle(.segmented)
                     .tint(themeManager.current.accentColor)
@@ -189,7 +193,7 @@ struct BackupRestoreSettingsView: View {
                     if store.autoBackupFrequency == .custom {
                         BuxFormRowDivider()
                         HStack {
-                            Text("Remind me every")
+                            BuxCatalogText.text("Remind me every")
                                 .font(.system(size: 14, weight: .semibold))
                             Spacer()
                             Stepper(value: Binding(
@@ -202,7 +206,12 @@ struct BackupRestoreSettingsView: View {
                                     }
                                 }
                             ), in: 1...30) {
-                                Text("\(store.customBackupIntervalDays) ") + Text(store.customBackupIntervalDays == 1 ? "day" : "days")
+                                Text("\(store.customBackupIntervalDays) ")
+                                    + Text(
+                                        store.customBackupIntervalDays == 1
+                                            ? BuxCatalogLabel.string("day", locale: appSettingsManager.interfaceLocale)
+                                            : BuxCatalogLabel.string("days", locale: appSettingsManager.interfaceLocale)
+                                    )
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(themeManager.current.accentColor)
                             }
@@ -223,7 +232,9 @@ struct BackupRestoreSettingsView: View {
                 passwordField("Password or recovery key", text: $restorePassword, isVisible: $showRestorePassword)
                     .buxFormFieldPadding()
 
-                Text("Use your backup password, or paste the BM-XXXX recovery key you saved when creating the backup.")
+                BuxCatalogDynamicText(
+                    key: "Use your backup password, or paste the BM-XXXX recovery key you saved when creating the backup."
+                )
                          .font(.system(size: 11, weight: .medium))
                          .buxLabelSecondary()
                          .fixedSize(horizontal: false, vertical: true)
@@ -751,7 +762,7 @@ private struct ArchiveProgressOverlay: View {
                 }
 
                 VStack(spacing: 8) {
-                    Text(operation.title)
+                    Text(operation.title(locale: BuxInterfaceLocale.currentInterfaceLocale))
                         .font(.system(size: 18, weight: .black, design: .rounded))
                     if let step {
                         Text(step.catalogLabel(locale: BuxInterfaceLocale.currentInterfaceLocale))
@@ -789,7 +800,9 @@ private struct ArchiveProgressOverlay: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(operation.title). \(step?.rawValue ?? ""). \(Int(progress * 100)) percent.")
+        .accessibilityLabel(
+            "\(operation.title(locale: BuxInterfaceLocale.currentInterfaceLocale)). \(step?.catalogLabel(locale: BuxInterfaceLocale.currentInterfaceLocale) ?? ""). \(Int(progress * 100)) percent."
+        )
     }
 }
 

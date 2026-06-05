@@ -143,6 +143,7 @@ public final class TaxManager: ObservableObject {
         }
         countries = payload.countries
         appliedUpdatedAt = payload.updatedAt
+        TaxTranslationCache.purgeStaleCatalogVersions(keeping: payload.updatedAt)
         if persist {
             try data.write(to: cacheURL, options: .atomic)
         }

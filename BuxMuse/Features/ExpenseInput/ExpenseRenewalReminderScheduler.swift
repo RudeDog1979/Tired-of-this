@@ -45,13 +45,22 @@ enum ExpenseRenewalReminderScheduler {
 
         cancel(for: record.id)
 
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         let content = UNMutableNotificationContent()
         if record.isTrial {
-            content.title = "Trial ending soon"
-            content.body = "\(record.name) trial ends soon — review before you're charged."
+            content.title = BuxCatalogLabel.string("Trial ending soon", locale: locale)
+            content.body = BuxLocalizedString.format(
+                "%@ trial ends soon — review before you're charged.",
+                locale: locale,
+                record.name
+            )
         } else {
-            content.title = "Subscription renewal"
-            content.body = "\(record.name) renews soon. Tap to review in BuxMuse."
+            content.title = BuxCatalogLabel.string("Subscription renewal", locale: locale)
+            content.body = BuxLocalizedString.format(
+                "%@ renews soon. Tap to review in BuxMuse.",
+                locale: locale,
+                record.name
+            )
         }
         content.sound = .default
 

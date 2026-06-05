@@ -833,6 +833,10 @@ public enum MileagePurpose: String, Codable, CaseIterable, Identifiable, Sendabl
         case .pleasure: return "Pleasure"
         }
     }
+
+    public func catalogLabel(locale: Locale) -> String {
+        BuxCatalogLabel.string(displayName, locale: locale)
+    }
 }
 
 public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
@@ -1185,7 +1189,11 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         appendSection("Payment terms", body: paymentTerms, to: &lines)
         appendSection("Timeline", body: timelineNotes, to: &lines)
         if hasTermsContent {
-            appendSection("Terms & conditions", body: composedTermsAndConditions, to: &lines)
+            appendSection(
+                "Terms & conditions",
+                body: composedTermsAndConditions(locale: BuxInterfaceLocale.currentInterfaceLocale),
+                to: &lines
+            )
         }
 
         if !signOffName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {

@@ -25,6 +25,12 @@ struct SimpleStudioLogTimeView: View {
 
     private var accent: Color { themeManager.current.accentColor }
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     private var jobs: [SimpleStudioEntry] {
         simpleStore.activeJobEntries
     }
@@ -160,7 +166,7 @@ struct SimpleStudioLogTimeView: View {
                         dismiss()
                     }
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
             } message: {
                 Text(finishDialogMessage)
             }
@@ -194,7 +200,7 @@ struct SimpleStudioLogTimeView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             } else {
-                Picker("Job", selection: jobSelectionBinding) {
+                Picker(loc("Job"), selection: jobSelectionBinding) {
                     ForEach(jobs) { job in
                         Text(jobPickerLabel(job)).tag(job.id)
                     }
@@ -360,7 +366,7 @@ struct SimpleStudioLogTimeView: View {
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(1)
 
-            TextField("Optional — e.g. painting, delivery run", text: $notes, axis: .vertical)
+            TextField(loc("Optional — e.g. painting, delivery run"), text: $notes, axis: .vertical)
                 .lineLimit(1...3)
                 .font(.system(size: 15, weight: .medium))
         }
@@ -408,15 +414,23 @@ struct SimpleStudioLogTimeView: View {
     }
 
     private var finishDialogTitle: String {
-        paySnapshot?.style == .byTheHour ? "Save hours to this job?" : "Save time on this job?"
+        let locale = appSettingsManager.interfaceLocale
+        let key = paySnapshot?.style == .byTheHour ? "Save hours to this job?" : "Save time on this job?"
+        return BuxCatalogLabel.string(key, locale: locale)
     }
 
     private var finishDialogAction: String {
-        paySnapshot?.saveButtonHint ?? "Save"
+        let locale = appSettingsManager.interfaceLocale
+        if let hint = paySnapshot?.saveButtonHint {
+            return BuxCatalogLabel.string(hint, locale: locale)
+        }
+        return BuxCatalogLabel.string("Save", locale: locale)
     }
 
     private var finishDialogMessage: String {
-        paySnapshot?.detail ?? "Adds this session to the job."
+        let locale = appSettingsManager.interfaceLocale
+        let key = paySnapshot?.detail ?? "Adds this session to the job."
+        return BuxCatalogLabel.string(key, locale: locale)
     }
 
     private var jobSelectionBinding: Binding<UUID> {

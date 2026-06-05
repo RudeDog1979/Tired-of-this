@@ -10,10 +10,11 @@ import SwiftUI
 
 struct DateFieldPicker: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @Binding var date: Date
 
     var body: some View {
-        DatePicker("Transaction Date", selection: $date, displayedComponents: .date)
+        DatePicker(BuxCatalogLabel.string("Transaction Date", locale: appSettingsManager.interfaceLocale), selection: $date, displayedComponents: .date)
             .tint(themeManager.current.accentColor)
     }
 }

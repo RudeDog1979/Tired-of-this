@@ -125,6 +125,12 @@ struct AgreementScratchpadEditorView: View {
     private let linkedProject: StudioProject?
     private let linkedJob: SimpleStudioEntry?
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     init(draft: AgreementDraft) {
         _draft = State(initialValue: draft)
         linkedProject = nil
@@ -163,7 +169,7 @@ struct AgreementScratchpadEditorView: View {
             statusBanner
 
             BuxFormSection(title: "Basics") {
-                TextField("Title", text: $draft.title)
+                TextField(BuxCatalogLabel.string("Title", locale: appSettingsManager.interfaceLocale), text: $draft.title)
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
                 if linkedProject != nil || linkedJob != nil {
@@ -207,7 +213,7 @@ struct AgreementScratchpadEditorView: View {
                 }
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
-                Picker("Client", selection: clientBinding) {
+                Picker(loc("Client"), selection: clientBinding) {
                     BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                     ForEach(store.clients) { client in
                         Text(client.name).tag(Optional(client.id))
@@ -216,7 +222,7 @@ struct AgreementScratchpadEditorView: View {
                 .pickerStyle(.menu)
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
-                Picker("Project", selection: projectBinding) {
+                Picker(loc("Project"), selection: projectBinding) {
                     BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                     ForEach(store.projects) { project in
                         Text(project.name).tag(Optional(project.id))
@@ -225,7 +231,7 @@ struct AgreementScratchpadEditorView: View {
                 .pickerStyle(.menu)
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
-                Picker("Linked invoice", selection: invoiceBinding) {
+                Picker(loc("Linked invoice"), selection: invoiceBinding) {
                     BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                     ForEach(linkedInvoiceCandidates) { invoice in
                         Text(invoicePickerLabel(invoice)).tag(Optional(invoice.id))
@@ -235,7 +241,7 @@ struct AgreementScratchpadEditorView: View {
                 .buxFormFieldPadding()
                 if !simpleStudioStore.entries.filter({ $0.kind == .job }).isEmpty {
                     BuxFormRowDivider()
-                    Picker("Linked job", selection: jobBinding) {
+                    Picker(loc("Linked job"), selection: jobBinding) {
                         BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                         ForEach(simpleStudioStore.entries.filter { $0.kind == .job }) { job in
                             Text(job.jobLabel ?? job.customerName).tag(Optional(job.id))
@@ -304,7 +310,7 @@ struct AgreementScratchpadEditorView: View {
                     action: { signatureRole = .provider }
                 )
                 BuxFormRowDivider()
-                TextField("Your name on agreement", text: $draft.providerSignatoryName)
+                TextField(BuxCatalogLabel.string("Your name on agreement", locale: appSettingsManager.interfaceLocale), text: $draft.providerSignatoryName)
                     .buxFormFieldPadding()
                 if draft.providerSignaturePNG != nil {
                     BuxFormRowDivider()
@@ -346,7 +352,7 @@ struct AgreementScratchpadEditorView: View {
             }
 
             BuxFormSection(title: "Sign-off note (optional)") {
-                TextField("Client name", text: $draft.signOffName)
+                TextField(BuxCatalogLabel.string("Client name", locale: appSettingsManager.interfaceLocale), text: $draft.signOffName)
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Toggle(isOn: signOffDateEnabled) {
@@ -357,7 +363,7 @@ struct AgreementScratchpadEditorView: View {
                 .buxFormFieldPadding()
                 if draft.signOffDate != nil {
                     BuxFormRowDivider()
-                    DatePicker("Date", selection: signOffDateBinding, displayedComponents: .date)
+                    DatePicker(loc("Date"), selection: signOffDateBinding, displayedComponents: .date)
                         .buxFormFieldPadding()
                 }
             }
@@ -552,7 +558,8 @@ struct AgreementScratchpadEditorView: View {
             draft: draft,
             clientName: draft.clientId.flatMap { id in store.clients.first(where: { $0.id == id })?.name },
             projectName: draft.projectId.flatMap { id in store.projects.first(where: { $0.id == id })?.name },
-            providerName: resolvedProviderName
+            providerName: resolvedProviderName,
+            locale: appSettingsManager.interfaceLocale
         ) else { return }
         let slug = draft.title
             .lowercased()
@@ -632,7 +639,7 @@ struct AgreementScratchpadEditorView: View {
     }
 
     private func scratchpadField(_ placeholder: String, text: Binding<String>) -> some View {
-        TextField(placeholder, text: text, axis: .vertical)
+        TextField(BuxCatalogLabel.string(placeholder, locale: appSettingsManager.interfaceLocale), text: text, axis: .vertical)
             .lineLimit(4...12)
             .buxFormFieldPadding()
     }

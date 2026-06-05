@@ -19,6 +19,10 @@ public struct StudioAgreementTermsClause: Identifiable, Equatable, Sendable {
         self.category = category
         self.defaultBody = defaultBody
     }
+
+    public func catalogDefaultBody(locale: Locale) -> String {
+        BuxCatalogLabel.string("agreement.body.\(id)", locale: locale)
+    }
 }
 
 public enum StudioAgreementTermsCategory: String, CaseIterable, Sendable {

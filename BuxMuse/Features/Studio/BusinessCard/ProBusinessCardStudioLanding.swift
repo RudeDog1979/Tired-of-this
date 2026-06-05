@@ -12,6 +12,7 @@ import SwiftUI
 struct BusinessCardStudioRibbon: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let title: String
     var subtitle: String? = nil
@@ -25,7 +26,7 @@ struct BusinessCardStudioRibbon: View {
                     .foregroundStyle(.white.opacity(0.95))
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(title.uppercased())
+                Text(BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale).uppercased())
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
                     .tracking(1.6)
                     .foregroundStyle(.white)
@@ -65,6 +66,7 @@ struct BusinessCardStudioRibbon: View {
 struct BusinessCardFeaturedCarousel: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @Binding var featuredTemplate: ProBusinessCardTemplate
     let templates: [ProBusinessCardTemplate]
@@ -97,7 +99,7 @@ struct BusinessCardFeaturedCarousel: View {
         VStack(alignment: .leading, spacing: 12) {
             BusinessCardStudioRibbon(
                 title: "Featured looks",
-                subtitle: "Swipe the deck — tap to open",
+                subtitle: BusinessCardL10n.line("Swipe the deck — tap to open", locale: appSettingsManager.interfaceLocale),
                 systemImage: "sparkles"
             )
 
@@ -136,10 +138,10 @@ struct BusinessCardFeaturedCarousel: View {
 
     private func templateLabel(_ template: ProBusinessCardTemplate) -> some View {
         VStack(spacing: 3) {
-            Text(template.title)
+            Text(template.catalogTitle(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 15, weight: .bold, design: .rounded))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
-            Text(template.subtitle)
+            Text(template.catalogSubtitle(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -158,6 +160,7 @@ struct BusinessCardFeaturedCarousel: View {
 struct BusinessCardTemplateShowcase: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let preview: (ProBusinessCardTemplate) -> ProBusinessCardDesign
     let logoData: Data?
@@ -175,7 +178,11 @@ struct BusinessCardTemplateShowcase: View {
         VStack(alignment: .leading, spacing: 14) {
             BusinessCardStudioRibbon(
                 title: "All templates",
-                subtitle: "\(ProBusinessCardTemplate.launchTemplates.count) geometric & editorial presets",
+                subtitle: BusinessCardL10n.format(
+                    "%lld geometric & editorial presets",
+                    locale: appSettingsManager.interfaceLocale,
+                    Int64(ProBusinessCardTemplate.launchTemplates.count)
+                ),
                 systemImage: "square.grid.3x3.fill"
             )
 
@@ -203,7 +210,7 @@ struct BusinessCardTemplateShowcase: View {
         }.max().map { $0 + 40 } ?? 180
 
         return VStack(alignment: .leading, spacing: 8) {
-            Text(collection.title)
+            Text(collection.catalogTitle(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(themeManager.current.accentColor)
                 .padding(.leading, 2)
@@ -217,7 +224,7 @@ struct BusinessCardTemplateShowcase: View {
                 contentMargins: 20,
                 showsPageIndicator: templates.count > 2
             ) { template in
-                Text(template.title)
+                Text(template.catalogTitle(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                     .multilineTextAlignment(.center)

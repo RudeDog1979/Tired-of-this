@@ -181,7 +181,7 @@ private struct MerchantInlineEditor: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                TextField("Label (e.g. Food, Clothes)", text: $disambiguatorText)
+                TextField(BuxCatalogLabel.string("Label (e.g. Food, Clothes)", locale: appSettingsManager.interfaceLocale), text: $disambiguatorText)
                     .font(.system(size: 15, weight: .medium))
                     .textInputAutocapitalization(.words)
                     .onChange(of: disambiguatorText) { _, _ in
@@ -206,7 +206,7 @@ private struct MerchantInlineEditor: View {
                 }
             }
 
-            Toggle("Subscription merchant", isOn: subscriptionBinding)
+            Toggle(BuxCatalogLabel.string("Subscription merchant", locale: appSettingsManager.interfaceLocale), isOn: subscriptionBinding)
                 .font(.system(size: 15, weight: .semibold))
                 .tint(themeManager.current.accentColor)
 

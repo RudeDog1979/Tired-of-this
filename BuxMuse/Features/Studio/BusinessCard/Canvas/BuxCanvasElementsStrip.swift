@@ -8,6 +8,7 @@ import SwiftUI
 struct BuxCanvasElementsStrip: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var settings = SettingsStore.shared
 
     let layers: [CardCanvasLayer]
@@ -31,7 +32,11 @@ struct BuxCanvasElementsStrip: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    elementChip(title: "Background", icon: "photo.fill.on.rectangle.fill", isSelected: backgroundSelected) {
+                    elementChip(
+                        title: BusinessCardL10n.line("Background", locale: appSettingsManager.interfaceLocale),
+                        icon: "photo.fill.on.rectangle.fill",
+                        isSelected: backgroundSelected
+                    ) {
                         selectedID = nil
                         backgroundSelected = true
                         onSelect(nil)

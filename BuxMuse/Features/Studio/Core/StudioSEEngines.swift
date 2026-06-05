@@ -303,17 +303,18 @@ public enum ComplianceAssistantEngine {
         invoices: [StudioInvoice],
         receipts: [StudioReceipt],
         quarterly: QuarterlyTaxEstimate,
-        countryCode: String
+        countryCode: String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> ComplianceAssistantResult {
         var warnings: [ComplianceMessage] = []
         let income = quarterly.breakdown.totalIncome
         let deductible = quarterly.breakdown.deductibleExpenses
 
         if !taxProfile.vatRegistered && income > 0 {
-            let thresholdNote = vatThresholdHint(countryCode: countryCode)
+            let thresholdNote = vatThresholdHint(countryCode: countryCode, locale: locale)
             warnings.append(ComplianceMessage(
                 id: "vat-threshold",
-                question: "Do I need to register for indirect tax?",
+                question: line("Do I need to register for indirect tax?", locale: locale),
                 answer: thresholdNote,
                 severity: "medium"
             ))
@@ -322,8 +323,11 @@ public enum ComplianceAssistantEngine {
         if income > 0 && deductible / income < 0.05 {
             warnings.append(ComplianceMessage(
                 id: "low-deductions",
-                question: "Why are deductions low?",
-                answer: "You have very few deductible expenses relative to income. Log business receipts to reduce taxable income.",
+                question: line("Why are deductions low?", locale: locale),
+                answer: line(
+                    "You have very few deductible expenses relative to income. Log business receipts to reduce taxable income.",
+                    locale: locale
+                ),
                 severity: "medium"
             ))
         }
@@ -331,8 +335,11 @@ public enum ComplianceAssistantEngine {
         if quarterly.totalDue > income * Decimal(0.35) {
             warnings.append(ComplianceMessage(
                 id: "high-tax",
-                question: "Why is my tax so high this quarter?",
-                answer: "Estimated tax is over 35% of quarterly income. Review your effective rate settings in Tax Profile or add deductions.",
+                question: line("Why is my tax so high this quarter?", locale: locale),
+                answer: line(
+                    "Estimated tax is over 35% of quarterly income. Review your effective rate settings in Tax Profile or add deductions.",
+                    locale: locale
+                ),
                 severity: "high"
             ))
         }
@@ -340,22 +347,32 @@ public enum ComplianceAssistantEngine {
         let faq: [ComplianceMessage] = [
             ComplianceMessage(
                 id: "faq-deductible",
-                question: "Is this expense deductible?",
-                answer: "Business expenses marked deductible with valid receipts reduce taxable income. Risky categories (meals, travel) may be partial.",
+                question: line("Is this expense deductible?", locale: locale),
+                answer: line(
+                    "Business expenses marked deductible with valid receipts reduce taxable income. Risky categories (meals, travel) may be partial.",
+                    locale: locale
+                ),
                 severity: "info"
             ),
             ComplianceMessage(
                 id: "faq-late",
-                question: "What if I don't pay this quarter?",
-                answer: "Missing payments can lead to penalties and interest. This is informational — check your country's rules in Tax Profile.",
+                question: line("What if I don't pay this quarter?", locale: locale),
+                answer: line(
+                    "Missing payments can lead to penalties and interest. This is informational — check your country's rules in Tax Profile.",
+                    locale: locale
+                ),
                 severity: "info"
             ),
             ComplianceMessage(
                 id: "faq-bracket",
-                question: "Could I hit a higher bracket?",
+                question: line("Could I hit a higher bracket?", locale: locale),
                 answer: income > 0
-                    ? "Rising income may push you into higher rates. Review \(taxProfile.primaryTaxRulesText.prefix(120))…"
-                    : "Add paid invoices to model bracket changes.",
+                    ? format(
+                        "Rising income may push you into higher rates. Review %@…",
+                        locale: locale,
+                        String(taxProfile.primaryTaxRulesText.prefix(120))
+                    )
+                    : line("Add paid invoices to model bracket changes.", locale: locale),
                 severity: "info"
             )
         ]
@@ -363,12 +380,37 @@ public enum ComplianceAssistantEngine {
         return ComplianceAssistantResult(warnings: warnings, faq: faq)
     }
 
-    private static func vatThresholdHint(countryCode: String) -> String {
+    private static func line(_ key: String, locale: Locale) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
+    private static func format(_ key: String, locale: Locale, _ arguments: CVarArg...) -> String {
+        BuxLocalizedString.format(key, locale: locale, arguments)
+    }
+
+    private static func vatThresholdHint(countryCode: String, locale: Locale) -> String {
         switch countryCode.uppercased() {
-        case "GB", "UK": return "UK VAT registration is commonly required around £90,000 turnover. You're not marked as registered yet."
-        case "US": return "US sales tax nexus varies by state. You are not marked as collecting indirect tax on invoices."
-        case "DE", "FR", "ES", "IT", "NL": return "EU VAT registration thresholds vary. Monitor turnover against local rules in your Tax Profile."
-        default: return "Review indirect tax registration thresholds for \(countryCode) in your saved tax rules."
+        case "GB", "UK":
+            return line(
+                "UK VAT registration is commonly required around £90,000 turnover. You're not marked as registered yet.",
+                locale: locale
+            )
+        case "US":
+            return line(
+                "US sales tax nexus varies by state. You are not marked as collecting indirect tax on invoices.",
+                locale: locale
+            )
+        case "DE", "FR", "ES", "IT", "NL":
+            return line(
+                "EU VAT registration thresholds vary. Monitor turnover against local rules in your Tax Profile.",
+                locale: locale
+            )
+        default:
+            return format(
+                "Review indirect tax registration thresholds for %@ in your saved tax rules.",
+                locale: locale,
+                countryCode
+            )
         }
     }
 }

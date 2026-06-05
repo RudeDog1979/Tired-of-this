@@ -9,56 +9,64 @@ import SwiftUI
 
 /// Card-layout fields (use inside `BuxFormSection`).
 struct InvoicePartyEditorFields: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     @Binding var party: InvoicePartyDetails
     var showRegistrationFields: Bool
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         groupLabel("Identity")
-        Toggle("Company / organization", isOn: $party.isOrganization)
+        Toggle(loc("Company / organization"), isOn: $party.isOrganization)
             .buxFormFieldPadding()
         if party.isOrganization {
             BuxFormRowDivider()
-            TextField("Organization name", text: $party.organizationName)
+            TextField(loc("Organization name"), text: $party.organizationName)
                 .buxFormFieldPadding()
             BuxFormRowDivider()
-            TextField("Trading name (optional)", text: $party.tradeName)
+            TextField(loc("Trading name (optional)"), text: $party.tradeName)
                 .buxFormFieldPadding()
         }
         BuxFormRowDivider()
-        TextField("Given / first name(s)", text: $party.givenNames)
+        TextField(loc("Given / first name(s)"), text: $party.givenNames)
             .buxFormFieldPadding()
         BuxFormRowDivider()
-        TextField("Additional name(s)", text: $party.additionalNames)
+        TextField(loc("Additional name(s)"), text: $party.additionalNames)
             .buxFormFieldPadding()
         BuxFormRowDivider()
-        TextField("Family / surname(s)", text: $party.familyNames)
+        TextField(loc("Family / surname(s)"), text: $party.familyNames)
             .buxFormFieldPadding()
 
         BuxFormRowDivider()
         groupLabel("Contact")
-        TextField("Email", text: $party.email)
+        TextField(loc("Email"), text: $party.email)
             .keyboardType(.emailAddress)
             .textInputAutocapitalization(.never)
             .buxFormFieldPadding()
         BuxFormRowDivider()
-        TextField("Phone", text: $party.phone)
+        TextField(loc("Phone"), text: $party.phone)
             .keyboardType(.phonePad)
             .buxFormFieldPadding()
 
         BuxFormRowDivider()
         groupLabel("Address")
-        TextField("Address line 1", text: $party.addressLine1)
+        TextField(loc("Address line 1"), text: $party.addressLine1)
             .buxFormFieldPadding()
         BuxFormRowDivider()
-        TextField("Address line 2", text: $party.addressLine2)
+        TextField(loc("Address line 2"), text: $party.addressLine2)
             .buxFormFieldPadding()
         BuxFormRowDivider()
-        Picker("Country", selection: $party.countryCode) {
+        Picker(loc("Country"), selection: $party.countryCode) {
             ForEach(CountryCatalog.allCountries) { country in
                 Text(
                     BuxLocalizedString.format(
                         "%@ %@",
-                        locale: BuxInterfaceLocale.currentInterfaceLocale,
+                        locale: locale,
                         country.flag,
                         country.name
                     )
@@ -69,26 +77,32 @@ struct InvoicePartyEditorFields: View {
         .buxFormFieldPadding()
         if InvoiceAddressRules.requiresSubdivision(for: party.countryCode) {
             BuxFormRowDivider()
-            TextField(InvoiceAddressRules.subdivisionLabel(for: party.countryCode), text: $party.subdivision)
+            TextField(
+                loc(InvoiceAddressRules.subdivisionLabel(for: party.countryCode)),
+                text: $party.subdivision
+            )
                 .buxFormFieldPadding()
         }
         BuxFormRowDivider()
-        TextField(InvoiceAddressRules.postalCodeLabel(for: party.countryCode), text: $party.postalCode)
+        TextField(
+            loc(InvoiceAddressRules.postalCodeLabel(for: party.countryCode)),
+            text: $party.postalCode
+        )
             .buxFormFieldPadding()
 
         if showRegistrationFields {
             BuxFormRowDivider()
             groupLabel("Registration")
-            TextField("Business registration no.", text: $party.businessRegistrationNumber)
+            TextField(loc("Business registration no."), text: $party.businessRegistrationNumber)
                 .buxFormFieldPadding()
             BuxFormRowDivider()
-            TextField("Tax / VAT registration no.", text: $party.taxRegistrationNumber)
+            TextField(loc("Tax / VAT registration no."), text: $party.taxRegistrationNumber)
                 .buxFormFieldPadding()
         }
     }
 
     private func groupLabel(_ title: String) -> some View {
-        Text(title.uppercased())
+        Text(loc(title).uppercased())
             .font(.system(size: 10, weight: .bold))
             .buxLabelSecondary()
             .padding(.horizontal, BuxLayout.section)
@@ -100,39 +114,51 @@ struct InvoicePartyEditorFields: View {
 
 /// Legacy Form sections — prefer `InvoicePartyEditorFields` in card layouts.
 struct InvoicePartyEditorForm: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     @Binding var party: InvoicePartyDetails
     var defaultCountryCode: String
     var showRegistrationFields: Bool
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
-        Section("Identity") {
-            Toggle("Company / organization", isOn: $party.isOrganization)
+        Section {
+            Toggle(loc("Company / organization"), isOn: $party.isOrganization)
             if party.isOrganization {
-                TextField("Organization name", text: $party.organizationName)
-                TextField("Trading name (optional)", text: $party.tradeName)
+                TextField(loc("Organization name"), text: $party.organizationName)
+                TextField(loc("Trading name (optional)"), text: $party.tradeName)
             }
-            TextField("Given / first name(s)", text: $party.givenNames)
-            TextField("Additional name(s)", text: $party.additionalNames)
-            TextField("Family / surname(s)", text: $party.familyNames)
+            TextField(loc("Given / first name(s)"), text: $party.givenNames)
+            TextField(loc("Additional name(s)"), text: $party.additionalNames)
+            TextField(loc("Family / surname(s)"), text: $party.familyNames)
+        } header: {
+            BuxCatalogDynamicText(key: "Identity")
         }
 
-        Section("Contact") {
-            TextField("Email", text: $party.email)
+        Section {
+            TextField(loc("Email"), text: $party.email)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
-            TextField("Phone", text: $party.phone)
+            TextField(loc("Phone"), text: $party.phone)
                 .keyboardType(.phonePad)
+        } header: {
+            BuxCatalogDynamicText(key: "Contact")
         }
 
-        Section("Address") {
-            TextField("Address line 1", text: $party.addressLine1)
-            TextField("Address line 2", text: $party.addressLine2)
-            Picker("Country", selection: $party.countryCode) {
+        Section {
+            TextField(loc("Address line 1"), text: $party.addressLine1)
+            TextField(loc("Address line 2"), text: $party.addressLine2)
+            Picker(loc("Country"), selection: $party.countryCode) {
                 ForEach(CountryCatalog.allCountries) { country in
                     Text(
                         BuxLocalizedString.format(
                             "%@ %@",
-                            locale: BuxInterfaceLocale.currentInterfaceLocale,
+                            locale: locale,
                             country.flag,
                             country.name
                         )
@@ -141,15 +167,25 @@ struct InvoicePartyEditorForm: View {
                 }
             }
             if InvoiceAddressRules.requiresSubdivision(for: party.countryCode) {
-                TextField(InvoiceAddressRules.subdivisionLabel(for: party.countryCode), text: $party.subdivision)
+                TextField(
+                    loc(InvoiceAddressRules.subdivisionLabel(for: party.countryCode)),
+                    text: $party.subdivision
+                )
             }
-            TextField(InvoiceAddressRules.postalCodeLabel(for: party.countryCode), text: $party.postalCode)
+            TextField(
+                loc(InvoiceAddressRules.postalCodeLabel(for: party.countryCode)),
+                text: $party.postalCode
+            )
+        } header: {
+            BuxCatalogDynamicText(key: "Address")
         }
 
         if showRegistrationFields {
-            Section("Registration") {
-                TextField("Business registration no.", text: $party.businessRegistrationNumber)
-                TextField("Tax / VAT registration no.", text: $party.taxRegistrationNumber)
+            Section {
+                TextField(loc("Business registration no."), text: $party.businessRegistrationNumber)
+                TextField(loc("Tax / VAT registration no."), text: $party.taxRegistrationNumber)
+            } header: {
+                BuxCatalogDynamicText(key: "Registration")
             }
         }
     }

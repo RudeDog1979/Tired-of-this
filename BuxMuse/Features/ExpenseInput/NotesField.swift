@@ -9,10 +9,11 @@
 import SwiftUI
 
 struct NotesField: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @Binding var notes: String
 
     var body: some View {
-        TextField("Add a note...", text: $notes, axis: .vertical)
+        TextField(BuxCatalogLabel.string("Add a note...", locale: appSettingsManager.interfaceLocale), text: $notes, axis: .vertical)
             .lineLimit(3...6)
     }
 }

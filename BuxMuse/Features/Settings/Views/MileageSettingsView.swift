@@ -10,12 +10,19 @@ import SwiftUI
 struct MileageSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
 
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Auto-location for mileage") {
-                Toggle("Auto-location for mileage", isOn: $store.autoLocationForMileage)
+                Toggle(loc("Auto-location for mileage"), isOn: $store.autoLocationForMileage)
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
                 BuxCatalogDynamicText(key: "When enabled, trip sheets can capture your current place name for start or end.")

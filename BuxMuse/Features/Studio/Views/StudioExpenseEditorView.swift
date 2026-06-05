@@ -57,6 +57,12 @@ struct StudioExpenseEditorView: View {
         )
     }
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     private var hasUnsavedChanges: Bool {
         if receiptToEdit == nil {
             return canSubmit
@@ -72,27 +78,27 @@ struct StudioExpenseEditorView: View {
 
                 BuxThemedCardForm {
                     BuxFormSection(title: "Expense") {
-                        TextField("Merchant / vendor", text: $merchant)
+                        TextField(loc("Merchant / vendor"), text: $merchant)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        TextField("Amount", text: $amount)
+                        TextField(loc("Amount"), text: $amount)
                             .keyboardType(.decimalPad)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        DatePicker("Date", selection: $date, displayedComponents: .date)
+                        DatePicker(loc("Date"), selection: $date, displayedComponents: .date)
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                     }
 
                     BuxFormSection(title: "Business classification") {
-                        Picker("Category", selection: $category) {
+                        Picker(loc("Category"), selection: $category) {
                             ForEach(BusinessExpenseCategory.allCases) { cat in
                                 Text(cat.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(cat.rawValue)
                             }
                         }
                         .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        Picker("Use", selection: $businessUse) {
+                        Picker(loc("Use"), selection: $businessUse) {
                             ForEach(ExpenseBusinessUse.allCases) { use in
                                 Text(use.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(use)
                             }
@@ -117,7 +123,7 @@ struct StudioExpenseEditorView: View {
                         }
                         .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        Toggle("Deductible", isOn: $isDeductible)
+                        Toggle(loc("Deductible"), isOn: $isDeductible)
                             .tint(themeManager.current.accentColor)
                             .disabled(businessUse == .personal)
                             .buxFormFieldPadding()
@@ -160,14 +166,17 @@ struct StudioExpenseEditorView: View {
                     }
 
                     BuxFormSection(title: "Tax details") {
-                        TextField("Indirect tax paid (optional)", text: $vatAmount)
+                        TextField(loc("Indirect tax paid (optional)"), text: $vatAmount)
                             .keyboardType(.decimalPad)
                             .buxFormFieldPadding()
                     }
 
                     BuxFormSection(title: "Attachment") {
                         PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                            Label(attachedImage == nil ? "Add receipt photo" : "Change photo", systemImage: "camera")
+                            Label(
+                                attachedImage == nil ? loc("Add receipt photo") : loc("Change photo"),
+                                systemImage: "camera"
+                            )
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .onChange(of: selectedPhoto) { _, item in
@@ -182,7 +191,7 @@ struct StudioExpenseEditorView: View {
                     }
 
                     BuxFormSection(title: "Notes") {
-                        TextField("Business purpose, project, etc.", text: $notes, axis: .vertical)
+                        TextField(loc("Business purpose, project, etc."), text: $notes, axis: .vertical)
                             .lineLimit(3...6)
                             .buxFormFieldPadding()
                     }

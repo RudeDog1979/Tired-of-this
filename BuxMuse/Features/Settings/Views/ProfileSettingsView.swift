@@ -23,6 +23,12 @@ struct ProfileSettingsView: View {
     @State private var loadFailed = false
     @State private var photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Avatar & identity") {
@@ -50,15 +56,15 @@ struct ProfileSettingsView: View {
             }
 
             BuxFormSection(title: "Name settings") {
-                TextField("Name(s)", text: $firstName)
+                TextField(loc("Name(s)"), text: $firstName)
                     .font(.system(size: 15, weight: .medium))
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
-                TextField("Surname(s)", text: $lastName)
+                TextField(loc("Surname(s)"), text: $lastName)
                     .font(.system(size: 15, weight: .medium))
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
-                Picker("Display Style", selection: $preferredNameStyle) {
+                Picker(loc("Display Style"), selection: $preferredNameStyle) {
                     ForEach(PreferredNameStyle.allCases) { style in
                         Text(style.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(style)
                     }

@@ -149,9 +149,12 @@ struct ProBusinessCardEditorView: View {
             }
         }
         .tint(controlTint)
-        .alert("Discard changes?", isPresented: $showDiscardAlert) {
-            Button("Keep editing", role: .cancel) { }
-            Button("Discard", role: .destructive) {
+        .alert(
+            BuxCatalogLabel.string("Discard changes?", locale: appSettingsManager.interfaceLocale),
+            isPresented: $showDiscardAlert
+        ) {
+            Button(BuxCatalogLabel.string("Keep editing", locale: appSettingsManager.interfaceLocale), role: .cancel) { }
+            Button(BuxCatalogLabel.string("Discard", locale: appSettingsManager.interfaceLocale), role: .destructive) {
                 discardAndLeave()
             }
         } message: {
@@ -161,12 +164,15 @@ struct ProBusinessCardEditorView: View {
                 BuxCatalogDynamicText(key: "Your edits since opening this card will be lost.")
             }
         }
-        .alert("Use for invoice branding?", isPresented: $showSetPrimaryBrandAlert) {
-            Button("Use for invoices") {
+        .alert(
+            BuxCatalogLabel.string("Use for invoice branding?", locale: appSettingsManager.interfaceLocale),
+            isPresented: $showSetPrimaryBrandAlert
+        ) {
+            Button(BuxCatalogLabel.string("Use for invoices", locale: appSettingsManager.interfaceLocale)) {
                 studioStore.setPrimaryBrandDesign(id: designID)
                 completeSaveFlow()
             }
-            Button("Not now", role: .cancel) {
+            Button(BuxCatalogLabel.string("Not now", locale: appSettingsManager.interfaceLocale), role: .cancel) {
                 completeSaveFlow()
             }
         } message: {
@@ -214,8 +220,8 @@ struct ProBusinessCardEditorView: View {
                         ratio: (draft ?? ProBusinessCardDesign(title: "Card")).aspect.aspectRatio,
                         cornerRadius: 0
                     ),
-                    title: "Crop background",
-                    hint: "Frame matches your card size. Drag to pan · slide to zoom."
+                    title: BusinessCardL10n.line("Crop background", locale: appSettingsManager.interfaceLocale),
+                    hint: BusinessCardL10n.line("Frame matches your card size. Drag to pan · slide to zoom.", locale: appSettingsManager.interfaceLocale)
                 ) { cropped in
                     if let path = SimpleStudioScanImageStore.save(cropped, id: UUID()) {
                         mutateDraft { d in
@@ -291,7 +297,7 @@ struct ProBusinessCardEditorView: View {
     private var editorSaveBar: some View {
         VStack(spacing: 0) {
             BuxButton(
-                title: "Save card",
+                title: BusinessCardL10n.line("Save card", locale: appSettingsManager.interfaceLocale),
                 systemImage: "checkmark.circle.fill",
                 role: .primary,
                 expands: true,
@@ -332,15 +338,15 @@ struct ProBusinessCardEditorView: View {
 
     private func cardOrientationBar(_ design: ProBusinessCardDesign) -> some View {
         HStack(spacing: 8) {
-            glassChoiceButton(title: "Landscape", isSelected: design.aspect == .standardUS) {
+            glassChoiceButton(title: BusinessCardL10n.line("Landscape", locale: appSettingsManager.interfaceLocale), isSelected: design.aspect == .standardUS) {
                 mutateDraft { $0.applyAspectChange(.standardUS) }
                 syncDraftChanges()
             }
-            glassChoiceButton(title: "Portrait", isSelected: design.aspect == .portraitVertical) {
+            glassChoiceButton(title: BusinessCardL10n.line("Portrait", locale: appSettingsManager.interfaceLocale), isSelected: design.aspect == .portraitVertical) {
                 mutateDraft { $0.applyAspectChange(.portraitVertical) }
                 syncDraftChanges()
             }
-            glassChoiceButton(title: "Square", isSelected: design.aspect == .squareSocial) {
+            glassChoiceButton(title: BusinessCardL10n.line("Square", locale: appSettingsManager.interfaceLocale), isSelected: design.aspect == .squareSocial) {
                 mutateDraft { $0.applyAspectChange(.squareSocial) }
                 syncDraftChanges()
             }
@@ -396,10 +402,14 @@ struct ProBusinessCardEditorView: View {
 
             splitPreviewActions(design)
             HStack {
-                Toggle("Safe zone", isOn: $showSafeZone)
+                Toggle(BusinessCardL10n.line("Safe zone", locale: appSettingsManager.interfaceLocale), isOn: $showSafeZone)
                     .font(.system(size: 11, weight: .medium))
                 Spacer()
-                Text(design.aspect.title + " · " + design.template.title)
+                Text(
+                    design.aspect.catalogTitle(locale: appSettingsManager.interfaceLocale)
+                    + " · "
+                    + design.template.catalogTitle(locale: appSettingsManager.interfaceLocale)
+                )
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.tertiary)
             }
@@ -436,10 +446,14 @@ struct ProBusinessCardEditorView: View {
 
             splitPreviewActions(design)
             HStack {
-                Toggle("Safe zone", isOn: $showSafeZone)
+                Toggle(BusinessCardL10n.line("Safe zone", locale: appSettingsManager.interfaceLocale), isOn: $showSafeZone)
                     .font(.system(size: 11, weight: .medium))
                 Spacer()
-                Text(design.aspect.title + " · " + design.template.title)
+                Text(
+                    design.aspect.catalogTitle(locale: appSettingsManager.interfaceLocale)
+                    + " · "
+                    + design.template.catalogTitle(locale: appSettingsManager.interfaceLocale)
+                )
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.tertiary)
             }
@@ -473,10 +487,14 @@ struct ProBusinessCardEditorView: View {
 
             compactPreviewActions(design)
             HStack {
-                Toggle("Safe zone", isOn: $showSafeZone)
+                Toggle(BusinessCardL10n.line("Safe zone", locale: appSettingsManager.interfaceLocale), isOn: $showSafeZone)
                     .font(.system(size: 11, weight: .medium))
                 Spacer()
-                Text(design.aspect.title + " · " + design.template.title)
+                Text(
+                    design.aspect.catalogTitle(locale: appSettingsManager.interfaceLocale)
+                    + " · "
+                    + design.template.catalogTitle(locale: appSettingsManager.interfaceLocale)
+                )
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.tertiary)
             }
@@ -510,8 +528,8 @@ struct ProBusinessCardEditorView: View {
 
     private func splitPreviewActions(_ design: ProBusinessCardDesign) -> some View {
         HStack(spacing: 6) {
-            previewActionButton(title: "See the look", icon: "rotate.3d.fill") { show3DLook = true }
-            previewActionButton(title: "Bux Canvas", icon: "square.3.layers.3d") { openBuxCanvas() }
+            previewActionButton(title: BusinessCardL10n.line("See the look", locale: appSettingsManager.interfaceLocale), icon: "rotate.3d.fill") { show3DLook = true }
+            previewActionButton(title: BusinessCardL10n.line("Bux Canvas", locale: appSettingsManager.interfaceLocale), icon: "square.3.layers.3d") { openBuxCanvas() }
             photoEditMenu(design)
         }
         .buxNativeGlassButtonRowContainer(spacing: 6)
@@ -521,9 +539,9 @@ struct ProBusinessCardEditorView: View {
 
     private func compactPreviewActions(_ design: ProBusinessCardDesign) -> some View {
         HStack(spacing: 6) {
-            previewActionButton(title: "See the look", icon: "rotate.3d.fill") { show3DLook = true }
-            previewActionButton(title: "Fullscreen", icon: "arrow.up.left.and.arrow.down.right") { showImmersivePreview = true }
-            previewActionButton(title: "Bux Canvas", icon: "square.3.layers.3d") { openBuxCanvas() }
+            previewActionButton(title: BusinessCardL10n.line("See the look", locale: appSettingsManager.interfaceLocale), icon: "rotate.3d.fill") { show3DLook = true }
+            previewActionButton(title: BusinessCardL10n.line("Fullscreen", locale: appSettingsManager.interfaceLocale), icon: "arrow.up.left.and.arrow.down.right") { showImmersivePreview = true }
+            previewActionButton(title: BusinessCardL10n.line("Bux Canvas", locale: appSettingsManager.interfaceLocale), icon: "square.3.layers.3d") { openBuxCanvas() }
             photoEditMenu(design)
         }
         .buxNativeGlassButtonRowContainer(spacing: 6)
@@ -585,7 +603,10 @@ struct ProBusinessCardEditorView: View {
                 Button("Add your photo") { pickTarget = .portrait }
             }
         } label: {
-            previewActionButtonLabel(title: "Edit photo", icon: "camera.filters")
+            previewActionButtonLabel(
+                title: BusinessCardL10n.line("Edit photo", locale: appSettingsManager.interfaceLocale),
+                icon: "camera.filters"
+            )
         }
         .menuStyle(.button)
         .businessCardPreviewActionButtonStyle()
@@ -765,7 +786,7 @@ struct ProBusinessCardEditorView: View {
                 toggle("Print back side", binding(\.backSide.isEnabled))
                 if design.backSide.isEnabled {
                     BuxFormRowDivider()
-                    TextField("Back note (optional)", text: binding(\.backSide.note), axis: .vertical)
+                    TextField(BusinessCardL10n.line("Back note (optional)", locale: appSettingsManager.interfaceLocale), text: binding(\.backSide.note), axis: .vertical)
                         .lineLimit(2...4)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
@@ -826,14 +847,14 @@ struct ProBusinessCardEditorView: View {
         BuxThemedCardForm {
             BuxFormSection(title: "Brand identity") {
                 Group {
-                    Picker("Mode", selection: identityBinding) {
+                    Picker(BusinessCardL10n.line("Mode", locale: appSettingsManager.interfaceLocale), selection: identityBinding) {
                         ForEach(ProBusinessCardIdentityMode.allCases) { mode in
-                            Text(mode.title).tag(mode)
+                            Text(mode.catalogTitle(locale: appSettingsManager.interfaceLocale)).tag(mode)
                         }
                     }
                     .buxThemedSegmentedPicker()
                     .buxFormFieldPadding()
-                    Text(design.style.identityMode.subtitle)
+                    Text(design.style.identityMode.catalogSubtitle(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary)
                         .buxFormFieldPadding()
@@ -892,8 +913,10 @@ struct ProBusinessCardEditorView: View {
     private func lookSection(_ design: ProBusinessCardDesign) -> some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Look") {
-                Picker("Background", selection: backgroundStyleBinding) {
-                    ForEach(ProBusinessCardBackgroundStyle.allCases) { Text($0.title).tag($0) }
+                Picker(BusinessCardL10n.line("Background", locale: appSettingsManager.interfaceLocale), selection: backgroundStyleBinding) {
+                    ForEach(ProBusinessCardBackgroundStyle.allCases) {
+                        Text($0.catalogTitle(locale: appSettingsManager.interfaceLocale)).tag($0)
+                    }
                 }
                 .buxFormFieldPadding()
                 if design.style.backgroundStyle == .photo {
@@ -909,14 +932,14 @@ struct ProBusinessCardEditorView: View {
                     }
                 }
                 BuxFormRowDivider()
-                Picker("Font mood", selection: binding(\.style.fontPairing)) {
+                Picker(BusinessCardL10n.line("Font mood", locale: appSettingsManager.interfaceLocale), selection: binding(\.style.fontPairing)) {
                     BuxCatalogDynamicText(key: "Modern").tag(ProBusinessCardFontPairing.modern)
                     BuxCatalogDynamicText(key: "Classic").tag(ProBusinessCardFontPairing.classic)
                     BuxCatalogDynamicText(key: "Bold").tag(ProBusinessCardFontPairing.bold)
                 }
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
-                Picker("Border", selection: binding(\.style.borderStyle)) {
+                Picker(BusinessCardL10n.line("Border", locale: appSettingsManager.interfaceLocale), selection: binding(\.style.borderStyle)) {
                     BuxCatalogDynamicText(key: "None").tag(ProBusinessCardBorderStyle.none)
                     BuxCatalogDynamicText(key: "Thin").tag(ProBusinessCardBorderStyle.thin)
                     BuxCatalogDynamicText(key: "Double").tag(ProBusinessCardBorderStyle.double)
@@ -930,7 +953,7 @@ struct ProBusinessCardEditorView: View {
     private func aspectExtras(_ design: ProBusinessCardDesign) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             BuxSectionHeader(title: "Print size")
-            Picker("Format", selection: aspectBinding) {
+            Picker(BusinessCardL10n.line("Format", locale: appSettingsManager.interfaceLocale), selection: aspectBinding) {
                 ForEach(ProBusinessCardAspect.allCases) { aspect in
                     Text(
                         BuxLocalizedString.format(
@@ -1018,7 +1041,7 @@ struct ProBusinessCardEditorView: View {
     private func photoControlsSection(_ design: ProBusinessCardDesign) -> some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Your photo") {
-                Picker("Size", selection: photoScaleBinding) {
+                Picker(BusinessCardL10n.line("Size", locale: appSettingsManager.interfaceLocale), selection: photoScaleBinding) {
                     BuxCatalogDynamicText(key: "Off").tag(ProBusinessCardPhotoScale.off)
                     BuxCatalogDynamicText(key: "Small").tag(ProBusinessCardPhotoScale.corner)
                     BuxCatalogDynamicText(key: "Medium").tag(ProBusinessCardPhotoScale.medium)
@@ -1026,7 +1049,7 @@ struct ProBusinessCardEditorView: View {
                 }
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
-                Picker("Frame", selection: binding(\.style.photoMask)) {
+                Picker(BusinessCardL10n.line("Frame", locale: appSettingsManager.interfaceLocale), selection: binding(\.style.photoMask)) {
                     BuxCatalogDynamicText(key: "Circle").tag(CardImageMask.circle)
                     BuxCatalogDynamicText(key: "Rounded").tag(CardImageMask.roundedRect)
                     BuxCatalogDynamicText(key: "Square").tag(CardImageMask.none)
@@ -1042,7 +1065,7 @@ struct ProBusinessCardEditorView: View {
                 }
             }
             BuxFormSection(title: "Business logo") {
-                Picker("Logo frame", selection: binding(\.style.logoMask)) {
+                Picker(BusinessCardL10n.line("Logo frame", locale: appSettingsManager.interfaceLocale), selection: binding(\.style.logoMask)) {
                     BuxCatalogDynamicText(key: "Circle").tag(CardImageMask.circle)
                     BuxCatalogDynamicText(key: "Rounded").tag(CardImageMask.roundedRect)
                     BuxCatalogDynamicText(key: "Square").tag(CardImageMask.none)
@@ -1126,7 +1149,7 @@ struct ProBusinessCardEditorView: View {
                 toggle("Show watermark", binding(\.style.watermark.isEnabled))
                 if design.style.watermark.isEnabled {
                     BuxFormRowDivider()
-                    TextField("Text", text: binding(\.style.watermark.text)).buxFormFieldPadding()
+                    TextField(BusinessCardL10n.line("Text", locale: appSettingsManager.interfaceLocale), text: binding(\.style.watermark.text)).buxFormFieldPadding()
                     BuxFormRowDivider()
                     slider("Opacity", binding(\.style.watermark.opacity), range: 0.04...0.4)
                     slider("Scale", binding(\.style.watermark.scale), range: 0.5...2.2)
@@ -1141,21 +1164,21 @@ struct ProBusinessCardEditorView: View {
     private func contentTab(_ design: ProBusinessCardDesign) -> some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Card text") {
-                TextField("Design name", text: binding(\.title)).buxFormFieldPadding()
+                TextField(BusinessCardL10n.line("Design name", locale: appSettingsManager.interfaceLocale), text: binding(\.title)).buxFormFieldPadding()
                 BuxFormRowDivider()
-                TextField("Name / business", text: businessNameBinding).buxFormFieldPadding()
+                TextField(BusinessCardL10n.line("Name / business", locale: appSettingsManager.interfaceLocale), text: businessNameBinding).buxFormFieldPadding()
                 BuxFormRowDivider()
-                TextField("Tagline / title", text: binding(\.content.tagline)).buxFormFieldPadding()
+                TextField(BusinessCardL10n.line("Tagline / title", locale: appSettingsManager.interfaceLocale), text: binding(\.content.tagline)).buxFormFieldPadding()
                 BuxFormRowDivider()
-                TextField("Phone", text: binding(\.content.phone)).keyboardType(.phonePad).buxFormFieldPadding()
+                TextField(BusinessCardL10n.line("Phone", locale: appSettingsManager.interfaceLocale), text: binding(\.content.phone)).keyboardType(.phonePad).buxFormFieldPadding()
                 BuxFormRowDivider()
-                TextField("Email", text: binding(\.content.email)).keyboardType(.emailAddress).textInputAutocapitalization(.never).buxFormFieldPadding()
+                TextField(BusinessCardL10n.line("Email", locale: appSettingsManager.interfaceLocale), text: binding(\.content.email)).keyboardType(.emailAddress).textInputAutocapitalization(.never).buxFormFieldPadding()
                 BuxFormRowDivider()
-                TextField("Website", text: binding(\.content.website)).textInputAutocapitalization(.never).buxFormFieldPadding()
+                TextField(BusinessCardL10n.line("Website", locale: appSettingsManager.interfaceLocale), text: binding(\.content.website)).textInputAutocapitalization(.never).buxFormFieldPadding()
                 BuxFormRowDivider()
-                TextField("Skills", text: binding(\.content.skills), axis: .vertical).lineLimit(2...4).buxFormFieldPadding()
+                TextField(BusinessCardL10n.line("Skills", locale: appSettingsManager.interfaceLocale), text: binding(\.content.skills), axis: .vertical).lineLimit(2...4).buxFormFieldPadding()
                 BuxFormRowDivider()
-                Picker("Text align", selection: binding(\.options.textAlignment)) {
+                Picker(BusinessCardL10n.line("Text align", locale: appSettingsManager.interfaceLocale), selection: binding(\.options.textAlignment)) {
                     BuxCatalogDynamicText(key: "Left").tag(ProBusinessCardAlignment.leading)
                     BuxCatalogDynamicText(key: "Center").tag(ProBusinessCardAlignment.center)
                 }
@@ -1184,13 +1207,28 @@ struct ProBusinessCardEditorView: View {
                     }
                 }
             }
-            BuxButton(title: "Export PDF (print ready)", systemImage: "doc.richtext", role: .secondary, expands: true) {
+            BuxButton(
+                title: BusinessCardL10n.line("Export PDF (print ready)", locale: appSettingsManager.interfaceLocale),
+                systemImage: "doc.richtext",
+                role: .secondary,
+                expands: true
+            ) {
                 ProBusinessCardShareActions.sharePDF(design: design, logoData: studioStore.profile.logoData)
             }
-            BuxButton(title: "Export PNG image", systemImage: "photo", role: .secondary, expands: true) {
+            BuxButton(
+                title: BusinessCardL10n.line("Export PNG image", locale: appSettingsManager.interfaceLocale),
+                systemImage: "photo",
+                role: .secondary,
+                expands: true
+            ) {
                 ProBusinessCardShareActions.sharePNG(design: design, logoData: studioStore.profile.logoData)
             }
-            BuxButton(title: "Share contact card (.vcf)", systemImage: "person.crop.circle.badge.plus", role: .secondary, expands: true) {
+            BuxButton(
+                title: BusinessCardL10n.line("Share contact card (.vcf)", locale: appSettingsManager.interfaceLocale),
+                systemImage: "person.crop.circle.badge.plus",
+                role: .secondary,
+                expands: true
+            ) {
                 ProBusinessCardShareActions.shareVCard(design: design, logoData: studioStore.profile.logoData)
             }
         }
@@ -1293,15 +1331,16 @@ struct ProBusinessCardEditorView: View {
     }
 
     private func toggle(_ title: String, _ b: Binding<Bool>, onChange: ((Bool) -> Void)? = nil) -> some View {
-        Toggle(title, isOn: b)
+        Toggle(BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale), isOn: b)
             .tint(themeManager.current.accentColor)
             .buxFormFieldPadding()
             .onChange(of: b.wrappedValue) { _, v in onChange?(v); syncDraftChanges() }
     }
 
     private func slider(_ title: String, _ b: Binding<Double>, range: ClosedRange<Double>) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.system(size: 12, weight: .medium))
+        let label = BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale)
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(label).font(.system(size: 12, weight: .medium))
             Slider(value: b, in: range).tint(themeManager.current.accentColor)
         }
         .buxFormFieldPadding()

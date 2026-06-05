@@ -27,16 +27,22 @@ struct StudioInvoiceSettingsView: View {
     @State private var savedBanner: String?
     @State private var lastSavedDraft: InvoiceSettingsDraft?
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         ZStack {
             themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
 
             BuxThemedCardForm {
                 BuxFormSection(title: "Numbering") {
-                    TextField("Prefix", text: $prefix)
+                    TextField(loc("Prefix"), text: $prefix)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Pattern", text: $pattern)
+                    TextField(loc("Pattern"), text: $pattern)
                         .buxFormFieldPadding()
                     BuxCatalogDynamicText(key: "Use {PREFIX}, {YEAR}, {SEQ}")
                         .font(.system(size: 11))
@@ -54,53 +60,53 @@ struct StudioInvoiceSettingsView: View {
                 }
 
                 BuxFormSection(title: "Design") {
-                    Picker("Template", selection: $template) {
+                    Picker(loc("Template"), selection: $template) {
                         ForEach(InvoiceTemplate.allCases) { t in
                             Text(t.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(t)
                         }
                     }
                     .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Picker("Logo position", selection: $logoPosition) {
+                    Picker(loc("Logo position"), selection: $logoPosition) {
                         ForEach(InvoiceLogoPosition.allCases) { p in
                             Text(p.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(p)
                         }
                     }
                     .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Document label", text: $documentLabel)
+                    TextField(loc("Document label"), text: $documentLabel)
                         .buxFormFieldPadding()
                 }
 
                 BuxFormSection(title: "Tax on invoices") {
-                    Picker("Tax behavior", selection: $taxBehavior) {
+                    Picker(loc("Tax behavior"), selection: $taxBehavior) {
                         ForEach(InvoiceTaxBehavior.allCases) { b in
                             Text(b.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(b)
                         }
                     }
                     .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Default tax rate %", text: $defaultTaxRate)
+                    TextField(loc("Default tax rate %"), text: $defaultTaxRate)
                         .keyboardType(.decimalPad)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Toggle("Show tax ID on PDF", isOn: $showTaxID)
+                    Toggle(loc("Show tax ID on PDF"), isOn: $showTaxID)
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                 }
 
                 BuxFormSection(title: "Payment") {
-                    Toggle("Show bank details", isOn: $showBankDetails)
+                    Toggle(loc("Show bank details"), isOn: $showBankDetails)
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Bank / payment details", text: $bankDetails, axis: .vertical)
+                    TextField(loc("Bank / payment details"), text: $bankDetails, axis: .vertical)
                         .lineLimit(3...8)
                         .buxFormFieldPadding()
                 }
 
                 BuxFormSection(title: "Legal footer") {
-                    Toggle("Show registration footer on PDF", isOn: $showLegalFooter)
+                    Toggle(loc("Show registration footer on PDF"), isOn: $showLegalFooter)
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                     BuxCatalogDynamicText(key: "Displays company address and registration at the bottom of designed invoices.")
@@ -193,7 +199,7 @@ struct StudioInvoiceSettingsView: View {
         store.updateInvoiceSettings(settings)
         lastSavedDraft = currentDraft
         BuxSaveFeedback.success()
-        savedBanner = "Invoice settings saved"
+        savedBanner = loc("Invoice settings saved")
     }
 }
 

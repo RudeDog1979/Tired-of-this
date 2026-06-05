@@ -195,7 +195,7 @@ struct StudioMileageLogView: View {
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(2)
-                Text(entry.purpose.displayName)
+                Text(entry.purpose.catalogLabel(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(purposeColor(entry.purpose))
             }
@@ -266,6 +266,7 @@ private enum MileageTripField: Hashable {
 private struct MileageAddressSearchField: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let title: String
     @Binding var text: String
@@ -278,12 +279,12 @@ private struct MileageAddressSearchField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased())
+            Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale).uppercased())
                 .font(.system(size: 10, weight: .bold))
                 .buxLabelSecondary()
 
             HStack(spacing: 8) {
-                TextField("Address or postcode", text: $text)
+                TextField(BuxCatalogLabel.string("Address or postcode", locale: appSettingsManager.interfaceLocale), text: $text)
                     .textInputAutocapitalization(.words)
                     .autocorrectionDisabled()
                     .focused(focusedField, equals: focusValue)
@@ -387,6 +388,12 @@ struct MileageEntrySheet: View {
     @State private var routeError: String?
 
     @FocusState private var focusedField: MileageTripField?
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
 
     private var isEditing: Bool { mode.editingEntryId != nil }
 
@@ -545,9 +552,9 @@ struct MileageEntrySheet: View {
     }
 
     private var purposePicker: some View {
-        Picker("Purpose", selection: $purpose) {
+        Picker(loc("Purpose"), selection: $purpose) {
             ForEach(MileagePurpose.allCases) { p in
-                Text(p.displayName).tag(p)
+                Text(p.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(p)
             }
         }
         .pickerStyle(.segmented)
@@ -594,9 +601,9 @@ struct MileageEntrySheet: View {
 
     private var dateNotesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            DatePicker("Date", selection: $date, displayedComponents: .date)
+            DatePicker(loc("Date"), selection: $date, displayedComponents: .date)
                 .tint(themeManager.current.accentColor)
-            TextField("Notes (optional)", text: $notes, axis: .vertical)
+            TextField(BuxCatalogLabel.string("Notes (optional)", locale: appSettingsManager.interfaceLocale), text: $notes, axis: .vertical)
                 .lineLimit(2...4)
                 .focused($focusedField, equals: .notes)
         }

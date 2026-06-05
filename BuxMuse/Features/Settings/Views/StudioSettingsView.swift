@@ -287,7 +287,7 @@ struct StudioSettingsView: View {
             }
             BuxFormRowDivider()
             studioToolLink(
-                title: "Workload & energy",
+                title: "Workload & Energy",
                 subtitle: store.burnoutGuardEnabled
                     ? BuxCatalogLabel.string("On", locale: appSettingsManager.interfaceLocale)
                     : BuxCatalogLabel.string("Off", locale: appSettingsManager.interfaceLocale),

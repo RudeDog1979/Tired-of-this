@@ -23,13 +23,13 @@ struct StudioProjectPlannerSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
             HStack(spacing: 6) {
-                Text("PROJECT PLANNER")
+                BuxCatalogDynamicText(key: "PROJECT PLANNER")
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 ProFeatureBadge(compact: true)
                 Spacer()
                 if let onEditMilestones {
-                    Button("Milestones", action: onEditMilestones)
+                    Button(BuxCatalogLabel.string("Milestones", locale: appSettingsManager.interfaceLocale), action: onEditMilestones)
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(accent)
                 }
@@ -45,7 +45,10 @@ struct StudioProjectPlannerSection: View {
                     milestonesList
                 } else if customMilestoneCount == 0, let onEditMilestones {
                     Button(action: onEditMilestones) {
-                        Label("Add planner milestones", systemImage: "plus.circle")
+                        Label(
+                            BuxCatalogLabel.string("Add planner milestones", locale: appSettingsManager.interfaceLocale),
+                            systemImage: "plus.circle"
+                        )
                             .font(.system(size: 12, weight: .semibold))
                     }
                 }

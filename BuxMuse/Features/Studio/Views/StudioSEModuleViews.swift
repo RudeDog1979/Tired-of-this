@@ -38,13 +38,13 @@ struct StudioIncomeTaxCalculatorView: View {
                 .environment(\.studioEnhancedTint, true)
             }
         }
-        .buxCatalogNavigationTitle("Income Tax Calculator")
+        .buxCatalogNavigationTitle("Income tax calculator")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private func heroCard(_ snapshot: IncomeTaxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            BuxCatalogDynamicText(key: "ESTIMATED ANNUAL TAX")
+            BuxCatalogDynamicText(key: "Estimated annual tax")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             Text(snapshot.totalEstimatedTaxFormatted)
@@ -88,7 +88,7 @@ struct StudioIncomeTaxCalculatorView: View {
 
     private func breakdownCard(_ snapshot: IncomeTaxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            BuxCatalogDynamicText(key: "BREAKDOWN")
+            BuxCatalogDynamicText(key: "Breakdown")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             seRow("Gross income", snapshot.totalIncomeFormatted)
@@ -105,7 +105,7 @@ struct StudioIncomeTaxCalculatorView: View {
 
     private func seRow(_ title: String, _ value: String, color: Color? = nil) -> some View {
         HStack {
-            Text(title)
+            Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 13))
                 .buxLabelSecondary()
             Spacer()
@@ -122,6 +122,7 @@ struct StudioQuarterlyTaxView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var studioBrain: StudioBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var body: some View {
         let snapshot = studioBrain.quarterlyDisplay
@@ -132,8 +133,8 @@ struct StudioQuarterlyTaxView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(snapshot.quarterLabel.uppercased())
-                            .font(.system(size: 11, weight: .bold))
+                        Text(snapshot.quarterLabel)
+                            .font(.system(size: 11, weight: .semibold))
                             .buxLabelSecondary()
                         Text(snapshot.totalDueFormatted)
                             .font(.system(size: 34, weight: .bold, design: .rounded))
@@ -150,7 +151,7 @@ struct StudioQuarterlyTaxView: View {
                     .seCard(colorScheme: colorScheme, themeManager: themeManager)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        BuxCatalogDynamicText(key: "QUARTERLY SPLIT")
+                        BuxCatalogDynamicText(key: "Quarterly split")
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
                         seMetric("Income tax", snapshot.incomeTaxFormatted)
@@ -170,13 +171,13 @@ struct StudioQuarterlyTaxView: View {
                 .environment(\.studioEnhancedTint, true)
             }
         }
-        .buxCatalogNavigationTitle("Quarterly Tax")
+        .buxCatalogNavigationTitle("Quarterly tax")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private func seMetric(_ title: String, _ value: String, bold: Bool = false) -> some View {
         HStack {
-            Text(title)
+            Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: bold ? 14 : 13, weight: bold ? .bold : .regular))
             Spacer()
             Text(value)
@@ -205,7 +206,7 @@ struct StudioComplianceAssistantView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
                     if !snapshot.warnings.isEmpty {
-                        BuxCatalogDynamicText(key: "WARNINGS")
+                        BuxCatalogDynamicText(key: "Warnings")
                             .font(.system(size: 11, weight: .bold))
                             .buxLabelSecondary()
                         ForEach(snapshot.warnings) { item in
@@ -213,7 +214,7 @@ struct StudioComplianceAssistantView: View {
                         }
                     }
 
-                    Text("FAQ")
+                    BuxCatalogDynamicText(key: "FAQ")
                         .font(.system(size: 11, weight: .bold))
                         .buxLabelSecondary()
                     ForEach(snapshot.faq) { item in

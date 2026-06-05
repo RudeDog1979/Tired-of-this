@@ -209,6 +209,12 @@ struct StudioReceiptScannerView: View {
     @State private var category = "Office Expenses"
     @State private var isDeductible = true
     @State private var strength: DeductionStrength = .strong
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
     
     var body: some View {
         NavigationStack {
@@ -297,20 +303,20 @@ struct StudioReceiptScannerView: View {
                             }
 
                             BuxFormSection(title: "Extracted document information") {
-                                TextField("Merchant", text: $merchant)
+                                TextField(loc("Merchant"), text: $merchant)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                TextField("Amount", text: $amount)
+                                TextField(loc("Amount"), text: $amount)
                                     .keyboardType(.decimalPad)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                DatePicker("Date", selection: $date, displayedComponents: .date)
+                                DatePicker(loc("Date"), selection: $date, displayedComponents: .date)
                                     .tint(themeManager.current.accentColor)
                                     .buxFormFieldPadding()
                             }
 
                             BuxFormSection(title: "Tax sandbox settings") {
-                                Picker("Deduction Category", selection: $category) {
+                                Picker(loc("Deduction Category"), selection: $category) {
                                     BuxCatalogDynamicText(key: "Office Expenses").tag("Office Expenses")
                                     BuxCatalogDynamicText(key: "Software Subscriptions").tag("Software Subscriptions")
                                     BuxCatalogDynamicText(key: "Hardware Assets").tag("Hardware Assets")
@@ -319,11 +325,11 @@ struct StudioReceiptScannerView: View {
                                 .tint(themeManager.current.accentColor)
                                 .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                Toggle("Eligible for Write-off", isOn: $isDeductible)
+                                Toggle(loc("Eligible for Write-off"), isOn: $isDeductible)
                                     .tint(themeManager.current.accentColor)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                Picker("Deduction Strength", selection: $strength) {
+                                Picker(loc("Deduction Strength"), selection: $strength) {
                                     ForEach(DeductionStrength.allCases) { st in
                                         Text(st.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(st)
                                     }

@@ -11,6 +11,7 @@ struct NotificationInboxView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     private var inbox: NotificationInboxDisplay { brain.notificationInboxDisplay }
 
@@ -42,7 +43,10 @@ struct NotificationInboxView: View {
                                             brain.dismissNotification(item.id)
                                         }
                                     } label: {
-                                        Label("Dismiss", systemImage: "xmark")
+                                        Label(
+                                            BuxCatalogLabel.string("Dismiss", locale: appSettingsManager.interfaceLocale),
+                                            systemImage: "xmark"
+                                        )
                                     }
                                 }
                             }
@@ -63,7 +67,7 @@ struct NotificationInboxView: View {
                 }
                 ToolbarItem(placement: .primaryAction) {
                     if !inbox.items.isEmpty {
-                        Button("Dismiss All") {
+                        Button(BuxCatalogLabel.string("Dismiss All", locale: appSettingsManager.interfaceLocale)) {
                             withAnimation(.easeInOut(duration: 0.25)) {
                                 brain.dismissAllNotifications()
                             }
@@ -88,7 +92,7 @@ struct NotificationInboxView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text(item.title)
+                    Text(BuxCatalogLabel.string(item.title, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 15, weight: item.isRead ? .medium : .semibold))
                         .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                     Spacer(minLength: 8)
@@ -98,7 +102,7 @@ struct NotificationInboxView: View {
                             .frame(width: 7, height: 7)
                     }
                 }
-                Text(item.message)
+                Text(BuxCatalogLabel.string(item.message, locale: appSettingsManager.interfaceLocale))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

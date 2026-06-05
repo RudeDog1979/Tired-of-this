@@ -145,7 +145,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
     @ViewBuilder
     private var completedJobPicker: some View {
         if !jobPicks.isEmpty {
-            Picker("Bill from job", selection: $selectedJobPickId) {
+            Picker(BuxCatalogLabel.string("Bill from job", locale: appSettingsManager.interfaceLocale), selection: $selectedJobPickId) {
                 BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                 ForEach(jobPicks) { pick in
                     Text(

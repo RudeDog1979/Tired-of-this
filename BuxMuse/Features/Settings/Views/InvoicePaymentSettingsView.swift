@@ -10,12 +10,19 @@ import SwiftUI
 struct InvoicePaymentSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
 
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection {
-                Toggle("Auto-detect bank account type", isOn: $store.autoDetectInvoiceBankAccountType)
+                Toggle(loc("Auto-detect bank account type"), isOn: $store.autoDetectInvoiceBankAccountType)
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
                 BuxCatalogDynamicText(key: "Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.")
@@ -26,9 +33,9 @@ struct InvoicePaymentSettingsView: View {
 
             if !store.autoDetectInvoiceBankAccountType {
                 BuxFormSection(title: "Manual account type") {
-                    Picker("Type", selection: bankTypeBinding) {
+                    Picker(loc("Type"), selection: bankTypeBinding) {
                         ForEach(BankAccountType.allCases) { type in
-                            Text(type.displayName).tag(type)
+                            Text(loc(type.displayName)).tag(type)
                         }
                     }
                     .tint(themeManager.current.accentColor)

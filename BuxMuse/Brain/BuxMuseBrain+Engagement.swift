@@ -60,7 +60,8 @@ extension BuxMuseBrain {
             studioInvoices: studioInvoices,
             taxDeadlineDays: taxDeadlineDays,
             tipsHistory: tipsEngine.loadTipHistory(),
-            currencyFormatter: { appSettings.format($0) }
+            currencyFormatter: { appSettings.format($0) },
+            locale: appSettings.interfaceLocale
         )
         await inboxEngine.syncLocalNotifications(settings: settings, inbox: notificationInboxDisplay)
     }

@@ -30,7 +30,7 @@ struct StudioTaxOverviewView: View {
                         taxOverviewContent(snapshot)
                     }
                 }
-                .buxCatalogNavigationTitle("Tax Overview")
+                .buxCatalogNavigationTitle("Tax overview")
                 .navigationBarTitleDisplayMode(.inline)
             }
         }
@@ -61,7 +61,7 @@ struct StudioTaxOverviewView: View {
     private func primaryRulesCard(_ snapshot: TaxSandboxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("YOUR TAX PROFILE")
+                BuxCatalogDynamicText(key: "Your tax profile")
                     .font(.system(size: 11, weight: .bold))
                     .buxLabelSecondary()
                 Spacer()
@@ -79,7 +79,7 @@ struct StudioTaxOverviewView: View {
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             if snapshot.primaryRulesPreview.isEmpty {
-                BuxCatalogDynamicText(key: "Open Tax Profile to choose a country preset or enter your rules.")
+                BuxCatalogDynamicText(key: "Open Tax profile to choose a country preset or enter your rules.")
                     .font(.system(size: 12))
                     .buxLabelSecondary()
             } else {
@@ -90,7 +90,7 @@ struct StudioTaxOverviewView: View {
 
                 if !snapshot.indirectTaxNotes.isEmpty {
                     Divider()
-                    Text(IndirectTaxLabelResolver.indirectTaxFieldLabel(for: store.taxProfile))
+                    Text(IndirectTaxLabelResolver.indirectTaxFieldLabel(for: store.taxProfile, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 10, weight: .bold))
                         .buxLabelSecondary()
                     Text(snapshot.indirectTaxNotes)
@@ -107,7 +107,7 @@ struct StudioTaxOverviewView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(
                 BuxLocalizedString.format(
-                    "INCOME & DEDUCTIONS (%@)",
+                    "Income & deductions (%@)",
                     locale: appSettingsManager.interfaceLocale,
                     snapshot.currencyCode
                 )
@@ -116,21 +116,21 @@ struct StudioTaxOverviewView: View {
                 .buxLabelSecondary()
 
             HStack {
-                metricColumn(title: "GROSS INCOME", value: snapshot.base.grossIncomeFormatted, color: themeManager.labelPrimary(for: colorScheme))
+                metricColumn(title: "Gross income", value: snapshot.base.grossIncomeFormatted, color: themeManager.labelPrimary(for: colorScheme))
                 Spacer()
-                metricColumn(title: "DEDUCTIONS", value: snapshot.base.deductionsFormatted, color: themeManager.current.accentColor)
+                metricColumn(title: "Deductions", value: snapshot.base.deductionsFormatted, color: themeManager.current.accentColor)
                 Spacer()
-                metricColumn(title: "AFTER DEDUCTIONS", value: snapshot.base.netIncomeFormatted, color: .green)
+                metricColumn(title: "After deductions", value: snapshot.base.netIncomeFormatted, color: .green)
             }
             .padding(.vertical, 6)
 
             Divider()
 
             HStack {
-                metricColumn(title: "EST. TAX", value: snapshot.base.estimatedTaxFormatted, color: .orange)
+                metricColumn(title: "Est. tax", value: snapshot.base.estimatedTaxFormatted, color: .orange)
                 Spacer()
                 metricColumn(
-                    title: "EFFECTIVE",
+                    title: "Effective rate",
                     value: BuxLocalizedString.format(
                         "%lld%%",
                         locale: appSettingsManager.interfaceLocale,
@@ -161,7 +161,7 @@ struct StudioTaxOverviewView: View {
 
     private func metricColumn(title: String, value: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
+            Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 9, weight: .semibold))
                 .buxLabelSecondary()
             Text(value)
@@ -172,7 +172,7 @@ struct StudioTaxOverviewView: View {
 
     private func simulatorSandboxCard(_ snapshot: TaxSandboxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            BuxCatalogDynamicText(key: "INTERACTIVE TAX SIMULATOR")
+            BuxCatalogDynamicText(key: "Interactive tax simulator")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
 
@@ -238,7 +238,7 @@ struct StudioTaxOverviewView: View {
             Divider()
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("PROJECTIONS OUTPUT")
+                BuxCatalogDynamicText(key: "PROJECTIONS OUTPUT")
                     .font(.system(size: 10, weight: .bold))
                     .buxLabelSecondary()
 
@@ -260,7 +260,7 @@ struct StudioTaxOverviewView: View {
     private func sliderRow(title: String, valueLabel: String, value: Binding<Double>, range: ClosedRange<Double>, step: Double) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text(title)
+                Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 12))
                     .buxLabelSecondary()
                 Spacer()
@@ -274,7 +274,7 @@ struct StudioTaxOverviewView: View {
 
     private func projectionRow(title: String, value: String, color: Color = .primary, bold: Bool = false) -> some View {
         HStack {
-            Text(title)
+            Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: bold ? 13 : 12, weight: bold ? .bold : .regular))
             Spacer()
             Text(value)

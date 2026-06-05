@@ -180,7 +180,7 @@ struct QuickCashDrawerAdjustSheet: View {
         NavigationStack {
             VStack(spacing: 24) {
                 // Header Segment picker
-                Picker("Adjustment type", selection: $isIncome) {
+                Picker(BuxCatalogLabel.string("Adjustment type", locale: appSettingsManager.interfaceLocale), selection: $isIncome) {
                     BuxCatalogText.text("Receive Cash (Income)").tag(true)
                     BuxCatalogText.text("Spend Cash (Expense)").tag(false)
                 }
@@ -286,7 +286,7 @@ struct QuickCashDrawerAdjustSheet: View {
                         .foregroundColor(.gray)
                         .padding(.horizontal)
                     
-                    TextField("e.g. Street vendor, taxi fare, project deposit", text: $noteText)
+                    TextField(BuxCatalogLabel.string("e.g. Street vendor, taxi fare, project deposit", locale: appSettingsManager.interfaceLocale), text: $noteText)
                         .padding()
                         .background(Color.gray.opacity(0.08))
                         .cornerRadius(12)

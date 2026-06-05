@@ -71,7 +71,11 @@ struct StudioProjectMilestonesEditorSheet: View {
                         Button {
                             showAddSheet = true
                         } label: {
-                            Label("Add milestone", systemImage: "plus.circle.fill")
+                            Label {
+                                BuxCatalogDynamicText(key: "Add milestone")
+                            } icon: {
+                                Image(systemName: "plus.circle.fill")
+                            }
                         }
                     }
                 }
@@ -171,6 +175,7 @@ struct StudioProjectMilestonesEditorSheet: View {
 private struct StudioProjectMilestoneFormSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let milestone: StudioProjectMilestone?
     let siblingMilestones: [StudioProjectMilestone]
@@ -182,27 +187,33 @@ private struct StudioProjectMilestoneFormSheet: View {
     @State private var notes = ""
     @State private var dependsOnId: UUID?
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         NavigationStack {
             BuxThemedCardForm {
                 BuxFormSection(title: "Milestone") {
-                    TextField("Title", text: $title)
+                    TextField(loc("Title"), text: $title)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    DatePicker("Due date", selection: $dueDate, displayedComponents: .date)
+                    DatePicker(loc("Due date"), selection: $dueDate, displayedComponents: .date)
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Toggle("Completed", isOn: $isCompleted)
+                    Toggle(loc("Completed"), isOn: $isCompleted)
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Notes (optional)", text: $notes, axis: .vertical)
+                    TextField(loc("Notes (optional)"), text: $notes, axis: .vertical)
                         .lineLimit(2...4)
                         .buxFormFieldPadding()
                     if !siblingMilestones.isEmpty {
                         BuxFormRowDivider()
-                        Picker("Depends on", selection: $dependsOnId) {
+                        Picker(loc("Depends on"), selection: $dependsOnId) {
                             BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                             ForEach(siblingMilestones.sorted(by: { $0.dueDate < $1.dueDate })) { s in
                                 Text(s.title).tag(Optional(s.id))

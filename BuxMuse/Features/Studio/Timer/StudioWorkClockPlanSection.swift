@@ -125,7 +125,7 @@ struct StudioWorkClockPlanSection: View {
                     }
                 } else {
                     HStack(spacing: BuxTokens.tight) {
-                        Picker("Hours", selection: $planHours) {
+                        Picker(BuxCatalogLabel.string("Hours", locale: appSettingsManager.interfaceLocale), selection: $planHours) {
                             ForEach(0..<13, id: \.self) { hour in
                                 Text(
                                     BuxLocalizedString.format(
@@ -139,7 +139,7 @@ struct StudioWorkClockPlanSection: View {
                         }
                         .pickerStyle(.menu)
 
-                        Picker("Minutes", selection: $planMinutes) {
+                        Picker(BuxCatalogLabel.string("Minutes", locale: appSettingsManager.interfaceLocale), selection: $planMinutes) {
                             ForEach(Array(stride(from: 0, through: 55, by: 5)), id: \.self) { m in
                                 Text(
                                     BuxLocalizedString.format(

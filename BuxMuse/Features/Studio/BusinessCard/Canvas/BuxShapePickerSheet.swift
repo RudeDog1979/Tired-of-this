@@ -7,6 +7,7 @@ import SwiftUI
 
 struct BuxShapePickerSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let palette: ProBusinessCardPalette
     var onPickShape: (CardShapeType) -> Void
@@ -15,27 +16,27 @@ struct BuxShapePickerSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Bux Layout Packs") {
+                Section(BusinessCardL10n.line("Bux Layout Packs", locale: appSettingsManager.interfaceLocale)) {
                     ForEach(BuxBrandStyleEngine.layoutPacks) { pack in
                         Button {
                             onApplyPack(pack)
                             dismiss()
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(pack.title).font(.headline)
-                                Text(pack.subtitle).font(.caption).foregroundStyle(.secondary)
+                                Text(pack.catalogTitle(locale: appSettingsManager.interfaceLocale)).font(.headline)
+                                Text(pack.catalogSubtitle(locale: appSettingsManager.interfaceLocale)).font(.caption).foregroundStyle(.secondary)
                             }
                         }
                     }
                 }
 
-                Section("Geometric shapes") {
+                Section(BusinessCardL10n.line("Geometric shapes", locale: appSettingsManager.interfaceLocale)) {
                     ForEach(CardShapeType.geometricShapes) { shape in
                         shapeRow(shape)
                     }
                 }
 
-                Section("Basic shapes") {
+                Section(BusinessCardL10n.line("Basic shapes", locale: appSettingsManager.interfaceLocale)) {
                     ForEach(CardShapeType.basicShapes) { shape in
                         shapeRow(shape)
                     }
@@ -43,7 +44,9 @@ struct BuxShapePickerSheet: View {
             }
             .buxCatalogNavigationTitle("Bux Shapes")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(BusinessCardL10n.line("Close", locale: appSettingsManager.interfaceLocale)) { dismiss() }
+                }
             }
         }
     }
@@ -62,7 +65,7 @@ struct BuxShapePickerSheet: View {
                     cornerRadius: 4
                 )
                 .frame(width: 36, height: 28)
-                Text(shape.title)
+                Text(shape.catalogTitle(locale: appSettingsManager.interfaceLocale))
             }
         }
     }

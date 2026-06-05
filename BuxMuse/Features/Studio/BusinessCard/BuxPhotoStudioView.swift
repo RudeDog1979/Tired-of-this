@@ -10,7 +10,7 @@ import SwiftUI
 private enum BuxPhotoStudioTab: String, CaseIterable, Identifiable {
     case adjust, filters, light
     var id: String { rawValue }
-    var title: String {
+    var catalogKey: String {
         switch self {
         case .adjust: return "Crop"
         case .filters: return "Filters"
@@ -29,6 +29,7 @@ private enum BuxPhotoStudioTab: String, CaseIterable, Identifiable {
 struct BuxPhotoStudioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let design: ProBusinessCardDesign
     let logoData: Data?
@@ -93,10 +94,10 @@ struct BuxPhotoStudioView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(BusinessCardL10n.line("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { applyEdits() }
+                    Button(BusinessCardL10n.line("Done", locale: appSettingsManager.interfaceLocale)) { applyEdits() }
                         .fontWeight(.semibold)
                 }
             }
@@ -137,7 +138,7 @@ struct BuxPhotoStudioView: View {
                         Button {
                             selectedTarget = target
                         } label: {
-                            Label(target.title, systemImage: target.icon)
+                            Label(target.catalogTitle(locale: appSettingsManager.interfaceLocale), systemImage: target.icon)
                                 .font(.system(size: 12, weight: .semibold))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
@@ -162,7 +163,7 @@ struct BuxPhotoStudioView: View {
                     VStack(spacing: 4) {
                         Image(systemName: tab.icon)
                             .font(.system(size: 15, weight: .semibold))
-                        Text(tab.title)
+                        Text(BusinessCardL10n.line(tab.catalogKey, locale: appSettingsManager.interfaceLocale))
                             .font(.system(size: 10, weight: .bold))
                     }
                     .frame(maxWidth: .infinity)
@@ -203,7 +204,7 @@ struct BuxPhotoStudioView: View {
                 maskPicker
             }
 
-            Toggle("Alignment guides", isOn: $showGuides)
+            Toggle(BusinessCardL10n.line("Alignment guides", locale: appSettingsManager.interfaceLocale), isOn: $showGuides)
                 .font(.system(size: 13, weight: .medium))
                 .tint(themeManager.current.accentColor)
                 .padding(.horizontal, 20)
@@ -233,7 +234,7 @@ struct BuxPhotoStudioView: View {
                 Button {
                     mask = option
                 } label: {
-                    Text(option.title)
+                    Text(option.catalogTitle(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 11, weight: .bold))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 7)
@@ -270,7 +271,7 @@ struct BuxPhotoStudioView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(BusinessCardCIFilterPipeline.presets, id: \.ciName) { preset in
-                        Button(preset.name) {
+                        Button(BusinessCardCIFilterPipeline.catalogName(for: preset.name, locale: appSettingsManager.interfaceLocale)) {
                             adjustments.filterName = preset.ciName
                         }
                         .font(.system(size: 12, weight: .semibold))
@@ -289,12 +290,12 @@ struct BuxPhotoStudioView: View {
     private var lightPanel: some View {
         ScrollView {
             VStack(spacing: 12) {
-                lightSlider("Exposure", value: $adjustments.exposure, range: -1...1)
-                lightSlider("Brilliance", value: $adjustments.brilliance, range: -1...1)
-                lightSlider("Brightness", value: $adjustments.brightness, range: -0.5...0.5)
-                lightSlider("Contrast", value: $adjustments.contrast, range: 0.5...1.8)
-                lightSlider("Saturation", value: $adjustments.saturation, range: 0...2)
-                lightSlider("Sharpness", value: $adjustments.sharpness, range: 0...1.5)
+                lightSlider(BusinessCardL10n.line("Exposure", locale: appSettingsManager.interfaceLocale), value: $adjustments.exposure, range: -1...1)
+                lightSlider(BusinessCardL10n.line("Brilliance", locale: appSettingsManager.interfaceLocale), value: $adjustments.brilliance, range: -1...1)
+                lightSlider(BusinessCardL10n.line("Brightness", locale: appSettingsManager.interfaceLocale), value: $adjustments.brightness, range: -0.5...0.5)
+                lightSlider(BusinessCardL10n.line("Contrast", locale: appSettingsManager.interfaceLocale), value: $adjustments.contrast, range: 0.5...1.8)
+                lightSlider(BusinessCardL10n.line("Saturation", locale: appSettingsManager.interfaceLocale), value: $adjustments.saturation, range: 0...2)
+                lightSlider(BusinessCardL10n.line("Sharpness", locale: appSettingsManager.interfaceLocale), value: $adjustments.sharpness, range: 0...1.5)
             }
             .padding(20)
         }

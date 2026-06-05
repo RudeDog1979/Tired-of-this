@@ -8,6 +8,7 @@ import SwiftUI
 struct CardFloatingToolbar: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var settings = SettingsStore.shared
 
     let layer: CardCanvasLayer?
@@ -19,6 +20,12 @@ struct CardFloatingToolbar: View {
 
     private var controlTint: Color {
         themeManager.contrastAccentColor(for: colorScheme)
+    }
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BusinessCardL10n.line(key, locale: locale)
     }
 
     private func glassMenu<Content: View, Label: View>(
@@ -111,7 +118,7 @@ struct CardFloatingToolbar: View {
 
             glassMenu {
                 ForEach(ProBusinessCardBackgroundStyle.allCases) { style in
-                    Button(style.title) {
+                    Button(style.catalogTitle(locale: locale)) {
                         document.background.style = style
                         document.markCustomized()
                         if style == .photo, document.background.photoPath == nil {
@@ -178,23 +185,23 @@ struct CardFloatingToolbar: View {
 
         case .image(let payload):
             glassMenu {
-                Button("Bux Photo Lab") { actions.onOpenPhotoLab?(layer.id) }
-                Button("Bux Focal Crop") { actions.onOpenFocalEditor?(.imageLayer(layer.id)) }
+                Button(loc("Bux Photo Lab")) { actions.onOpenPhotoLab?(layer.id) }
+                Button(loc("Bux Focal Crop")) { actions.onOpenFocalEditor?(.imageLayer(layer.id)) }
                 Divider()
                 ForEach(CardImageMask.allCases, id: \.self) { mask in
-                    Button(mask.title) {
+                    Button(mask.catalogTitle(locale: locale)) {
                         var p = payload
                         p.mask = mask
                         updatePayload(layer.id, .image(p))
                     }
                 }
                 Divider()
-                Button("Flip horizontal") {
+                Button(loc("Flip horizontal")) {
                     var p = payload
                     p.flipHorizontal.toggle()
                     updatePayload(layer.id, .image(p))
                 }
-                Button("Flip vertical") {
+                Button(loc("Flip vertical")) {
                     var p = payload
                     p.flipVertical.toggle()
                     updatePayload(layer.id, .image(p))
@@ -211,18 +218,18 @@ struct CardFloatingToolbar: View {
 
         case .shape(let payload):
             glassMenu {
-                Menu("Geometric") {
+                Menu(loc("Geometric")) {
                     ForEach(CardShapeType.geometricShapes) { shape in
-                        Button(shape.title) {
+                        Button(shape.catalogTitle(locale: locale)) {
                             var p = payload
                             p.shapeType = shape
                             updatePayload(layer.id, .shape(p))
                         }
                     }
                 }
-                Menu("Basic") {
+                Menu(loc("Basic")) {
                     ForEach(CardShapeType.basicShapes) { shape in
-                        Button(shape.title) {
+                        Button(shape.catalogTitle(locale: locale)) {
                             var p = payload
                             p.shapeType = shape
                             updatePayload(layer.id, .shape(p))
@@ -230,7 +237,7 @@ struct CardFloatingToolbar: View {
                     }
                 }
                 Divider()
-                Toggle("Gradient fill", isOn: Binding(
+                Toggle(BusinessCardL10n.line("Gradient fill", locale: appSettingsManager.interfaceLocale), isOn: Binding(
                     get: { payload.useGradient },
                     set: { v in
                         var p = payload
@@ -291,28 +298,28 @@ struct CardFloatingToolbar: View {
                         delta > 0
                             ? BuxLocalizedString.format(
                                 "+%lld°",
-                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                locale: locale,
                                 Int64(delta)
                             )
                             : BuxLocalizedString.format(
                                 "%lld°",
-                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                locale: locale,
                                 Int64(delta)
                             )
                     )
                 }
             }
             Divider()
-            Button("Reset") { setRotation(layerID: layer.id, degrees: 0) }
+            Button(loc("Reset")) { setRotation(layerID: layer.id, degrees: 0) }
         } label: { toolLabel("Rotate", icon: "rotate.right") }
     }
 
     private func layerOrderMenu(_ layer: CardCanvasLayer) -> some View {
         glassMenu {
-            Button("Bring to front") { document.bringToFront(id: layer.id); document.markCustomized(); onChange() }
-            Button("Forward") { document.bringForward(id: layer.id); document.markCustomized(); onChange() }
-            Button("Backward") { document.sendBackward(id: layer.id); document.markCustomized(); onChange() }
-            Button("Send to back") { document.sendToBack(id: layer.id); document.markCustomized(); onChange() }
+            Button(loc("Bring to front")) { document.bringToFront(id: layer.id); document.markCustomized(); onChange() }
+            Button(loc("Forward")) { document.bringForward(id: layer.id); document.markCustomized(); onChange() }
+            Button(loc("Backward")) { document.sendBackward(id: layer.id); document.markCustomized(); onChange() }
+            Button(loc("Send to back")) { document.sendToBack(id: layer.id); document.markCustomized(); onChange() }
         } label: { toolLabel("Order", icon: "square.3.layers.3d.down.forward") }
     }
 
@@ -335,7 +342,7 @@ struct CardFloatingToolbar: View {
     private func fontMenu(payload: CardTextPayload, layerID: UUID) -> some View {
         glassMenu {
             ForEach(ProBusinessCardFontID.allCases) { font in
-                Button(font.title) {
+                Button(loc(font.title)) {
                     var p = payload
                     p.style.fontID = font.rawValue
                     updatePayload(layerID, .text(p))
@@ -346,15 +353,15 @@ struct CardFloatingToolbar: View {
 
     private func alignMenu(payload: CardTextPayload, layerID: UUID) -> some View {
         glassMenu {
-            Button("Left") { updateTextAlign(layerID: layerID, payload: payload, align: "leading") }
-            Button("Center") { updateTextAlign(layerID: layerID, payload: payload, align: "center") }
+            Button(loc("Left")) { updateTextAlign(layerID: layerID, payload: payload, align: "leading") }
+            Button(loc("Center")) { updateTextAlign(layerID: layerID, payload: payload, align: "center") }
         } label: { toolLabel("Align", icon: "text.alignleft") }
     }
 
     private func effectMenu(payload: CardTextPayload, layerID: UUID) -> some View {
         glassMenu {
             ForEach(CardTextEffectPreset.allCases) { preset in
-                Button(preset.title) {
+                Button(loc(preset.title)) {
                     var p = payload
                     p.style.effectPreset = preset
                     updatePayload(layerID, .text(p))
@@ -416,7 +423,7 @@ struct CardFloatingToolbar: View {
     private func strokeWidthMenu(payload: CardShapePayload, layerID: UUID) -> some View {
         glassMenu {
             ForEach([0.0, 0.5, 1.0, 2.0, 4.0, 6.0], id: \.self) { width in
-                Button(width == 0 ? "No stroke" : String(format: "%.1f pt", width)) {
+                Button(width == 0 ? loc("No stroke") : String(format: "%.1f pt", width)) {
                     var p = payload
                     p.strokeWidth = width
                     if width > 0, p.strokeHex == nil {
@@ -451,7 +458,7 @@ struct CardFloatingToolbar: View {
 
     private func toolLabel(_ title: String, icon: String, destructive: Bool = false) -> some View {
         Label {
-            Text(title)
+            Text(BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
         } icon: {

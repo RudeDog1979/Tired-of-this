@@ -7,6 +7,8 @@ import PhotosUI
 import SwiftUI
 
 struct CardBackgroundEditor: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     @Binding var background: CardBackgroundSpec
     var brandPalette: ProBusinessCardPalette = .defaultPreset
     var cardAspect: ProBusinessCardAspect = .standardUS
@@ -68,8 +70,10 @@ struct CardBackgroundEditor: View {
                 BuxCatalogDynamicText(key: "Background photo")
             }
 
-            Picker("Style", selection: $background.style) {
-                ForEach(ProBusinessCardBackgroundStyle.allCases) { Text($0.title).tag($0) }
+            Picker(BusinessCardL10n.line("Style", locale: appSettingsManager.interfaceLocale), selection: $background.style) {
+                ForEach(ProBusinessCardBackgroundStyle.allCases) {
+                    Text($0.catalogTitle(locale: appSettingsManager.interfaceLocale)).tag($0)
+                }
             }
             .onChange(of: background.style) { _, style in
                 if style == .photo, background.photoPath == nil {

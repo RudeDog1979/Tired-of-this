@@ -479,7 +479,7 @@ struct CurrencyRegionPickerView: View {
                     .foregroundColor(themeManager.labelTertiary(for: colorScheme))
                     .font(.system(size: 16, weight: .bold))
                 
-                TextField("Search region, code or symbol...", text: $searchText)
+                TextField(BuxCatalogLabel.string("Search region, code or symbol...", locale: appSettingsManager.interfaceLocale), text: $searchText)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .autocorrectionDisabled(true)

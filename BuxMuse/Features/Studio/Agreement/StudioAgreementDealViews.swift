@@ -51,6 +51,7 @@ struct StudioAgreementImportSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var store: StudioStore
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @Binding var draft: AgreementDraft
     var simpleStore: SimpleStudioStore?
@@ -88,7 +89,7 @@ struct StudioAgreementImportSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Apply") {
+                    Button(StudioAgreementL10n.line("Apply", locale: appSettingsManager.interfaceLocale)) {
                         applyImport()
                         dismiss()
                     }
@@ -100,17 +101,20 @@ struct StudioAgreementImportSheet: View {
     }
 
     private var importSubtitle: String {
-        if let project { return "Pull fields from project “\(project.name)”." }
+        let locale = appSettingsManager.interfaceLocale
+        if let project {
+            return StudioAgreementL10n.format("Pull fields from project “%@”.", locale: locale, project.name)
+        }
         if let job {
             let label = job.jobLabel ?? job.customerName
-            return "Pull fields from job “\(label)”."
+            return StudioAgreementL10n.format("Pull fields from job “%@”.", locale: locale, label)
         }
-        return "Choose sections to copy."
+        return StudioAgreementL10n.line("Choose sections to copy.", locale: locale)
     }
 
     private func toggleRow(_ title: String, option: StudioAgreementPrefillOptions) -> some View {
         Toggle(isOn: binding(for: option)) {
-            Text(title)
+            Text(StudioAgreementL10n.line(title, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 15, weight: .semibold))
         }
         .tint(themeManager.current.accentColor)
@@ -149,6 +153,7 @@ struct StudioAgreementImportSheet: View {
 struct StudioAgreementApprovalSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @Binding var draft: AgreementDraft
     var workAlreadyStarted: Bool
@@ -174,7 +179,7 @@ struct StudioAgreementApprovalSection: View {
                 BuxFormRowDivider()
             }
 
-            Picker("How did the client approve?", selection: channelBinding) {
+            Picker(StudioAgreementL10n.line("How did the client approve?", locale: appSettingsManager.interfaceLocale), selection: channelBinding) {
                 BuxCatalogDynamicText(key: "Choose…").tag(StudioAgreementApprovalChannel?.none)
                 ForEach(StudioAgreementApprovalChannel.allCases) { channel in
                     Text(channel.shortTitle).tag(Optional(channel))
@@ -195,7 +200,10 @@ struct StudioAgreementApprovalSection: View {
                     draft.agreementSentAt = Date()
                     onMarkSent?()
                 } label: {
-                    Label("Mark terms sent to client", systemImage: "paperplane")
+                    Label(
+                        StudioAgreementL10n.line("Mark terms sent to client", locale: appSettingsManager.interfaceLocale),
+                        systemImage: "paperplane"
+                    )
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
                 }
@@ -243,13 +251,13 @@ struct StudioAgreementApprovalSection: View {
                 draft.refreshAgreementStatus()
             }
             BuxFormRowDivider()
-            TextField("How they approved (text, call, etc.)", text: $draft.clientClearNote, axis: .vertical)
+            TextField(StudioAgreementL10n.line("How they approved (text, call, etc.)", locale: appSettingsManager.interfaceLocale), text: $draft.clientClearNote, axis: .vertical)
                 .lineLimit(2...4)
                 .buxFormFieldPadding()
         case .returnedPDF, .printedScanned, .externalService:
             if draft.approvalChannel == .externalService {
                 BuxFormRowDivider()
-                TextField("Service name (DocuSign, email…)", text: $draft.externalServiceName)
+                TextField(StudioAgreementL10n.line("Service name (DocuSign, email…)", locale: appSettingsManager.interfaceLocale), text: $draft.externalServiceName)
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Button {
@@ -263,7 +271,10 @@ struct StudioAgreementApprovalSection: View {
                 if let onExportAgreementPDF {
                     BuxFormRowDivider()
                     Button(action: onExportAgreementPDF) {
-                        Label("Export PDF for external signing", systemImage: "square.and.arrow.up")
+                        Label(
+                            StudioAgreementL10n.line("Export PDF for external signing", locale: appSettingsManager.interfaceLocale),
+                            systemImage: "square.and.arrow.up"
+                        )
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(themeManager.current.accentColor)
                     }
@@ -296,14 +307,20 @@ struct StudioAgreementApprovalSection: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                         .buxFormFieldPadding()
                 } else {
-                    Label("Signed document attached", systemImage: "doc.fill")
+                    Label(
+                        StudioAgreementL10n.line("Signed document attached", locale: appSettingsManager.interfaceLocale),
+                        systemImage: "doc.fill"
+                    )
                         .font(.system(size: 14, weight: .semibold))
                         .buxFormFieldPadding()
                 }
                 if let url = attachedShareURL ?? shareURLForAttachment() {
                     BuxFormRowDivider()
                     ShareLink(item: url) {
-                        Label("Share attached file", systemImage: "square.and.arrow.up")
+                        Label(
+                            StudioAgreementL10n.line("Share attached file", locale: appSettingsManager.interfaceLocale),
+                            systemImage: "square.and.arrow.up"
+                        )
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(themeManager.current.accentColor)
                     }

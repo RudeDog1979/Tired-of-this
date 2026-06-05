@@ -267,7 +267,7 @@ struct TotalSpendDetailSheet: View {
     // MARK: - Picker Section
 
     private var pickerSection: some View {
-        Picker("Range", selection: $selectedRange) {
+        Picker(BuxCatalogLabel.string("Range", locale: appSettingsManager.interfaceLocale), selection: $selectedRange) {
             ForEach(TimeRange.allCases) { range in
                 Text(range.localizedTitle(locale: appSettingsManager.interfaceLocale)).tag(range)
             }

@@ -18,6 +18,7 @@ public struct TaxStudioContext: Equatable {
     public var countryPreset: TaxInfo?
     public var catalogUpdatedAt: String?
     public var now: Date
+    public var locale: Locale
 
     public init(
         profile: StudioProfile,
@@ -27,7 +28,8 @@ public struct TaxStudioContext: Equatable {
         mileageEntries: [MileageEntry] = [],
         countryPreset: TaxInfo? = nil,
         catalogUpdatedAt: String? = nil,
-        now: Date = Date()
+        now: Date = Date(),
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) {
         self.profile = profile
         self.taxProfile = taxProfile
@@ -37,6 +39,7 @@ public struct TaxStudioContext: Equatable {
         self.countryPreset = countryPreset
         self.catalogUpdatedAt = catalogUpdatedAt
         self.now = now
+        self.locale = locale
     }
 }
 
@@ -54,6 +57,12 @@ public struct TaxIntelligenceSnapshot: Equatable {
 }
 
 // MARK: - Forecast
+
+public struct TaxStudioForecastBar: Identifiable, Equatable {
+    public var id: String
+    public var monthLabel: String
+    public var value: Double
+}
 
 public struct TaxForecastSnapshot: Equatable {
     public var projectedTaxableIncome: Decimal
@@ -80,10 +89,19 @@ public struct TaxHealthRecommendation: Identifiable, Equatable {
     public var band: TaxHealthBand
 }
 
+public struct TaxHealthFactor: Identifiable, Equatable {
+    public var id: String
+    public var title: String
+    public var valueLabel: String
+    /// 0…1 progress for the factor bar.
+    public var progress: Double
+}
+
 public struct TaxHealthSnapshot: Equatable {
     public var score: Int
     public var band: TaxHealthBand
     public var riskLevel: String
+    public var factors: [TaxHealthFactor]
     public var recommendations: [TaxHealthRecommendation]
 }
 

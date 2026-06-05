@@ -65,7 +65,7 @@ struct HealthKitConsentSheet: View {
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 10) {
                     BuxButton(
-                        title: "Continue to Apple Health",
+                        title: BuxCatalogLabel.string("Continue to Apple Health", locale: appSettingsManager.interfaceLocale),
                         systemImage: "heart.fill",
                         role: .primary,
                         expands: true
@@ -74,7 +74,7 @@ struct HealthKitConsentSheet: View {
                         onContinue()
                     }
                     BuxButton(
-                        title: "Not now",
+                        title: BuxCatalogLabel.string("Not now", locale: appSettingsManager.interfaceLocale),
                         systemImage: "xmark",
                         role: .secondary,
                         expands: true

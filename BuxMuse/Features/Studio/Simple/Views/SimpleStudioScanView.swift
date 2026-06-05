@@ -439,7 +439,7 @@ private struct SimpleScanChipEditorSheet: View {
         switch field {
         case .kind:
             BuxFormSection(title: "What is this?") {
-                Picker("Type", selection: $draft.kind) {
+                Picker(BuxCatalogLabel.string("Type", locale: locale), selection: $draft.kind) {
                     ForEach(scanKinds, id: \.self) { kind in
                         Label(kind.localizedLogTitle(locale: locale), systemImage: kind.systemImage).tag(kind)
                     }
@@ -472,7 +472,7 @@ private struct SimpleScanChipEditorSheet: View {
             }
         case .payment:
             BuxFormSection(title: "Payment status") {
-                Picker("Status", selection: $draft.paymentStatus) {
+                Picker(BuxCatalogLabel.string("Status", locale: locale), selection: $draft.paymentStatus) {
                     BuxCatalogDynamicText(key: "Paid").tag(SimplePaymentStatus.paid)
                     BuxCatalogDynamicText(key: "Partial").tag(SimplePaymentStatus.partial)
                     BuxCatalogDynamicText(key: "Still waiting").tag(SimplePaymentStatus.unpaid)

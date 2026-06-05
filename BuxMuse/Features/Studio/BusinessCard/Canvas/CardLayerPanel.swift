@@ -6,6 +6,8 @@
 import SwiftUI
 
 struct CardLayerPanel: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     @Binding var document: CardCanvasDocument
     @Binding var selectedID: UUID?
     @Binding var backgroundSelected: Bool
@@ -17,14 +19,18 @@ struct CardLayerPanel: View {
 
     var body: some View {
         List {
-            Section("Canvas") {
-                layerRow(title: "Background", icon: "photo.fill.on.rectangle.fill", isSelected: backgroundSelected) {
+            Section(BusinessCardL10n.line("Canvas", locale: appSettingsManager.interfaceLocale)) {
+                layerRow(
+                    title: BusinessCardL10n.line("Background", locale: appSettingsManager.interfaceLocale),
+                    icon: "photo.fill.on.rectangle.fill",
+                    isSelected: backgroundSelected
+                ) {
                     selectedID = nil
                     backgroundSelected = true
                 }
             }
 
-            Section("Elements · top to bottom") {
+            Section(BusinessCardL10n.line("Elements · top to bottom", locale: appSettingsManager.interfaceLocale)) {
                 ForEach(orderedLayers) { layer in
                     layerRow(
                         title: layer.name,

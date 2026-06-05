@@ -8,6 +8,7 @@ import SwiftUI
 struct BuxDesignerColorPanel: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let title: String
     let currentHex: String
@@ -34,7 +35,7 @@ struct BuxDesignerColorPanel: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            Text(title)
+            Text(BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(.secondary)
                 .frame(width: 72, alignment: .leading)

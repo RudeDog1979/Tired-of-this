@@ -11,6 +11,7 @@ struct CardProCanvasView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @Binding var design: ProBusinessCardDesign
     let logoData: Data?
@@ -301,7 +302,7 @@ struct CardProCanvasView: View {
             HStack(spacing: 16) {
                 canvasToggleRow(title: "Safe zone", isOn: $showSafeZone)
                 canvasToggleRow(title: "Snap", isOn: $showSnapGuides)
-                Button("Reset zoom") { resetWorkspaceZoom() }
+                Button(BusinessCardL10n.line("Reset zoom", locale: appSettingsManager.interfaceLocale)) { resetWorkspaceZoom() }
                     .font(.system(size: 12, weight: .semibold))
                     .buxNativeButtonStyle(.secondary)
                     .buxActionButtonChrome(role: .secondary, accent: controlTint)
@@ -321,7 +322,7 @@ struct CardProCanvasView: View {
     private var topBar: some View {
         BuxCenteredTopBar(title: "Bux Canvas") {
             HStack(spacing: 8) {
-                Button("Exit") { exitAndDismiss() }
+                Button(BusinessCardL10n.line("Exit", locale: appSettingsManager.interfaceLocale)) { exitAndDismiss() }
                     .font(.system(size: 13, weight: .semibold))
                     .buxNativeButtonStyle(.secondary)
             }
@@ -809,7 +810,7 @@ struct CardProCanvasView: View {
     ) -> some View {
         Button(action: action) {
             Label {
-                Text(title)
+                BuxCatalogText.text(title)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
             } icon: {
@@ -831,7 +832,7 @@ struct CardProCanvasView: View {
                 .ignoresSafeArea()
                 .onTapGesture { inlineEditLayerID = nil }
             VStack(spacing: 12) {
-                TextField("Edit text", text: $inlineEditText, axis: .vertical)
+                TextField(BusinessCardL10n.line("Edit text", locale: appSettingsManager.interfaceLocale), text: $inlineEditText, axis: .vertical)
                     .lineLimit(1...4)
                     .padding()
                     .background(Color(uiColor: .secondarySystemGroupedBackground))

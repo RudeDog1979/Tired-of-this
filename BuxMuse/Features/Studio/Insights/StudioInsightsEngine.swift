@@ -53,6 +53,7 @@ public enum StudioInsightsEngine {
         receipts: [StudioReceipt],
         simpleEntries: [SimpleStudioEntry],
         profile: StudioProfile,
+        locale: Locale,
         currencyFormat: (Decimal) -> String
     ) -> StudioInsightsSnapshot {
         var metrics: [StudioInsightRow] = []
@@ -69,9 +70,9 @@ public enum StudioInsightsEngine {
         if totalRevenue > 0 {
             metrics.append(.init(
                 id: "profit",
-                title: "Studio profit",
+                title: BuxCatalogLabel.string("Studio profit", locale: locale),
                 value: currencyFormat(profit),
-                subtitle: "Paid invoices minus linked project expenses",
+                subtitle: BuxCatalogLabel.string("Paid invoices minus linked project expenses", locale: locale),
                 systemImage: "chart.line.uptrend.xyaxis"
             ))
         }
@@ -85,9 +86,9 @@ public enum StudioInsightsEngine {
             let perHour = totalRevenue / Decimal(billableHours)
             metrics.append(.init(
                 id: "per-hour",
-                title: "Profit per hour",
+                title: BuxCatalogLabel.string("Profit per hour", locale: locale),
                 value: currencyFormat(perHour),
-                subtitle: "Across logged billable project time",
+                subtitle: BuxCatalogLabel.string("Across logged billable project time", locale: locale),
                 systemImage: "clock.badge.checkmark"
             ))
         }
@@ -101,9 +102,13 @@ public enum StudioInsightsEngine {
         if !jobs.isEmpty {
             metrics.append(.init(
                 id: "per-job",
-                title: "Simple job revenue",
+                title: BuxCatalogLabel.string("Simple job revenue", locale: locale),
                 value: currencyFormat(jobRevenue),
-                subtitle: "\(jobs.count) job(s) tracked",
+                subtitle: BuxLocalizedString.format(
+                    "%lld job(s) tracked",
+                    locale: locale,
+                    Int64(jobs.count)
+                ),
                 systemImage: "briefcase.fill"
             ))
         }
@@ -115,9 +120,9 @@ public enum StudioInsightsEngine {
         if let top = clientProfit.max(by: { $0.value < $1.value }) {
             metrics.append(.init(
                 id: "top-client",
-                title: "Top client (paid)",
+                title: BuxCatalogLabel.string("Top client (paid)", locale: locale),
                 value: currencyFormat(top.value),
-                subtitle: "Highest paid invoice total for one client",
+                subtitle: BuxCatalogLabel.string("Highest paid invoice total for one client", locale: locale),
                 systemImage: "person.crop.circle.badge.checkmark"
             ))
         }
@@ -127,9 +132,14 @@ public enum StudioInsightsEngine {
         if projects.count > 0 {
             metrics.append(.init(
                 id: "mix",
-                title: "Project mix",
-                value: "\(hourlyCount) hourly · \(fixedCount) fixed",
-                subtitle: "Active portfolio shape",
+                title: BuxCatalogLabel.string("Project mix", locale: locale),
+                value: BuxLocalizedString.format(
+                    "%lld hourly · %lld fixed",
+                    locale: locale,
+                    Int64(hourlyCount),
+                    Int64(fixedCount)
+                ),
+                subtitle: BuxCatalogLabel.string("Active portfolio shape", locale: locale),
                 systemImage: "square.grid.2x2"
             ))
         }
@@ -139,7 +149,8 @@ public enum StudioInsightsEngine {
                 project: project,
                 receipts: receipts,
                 agreement: nil,
-                profile: profile
+                profile: profile,
+                locale: locale
             )
             scopeAlerts += snap.alerts.filter { $0.id.contains("scope") }.count
         }
@@ -151,16 +162,29 @@ public enum StudioInsightsEngine {
                 return a.effectiveHourlyRate > 0 && a.effectiveHourlyRate < defaultRate * Decimal(0.9)
             }
             if !lowProjects.isEmpty {
-                rateTip = "Raise rates on \(lowProjects.count) project(s) — effective hourly is below your \(defaultRate)/hr default."
+                rateTip = BuxLocalizedString.format(
+                    "Raise rates on %lld project(s) — effective hourly is below your %@/hr default.",
+                    locale: locale,
+                    Int64(lowProjects.count),
+                    "\(defaultRate)"
+                )
             } else if leakageHours >= 3 {
-                rateTip = "You logged \(String(format: "%.1f", leakageHours))h non-billable — convert admin time or exclude it from client work."
+                rateTip = BuxLocalizedString.format(
+                    "You logged %.1fh non-billable — convert admin time or exclude it from client work.",
+                    locale: locale,
+                    leakageHours
+                )
             }
         }
 
         let headline: String = {
-            if metrics.isEmpty { return "Add projects or jobs to see Studio insights." }
-            if profit > 0 { return "Studio is profitable on recorded paid work." }
-            return "Track paid invoices and expenses for profit insights."
+            if metrics.isEmpty {
+                return BuxCatalogLabel.string("Add projects or jobs to see Studio insights.", locale: locale)
+            }
+            if profit > 0 {
+                return BuxCatalogLabel.string("Studio is profitable on recorded paid work.", locale: locale)
+            }
+            return BuxCatalogLabel.string("Track paid invoices and expenses for profit insights.", locale: locale)
         }()
 
         return StudioInsightsSnapshot(

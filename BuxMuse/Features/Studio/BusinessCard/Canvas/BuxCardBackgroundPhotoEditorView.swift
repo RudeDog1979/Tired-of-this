@@ -29,6 +29,7 @@ struct BuxCardBackgroundPhotoEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let initialAspect: ProBusinessCardAspect
     let image: UIImage
@@ -183,14 +184,14 @@ struct BuxCardBackgroundPhotoEditorView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .buxFormSectionCard()
 
-            Picker("Mode", selection: $mode) {
+            Picker(BusinessCardL10n.line("Mode", locale: appSettingsManager.interfaceLocale), selection: $mode) {
                 ForEach(BuxCardBackgroundPhotoMode.allCases) { m in
-                    Text(m.catalogLabel(locale: BuxInterfaceLocale.currentInterfaceLocale)).tag(m)
+                    Text(m.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(m)
                 }
             }
             .pickerStyle(.segmented)
 
-            Text(mode.detail)
+            Text(mode.catalogDetail(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)

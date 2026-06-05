@@ -29,6 +29,9 @@ struct RootView: View {
 
     var body: some View {
         coreTabView
+            .background {
+                TaxTranslationSessionBridgeView()
+            }
             .background(themeManager.screenBackground(for: colorScheme))
             .overlay(alignment: .top) {
                 ConnectivityToastView()

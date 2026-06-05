@@ -327,7 +327,7 @@ struct ExpenseDetailView: View {
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             VStack(alignment: .leading, spacing: 12) {
-                TextField("Add a note", text: $viewModel.notesDraft, axis: .vertical)
+                TextField(BuxCatalogLabel.string("Add a note", locale: appSettingsManager.interfaceLocale), text: $viewModel.notesDraft, axis: .vertical)
                     .lineLimit(3...6)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))

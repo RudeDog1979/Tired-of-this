@@ -54,6 +54,7 @@ struct StudioHubView: View {
             receipts: store.receipts,
             simpleEntries: simpleStudioStore.entries,
             profile: store.profile,
+            locale: appSettingsManager.interfaceLocale,
             currencyFormat: { appSettingsManager.format($0) }
         )
     }
@@ -75,6 +76,9 @@ struct StudioHubView: View {
     private var proStudioHub: some View {
         NavigationStack {
             studioHubLayer
+        }
+        .background {
+            TaxTranslationSessionBridgeView()
         }
         .buxInterfaceLocale()
     }
@@ -408,7 +412,7 @@ struct StudioHubView: View {
                     studioRowDivider
                     navRow(title: "Studio Insights", icon: "chart.bar.xaxis", color: .mint) { navigateToInsights = true }
                     studioRowDivider
-                    navRow(title: "Tax Studio", icon: "percent", color: .red) { openTaxHub(.overview) }
+                    navRow(title: "Tax studio", icon: "percent", color: .red) { openTaxHub(.overview) }
                     studioRowDivider
                     navRow(title: "Cashflow", icon: "chart.line.uptrend.xyaxis", color: .orange) { navigateToCashflow = true }
                     studioRowDivider
@@ -473,6 +477,12 @@ struct NewClientSheet: View {
     @State private var rate = ""
     @State private var terms = "14"
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -480,15 +490,15 @@ struct NewClientSheet: View {
 
                 BuxThemedCardForm {
                     BuxFormSection(title: "Client Info") {
-                        TextField("Display name", text: $name)
+                        TextField(loc("Display name"), text: $name)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        TextField("Email", text: $email)
+                        TextField(loc("Email"), text: $email)
                             .keyboardType(.emailAddress)
                             .onChange(of: email) { _, v in party.email = v }
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        TextField("Phone", text: $phone)
+                        TextField(loc("Phone"), text: $phone)
                             .keyboardType(.phonePad)
                             .onChange(of: phone) { _, v in party.phone = v }
                             .buxFormFieldPadding()
@@ -502,11 +512,11 @@ struct NewClientSheet: View {
                     }
 
                     BuxFormSection(title: "Contract settings") {
-                        TextField("Default Hourly Rate", text: $rate)
+                        TextField(loc("Default Hourly Rate"), text: $rate)
                             .keyboardType(.decimalPad)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        Picker("Payment Terms (Days)", selection: $terms) {
+                        Picker(loc("Payment Terms (Days)"), selection: $terms) {
                             BuxCatalogDynamicText(key: "Due on Receipt").tag("0")
                             BuxCatalogDynamicText(key: "7 Days").tag("7")
                             BuxCatalogDynamicText(key: "14 Days").tag("14")

@@ -21,16 +21,22 @@ struct StudioProfileView: View {
     @State private var hourlyRate = ""
     @State private var logoData: Data?
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         StudioThemedListBackdrop {
             BuxThemedCardForm {
                 BuxFormSection(title: "Business details") {
                     PhotoPickCropRow(
-                        title: "Company Logo",
-                        subtitle: "Shown on exported invoice PDFs",
+                        title: loc("Company Logo"),
+                        subtitle: loc("Shown on exported invoice PDFs"),
                         imageData: logoData,
                         cropShape: .roundedRectangle(cornerRadius: 12),
-                        cropTitle: "Crop Logo",
+                        cropTitle: loc("Crop Logo"),
                         previewSize: 64,
                         previewCornerRadius: 12
                     ) { data in
@@ -39,13 +45,13 @@ struct StudioProfileView: View {
                     }
                     .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Full Name", text: $displayName)
+                    TextField(loc("Full Name"), text: $displayName)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Business Name", text: $businessName)
+                    TextField(loc("Business Name"), text: $businessName)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Picker("Business Type", selection: $businessType) {
+                    Picker(loc("Business Type"), selection: $businessType) {
                         ForEach(BusinessType.allCases) { type in
                             Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
                         }
@@ -87,14 +93,19 @@ struct StudioProfileView: View {
                 }
 
                 BuxFormSection(title: "Invoicing defaults") {
-                    Stepper("Payment Terms: \(paymentTerms) Days", value: $paymentTerms, in: 0...120, step: 1)
+                    Stepper(
+                        BuxLocalizedString.format("Payment Terms: %lld Days", locale: locale, Int64(paymentTerms)),
+                        value: $paymentTerms,
+                        in: 0...120,
+                        step: 1
+                    )
                         .tint(themeManager.current.accentColor)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     HStack {
                         BuxCatalogDynamicText(key: "Default Hourly Rate")
                         Spacer()
-                        TextField("Rate", text: $hourlyRate)
+                        TextField(loc("Rate"), text: $hourlyRate)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)

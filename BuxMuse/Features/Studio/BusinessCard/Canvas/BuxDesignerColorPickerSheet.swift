@@ -221,7 +221,7 @@ struct BuxDesignerColorPickerSheet: View {
 
     private var presetGroupsSection: some View {
         ForEach(BuxDesignerColorPresets.groups) { group in
-            swatchSection(title: group.title, swatches: group.colors.map { ($0, $0) })
+            swatchSection(title: group.catalogTitle(locale: appSettingsManager.interfaceLocale), swatches: group.colors.map { ($0, $0) })
         }
     }
 
@@ -298,6 +298,7 @@ struct BuxDesignerColorPickerSheet: View {
 struct BuxDesignerColorToolbarButton: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let title: String
     let hex: String
@@ -315,7 +316,7 @@ struct BuxDesignerColorToolbarButton: View {
         Button { showSheet = true } label: {
             HStack(spacing: 6) {
                 BuxDesignerColorWell(hex: hex, size: 22)
-                Text(title)
+                Text(BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
@@ -344,6 +345,7 @@ struct BuxDesignerColorToolbarButton: View {
 
 struct BuxDesignerColorFormRow: View {
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @Environment(\.colorScheme) private var colorScheme
 
     let title: String
@@ -358,7 +360,7 @@ struct BuxDesignerColorFormRow: View {
             showSheet = true
         } label: {
             HStack {
-                Text(title)
+                Text(BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                 Spacer()
                 swatch

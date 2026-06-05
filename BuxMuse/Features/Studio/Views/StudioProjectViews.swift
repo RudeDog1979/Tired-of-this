@@ -284,7 +284,7 @@ struct StudioProjectDetailView: View {
         .navigationTitle(project.name)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Edit") {
+                Button(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale)) {
                     showProjectEditor = true
                 }
                 .font(.system(size: 15, weight: .semibold))
@@ -317,7 +317,7 @@ struct StudioProjectDetailView: View {
     ) -> some View {
         let clientName = store.clients.first(where: { $0.id == project.clientId })?.name ?? "No client linked"
         return VStack(alignment: .leading, spacing: BuxTokens.tight) {
-            Text("PROJECT OVERVIEW")
+            BuxCatalogDynamicText(key: "PROJECT OVERVIEW")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
 
@@ -474,7 +474,8 @@ struct StudioProjectDetailView: View {
             project: project,
             receipts: store.receipts,
             agreement: store.agreementDraft(forProjectId: project.id),
-            profile: store.profile
+            profile: store.profile,
+            locale: appSettingsManager.interfaceLocale
         )
     }
 
@@ -671,7 +672,7 @@ struct StudioProjectDetailView: View {
                 }
                 Spacer()
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("PROFIT")
+                    BuxCatalogDynamicText(key: "PROFIT")
                         .font(.system(size: 9, weight: .semibold))
                         .buxLabelSecondary()
                     Text(appSettingsManager.format(analysis.projectedProfit))
@@ -764,17 +765,22 @@ struct StudioProjectDetailView: View {
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
         }
-        .alert("Delete time entry?", isPresented: Binding(
-            get: { timeEntryPendingDelete != nil },
-            set: { if !$0 { timeEntryPendingDelete = nil } }
-        )) {
-            Button("Delete", role: .destructive) {
+        .alert(
+            BuxCatalogLabel.string("Delete time entry?", locale: appSettingsManager.interfaceLocale),
+            isPresented: Binding(
+                get: { timeEntryPendingDelete != nil },
+                set: { if !$0 { timeEntryPendingDelete = nil } }
+            )
+        ) {
+            Button(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), role: .destructive) {
                 if let entry = timeEntryPendingDelete {
                     deleteTimeEntry(entry)
                 }
                 timeEntryPendingDelete = nil
             }
-            Button("Cancel", role: .cancel) { timeEntryPendingDelete = nil }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {
+                timeEntryPendingDelete = nil
+            }
         } message: {
             BuxCatalogDynamicText(key: "This removes the entry from the project log.")
         }
@@ -1008,7 +1014,7 @@ struct ActiveTimeTrackerView: View {
                 timer.setJobEstimate(enabled: hasJobEstimate, duration: estimateDuration, autoPauseAtEnd: value)
             }
             .confirmationDialog(
-                "Finished early?",
+                BuxCatalogLabel.string("Finished early?", locale: appSettingsManager.interfaceLocale),
                 isPresented: $showFinishEarlyConfirm,
                 titleVisibility: .visible
             ) {
@@ -1023,7 +1029,7 @@ struct ActiveTimeTrackerView: View {
                         )
                     )
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
             } message: {
                 BuxCatalogDynamicText(key: "Save your time entry and end the Live Activity.")
             }
@@ -1033,7 +1039,7 @@ struct ActiveTimeTrackerView: View {
 
     private var projectPicker: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("PROJECT")
+            BuxCatalogDynamicText(key: "PROJECT")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(1)
@@ -1043,7 +1049,7 @@ struct ActiveTimeTrackerView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             } else {
-                Picker("Project", selection: projectSelectionBinding) {
+                Picker(BuxCatalogLabel.string("Project", locale: appSettingsManager.interfaceLocale), selection: projectSelectionBinding) {
                     ForEach(store.projects) { project in
                         Text(project.name).tag(project.id)
                     }
@@ -1064,7 +1070,7 @@ struct ActiveTimeTrackerView: View {
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(1)
 
-            TextField("What are you working on?", text: $notes, axis: .vertical)
+            TextField(BuxCatalogLabel.string("What are you working on?", locale: appSettingsManager.interfaceLocale), text: $notes, axis: .vertical)
                 .lineLimit(1...3)
                 .focused($notesFieldFocused)
                 .submitLabel(.done)
@@ -1113,7 +1119,7 @@ struct ActiveTimeTrackerView: View {
 
     private var lapsList: some View {
         VStack(alignment: .leading, spacing: BuxTokens.tight) {
-            Text("LAPS")
+            BuxCatalogDynamicText(key: "LAPS")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(1)
@@ -1445,10 +1451,10 @@ struct StudioProjectEditorSheet: View {
                 ScrollView(showsIndicators: false) {
                     BuxThemedCardForm {
                         BuxFormSection(title: "Project") {
-                            TextField("Project name", text: $name)
+                            TextField(BuxCatalogLabel.string("Project name", locale: appSettingsManager.interfaceLocale), text: $name)
                                 .buxFormFieldPadding()
                             BuxFormRowDivider()
-                            Picker("Client", selection: $clientId) {
+                            Picker(BuxCatalogLabel.string("Client", locale: appSettingsManager.interfaceLocale), selection: $clientId) {
                                 if store.clients.isEmpty {
                                     BuxCatalogDynamicText(key: "No client").tag(UUID())
                                 } else {
@@ -1459,7 +1465,7 @@ struct StudioProjectEditorSheet: View {
                             }
                             .buxFormFieldPadding()
                             BuxFormRowDivider()
-                            Picker("Status", selection: $status) {
+                            Picker(BuxCatalogLabel.string("Status", locale: appSettingsManager.interfaceLocale), selection: $status) {
                                 ForEach(StudioProjectStatus.allCases) { s in
                                     Text(s.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(s)
                                 }
@@ -1468,7 +1474,7 @@ struct StudioProjectEditorSheet: View {
                         }
 
                         BuxFormSection(title: "How you charge") {
-                            Picker("Billing", selection: $billingChoice) {
+                            Picker(BuxCatalogLabel.string("Billing", locale: appSettingsManager.interfaceLocale), selection: $billingChoice) {
                                 ForEach(StudioProjectBillingChoice.allCases) { choice in
                                     Text(choice.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(choice)
                                 }
@@ -1485,28 +1491,28 @@ struct StudioProjectEditorSheet: View {
 
                             if billingChoice == .hourly || billingChoice == .both {
                                 BuxFormRowDivider()
-                                TextField("Hourly rate", text: $hourlyRate)
+                                TextField(BuxCatalogLabel.string("Hourly rate", locale: appSettingsManager.interfaceLocale), text: $hourlyRate)
                                     .keyboardType(.decimalPad)
                                     .buxFormFieldPadding()
                             }
                             if billingChoice == .fixedPrice || billingChoice == .both {
                                 BuxFormRowDivider()
-                                TextField("Fixed price for whole project", text: $fixedFee)
+                                TextField(BuxCatalogLabel.string("Fixed price for whole project", locale: appSettingsManager.interfaceLocale), text: $fixedFee)
                                     .keyboardType(.decimalPad)
                                     .buxFormFieldPadding()
                             }
                         }
 
                         BuxFormSection(title: "Dates") {
-                            DatePicker("Started", selection: $startDate, displayedComponents: .date)
+                            DatePicker(BuxCatalogLabel.string("Started", locale: appSettingsManager.interfaceLocale), selection: $startDate, displayedComponents: .date)
                                 .buxFormFieldPadding()
                             BuxFormRowDivider()
-                            Toggle("Set end date", isOn: $hasEndDate)
+                            Toggle(BuxCatalogLabel.string("Set end date", locale: appSettingsManager.interfaceLocale), isOn: $hasEndDate)
                                 .padding(.horizontal, BuxTokens.section)
                                 .padding(.vertical, 10)
                             if hasEndDate {
                                 BuxFormRowDivider()
-                                DatePicker("Ended", selection: $endDate, displayedComponents: .date)
+                                DatePicker(BuxCatalogLabel.string("Ended", locale: appSettingsManager.interfaceLocale), selection: $endDate, displayedComponents: .date)
                                     .buxFormFieldPadding()
                             }
                         }
@@ -1518,11 +1524,11 @@ struct StudioProjectEditorSheet: View {
                                 .padding(.horizontal, BuxTokens.section)
                                 .padding(.top, 8)
                             BuxFormRowDivider()
-                            TextField("Scope (for agreements)", text: $plannedScope, axis: .vertical)
+                            TextField(BuxCatalogLabel.string("Scope (for agreements)", locale: appSettingsManager.interfaceLocale), text: $plannedScope, axis: .vertical)
                                 .lineLimit(2...6)
                                 .buxFormFieldPadding()
                             BuxFormRowDivider()
-                            TextField("Deliverables", text: $plannedDeliverables, axis: .vertical)
+                            TextField(BuxCatalogLabel.string("Deliverables", locale: appSettingsManager.interfaceLocale), text: $plannedDeliverables, axis: .vertical)
                                 .lineLimit(2...6)
                                 .buxFormFieldPadding()
                         }
@@ -1535,7 +1541,7 @@ struct StudioProjectEditorSheet: View {
                                         : "\(plannerMilestones.count) milestone(s)")
                                         .font(.system(size: 14, weight: .medium))
                                     Spacer()
-                                    Button("Manage") { showMilestonesEditor = true }
+                                    Button(BuxCatalogLabel.string("Manage", locale: appSettingsManager.interfaceLocale)) { showMilestonesEditor = true }
                                         .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(themeManager.current.accentColor)
                                 }
@@ -1544,23 +1550,23 @@ struct StudioProjectEditorSheet: View {
                         }
 
                         BuxFormSection(title: "Internal notes") {
-                            TextField("Reminders, links, private notes…", text: $notes, axis: .vertical)
+                            TextField(BuxCatalogLabel.string("Reminders, links, private notes…", locale: appSettingsManager.interfaceLocale), text: $notes, axis: .vertical)
                                 .lineLimit(2...5)
                                 .buxFormFieldPadding()
                         }
 
                         if settingsStore.studioMode == .pro, settingsStore.antiScopeCreepEnabled {
                             BuxFormSection(title: "Scope Radar") {
-                                TextField("Budgeted hours", text: $budgetedHours)
+                                TextField(BuxCatalogLabel.string("Budgeted hours", locale: appSettingsManager.interfaceLocale), text: $budgetedHours)
                                     .keyboardType(.decimalPad)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                TextField("Included revisions", text: $allowedRevisions)
+                                TextField(BuxCatalogLabel.string("Included revisions", locale: appSettingsManager.interfaceLocale), text: $allowedRevisions)
                                     .keyboardType(.numberPad)
                                     .buxFormFieldPadding()
                                 if isEditing {
                                     BuxFormRowDivider()
-                                    TextField("Revisions used so far", text: $currentRevisions)
+                                    TextField(BuxCatalogLabel.string("Revisions used so far", locale: appSettingsManager.interfaceLocale), text: $currentRevisions)
                                         .keyboardType(.numberPad)
                                         .buxFormFieldPadding()
                                 }

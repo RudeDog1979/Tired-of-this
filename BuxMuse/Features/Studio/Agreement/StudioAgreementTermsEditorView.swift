@@ -10,6 +10,7 @@ struct StudioAgreementTermsEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @Binding var enabledClauseIds: [String]
     @Binding var clauseOverrides: [String: String]
@@ -61,7 +62,8 @@ struct StudioAgreementTermsEditorView: View {
         StudioAgreementTermsComposer.composedText(
             enabledClauseIds: enabledClauseIds,
             overrides: clauseOverrides,
-            customText: customText
+            customText: customText,
+            locale: appSettingsManager.interfaceLocale
         )
     }
 
@@ -82,14 +84,19 @@ struct StudioAgreementTermsEditorView: View {
     }
 
     private func packRow(_ pack: StudioAgreementTermsPack, replace: Bool) -> some View {
-        Button {
+        let locale = appSettingsManager.interfaceLocale
+        return Button {
             applyPack(pack, replace: replace)
         } label: {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(replace ? "Use \(pack.title)" : "Add \(pack.title)")
+                    Text(
+                        replace
+                            ? StudioAgreementL10n.format("Use %@", locale: locale, pack.catalogTitle(locale: locale))
+                            : StudioAgreementL10n.format("Add %@", locale: locale, pack.catalogTitle(locale: locale))
+                    )
                         .font(.system(size: 14, weight: .semibold))
-                    Text(pack.subtitle)
+                    Text(pack.catalogSubtitle(locale: locale))
                         .font(.system(size: 11, weight: .medium))
                         .buxLabelSecondary()
                         .multilineTextAlignment(.leading)
@@ -105,11 +112,17 @@ struct StudioAgreementTermsEditorView: View {
     }
 
     private var clausesSection: some View {
-        BuxFormSection(title: "Clauses (\(enabledClauseIds.count) on)") {
+        BuxFormSection(
+            title: StudioAgreementL10n.format(
+                "Clauses (%lld on)",
+                locale: appSettingsManager.interfaceLocale,
+                Int64(enabledClauseIds.count)
+            )
+        ) {
             ForEach(StudioAgreementTermsCategory.allCases, id: \.self) { category in
                 let clauses = StudioAgreementTermsLibrary.allClauses.filter { $0.category == category }
                 if !clauses.isEmpty {
-                    categoryHeader(category.label)
+                    categoryHeader(category.catalogLabel(locale: appSettingsManager.interfaceLocale))
                     ForEach(clauses) { clause in
                         BuxFormRowDivider()
                         clauseRow(clause)
@@ -134,7 +147,7 @@ struct StudioAgreementTermsEditorView: View {
                 .labelsHidden()
                 .tint(themeManager.current.accentColor)
             VStack(alignment: .leading, spacing: 4) {
-                Text(clause.title)
+                Text(clause.catalogTitle(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 14, weight: .semibold))
                 if isEdited {
                     BuxCatalogDynamicText(key: "Custom wording")
@@ -159,7 +172,7 @@ struct StudioAgreementTermsEditorView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .buxFormFieldPadding()
             BuxFormRowDivider()
-            TextField("Custom terms & conditions", text: $customText, axis: .vertical)
+            TextField(BuxCatalogLabel.string("Custom terms & conditions", locale: appSettingsManager.interfaceLocale), text: $customText, axis: .vertical)
                 .lineLimit(4...16)
                 .buxFormFieldPadding()
         }
@@ -174,7 +187,7 @@ struct StudioAgreementTermsEditorView: View {
             }
             .buxFormFieldPadding()
             BuxFormRowDivider()
-            Text(StudioAgreementTermsLibrary.disclaimer)
+            BuxCatalogDynamicText(key: StudioAgreementTermsLibrary.disclaimer)
                 .font(.system(size: 11, weight: .medium))
                 .buxLabelSecondary()
                 .fixedSize(horizontal: false, vertical: true)
@@ -241,6 +254,7 @@ struct StudioAgreementTermsEditorView: View {
 private struct StudioAgreementTermsClauseEditSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let clause: StudioAgreementTermsClause
     @Binding var overrideText: String
@@ -257,11 +271,11 @@ private struct StudioAgreementTermsClauseEditSheet: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    TextField("Clause text", text: $draftText, axis: .vertical)
+                    TextField(BuxCatalogLabel.string("Clause text", locale: appSettingsManager.interfaceLocale), text: $draftText, axis: .vertical)
                         .lineLimit(6...20)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Button("Restore template") {
+                    Button(BuxCatalogLabel.string("Restore template", locale: appSettingsManager.interfaceLocale)) {
                         draftText = ""
                         overrideText = ""
                         dismiss()

@@ -36,9 +36,13 @@ public final class BackupNotificationScheduler {
             return
         }
         
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         let content = UNMutableNotificationContent()
-        content.title = "BuxMuse Backup Reminder"
-        content.body = "Protect your ledger data. Open Settings -> Data to create an encrypted backup."
+        content.title = BuxCatalogLabel.string("BuxMuse Backup Reminder", locale: locale)
+        content.body = BuxCatalogLabel.string(
+            "Protect your ledger data. Open Settings → Data to create an encrypted backup.",
+            locale: locale
+        )
         content.sound = .default
         
         let interval: TimeInterval

@@ -9,42 +9,48 @@ enum StudioAgreementTermsComposer {
 
     static func body(
         for clauseId: String,
-        overrides: [String: String]
+        overrides: [String: String],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> String? {
         guard let clause = StudioAgreementTermsLibrary.clause(id: clauseId) else { return nil }
         let custom = overrides[clauseId]?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !custom.isEmpty { return custom }
-        return clause.defaultBody.trimmingCharacters(in: .whitespacesAndNewlines)
+        return clause.catalogDefaultBody(locale: locale).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     static func composedText(
         enabledClauseIds: [String],
         overrides: [String: String],
         customText: String,
-        includeDisclaimer: Bool = true
+        includeDisclaimer: Bool = true,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> String {
         var sections: [String] = []
         let ordered = StudioAgreementTermsLibrary.allClauses
             .filter { enabledClauseIds.contains($0.id) }
 
         for clause in ordered {
-            guard let text = body(for: clause.id, overrides: overrides), !text.isEmpty else { continue }
-            sections.append("\(clause.title)\n\(text)")
+            guard let text = body(for: clause.id, overrides: overrides, locale: locale), !text.isEmpty else { continue }
+            sections.append("\(clause.catalogTitle(locale: locale))\n\(text)")
         }
 
         let extra = customText.trimmingCharacters(in: .whitespacesAndNewlines)
         if !extra.isEmpty {
-            sections.append("Additional terms\n\(extra)")
+            sections.append(
+                "\(BuxCatalogLabel.string("Additional terms", locale: locale))\n\(extra)"
+            )
         }
 
         guard !sections.isEmpty else {
-            if includeDisclaimer { return StudioAgreementTermsLibrary.disclaimer }
+            if includeDisclaimer {
+                return BuxCatalogLabel.string(StudioAgreementTermsLibrary.disclaimer, locale: locale)
+            }
             return ""
         }
 
         var result = sections.joined(separator: "\n\n")
         if includeDisclaimer {
-            result += "\n\n" + StudioAgreementTermsLibrary.disclaimer
+            result += "\n\n" + BuxCatalogLabel.string(StudioAgreementTermsLibrary.disclaimer, locale: locale)
         }
         return result
     }
@@ -52,11 +58,12 @@ enum StudioAgreementTermsComposer {
 
 extension AgreementDraft {
 
-    public var composedTermsAndConditions: String {
+    public func composedTermsAndConditions(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
         StudioAgreementTermsComposer.composedText(
             enabledClauseIds: enabledTermsClauseIds,
             overrides: termsClauseOverrides,
-            customText: termsCustomText
+            customText: termsCustomText,
+            locale: locale
         )
     }
 

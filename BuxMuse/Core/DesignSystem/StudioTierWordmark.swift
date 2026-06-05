@@ -35,7 +35,7 @@ struct StudioTierWordmark: View {
 
     private var heroMark: some View {
         VStack(alignment: .leading, spacing: 2) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
                 studioTitle(size: 34, weight: .bold)
                 tierBadge(compact: false)
             }
@@ -49,7 +49,7 @@ struct StudioTierWordmark: View {
     }
 
     private var navigationMark: some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .center, spacing: 8) {
             studioTitle(size: 17, weight: .bold)
             tierBadge(compact: true)
         }

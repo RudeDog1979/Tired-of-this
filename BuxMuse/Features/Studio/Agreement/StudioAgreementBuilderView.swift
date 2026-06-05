@@ -12,11 +12,20 @@ struct StudioAgreementBuilderView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var store: StudioStore
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @Binding var draft: AgreementDraft
     @State private var step = 0
 
-    private let stepTitles = ["Basics", "Scope", "Money & timing", "Review"]
+    private var stepTitles: [String] {
+        let locale = appSettingsManager.interfaceLocale
+        return [
+            BuxCatalogLabel.string("Basics", locale: locale),
+            BuxCatalogLabel.string("Scope", locale: locale),
+            BuxCatalogLabel.string("Money & timing", locale: locale),
+            BuxCatalogLabel.string("Review", locale: locale)
+        ]
+    }
 
     var body: some View {
         NavigationStack {
@@ -40,15 +49,15 @@ struct StudioAgreementBuilderView: View {
                     if step == 0 {
                         BuxToolbarCancelButton { dismiss() }
                     } else {
-                        Button("Back") { step -= 1 }
+                        Button(BuxCatalogLabel.string("Back", locale: appSettingsManager.interfaceLocale)) { step -= 1 }
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if step < stepTitles.count - 1 {
-                        Button("Next") { step += 1 }
+                        Button(BuxCatalogLabel.string("Next", locale: appSettingsManager.interfaceLocale)) { step += 1 }
                             .font(.system(size: 15, weight: .bold))
                     } else {
-                        Button("Done") {
+                        Button(BuxCatalogLabel.string("Done", locale: appSettingsManager.interfaceLocale)) {
                             draft.refreshAgreementStatus()
                             dismiss()
                         }
@@ -62,10 +71,10 @@ struct StudioAgreementBuilderView: View {
 
     private var basicsStep: some View {
         BuxFormSection(title: "Who is this for?") {
-            TextField("Agreement title", text: $draft.title)
+            TextField(loc("Agreement title"), text: $draft.title)
                 .buxFormFieldPadding()
             BuxFormRowDivider()
-            Picker("Client", selection: clientBinding) {
+            Picker(loc("Client"), selection: clientBinding) {
                 BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                 ForEach(store.clients) { client in
                     Text(client.name).tag(Optional(client.id))
@@ -74,7 +83,7 @@ struct StudioAgreementBuilderView: View {
             .pickerStyle(.menu)
             .buxFormFieldPadding()
             BuxFormRowDivider()
-            Picker("Project", selection: projectBinding) {
+            Picker(loc("Project"), selection: projectBinding) {
                 BuxCatalogDynamicText(key: "None").tag(UUID?.none)
                 ForEach(store.projects) { project in
                     Text(project.name).tag(Optional(project.id))
@@ -103,7 +112,7 @@ struct StudioAgreementBuilderView: View {
             BuxFormRowDivider()
             builderField("Timeline & milestones", text: $draft.timelineNotes)
             BuxFormRowDivider()
-            TextField("Your name on signature", text: $draft.providerSignatoryName)
+            TextField(loc("Your name on signature"), text: $draft.providerSignatoryName)
                 .buxFormFieldPadding()
         }
     }
@@ -153,8 +162,12 @@ struct StudioAgreementBuilderView: View {
         })
     }
 
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: appSettingsManager.interfaceLocale)
+    }
+
     private func builderField(_ placeholder: String, text: Binding<String>) -> some View {
-        TextField(placeholder, text: text, axis: .vertical)
+        TextField(loc(placeholder), text: text, axis: .vertical)
             .lineLimit(3...10)
             .buxFormFieldPadding()
     }

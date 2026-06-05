@@ -19,6 +19,12 @@ struct DualCashDrawerSettingsView: View {
     @State private var localBalanceInput = ""
     @State private var secondaryBalanceInput = ""
     @State private var showSavedAlert = false
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
     
     var body: some View {
         BuxThemedCardForm {
@@ -51,7 +57,7 @@ struct DualCashDrawerSettingsView: View {
                                     .font(.system(size: 12, weight: .bold))
                                     .buxLabelSecondary()
                                 
-                                TextField("e.g. DOP, USD, EUR", text: $primaryInput)
+                                TextField(loc("e.g. DOP, USD, EUR"), text: $primaryInput)
                                     .font(.system(size: 15, weight: .semibold))
                                     .tint(themeManager.current.accentColor)
                                     .textFieldStyle(.plain)
@@ -67,7 +73,7 @@ struct DualCashDrawerSettingsView: View {
                                     .font(.system(size: 12, weight: .bold))
                                     .buxLabelSecondary()
                                 
-                                TextField("e.g. USD, DOP", text: $secondaryInput)
+                                TextField(loc("e.g. USD, DOP"), text: $secondaryInput)
                                     .font(.system(size: 15, weight: .semibold))
                                     .tint(themeManager.current.accentColor)
                                     .textFieldStyle(.plain)

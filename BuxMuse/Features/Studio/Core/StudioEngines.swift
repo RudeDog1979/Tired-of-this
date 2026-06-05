@@ -611,7 +611,8 @@ public final class StudioDeductionEngine {
         receipts: [StudioReceipt],
         taxProfile: StudioTaxProfile,
         mileageEntries: [MileageEntry] = [],
-        mileageRatePerUnit: Decimal = 0
+        mileageRatePerUnit: Decimal = 0,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> (totalDeductible: Decimal, opportunities: [DeductionOpportunity]) {
         
         let totalDeductible = StudioDeductionMath.totalDeductible(
@@ -628,8 +629,11 @@ public final class StudioDeductionEngine {
         if !receipts.isEmpty && softwareReceipts.isEmpty {
             opportunities.append(DeductionOpportunity(
                 id: UUID(),
-                title: "Software Deductions",
-                description: "No software subscriptions logged yet. Business tools you pay for may be deductible based on your tax profile.",
+                title: BuxCatalogLabel.string("Software Deductions", locale: locale),
+                description: BuxCatalogLabel.string(
+                    "No software subscriptions logged yet. Business tools you pay for may be deductible based on your tax profile.",
+                    locale: locale
+                ),
                 estimatedTaxSaving: 0
             ))
         }
@@ -639,15 +643,22 @@ public final class StudioDeductionEngine {
             let mileageDeduction = MileageBrain.deductionAmount(entries: mileageEntries, ratePerUnit: mileageRatePerUnit)
             opportunities.append(DeductionOpportunity(
                 id: UUID(),
-                title: "Business mileage",
-                description: String(format: "%.1f business miles logged — allowance applied at your configured rate.", businessMiles),
+                title: BuxCatalogLabel.string("Business mileage", locale: locale),
+                description: BuxLocalizedString.format(
+                    "%.1f business miles logged — allowance applied at your configured rate.",
+                    locale: locale,
+                    businessMiles
+                ),
                 estimatedTaxSaving: mileageDeduction * combinedRate
             ))
         } else if mileageEntries.isEmpty {
             opportunities.append(DeductionOpportunity(
                 id: UUID(),
-                title: "Track business mileage",
-                description: "Log business trips to include mileage allowances in your deduction estimate.",
+                title: BuxCatalogLabel.string("Track business mileage", locale: locale),
+                description: BuxCatalogLabel.string(
+                    "Log business trips to include mileage allowances in your deduction estimate.",
+                    locale: locale
+                ),
                 estimatedTaxSaving: 0
             ))
         }
@@ -658,8 +669,11 @@ public final class StudioDeductionEngine {
             let estimatedSaving = largest * combinedRate
             opportunities.append(DeductionOpportunity(
                 id: UUID(),
-                title: "Hardware Write-off Review",
-                description: "A large purchase was logged without a hardware category. Review whether it qualifies for accelerated depreciation.",
+                title: BuxCatalogLabel.string("Hardware Write-off Review", locale: locale),
+                description: BuxCatalogLabel.string(
+                    "A large purchase was logged without a hardware category. Review whether it qualifies for accelerated depreciation.",
+                    locale: locale
+                ),
                 estimatedTaxSaving: estimatedSaving
             ))
         }
@@ -695,15 +709,19 @@ public enum IndirectTaxLabelResolver {
         return trimmed.components(separatedBy: .whitespaces).prefix(3).joined(separator: " ")
     }
 
-    public static func registrationLabel(for taxProfile: StudioTaxProfile) -> String {
+    public static func registrationLabel(for taxProfile: StudioTaxProfile, locale: Locale) -> String {
         let name = shortName(from: taxProfile.effectiveIndirectTax)
-        if name.isEmpty { return "Indirect tax registered" }
-        return "Registered for \(name)"
+        if name.isEmpty {
+            return BuxCatalogLabel.string("Indirect tax registered", locale: locale)
+        }
+        return BuxLocalizedString.format("Registered for %@", locale: locale, name)
     }
 
-    public static func indirectTaxFieldLabel(for taxProfile: StudioTaxProfile) -> String {
+    public static func indirectTaxFieldLabel(for taxProfile: StudioTaxProfile, locale: Locale) -> String {
         let name = shortName(from: taxProfile.effectiveIndirectTax)
-        if name.isEmpty { return "Indirect Tax" }
+        if name.isEmpty {
+            return BuxCatalogLabel.string("Indirect Tax", locale: locale)
+        }
         return name
     }
 }

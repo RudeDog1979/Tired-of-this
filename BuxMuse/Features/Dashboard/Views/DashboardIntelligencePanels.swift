@@ -362,7 +362,8 @@ struct StudioIntelligenceSummaryCard: View {
             projects: scopedProjects,
             locale: appSettingsManager.interfaceLocale
         ).count
-        let workspaceName = HustleWorkspaceFilter.activeWorkspaceLabel() ?? "All workspaces"
+        let workspaceName = HustleWorkspaceFilter.activeWorkspaceLabel()
+            ?? BuxCatalogLabel.string("All workspaces", locale: appSettingsManager.interfaceLocale)
 
         BuxCard(elevation: .card, cornerRadius: 18, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: 12) {
@@ -431,9 +432,14 @@ struct StudioIntelligenceSummaryCard: View {
                 .textCase(.uppercase)
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                 .kerning(0.4)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
             Text(value)
                 .font(.system(size: 15, weight: .black, design: .rounded))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

@@ -29,9 +29,15 @@ enum StudioTimerNotificationScheduler {
         Task {
             guard await requestAuthorizationIfNeeded() else { return }
             cancelAll()
+            let locale = BuxInterfaceLocale.currentInterfaceLocale
             let content = UNMutableNotificationContent()
-            content.title = "Job time almost up"
-            content.body = "\(projectName): about \(max(1, minutesLeft)) min left on your estimate."
+            content.title = BuxCatalogLabel.string("Job time almost up", locale: locale)
+            content.body = BuxLocalizedString.format(
+                "%@: about %lld min left on your estimate.",
+                locale: locale,
+                projectName,
+                Int64(max(1, minutesLeft))
+            )
             content.sound = .default
             let request = UNNotificationRequest(
                 identifier: approachingId,
@@ -46,9 +52,14 @@ enum StudioTimerNotificationScheduler {
         Task {
             guard await requestAuthorizationIfNeeded() else { return }
             cancelAll()
+            let locale = BuxInterfaceLocale.currentInterfaceLocale
             let content = UNMutableNotificationContent()
-            content.title = "Estimate reached"
-            content.body = "\(projectName): planned time is up. Still working? Add time or finish in BuxMuse."
+            content.title = BuxCatalogLabel.string("Estimate reached", locale: locale)
+            content.body = BuxLocalizedString.format(
+                "%@: planned time is up. Still working? Add time or finish in BuxMuse.",
+                locale: locale,
+                projectName
+            )
             content.sound = .default
             let request = UNNotificationRequest(
                 identifier: atGoalId,

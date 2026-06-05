@@ -348,7 +348,7 @@ struct StudioClientDetailView: View {
         let clientProjects = store.projects.filter { $0.clientId == client.id }
         
         return VStack(alignment: .leading, spacing: 10) {
-            Text("PROJECTS")
+            BuxCatalogDynamicText(key: "PROJECTS")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             

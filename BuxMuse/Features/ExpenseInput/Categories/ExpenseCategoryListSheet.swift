@@ -115,6 +115,7 @@ struct ExpenseCategoryEditorSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @State private var name = ""
     @State private var icon = "tag.fill"
@@ -190,7 +191,7 @@ struct ExpenseCategoryEditorSheet: View {
             BuxCatalogText.text("Name")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
-            TextField("Name", text: $name)
+            TextField(BuxCatalogLabel.string("Name", locale: appSettingsManager.interfaceLocale), text: $name)
                 .padding(BuxLayout.section)
                 .expensesThemedCardChrome(cornerRadius: 20)
                 .onChange(of: name) { _, newValue in

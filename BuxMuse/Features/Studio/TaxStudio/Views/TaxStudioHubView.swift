@@ -36,6 +36,7 @@ struct TaxStudioHubView: View {
     @EnvironmentObject private var appDataManager: AppDataManager
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var studioBrain: StudioBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var initialTab: TaxStudioTab = .overview
     @State private var selectedTab: TaxStudioTab = .overview
@@ -56,6 +57,16 @@ struct TaxStudioHubView: View {
                 }
 
                 Section {
+                    TaxStudioNavigationTitle(style: .large)
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                        .studioHubEmbeddedHorizontalPadding()
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 4, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
+
+                Section {
                     taxSectionMenu
                         .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                         .listRowSeparator(.hidden)
@@ -72,8 +83,8 @@ struct TaxStudioHubView: View {
             .contentMargins(.top, BuxLayout.invoicesNavChromeScrollInset, for: .scrollContent)
             .studioThemedListRows()
         }
-        .buxCatalogNavigationTitle("Tax Studio")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -96,7 +107,7 @@ struct TaxStudioHubView: View {
         StudioGlassHorizontalSectionMenu(
             selection: $selectedTab,
             tabs: TaxStudioTab.allCases,
-            label: { $0.menuLabel }
+            label: { $0.catalogLabel(locale: appSettingsManager.interfaceLocale) }
         )
     }
 
@@ -150,7 +161,7 @@ struct TaxStudioDisclaimerBanner: View {
             HStack(alignment: .top, spacing: BuxTokens.tight) {
                 Image(systemName: "calendar.badge.clock")
                     .foregroundColor(themeManager.current.accentColor)
-                Text(TaxReferenceCopy.monthlyDataBanner)
+                BuxCatalogDynamicText(key: TaxReferenceCopy.monthlyDataBanner)
                     .buxCaptionStyle(color: themeManager.labelPrimary(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -170,154 +181,182 @@ struct TaxStudioDisclaimerBanner: View {
 struct TaxStudioOverviewView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: TaxStudioDisplay
 
     var body: some View {
-        taxStudioTabStack {
+        taxStudioTabStack(spacing: BuxTokens.section) {
+            TaxStudioHeroCard(hero: display.hero)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+
+            TaxStudioSparklineCard(
+                points: display.taxPressureSparkline,
+                totalLabel: display.taxPressureSparklineLabel
+            )
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
+
             if !display.autopilot.isEmpty {
-                VStack(alignment: .leading, spacing: BuxTokens.tight) {
-                    BuxCatalogDynamicText(key: "AUTOPILOT")
-                        .font(.system(size: 11, weight: .bold))
-                        .buxLabelSecondary()
-                    ForEach(display.autopilot) { item in
-                        HStack(alignment: .top, spacing: 10) {
-                            Image(systemName: item.icon)
-                                .foregroundColor(themeManager.current.accentColor)
-                            Text(item.message)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                VStack(alignment: .leading, spacing: 10) {
+                    TaxStudioRibbon(titleKey: "Autopilot", systemImage: "sparkles")
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+
+                    VStack(spacing: 8) {
+                        ForEach(display.autopilot) { item in
+                            TaxStudioInsightChip(
+                                icon: item.icon,
+                                message: item.message,
+                                tone: item.tone
+                            )
+                            .environmentObject(themeManager)
                         }
-                        .padding(12)
-                        .studioThemedCardChrome(cornerRadius: 14)
                     }
                 }
             }
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: BuxTokens.tight) {
-                ForEach(display.metrics) { metric in
-                    TaxStudioMetricCard(metric: metric)
+            VStack(alignment: .leading, spacing: 10) {
+                TaxStudioRibbon(titleKey: "Key metrics", systemImage: "square.grid.2x2.fill")
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(), spacing: BuxTokens.tight),
+                        GridItem(.flexible(), spacing: BuxTokens.tight)
+                    ],
+                    spacing: BuxTokens.tight
+                ) {
+                    ForEach(display.metrics) { metric in
+                        TaxStudioMetricCard(
+                            metric: metric,
+                            healthBand: metric.id == "health" ? display.health.band : nil
+                        )
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                    }
                 }
             }
 
             if !display.thresholdWarnings.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    BuxCatalogDynamicText(key: "THRESHOLDS")
-                        .font(.system(size: 11, weight: .bold))
-                        .buxLabelSecondary()
-                    ForEach(display.thresholdWarnings, id: \.self) { w in
-                        Text(w)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.orange)
-                    }
+                VStack(alignment: .leading, spacing: 10) {
+                    TaxStudioRibbon(titleKey: "Thresholds", systemImage: "exclamationmark.triangle.fill")
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+
+                    TaxStudioThresholdCard(warnings: display.thresholdWarnings)
+                        .environmentObject(themeManager)
                 }
-                .padding(14)
-                .studioThemedCardChrome(cornerRadius: 16)
             }
 
-            Text(display.bracketLabel)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+            VStack(alignment: .leading, spacing: 6) {
+                Text(display.bracketLabel)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
 
-            Text(display.catalogUpdatedLabel)
-                .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
+                Text(display.catalogUpdatedLabel)
+                    .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
+            }
+            .padding(.horizontal, 2)
 
             TaxReferenceDisclaimerNote()
             Spacer().frame(height: 40)
         }
-    }
-}
-
-struct TaxStudioMetricCard: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject private var themeManager: ThemeManager
-    @EnvironmentObject private var appSettingsManager: AppSettingsManager
-    let metric: TaxStudioMetricDisplay
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(
-                BuxCatalogLabel.string(metric.title, locale: appSettingsManager.interfaceLocale)
-                    .uppercased()
-            )
-                .font(.system(size: 9, weight: .bold))
-                .buxLabelSecondary()
-            Text(metric.value)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(themeManager.current.accentColor)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Text(
-                BuxCatalogLabel.string(metric.subtitle, locale: appSettingsManager.interfaceLocale)
-            )
-                .font(.system(size: 10, weight: .medium))
-                .buxLabelSecondary()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .studioThemedCardChrome(cornerRadius: 16)
     }
 }
 
 // MARK: - Calculator
 
 struct TaxStudioCalculatorView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioBrain: StudioBrain
     let display: TaxStudioDisplay
 
     var body: some View {
-        taxStudioTabStack {
+        taxStudioTabStack(spacing: BuxTokens.section) {
+            TaxStudioRibbon(titleKey: "Calculator", systemImage: "function")
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+
+            TaxStudioRibbon(
+                titleKey: "Live tax sandbox",
+                subtitle: TaxStudioL10n.line(
+                    "Adjust sliders to stress-test your tax profile.",
+                    locale: appSettingsManager.interfaceLocale
+                ),
+                systemImage: "slider.horizontal.3"
+            )
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
+
             StudioTaxOverviewView()
                 .environmentObject(studioBrain)
                 .environment(\.studioHubEmbedded, true)
 
-            NavigationLink {
-                StudioIncomeTaxCalculatorView()
-                    .environmentObject(studioBrain)
-            } label: {
-                linkRow("Income Tax Calculator", icon: "function")
-            }
+            VStack(spacing: BuxTokens.tight) {
+                NavigationLink {
+                    StudioIncomeTaxCalculatorView()
+                        .environmentObject(studioBrain)
+                } label: {
+                    TaxStudioFeatureCard(
+                        titleKey: "Income tax calculator",
+                        subtitleKey: "Annual estimate from gross income, deductions, and your effective rates.",
+                        icon: "function",
+                        tint: .orange
+                    )
+                    .environmentObject(themeManager)
+                }
 
-            NavigationLink {
-                StudioQuarterlyTaxView()
-                    .environmentObject(studioBrain)
-            } label: {
-                linkRow("Quarterly Tax", icon: "calendar.badge.clock")
+                NavigationLink {
+                    StudioQuarterlyTaxView()
+                        .environmentObject(studioBrain)
+                } label: {
+                    TaxStudioFeatureCard(
+                        titleKey: "Quarterly tax",
+                        subtitleKey: "Quarter totals, next payment date, and set-aside guidance.",
+                        icon: "calendar.badge.clock",
+                        tint: themeManager.current.accentColor
+                    )
+                    .environmentObject(themeManager)
+                }
             }
 
             TaxReferenceDisclaimerNote()
             Spacer().frame(height: 40)
         }
     }
-
-    private func linkRow(_ title: String, icon: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 14, weight: .semibold))
-            BuxCatalogText.text(title)
-                .font(.system(size: 14, weight: .semibold))
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .bold))
-                .opacity(0.5)
-        }
-        .padding(14)
-        .studioThemedCardChrome(cornerRadius: 16)
-        .contentShape(Rectangle())
-    }
 }
 
 // MARK: - Forecast
 
 struct TaxStudioForecastView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: TaxStudioDisplay
 
     var body: some View {
-        taxStudioTabStack(spacing: BuxTokens.tight) {
-            Text("12-MONTH PROJECTION")
-                .font(.system(size: 11, weight: .bold))
-                .buxLabelSecondary()
-            ForEach(display.forecastRows) { row in
-                TaxStudioMetricCard(metric: row)
+        taxStudioTabStack(spacing: BuxTokens.section) {
+            TaxStudioRibbon(titleKey: "12-month projection", systemImage: "chart.line.uptrend.xyaxis")
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+
+            TaxStudioForecastBarChart(bars: display.forecastMonthlyBars)
+                .environmentObject(themeManager)
+
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), spacing: BuxTokens.tight),
+                    GridItem(.flexible(), spacing: BuxTokens.tight)
+                ],
+                spacing: BuxTokens.tight
+            ) {
+                ForEach(display.forecastRows) { row in
+                    TaxStudioMetricCard(metric: row)
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                }
             }
             TaxReferenceDisclaimerNote()
             Spacer().frame(height: 40)
@@ -334,28 +373,14 @@ struct TaxStudioTimelineView: View {
     let display: TaxStudioDisplay
 
     var body: some View {
-        taxStudioTabStack(spacing: BuxTokens.tight) {
-            ForEach(display.timeline) { event in
-                HStack(alignment: .top, spacing: 12) {
-                    Circle()
-                        .fill(event.accent)
-                        .frame(width: 10, height: 10)
-                        .padding(.top, 4)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(event.dateLabel)
-                            .font(.system(size: 10, weight: .bold))
-                            .buxLabelSecondary()
-                        BuxCatalogDynamicText(key: event.title)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        BuxCatalogDynamicText(key: event.subtitle)
-                            .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
-                    }
-                    Spacer()
-                }
-                .padding(14)
-                .studioThemedCardChrome(cornerRadius: 16)
-            }
+        taxStudioTabStack(spacing: BuxTokens.section) {
+            TaxStudioRibbon(titleKey: "Timeline", systemImage: "calendar")
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+
+            TaxStudioTimelineRail(events: display.timeline)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
             TaxReferenceDisclaimerNote()
             Spacer().frame(height: 40)
         }
@@ -370,57 +395,41 @@ struct TaxStudioHealthScoreView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let display: TaxStudioDisplay
 
-    private var scoreColor: Color {
-        switch display.health.band {
-        case .green: return .green
-        case .yellow: return .yellow
-        case .red: return .red
-        }
-    }
-
     var body: some View {
-        taxStudioTabStack {
-            VStack(spacing: 8) {
-                Text(display.health.score, format: .number)
-                    .font(.system(size: 56, weight: .bold, design: .rounded))
-                    .foregroundColor(scoreColor)
-                Text(
-                    BuxLocalizedString.format(
-                        "Tax Health · %@ risk",
-                        locale: appSettingsManager.interfaceLocale,
-                        display.health.riskLevel
-                    )
-                )
-                    .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(BuxLayout.section)
-            .studioThemedCardChrome(cornerRadius: 20)
+        taxStudioTabStack(spacing: BuxTokens.section) {
+            TaxStudioRibbon(titleKey: "Health", systemImage: "heart.text.square.fill")
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
 
-            ForEach(display.health.recommendations) { rec in
-                VStack(alignment: .leading, spacing: 6) {
-                    BuxCatalogDynamicText(key: rec.title)
-                        .font(.system(size: 14, weight: .semibold))
-                    BuxCatalogDynamicText(key: rec.body)
-                        .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
+            TaxStudioHealthHeroCard(health: display.health)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+
+            if !display.health.recommendations.isEmpty {
+                TaxStudioRibbon(titleKey: "Recommendations", systemImage: "list.number")
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+
+                VStack(spacing: BuxTokens.tight) {
+                    ForEach(Array(display.health.recommendations.enumerated()), id: \.element.id) { index, rec in
+                        TaxStudioRecommendationCard(index: index + 1, recommendation: rec)
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                    }
                 }
-                .padding(14)
-                .studioThemedCardChrome(cornerRadius: 16)
             }
 
-            ForEach(display.sanity) { w in
-                VStack(alignment: .leading, spacing: 4) {
-                    BuxCatalogDynamicText(key: w.title)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.orange)
-                    BuxCatalogDynamicText(key: w.detail)
-                        .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
-                    BuxCatalogDynamicText(key: w.suggestion)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(themeManager.current.accentColor)
+            if !display.sanity.isEmpty {
+                TaxStudioRibbon(titleKey: "Sanity checks", systemImage: "checkmark.shield.fill")
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+
+                VStack(spacing: BuxTokens.tight) {
+                    ForEach(display.sanity) { w in
+                        TaxStudioSanityAlertCard(warning: w)
+                            .environmentObject(themeManager)
+                    }
                 }
-                .padding(14)
-                .studioThemedCardChrome(cornerRadius: 14)
             }
 
             TaxReferenceDisclaimerNote()
@@ -438,16 +447,26 @@ struct TaxStudioCoachView: View {
     let display: TaxStudioDisplay
 
     var body: some View {
-        taxStudioTabStack(spacing: BuxTokens.tight) {
+        taxStudioTabStack(spacing: BuxTokens.section) {
+            TaxStudioRibbon(titleKey: "Coach", systemImage: "lightbulb.fill")
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+
             ForEach(display.coachCards) { card in
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(card.category.uppercased())
-                        .font(.system(size: 9, weight: .bold))
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(
+                        BuxCatalogLabel.string(card.category, locale: appSettingsManager.interfaceLocale)
+                    )
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(themeManager.current.accentColor)
-                    BuxCatalogDynamicText(key: card.title)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.2 : 0.12))
+                        .clipShape(Capsule())
+                    Text(card.title)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    BuxCatalogDynamicText(key: card.body)
+                    Text(card.body)
                         .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -469,7 +488,13 @@ struct TaxStudioSettingsView: View {
     @EnvironmentObject private var store: StudioStore
 
     var body: some View {
-        StudioTaxReferenceView()
+        taxStudioTabStack(spacing: BuxTokens.section) {
+            TaxStudioRibbon(titleKey: "Settings", systemImage: "slider.horizontal.3")
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+
+            StudioTaxReferenceView()
+        }
             .environmentObject(themeManager)
             .environmentObject(appSettingsManager)
             .environmentObject(store)

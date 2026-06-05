@@ -158,7 +158,8 @@ public final class StudioBrain: ObservableObject {
             receipts: scopedReceipts,
             taxProfile: store.taxProfile,
             mileageEntries: store.mileageEntries,
-            mileageRatePerUnit: mileageRate
+            mileageRatePerUnit: mileageRate,
+            locale: appSettings.interfaceLocale
         )
 
         let paidInvoices = scopedInvoices.filter { $0.status == .paid }
@@ -171,11 +172,15 @@ public final class StudioBrain: ObservableObject {
 
         let locale = appSettings.interfaceLocale
         let hero = StudioHeroDisplay(
-            businessTitle: profile.businessName.isEmpty ? "Set Up Your Business" : profile.businessName,
+            businessTitle: profile.businessName.isEmpty
+                ? BuxCatalogLabel.string("Set Up Your Business", locale: locale)
+                : profile.businessName,
             businessSubtitle: profile.businessType.catalogLabel(locale: locale),
             estimatedTaxFormatted: appSettings.format(taxResult.estimatedTax),
             effectiveTaxRatePercent: Int(taxResult.effectiveTaxRate * 100),
-            runwayMonthsFormatted: forecast.runwayMonths > 0 ? String(format: "%.1f mo", forecast.runwayMonths) : "—",
+            runwayMonthsFormatted: forecast.runwayMonths > 0
+                ? BuxLocalizedString.format("%.1f mo", locale: locale, forecast.runwayMonths)
+                : "—",
             monthlyBurnFormatted: appSettings.format(forecast.historicalBurnRate),
             totalPaidFormatted: appSettings.format(totalPaid),
             totalOutstandingFormatted: appSettings.format(totalOutstanding),
@@ -228,22 +233,23 @@ public final class StudioBrain: ObservableObject {
             newPurchasesAmount: Decimal(taxSandboxParams.newPurchases)
         )
 
+        let locale = appSettings.interfaceLocale
         let countryLabel: String
         if let code = taxProfile.selectedTaxCountry, let preset = TaxPresetLoader.preset(for: code) {
-            countryLabel = "\(preset.name) (\(code))"
+            countryLabel = TaxCountryDisplayName.pickerLabel(for: preset, locale: locale)
         } else if taxProfile.isTaxProfileConfigured {
-            countryLabel = "Custom profile"
+            countryLabel = BuxCatalogLabel.string("Custom profile", locale: locale)
         } else {
-            countryLabel = "No tax profile saved yet"
+            countryLabel = BuxCatalogLabel.string("No tax profile saved yet", locale: locale)
         }
 
         return TaxSandboxDisplay(
             currencyCode: appSettings.selectedCurrency.id,
-            incomeTypeLabel: taxProfile.taxIncomeType.summaryLabel,
+            incomeTypeLabel: taxProfile.taxIncomeType.catalogSummaryLabel(locale: locale),
             countryLabel: countryLabel,
             primaryRulesPreview: taxProfile.primaryTaxRulesText,
             indirectTaxNotes: taxProfile.effectiveIndirectTax,
-            indirectTaxRegistrationLabel: IndirectTaxLabelResolver.registrationLabel(for: taxProfile),
+            indirectTaxRegistrationLabel: IndirectTaxLabelResolver.registrationLabel(for: taxProfile, locale: locale),
             isProfileConfigured: taxProfile.isTaxProfileConfigured,
             base: formatSandboxResult(baseResult),
             simulated: formatSandboxResult(simResult)
@@ -300,17 +306,33 @@ public final class StudioBrain: ObservableObject {
             mileageRatePerUnit: mileageRate,
             taxYearStartMonth: store.profile.taxYearStartMonth
         )
+        let locale = appSettings.interfaceLocale
         let formatter = DateFormatter()
+        formatter.locale = locale
         formatter.dateStyle = .medium
         let range = "\(formatter.string(from: estimate.periodStart)) – \(formatter.string(from: estimate.periodEnd))"
         let nextLabel: String
         if let next = estimate.nextPaymentDate {
-            nextLabel = "Next payment: \(formatter.string(from: next))"
+            nextLabel = BuxLocalizedString.format(
+                "Next payment: %@",
+                locale: locale,
+                formatter.string(from: next)
+            )
         } else {
-            nextLabel = "Configure payment schedule in Tax Profile"
+            nextLabel = BuxCatalogLabel.string("Configure payment schedule in Tax Profile", locale: locale)
         }
+        let calendar = Calendar.current
+        let qMonth = calendar.component(.month, from: estimate.periodStart)
+        let qYear = calendar.component(.year, from: estimate.periodStart)
+        let quarterNumber = ((qMonth - 1) / 3) + 1
+        let localizedQuarter = BuxLocalizedString.format(
+            "Q%lld %lld",
+            locale: locale,
+            Int64(quarterNumber),
+            Int64(qYear)
+        )
         return QuarterlyTaxDisplay(
-            quarterLabel: estimate.quarterLabel,
+            quarterLabel: localizedQuarter,
             periodRangeLabel: range,
             incomeTaxFormatted: appSettings.format(estimate.incomeTax),
             selfEmployedTaxFormatted: appSettings.format(estimate.selfEmployedTax),
@@ -354,7 +376,8 @@ public final class StudioBrain: ObservableObject {
             invoices: store.invoices,
             receipts: store.receipts,
             quarterly: quarterly,
-            countryCode: appSettings.selectedCountry.id
+            countryCode: appSettings.selectedCountry.id,
+            locale: appSettings.interfaceLocale
         )
         return ComplianceDisplay(
             warnings: result.warnings.map { ComplianceItemDisplay(id: $0.id, question: $0.question, answer: $0.answer, severity: $0.severity) },
@@ -396,7 +419,9 @@ public final class StudioBrain: ObservableObject {
             estimatedTaxFormatted: appSettings.format(breakdown.totalEstimatedTax),
             quarterlyDueFormatted: appSettings.format(quarterly.totalDue),
             effectiveRatePercent: Int(breakdown.effectiveRate * 100),
-            runwayMonthsFormatted: forecast.runwayMonths > 0 ? String(format: "%.1f mo", forecast.runwayMonths) : "—",
+            runwayMonthsFormatted: forecast.runwayMonths > 0
+                ? BuxLocalizedString.format("%.1f mo", locale: appSettings.interfaceLocale, forecast.runwayMonths)
+                : "—",
             hasData: hasData
         )
     }
@@ -424,7 +449,9 @@ public final class StudioBrain: ObservableObject {
 
     private func buildCashflowDisplay(from forecast: CashflowForecast, hasData: Bool) -> StudioCashflowDisplay {
         StudioCashflowDisplay(
-            runwayMonthsFormatted: forecast.runwayMonths > 0 ? String(format: "%.1f months", forecast.runwayMonths) : "—",
+            runwayMonthsFormatted: forecast.runwayMonths > 0
+                ? BuxLocalizedString.format("%.1f months", locale: appSettings.interfaceLocale, forecast.runwayMonths)
+                : "—",
             survivalIncomeFormatted: appSettings.format(forecast.survivalMonthlyIncomeNeeded),
             projectedInflowFormatted: appSettings.format(forecast.projectedInflow30Days),
             burnRateFormatted: appSettings.format(forecast.historicalBurnRate),
@@ -458,7 +485,8 @@ public final class StudioBrain: ObservableObject {
             receipts: store.receipts,
             taxProfile: store.taxProfile,
             mileageEntries: store.mileageEntries,
-            mileageRatePerUnit: mileageRate
+            mileageRatePerUnit: mileageRate,
+            locale: appSettings.interfaceLocale
         )
         let mileageSummary = MileageBrain.summary(
             entries: store.mileageEntries,
@@ -484,12 +512,11 @@ public final class StudioBrain: ObservableObject {
     }
 
     private func mapDeductionOpportunities(_ opps: [DeductionOpportunity]) -> [StudioDeductionDisplay] {
-        let locale = appSettings.interfaceLocale
         return opps.map { opp in
             StudioDeductionDisplay(
                 id: opp.id,
-                title: BuxCatalogLabel.string(opp.title, locale: locale),
-                description: BuxCatalogLabel.string(opp.description, locale: locale),
+                title: opp.title,
+                description: opp.description,
                 savingsFormatted: opp.estimatedTaxSaving > 0
                     ? appSettings.format(opp.estimatedTaxSaving)
                     : BuxLocalizedString.string("Configure tax rules", locale: appSettings.interfaceLocale)
@@ -568,10 +595,16 @@ public final class StudioBrain: ObservableObject {
             effectiveRatePercent: needsSetup ? 0 : Int(result.effectiveTaxRate * 100),
             totalDeductionsFormatted: appSettings.format(result.totalDeductions),
             taxDeadlineDays: deadline,
-            taxDeadlineLabel: deadline.map { "\($0) days until next tax deadline" } ?? "Configure tax profile",
+            taxDeadlineLabel: deadline.map {
+                BuxLocalizedString.format(
+                    "%lld days until next tax deadline",
+                    locale: appSettings.interfaceLocale,
+                    Int64($0)
+                )
+            } ?? BuxCatalogLabel.string("Configure tax profile", locale: appSettings.interfaceLocale),
             needsTaxProfileSetup: needsSetup,
             primaryRulesPreview: taxProfile.primaryTaxRulesText,
-            incomeTypeLabel: taxProfile.taxIncomeType.summaryLabel
+            incomeTypeLabel: taxProfile.taxIncomeType.catalogSummaryLabel(locale: appSettings.interfaceLocale)
         )
     }
 
@@ -774,6 +807,7 @@ public final class StudioBrain: ObservableObject {
     private func buildTaxStudioDisplay() -> TaxStudioDisplay {
         let presetCode = store.taxProfile.selectedTaxCountry ?? store.profile.countryCode
         let preset = TaxPresetLoader.preset(for: presetCode)
+        let locale = appSettings.interfaceLocale
         let ctx = TaxStudioContext(
             profile: store.profile,
             taxProfile: store.taxProfile,
@@ -782,28 +816,54 @@ public final class StudioBrain: ObservableObject {
             mileageEntries: store.mileageEntries,
             countryPreset: preset,
             catalogUpdatedAt: TaxManager.shared.catalogUpdatedAt,
-            now: Date()
+            now: Date(),
+            locale: locale
         )
         let snapshot = TaxStudioOrchestrator.buildSnapshot(ctx)
         let intel = snapshot.intelligence
 
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
-        let catalogLabel = ctx.catalogUpdatedAt.map { "Reference data: \($0)" } ?? "Bundled reference data"
+        let catalogLabel = ctx.catalogUpdatedAt.map {
+            BuxLocalizedString.format("Reference data: %@", locale: locale, $0)
+        } ?? BuxCatalogLabel.string("Bundled reference data", locale: locale)
 
         let lastBannerMonth = UserDefaults.standard.string(forKey: "tax_studio_banner_month")
         let currentMonth = taxStudioMonthKey(from: Date())
         let showBanner = lastBannerMonth != currentMonth
+
+        let qMonth = Calendar.current.component(.month, from: intel.quarterly.periodStart)
+        let qYear = Calendar.current.component(.year, from: intel.quarterly.periodStart)
+        let quarterSubtitle = BuxLocalizedString.format(
+            "Q%lld %lld",
+            locale: locale,
+            Int64(((qMonth - 1) / 3) + 1),
+            Int64(qYear)
+        )
 
         let metrics: [TaxStudioMetricDisplay] = [
             .init(id: "taxable", title: "Taxable income", value: appSettings.format(intel.breakdown.taxableIncome), subtitle: "After deductions"),
             .init(id: "deduct", title: "Deductible expenses", value: appSettings.format(intel.breakdown.deductibleExpenses), subtitle: "Business use"),
             .init(id: "tax", title: "Estimated tax", value: appSettings.format(intel.breakdown.totalEstimatedTax), subtitle: "Income + SE"),
             .init(id: "etr", title: "Effective rate", value: "\(Int(intel.breakdown.effectiveRate * 100))%", subtitle: "On gross income"),
-            .init(id: "qdue", title: "Quarterly due", value: appSettings.format(intel.quarterly.totalDue), subtitle: intel.quarterly.quarterLabel),
+            .init(id: "qdue", title: "Quarterly due", value: appSettings.format(intel.quarterly.totalDue), subtitle: quarterSubtitle),
             .init(id: "vat", title: "VAT/GST net", value: appSettings.format(intel.breakdown.indirectTaxNet), subtitle: store.taxProfile.vatRegistered ? "Collected − paid" : "Not registered"),
-            .init(id: "runway", title: "Runway after tax", value: String(format: "%.1f mo", snapshot.forecast.projectedRunwayAfterTaxMonths), subtitle: "Projected"),
-            .init(id: "health", title: "Tax health", value: "\(snapshot.health.score)", subtitle: snapshot.health.riskLevel)
+            .init(
+                id: "runway",
+                title: "Runway after tax",
+                value: BuxLocalizedString.format(
+                    "%.1f mo",
+                    locale: locale,
+                    snapshot.forecast.projectedRunwayAfterTaxMonths
+                ),
+                subtitle: "Projected"
+            ),
+            .init(
+                id: "health",
+                title: "Tax health",
+                value: "\(snapshot.health.score)",
+                subtitle: snapshot.health.band == .green ? "Low" : (snapshot.health.band == .yellow ? "Medium" : "Elevated")
+            )
         ]
 
         let forecastRows: [TaxStudioMetricDisplay] = [
@@ -815,46 +875,125 @@ public final class StudioBrain: ObservableObject {
             .init(id: "fexp", title: "Expense velocity", value: appSettings.format(snapshot.forecast.monthlyExpenseVelocity), subtitle: "Per month")
         ]
 
+        let sortedTimeline = snapshot.timeline.sorted { $0.date < $1.date }
+        let nextHighlightID = sortedTimeline.first(where: { $0.date >= ctx.now })?.id
+            ?? sortedTimeline.first?.id
+
         let healthDisplay = TaxStudioHealthDisplay(
             score: snapshot.health.score,
             band: snapshot.health.band,
             riskLevel: snapshot.health.riskLevel,
             scoreColorName: taxStudioColorName(for: snapshot.health.band),
+            factors: snapshot.health.factors.map {
+                TaxStudioHealthFactorDisplay(
+                    id: $0.id,
+                    title: $0.title,
+                    valueLabel: $0.valueLabel,
+                    progress: $0.progress
+                )
+            },
             recommendations: snapshot.health.recommendations.map {
-                TaxStudioCoachCardDisplay(id: $0.id, title: $0.title, body: $0.detail, category: "Recommendation")
+                TaxStudioCoachCardDisplay(
+                    id: $0.id,
+                    title: $0.title,
+                    body: $0.detail,
+                    category: BuxCatalogLabel.string("Recommendation", locale: locale)
+                )
             }
+        )
+
+        let countryLabel: String
+        if let preset {
+            countryLabel = TaxCountryDisplayName.pickerLabel(for: preset, locale: locale)
+        } else if store.taxProfile.isTaxProfileConfigured {
+            countryLabel = BuxCatalogLabel.string("Custom profile", locale: locale)
+        } else {
+            countryLabel = BuxCatalogLabel.string("No preset", locale: locale)
+        }
+
+        let hero = TaxStudioHeroDisplay(
+            estimatedTax: appSettings.format(intel.breakdown.totalEstimatedTax),
+            effectiveRate: "\(Int(intel.breakdown.effectiveRate * 100))%",
+            quarterlyDue: appSettings.format(intel.quarterly.totalDue),
+            quarterLabel: quarterSubtitle,
+            runway: BuxLocalizedString.format(
+                "%.1f mo",
+                locale: locale,
+                snapshot.forecast.projectedRunwayAfterTaxMonths
+            ),
+            vatSummary: appSettings.format(intel.breakdown.indirectTaxNet),
+            countryLabel: countryLabel,
+            healthScore: snapshot.health.score,
+            healthBand: snapshot.health.band,
+            healthRiskLevel: snapshot.health.riskLevel
+        )
+
+        let sparkline = TaxStudioChartEngine.taxPressureSparkline(
+            invoices: store.invoices,
+            receipts: store.receipts,
+            effectiveRate: intel.breakdown.effectiveRate,
+            now: ctx.now
+        )
+        let sparklineTotal = sparkline.reduce(0, +)
+        let sparklineLabel = appSettings.format(Decimal(sparklineTotal))
+        let forecastBars = TaxStudioChartEngine.forecastMonthlyBars(
+            projectedAnnualTax: snapshot.forecast.projectedTaxOwed,
+            locale: locale,
+            now: ctx.now
         )
 
         return TaxStudioDisplay(
             catalogUpdatedLabel: catalogLabel,
             showMonthlyBanner: showBanner,
+            hero: hero,
             metrics: metrics,
             health: healthDisplay,
             autopilot: snapshot.autopilot.map {
-                TaxStudioAutopilotDisplay(id: $0.id, message: $0.message, icon: $0.icon)
+                TaxStudioAutopilotDisplay(
+                    id: $0.id,
+                    message: $0.message,
+                    icon: $0.icon,
+                    tone: taxStudioAutopilotTone(id: $0.id)
+                )
             },
             coachCards: snapshot.coach.map {
                 TaxStudioCoachCardDisplay(id: $0.id, title: $0.title, body: $0.body, category: $0.category)
             },
-            timeline: snapshot.timeline.map { event in
+            timeline: sortedTimeline.map { event in
                 TaxStudioTimelineEventDisplay(
                     id: event.id,
+                    date: event.date,
                     dateLabel: formatter.string(from: event.date),
                     title: event.title,
                     subtitle: event.subtitle,
                     severity: event.severity,
-                    accent: taxStudioTimelineColor(event.severity)
+                    accent: taxStudioTimelineColor(event.severity),
+                    isNextHighlight: event.id == nextHighlightID
                 )
             },
             sanity: snapshot.sanity.warnings.map {
                 TaxStudioSanityDisplay(id: $0.id, title: $0.title, detail: $0.detail, suggestion: $0.suggestion)
             },
             forecastRows: forecastRows,
+            taxPressureSparkline: sparkline,
+            taxPressureSparklineLabel: sparklineLabel,
+            forecastMonthlyBars: forecastBars,
             bracketLabel: intel.bracketLabel,
             thresholdWarnings: intel.thresholdWarnings,
             incomeTaxDisplay: incomeTaxDisplay,
             quarterlyDisplay: quarterlyDisplay
         )
+    }
+
+    private func taxStudioAutopilotTone(id: String) -> TaxStudioInsightTone {
+        switch id {
+        case "setaside", "dedweek", "qtrack":
+            return .positive
+        case "trend", "vateta", "runway", "health":
+            return .warning
+        default:
+            return .info
+        }
     }
 
     private func taxStudioColorName(for band: TaxHealthBand) -> String {

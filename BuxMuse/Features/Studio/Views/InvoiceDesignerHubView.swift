@@ -259,7 +259,7 @@ struct InvoiceDesignerHubView: View {
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                Picker("Completed project", selection: $linkedProjectId) {
+                Picker(loc("Completed project"), selection: $linkedProjectId) {
                     BuxCatalogDynamicText(key: "None — add lines manually").tag(nil as UUID?)
                     ForEach(completedProjectsForClient) { pick in
                         Text(
@@ -314,7 +314,7 @@ struct InvoiceDesignerHubView: View {
                     .background(Color.orange.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 } else {
-                    Picker("Client", selection: $selectedClientId) {
+                    Picker(loc("Client"), selection: $selectedClientId) {
                         ForEach(store.clients) { client in
                             Text(client.name).tag(client.id)
                         }
@@ -332,7 +332,7 @@ struct InvoiceDesignerHubView: View {
 
             designerSection("Invoice Details") {
                 VStack(spacing: 10) {
-                    TextField("Invoice number", text: $invoiceNumber)
+                    TextField(loc("Invoice number"), text: $invoiceNumber)
                         .padding(10)
                         .buxThemedInputPlate(cornerRadius: 10)
 
@@ -362,9 +362,9 @@ struct InvoiceDesignerHubView: View {
                         .font(.system(size: 10))
                         .buxLabelSecondary()
 
-                    DatePicker("Issue date", selection: $issueDate, displayedComponents: .date)
-                    DatePicker("Due date", selection: $dueDate, displayedComponents: .date)
-                    Picker("Status", selection: $status) {
+                    DatePicker(loc("Issue date"), selection: $issueDate, displayedComponents: .date)
+                    DatePicker(loc("Due date"), selection: $dueDate, displayedComponents: .date)
+                    Picker(loc("Status"), selection: $status) {
                         ForEach(InvoiceStatus.allCases) { st in
                             Text(st.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(st)
                         }
@@ -712,13 +712,13 @@ struct InvoiceDesignerHubView: View {
             // Bank Block
             designerSection("Bank Transfer") {
                 VStack(spacing: 10) {
-                    Toggle("Show bank details", isOn: $engine.paymentConfig.showBankBlock)
+                    Toggle(loc("Show bank details"), isOn: $engine.paymentConfig.showBankBlock)
                         .tint(themeManager.current.accentColor)
 
                     if engine.paymentConfig.showBankBlock {
-                        Picker("Account type", selection: bankTypeBinding) {
+                        Picker(loc("Account type"), selection: bankTypeBinding) {
                             ForEach(BankAccountType.allCases) { type in
-                                Text(type.displayName).tag(type)
+                                Text(loc(type.displayName)).tag(type)
                             }
                         }
                         paymentField("Bank Name", text: $engine.paymentConfig.bankName)
@@ -730,7 +730,7 @@ struct InvoiceDesignerHubView: View {
             // QR Code Block
             designerSection("QR Code") {
                 VStack(spacing: 10) {
-                    Toggle("Show QR code block", isOn: $engine.paymentConfig.showQRBlock)
+                    Toggle(loc("Show QR code block"), isOn: $engine.paymentConfig.showQRBlock)
                         .tint(themeManager.current.accentColor)
 
                     if engine.paymentConfig.showQRBlock {
@@ -754,7 +754,7 @@ struct InvoiceDesignerHubView: View {
             // Payment Link
             designerSection("Payment Link") {
                 VStack(spacing: 10) {
-                    Toggle("Show payment link", isOn: $engine.paymentConfig.showPaymentLink)
+                    Toggle(loc("Show payment link"), isOn: $engine.paymentConfig.showPaymentLink)
                         .tint(themeManager.current.accentColor)
                     if engine.paymentConfig.showPaymentLink {
                         paymentField("URL (e.g. https://pay.stripe.com/…)", text: $engine.paymentConfig.paymentLinkURL)
@@ -770,10 +770,14 @@ struct InvoiceDesignerHubView: View {
 
     // MARK: - Shared Sub-Views
 
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: appSettingsManager.interfaceLocale)
+    }
+
     @ViewBuilder
     private func designerSection<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title.uppercased())
+            Text(loc(title).uppercased())
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(themeManager.current.accentColor)
                 .tracking(0.8)
@@ -922,7 +926,7 @@ struct InvoiceDesignerHubView: View {
     }
 
     private func paymentField(_ placeholder: String, text: Binding<String>) -> some View {
-        TextField(placeholder, text: text)
+        TextField(loc(placeholder), text: text)
             .font(.system(size: 12))
             .padding(10)
             .buxThemedInputPlate(cornerRadius: 10)
@@ -1033,14 +1037,14 @@ struct InvoiceDesignerHubView: View {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
                 BuxThemedCardForm {
                     BuxFormSection(title: "Line item") {
-                        TextField("Description", text: $newItemDesc)
+                        TextField(loc("Description"), text: $newItemDesc)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        TextField("Quantity", text: $newItemQty)
+                        TextField(loc("Quantity"), text: $newItemQty)
                             .keyboardType(.decimalPad)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
-                        TextField("Unit price", text: $newItemPrice)
+                        TextField(loc("Unit price"), text: $newItemPrice)
                             .keyboardType(.decimalPad)
                             .buxFormFieldPadding()
                     }
@@ -1082,6 +1086,7 @@ struct InvoiceDesignerHubView: View {
             showAddRateSheet = false
         }
         .environmentObject(themeManager)
+        .environmentObject(appSettingsManager)
     }
 
     // MARK: - Toolbar
@@ -1113,7 +1118,7 @@ struct InvoiceDesignerHubView: View {
         store.updateInvoiceSettings(settings)
 
         withAnimation {
-            savedBanner = "Design saved as default"
+            savedBanner = loc("Design saved as default")
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             withAnimation { savedBanner = nil }
@@ -1289,10 +1294,15 @@ private struct ColorSwatchRow: View {
 
 private struct AddTaxRateSheet: View {
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
     let onAdd: (InvoiceTaxRate) -> Void
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: appSettingsManager.interfaceLocale)
+    }
 
     @State private var label       = ""
     @State private var percentage  = ""
@@ -1304,11 +1314,11 @@ private struct AddTaxRateSheet: View {
                 themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
                 BuxThemedCardForm {
                     BuxFormSection(title: "Rate Details") {
-                        TextField("Label (e.g. VAT, GST, ITBIS)", text: $label)
+                        TextField(loc("Label (e.g. VAT, GST, ITBIS)"), text: $label)
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         HStack {
-                            TextField("Rate %", text: $percentage)
+                            TextField(loc("Rate %"), text: $percentage)
                                 .keyboardType(.decimalPad)
                             Text("%")
                                 .buxLabelSecondary()
@@ -1316,7 +1326,7 @@ private struct AddTaxRateSheet: View {
                         .buxFormFieldPadding()
                     }
                     BuxFormSection(title: "Options") {
-                        Toggle("Compounding (stacks on previous rate)", isOn: $compounding)
+                        Toggle(loc("Compounding (stacks on previous rate)"), isOn: $compounding)
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
                         BuxCatalogDynamicText(key: "Compounding rates apply to the running total including previous taxes.")

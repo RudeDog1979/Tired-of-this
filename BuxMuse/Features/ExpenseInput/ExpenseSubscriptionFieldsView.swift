@@ -19,17 +19,23 @@ struct ExpenseSubscriptionFieldsView: View {
 
     private let reminderPresets = [1, 3, 7, 14]
 
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         Group {
-            Toggle("This is a subscription", isOn: $isSubscription)
+            Toggle(loc("This is a subscription"), isOn: $isSubscription)
 
             if isSubscription {
-                Toggle("This is a trial", isOn: $isTrial)
+                Toggle(loc("This is a trial"), isOn: $isTrial)
 
                 if isTrial {
-                    DatePicker("Trial end date", selection: $trialEndDate, displayedComponents: .date)
+                    DatePicker(loc("Trial end date"), selection: $trialEndDate, displayedComponents: .date)
                 } else {
-                    DatePicker("Subscription start", selection: $subscriptionStartDate, displayedComponents: .date)
+                    DatePicker(loc("Subscription start"), selection: $subscriptionStartDate, displayedComponents: .date)
                 }
 
                 reminderSection

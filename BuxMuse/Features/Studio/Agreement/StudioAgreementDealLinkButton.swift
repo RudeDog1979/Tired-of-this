@@ -10,6 +10,7 @@ struct StudioAgreementDealLinkButton: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let agreement: AgreementDraft?
     let linkedJob: SimpleStudioEntry?
@@ -21,7 +22,7 @@ struct StudioAgreementDealLinkButton: View {
         Group {
             if agreement != nil || linkedJob != nil || linkedProject != nil {
                 BuxButton(
-                    title: "View deal",
+                    title: BuxCatalogLabel.string("View deal", locale: appSettingsManager.interfaceLocale),
                     systemImage: "signature",
                     role: .secondary,
                     expands: true

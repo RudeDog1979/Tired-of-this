@@ -18,7 +18,13 @@ struct TaxCountryPickerSheet: View {
     var onSelect: (TaxInfo) -> Void
 
     private var filteredCountries: [TaxInfo] {
-        TaxPresetLoader.filteredCountries(matching: searchQuery)
+        TaxPresetLoader.filteredCountries(matching: searchQuery, locale: locale)
+    }
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
     }
 
     var body: some View {
@@ -30,7 +36,7 @@ struct TaxCountryPickerSheet: View {
                     HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass")
                             .buxLabelSecondary()
-                        TextField("Search country, ISO, or region", text: $searchQuery)
+                        TextField(loc("Search country, ISO, or region"), text: $searchQuery)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                     }
@@ -38,6 +44,11 @@ struct TaxCountryPickerSheet: View {
                     .buxThemedInputPlate(cornerRadius: 12)
                     .padding(.horizontal, BuxLayout.marginHorizontal)
                     .padding(.vertical, 10)
+
+                    TaxTranslationPackNoticeBanner()
+                        .environmentObject(appSettingsManager)
+                        .padding(.horizontal, BuxLayout.marginHorizontal)
+                        .padding(.bottom, 8)
 
                     HStack {
                         Text(
@@ -102,7 +113,7 @@ struct TaxCountryPickerSheet: View {
                                     dismiss()
                                 } label: {
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text(country.name)
+                                        Text(TaxCountryDisplayName.displayName(for: country, locale: locale))
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                         HStack(spacing: 6) {
@@ -118,11 +129,8 @@ struct TaxCountryPickerSheet: View {
                                         }
                                         .font(.system(size: 11, weight: .medium))
                                         .buxLabelSecondary()
-                                        Text(country.presetLineSummary)
-                                            .font(.system(size: 11, weight: .medium))
-                                            .buxLabelSecondary()
-                                            .multilineTextAlignment(.leading)
-                                            .lineLimit(2)
+                                        TaxPresetLineSummaryText(preset: country)
+                                            .environmentObject(appSettingsManager)
                                     }
                                     .padding(.vertical, 4)
                                     .studioThemedListRowCard()
@@ -143,6 +151,9 @@ struct TaxCountryPickerSheet: View {
             }
             .task {
                 await TaxPresetLoader.ensureCatalogLoaded()
+            }
+            .background {
+                TaxTranslationSessionBridgeView()
             }
             .environment(\.studioEnhancedTint, true)
             .buxStudioSheetContent()
