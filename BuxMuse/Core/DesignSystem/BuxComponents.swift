@@ -384,6 +384,7 @@ struct BuxCenteredTopBar<Leading: View, Trailing: View>: View {
 }
 
 struct BuxDrawerSearchModifier: ViewModifier {
+    @Environment(\.buxSemanticTheme) private var semantic
     @Binding var searchText: String
     let prompt: String
     @Binding var isPresented: Bool
@@ -391,20 +392,17 @@ struct BuxDrawerSearchModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
             content
-                .searchable(
-                    text: $searchText,
-                    placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: prompt
-                )
-                .searchToolbarBehavior(.minimize)
+                .searchable(text: $searchText, isPresented: $isPresented, prompt: prompt)
+                .tint(semantic.accent)
         } else {
             content
                 .searchable(
                     text: $searchText,
                     isPresented: $isPresented,
-                    placement: .navigationBarDrawer(displayMode: .always),
+                    placement: .navigationBarDrawer(displayMode: .automatic),
                     prompt: prompt
                 )
+                .tint(semantic.accent)
         }
     }
 }

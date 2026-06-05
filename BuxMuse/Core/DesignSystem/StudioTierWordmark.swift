@@ -20,6 +20,8 @@ struct StudioTierWordmark: View {
         case hero
         case navigation
         case badge
+        case largeTitle
+        case largeSubtitle
     }
 
     var body: some View {
@@ -30,22 +32,34 @@ struct StudioTierWordmark: View {
             navigationMark
         case .badge:
             tierBadge(compact: true)
+        case .largeTitle:
+            heroTitleLine
+        case .largeSubtitle:
+            heroTaglineLine
         }
     }
 
     private var heroMark: some View {
         VStack(alignment: .leading, spacing: 2) {
-            HStack(alignment: .center, spacing: 8) {
-                studioTitle(size: 34, weight: .bold)
-                tierBadge(compact: false)
-            }
-            BuxCatalogDynamicText(key: "Full tax, PDF invoices, analytics")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
+            heroTitleLine
+            heroTaglineLine
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(BuxCatalogLabel.string("Pro Studio", locale: appSettingsManager.interfaceLocale))
+    }
+
+    private var heroTitleLine: some View {
+        HStack(alignment: .center, spacing: 8) {
+            studioTitle(size: 34, weight: .bold)
+            tierBadge(compact: false)
+        }
+    }
+
+    private var heroTaglineLine: some View {
+        BuxCatalogDynamicText(key: "Full tax, PDF invoices, analytics")
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.secondary)
     }
 
     private var navigationMark: some View {
@@ -111,26 +125,53 @@ struct SimpleStudioHeader: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
+    var style: Style = .hero
+
+    enum Style {
+        case hero
+        case largeTitle
+        case largeSubtitle
+    }
+
     var body: some View {
+        switch style {
+        case .hero:
+            heroMark
+        case .largeTitle:
+            titleLine
+        case .largeSubtitle:
+            taglineLine
+        }
+    }
+
+    private var heroMark: some View {
         VStack(alignment: .leading, spacing: 2) {
-            HStack(alignment: .firstTextBaseline, spacing: 0) {
-                Text("Simple ")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                Text("S")
-                    .font(.system(size: 34, weight: .black, design: .rounded))
-                    .foregroundStyle(simpleStudioSGradient)
-                BuxCatalogDynamicText(key: "tudio")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-            }
-            BuxCatalogDynamicText(key: "Track jobs, advances, and who owes you — free.")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
+            titleLine
+            taglineLine
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(BuxCatalogLabel.string("Simple Studio", locale: appSettingsManager.interfaceLocale))
+    }
+
+    private var titleLine: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
+            Text("Simple ")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            Text("S")
+                .font(.system(size: 34, weight: .black, design: .rounded))
+                .foregroundStyle(simpleStudioSGradient)
+            BuxCatalogDynamicText(key: "tudio")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+        }
+    }
+
+    private var taglineLine: some View {
+        BuxCatalogDynamicText(key: "Track jobs, advances, and who owes you — free.")
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.secondary)
     }
 
     private var simpleStudioSGradient: LinearGradient {

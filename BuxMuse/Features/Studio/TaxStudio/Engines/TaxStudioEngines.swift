@@ -46,7 +46,7 @@ public enum TaxIntelligenceEngine {
         let (bracketLabel, proximity) = bracketProximity(
             taxable: breakdown.taxableIncome,
             rules: ctx.taxProfile.incomeTaxRules,
-            locale: locale
+            ctx: ctx
         )
         let warnings = thresholdWarnings(ctx: ctx, breakdown: breakdown, locale: locale)
 
@@ -65,18 +65,22 @@ public enum TaxIntelligenceEngine {
     private static func bracketProximity(
         taxable: Decimal,
         rules: [TaxBracketRule],
-        locale: Locale
+        ctx: TaxStudioContext
     ) -> (String, Int) {
+        let locale = ctx.locale
+        let currencyCode = taxCurrencyCode(ctx)
+        let countryCode = ctx.taxProfile.selectedTaxCountry ?? ctx.profile.countryCode
+
         guard !rules.isEmpty else {
-            let thresholds: [(Decimal, String)] = [
-                (10_000, "£10k"),
-                (50_000, "£50k"),
-                (100_000, "£100k")
-            ]
-            for (limit, label) in thresholds where taxable < limit {
+            let limits = TaxCountryHeuristics.incomeBandLimits(
+                countryCode: countryCode,
+                currencyCode: currencyCode
+            )
+            for limit in limits where taxable < limit {
                 let pct = taxable > 0
                     ? Int(truncating: ((taxable / limit) * 100) as NSDecimalNumber)
                     : 0
+                let label = compactBandLabel(amount: limit, currencyCode: currencyCode, locale: locale)
                 return (
                     TaxStudioL10n.format("Approaching %@ taxable band", locale: locale, label),
                     min(99, pct)
@@ -89,16 +93,45 @@ public enum TaxIntelligenceEngine {
             let pct = rule.lowerBound > 0
                 ? Int(truncating: ((taxable / rule.lowerBound) * 100) as NSDecimalNumber)
                 : 0
+            let label = compactBandLabel(amount: rule.lowerBound, currencyCode: currencyCode, locale: locale)
             return (
-                TaxStudioL10n.format(
-                    "Approaching %@ threshold",
-                    locale: locale,
-                    "\(rule.lowerBound)"
-                ),
+                TaxStudioL10n.format("Approaching %@ threshold", locale: locale, label),
                 min(99, pct)
             )
         }
         return (TaxStudioL10n.line("Top bracket in profile", locale: locale), 100)
+    }
+
+    private static func taxCurrencyCode(_ ctx: TaxStudioContext) -> String {
+        ctx.countryPreset?.currency ?? ctx.profile.currencyCode
+    }
+
+    private static func compactBandLabel(amount: Decimal, currencyCode: String, locale: Locale) -> String {
+        let value = NSDecimalNumber(decimal: amount).doubleValue
+        let currencyFormatter = NumberFormatter()
+        currencyFormatter.numberStyle = .currency
+        currencyFormatter.currencyCode = currencyCode
+        currencyFormatter.locale = locale
+        currencyFormatter.maximumFractionDigits = 0
+        let symbol = currencyFormatter.currencySymbol ?? currencyCode
+
+        if value >= 1_000_000 {
+            let scaled = value / 1_000_000
+            return "\(symbol)\(decimalCompact(scaled, locale: locale))M"
+        }
+        if value >= 1_000 {
+            let scaled = value / 1_000
+            return "\(symbol)\(decimalCompact(scaled, locale: locale))k"
+        }
+        return currencyFormatter.string(from: NSDecimalNumber(decimal: amount)) ?? "\(symbol)\(amount)"
+    }
+
+    private static func decimalCompact(_ value: Double, locale: Locale) -> String {
+        let formatter = NumberFormatter()
+        formatter.locale = locale
+        formatter.maximumFractionDigits = value.truncatingRemainder(dividingBy: 1) == 0 ? 0 : 1
+        formatter.minimumFractionDigits = 0
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.0f", value)
     }
 
     private static func thresholdWarnings(
@@ -108,7 +141,14 @@ public enum TaxIntelligenceEngine {
     ) -> [String] {
         var items: [String] = []
         let rollingGross = rollingTwelveMonthGross(invoices: ctx.invoices, now: ctx.now)
-        if !ctx.taxProfile.vatRegistered, rollingGross >= 85_000 {
+        let countryCode = ctx.taxProfile.selectedTaxCountry ?? ctx.profile.countryCode
+        let currencyCode = taxCurrencyCode(ctx)
+        if !ctx.taxProfile.vatRegistered,
+           TaxCountryHeuristics.isApproachingVATThreshold(
+               rollingGross: rollingGross,
+               countryCode: countryCode,
+               currencyCode: currencyCode
+           ) {
             items.append(
                 TaxStudioL10n.line(
                     "Rolling 12-month turnover may approach VAT/GST registration thresholds — review local rules.",
@@ -121,7 +161,7 @@ public enum TaxIntelligenceEngine {
            ctx.taxProfile.estimatedSelfEmployedRatePercent == nil {
             items.append(
                 TaxStudioL10n.line(
-                    "Set effective tax rates in Tax studio settings for accurate estimates.",
+                    "Set effective tax rates in Tax Studio Settings for accurate estimates.",
                     locale: locale
                 )
             )
@@ -182,7 +222,12 @@ public enum TaxForecastingEngine {
 
         let vatETA: Date? = {
             guard !ctx.taxProfile.vatRegistered, incomeVelocity > 0 else { return nil }
-            let target: Decimal = 85_000
+            let countryCode = ctx.taxProfile.selectedTaxCountry ?? ctx.profile.countryCode
+            let currencyCode = ctx.countryPreset?.currency ?? ctx.profile.currencyCode
+            guard let target = TaxCountryHeuristics.vatRegistrationThreshold(
+                countryCode: countryCode,
+                currencyCode: currencyCode
+            ) else { return nil }
             let current = TaxIntelligenceEngine.rollingTwelveMonthGross(invoices: ctx.invoices, now: ctx.now)
             let remaining = max(0, target - current)
             let monthsToThreshold = remaining / incomeVelocity
@@ -296,8 +341,15 @@ public enum TaxHealthScoreEngine {
             score -= 8
         }
 
+        let rollingGross = TaxIntelligenceEngine.rollingTwelveMonthGross(invoices: ctx.invoices, now: ctx.now)
+        let vatCountry = ctx.taxProfile.selectedTaxCountry ?? ctx.profile.countryCode
+        let vatCurrency = ctx.countryPreset?.currency ?? ctx.profile.currencyCode
         if !ctx.taxProfile.vatRegistered,
-           TaxIntelligenceEngine.rollingTwelveMonthGross(invoices: ctx.invoices, now: ctx.now) > 70_000 {
+           TaxCountryHeuristics.isApproachingVATThreshold(
+               rollingGross: rollingGross,
+               countryCode: vatCountry,
+               currencyCode: vatCurrency
+           ) {
             score -= 10
             recs.append(.init(
                 id: "vat",
@@ -312,7 +364,7 @@ public enum TaxHealthScoreEngine {
             recs.append(.init(
                 id: "rates",
                 title: TaxStudioL10n.line("Set effective rates", locale: locale),
-                detail: TaxStudioL10n.line("Add income and self-employed % overrides in Tax studio settings.", locale: locale),
+                detail: TaxStudioL10n.line("Add income and self-employed % overrides in Tax Studio Settings.", locale: locale),
                 band: .red
             ))
         }
@@ -796,13 +848,20 @@ public enum TaxSanityCheckEngine {
                 id: "rate-inc",
                 title: TaxStudioL10n.line("Missing income tax %", locale: locale),
                 detail: TaxStudioL10n.line("Effective income tax override is not set.", locale: locale),
-                suggestion: TaxStudioL10n.line("Open Tax studio settings.", locale: locale),
+                suggestion: TaxStudioL10n.line("Open Tax Studio Settings.", locale: locale),
                 deepLink: .settings
             ))
         }
 
         let rolling = TaxIntelligenceEngine.rollingTwelveMonthGross(invoices: ctx.invoices, now: ctx.now)
-        if rolling > 75_000, !ctx.taxProfile.vatRegistered {
+        let sanityCountry = ctx.taxProfile.selectedTaxCountry ?? ctx.profile.countryCode
+        let sanityCurrency = ctx.countryPreset?.currency ?? ctx.profile.currencyCode
+        if !ctx.taxProfile.vatRegistered,
+           TaxCountryHeuristics.isApproachingVATThreshold(
+               rollingGross: rolling,
+               countryCode: sanityCountry,
+               currencyCode: sanityCurrency
+           ) {
             warnings.append(.init(
                 id: "vat-near",
                 title: TaxStudioL10n.line("VAT/GST proximity", locale: locale),

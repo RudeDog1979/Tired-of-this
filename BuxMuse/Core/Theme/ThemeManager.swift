@@ -480,6 +480,15 @@ public final class ThemeManager: ObservableObject {
         } else {
             current = AppTheme.standardNeutral(accent: store.resolvedSystemAccent())
         }
+
+        #if canImport(UIKit)
+        if let searchIcon = UIImage(systemName: "magnifyingglass")?.withRenderingMode(.alwaysTemplate) {
+            UISearchBar.appearance().setImage(searchIcon, for: .search, state: .normal)
+        }
+        if let clearIcon = UIImage(systemName: "xmark.circle.fill")?.withRenderingMode(.alwaysTemplate) {
+            UISearchBar.appearance().setImage(clearIcon, for: .clear, state: .normal)
+        }
+        #endif
     }
 
     /// Select a theme with a smooth animated transition

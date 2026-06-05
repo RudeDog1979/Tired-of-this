@@ -40,25 +40,20 @@ struct TaxStudioNavigationTitle: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(
-            BuxCatalogLabel.string("Tax studio Pro", locale: appSettingsManager.interfaceLocale)
-        )
+        .accessibilityLabel("TaxStudio Pro")
     }
 
     private var taxStudioWordmark: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 0) {
-            BuxCatalogDynamicText(key: "Tax ")
-                .font(.system(size: style.prefixSize, weight: style.weight, design: .rounded))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-
+        let primary = themeManager.labelPrimary(for: colorScheme)
+        return (
+            Text("Tax\u{2009}")
+                .foregroundColor(primary) +
             Text("S")
-                .font(.system(size: style.prefixSize, weight: .black, design: .rounded))
-                .foregroundStyle(studioSGradient)
-
-            BuxCatalogDynamicText(key: "tudio")
-                .font(.system(size: style.prefixSize, weight: style.weight, design: .rounded))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-        }
+                .foregroundStyle(studioSGradient) +
+            Text("tudio")
+                .foregroundColor(primary)
+        )
+        .font(.system(size: style.prefixSize, weight: style.weight, design: .rounded))
     }
 
     private var studioSGradient: LinearGradient {

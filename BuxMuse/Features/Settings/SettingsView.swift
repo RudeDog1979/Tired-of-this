@@ -20,7 +20,6 @@ struct SettingsView: View {
     @State private var settingsPath = NavigationPath()
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
     @State private var showOnboardingReplay = false
-
     var body: some View {
         NavigationStack(path: $settingsPath) {
             ZStack {
@@ -29,9 +28,6 @@ struct SettingsView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {
-
-
-
                         // Generate layout dynamically from SettingsBrain display structs
                         let appearanceLabel = store.resolvedAppearanceSummary(
                             themeManager: themeManager,

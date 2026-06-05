@@ -59,8 +59,10 @@ struct SimpleStudioHubView: View {
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
-                        SimpleStudioHeader()
-                            .buxScreenEntrance(index: 0, isVisible: hubAppeared)
+                        if #unavailable(iOS 26) {
+                            SimpleStudioHeader()
+                                .buxScreenEntrance(index: 0, isVisible: hubAppeared)
+                        }
 
                         simpleQuickActions
                             .buxScreenEntrance(index: 1, isVisible: hubAppeared)
@@ -156,10 +158,8 @@ struct SimpleStudioHubView: View {
 
                 fabLayer
             }
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
+            .buxStudioRootTabChrome(brand: .simple)
             .buxInterfaceLocale()
-            .buxRootNavigationChrome()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {

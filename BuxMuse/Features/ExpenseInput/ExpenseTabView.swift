@@ -3,7 +3,7 @@
 //  BuxMuse
 //  Features/ExpenseInput/
 //
-//  Unified scroll: hero carousel + transaction list. Monzo-style top toolbar + nav search.
+//  Unified scroll: hero carousel + transaction list. Floating toolbar + inline search.
 //
 
 import SwiftUI
@@ -74,6 +74,11 @@ struct ExpenseTabView: View {
         )
     }
 
+    /// Search or filters active — hero collapses so results stay in focus.
+    private var isListFocusMode: Bool {
+        navigationCoordinator.isExpenseSearchPresented || listModel.filters.isActive
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -98,6 +103,7 @@ struct ExpenseTabView: View {
                 isSearchPresented: $navigationCoordinator.isExpenseSearchPresented
             ))
         }
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
         .buxInterfaceLocale()
         .environment(\.expensesEnhancedTint, true)
         .buxReportsContainerWidth()
@@ -124,6 +130,11 @@ struct ExpenseTabView: View {
         }
         .onDisappear {
             navigationCoordinator.dismissExpenseSearch()
+        }
+        .onChange(of: navigationCoordinator.isExpenseSearchPresented) { _, presented in
+            if !presented {
+                refreshExpenseListDisplay()
+            }
         }
         .onChange(of: expenseDataToken) { _, _ in
             listModel.reloadCatalog(brain: brain)
@@ -219,8 +230,8 @@ struct ExpenseTabView: View {
 
     @ToolbarContentBuilder
     private var expenseToolbar: some ToolbarContent {
-        ToolbarItemGroup(placement: .topBarTrailing) {
-            if !allRecords.isEmpty {
+        if !allRecords.isEmpty {
+            ToolbarItemGroup(placement: .topBarTrailing) {
                 expenseFilterMenu
 
                 BuxNavIconButton(
@@ -236,10 +247,15 @@ struct ExpenseTabView: View {
                 )
             }
 
+            if #available(iOS 26.0, *) {
+                ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            }
+        }
+
+        ToolbarItem(placement: .topBarTrailing) {
             BuxNavIconButton(
                 systemName: "plus",
                 accessibilityLabel: "Add expense",
-                useAccent: true,
                 action: {
                     withAnimation(.buxSnap) {
                         activeSheet = .add
@@ -377,11 +393,10 @@ struct ExpenseTabView: View {
                     }
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.top, BuxTokens.tight)
         }
         .scrollDismissesKeyboard(.interactively)
-        .buxScrollContentMargins()
-        .buxRootScrollEdgeChrome()
+        .buxRootTabScrollChrome()
         .buxStaggeredReveal(index: 0, isVisible: listAppeared)
     }
 
@@ -402,7 +417,7 @@ struct ExpenseTabView: View {
 
         return ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 0) {
-                if showHero, carouselSessionReady {
+                if showHero, carouselSessionReady, !isListFocusMode {
                     ExpensesTopCarousel(
                         header: display.header,
                         summary: display.summary,
@@ -415,10 +430,15 @@ struct ExpenseTabView: View {
                     .environmentObject(appSettingsManager)
                     .padding(expenseHeroRowInsets)
                     .padding(.bottom, 16)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
                 HustleSelectorBar()
                     .padding(.bottom, 4)
+
+                if filteredRecords.isEmpty, listModel.filters.isActive {
+                    expenseNoMatchesState
+                }
 
                 ForEach(display.sections) { section in
                     Section {
@@ -447,11 +467,36 @@ struct ExpenseTabView: View {
                     }
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.top, BuxTokens.tight)
         }
         .scrollDismissesKeyboard(.interactively)
-        .buxScrollContentMargins()
-        .buxRootScrollEdgeChrome()
+        .buxRootTabScrollChrome()
+        .animation(.buxSnap, value: isListFocusMode)
+    }
+
+    private var expenseNoMatchesState: some View {
+        ContentUnavailableView {
+            Label("No matches", systemImage: "line.3.horizontal.decrease.circle")
+        } description: {
+            BuxCatalogText.text("Try a different merchant, note, or filter.")
+        } actions: {
+            if listModel.filters.isActive {
+                BuxButton(
+                    title: "Clear filters",
+                    systemImage: "xmark.circle",
+                    role: .secondary,
+                    size: .regular
+                ) {
+                    withAnimation(.buxSnap) {
+                        listModel.filters = ExpenseFilterState()
+                        listModel.searchScope = .all
+                        navigationCoordinator.dismissExpenseSearch()
+                    }
+                }
+            }
+        }
+        .padding(.top, 24)
+        .padding(.bottom, 8)
     }
 
     @ViewBuilder
@@ -561,30 +606,46 @@ struct ExpenseTabView: View {
     }
 }
 
-// MARK: - Navigation-owned search (Monzo / Apple Music pattern)
+// MARK: - Inline search (iOS 26 toolbar / iOS 18 drawer)
 
 private struct ExpenseSearchModifier: ViewModifier {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @Binding var searchText: String
     @Binding var searchScope: ExpenseSearchScope
     @Binding var isSearchPresented: Bool
 
     func body(content: Content) -> some View {
         content
-            .modifier(BuxDrawerSearchModifier(
+            .modifier(BuxDrawerScopeModifier(
                 searchText: $searchText,
-                prompt: "Search merchants, notes…",
-                isPresented: $isSearchPresented
-            ))
-            .searchScopes($searchScope) {
-                ForEach(ExpenseSearchScope.allCases) { scope in
-                    Text(
-                        BuxCatalogLabel.string(
-                            scope.title,
-                            locale: BuxInterfaceLocale.currentInterfaceLocale
+                selection: $searchScope,
+                isPresented: $isSearchPresented,
+                prompt: BuxCatalogLabel.string(
+                    "Search merchants, notes…",
+                    locale: appSettingsManager.interfaceLocale
+                ),
+                scopes: {
+                    ForEach(ExpenseSearchScope.allCases) { scope in
+                        Text(
+                            BuxCatalogLabel.string(
+                                scope.title,
+                                locale: appSettingsManager.interfaceLocale
+                            )
                         )
-                    )
-                    .tag(scope)
+                        .tag(scope)
+                    }
                 }
-            }
+            ))
+            .modifier(ExpenseSearchToolbarBehaviorModifier())
+    }
+}
+
+private struct ExpenseSearchToolbarBehaviorModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.searchToolbarBehavior(.minimize)
+        } else {
+            content
+        }
     }
 }

@@ -36,6 +36,9 @@ enum BuxLayout {
     /// Extra list top inset so large title + search drawer sit above scroll content (Studio invoices).
     static let invoicesNavChromeScrollInset: CGFloat = 16
 
+    /// Nudge Studio branded `.largeTitle` down vs system default (tune here only).
+    static let studioRootTabNavTitleTopInset: CGFloat = 16
+
     static let sheetBottomClearance: CGFloat = BuxTokens.sheetBottomClearance
 
     static func horizontalMargin(for width: CGFloat) -> CGFloat {

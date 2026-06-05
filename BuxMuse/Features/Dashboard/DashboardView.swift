@@ -590,7 +590,7 @@ struct DashboardView: View {
                 .environment(\.dashboardEnhancedTint, true)
             }
             .buxRootTabScrollChrome()
-            .coordinateSpace(name: "dashboard_scroll")
+            .buxScrollCollapseCoordinateSpace()
             .onTapGesture {
                 // Tapping scroll area collapses category and transaction bars
                 if isPillSectionExpanded {
@@ -794,7 +794,7 @@ private struct DashboardHeroSection: View {
                     heroNotificationBell
                 }
                 .padding(.top, collapseValue(start: 8, end: 0))
-                .opacity(max(0, 1.0 + (scrollOffset / 140.0)))
+                .opacity(BuxScrollCollapseMath.fadeOpacity(scrollOffset: scrollOffset, fadeDistance: 140))
 
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
@@ -807,7 +807,7 @@ private struct DashboardHeroSection: View {
                         Text(balanceTitle)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                            .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
+                            .opacity(BuxScrollCollapseMath.fadeOpacity(scrollOffset: scrollOffset))
 
                         Button(action: {
                             withAnimation { navigationCoordinator.isBalanceVisible.toggle() }
@@ -816,7 +816,7 @@ private struct DashboardHeroSection: View {
                                 .font(.system(size: 12))
                                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                         }
-                        .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
+                        .opacity(BuxScrollCollapseMath.fadeOpacity(scrollOffset: scrollOffset))
                     }
 
                     let balanceToFormat = dashSnapshot.totalBalance
@@ -928,20 +928,7 @@ private struct DashboardHeroSection: View {
                 .allowsHitTesting(false)
             )
         }
-        .background {
-            GeometryReader { geo in
-                Color.clear.preference(
-                    key: ScrollOffsetPreferenceKey.self,
-                    value: geo.frame(in: .named("dashboard_scroll")).minY
-                )
-            }
-        }
-        .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-            let next = value < 0 ? max(-150, value) : 0
-            let stepped = (next / 8).rounded() * 8
-            guard abs(stepped - scrollOffset) >= 7 else { return }
-            scrollOffset = stepped
-        }
+        .buxTrackScrollCollapse(scrollOffset: $scrollOffset)
     }
 
     private var heroNotificationBell: some View {
@@ -960,9 +947,12 @@ private struct DashboardHeroSection: View {
     }
 
     private func collapseValue(start: CGFloat, end: CGFloat) -> CGFloat {
-        let range = start - end
-        let factor = min(1.0, max(0.0, -scrollOffset / 100.0))
-        return start - (range * factor)
+        BuxScrollCollapseMath.lerp(
+            start: start,
+            end: end,
+            scrollOffset: scrollOffset,
+            distance: 100
+        )
     }
 }
 

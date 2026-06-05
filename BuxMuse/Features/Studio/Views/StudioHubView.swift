@@ -90,9 +90,10 @@ struct StudioHubView: View {
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
-                        StudioTierWordmark(style: .hero)
-                            .padding(.horizontal, BuxTokens.marginRegular)
-                            .buxScreenEntrance(index: 0, isVisible: hubAppeared)
+                        if #unavailable(iOS 26) {
+                            StudioTierWordmark(style: .hero)
+                                .buxScreenEntrance(index: 0, isVisible: hubAppeared)
+                        }
 
                         HustleSelectorBar()
                             .padding(.bottom, 4)
@@ -167,9 +168,7 @@ struct StudioHubView: View {
                 }
                 .buxRootTabScrollChrome()
             }
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .buxRootNavigationChrome()
+            .buxStudioRootTabChrome(brand: .pro)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {

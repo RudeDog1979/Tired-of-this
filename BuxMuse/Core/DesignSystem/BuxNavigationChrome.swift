@@ -7,6 +7,63 @@
 
 import SwiftUI
 
+// MARK: - Studio root tab (branded title in system large-title slot — iOS 26)
+
+enum BuxStudioRootTabBrand {
+    case pro
+    case simple
+}
+
+private struct BuxStudioRootTabChromeModifier: ViewModifier {
+    let brand: BuxStudioRootTabBrand
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .buxCatalogNavigationTitle("Studio")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbarTitleDisplayMode(.automatic)
+                .buxRootNavigationChrome()
+                .toolbar {
+                    ToolbarItem(placement: .largeTitle) {
+                        studioNavTitleLine(brand: brand)
+                            .padding(.top, BuxLayout.studioRootTabNavTitleTopInset)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    ToolbarItem(placement: .largeSubtitle) {
+                        studioNavSubtitleLine(brand: brand)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+        } else {
+            content
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
+                .buxRootNavigationChrome()
+        }
+    }
+
+    @ViewBuilder
+    private func studioNavTitleLine(brand: BuxStudioRootTabBrand) -> some View {
+        switch brand {
+        case .pro:
+            StudioTierWordmark(style: .largeTitle)
+        case .simple:
+            SimpleStudioHeader(style: .largeTitle)
+        }
+    }
+
+    @ViewBuilder
+    private func studioNavSubtitleLine(brand: BuxStudioRootTabBrand) -> some View {
+        switch brand {
+        case .pro:
+            StudioTierWordmark(style: .largeSubtitle)
+        case .simple:
+            SimpleStudioHeader(style: .largeSubtitle)
+        }
+    }
+}
+
 // MARK: - Root tabs (Dashboard, Expenses, Studio, Settings)
 
 private struct BuxRootNavigationChromeModifier: ViewModifier {
@@ -108,6 +165,11 @@ extension ToolbarContent {
 }
 
 extension View {
+    /// Same nav chain as Expenses / Settings; branding lives in `.largeTitle` / `.largeSubtitle` on iOS 26.
+    func buxStudioRootTabChrome(brand: BuxStudioRootTabBrand) -> some View {
+        modifier(BuxStudioRootTabChromeModifier(brand: brand))
+    }
+
     func buxRootNavigationChrome() -> some View {
         modifier(BuxRootNavigationChromeModifier())
     }
