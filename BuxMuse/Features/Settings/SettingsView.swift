@@ -64,7 +64,7 @@ struct SettingsView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 12) {
-                            BuxSectionHeader(title: "Guides & help")
+                            BuxSectionHeader(title: "Guides & Help")
                                 .padding(.leading, 4)
 
                             VStack(spacing: 0) {
@@ -73,7 +73,7 @@ struct SettingsView: View {
                                 } label: {
                                     SettingsRow(
                                         icon: "sparkles",
-                                        label: "Replay onboarding guide",
+                                        label: "Replay Onboarding Guide",
                                         color: themeManager.current.accentColor,
                                         trailingText: nil,
                                         showsProBadge: false

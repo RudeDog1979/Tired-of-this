@@ -484,6 +484,7 @@ struct SimpleStudioHubView: View {
                 showLogMoney = true
             }
         }
+        .fixedSize(horizontal: false, vertical: true)
         .buxNativeGlassButtonRowContainer(spacing: BuxTokens.tight)
         .tint(themeManager.contrastAccentColor(for: colorScheme))
     }

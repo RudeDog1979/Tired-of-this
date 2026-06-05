@@ -16,27 +16,39 @@ public enum SimpleJobPayStyle: String, Codable, CaseIterable, Identifiable, Send
 
     public var id: String { rawValue }
 
-    public var chipTitle: String {
+    public func localizedChipTitle(locale: Locale) -> String {
         switch self {
-        case .onePrice: return SimpleStudioCopy.line("One price")
-        case .byTheHour: return SimpleStudioCopy.line("By the hour")
+        case .onePrice: return SimpleStudioCopy.line("One price", locale: locale)
+        case .byTheHour: return SimpleStudioCopy.line("By the hour", locale: locale)
+        }
+    }
+
+    public var chipTitle: String {
+        localizedChipTitle(locale: BuxInterfaceLocale.currentInterfaceLocale)
+    }
+
+    public func localizedPlainTitle(locale: Locale) -> String {
+        switch self {
+        case .onePrice: return SimpleStudioCopy.line("One price for the whole job", locale: locale)
+        case .byTheHour: return SimpleStudioCopy.line("Paid by the hour", locale: locale)
         }
     }
 
     public var plainTitle: String {
+        localizedPlainTitle(locale: BuxInterfaceLocale.currentInterfaceLocale)
+    }
+
+    public func localizedClockSubtitle(locale: Locale) -> String {
         switch self {
-        case .onePrice: return SimpleStudioCopy.line("One price for the whole job")
-        case .byTheHour: return SimpleStudioCopy.line("Paid by the hour")
+        case .onePrice:
+            return SimpleStudioCopy.line("Track your time — it does not change what you agreed.", locale: locale)
+        case .byTheHour:
+            return SimpleStudioCopy.line("The clock figures out what they owe from your hourly rate.", locale: locale)
         }
     }
 
     public var clockSubtitle: String {
-        switch self {
-        case .onePrice:
-            return SimpleStudioCopy.line("Track your time — it does not change what you agreed.")
-        case .byTheHour:
-            return SimpleStudioCopy.line("The clock figures out what they owe from your hourly rate.")
-        }
+        localizedClockSubtitle(locale: BuxInterfaceLocale.currentInterfaceLocale)
     }
 }
 

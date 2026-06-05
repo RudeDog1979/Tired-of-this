@@ -60,7 +60,7 @@ struct SimpleStudioInvoiceDetailView: View {
                                     BuxFormRowDivider()
                                     detailRow("For", invoice.jobDescription)
                                     BuxFormRowDivider()
-                                    detailRow("Status", invoice.status == .paid ? "Paid" : "Waiting")
+                                    detailRow("Status", invoice.status == .paid ? BuxCatalogLabel.string("Paid", locale: appSettingsManager.interfaceLocale) : BuxCatalogLabel.string("Waiting", locale: appSettingsManager.interfaceLocale))
                                     BuxFormRowDivider()
                                     detailRow("Sent", formattedDate(invoice.createdAt))
                                 }
@@ -197,9 +197,9 @@ struct SimpleStudioInvoiceDetailView: View {
             Image(systemName: "doc.questionmark")
                 .font(.system(size: 36, weight: .semibold))
                 .foregroundStyle(.secondary)
-            Text(title)
+            BuxCatalogDynamicText(key: title)
                 .font(.system(size: 17, weight: .bold))
-            Text(message)
+            BuxCatalogDynamicText(key: message)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -212,7 +212,7 @@ struct SimpleStudioInvoiceDetailView: View {
 
     private func detailRow(_ label: String, _ value: String) -> some View {
         HStack {
-            Text(label)
+            BuxCatalogText.text(label)
                 .font(.system(size: 13, weight: .medium))
                 .buxLabelSecondary()
             Spacer()

@@ -384,6 +384,7 @@ struct StudioHubView: View {
                     role: .primary
                 ) { showScanReceipt = true }
             }
+            .fixedSize(horizontal: false, vertical: true)
             .buxNativeGlassButtonRowContainer(spacing: BuxTokens.tight)
             .tint(themeManager.contrastAccentColor(for: colorScheme))
         }

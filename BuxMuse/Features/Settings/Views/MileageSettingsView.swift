@@ -42,6 +42,7 @@ struct MileageSettingsView: View {
         }
         .buxCatalogNavigationTitle("Mileage log")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
         .onChange(of: store.autoLocationForMileage) { _, _ in store.save() }
         .onChange(of: store.mileageRatePerUnitValue) { _, _ in store.save() }
     }

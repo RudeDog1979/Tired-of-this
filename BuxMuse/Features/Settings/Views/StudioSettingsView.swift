@@ -369,6 +369,7 @@ struct StudioSettingsView: View {
     ) -> some View {
         NavigationLink {
             destination()
+                .environment(\.isSettingsContext, true)
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: icon)

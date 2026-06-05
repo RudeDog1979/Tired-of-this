@@ -392,6 +392,7 @@ private struct SimpleScanChipEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let field: SimpleScanField
     @Binding var draft: SimpleScanDraft
@@ -434,12 +435,13 @@ private struct SimpleScanChipEditorSheet: View {
 
     @ViewBuilder
     private var editorContent: some View {
+        let locale = appSettingsManager.interfaceLocale
         switch field {
         case .kind:
             BuxFormSection(title: "What is this?") {
                 Picker("Type", selection: $draft.kind) {
                     ForEach(scanKinds, id: \.self) { kind in
-                        Label(kind.logTitle, systemImage: kind.systemImage).tag(kind)
+                        Label(kind.localizedLogTitle(locale: locale), systemImage: kind.systemImage).tag(kind)
                     }
                 }
                 .pickerStyle(.inline)
@@ -454,17 +456,17 @@ private struct SimpleScanChipEditorSheet: View {
             }
         case .customer:
             BuxFormSection(title: "Who") {
-                TextField("Customer or merchant", text: $customerText)
+                TextField(BuxCatalogLabel.string("Customer or merchant", locale: locale), text: $customerText)
                     .buxFormFieldPadding()
             }
         case .jobLabel:
             BuxFormSection(title: "What was it for?") {
-                TextField("Job or description", text: $jobText)
+                TextField(BuxCatalogLabel.string("Job or description", locale: locale), text: $jobText)
                     .buxFormFieldPadding()
             }
         case .note:
             BuxFormSection(title: "Note") {
-                TextField("Optional details", text: $noteText, axis: .vertical)
+                TextField(BuxCatalogLabel.string("Optional details", locale: locale), text: $noteText, axis: .vertical)
                     .lineLimit(2...4)
                     .buxFormFieldPadding()
             }

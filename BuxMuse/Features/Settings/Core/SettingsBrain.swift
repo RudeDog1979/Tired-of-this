@@ -126,7 +126,7 @@ public final class SettingsBrain {
         )
         
         let appearanceRow = SettingsRowDisplay(
-            title: "Appearance & themes",
+            title: "Appearance & Themes",
             subtitle: "Accent, glassmorphism, motion",
             iconName: "paintpalette.fill",
             hexColor: "#00E5FF", // Neon Blue
@@ -135,7 +135,7 @@ public final class SettingsBrain {
         )
         
         let regionRow = SettingsRowDisplay(
-            title: "Currency & region",
+            title: "Currency & Region",
             subtitle: "Currency code, formatting",
             iconName: "globe",
             hexColor: "#BF5AF2", // Purple
@@ -159,7 +159,7 @@ public final class SettingsBrain {
         )
         
         let budgetRow = SettingsRowDisplay(
-            title: "Budgets & custom budgets",
+            title: "Budgets & Custom Budgets",
             subtitle: budgetSubtitle,
             iconName: "chart.pie.fill",
             hexColor: "#30D158", // Bright Green
@@ -178,7 +178,7 @@ public final class SettingsBrain {
         )
 
         let paymentSourcesRow = SettingsRowDisplay(
-            title: "Payment sources",
+            title: "Payment Sources",
             subtitle: "Visa, PayPal, Klarna tags for credit insights",
             iconName: "creditcard.fill",
             hexColor: "#5856D6",
@@ -187,7 +187,7 @@ public final class SettingsBrain {
         )
 
         let expenseIntelligenceSection = SettingsSectionDisplay(
-            title: "Expense intelligence",
+            title: "Expense Intelligence",
             rows: [paymentSourcesRow]
         )
 
@@ -212,7 +212,7 @@ public final class SettingsBrain {
         )
         
         let securityRow = SettingsRowDisplay(
-            title: "Security & app lock",
+            title: "Security & App Lock",
             subtitle: "Face ID, PIN passcode",
             iconName: "lock.fill",
             hexColor: "#0A84FF", // Blue
@@ -221,13 +221,13 @@ public final class SettingsBrain {
         )
         
         let securitySection = SettingsSectionDisplay(
-            title: "Security & notifications",
+            title: "Security & Notifications",
             rows: [notifyRow, securityRow]
         )
         
         // 4. Data Control Section
         let dataRow = SettingsRowDisplay(
-            title: "Backup & restore",
+            title: "Backup & Restore",
             subtitle: "Encrypted archive, export, full restore",
             iconName: "arrow.down.doc.fill",
             hexColor: "#E0C3FC",
@@ -244,7 +244,7 @@ public final class SettingsBrain {
         )
         
         let dataSection = SettingsSectionDisplay(
-            title: "System & privacy",
+            title: "System & Privacy",
             rows: [dataRow, aboutRow]
         )
         

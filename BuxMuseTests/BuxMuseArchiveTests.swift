@@ -212,13 +212,13 @@ final class BuxMuseArchiveTests: XCTestCase {
         // 1. Reschedule with .off
         await BackupNotificationScheduler.reschedule(frequency: .off)
         
-        // 2. Reschedule with .daily
-        await BackupNotificationScheduler.reschedule(frequency: .daily)
+        // 2. Reschedule with .custom
+        await BackupNotificationScheduler.reschedule(frequency: .custom)
         
         // 3. Verify it does not crash and the settings properties align
         let settings = SettingsStore.shared
-        settings.autoBackupFrequency = .daily
-        XCTAssertEqual(settings.autoBackupFrequency, .daily)
+        settings.autoBackupFrequency = .custom
+        XCTAssertEqual(settings.autoBackupFrequency, .custom)
     }
 }
 

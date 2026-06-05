@@ -160,6 +160,7 @@ struct HustleSettingsView: View {
         }
         .buxCatalogNavigationTitle("Workspaces")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
         .sheet(item: $proUpsellFeature) { feature in
             StudioProUpsellSheet(feature: feature)
                 .environmentObject(themeManager)

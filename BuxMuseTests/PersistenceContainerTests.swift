@@ -17,7 +17,7 @@ final class PersistenceContainerTests: XCTestCase {
     }
 
     func testOnDiskContainerOpens() throws {
-        let persistence = PersistenceController(inMemory: false)
+        let persistence = PersistenceController(inMemory: false, customStoreName: "BuxMuse_test_\(UUID().uuidString)")
         XCTAssertNotNil(persistence.container)
         try persistence.seedExpenseCatalogIfNeeded()
     }

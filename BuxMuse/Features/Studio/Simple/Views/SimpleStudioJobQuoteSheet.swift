@@ -122,7 +122,7 @@ struct SimpleStudioJobQuoteSheet: View {
                             BuxFormSection(title: "How do you get paid?") {
                                 Picker(BuxCatalogLabel.string("Pay type", locale: appSettingsManager.interfaceLocale), selection: $payStyle) {
                                     ForEach(SimpleJobPayStyle.allCases) { style in
-                                        Text(style.plainTitle).tag(style)
+                                        Text(style.localizedPlainTitle(locale: appSettingsManager.interfaceLocale)).tag(style)
                                     }
                                 }
                                 .pickerStyle(.segmented)

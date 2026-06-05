@@ -279,18 +279,23 @@ struct StudioDashboardWidget: View {
             BuxCardButton(action: {
                 navigationCoordinator.selectedTab = .studio
             }) {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Label {
-                            BuxCatalogDynamicText(key: "Studio")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
-                        } icon: {
-                            StudioTabIcon(isSelected: true)
-                                .foregroundStyle(themeManager.current.accentColor)
-                                .frame(width: 18, height: 18)
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(alignment: .center) {
+                        HStack(alignment: .firstTextBaseline, spacing: 0) {
+                            Text("S")
+                                .font(.system(size: 16, weight: .black, design: .rounded))
+                                .foregroundStyle(LinearGradient(
+                                    colors: [themeManager.current.accentColor, themeManager.current.accentColor.opacity(0.5)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                            Text(BuxLocalizedString.string("tudio", locale: appSettingsManager.interfaceLocale))
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         }
+                        
                         Spacer()
+                        
                         Text(
                             BuxLocalizedString.format(
                                 "Runway %@",
@@ -298,20 +303,36 @@ struct StudioDashboardWidget: View {
                                 display.runwayMonthsFormatted
                             )
                         )
-                            .font(.system(size: 10, weight: .bold))
-                            .buxLabelSecondary()
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            LinearGradient(
+                                colors: [themeManager.current.accentColor, .purple],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(8)
+                        .shadow(color: themeManager.current.accentColor.opacity(0.25), radius: 3, x: 0, y: 1)
                     }
 
-                    HStack(spacing: BuxLayout.section) {
-                        widgetMetric("Income", display.incomeFormatted)
-                        widgetMetric("Expenses", display.expensesFormatted)
-                        widgetMetric("Net", display.netProfitFormatted)
-                    }
+                    VStack(spacing: 12) {
+                        HStack(spacing: 12) {
+                            widgetMetric("Income", display.incomeFormatted, systemIcon: "arrow.down.right.circle.fill", iconColor: .green)
+                            widgetMetric("Expenses", display.expensesFormatted, systemIcon: "arrow.up.left.circle.fill", iconColor: .orange)
+                            widgetMetric("Net", display.netProfitFormatted, systemIcon: "chart.line.uptrend.xyaxis.circle.fill", iconColor: .blue)
+                        }
 
-                    HStack(spacing: BuxLayout.section) {
-                        widgetMetric("Est. tax", display.estimatedTaxFormatted)
-                        widgetMetric("Quarter due", display.quarterlyDueFormatted)
-                        widgetMetric("Rate", "\(display.effectiveRatePercent)%")
+                        Divider()
+                            .opacity(0.5)
+
+                        HStack(spacing: 12) {
+                            widgetMetric("Est. tax", display.estimatedTaxFormatted, systemIcon: "building.columns.circle.fill", iconColor: .purple)
+                            widgetMetric("Quarter due", display.quarterlyDueFormatted, systemIcon: "calendar.circle.fill", iconColor: .teal)
+                            widgetMetric("Rate", "\(display.effectiveRatePercent)%", systemIcon: "percent", iconColor: .indigo)
+                        }
                     }
                 }
                 .padding(BuxLayout.section)
@@ -322,17 +343,25 @@ struct StudioDashboardWidget: View {
         }
     }
 
-    private func widgetMetric(_ title: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            BuxCatalogText.text(title)
-                .font(.system(size: 9, weight: .semibold))
-                .textCase(.uppercase)
-                .buxLabelSecondary()
-            Text(value)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+    private func widgetMetric(_ title: String, _ value: String, systemIcon: String, iconColor: Color) -> some View {
+        HStack(alignment: .center, spacing: 6) {
+            Image(systemName: systemIcon)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(iconColor)
+                .frame(width: 20, height: 20)
+                .background(iconColor.opacity(0.12))
+                .clipShape(Circle())
+            
+            VStack(alignment: .leading, spacing: 1) {
+                BuxCatalogText.text(title)
+                    .font(.system(size: 9, weight: .bold))
+                    .buxLabelSecondary()
+                Text(value)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

@@ -55,7 +55,7 @@ struct SimpleStudioLogMoneySheet: View {
                     }
 
                     BuxFormSection(title: "Who") {
-                        TextField("Customer name", text: $customerName)
+                        TextField(BuxCatalogLabel.string("Customer name", locale: appSettingsManager.interfaceLocale), text: $customerName)
                             .buxFormFieldPadding()
                         if !store.recentCustomerNames().isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -83,7 +83,7 @@ struct SimpleStudioLogMoneySheet: View {
 
                     if kind == .job || kind == .income {
                         BuxFormSection(title: "Job") {
-                            TextField("What was it for?", text: $jobLabel)
+                            TextField(BuxCatalogLabel.string("What was it for?", locale: appSettingsManager.interfaceLocale), text: $jobLabel)
                                 .buxFormFieldPadding()
                         }
                         jobCostFields
@@ -100,7 +100,7 @@ struct SimpleStudioLogMoneySheet: View {
                     }
 
                     BuxFormSection(title: "Note") {
-                        TextField("Optional", text: $note)
+                        TextField(BuxCatalogLabel.string("Optional", locale: appSettingsManager.interfaceLocale), text: $note)
                             .buxFormFieldPadding()
                     }
                 }

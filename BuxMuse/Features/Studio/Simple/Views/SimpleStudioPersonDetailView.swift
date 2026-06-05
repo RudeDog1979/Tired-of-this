@@ -72,14 +72,14 @@ struct SimpleStudioPersonDetailView: View {
 
                     BuxThemedCardForm {
                         BuxFormSection(title: "Person") {
-                            TextField("Name", text: $name)
+                            TextField(BuxCatalogLabel.string("Name", locale: appSettingsManager.interfaceLocale), text: $name)
                                 .buxFormFieldPadding()
                             BuxFormRowDivider()
-                            TextField("Phone / WhatsApp", text: $phone)
+                            TextField(BuxCatalogLabel.string("Phone / WhatsApp", locale: appSettingsManager.interfaceLocale), text: $phone)
                                 .keyboardType(.phonePad)
                                 .buxFormFieldPadding()
                             BuxFormRowDivider()
-                            TextField("Notes", text: $notes, axis: .vertical)
+                            TextField(BuxCatalogLabel.string("Notes", locale: appSettingsManager.interfaceLocale), text: $notes, axis: .vertical)
                                 .lineLimit(2...4)
                                 .buxFormFieldPadding()
                         }
@@ -154,7 +154,7 @@ struct SimpleStudioPersonDetailView: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
-                Text(title)
+                BuxCatalogText.text(title)
                     .font(.system(size: 14, weight: .bold))
             }
             .frame(maxWidth: .infinity)
@@ -173,12 +173,24 @@ struct SimpleStudioPersonDetailView: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(job.jobLabel ?? "Job")
+                    BuxCatalogText.text(job.jobLabel ?? "Job")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text(job.isJobFullyPaid ? "Paid" : "Waiting \(appSettingsManager.format(job.jobBalanceDue))")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(job.isJobFullyPaid ? .green : .orange)
+                    if job.isJobFullyPaid {
+                        BuxCatalogDynamicText(key: "Paid")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.green)
+                    } else {
+                        Text(
+                            BuxLocalizedString.format(
+                                "Waiting %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                appSettingsManager.format(job.jobBalanceDue)
+                            )
+                        )
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.orange)
+                    }
                 }
                 Spacer()
                 Image(systemName: "chevron.right")

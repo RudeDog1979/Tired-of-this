@@ -156,6 +156,7 @@ struct BurnoutGuardSettingsView: View {
         }
         .buxCatalogNavigationTitle("Creative energy")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
         .onChange(of: store.burnoutGuardEnabled) { _, _ in store.save() }
         .onChange(of: store.manualSleepHours) { _, _ in store.save() }
         .onChange(of: store.manualStressLevel) { _, _ in store.save() }

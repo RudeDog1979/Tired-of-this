@@ -150,6 +150,7 @@ struct DualCashDrawerSettingsView: View {
         }
         .buxCatalogNavigationTitle("Dual-cash drawer")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
         .onAppear {
             primaryInput = store.primaryLocalCurrency
             secondaryInput = store.secondaryTradingCurrency

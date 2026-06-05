@@ -72,13 +72,19 @@ struct SimpleStudioBusinessCardSheet: View {
                                         Button {
                                             showNativePicker = true
                                         } label: {
-                                            Label(cardPhoto == nil ? "Choose photo" : "Change photo", systemImage: "photo.on.rectangle")
-                                                .font(.system(size: 14, weight: .semibold))
+                                            Label {
+                                                Text(BuxCatalogLabel.string(cardPhoto == nil ? "Choose photo" : "Change photo", locale: appSettingsManager.interfaceLocale))
+                                            } icon: {
+                                                Image(systemName: "photo.on.rectangle")
+                                            }
+                                            .font(.system(size: 14, weight: .semibold))
                                         }
                                         if cardPhoto != nil {
-                                            Button("Remove photo", role: .destructive) {
+                                            Button(role: .destructive) {
                                                 cardPhoto = nil
                                                 photoPath = nil
+                                            } label: {
+                                                Text(BuxCatalogLabel.string("Remove photo", locale: appSettingsManager.interfaceLocale))
                                             }
                                             .font(.system(size: 13, weight: .medium))
                                         }
@@ -94,22 +100,22 @@ struct SimpleStudioBusinessCardSheet: View {
                             }
 
                             BuxFormSection(title: "Your card") {
-                                TextField("Name / business", text: $name)
+                                TextField(BuxCatalogLabel.string("Name / business", locale: appSettingsManager.interfaceLocale), text: $name)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                TextField("What you do", text: $tagline)
+                                TextField(BuxCatalogLabel.string("What you do", locale: appSettingsManager.interfaceLocale), text: $tagline)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                TextField("Phone / WhatsApp", text: $phone)
+                                TextField(BuxCatalogLabel.string("Phone / WhatsApp", locale: appSettingsManager.interfaceLocale), text: $phone)
                                     .keyboardType(.phonePad)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                TextField("Email (optional)", text: $email)
+                                TextField(BuxCatalogLabel.string("Email (optional)", locale: appSettingsManager.interfaceLocale), text: $email)
                                     .keyboardType(.emailAddress)
                                     .textInputAutocapitalization(.never)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                TextField("Skills & jobs I do", text: $skills, axis: .vertical)
+                                TextField(BuxCatalogLabel.string("Skills & jobs I do", locale: appSettingsManager.interfaceLocale), text: $skills, axis: .vertical)
                                     .lineLimit(2...4)
                                     .buxFormFieldPadding()
                             }
@@ -192,8 +198,8 @@ struct SimpleStudioBusinessCardSheet: View {
                     ImageCropView(
                         inputImage: pickedImage,
                         cropShape: .roundedRectangle(cornerRadius: 12),
-                        title: "Crop photo",
-                        hint: "Drag to pan, slide to scale your card photo."
+                        title: BuxCatalogLabel.string("Crop photo", locale: appSettingsManager.interfaceLocale),
+                        hint: BuxCatalogLabel.string("Drag to pan, slide to scale your card photo.", locale: appSettingsManager.interfaceLocale)
                     ) { cropped in
                         cardPhoto = cropped
                         photoPath = SimpleStudioScanImageStore.saveBusinessCardPhoto(cropped)
@@ -338,6 +344,7 @@ struct SimpleStudioBusinessCardSheet: View {
                 qrImage: qrImage,
                 brandLogo: brandLogo
             )
+            .environmentObject(appSettingsManager)
             .frame(width: 340)
             .fixedSize(horizontal: false, vertical: true)
         )
@@ -357,6 +364,7 @@ struct SimpleStudioBusinessCardSheet: View {
             qrImage: qrImage,
             brandLogo: brandLogo
         )
+        .environmentObject(appSettingsManager)
         guard let data = SimpleStudioBusinessCardPDFExporter.generatePDF(from: cardView),
               let url = SimpleStudioBusinessCardPDFExporter.temporaryFileURL(data: data) else { return }
         SimpleStudioShareHelper.present(items: [url])
@@ -381,7 +389,7 @@ struct SimpleStudioBusinessCardSheet: View {
         items.append(shareMessage)
         SimpleStudioContactActions.present(
             SimpleStudioContactActions.Options(
-                sheetTitle: "Send card",
+                sheetTitle: BuxCatalogLabel.string("Send card", locale: appSettingsManager.interfaceLocale),
                 message: shareMessage,
                 recipientPhone: phone.isEmpty ? nil : phone,
                 shareItems: items
@@ -401,6 +409,7 @@ struct SimpleStudioBusinessCardSheet: View {
 }
 
 struct SimpleBusinessCardView: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let name: String
     let tagline: String
     let phone: String
@@ -451,17 +460,17 @@ struct SimpleBusinessCardView: View {
             }
             Divider()
             if !skills.isEmpty {
-                labelRow("Skills & jobs", skills)
+                labelRow(BuxCatalogLabel.string("Skills & jobs", locale: appSettingsManager.interfaceLocale), skills)
             }
             if !phone.isEmpty {
-                labelRow("Phone", phone)
+                labelRow(BuxCatalogLabel.string("Phone", locale: appSettingsManager.interfaceLocale), phone)
             }
             if !email.isEmpty {
-                labelRow("Email", email)
+                labelRow(BuxCatalogLabel.string("Email", locale: appSettingsManager.interfaceLocale), email)
             }
 
             HStack(alignment: .bottom) {
-                Text(isProStyle ? "Pro Studio · BuxMuse" : "Local · Private · BuxMuse")
+                Text(BuxCatalogLabel.string(isProStyle ? "Pro Studio · BuxMuse" : "Local · Private · BuxMuse", locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(.tertiary)
                 Spacer()

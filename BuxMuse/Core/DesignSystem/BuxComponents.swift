@@ -157,7 +157,7 @@ struct BuxQuickActionButton: View {
                 .lineLimit(2)
                 .minimumScaleFactor(0.85)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var nativeGlassBody: some View {

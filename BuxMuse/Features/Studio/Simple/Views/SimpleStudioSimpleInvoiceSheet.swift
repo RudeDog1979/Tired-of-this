@@ -44,24 +44,24 @@ struct SimpleStudioSimpleInvoiceSheet: View {
 
                         BuxThemedCardForm {
                             BuxFormSection(title: "Invoice") {
-                                TextField("Customer", text: $customerName)
+                                TextField(BuxCatalogLabel.string("Customer", locale: appSettingsManager.interfaceLocale), text: $customerName)
                                     .buxFormFieldPadding()
                                 customerChips
                                 BuxFormRowDivider()
-                                TextField("Amount", text: $amountText)
+                                TextField(BuxCatalogLabel.string("Amount", locale: appSettingsManager.interfaceLocale), text: $amountText)
                                     .keyboardType(.decimalPad)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
                                 completedJobPicker
                                 BuxFormRowDivider()
-                                TextField("For what?", text: $jobDescription)
+                                TextField(BuxCatalogLabel.string("For what?", locale: appSettingsManager.interfaceLocale), text: $jobDescription)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                DatePicker("Due by", selection: $dueDate, displayedComponents: .date)
+                                DatePicker(BuxCatalogLabel.string("Due by", locale: appSettingsManager.interfaceLocale), selection: $dueDate, displayedComponents: .date)
                                     .tint(themeManager.current.accentColor)
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
-                                TextField("Note (optional)", text: $note, axis: .vertical)
+                                TextField(BuxCatalogLabel.string("Note (optional)", locale: appSettingsManager.interfaceLocale), text: $note, axis: .vertical)
                                     .lineLimit(2...3)
                                     .buxFormFieldPadding()
                             }
@@ -216,7 +216,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
             }
         }
         agreementAppliedHint = draft.usedAgreement
-            ? "Amount and due date follow your linked agreement."
+            ? BuxCatalogLabel.string("Amount and due date follow your linked agreement.", locale: appSettingsManager.interfaceLocale)
             : nil
     }
 
@@ -271,7 +271,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
             description: jobDescription.isEmpty ? "Work completed" : jobDescription,
             isPaid: false,
             accent: themeManager.current.accentColor,
-            dueDateLabel: "Due \(formattedDueDate)",
+            dueDateLabel: "\(BuxCatalogLabel.string("Due by", locale: appSettingsManager.interfaceLocale)) \(formattedDueDate)",
             note: note.isEmpty ? nil : note,
             locale: appSettingsManager.interfaceLocale
         )

@@ -52,6 +52,7 @@ struct ScopeCreepRadarSettingsView: View {
         }
         .buxCatalogNavigationTitle("Scope creep radar")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
         .onChange(of: store.antiScopeCreepEnabled) { _, _ in store.save() }
     }
 

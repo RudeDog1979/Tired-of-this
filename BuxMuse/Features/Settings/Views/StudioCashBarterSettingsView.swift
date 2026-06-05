@@ -18,6 +18,7 @@ struct StudioCashBarterSettingsView: View {
                 NavigationLink {
                     DualCashDrawerSettingsView()
                         .environmentObject(themeManager)
+                        .environment(\.isSettingsContext, true)
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
@@ -39,6 +40,7 @@ struct StudioCashBarterSettingsView: View {
                 NavigationLink {
                     BarterLoggerSettingsView()
                         .environmentObject(themeManager)
+                        .environment(\.isSettingsContext, true)
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
@@ -58,5 +60,6 @@ struct StudioCashBarterSettingsView: View {
         }
         .buxCatalogNavigationTitle("Cash & barter")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
     }
 }

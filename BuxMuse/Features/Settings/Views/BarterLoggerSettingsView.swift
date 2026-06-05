@@ -61,6 +61,7 @@ struct BarterLoggerSettingsView: View {
         }
         .buxCatalogNavigationTitle("Barter & trade logger")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
     }
 
     private func barterInfoRow(icon: String, color: Color, title: String, body: String) -> some View {

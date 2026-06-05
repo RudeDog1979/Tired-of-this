@@ -57,6 +57,17 @@ public final class SettingsStore: ObservableObject {
             UserDefaults.standard.set(landingBackdropEnabled, forKey: "buxmuse.landingBackdrop.enabled")
         }
     }
+    @Published public var showVisualHorizonBackground: Bool = {
+        if UserDefaults.standard.object(forKey: "buxmuse.showVisualHorizonBackground") == nil {
+            return true
+        }
+        return UserDefaults.standard.bool(forKey: "buxmuse.showVisualHorizonBackground")
+    }() {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(showVisualHorizonBackground, forKey: "buxmuse.showVisualHorizonBackground")
+        }
+    }
     @Published public var reducedMotion: Bool = false
     @Published public var solarContrastModeEnabled: Bool = false
     

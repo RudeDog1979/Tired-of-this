@@ -20,7 +20,7 @@ public final class PersistenceController: ObservableObject {
     /// Bumped when SwiftData models change incompatibly (avoids loadIssueModelContainer on old stores).
     private static let storeName = "BuxMuse_v3"
 
-    public init(inMemory: Bool = false) {
+    public init(inMemory: Bool = false, customStoreName: String? = nil) {
         let schema = Schema([
             ExpenseEntity.self,
             GoalEntity.self,
@@ -39,16 +39,17 @@ public final class PersistenceController: ObservableObject {
         ])
 
         let config: ModelConfiguration
+        let targetStoreName = customStoreName ?? Self.storeName
         if inMemory {
             config = ModelConfiguration(
-                "\(Self.storeName)_\(UUID().uuidString)",
+                "\(targetStoreName)_\(UUID().uuidString)",
                 schema: schema,
                 isStoredInMemoryOnly: true
             )
         } else {
-            let storeURL = Self.prepareOnDiskStoreURL()
+            let storeURL = Self.prepareOnDiskStoreURL(storeName: targetStoreName)
             config = ModelConfiguration(
-                Self.storeName,
+                targetStoreName,
                 schema: schema,
                 url: storeURL,
                 allowsSave: true
@@ -56,7 +57,7 @@ public final class PersistenceController: ObservableObject {
         }
 
         do {
-            container = try Self.openContainer(schema: schema, configuration: config)
+            container = try Self.openContainer(schema: schema, configuration: config, storeName: targetStoreName)
             context = container.mainContext
             context.autosaveEnabled = false
         } catch {
@@ -65,7 +66,7 @@ public final class PersistenceController: ObservableObject {
     }
 
     /// Ensures on-disk Library folders exist before SwiftData / Core Data open SQLite (fixes errno 2 on first device launch).
-    private static func prepareOnDiskStoreURL() -> URL {
+    private static func prepareOnDiskStoreURL(storeName: String) -> URL {
         let fm = FileManager.default
         for directory in [FileManager.SearchPathDirectory.applicationSupportDirectory, .cachesDirectory] {
             guard let url = fm.urls(for: directory, in: .userDomainMask).first else { continue }
@@ -81,7 +82,7 @@ public final class PersistenceController: ObservableObject {
         return supportURL.appendingPathComponent("\(storeName).store", isDirectory: false)
     }
 
-    private static func openContainer(schema: Schema, configuration: ModelConfiguration) throws -> ModelContainer {
+    private static func openContainer(schema: Schema, configuration: ModelConfiguration, storeName: String) throws -> ModelContainer {
         do {
             return try ModelContainer(for: schema, configurations: [configuration])
         } catch {

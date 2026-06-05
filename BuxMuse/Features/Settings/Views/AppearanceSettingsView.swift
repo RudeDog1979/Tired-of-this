@@ -176,6 +176,22 @@ struct AppearanceSettingsView: View {
                             }
                             .padding(.horizontal, BuxLayout.section)
                             .padding(.vertical, 12)
+
+                            Divider().opacity(0.08)
+
+                            // Visual Horizon Toggle
+                            Toggle(isOn: $store.showVisualHorizonBackground) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    BuxCatalogDynamicText(key: "visual horizon background")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                    BuxCatalogDynamicText(key: "show spending trend lines in the dashboard wallet card")
+                                        .font(.system(size: 11))
+                                        .buxLabelSecondary()
+                                }
+                            }
+                            .padding(.horizontal, BuxLayout.section)
+                            .padding(.vertical, 12)
                         }
                         .settingsThemedCardChrome(cornerRadius: 20)
                         .padding(.horizontal, 20)
@@ -249,6 +265,7 @@ struct AppearanceSettingsView: View {
         .onChange(of: store.useGlassmorphism) { _, _ in store.save() }
         .onChange(of: store.reducedMotion) { _, _ in store.save() }
         .onChange(of: store.solarContrastModeEnabled) { _, _ in store.save() }
+        .onChange(of: store.showVisualHorizonBackground) { _, _ in store.save() }
         .onChange(of: store.neutralAccentId) { _, _ in
             store.applyBrandThemesAppearance(to: themeManager)
             store.save()

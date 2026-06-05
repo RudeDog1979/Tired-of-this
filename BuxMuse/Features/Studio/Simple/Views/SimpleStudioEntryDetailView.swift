@@ -243,7 +243,7 @@ struct SimpleStudioEntryDetailView: View {
     private func jobPayRows(_ entry: SimpleStudioEntry) -> some View {
         Group {
             BuxFormRowDivider()
-            detailRow("Pay type", entry.resolvedPayStyle.plainTitle)
+            detailRow("Pay type", entry.resolvedPayStyle.localizedPlainTitle(locale: appSettingsManager.interfaceLocale))
             if entry.resolvedPayStyle == .byTheHour, let rate = entry.hourlyRate {
                 BuxFormRowDivider()
                 detailRow("Hourly rate", "\(appSettingsManager.format(rate)) / hr")

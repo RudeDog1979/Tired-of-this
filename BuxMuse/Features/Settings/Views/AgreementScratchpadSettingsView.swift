@@ -45,6 +45,7 @@ struct AgreementScratchpadSettingsView: View {
                             .environmentObject(studioStore)
                             .environmentObject(SimpleStudioStore.shared)
                             .environmentObject(themeManager)
+                            .environment(\.isSettingsContext, true)
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
@@ -66,6 +67,7 @@ struct AgreementScratchpadSettingsView: View {
                     NavigationLink {
                         StudioAgreementDefaultTermsSettingsView()
                             .environmentObject(themeManager)
+                            .environment(\.isSettingsContext, true)
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
@@ -98,6 +100,7 @@ struct AgreementScratchpadSettingsView: View {
         }
         .buxCatalogNavigationTitle("Agreement scratchpad")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
         .onChange(of: store.agreementScratchpadEnabled) { _, _ in store.save() }
     }
 

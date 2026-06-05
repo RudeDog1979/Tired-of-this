@@ -38,6 +38,7 @@ struct InvoicePaymentSettingsView: View {
         }
         .buxCatalogNavigationTitle("Invoice payment")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.isSettingsContext, true)
         .onChange(of: store.autoDetectInvoiceBankAccountType) { _, _ in store.save() }
         .onChange(of: store.invoiceBankAccountTypeOverride) { _, _ in store.save() }
     }

@@ -162,6 +162,7 @@ enum SimpleStudioSearchEngine {
         query: String,
         snapshot: SimpleStudioSnapshot,
         format: (Decimal) -> String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
         now: Date = Date(),
         calendar: Calendar = .current
     ) -> [Result] {
@@ -171,9 +172,9 @@ enum SimpleStudioSearchEngine {
         let parsed = parse(trimmed, now: now, calendar: calendar)
         var results: [Result] = []
 
-        results.append(contentsOf: searchPeople(parsed: parsed, customers: snapshot.customers, format: format))
-        results.append(contentsOf: searchInvoices(parsed: parsed, invoices: snapshot.invoices, format: format, calendar: calendar))
-        results.append(contentsOf: searchEntries(parsed: parsed, entries: snapshot.entries, format: format, calendar: calendar))
+        results.append(contentsOf: searchPeople(parsed: parsed, customers: snapshot.customers, format: format, locale: locale))
+        results.append(contentsOf: searchInvoices(parsed: parsed, invoices: snapshot.invoices, format: format, locale: locale, calendar: calendar))
+        results.append(contentsOf: searchEntries(parsed: parsed, entries: snapshot.entries, format: format, locale: locale, calendar: calendar))
 
         var seen = Set<UUID>()
         return results
@@ -188,16 +189,18 @@ enum SimpleStudioSearchEngine {
         matchingChartSliceID sliceID: String,
         snapshot: SimpleStudioSnapshot,
         format: (Decimal) -> String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
         now: Date = Date(),
         calendar: Calendar = .current
     ) -> [Result] {
-        chartFilterResults(sliceID: sliceID, snapshot: snapshot, format: format, now: now, calendar: calendar)
+        chartFilterResults(sliceID: sliceID, snapshot: snapshot, format: format, locale: locale, now: now, calendar: calendar)
     }
 
     static func chartFilterResults(
         sliceID: String,
         snapshot: SimpleStudioSnapshot,
         format: (Decimal) -> String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
         now: Date = Date(),
         calendar: Calendar = .current
     ) -> [Result] {
@@ -205,13 +208,13 @@ enum SimpleStudioSearchEngine {
         case "waiting":
             var results: [Result] = []
             for invoice in snapshot.invoices where invoice.status != .paid {
-                results.append(makeInvoiceResult(invoice, format: format, reason: "Waiting on payment"))
+                results.append(makeInvoiceResult(invoice, format: format, reason: "Waiting on payment", locale: locale))
             }
             for entry in snapshot.entries {
                 if entry.kind == .owedToMe, entry.paymentStatus != .paid {
-                    results.append(makeEntryResult(entry, format: format, reason: "Waiting on payment"))
+                    results.append(makeEntryResult(entry, format: format, reason: "Waiting on payment", locale: locale))
                 } else if entry.kind == .job, !entryIsJobFullyPaid(entry) {
-                    results.append(makeEntryResult(entry, format: format, reason: "Waiting on payment"))
+                    results.append(makeEntryResult(entry, format: format, reason: "Waiting on payment", locale: locale))
                 }
             }
             return sortedResults(results)
@@ -220,21 +223,21 @@ enum SimpleStudioSearchEngine {
             let entries = snapshot.entries.filter {
                 ($0.kind == .iOwe || $0.kind == .lent) && $0.paymentStatus != .paid
             }
-            return sortedResults(entries.map { makeEntryResult($0, format: format, reason: "You owe") })
+            return sortedResults(entries.map { makeEntryResult($0, format: format, reason: "You owe", locale: locale) })
 
         case "spent":
             let monthEntries = snapshot.entries.filter {
                 calendar.isDate($0.createdAt, equalTo: now, toGranularity: .month)
             }
             let filtered = monthEntries.filter(isSpentEntry)
-            return sortedResults(filtered.map { makeEntryResult($0, format: format, reason: "Spent this month") })
+            return sortedResults(filtered.map { makeEntryResult($0, format: format, reason: "Spent this month", locale: locale) })
 
         case "made":
             let monthEntries = snapshot.entries.filter {
                 calendar.isDate($0.createdAt, equalTo: now, toGranularity: .month)
             }
             let filtered = monthEntries.filter(isMadeEntry)
-            return sortedResults(filtered.map { makeEntryResult($0, format: format, reason: "Made this month") })
+            return sortedResults(filtered.map { makeEntryResult($0, format: format, reason: "Made this month", locale: locale) })
 
         default:
             return []
@@ -290,17 +293,20 @@ enum SimpleStudioSearchEngine {
     private static func makeEntryResult(
         _ entry: SimpleStudioEntry,
         format: (Decimal) -> String,
-        reason: String
+        reason: String,
+        locale: Locale
     ) -> Result {
         let amount = entry.kind == .job ? entryJobBalanceDue(entry) : entry.amount
+        let title = entryTitle(for: entry, locale: locale)
+        let detail = entry.jobLabel ?? entry.kind.localizedLogTitle(locale: locale)
         return Result(
             id: entry.id,
             kind: .entry(entry.id),
-            title: entryTitle(for: entry),
-            subtitle: entry.customerName.isEmpty ? (entry.jobLabel ?? entry.kind.logTitle) : entry.customerName,
-            detail: entry.jobLabel ?? entry.kind.logTitle,
+            title: title,
+            subtitle: entry.customerName.isEmpty ? detail : entry.customerName,
+            detail: detail,
             amountFormatted: format(amount),
-            matchReason: reason,
+            matchReason: SimpleStudioCopy.line(reason, locale: locale),
             timestamp: entry.createdAt,
             score: 100
         )
@@ -309,16 +315,19 @@ enum SimpleStudioSearchEngine {
     private static func makeInvoiceResult(
         _ invoice: SimpleInvoice,
         format: (Decimal) -> String,
-        reason: String
+        reason: String,
+        locale: Locale
     ) -> Result {
-        Result(
+        let invoiceLabel = SimpleStudioCopy.line("Invoice", locale: locale)
+        let detail = invoice.status == .paid ? SimpleStudioCopy.line("Paid", locale: locale) : SimpleStudioCopy.line("Waiting", locale: locale)
+        return Result(
             id: invoice.id,
             kind: .invoice(invoice.id),
-            title: "Invoice · \(invoice.customerName)",
+            title: "\(invoiceLabel) · \(invoice.customerName)",
             subtitle: invoice.jobDescription,
-            detail: invoice.status == .paid ? "Paid" : "Waiting",
+            detail: detail,
             amountFormatted: format(invoice.amount),
-            matchReason: reason,
+            matchReason: SimpleStudioCopy.line(reason, locale: locale),
             timestamp: invoice.createdAt,
             score: 100
         )
@@ -333,16 +342,19 @@ enum SimpleStudioSearchEngine {
     private static func searchPeople(
         parsed: ParsedQuery,
         customers: [SimpleCustomerMemory],
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale
     ) -> [Result] {
         customers.compactMap { person in
             let score = scorePerson(person, parsed: parsed)
             guard score > 0 else { return nil }
 
             var subtitleParts: [String] = []
-            if let job = person.lastJobLabel { subtitleParts.append("Last: \(job)") }
+            if let job = person.lastJobLabel {
+                subtitleParts.append(String(format: SimpleStudioCopy.line("Last: %@", locale: locale), job))
+            }
             if person.outstandingBalance > 0 {
-                subtitleParts.append("Waiting \(format(person.outstandingBalance))")
+                subtitleParts.append(String(format: SimpleStudioCopy.line("Waiting %@", locale: locale), format(person.outstandingBalance)))
             }
 
             return Result(
@@ -352,7 +364,7 @@ enum SimpleStudioSearchEngine {
                 subtitle: subtitleParts.joined(separator: " · "),
                 detail: person.phone ?? "",
                 amountFormatted: person.outstandingBalance > 0 ? format(person.outstandingBalance) : nil,
-                matchReason: matchReason(for: parsed, fallback: "Person"),
+                matchReason: matchReason(for: parsed, fallback: "Person", locale: locale),
                 timestamp: person.lastSeen,
                 score: score
             )
@@ -363,6 +375,7 @@ enum SimpleStudioSearchEngine {
         parsed: ParsedQuery,
         invoices: [SimpleInvoice],
         format: (Decimal) -> String,
+        locale: Locale,
         calendar: Calendar
     ) -> [Result] {
         invoices.compactMap { invoice in
@@ -370,17 +383,8 @@ enum SimpleStudioSearchEngine {
             let score = scoreInvoice(invoice, parsed: parsed)
             guard score > 0 else { return nil }
 
-            return Result(
-                id: invoice.id,
-                kind: .invoice(invoice.id),
-                title: "Invoice · \(invoice.customerName)",
-                subtitle: invoice.jobDescription,
-                detail: invoice.status == .paid ? "Paid" : "Waiting",
-                amountFormatted: format(invoice.amount),
-                matchReason: matchReason(for: parsed, fallback: "Invoice"),
-                timestamp: invoice.createdAt,
-                score: score
-            )
+            let reason = matchReason(for: parsed, fallback: "Invoice", locale: locale)
+            return makeInvoiceResult(invoice, format: format, reason: reason, locale: locale)
         }
     }
 
@@ -388,6 +392,7 @@ enum SimpleStudioSearchEngine {
         parsed: ParsedQuery,
         entries: [SimpleStudioEntry],
         format: (Decimal) -> String,
+        locale: Locale,
         calendar: Calendar
     ) -> [Result] {
         entries.compactMap { entry in
@@ -397,14 +402,17 @@ enum SimpleStudioSearchEngine {
             guard score > 0 else { return nil }
 
             let amount = entry.kind == .job ? entryJobBalanceDue(entry) : entry.amount
+            let title = entryTitle(for: entry, locale: locale)
+            let detail = entry.jobLabel ?? entry.kind.localizedLogTitle(locale: locale)
+            let reason = matchReason(for: parsed, fallback: entry.kind.logTitle, locale: locale)
             return Result(
                 id: entry.id,
                 kind: .entry(entry.id),
-                title: entryTitle(for: entry),
-                subtitle: entry.customerName.isEmpty ? (entry.jobLabel ?? entry.kind.logTitle) : entry.customerName,
-                detail: entry.jobLabel ?? entry.kind.logTitle,
+                title: title,
+                subtitle: entry.customerName.isEmpty ? detail : entry.customerName,
+                detail: detail,
                 amountFormatted: format(amount),
-                matchReason: matchReason(for: parsed, fallback: entry.kind.logTitle),
+                matchReason: reason,
                 timestamp: entry.createdAt,
                 score: score
             )
@@ -509,21 +517,21 @@ enum SimpleStudioSearchEngine {
         return range.contains(date)
     }
 
-    private static func entryTitle(for entry: SimpleStudioEntry) -> String {
+    private static func entryTitle(for entry: SimpleStudioEntry, locale: Locale) -> String {
         if let job = entry.jobLabel, !job.isEmpty { return job }
-        return entry.kind.logTitle
+        return entry.kind.localizedLogTitle(locale: locale)
     }
 
-    private static func matchReason(for parsed: ParsedQuery, fallback: String) -> String {
-        if parsed.intents.contains(.waitingOnMe) { return "Waiting on payment" }
-        if parsed.intents.contains(.iOwe) { return "You owe" }
-        if parsed.intents.contains(.jobs) { return "Job" }
-        if parsed.intents.contains(.invoices) { return "Invoice" }
-        if parsed.intents.contains(.expenses) { return "Spent" }
-        if parsed.intents.contains(.income) { return "Made" }
-        if parsed.intents.contains(.people) { return "Person" }
-        if parsed.dateRange != nil { return "This period" }
-        return fallback
+    private static func matchReason(for parsed: ParsedQuery, fallback: String, locale: Locale) -> String {
+        if parsed.intents.contains(.waitingOnMe) { return SimpleStudioCopy.line("Waiting on payment", locale: locale) }
+        if parsed.intents.contains(.iOwe) { return SimpleStudioCopy.line("You owe", locale: locale) }
+        if parsed.intents.contains(.jobs) { return SimpleStudioCopy.line("Job", locale: locale) }
+        if parsed.intents.contains(.invoices) { return SimpleStudioCopy.line("Invoice", locale: locale) }
+        if parsed.intents.contains(.expenses) { return SimpleStudioCopy.line("Spent", locale: locale) }
+        if parsed.intents.contains(.income) { return SimpleStudioCopy.line("Made", locale: locale) }
+        if parsed.intents.contains(.people) { return SimpleStudioCopy.line("Person", locale: locale) }
+        if parsed.dateRange != nil { return SimpleStudioCopy.line("This period", locale: locale) }
+        return SimpleStudioCopy.line(fallback, locale: locale)
     }
 
     private static func dayRange(for date: Date, calendar: Calendar) -> ClosedRange<Date> {

@@ -75,7 +75,7 @@ struct SimpleStudioPeopleView: View {
         .background(themeManager.screenBackground(for: colorScheme))
         .buxCatalogNavigationTitle("People")
         .navigationBarTitleDisplayMode(.large)
-        .searchable(text: $nameFilter, prompt: "Find by name or phone")
+        .searchable(text: $nameFilter, prompt: Text(BuxCatalogLabel.string("Find by name or phone", locale: appSettingsManager.interfaceLocale)))
     }
 
     private func personRow(_ person: SimpleCustomerMemory) -> some View {

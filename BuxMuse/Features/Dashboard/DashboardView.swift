@@ -88,9 +88,13 @@ struct DashboardView: View {
                                             navigationCoordinator.selectedTab = .settings
                                         }
                                     }) {
-                                        VStack(alignment: .leading, spacing: 12) {
-                                            HStack {
-                                                VStack(alignment: .leading, spacing: 4) {
+                                        HStack(alignment: .center, spacing: 16) {
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                HStack(spacing: 6) {
+                                                    Image(systemName: "chart.bar.fill")
+                                                        .font(.system(size: 10))
+                                                        .foregroundColor(themeManager.current.accentColor)
+                                                    
                                                     Text(
                                                         BuxLocalizedString.format(
                                                             "Active budget: %@",
@@ -98,50 +102,89 @@ struct DashboardView: View {
                                                             budgetName
                                                         )
                                                     )
-                                                        .buxSectionLabelStyle(color: themeManager.current.accentColor)
+                                                    .font(.system(size: 10, weight: .bold))
+                                                    .foregroundColor(themeManager.current.accentColor)
+                                                }
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 4)
+                                                .background(themeManager.current.accentColor.opacity(0.12))
+                                                .cornerRadius(6)
+                                                
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(appSettingsManager.format(remaining))
+                                                        .font(.system(size: 22, weight: .black, design: .rounded))
+                                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                                     
                                                     Text(
                                                         BuxLocalizedString.format(
-                                                            "%@ left of %@",
+                                                            "%@ of %@",
                                                             locale: appSettingsManager.interfaceLocale,
-                                                            appSettingsManager.format(remaining),
+                                                            BuxLocalizedString.string("Remaining budget", locale: appSettingsManager.interfaceLocale),
                                                             appSettingsManager.format(limit)
                                                         )
                                                     )
-                                                        .font(.system(size: 16, weight: .bold))
-                                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                                    .font(.system(size: 11, weight: .bold))
+                                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                                                 }
-                                                
-                                                Spacer()
-                                                
-                                                Text(
-                                                    BuxLocalizedString.format(
-                                                        "%lld%% spent",
-                                                        locale: appSettingsManager.interfaceLocale,
-                                                        Int(progress * 100)
-                                                    )
-                                                )
-                                                    .font(.system(size: 12, weight: .bold))
-                                                    .foregroundColor(warnBudget ? .red : themeManager.labelSecondary(for: colorScheme))
                                             }
                                             
-                                            // Progress Bar
-                                            GeometryReader { geometry in
-                                                ZStack(alignment: .leading) {
-                                                    RoundedRectangle(cornerRadius: 4)
-                                                        .fill(Color(.systemGray5).opacity(colorScheme == .dark ? 0.35 : 0.55))
-                                                        .frame(height: 8)
-                                                    
-                                                    RoundedRectangle(cornerRadius: 4)
-                                                        .fill(LinearGradient(
+                                            Spacer()
+                                            
+                                            ZStack {
+                                                Circle()
+                                                    .stroke(
+                                                        Color(.systemGray5).opacity(colorScheme == .dark ? 0.35 : 0.55),
+                                                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                                                    )
+                                                    .frame(width: 58, height: 58)
+                                                
+                                                Circle()
+                                                    .trim(from: 0.0, to: CGFloat(progress))
+                                                    .stroke(
+                                                        LinearGradient(
                                                             colors: warnBudget ? [.red, .orange] : [themeManager.current.accentColor, themeManager.current.accentColor.opacity(0.7)],
-                                                            startPoint: .leading,
-                                                            endPoint: .trailing
-                                                        ))
-                                                        .frame(width: geometry.size.width * CGFloat(progress), height: 8)
+                                                            startPoint: .top,
+                                                            endPoint: .bottom
+                                                        ),
+                                                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                                                    )
+                                                    .rotationEffect(.degrees(-90))
+                                                    .frame(width: 58, height: 58)
+                                                    .shadow(
+                                                        color: (warnBudget ? Color.red : themeManager.current.accentColor).opacity(0.3),
+                                                        radius: 3, x: 0, y: 1
+                                                    )
+                                                
+                                                VStack(spacing: 0) {
+                                                    Text(
+                                                        BuxLocalizedString.format(
+                                                            "%lld%%",
+                                                            locale: appSettingsManager.interfaceLocale,
+                                                            Int(progress * 100)
+                                                        )
+                                                    )
+                                                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                                    .foregroundColor(warnBudget ? .red : themeManager.labelPrimary(for: colorScheme))
+                                                    
+                                                    Text(
+                                                        BuxLocalizedString.string(
+                                                            "spent",
+                                                            locale: appSettingsManager.interfaceLocale
+                                                        )
+                                                    )
+                                                    .font(.system(size: 8, weight: .bold))
+                                                    .textCase(.uppercase)
+                                                    .foregroundColor(warnBudget ? .red.opacity(0.8) : themeManager.labelSecondary(for: colorScheme))
                                                 }
                                             }
-                                            .frame(height: 8)
+                                            .overlay {
+                                                if warnBudget {
+                                                    Circle()
+                                                        .stroke(Color.red.opacity(0.2), lineWidth: 1)
+                                                        .scaleEffect(1.15)
+                                                        .frame(width: 58, height: 58)
+                                                }
+                                            }
                                         }
                                         .padding(BuxTokens.section)
                                         .dashboardMaterialCardChrome(.outlined)
@@ -155,30 +198,57 @@ struct DashboardView: View {
                                             navigationCoordinator.selectedTab = .settings
                                         }
                                     }) {
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            HStack {
+                                        HStack(spacing: 16) {
+                                            ZStack {
+                                                Circle()
+                                                    .stroke(
+                                                        themeManager.current.accentColor.opacity(0.4),
+                                                        style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [4, 4])
+                                                    )
+                                                    .frame(width: 44, height: 44)
+                                                
                                                 Image(systemName: "chart.pie.fill")
+                                                    .font(.system(size: 18))
                                                     .foregroundColor(themeManager.current.accentColor)
-                                                BuxCatalogText.text("No Active Budget Profile")
-                                                    .font(.system(size: 13, weight: .bold))
-                                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                                Spacer()
-                                                BuxChevron()
                                             }
+                                            .padding(.leading, 4)
                                             
-                                            Text(
-                                                BuxLocalizedString.format(
-                                                    "You have enabled %@ budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.",
-                                                    locale: appSettingsManager.interfaceLocale,
-                                                    settingsStore.budgetingMode.localizedDisplayName(locale: appSettingsManager.interfaceLocale)
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                HStack(spacing: 4) {
+                                                    BuxCatalogText.text("No Active Budget Profile")
+                                                        .font(.system(size: 13, weight: .bold))
+                                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                                    
+                                                    Spacer()
+                                                    
+                                                    BuxChevron()
+                                                }
+                                                
+                                                Text(
+                                                    BuxLocalizedString.format(
+                                                        "You have enabled %@ budgeting mode, but do not have an active budget profile yet. Tap here to configure a profile in App Settings.",
+                                                        locale: appSettingsManager.interfaceLocale,
+                                                        settingsStore.budgetingMode.localizedDisplayName(locale: appSettingsManager.interfaceLocale)
+                                                    )
                                                 )
-                                            )
                                                 .font(.system(size: 11, weight: .medium))
                                                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                                                 .multilineTextAlignment(.leading)
+                                                .lineLimit(2)
+                                            }
                                         }
                                         .padding(BuxTokens.section)
-                                        .dashboardMaterialCardChrome(.outlined)
+                                        .background {
+                                            RoundedRectangle(cornerRadius: BuxMaterialChrome.cardCornerRadius, style: .continuous)
+                                                .stroke(
+                                                    themeManager.current.accentColor.opacity(0.25),
+                                                    style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [5, 5])
+                                                )
+                                        }
+                                        .background(
+                                            RoundedRectangle(cornerRadius: BuxMaterialChrome.cardCornerRadius, style: .continuous)
+                                                .fill(themeManager.cardFill(for: colorScheme).opacity(0.5))
+                                        )
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -728,21 +798,11 @@ private struct DashboardHeroSection: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
-                        let balanceTitle = {
-                            switch settingsStore.budgetingMode {
-                            case .simple:
-                                return BuxLocalizedString.string("Remaining budget", locale: appSettingsManager.interfaceLocale)
-                            case .envelope, .custom:
-                                if dashSnapshot.activeBudgetName != nil {
-                                    return BuxLocalizedString.string("Remaining budget", locale: appSettingsManager.interfaceLocale)
-                                } else {
-                                    return BuxLocalizedString.string(
-                                        "Total balance (no active budget)",
-                                        locale: appSettingsManager.interfaceLocale
-                                    )
-                                }
-                            }
-                        }()
+                        let balanceTitle = BuxLocalizedString.format(
+                            "%@ Wallet",
+                            locale: appSettingsManager.interfaceLocale,
+                            appSettingsManager.selectedCurrency.id
+                        )
 
                         Text(balanceTitle)
                             .font(.system(size: 13, weight: .medium))
@@ -759,18 +819,7 @@ private struct DashboardHeroSection: View {
                         .opacity(max(0, 1.0 + (scrollOffset / 100.0)))
                     }
 
-                    let balanceToFormat: Decimal = {
-                        switch settingsStore.budgetingMode {
-                        case .simple:
-                            return dashSnapshot.activeBudgetLimit - dashSnapshot.activeBudgetSpent
-                        case .envelope, .custom:
-                            if dashSnapshot.activeBudgetName != nil {
-                                return dashSnapshot.activeBudgetLimit - dashSnapshot.activeBudgetSpent
-                            } else {
-                                return dashSnapshot.totalBalance
-                            }
-                        }
-                    }()
+                    let balanceToFormat = dashSnapshot.totalBalance
 
                     Text(navigationCoordinator.isBalanceVisible ? appSettingsManager.format(balanceToFormat) : "\(appSettingsManager.selectedCurrency.symbol) ••••••••")
                         .font(.system(size: collapseValue(start: 38, end: 24), weight: .semibold, design: .rounded))
@@ -863,6 +912,21 @@ private struct DashboardHeroSection: View {
                 .padding(.bottom, BuxTokens.section)
                 .offset(y: collapseValue(start: 0, end: -15))
             }
+            .background(
+                Group {
+                    if settingsStore.showVisualHorizonBackground {
+                        VisualHorizonView(
+                            points: brain.expenseInteractionSnapshot.header.sparklinePoints,
+                            accentColor: themeManager.current.accentColor,
+                            horizontalPadding: 0,
+                            cornerRadius: BuxTokens.Radius.sheet
+                        )
+                        .padding(.horizontal, -heroCardPadding)
+                        .opacity(0.8)
+                    }
+                }
+                .allowsHitTesting(false)
+            )
         }
         .background {
             GeometryReader { geo in
