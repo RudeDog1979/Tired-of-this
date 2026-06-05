@@ -26,6 +26,15 @@ struct ExpenseDetailView: View {
 
     @ObservedObject private var settings = SettingsStore.shared
 
+    private var categoryDisplayName: String {
+        let records = (try? brain.fetchAllCategoryRecords()) ?? []
+        let byId = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
+        return viewModel.record.resolvedCategoryLabel(
+            categoriesById: byId,
+            locale: appSettingsManager.interfaceLocale
+        )
+    }
+
     init(record: ExpenseRecord, brain: BuxMuseBrain, settingsManager: AppSettingsManager, onUpdated: @escaping () -> Void) {
         self.brain = brain
         self.onUpdated = onUpdated
@@ -184,9 +193,7 @@ struct ExpenseDetailView: View {
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                    Text(viewModel.record.transactionCategory.localizedDisplayName(
-                        locale: appSettingsManager.interfaceLocale
-                    ))
+                    Text(categoryDisplayName)
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(brandAccent)
                         .padding(.horizontal, 10)

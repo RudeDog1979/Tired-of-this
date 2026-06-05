@@ -12826,6 +12826,29 @@
         }
       }
     },
+    "Choose icon" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir icono"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir icono"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir icono"
+          }
+        }
+      }
+    },
     "Choose merchant" : {
       "extractionState" : "stale",
       "localizations" : {

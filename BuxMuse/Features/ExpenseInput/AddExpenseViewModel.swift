@@ -672,10 +672,13 @@ public final class AddExpenseViewModel: ObservableObject {
             categoryRaw: selectedCategory.rawValue,
             merchantName: cleanName
         )
+        let categoryRecords = (try? brain.fetchAllCategoryRecords()) ?? []
+        let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
         let analysis = ExpenseIntelligenceEngine.analyze(
             record: preview,
             allRecords: records,
             activeSubscriptions: brain.financialEngine.activeSubscriptions(),
+            categoriesById: categoriesById,
             locale: settingsManager.interfaceLocale
         )
         var hints: [String] = []

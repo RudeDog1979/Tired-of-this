@@ -79,7 +79,6 @@ struct ExpenseCategoryListSheet: View {
                 reload()
             }
             .environmentObject(themeManager)
-            .buxThemedSheetContent()
         }
         .sheet(item: $mergeSource) { source in
             ExpenseCategoryMergeSheet(source: source, targets: categories.filter { $0.id != source.id }) { target in
@@ -120,29 +119,183 @@ struct ExpenseCategoryEditorSheet: View {
     @State private var name = ""
     @State private var icon = "tag.fill"
     @State private var color = "blue"
+    @State private var iconManuallyChosen = false
     let onSave: (String, String, String) -> Void
 
+    private let iconColumns = Array(
+        repeating: GridItem(.flexible(minimum: 44), spacing: 8),
+        count: 5
+    )
+    private let colorColumns = Array(
+        repeating: GridItem(.flexible(), spacing: 10),
+        count: 6
+    )
+
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-            VStack(spacing: 16) {
-                BuxCatalogText.text("New category")
-                    .font(.system(size: 17, weight: .bold))
-                    .padding(.top, 24)
-                TextField("Name", text: $name)
-                    .textFieldStyle(.roundedBorder)
-                    .padding(.horizontal, BuxLayout.marginHorizontal)
-                Button("Save") {
-                    guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                    onSave(name, icon, color)
-                    dismiss()
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: BuxLayout.section) {
+                        previewSection
+                        nameSection
+                        iconSection
+                        colorSection
+                    }
+                    .buxScreenContentMargins()
+                    .padding(.top, BuxLayout.tight)
+                    .padding(.bottom, 48)
                 }
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(themeManager.current.accentColor)
-                Spacer()
+                .buxDetailScrollChrome()
+                .scrollDismissesKeyboard(.interactively)
+            }
+            .buxCatalogNavigationTitle("New category")
+            .navigationBarTitleDisplayMode(.inline)
+            .buxInterfaceLocale()
+            .buxThemedPresentation()
+            .buxDetailNavigationChrome()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    BuxToolbarCancelButton { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    BuxToolbarConfirmButton(
+                        accessibilityLabel: "Save",
+                        isEnabled: !trimmedName.isEmpty
+                    ) {
+                        onSave(trimmedName, icon, color)
+                        dismiss()
+                    }
+                }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
+        .tint(themeManager.current.accentColor)
+    }
+
+    private var previewSection: some View {
+        previewChip
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(BuxLayout.section)
+            .expensesThemedCardChrome(cornerRadius: 20)
+    }
+
+    private var nameSection: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            BuxCatalogText.text("Name")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            TextField("Name", text: $name)
+                .padding(BuxLayout.section)
+                .expensesThemedCardChrome(cornerRadius: 20)
+                .onChange(of: name) { _, newValue in
+                    guard !iconManuallyChosen else { return }
+                    icon = ExpenseCategoryIconCatalog.suggestedIcon(for: newValue)
+                }
+        }
+    }
+
+    private var iconSection: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            BuxCatalogText.text("Choose icon")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            iconPickerGrid
+                .padding(BuxLayout.section)
+                .expensesThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var colorSection: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            BuxCatalogText.text("Color")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            colorPickerGrid
+                .padding(BuxLayout.section)
+                .expensesThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var iconPickerGrid: some View {
+        LazyVGrid(columns: iconColumns, spacing: 8) {
+            ForEach(ExpenseCategoryIconCatalog.pickerIcons, id: \.self) { symbol in
+                Button {
+                    iconManuallyChosen = true
+                    icon = symbol
+                } label: {
+                    Image(systemName: symbol)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(
+                            icon == symbol
+                                ? themeManager.current.accentColor
+                                : themeManager.labelSecondary(for: colorScheme)
+                        )
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background {
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(
+                                    icon == symbol
+                                        ? themeManager.current.accentColor.opacity(0.14)
+                                        : themeManager.pillTrackFill(for: colorScheme)
+                                )
+                        }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private var colorPickerGrid: some View {
+        LazyVGrid(columns: colorColumns, spacing: 12) {
+            ForEach(ExpenseCategoryIconCatalog.pickerColors, id: \.self) { tone in
+                Button {
+                    color = tone
+                } label: {
+                    Circle()
+                        .fill(ExpenseCategoryStyle.foreground(for: tone))
+                        .frame(width: 30, height: 30)
+                        .overlay {
+                            if color == tone {
+                                Circle()
+                                    .strokeBorder(Color.white, lineWidth: 2)
+                                    .padding(1)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 36)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private var previewChip: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(ExpenseCategoryStyle.foreground(for: color))
+                .frame(width: 32, height: 32)
+                .background {
+                    Circle()
+                        .fill(ExpenseCategoryStyle.background(for: color))
+                }
+            Text(name.isEmpty ? "Preview" : name)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background {
+            Capsule()
+                .fill(themeManager.pillTrackFill(for: colorScheme))
+        }
     }
 }
 

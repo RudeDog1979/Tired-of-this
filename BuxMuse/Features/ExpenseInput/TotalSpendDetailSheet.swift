@@ -21,8 +21,9 @@ struct TotalSpendDetailSheet: View {
     let formatAmount: (Decimal) -> String
 
     @State private var selectedRange = TimeRange.days30
-    @State private var animateCharts = false
     @State private var allRecords: [ExpenseRecord] = []
+    @State private var chartProgress: Double = 0
+    @State private var chartAnimationPlayed = false
 
     private enum TimeRange: String, CaseIterable, Identifiable {
         case days7 = "7 Days"
@@ -143,15 +144,7 @@ struct TotalSpendDetailSheet: View {
             .buxDetailNavigationChrome()
             .onAppear {
                 loadRecords()
-                withAnimation(.easeOut(duration: 0.6)) {
-                    animateCharts = true
-                }
-            }
-            .onChange(of: selectedRange) { _, _ in
-                animateCharts = false
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                    animateCharts = true
-                }
+                playDetailChartAnimationIfNeeded()
             }
         }
     }
@@ -159,6 +152,18 @@ struct TotalSpendDetailSheet: View {
     private func loadRecords() {
         if let records = try? brain.fetchAllExpenseRecords() {
             allRecords = records
+        }
+    }
+
+    private func playDetailChartAnimationIfNeeded() {
+        guard !chartAnimationPlayed else { return }
+        chartAnimationPlayed = true
+        if BuxMotion.reducedMotion {
+            chartProgress = 1
+        } else {
+            withAnimation(BuxChartMotion.entrance) {
+                chartProgress = 1
+            }
         }
     }
 
@@ -175,10 +180,7 @@ struct TotalSpendDetailSheet: View {
             )
                 .buxSectionLabelStyle(color: .gray)
 
-            Text(formatAmount(Decimal(totalSpentInRange)))
-                .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                .contentTransition(.numericText())
+            sheetAmountHero(formatAmount(Decimal(totalSpentInRange)))
 
             HStack(spacing: 32) {
                 VStack(spacing: 4) {
@@ -207,34 +209,59 @@ struct TotalSpendDetailSheet: View {
         .padding(.vertical, 24)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity)
-        .background {
+        .background { sheetHeroCardBackground }
+    }
+
+    private func sheetAmountHero(_ amount: String) -> some View {
+        Text(amount)
+            .font(.system(size: 40, weight: .bold, design: .rounded))
+            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            .contentTransition(.numericText())
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+    }
+
+    private var sheetHeroCardBackground: some View {
+        ZStack {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(
                     colorScheme == .dark
                         ? Color.white.opacity(0.04)
                         : Color.black.opacity(0.02)
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [
-                                    themeManager.current.accentColor.opacity(0.2),
-                                    Color.clear
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(
-                    color: Color.black.opacity(colorScheme == .dark ? 0.25 : 0.05),
-                    radius: 12,
-                    x: 0,
-                    y: 6
+
+            RadialGradient(
+                colors: [
+                    themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.24 : 0.16),
+                    themeManager.current.accentColor.opacity(0.06),
+                    Color.clear
+                ],
+                center: .center,
+                startRadius: 4,
+                endRadius: 130
+            )
+            .padding(.vertical, 8)
+            .allowsHitTesting(false)
+
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            themeManager.current.accentColor.opacity(0.2),
+                            Color.clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
                 )
         }
+        .shadow(
+            color: Color.black.opacity(colorScheme == .dark ? 0.25 : 0.05),
+            radius: 12,
+            x: 0,
+            y: 6
+        )
     }
 
     // MARK: - Picker Section
@@ -261,33 +288,34 @@ struct TotalSpendDetailSheet: View {
             Chart {
                 ForEach(trendDataPoints.indices, id: \.self) { index in
                     let point = trendDataPoints[index]
-                    
+                    let amount = BuxChartMotion.scaled(point.1, progress: chartProgress)
+
                     AreaMark(
                         x: .value("Date", point.0),
-                        y: .value("Amount", animateCharts ? point.1 : 0)
+                        y: .value("Amount", amount)
                     )
                     .interpolationMethod(.catmullRom)
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [
-                                BuxChartColors.spendTrend(for: colorScheme).opacity(0.24),
-                                BuxChartColors.spendTrend(for: colorScheme).opacity(0.01)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
+                    .foregroundStyle(BuxChartColors.spendTrendGradient(for: colorScheme))
 
                     LineMark(
                         x: .value("Date", point.0),
-                        y: .value("Amount", animateCharts ? point.1 : 0)
+                        y: .value("Amount", amount)
                     )
                     .interpolationMethod(.catmullRom)
-                    .foregroundStyle(BuxChartColors.spendTrend(for: colorScheme).gradient)
+                    .foregroundStyle(BuxChartColors.spendTrend(for: colorScheme).opacity(0.2))
+                    .lineStyle(StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
+
+                    LineMark(
+                        x: .value("Date", point.0),
+                        y: .value("Amount", amount)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    .foregroundStyle(BuxChartColors.spendTrendLineGradient(for: colorScheme))
                     .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
                 }
             }
             .frame(height: 180)
+            .gpuChartLayer()
             .chartXAxis {
                 AxisMarks(values: .stride(by: selectedRange == .days7 ? .day : .day, count: selectedRange == .days7 ? 1 : (selectedRange == .days30 ? 7 : 21))) { value in
                     AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4, 4]))
@@ -329,34 +357,36 @@ struct TotalSpendDetailSheet: View {
                 let normWidth = Double(heatZoneCounts.normal) / total
 
                 GeometryReader { geo in
+                    let scale = CGFloat(chartProgress)
                     HStack(spacing: 3) {
                         if critWidth > 0 {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.orange)
-                                .frame(width: max(8, geo.size.width * CGFloat(critWidth)))
+                            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                .fill(BuxChartColors.heatZoneGradient(.high))
+                                .frame(width: max(8, geo.size.width * CGFloat(critWidth) * scale))
                         }
                         if warnWidth > 0 {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.yellow)
-                                .frame(width: max(8, geo.size.width * CGFloat(warnWidth)))
+                            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                .fill(BuxChartColors.heatZoneGradient(.warning))
+                                .frame(width: max(8, geo.size.width * CGFloat(warnWidth) * scale))
                         }
                         if normWidth > 0 {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.green)
-                                .frame(width: max(8, geo.size.width * CGFloat(normWidth)))
+                            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                .fill(BuxChartColors.heatZoneGradient(.safe))
+                                .frame(width: max(8, geo.size.width * CGFloat(normWidth) * scale))
                         }
                     }
                 }
                 .frame(height: 12)
+                .gpuChartLayer()
                 .padding(.bottom, 4)
 
                 // Legend
                 HStack(spacing: 16) {
-                    legendItem(title: "High Risk", count: heatZoneCounts.critical, color: .orange)
+                    legendItem(title: "High Risk", count: heatZoneCounts.critical, level: .high)
                     Spacer()
-                    legendItem(title: "Warning", count: heatZoneCounts.warning, color: .yellow)
+                    legendItem(title: "Warning", count: heatZoneCounts.warning, level: .warning)
                     Spacer()
-                    legendItem(title: "Safe Zone", count: heatZoneCounts.normal, color: .green)
+                    legendItem(title: "Safe Zone", count: heatZoneCounts.normal, level: .safe)
                 }
             }
         }
@@ -364,10 +394,10 @@ struct TotalSpendDetailSheet: View {
         .expensesThemedCardChrome(cornerRadius: 20)
     }
 
-    private func legendItem(title: String, count: Int, color: Color) -> some View {
-        HStack(spacing: 8) {
+    private func legendItem(title: String, count: Int, level: BuxChartColors.HeatZoneLevel) -> some View {
+        return HStack(spacing: 8) {
             Circle()
-                .fill(color)
+                .fill(BuxChartColors.heatZoneGradient(level))
                 .frame(width: 8, height: 8)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -404,18 +434,9 @@ struct TotalSpendDetailSheet: View {
             } else {
                 VStack(spacing: 12) {
                     ForEach(largestPurchases) { record in
-                        let categoryTint = BuxChartColors.color(for: record.transactionCategory)
                         HStack(spacing: 16) {
-                            // Category Icon
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(categoryTint.opacity(0.12))
-                                    .frame(width: 44, height: 44)
-                                
-                                Image(systemName: record.transactionCategory.iconName)
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(categoryTint)
-                            }
+                            ExpenseLedgerAvatarView(record: record, size: 44)
+                                .environmentObject(brain)
 
                             // Merchant Details
                             VStack(alignment: .leading, spacing: 4) {
@@ -445,20 +466,5 @@ struct TotalSpendDetailSheet: View {
         }
         .padding(20)
         .expensesThemedCardChrome(cornerRadius: 20)
-    }
-}
-
-// Extension to map TransactionCategory to System Icons
-private extension TransactionCategory {
-    var iconName: String {
-        switch self {
-        case .groceries: return "cart.fill"
-        case .restaurants: return "fork.knife"
-        case .transport: return "car.fill"
-        case .subscriptions: return "arrow.triangle.2.circlepath"
-        case .housing: return "house.fill"
-        case .income: return "banknote.fill"
-        default: return "square.grid.2x2.fill"
-        }
     }
 }

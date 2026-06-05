@@ -10,20 +10,48 @@ struct SparklineChart: View {
     let points: [Double]
     let color: Color
     var showAreaFill: Bool = false
-    @State private var isVisible = false
-    
+    var progress: Double = 1
+    var useGPUReveal: Bool = true
+
+    var body: some View {
+        Group {
+            if useGPUReveal {
+                SparklineChartLayer(points: points, color: color, showAreaFill: showAreaFill)
+                    .equatable()
+                    .buxGPUChartReveal(progress: progress)
+            } else {
+                SparklineChartLayer(points: points, color: color, showAreaFill: showAreaFill)
+                    .equatable()
+            }
+        }
+    }
+}
+
+private struct SparklineChartLayer: View, Equatable {
+    let points: [Double]
+    let color: Color
+    let showAreaFill: Bool
+
+    private var yDomain: ClosedRange<Double> {
+        BuxChartMotion.paddedYDomain(for: points)
+    }
+
+    static func == (lhs: SparklineChartLayer, rhs: SparklineChartLayer) -> Bool {
+        lhs.points == rhs.points && lhs.color == rhs.color && lhs.showAreaFill == rhs.showAreaFill
+    }
+
     var body: some View {
         Chart {
             ForEach(Array(points.enumerated()), id: \.offset) { index, point in
                 if showAreaFill {
                     AreaMark(
                         x: .value("Day", index),
-                        y: .value("Amount", isVisible ? point : 0)
+                        y: .value("Amount", point)
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [color.opacity(0.28), color.opacity(0.02)],
+                            colors: [color.opacity(0.26), color.opacity(0.04), color.opacity(0)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -32,19 +60,19 @@ struct SparklineChart: View {
 
                 LineMark(
                     x: .value("Day", index),
-                    y: .value("Amount", isVisible ? point : 0)
+                    y: .value("Amount", point)
                 )
                 .interpolationMethod(.catmullRom)
-                .foregroundStyle(color.gradient)
-                .lineStyle(StrokeStyle(lineWidth: showAreaFill ? 2 : 1.5, lineCap: .round, lineJoin: .round))
+                .foregroundStyle(color)
+                .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
             }
         }
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                isVisible = true
-            }
+        .chartYScale(domain: yDomain)
+        .chartPlotStyle { plotArea in
+            plotArea.padding(.vertical, 4).padding(.horizontal, 2)
         }
+        .drawingGroup(opaque: false, colorMode: .linear)
     }
 }

@@ -8,35 +8,61 @@ import Charts
 
 struct CategoryBreakdownChart: View {
     let breakdown: [(String, Double)]
-    @State private var isVisible = false
+    var customCategories: [ExpenseCategoryRecord] = []
+    var progress: Double = 1
+    var useGPUReveal: Bool = true
+
+    var body: some View {
+        Group {
+            if useGPUReveal {
+                CategoryBreakdownChartLayer(breakdown: breakdown, customCategories: customCategories)
+                    .equatable()
+                    .buxGPUChartReveal(progress: progress)
+            } else {
+                CategoryBreakdownChartLayer(breakdown: breakdown, customCategories: customCategories)
+                    .equatable()
+            }
+        }
+    }
+}
+
+private struct CategoryBreakdownChartLayer: View, Equatable {
+    let breakdown: [(String, Double)]
+    let customCategories: [ExpenseCategoryRecord]
 
     private var categoryNames: [String] {
         breakdown.map(\.0)
     }
 
-    private var categoryColors: [Color] {
+    private var categoryGradients: [LinearGradient] {
         breakdown.enumerated().map { index, item in
-            BuxChartColors.color(forCategoryName: item.0, fallbackIndex: index)
+            BuxChartColors.categoryGradient(
+                forCategoryName: item.0,
+                customCategories: customCategories,
+                fallbackIndex: index
+            )
         }
+    }
+
+    static func == (lhs: CategoryBreakdownChartLayer, rhs: CategoryBreakdownChartLayer) -> Bool {
+        lhs.breakdown.elementsEqual(rhs.breakdown) { $0.0 == $1.0 && $0.1 == $1.1 }
+            && lhs.customCategories.map(\.id) == rhs.customCategories.map(\.id)
     }
 
     var body: some View {
         Chart {
             ForEach(breakdown, id: \.0) { item in
                 BarMark(
-                    x: .value("Amount", isVisible ? item.1 : 0),
+                    x: .value("Amount", item.1),
                     y: .value("Category", item.0)
                 )
                 .foregroundStyle(by: .value("Category", item.0))
+                .cornerRadius(6)
             }
         }
         .chartLegend(.hidden)
         .chartXAxis(.hidden)
-        .chartForegroundStyleScale(domain: categoryNames, range: categoryColors)
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                isVisible = true
-            }
-        }
+        .chartForegroundStyleScale(domain: categoryNames, range: categoryGradients)
+        .drawingGroup(opaque: false, colorMode: .linear)
     }
 }

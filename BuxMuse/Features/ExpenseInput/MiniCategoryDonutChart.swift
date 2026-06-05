@@ -2,16 +2,14 @@
 //  MiniCategoryDonutChart.swift
 //  BuxMuse
 //
-//  Compact category ring for the Total Spend hero card.
-//
 
 import SwiftUI
-import Charts
 
 struct MiniCategoryDonutChart: View {
     let breakdown: [(String, Double)]
-
-    @State private var isVisible = false
+    var customCategories: [ExpenseCategoryRecord] = []
+    var progress: Double = 1
+    var useGPUReveal: Bool = true
 
     private var segments: [(name: String, amount: Double)] {
         Array(breakdown.prefix(4))
@@ -22,29 +20,185 @@ struct MiniCategoryDonutChart: View {
     }
 
     var body: some View {
-        Chart {
-            ForEach(Array(segments.enumerated()), id: \.offset) { index, item in
-                SectorMark(
-                    angle: .value("Amount", isVisible ? item.amount : 0),
-                    innerRadius: .ratio(0.62),
-                    angularInset: 1.5
+        ZStack {
+            if useGPUReveal {
+                DonutChartLayer(breakdown: breakdown, customCategories: customCategories)
+                    .equatable()
+                    .compositingGroup()
+                    .mask(alignment: .center) {
+                        DonutRoundSweepMask(progress: progress)
+                    }
+            } else {
+                DonutChartLayer(breakdown: breakdown, customCategories: customCategories)
+                    .equatable()
+            }
+
+            Circle()
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.14),
+                            Color.white.opacity(0.04),
+                            Color.clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
                 )
-                .foregroundStyle(segmentColor(for: item.name, index: index))
-            }
-        }
-        .chartLegend(.hidden)
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.82)) {
-                isVisible = true
-            }
+                .padding(10)
+                .allowsHitTesting(false)
         }
         .accessibilityLabel("Category breakdown")
         .accessibilityValue(
             segments.map { "\($0.name) \(Int(($0.amount / total) * 100)) percent" }.joined(separator: ", ")
         )
     }
+}
 
-    private func segmentColor(for name: String, index: Int) -> Color {
-        BuxChartColors.color(forCategoryName: name, fallbackIndex: index)
+// MARK: - Clockwise ring reveal (donut only — not shared with bar/sparkline masks)
+
+private struct DonutRoundSweepMask: View, Animatable {
+    var progress: Double
+
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    var body: some View {
+        DonutSweepWedge(progress: progress)
+            .fill(.white)
+    }
+}
+
+private struct DonutSweepWedge: Shape {
+    var progress: Double
+
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let clamped = min(max(progress, 0), 1)
+        var path = Path()
+        guard clamped > 0.0001 else { return path }
+
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let radius = hypot(rect.width, rect.height) * 0.5 + 2
+
+        path.move(to: center)
+        path.addArc(
+            center: center,
+            radius: radius,
+            startAngle: .degrees(-90),
+            endAngle: .degrees(-90 + 360 * clamped),
+            clockwise: false
+        )
+        path.closeSubpath()
+        return path
+    }
+}
+
+// MARK: - Native ring (GPU bitmap once — no Swift Charts per frame)
+
+private struct DonutChartLayer: View, Equatable {
+    let breakdown: [(String, Double)]
+    let customCategories: [ExpenseCategoryRecord]
+
+    private static let innerRadiusRatio: CGFloat = 0.62
+    private static let angularInsetDegrees: Double = 1.5
+
+    private var segments: [(name: String, amount: Double)] {
+        Array(breakdown.prefix(4))
+    }
+
+    private var segmentSlices: [DonutSlice] {
+        let total = max(segments.reduce(0) { $0 + $1.amount }, 0.01)
+        var slices: [DonutSlice] = []
+        var cursor = -90.0
+
+        for (index, item) in segments.enumerated() {
+            let sweep = (item.amount / total) * 360
+            let inset = min(Self.angularInsetDegrees, max(sweep * 0.12, 0))
+            let start = cursor + inset * 0.5
+            let end = cursor + sweep - inset * 0.5
+            if end > start {
+                slices.append(
+                    DonutSlice(
+                        id: index,
+                        name: item.name,
+                        startDegrees: start,
+                        endDegrees: end
+                    )
+                )
+            }
+            cursor += sweep
+        }
+        return slices
+    }
+
+    static func == (lhs: DonutChartLayer, rhs: DonutChartLayer) -> Bool {
+        lhs.breakdown.elementsEqual(rhs.breakdown) { $0.0 == $1.0 && $0.1 == $1.1 }
+            && lhs.customCategories.map(\.id) == rhs.customCategories.map(\.id)
+    }
+
+    var body: some View {
+        ZStack {
+            ForEach(segmentSlices) { slice in
+                DonutRingSegment(
+                    startDegrees: slice.startDegrees,
+                    endDegrees: slice.endDegrees,
+                    innerRadiusRatio: Self.innerRadiusRatio
+                )
+                .fill(
+                    BuxChartColors.donutSegmentGradient(
+                        forCategoryName: slice.name,
+                        customCategories: customCategories,
+                        fallbackIndex: slice.id
+                    )
+                )
+            }
+        }
+        .transaction { $0.animation = nil }
+        .drawingGroup(opaque: false, colorMode: .linear)
+    }
+}
+
+private struct DonutSlice: Identifiable {
+    let id: Int
+    let name: String
+    let startDegrees: Double
+    let endDegrees: Double
+}
+
+private struct DonutRingSegment: Shape {
+    let startDegrees: Double
+    let endDegrees: Double
+    let innerRadiusRatio: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let outerRadius = min(rect.width, rect.height) * 0.5
+        let innerRadius = outerRadius * innerRadiusRatio
+
+        var path = Path()
+        path.addArc(
+            center: center,
+            radius: outerRadius,
+            startAngle: .degrees(startDegrees),
+            endAngle: .degrees(endDegrees),
+            clockwise: false
+        )
+        path.addArc(
+            center: center,
+            radius: innerRadius,
+            startAngle: .degrees(endDegrees),
+            endAngle: .degrees(startDegrees),
+            clockwise: true
+        )
+        path.closeSubpath()
+        return path
     }
 }

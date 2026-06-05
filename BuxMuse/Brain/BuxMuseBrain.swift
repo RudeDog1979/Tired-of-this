@@ -255,10 +255,13 @@ public final class BuxMuseBrain: ObservableObject {
             working.renewalReminderDays = nil
         }
         let subs = financialEngine.activeSubscriptions()
+        let categoryRecords = (try? fetchAllCategoryRecords()) ?? []
+        let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
         let analysis = ExpenseIntelligenceEngine.analyze(
             record: working,
             allRecords: all,
             activeSubscriptions: subs,
+            categoriesById: categoriesById,
             locale: BuxInterfaceLocale.currentInterfaceLocale
         )
         if !userMarkedRecurring {
@@ -405,10 +408,13 @@ public final class BuxMuseBrain: ObservableObject {
         guard let record = try? persistence.fetchExpenseRecord(id: id) else { return .empty }
         let all = (try? persistence.fetchAllExpenseRecords()) ?? []
         let subs = financialEngine.activeSubscriptions()
+        let categoryRecords = (try? fetchAllCategoryRecords()) ?? []
+        let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
         return ExpenseIntelligenceEngine.analyze(
             record: record,
             allRecords: all,
             activeSubscriptions: subs,
+            categoriesById: categoriesById,
             locale: resolvedLocale
         ).display
     }
@@ -750,8 +756,10 @@ public final class BuxMuseBrain: ObservableObject {
         let change = totalSpent - lastMonthSpent
 
         let locale = BuxInterfaceLocale.currentInterfaceLocale
+        let categoryRecords = (try? fetchAllCategoryRecords()) ?? []
+        let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
         let categories = Dictionary(grouping: thisMonthRecords, by: {
-            $0.transactionCategory.localizedDisplayName(locale: locale)
+            $0.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale)
         })
         let biggestCategory = categories.max(by: { $0.value.reduce(0) { $0 + abs($1.amountDouble) } < $1.value.reduce(0) { $0 + abs($1.amountDouble) } })?.key
 
@@ -793,7 +801,7 @@ public final class BuxMuseBrain: ObservableObject {
                         currency: AppSettingsManager.currencySetting(for: r.currencyCode)
                     ),
                     date: r.date,
-                    category: r.transactionCategory.localizedDisplayName(locale: locale),
+                    category: r.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale),
                     merchant: r.merchantName,
                     heatZone: r.heatZoneBucket,
                     habitSignature: r.habitSignatureId,

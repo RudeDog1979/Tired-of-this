@@ -14,11 +14,14 @@ struct MonthlySummaryDetailSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var brain: BuxMuseBrain
 
     let summary: ExpensesSummaryDisplay
     let formatAmount: (Decimal) -> String
 
-    @State private var animateRows = false
+    @State private var chartProgress: Double = 0
+    @State private var chartAnimationPlayed = false
+    @State private var customCategories: [ExpenseCategoryRecord] = []
 
     // Extracted complex arithmetic for fast compilation
     private var subscriptionPercentage: Double {
@@ -62,9 +65,20 @@ struct MonthlySummaryDetailSheet: View {
             }
             .buxDetailNavigationChrome()
             .onAppear {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                    animateRows = true
-                }
+                customCategories = (try? brain.fetchAllCategoryRecords())?.filter(\.isCustom) ?? []
+                playDetailChartAnimationIfNeeded()
+            }
+        }
+    }
+
+    private func playDetailChartAnimationIfNeeded() {
+        guard !chartAnimationPlayed else { return }
+        chartAnimationPlayed = true
+        if BuxMotion.reducedMotion {
+            chartProgress = 1
+        } else {
+            withAnimation(BuxChartMotion.entrance) {
+                chartProgress = 1
             }
         }
     }
@@ -76,10 +90,7 @@ struct MonthlySummaryDetailSheet: View {
             BuxCatalogText.text("Monthly summary")
                 .buxSectionLabelStyle(color: .gray)
 
-            Text(formatAmount(Decimal(summary.totalSpent)))
-                .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                .contentTransition(.numericText())
+            sheetAmountHero(formatAmount(Decimal(summary.totalSpent)))
 
             if let prediction = summary.prediction {
                 HStack(spacing: 8) {
@@ -103,34 +114,59 @@ struct MonthlySummaryDetailSheet: View {
         .padding(.vertical, 24)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity)
-        .background {
+        .background { sheetHeroCardBackground }
+    }
+
+    private func sheetAmountHero(_ amount: String) -> some View {
+        Text(amount)
+            .font(.system(size: 40, weight: .bold, design: .rounded))
+            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            .contentTransition(.numericText())
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+    }
+
+    private var sheetHeroCardBackground: some View {
+        ZStack {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(
                     colorScheme == .dark
                         ? Color.white.opacity(0.04)
                         : Color.black.opacity(0.02)
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [
-                                    themeManager.current.accentColor.opacity(0.2),
-                                    Color.clear
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(
-                    color: Color.black.opacity(colorScheme == .dark ? 0.25 : 0.05),
-                    radius: 12,
-                    x: 0,
-                    y: 6
+
+            RadialGradient(
+                colors: [
+                    themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.24 : 0.16),
+                    themeManager.current.accentColor.opacity(0.06),
+                    Color.clear
+                ],
+                center: .center,
+                startRadius: 4,
+                endRadius: 130
+            )
+            .padding(.vertical, 8)
+            .allowsHitTesting(false)
+
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            themeManager.current.accentColor.opacity(0.2),
+                            Color.clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
                 )
         }
+        .shadow(
+            color: Color.black.opacity(colorScheme == .dark ? 0.25 : 0.05),
+            radius: 12,
+            x: 0,
+            y: 6
+        )
     }
 
     // MARK: - Category Breakdown Section
@@ -164,14 +200,27 @@ struct MonthlySummaryDetailSheet: View {
     }
 
     private func categoryRow(name: String, value: Double, percentage: Double, index: Int) -> some View {
-        let categoryTint = BuxChartColors.color(forCategoryName: name, fallbackIndex: index)
-        let progressGradient = LinearGradient(
-            colors: [
-                categoryTint,
-                categoryTint.opacity(0.6)
-            ],
-            startPoint: .leading,
-            endPoint: .trailing
+        let catalogColor = ExpenseCategoryCatalog.catalogColorName(
+            forDisplayName: name,
+            customCategories: customCategories,
+            locale: appSettingsManager.interfaceLocale
+        )
+        let categoryTint = ExpenseCategoryStyle.foreground(for: catalogColor)
+        let categoryBackground = ExpenseCategoryStyle.background(for: catalogColor)
+        let categoryIcon = ExpenseCategoryCatalog.icon(
+            forDisplayName: name,
+            customCategories: customCategories,
+            locale: appSettingsManager.interfaceLocale
+        )
+        let progressGradient = BuxChartColors.categoryGradient(
+            forCategoryName: name,
+            customCategories: customCategories,
+            fallbackIndex: index
+        )
+        let rowProgress = BuxChartMotion.staggeredProgress(
+            global: chartProgress,
+            index: index,
+            count: summary.categoryBreakdown.count
         )
 
         return VStack(spacing: 6) {
@@ -179,12 +228,12 @@ struct MonthlySummaryDetailSheet: View {
                 // Category Icon
                 ZStack {
                     Circle()
-                        .fill(categoryTint.opacity(0.08))
+                        .fill(categoryBackground)
                         .frame(width: 32, height: 32)
-                    
-                    Image(systemName: iconName(for: name))
+
+                    Image(systemName: categoryIcon)
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(categoryTint)
+                        .foregroundStyle(categoryTint)
                 }
 
                 // Category Name
@@ -214,8 +263,8 @@ struct MonthlySummaryDetailSheet: View {
 
             // Dynamic Gradient Progress Bar
             GeometryReader { geo in
-                let barWidth = animateRows ? geo.size.width * CGFloat(percentage / 100) : CGFloat.zero
-                
+                let barWidth = geo.size.width * CGFloat(percentage / 100) * CGFloat(rowProgress)
+
                 ZStack(alignment: .leading) {
                     Capsule()
                         .fill(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.04))
@@ -224,9 +273,17 @@ struct MonthlySummaryDetailSheet: View {
                     Capsule()
                         .fill(progressGradient)
                         .frame(width: barWidth)
+                        .overlay(alignment: .leading) {
+                            if barWidth > 4 {
+                                Capsule()
+                                    .fill(Color.white.opacity(colorScheme == .dark ? 0.22 : 0.35))
+                                    .frame(width: 3, height: 6)
+                            }
+                        }
                 }
             }
             .frame(height: 6)
+            .gpuChartLayer()
         }
     }
 
@@ -264,15 +321,25 @@ struct MonthlySummaryDetailSheet: View {
 
     private func merchantRow(index: Int, name: String, value: Double, ratio: Double) -> some View {
         let merchantTint = BuxChartColors.merchantColor(fallbackIndex: index)
-        let merchantGradient = merchantTint.opacity(0.85).gradient
+        let merchantGradient = BuxChartColors.merchantGradient(fallbackIndex: index)
+        let rowProgress = BuxChartMotion.staggeredProgress(
+            global: chartProgress,
+            index: index,
+            count: summary.merchantBreakdown.count
+        )
         let rankString = "\(index + 1)"
 
         return HStack(spacing: 12) {
             // Rank Number
             Text(rankString)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(.gray.opacity(0.6))
-                .frame(width: 16)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(merchantTint)
+                .frame(width: 22, height: 22)
+                .background {
+                    Circle()
+                        .fill(merchantTint.opacity(0.12))
+                }
+                .frame(width: 24)
 
             // Merchant Name and dynamic width indicator card
             VStack(alignment: .leading, spacing: 6) {
@@ -288,19 +355,27 @@ struct MonthlySummaryDetailSheet: View {
 
                 // Visual bar representing size compared to top merchant
                 GeometryReader { geo in
-                    let barWidth = animateRows ? geo.size.width * CGFloat(ratio) : CGFloat.zero
-                    
+                    let barWidth = geo.size.width * CGFloat(ratio) * CGFloat(rowProgress)
+
                     ZStack(alignment: .leading) {
                         Capsule()
                             .fill(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.03))
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        
+
                         Capsule()
                             .fill(merchantGradient)
                             .frame(width: barWidth)
+                            .overlay(alignment: .leading) {
+                                if barWidth > 4 {
+                                    Capsule()
+                                        .fill(Color.white.opacity(colorScheme == .dark ? 0.18 : 0.3))
+                                        .frame(width: 3, height: 5)
+                                }
+                            }
                     }
                 }
                 .frame(height: 5)
+                .gpuChartLayer()
             }
         }
     }
@@ -330,19 +405,21 @@ struct MonthlySummaryDetailSheet: View {
                 .lineSpacing(4)
         }
         .padding(20)
+        .background {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.yellow.opacity(colorScheme == .dark ? 0.06 : 0.04),
+                            Color.clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .allowsHitTesting(false)
+        }
         .expensesThemedCardChrome(cornerRadius: 20)
     }
 
-    // Utility icons based on category names
-    private func iconName(for category: String) -> String {
-        switch category.lowercased() {
-        case "groceries": return "cart.fill"
-        case "restaurants", "dining": return "fork.knife"
-        case "transport", "travel": return "car.fill"
-        case "subscriptions": return "arrow.triangle.2.circlepath"
-        case "housing", "rent": return "house.fill"
-        case "income": return "banknote.fill"
-        default: return "square.grid.2x2.fill"
-        }
-    }
 }

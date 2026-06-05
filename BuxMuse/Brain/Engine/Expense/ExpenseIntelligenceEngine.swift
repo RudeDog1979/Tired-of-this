@@ -30,6 +30,7 @@ struct ExpenseIntelligenceEngine {
         record: ExpenseRecord,
         allRecords: [ExpenseRecord],
         activeSubscriptions: [SubscriptionInfo] = [],
+        categoriesById: [UUID: ExpenseCategoryRecord] = [:],
         locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> AnalysisResult {
         let sameMerchant = allRecords.filter {
@@ -96,12 +97,17 @@ struct ExpenseIntelligenceEngine {
                 locale: locale
             )
         }
-        display.categoryInsight = categoryInsight(for: record, allRecords: allRecords, locale: locale)
+        display.categoryInsight = categoryInsight(
+            for: record,
+            allRecords: allRecords,
+            categoriesById: categoriesById,
+            locale: locale
+        )
         display.merchantInsight = merchantInsight(for: record, history: sameMerchant, locale: locale)
         display.goalsImpact = BuxLocalizedString.format(
             "Spending in %@ affects goal pacing.",
             locale: locale,
-            record.transactionCategory.localizedDisplayName(locale: locale)
+            record.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale)
         )
         if subscription.matchesSubscription {
             display.subscriptionsImpact = BuxLocalizedString.string(
@@ -264,14 +270,18 @@ struct ExpenseIntelligenceEngine {
     private static func categoryInsight(
         for record: ExpenseRecord,
         allRecords: [ExpenseRecord],
+        categoriesById: [UUID: ExpenseCategoryRecord],
         locale: Locale
     ) -> String? {
-        let count = allRecords.filter { $0.transactionCategory == record.transactionCategory }.count
+        let label = record.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale)
+        let count = allRecords.filter {
+            $0.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale) == label
+        }.count
         guard count >= 3 else { return nil }
         return BuxLocalizedString.format(
             "%@ appears often in your recent activity (%lld times).",
             locale: locale,
-            record.transactionCategory.localizedDisplayName(locale: locale),
+            label,
             count
         )
     }

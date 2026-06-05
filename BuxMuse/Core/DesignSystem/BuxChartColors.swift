@@ -37,8 +37,19 @@ enum BuxChartColors {
         return categoryPalette[0]
     }
 
-    static func color(forCategoryName name: String, fallbackIndex: Int = 0) -> Color {
-        if let match = TransactionCategory.allCases.first(where: { $0.displayName == name }) {
+    static func color(
+        forCategoryName name: String,
+        customCategories: [ExpenseCategoryRecord] = [],
+        fallbackIndex: Int = 0
+    ) -> Color {
+        let catalogColor = ExpenseCategoryCatalog.catalogColorName(
+            forDisplayName: name,
+            customCategories: customCategories
+        )
+        if let resolved = namedColor(catalogColor) {
+            return resolved
+        }
+        if let match = ExpenseCategoryCatalog.category(forDisplayName: name) {
             return color(for: match)
         }
         return categoryPalette[abs(fallbackIndex) % categoryPalette.count]
@@ -87,5 +98,112 @@ enum BuxChartColors {
         case "yellow": return Color(red: 255/255, green: 204/255, blue: 0/255)
         default: return nil
         }
+    }
+
+    // MARK: - Trend gradients
+
+    static func spendTrendGradient(for colorScheme: ColorScheme) -> LinearGradient {
+        let base = spendTrend(for: colorScheme)
+        let topOpacity = colorScheme == .dark ? 0.36 : 0.30
+        return LinearGradient(
+            colors: [base.opacity(topOpacity), base.opacity(0.08), base.opacity(0)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
+    static func spendTrendLineGradient(for colorScheme: ColorScheme) -> LinearGradient {
+        let base = spendTrend(for: colorScheme)
+        return LinearGradient(
+            colors: [base.opacity(0.72), base, base.opacity(0.88)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
+    static func spendTrendGlow(for colorScheme: ColorScheme) -> Color {
+        spendTrend(for: colorScheme).opacity(colorScheme == .dark ? 0.22 : 0.14)
+    }
+
+    // MARK: - Category / merchant gradients
+
+    static func categoryGradient(for category: TransactionCategory) -> LinearGradient {
+        let tint = color(for: category)
+        return LinearGradient(
+            colors: [tint, tint.opacity(0.58)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
+    static func categoryGradient(
+        forCategoryName name: String,
+        customCategories: [ExpenseCategoryRecord] = [],
+        fallbackIndex: Int = 0
+    ) -> LinearGradient {
+        let tint = color(forCategoryName: name, customCategories: customCategories, fallbackIndex: fallbackIndex)
+        return LinearGradient(
+            colors: [tint, tint.opacity(0.58)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
+    static func merchantGradient(fallbackIndex: Int) -> LinearGradient {
+        let tint = merchantColor(fallbackIndex: fallbackIndex)
+        return LinearGradient(
+            colors: [tint.opacity(0.95), tint.opacity(0.62)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
+    static func donutSegmentGradient(
+        forCategoryName name: String,
+        customCategories: [ExpenseCategoryRecord] = [],
+        fallbackIndex: Int
+    ) -> AngularGradient {
+        let tint = color(forCategoryName: name, customCategories: customCategories, fallbackIndex: fallbackIndex)
+        return AngularGradient(
+            colors: [tint.opacity(0.72), tint, tint.opacity(0.82)],
+            center: .center
+        )
+    }
+
+    static func donutSegmentStroke(
+        forCategoryName name: String,
+        customCategories: [ExpenseCategoryRecord] = [],
+        fallbackIndex: Int
+    ) -> Color {
+        color(forCategoryName: name, customCategories: customCategories, fallbackIndex: fallbackIndex).opacity(0.35)
+    }
+
+    // MARK: - Heat zones (spending analysis)
+
+    enum HeatZoneLevel: Sendable {
+        case high
+        case warning
+        case safe
+    }
+
+    static let heatZoneHigh = Color(red: 255/255, green: 138/255, blue: 61/255)
+    static let heatZoneWarning = Color(red: 255/255, green: 204/255, blue: 72/255)
+    static let heatZoneSafe = Color(red: 62/255, green: 207/255, blue: 126/255)
+
+    static func heatZoneColor(_ level: HeatZoneLevel) -> Color {
+        switch level {
+        case .high: heatZoneHigh
+        case .warning: heatZoneWarning
+        case .safe: heatZoneSafe
+        }
+    }
+
+    static func heatZoneGradient(_ level: HeatZoneLevel) -> LinearGradient {
+        let tint = heatZoneColor(level)
+        return LinearGradient(
+            colors: [tint.opacity(0.92), tint.opacity(0.65)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
     }
 }

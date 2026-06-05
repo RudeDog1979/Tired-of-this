@@ -55,6 +55,18 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         TransactionCategory(rawValue: categoryRaw) ?? .other
     }
 
+    /// Resolves custom category name when `categoryId` points at a user tag; otherwise system label.
+    public func resolvedCategoryLabel(
+        categoriesById: [UUID: ExpenseCategoryRecord],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> String {
+        if let categoryId,
+           let tag = categoriesById[categoryId] {
+            return tag.localizedDisplayName(locale: locale)
+        }
+        return transactionCategory.localizedDisplayName(locale: locale)
+    }
+
     public var isRefund: Bool {
         amountValue > 0 && transactionCategory != .income
     }
@@ -430,6 +442,55 @@ enum ExpenseCategoryCatalog {
         (.income, "banknote.fill", "mint"),
         (.other, "square.grid.2x2.fill", "gray")
     ]
+
+    static func category(forDisplayName name: String, locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> TransactionCategory? {
+        TransactionCategory.allCases.first { category in
+            category.displayName.caseInsensitiveCompare(name) == .orderedSame
+                || category.localizedDisplayName(locale: locale).caseInsensitiveCompare(name) == .orderedSame
+        }
+    }
+
+    static func catalogColorName(
+        forDisplayName name: String,
+        customCategories: [ExpenseCategoryRecord] = [],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> String {
+        if let custom = matchingCustomCategory(named: name, in: customCategories, locale: locale) {
+            return custom.color
+        }
+        guard let category = category(forDisplayName: name, locale: locale),
+              let def = systemDefinitions.first(where: { $0.0 == category }) else {
+            return "gray"
+        }
+        return def.color
+    }
+
+    static func icon(
+        forDisplayName name: String,
+        customCategories: [ExpenseCategoryRecord] = [],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> String {
+        if let custom = matchingCustomCategory(named: name, in: customCategories, locale: locale) {
+            return custom.icon
+        }
+        guard let category = category(forDisplayName: name, locale: locale),
+              let def = systemDefinitions.first(where: { $0.0 == category }) else {
+            return ExpenseCategoryIconCatalog.suggestedIcon(for: name)
+        }
+        return def.icon
+    }
+
+    static func matchingCustomCategory(
+        named name: String,
+        in customCategories: [ExpenseCategoryRecord],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> ExpenseCategoryRecord? {
+        customCategories.first { record in
+            guard record.isCustom else { return false }
+            return record.name.caseInsensitiveCompare(name) == .orderedSame
+                || record.localizedDisplayName(locale: locale).caseInsensitiveCompare(name) == .orderedSame
+        }
+    }
 }
 
 // MARK: - Brain Output Structs for 120fps UI

@@ -16,9 +16,11 @@ struct ExpensesTopCarousel: View {
     let header: ExpensesHeaderDisplay
     let summary: ExpensesSummaryDisplay
     let formatAmount: (Decimal) -> String
+    let playRequest: UUID
+    @Binding var playedPages: Set<Int>
+    @Binding var pageProgress: [Int: Double]
 
     @State private var pageIndex: Int? = 0
-    @State private var cardReveal = false
     @State private var activeDetailSheet: HeroSheetType?
 
     private enum HeroSheetType: String, Identifiable {
@@ -42,6 +44,10 @@ struct ExpensesTopCarousel: View {
         min(pageIndex ?? 0, max(pages.count - 1, 0))
     }
 
+    private var customCategories: [ExpenseCategoryRecord] {
+        ((try? brain.fetchAllCategoryRecords()) ?? []).filter(\.isCustom)
+    }
+
     private var slotHeight: CGFloat {
         pages.isEmpty ? 0 : BuxLayout.expenseHeroSummaryHeight
     }
@@ -55,7 +61,7 @@ struct ExpensesTopCarousel: View {
                             Group {
                                 switch page {
                                 case .totalSpend:
-                                    totalSpendCard
+                                    totalSpendCard(progress: pageProgressValue(index))
                                         .contentShape(Rectangle())
                                         .onTapGesture {
                                             let impact = UIImpactFeedbackGenerator(style: .medium)
@@ -65,9 +71,12 @@ struct ExpensesTopCarousel: View {
                                 case .monthlySummary:
                                     ExpensesSummaryCard(
                                         display: summary,
+                                        customCategories: customCategories,
+                                        chartProgress: pageProgressValue(index),
                                         chromeTier: pages.count > 1 ? .list : .hero
                                     )
                                         .environmentObject(themeManager)
+                                        .environmentObject(appSettingsManager)
                                         .contentShape(Rectangle())
                                         .onTapGesture {
                                             let impact = UIImpactFeedbackGenerator(style: .medium)
@@ -97,8 +106,19 @@ struct ExpensesTopCarousel: View {
                         Capsule()
                             .fill(
                                 index == activePageIndex
-                                    ? themeManager.current.accentColor
-                                    : themeManager.pillInactiveLabelColor(for: colorScheme).opacity(0.35)
+                                    ? AnyShapeStyle(
+                                        LinearGradient(
+                                            colors: [
+                                                themeManager.current.accentColor,
+                                                themeManager.current.accentColor.opacity(0.72)
+                                            ],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    : AnyShapeStyle(
+                                        themeManager.pillInactiveLabelColor(for: colorScheme).opacity(0.35)
+                                    )
                             )
                             .frame(width: index == activePageIndex ? 18 : 6, height: 6)
                             .animation(.spring(response: 0.35, dampingFraction: 0.82), value: activePageIndex)
@@ -106,10 +126,11 @@ struct ExpensesTopCarousel: View {
                 }
             }
         }
-        .onAppear {
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.84)) {
-                cardReveal = true
-            }
+        .onChange(of: playRequest, initial: true) { _, _ in
+            animatePage(activePageIndex)
+        }
+        .onChange(of: activePageIndex) { _, index in
+            animatePage(index)
         }
         .sheet(item: $activeDetailSheet) { sheetType in
             Group {
@@ -126,6 +147,7 @@ struct ExpensesTopCarousel: View {
                     MonthlySummaryDetailSheet(summary: summary, formatAmount: formatAmount)
                         .environmentObject(themeManager)
                         .environmentObject(appSettingsManager)
+                        .environmentObject(brain)
                         .environment(\.expensesEnhancedTint, true)
                         .presentationDetents([.fraction(0.88), .large])
                         .presentationDragIndicator(.visible)
@@ -136,7 +158,27 @@ struct ExpensesTopCarousel: View {
         }
     }
 
-    private var totalSpendCard: some View {
+    private func pageProgressValue(_ index: Int) -> Double {
+        pageProgress[index] ?? 0
+    }
+
+    private func animatePage(_ index: Int) {
+        guard pages.indices.contains(index) else { return }
+        guard !playedPages.contains(index) else { return }
+
+        playedPages.insert(index)
+        pageProgress[index] = 0
+
+        if BuxMotion.reducedMotion {
+            pageProgress[index] = 1
+        } else {
+            withAnimation(BuxChartMotion.cardEntrance) {
+                pageProgress[index] = 1
+            }
+        }
+    }
+
+    private func totalSpendCard(progress: Double) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -153,11 +195,14 @@ struct ExpensesTopCarousel: View {
                 Spacer(minLength: 8)
 
                 if !summary.categoryBreakdown.isEmpty {
-                    MiniCategoryDonutChart(breakdown: summary.categoryBreakdown)
+                    MiniCategoryDonutChart(
+                        breakdown: summary.categoryBreakdown,
+                        customCategories: customCategories,
+                        progress: progress
+                    )
                         .frame(width: 72, height: 72)
                 }
             }
-            .heroCardReveal(isVisible: cardReveal, delay: 0)
 
             if !summary.categoryBreakdown.isEmpty || !summary.merchantBreakdown.isEmpty {
                 HStack(spacing: 16) {
@@ -166,8 +211,12 @@ struct ExpensesTopCarousel: View {
                             BuxCatalogText.text("Top Categories")
                                 .font(.caption.bold())
                                 .foregroundColor(.gray)
-                            CategoryBreakdownChart(breakdown: summary.categoryBreakdown)
-                                .frame(height: 72)
+                            CategoryBreakdownChart(
+                                breakdown: summary.categoryBreakdown,
+                                customCategories: customCategories,
+                                progress: progress
+                            )
+                            .frame(height: 72)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -179,7 +228,8 @@ struct ExpensesTopCarousel: View {
                                 .foregroundColor(.gray)
                             MerchantBreakdownChart(
                                 breakdown: summary.merchantBreakdown,
-                                maxItems: 3
+                                maxItems: 3,
+                                progress: progress
                             )
                             .frame(height: MerchantBreakdownChart.compactHeight(itemCount: min(3, summary.merchantBreakdown.count)))
                             if summary.merchantBreakdown.count > 3 {
@@ -197,7 +247,6 @@ struct ExpensesTopCarousel: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                .heroCardReveal(isVisible: cardReveal, delay: 0.06)
             }
 
             if !header.sparklinePoints.isEmpty {
@@ -210,19 +259,33 @@ struct ExpensesTopCarousel: View {
                         SparklineChart(
                             points: header.sparklinePoints,
                             color: BuxChartColors.spendTrend(for: colorScheme),
-                            showAreaFill: true
+                            showAreaFill: true,
+                            progress: progress
                         )
-                        .frame(height: 44)
+                        .frame(height: 52)
+                        .padding(.vertical, 2)
+                        .background {
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            BuxChartColors.spendTrendGlow(for: colorScheme),
+                                            BuxChartColors.spendTrend(for: colorScheme).opacity(0.02)
+                                        ],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .allowsHitTesting(false)
+                        }
 
                         monthChangeBadge
                     }
                 }
-                .heroCardReveal(isVisible: cardReveal, delay: 0.12)
             }
 
             if let insight = header.microInsight {
                 InlineInsightView(text: insight)
-                    .heroCardReveal(isVisible: cardReveal, delay: 0.18)
             }
         }
         .expenseHeroCardChrome(themeManager: themeManager, colorScheme: colorScheme)
@@ -232,7 +295,9 @@ struct ExpensesTopCarousel: View {
     private var monthChangeBadge: some View {
         let isUp = header.changeVsLastMonth > 0
         let isDown = header.changeVsLastMonth < 0
-        let tint: Color = isUp ? .orange : (isDown ? Color(red: 46/255, green: 204/255, blue: 113/255) : .gray)
+        let tint: Color = isUp
+            ? BuxChartColors.comparisonUp
+            : (isDown ? BuxChartColors.comparisonDown : .gray)
 
         return VStack(alignment: .trailing, spacing: 2) {
             BuxCatalogText.text("vs last mo")
@@ -249,6 +314,22 @@ struct ExpensesTopCarousel: View {
                     .font(.system(size: 13, weight: .bold, design: .rounded))
             }
             .foregroundColor(tint)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [tint.opacity(0.16), tint.opacity(0.05)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(tint.opacity(0.2), lineWidth: 0.5)
+                }
         }
         .frame(minWidth: 72, alignment: .trailing)
     }
@@ -285,24 +366,6 @@ struct ExpenseCardChromeModifier: ViewModifier {
 struct ExpenseHeroCardChrome: ViewModifier {
     func body(content: Content) -> some View {
         content.modifier(ExpenseCardChromeModifier(tier: .hero))
-    }
-}
-
-private struct HeroCardRevealModifier: ViewModifier {
-    let isVisible: Bool
-    let delay: Double
-
-    func body(content: Content) -> some View {
-        content
-            .opacity(isVisible ? 1 : 0)
-            .offset(y: isVisible ? 0 : 10)
-            .animation(.spring(response: 0.5, dampingFraction: 0.84).delay(delay), value: isVisible)
-    }
-}
-
-private extension View {
-    func heroCardReveal(isVisible: Bool, delay: Double) -> some View {
-        modifier(HeroCardRevealModifier(isVisible: isVisible, delay: delay))
     }
 }
 

@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ExpenseTabView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var brain: BuxMuseBrain
@@ -19,6 +20,12 @@ struct ExpenseTabView: View {
     @State private var activeSheet: ExpenseSheetMode?
     @State private var categorySheetTransaction: Transaction?
     @State private var listAppeared = false
+    @State private var carouselPlayRequest = UUID()
+    @State private var carouselPlayedPages: Set<Int> = []
+    @State private var carouselPageProgress: [Int: Double] = [:]
+    @State private var carouselSessionReady = false
+    @State private var lastAnimatedHeroDataToken: String?
+    @State private var didEnterBackground = false
     @State private var removedRowIds: Set<UUID> = []
     @State private var expandedExpenseId: UUID?
     @State private var selectedRecord: ExpenseRecord?
@@ -38,6 +45,20 @@ struct ExpenseTabView: View {
 
     private var expenseDataToken: String {
         brain.expenseRecords.map { "\($0.id.uuidString)-\($0.updatedAt.timeIntervalSince1970)" }.joined(separator: "|")
+    }
+
+    /// Fingerprint for hero carousel charts — re-animate only when these values change.
+    private var heroDataToken: String {
+        let display = brain.expenseInteractionSnapshot
+        var parts: [String] = []
+        parts.append(String(display.header.totalSpent))
+        parts.append(String(display.header.changeVsLastMonth))
+        parts.append(String(display.header.monthlyTransactionCount))
+        parts.append(display.header.sparklinePoints.map { String(format: "%.4f", $0) }.joined(separator: ","))
+        parts.append(display.summary.categoryBreakdown.map { "\($0.0):\(String(format: "%.4f", $0.1))" }.joined(separator: ","))
+        parts.append(display.summary.merchantBreakdown.map { "\($0.0):\(String(format: "%.4f", $0.1))" }.joined(separator: ","))
+        parts.append(display.summary.trendPoints.map { String(format: "%.4f", $0) }.joined(separator: ","))
+        return parts.joined(separator: "|")
     }
 
     private var expenseListRowInsets: EdgeInsets {
@@ -84,6 +105,22 @@ struct ExpenseTabView: View {
             listModel.reloadCatalog(brain: brain)
             refreshExpenseListDisplay()
             listAppeared = true
+            if !carouselSessionReady {
+                bumpCarouselAnimationIfNeeded()
+                carouselSessionReady = true
+            }
+        }
+        .onChange(of: heroDataToken) { old, new in
+            guard old != new else { return }
+            bumpCarouselAnimationIfNeeded()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                didEnterBackground = true
+            } else if phase == .active, didEnterBackground {
+                didEnterBackground = false
+                bumpCarouselAnimation(force: true)
+            }
         }
         .onDisappear {
             navigationCoordinator.dismissExpenseSearch()
@@ -365,13 +402,17 @@ struct ExpenseTabView: View {
 
         return ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 0) {
-                if showHero {
+                if showHero, carouselSessionReady {
                     ExpensesTopCarousel(
                         header: display.header,
                         summary: display.summary,
-                        formatAmount: { appSettingsManager.format($0) }
+                        formatAmount: { appSettingsManager.format($0) },
+                        playRequest: carouselPlayRequest,
+                        playedPages: $carouselPlayedPages,
+                        pageProgress: $carouselPageProgress
                     )
                     .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
                     .padding(expenseHeroRowInsets)
                     .padding(.bottom, 16)
                 }
@@ -503,6 +544,20 @@ struct ExpenseTabView: View {
         } catch {
             print("Category change failed: \(error)")
         }
+    }
+
+    /// Plays hero carousel charts once per data fingerprint; replays when data changes or app returns from background.
+    private func bumpCarouselAnimationIfNeeded() {
+        bumpCarouselAnimation(force: false)
+    }
+
+    private func bumpCarouselAnimation(force: Bool) {
+        let token = heroDataToken
+        guard force || lastAnimatedHeroDataToken != token else { return }
+        lastAnimatedHeroDataToken = token
+        carouselPlayedPages.removeAll()
+        carouselPageProgress.removeAll()
+        carouselPlayRequest = UUID()
     }
 }
 
