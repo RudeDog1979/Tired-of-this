@@ -26,9 +26,9 @@ struct TotalSpendDetailSheet: View {
     @State private var chartAnimationPlayed = false
 
     private enum TimeRange: String, CaseIterable, Identifiable {
-        case days7 = "7 Days"
-        case days30 = "30 Days"
-        case days90 = "90 Days"
+        case days7 = "7 days"
+        case days30 = "30 days"
+        case days90 = "90 days"
 
         func localizedTitle(locale: Locale) -> String {
             BuxLocalizedString.string(String.LocalizationValue(stringLiteral: rawValue), locale: locale)
@@ -134,7 +134,7 @@ struct TotalSpendDetailSheet: View {
                 }
                 .buxDetailScrollChrome()
             }
-            .navigationTitle("Spending Analysis")
+            .buxCatalogNavigationTitle("Spending analysis")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -184,7 +184,7 @@ struct TotalSpendDetailSheet: View {
 
             HStack(spacing: 32) {
                 VStack(spacing: 4) {
-                    BuxCatalogText.text("Daily Average")
+                    BuxCatalogText.text("Daily average")
                         .font(.caption)
                         .foregroundColor(.gray)
                     Text(formatAmount(Decimal(dailyAverageInRange)))
@@ -280,10 +280,9 @@ struct TotalSpendDetailSheet: View {
 
     private var chartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            BuxCatalogText.text("Trend Over Time")
-                .font(.system(size: 14, weight: .bold))
+            BuxCatalogText.text("Trend over time")
+                .font(.subheadline.weight(.semibold))
                 .foregroundColor(.gray)
-                .kerning(0.5)
 
             Chart {
                 ForEach(trendDataPoints.indices, id: \.self) { index in
@@ -344,10 +343,9 @@ struct TotalSpendDetailSheet: View {
 
     private var heatZoneSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            BuxCatalogText.text("Spending Heat Zones")
-                .font(.system(size: 14, weight: .bold))
+            BuxCatalogText.text("Spending heat zones")
+                .font(.subheadline.weight(.semibold))
                 .foregroundColor(.gray)
-                .kerning(0.5)
 
             VStack(spacing: 12) {
                 // Segmented bar
@@ -382,11 +380,11 @@ struct TotalSpendDetailSheet: View {
 
                 // Legend
                 HStack(spacing: 16) {
-                    legendItem(title: "High Risk", count: heatZoneCounts.critical, level: .high)
+                    legendItem(title: "High risk", count: heatZoneCounts.critical, level: .high)
                     Spacer()
                     legendItem(title: "Warning", count: heatZoneCounts.warning, level: .warning)
                     Spacer()
-                    legendItem(title: "Safe Zone", count: heatZoneCounts.normal, level: .safe)
+                    legendItem(title: "Safe zone", count: heatZoneCounts.normal, level: .safe)
                 }
             }
         }
@@ -400,7 +398,7 @@ struct TotalSpendDetailSheet: View {
                 .fill(BuxChartColors.heatZoneGradient(level))
                 .frame(width: 8, height: 8)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                     .font(.caption2.bold())
                     .foregroundColor(.gray)
                 Text(
@@ -420,10 +418,9 @@ struct TotalSpendDetailSheet: View {
 
     private var largestPurchasesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            BuxCatalogText.text("Largest Purchases")
-                .font(.system(size: 14, weight: .bold))
+            BuxCatalogText.text("Largest purchases")
+                .font(.subheadline.weight(.semibold))
                 .foregroundColor(.gray)
-                .kerning(0.5)
 
             if largestPurchases.isEmpty {
                 BuxCatalogText.text("No transactions logged in this range.")

@@ -68,6 +68,8 @@ public enum BuxBudgetPeriodCalculator {
             return weekAlignedStart(now: today, calendar: calendar)
         case .biweekly:
             return biweeklyAlignedStart(anchor: configuration.anchorDate, now: today, calendar: calendar)
+        case .daily:
+            return today
         case .custom:
             return customAlignedStart(anchor: configuration.anchorDate, now: today, calendar: calendar)
         }
@@ -85,6 +87,8 @@ public enum BuxBudgetPeriodCalculator {
             return calendar.date(byAdding: .day, value: 7, to: periodStart) ?? periodStart.addingTimeInterval(86_400 * 7)
         case .biweekly:
             return calendar.date(byAdding: .day, value: 14, to: periodStart) ?? periodStart.addingTimeInterval(86_400 * 14)
+        case .daily:
+            return calendar.date(byAdding: .day, value: 1, to: periodStart) ?? periodStart.addingTimeInterval(86_400)
         }
     }
 

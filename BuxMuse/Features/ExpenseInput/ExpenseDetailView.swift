@@ -175,6 +175,7 @@ struct ExpenseDetailView: View {
                     EmotionalTagAppearance.watermark(
                         tag: tag,
                         colorScheme: colorScheme,
+                        locale: appSettingsManager.interfaceLocale,
                         scale: .detailCard,
                         opacity: emotionWatermarkOpacity,
                         includeLabel: true

@@ -183,4 +183,26 @@ final class ExpenseInputTests: XCTestCase {
         let expectedDetails = "• Avocados ($4.50)\n• Almond Milk ($3.29)"
         XCTAssertEqual(result.details, expectedDetails)
     }
+
+    func testSubscriptionsCategoryAutoEnablesSubscriptionAndUsesExpenseDate() {
+        let expenseDate = Calendar.current.date(from: DateComponents(year: 2026, month: 3, day: 15))!
+        viewModel.date = expenseDate
+        viewModel.merchantName = "Netflix"
+        viewModel.amountString = "15.99"
+        viewModel.selectedCategory = .subscriptions
+        viewModel.categorySelectionDidChange()
+
+        XCTAssertTrue(viewModel.isSubscription)
+        XCTAssertEqual(viewModel.subscriptionStartDate, expenseDate)
+
+        XCTAssertTrue(viewModel.saveTransaction())
+        let record = try brain.fetchAllExpenseRecords().first
+        XCTAssertEqual(record?.subscriptionStartDate, expenseDate)
+        XCTAssertEqual(record?.isSubscriptionLike, true)
+        XCTAssertEqual(record?.transactionCategory, .subscriptions)
+
+        viewModel.selectedCategory = .groceries
+        viewModel.categorySelectionDidChange()
+        XCTAssertFalse(viewModel.isSubscription)
+    }
 }

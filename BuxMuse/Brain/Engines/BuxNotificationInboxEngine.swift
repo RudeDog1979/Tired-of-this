@@ -12,6 +12,7 @@ import UserNotifications
 final class BuxNotificationInboxEngine {
     private let readIdsKey = "buxmuse.notifications.readIds"
     private let dismissedIdsKey = "buxmuse.notifications.dismissedIds"
+    private let pushedIdsKey = "buxmuse.notifications.pushedIds"
 
     func rebuildInbox(
         settings: SettingsStore,
@@ -43,27 +44,65 @@ final class BuxNotificationInboxEngine {
             ))
         }
 
-        if settings.budgetAlertsEnabled, let budgetName = dashSnapshot.activeBudgetName {
-            let limit = dashSnapshot.activeBudgetLimit
-            let spent = dashSnapshot.activeBudgetSpent
-            if limit > 0 {
-                let ratio = NSDecimalNumber(decimal: spent / limit).doubleValue
-                if ratio >= 0.9 {
+        if settings.budgetAlertsEnabled {
+            let threshold = Double(max(1, min(100, dashSnapshot.approachingThresholdPercent))) / 100.0
+
+            if dashSnapshot.budgetingMode == .envelope, !dashSnapshot.envelopeBudgets.isEmpty {
+                for envelope in dashSnapshot.envelopeBudgets where envelope.effectiveLimit > 0 {
+                    guard envelope.status != .ok else { continue }
+                    let title: String
+                    let severity: String
+                    switch envelope.status {
+                    case .over:
+                        title = line("Envelope over limit", locale: locale)
+                        severity = "high"
+                    case .atLimit:
+                        title = line("Envelope empty", locale: locale)
+                        severity = "high"
+                    case .approaching:
+                        title = line("Envelope approaching limit", locale: locale)
+                        severity = "medium"
+                    case .ok:
+                        continue
+                    }
                     items.append(AppNotificationItem(
-                        id: "budget-warning-\(budgetName)",
-                        title: line("Budget nearly exhausted", locale: locale),
+                        id: "envelope-\(envelope.id.uuidString)-\(envelope.status.rawValue)",
+                        title: title,
                         message: format(
-                            "%@: %@ spent of %@.",
+                            "%@: %@ of %@.",
                             locale: locale,
-                            budgetName,
-                            currencyFormatter(spent),
-                            currencyFormatter(limit)
+                            envelope.name,
+                            currencyFormatter(envelope.spent),
+                            currencyFormatter(envelope.effectiveLimit)
                         ),
                         date: now,
                         category: .budget,
                         isRead: false,
-                        severity: ratio >= 1.0 ? "high" : "medium"
+                        severity: severity
                     ))
+                }
+            } else if let budgetName = dashSnapshot.activeBudgetName {
+                let limit = dashSnapshot.activeBudgetLimit
+                let spent = dashSnapshot.activeBudgetSpent
+                if limit > 0 {
+                    let ratio = NSDecimalNumber(decimal: spent / limit).doubleValue
+                    if ratio >= threshold {
+                        items.append(AppNotificationItem(
+                            id: "budget-warning-\(budgetName)",
+                            title: line("Budget nearly exhausted", locale: locale),
+                            message: format(
+                                "%@: %@ spent of %@.",
+                                locale: locale,
+                                budgetName,
+                                currencyFormatter(spent),
+                                currencyFormatter(limit)
+                            ),
+                            date: now,
+                            category: .budget,
+                            isRead: false,
+                            severity: ratio >= 1.0 ? "high" : "medium"
+                        ))
+                    }
                 }
             }
         }
@@ -204,6 +243,7 @@ final class BuxNotificationInboxEngine {
         var ids = Set(UserDefaults.standard.stringArray(forKey: readIdsKey) ?? [])
         ids.insert(id)
         UserDefaults.standard.set(Array(ids), forKey: readIdsKey)
+        cancelPendingNotification(for: id)
     }
 
     func markAllRead(_ ids: [String]) {
@@ -216,6 +256,7 @@ final class BuxNotificationInboxEngine {
         var ids = Set(UserDefaults.standard.stringArray(forKey: dismissedIdsKey) ?? [])
         ids.insert(id)
         UserDefaults.standard.set(Array(ids), forKey: dismissedIdsKey)
+        removePushedId(id)
         markRead(id)
     }
 
@@ -232,20 +273,39 @@ final class BuxNotificationInboxEngine {
     ) async {
         guard settings.notificationsEnabled else {
             await cancelAllManagedNotifications()
+            savePushedIds([])
             return
         }
         guard await requestAuthorizationIfNeeded() else { return }
 
-        await cancelAllManagedNotifications()
+        let eligible = inbox.items.filter { !$0.isRead && isSchedulableCategory($0.category) }
+        let desiredNotificationIds = Set(eligible.map { managedNotificationId($0.id) })
 
-        for item in inbox.items {
-            switch item.category {
-            case .invoice, .tax, .budget, .bill, .studio, .digest:
-                await schedule(item: item, settings: settings)
-            default:
-                break
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        let managedPendingIds = Set(
+            pending.map(\.identifier).filter { $0.hasPrefix("buxmuse.inbox.") }
+        )
+
+        let stalePending = managedPendingIds.subtracting(desiredNotificationIds)
+        if !stalePending.isEmpty {
+            center.removePendingNotificationRequests(withIdentifiers: Array(stalePending))
+        }
+
+        var pushedIds = pushedIdsSet()
+        let activeItemIds = Set(inbox.items.map(\.id))
+        pushedIds = pushedIds.intersection(activeItemIds)
+
+        for item in eligible {
+            guard !pushedIds.contains(item.id) else { continue }
+            let notificationId = managedNotificationId(item.id)
+            guard !managedPendingIds.contains(notificationId) else { continue }
+            if await schedule(item: item, settings: settings) {
+                pushedIds.insert(item.id)
             }
         }
+
+        savePushedIds(pushedIds)
     }
 
     // MARK: - Private
@@ -290,11 +350,9 @@ final class BuxNotificationInboxEngine {
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
-    private func schedule(item: AppNotificationItem, settings: SettingsStore) async {
-        guard !isWithinQuietHours(settings) else { return }
-
-        let fireDate = max(Date().addingTimeInterval(60), item.date)
-        guard fireDate > Date() else { return }
+    private func schedule(item: AppNotificationItem, settings: SettingsStore) async -> Bool {
+        guard !isWithinQuietHours(settings) else { return false }
+        guard let fireDate = fireDate(for: item), fireDate > Date() else { return false }
 
         let content = UNMutableNotificationContent()
         content.title = item.title
@@ -308,7 +366,64 @@ final class BuxNotificationInboxEngine {
             content: content,
             trigger: trigger
         )
-        try? await UNUserNotificationCenter.current().add(request)
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private func isSchedulableCategory(_ category: AppNotificationCategory) -> Bool {
+        switch category {
+        case .invoice, .tax, .budget, .bill, .studio, .digest:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func fireDate(for item: AppNotificationItem) -> Date? {
+        let now = Date()
+        if item.id.hasPrefix("daily-summary-") {
+            return dailySummaryFireDate(from: now)
+        }
+        if item.date > now {
+            return item.date
+        }
+        return now.addingTimeInterval(180)
+    }
+
+    private func dailySummaryFireDate(from now: Date) -> Date? {
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: now)
+        components.hour = 20
+        components.minute = 0
+        guard var target = calendar.date(from: components) else { return nil }
+        if target <= now {
+            target = calendar.date(byAdding: .day, value: 1, to: target) ?? target
+        }
+        return target
+    }
+
+    private func pushedIdsSet() -> Set<String> {
+        Set(UserDefaults.standard.stringArray(forKey: pushedIdsKey) ?? [])
+    }
+
+    private func savePushedIds(_ ids: Set<String>) {
+        UserDefaults.standard.set(Array(ids), forKey: pushedIdsKey)
+    }
+
+    private func removePushedId(_ id: String) {
+        var ids = pushedIdsSet()
+        ids.remove(id)
+        savePushedIds(ids)
+    }
+
+    private func cancelPendingNotification(for itemId: String) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [managedNotificationId(itemId)]
+        )
     }
 
     private func isWithinQuietHours(_ settings: SettingsStore) -> Bool {

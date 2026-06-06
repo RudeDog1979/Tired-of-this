@@ -142,8 +142,8 @@ struct BuxFormSectionLabel: View {
 
     var body: some View {
         BuxCatalogText.text(title)
-            .font(.system(size: 11, weight: .bold))
-            .textCase(isSettingsContext ? nil : .uppercase)
+            .font(.footnote.weight(.semibold))
+            .textCase(nil)
             .buxLabelSecondary()
             .frame(maxWidth: .infinity, alignment: .leading)
     }

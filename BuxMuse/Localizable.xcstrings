@@ -3984,6 +3984,29 @@
         }
       }
     },
+    "7 days" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 días"
+          }
+        }
+      }
+    },
     "7 Days" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4193,6 +4216,29 @@
         }
       }
     },
+    "30 days" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 días"
+          }
+        }
+      }
+    },
     "30 Days" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4306,6 +4352,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "60 días"
+          }
+        }
+      }
+    },
+    "90 days" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "90 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "90 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "90 días"
           }
         }
       }
@@ -10671,6 +10740,29 @@
         }
       }
     },
+    "Barter / exchange" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trueque / intercambio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trueque / intercambio"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trueque / intercambio"
+          }
+        }
+      }
+    },
     "Barter / Exchange" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10805,6 +10897,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Registro de trueque e intercambio"
+          }
+        }
+      }
+    },
+    "Barter details" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalles del trueque"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalles del trueque"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalles del trueque"
           }
         }
       }
@@ -13533,6 +13648,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BuxMuse tiene acceso a una selección limitada de sus fotos. Puede elegir de sus fotos actualmente seleccionadas, seleccionar más fotos de su biblioteca o permitir el acceso completo en los Ajustes."
+          }
+        }
+      }
+    },
+    "BuxMuse intelligence" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inteligencia BuxMuse"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inteligencia BuxMuse"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inteligencia BuxMuse"
           }
         }
       }
@@ -20048,6 +20186,29 @@
         }
       }
     },
+    "Daily average" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Promedio diario"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Promedio diario"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Promedio diario"
+          }
+        }
+      }
+    },
     "Daily Average" : {
       "comment" : "A label displayed under the daily average of the total spent.",
       "extractionState" : "stale",
@@ -23545,6 +23706,29 @@
         }
       }
     },
+    "Edit expense" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar gasto"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar gasto"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar gasto"
+          }
+        }
+      }
+    },
     "Edit Expense" : {
       "comment" : "A title for a screen that edits an existing expense.",
       "extractionState" : "stale",
@@ -23904,8 +24088,32 @@
         }
       }
     },
+    "Edit transaction" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar transacción"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar transacción"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar transacción"
+          }
+        }
+      }
+    },
     "Edit Transaction" : {
       "comment" : "A label for editing a transaction.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "es" : {
@@ -26168,6 +26376,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recordatorios de impuestos estimados"
+          }
+        }
+      }
+    },
+    "Estimated value (%@)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valor estimado (%@)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valor estimado (%@)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valor estimado (%@)"
           }
         }
       }
@@ -30330,6 +30561,29 @@
         }
       }
     },
+    "Goods / services given" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienes / servicios entregados"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienes / servicios entregados"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienes / servicios entregados"
+          }
+        }
+      }
+    },
     "GOODS / SERVICES GIVEN" : {
       "comment" : "A label displayed in the bartering section of the add expense sheet.",
       "extractionState" : "stale",
@@ -30351,6 +30605,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BIENES / SERVICIOS ENTREGADOS"
+          }
+        }
+      }
+    },
+    "Goods / services received" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienes / servicios recibidos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienes / servicios recibidos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienes / servicios recibidos"
           }
         }
       }
@@ -31572,6 +31849,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alto"
+          }
+        }
+      }
+    },
+    "High risk" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alto riesgo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alto riesgo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alto riesgo"
           }
         }
       }
@@ -35716,6 +36016,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gastos grandes y puntuales recientes han afectado temporalmente tu ahorro líquido."
+          }
+        }
+      }
+    },
+    "Largest purchases" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mayores compras"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mayores compras"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mayores compras"
           }
         }
       }
@@ -41237,6 +41560,7 @@
     },
     "Monthly Summary" : {
       "comment" : "A label displayed above the monthly expenses summary.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "es" : {
@@ -53803,6 +54127,29 @@
         }
       }
     },
+    "Renewal is based on the expense date." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La renovación se basa en la fecha del gasto."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La renovación se basa en la fecha del gasto."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La renovación se basa en la fecha del gasto."
+          }
+        }
+      }
+    },
     "Rent, utilities, subscriptions you pay outside the subscription toggle." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -62322,8 +62669,32 @@
         }
       }
     },
+    "Spending analysis" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Análisis de gastos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Análisis de gastos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Análisis de gastos"
+          }
+        }
+      }
+    },
     "Spending Analysis" : {
       "comment" : "The title of the screen that shows the user's spending trends and analysis.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "es" : {
@@ -62388,6 +62759,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tope de gasto"
+          }
+        }
+      }
+    },
+    "Spending heat zones" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zonas de gasto críticas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zonas de gasto críticas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zonas de gasto críticas"
           }
         }
       }
@@ -69951,6 +70345,29 @@
         }
       }
     },
+    "Top categories" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principales categorías"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principales categorías"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principales categorías"
+          }
+        }
+      }
+    },
     "Top Categories" : {
       "comment" : "A label displayed above a chart showing the user's most common spending categories.",
       "extractionState" : "stale",
@@ -70135,6 +70552,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comercio principal"
+          }
+        }
+      }
+    },
+    "Top merchants" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principales comercios"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principales comercios"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principales comercios"
           }
         }
       }
@@ -70540,6 +70980,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Costo directo total del proyecto:"
+          }
+        }
+      }
+    },
+    "Total spend" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto total"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto total"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto total"
           }
         }
       }
@@ -71286,6 +71749,29 @@
         }
       }
     },
+    "Transaction date" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha de transacción"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha de transacción"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha de transacción"
+          }
+        }
+      }
+    },
     "Transaction Date" : {
       "comment" : "A label for the transaction date picker.",
       "extractionState" : "stale",
@@ -71562,6 +72048,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tendencia"
+          }
+        }
+      }
+    },
+    "Trend over time" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendencia en el tiempo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendencia en el tiempo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendencia en el tiempo"
           }
         }
       }
@@ -74271,6 +74780,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "vs mes ant."
+          }
+        }
+      }
+    },
+    "Vs last mo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vs mes ant."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vs mes ant."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vs mes ant."
           }
         }
       }

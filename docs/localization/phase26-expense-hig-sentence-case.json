@@ -1,0 +1,126 @@
+{
+  "Add expense": {
+    "es-419": "Agregar gasto",
+    "es-ES": "Añadir gasto"
+  },
+  "Edit expense": {
+    "es-419": "Editar gasto",
+    "es-ES": "Editar gasto"
+  },
+  "Log income": {
+    "es-419": "Registrar ingreso",
+    "es-ES": "Registrar ingreso"
+  },
+  "Edit income": {
+    "es-419": "Editar ingreso",
+    "es-ES": "Editar ingreso"
+  },
+  "Barter details": {
+    "es-419": "Detalles del trueque",
+    "es-ES": "Detalles del trueque"
+  },
+  "Goods / services given": {
+    "es-419": "Bienes / servicios entregados",
+    "es-ES": "Bienes / servicios entregados"
+  },
+  "Goods / services received": {
+    "es-419": "Bienes / servicios recibidos",
+    "es-ES": "Bienes / servicios recibidos"
+  },
+  "Barter / exchange": {
+    "es-419": "Trueque / intercambio",
+    "es-ES": "Trueque / intercambio"
+  },
+  "Cash & barter": {
+    "es-419": "Efectivo y trueque",
+    "es-ES": "Efectivo y trueque"
+  },
+  "Transaction date": {
+    "es-419": "Fecha de transacción",
+    "es-ES": "Fecha de transacción"
+  },
+  "Spending analysis": {
+    "es-419": "Análisis de gastos",
+    "es-ES": "Análisis de gastos"
+  },
+  "Daily average": {
+    "es-419": "Promedio diario",
+    "es-ES": "Promedio diario"
+  },
+  "Trend over time": {
+    "es-419": "Tendencia en el tiempo",
+    "es-ES": "Tendencia en el tiempo"
+  },
+  "Spending heat zones": {
+    "es-419": "Zonas de gasto críticas",
+    "es-ES": "Zonas de gasto críticas"
+  },
+  "High risk": {
+    "es-419": "Alto riesgo",
+    "es-ES": "Alto riesgo"
+  },
+  "Safe zone": {
+    "es-419": "Zona segura",
+    "es-ES": "Zona segura"
+  },
+  "Largest purchases": {
+    "es-419": "Mayores compras",
+    "es-ES": "Mayores compras"
+  },
+  "Total spend": {
+    "es-419": "Gasto total",
+    "es-ES": "Gasto total"
+  },
+  "Top categories": {
+    "es-419": "Principales categorías",
+    "es-ES": "Principales categorías"
+  },
+  "Top merchants": {
+    "es-419": "Principales comercios",
+    "es-ES": "Principales comercios"
+  },
+  "Monthly summary": {
+    "es-419": "Resumen mensual",
+    "es-ES": "Resumen mensual"
+  },
+  "Category breakdown": {
+    "es-419": "Desglose por categoría",
+    "es-ES": "Desglose por categoría"
+  },
+  "Heat zone": {
+    "es-419": "Zona caliente",
+    "es-ES": "Zona caliente"
+  },
+  "Edit transaction": {
+    "es-419": "Editar transacción",
+    "es-ES": "Editar transacción"
+  },
+  "Renewal is based on the expense date.": {
+    "es-419": "La renovación se basa en la fecha del gasto.",
+    "es-ES": "La renovación se basa en la fecha del gasto."
+  },
+  "7 days": {
+    "es-419": "7 días",
+    "es-ES": "7 días"
+  },
+  "30 days": {
+    "es-419": "30 días",
+    "es-ES": "30 días"
+  },
+  "90 days": {
+    "es-419": "90 días",
+    "es-ES": "90 días"
+  },
+  "BuxMuse intelligence": {
+    "es-419": "Inteligencia BuxMuse",
+    "es-ES": "Inteligencia BuxMuse"
+  },
+  "Estimated value (%@)": {
+    "es-419": "Valor estimado (%@)",
+    "es-ES": "Valor estimado (%@)"
+  },
+  "Vs last mo": {
+    "es-419": "Vs mes ant.",
+    "es-ES": "Vs mes ant."
+  }
+}

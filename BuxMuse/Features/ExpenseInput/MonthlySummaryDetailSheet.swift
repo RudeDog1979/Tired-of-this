@@ -56,7 +56,7 @@ struct MonthlySummaryDetailSheet: View {
                 }
                 .buxDetailScrollChrome()
             }
-            .navigationTitle("Monthly Summary")
+            .buxCatalogNavigationTitle("Monthly summary")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -173,10 +173,9 @@ struct MonthlySummaryDetailSheet: View {
 
     private var categoryBreakdownSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            BuxCatalogText.text("Category Breakdown")
-                .font(.system(size: 14, weight: .bold))
+            BuxCatalogText.text("Category breakdown")
+                .font(.subheadline.weight(.semibold))
                 .foregroundColor(.gray)
-                .kerning(0.5)
 
             if summary.categoryBreakdown.isEmpty {
                 BuxCatalogText.text("No data available.")
@@ -291,10 +290,9 @@ struct MonthlySummaryDetailSheet: View {
 
     private var merchantLeaderboardSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            BuxCatalogText.text("Top Merchants")
-                .font(.system(size: 14, weight: .bold))
+            BuxCatalogText.text("Top merchants")
+                .font(.subheadline.weight(.semibold))
                 .foregroundColor(.gray)
-                .kerning(0.5)
 
             if summary.merchantBreakdown.isEmpty {
                 BuxCatalogText.text("No merchant data available.")
@@ -388,7 +386,7 @@ struct MonthlySummaryDetailSheet: View {
                 Image(systemName: "lightbulb.fill")
                     .font(.system(size: 18))
                     .foregroundColor(.yellow)
-                BuxCatalogText.text("BuxMuse Intelligence")
+                BuxCatalogText.text("BuxMuse intelligence")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }

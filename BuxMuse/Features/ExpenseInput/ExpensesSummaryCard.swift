@@ -16,13 +16,13 @@ struct ExpensesSummaryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            BuxCatalogText.text("Monthly Summary")
+            BuxCatalogText.text("Monthly summary")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
-                    BuxCatalogText.text("Top Categories")
+                    BuxCatalogText.text("Top categories")
                         .font(.caption.bold())
                         .foregroundColor(.gray)
                     CategoryBreakdownChart(
@@ -34,7 +34,7 @@ struct ExpensesSummaryCard: View {
                 }
 
                 VStack(alignment: .leading, spacing: 6) {
-                    BuxCatalogText.text("Top Merchants")
+                    BuxCatalogText.text("Top merchants")
                         .font(.caption.bold())
                         .foregroundColor(.gray)
                     MerchantBreakdownChart(

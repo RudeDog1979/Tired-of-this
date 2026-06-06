@@ -15,6 +15,7 @@ struct InlineInsightView: View {
                 .font(.system(size: 10, weight: .bold))
             Text(text)
                 .font(.system(size: 12, weight: .medium))
+                .textCase(nil)
         }
         .foregroundColor(.purple)
         .padding(.horizontal, 8)

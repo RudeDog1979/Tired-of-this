@@ -53,6 +53,16 @@ final class ExpensesViewModel: ObservableObject {
                 guard haystack.contains(query) else { return false }
             }
             if let categoryId = filters.categoryId, record.categoryId != categoryId { return false }
+            if let systemRaw = filters.systemCategoryRaw {
+                var matches = record.transactionCategory.rawValue == systemRaw
+                if !matches,
+                   let recordCategoryId = record.categoryId,
+                   let custom = categories.first(where: { $0.id == recordCategoryId }),
+                   custom.systemCategoryRaw == systemRaw {
+                    matches = true
+                }
+                guard matches else { return false }
+            }
             if let merchantId = filters.merchantId, record.merchantId != merchantId { return false }
             if let from = filters.dateFrom, record.date < from { return false }
             if let to = filters.dateTo, record.date > to { return false }

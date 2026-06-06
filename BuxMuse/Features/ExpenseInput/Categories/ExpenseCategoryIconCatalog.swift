@@ -13,7 +13,15 @@ enum ExpenseCategoryIconCatalog {
         "bolt.fill", "drop.fill", "film.fill", "gamecontroller.fill", "book.fill",
         "graduationcap.fill", "briefcase.fill", "scissors", "pawprint.fill",
         "leaf.fill", "figure.run", "dumbbell.fill", "iphone", "creditcard.fill",
-        "arrow.triangle.2.circlepath", "sparkles", "star.fill", "hammer.fill"
+        "arrow.triangle.2.circlepath", "sparkles", "star.fill", "hammer.fill",
+        "building.columns.fill", "banknote.fill", "dollarsign.circle.fill", "wallet.bifold.fill",
+        "percent", "doc.text.fill", "receipt.fill", "chart.pie.fill", "chart.bar.fill",
+        "fuelpump.fill", "tshirt.fill", "wifi", "shield.fill", "storefront.fill",
+        "bicycle", "suitcase.fill", "tv.fill", "headphones", "play.tv.fill",
+        "pills.fill", "stethoscope", "party.popper.fill", "birthday.cake.fill",
+        "music.note", "ticket.fill", "paintbrush.fill", "wrench.and.screwdriver.fill",
+        "flame.fill", "tree.fill", "key.fill", "lock.fill", "envelope.fill",
+        "camera.fill", "sportscourt.fill", "tram.fill", "ferry.fill", "map.fill"
     ]
 
     static let pickerColors: [String] = [
@@ -81,10 +89,20 @@ enum ExpenseCategoryIconCatalog {
         ("electric", "bolt.fill"),
         ("water", "drop.fill"),
         ("rent", "house.fill"),
-        ("mortgage", "house.fill"),
         ("insurance", "shield.fill"),
+        ("bank", "building.columns.fill"),
+        ("loan", "percent"),
+        ("debt", "percent"),
+        ("mortgage", "building.columns.fill"),
+        ("cash", "banknote.fill"),
+        ("money", "dollarsign.circle.fill"),
+        ("wallet", "wallet.bifold.fill"),
+        ("bill", "doc.text.fill"),
+        ("invoice", "doc.text.fill"),
+        ("receipt", "receipt.fill"),
         ("salary", "banknote.fill"),
         ("income", "banknote.fill"),
+        ("paycheck", "banknote.fill"),
         ("education", "book.fill"),
         ("school", "graduationcap.fill"),
         ("tuition", "graduationcap.fill"),

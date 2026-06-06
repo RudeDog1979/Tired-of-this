@@ -61,9 +61,9 @@ struct AddExpenseSheet: View {
 
     private var sheetTitleKey: String {
         if viewModel.isEditing {
-            return isIncomeMode ? "Edit Income" : "Edit Expense"
+            return isIncomeMode ? "Edit income" : "Edit expense"
         }
-        return isIncomeMode ? "Log Income" : "Add Expense"
+        return isIncomeMode ? "Log income" : "Add expense"
     }
 
     private var incomeAccent: Color { .mint }
@@ -188,6 +188,15 @@ struct AddExpenseSheet: View {
                                 .expensesThemedCardChrome(cornerRadius: 20)
                         }
 
+                        if !isIncomeMode, let warning = viewModel.envelopeWarning {
+                            Text(warning)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.orange)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(BuxLayout.section)
+                                .expensesThemedCardChrome(cornerRadius: 20)
+                        }
+
                         if let error = viewModel.saveError {
                             Text(error)
                                 .font(.system(size: 13, weight: .medium))
@@ -227,6 +236,14 @@ struct AddExpenseSheet: View {
             .onChange(of: viewModel.emotionTag) { _, newTag in
                 guard !isIncomeMode else { return }
                 syncMoodBackdrop(to: newTag, animated: true)
+            }
+            .onChange(of: viewModel.selectedCategory) { _, _ in
+                guard !isIncomeMode else { return }
+                viewModel.categorySelectionDidChange()
+            }
+            .onChange(of: viewModel.date) { _, _ in
+                guard !isIncomeMode else { return }
+                viewModel.expenseDateDidChange()
             }
             .onDisappear {
                 moodCrossfadeTask?.cancel()
@@ -796,7 +813,8 @@ struct AddExpenseSheet: View {
                 isTrial: $viewModel.isTrial,
                 subscriptionStartDate: $viewModel.subscriptionStartDate,
                 trialEndDate: $viewModel.trialEndDate,
-                renewalReminderDays: $viewModel.renewalReminderDays
+                renewalReminderDays: $viewModel.renewalReminderDays,
+                categoryImpliesSubscription: viewModel.isSubscriptionsCategorySelected
             )
             .padding(BuxLayout.section)
             .expensesThemedCardChrome(cornerRadius: 20)
@@ -855,14 +873,14 @@ struct AddExpenseSheet: View {
 
     private var operationalPaymentCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            BuxCatalogText.text("Cash & Barter")
+            BuxCatalogText.text("Cash & barter")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             HStack {
                 Image(systemName: viewModel.isBarterExchange ? "arrow.left.arrow.right" : "banknote.fill")
                     .foregroundColor(viewModel.isBarterExchange ? .orange : themeManager.current.accentColor)
 
-                Picker(loc("Cash & Barter"), selection: operationalPaymentSelection) {
+                Picker(loc("Cash & barter"), selection: operationalPaymentSelection) {
                     BuxCatalogText.text("Not cash or barter").tag("")
                     if settingsStore.dualCashDrawerEnabled {
                         Text(
@@ -883,7 +901,7 @@ struct AddExpenseSheet: View {
                         .tag("Cash (\(settingsStore.secondaryTradingCurrency))")
                     }
                     if settingsStore.barterLoggerEnabled {
-                        BuxCatalogText.text("Barter / Exchange").tag("Barter")
+                        BuxCatalogText.text("Barter / exchange").tag("Barter")
                     }
                 }
                 .pickerStyle(.menu)
@@ -998,16 +1016,15 @@ struct AddExpenseSheet: View {
             HStack(spacing: 8) {
                 Image(systemName: "arrow.left.arrow.right.circle.fill")
                     .foregroundColor(.orange)
-                BuxCatalogText.text("Barter Details")
+                BuxCatalogText.text("Barter details")
                     .buxSectionLabelStyle(color: .orange)
             }
 
             VStack(spacing: BuxLayout.tight) {
                 VStack(alignment: .leading, spacing: 4) {
-                    BuxCatalogText.text("GOODS / SERVICES GIVEN")
-                        .font(.system(size: 10, weight: .bold))
+                    BuxCatalogText.text("Goods / services given")
+                        .font(.subheadline.weight(.medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                        .kerning(0.5)
                     TextField(loc("What did you give? (e.g. web design)"), text: $viewModel.barterGoodsGiven, axis: .vertical)
                         .lineLimit(1...3)
                         .font(.system(size: 14, weight: .medium))
@@ -1017,10 +1034,9 @@ struct AddExpenseSheet: View {
                 Divider().opacity(0.12)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    BuxCatalogText.text("GOODS / SERVICES RECEIVED")
-                        .font(.system(size: 10, weight: .bold))
+                    BuxCatalogText.text("Goods / services received")
+                        .font(.subheadline.weight(.medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                        .kerning(0.5)
                     TextField(loc("What did you receive? (e.g. boat repairs)"), text: $viewModel.barterGoodsReceived, axis: .vertical)
                         .lineLimit(1...3)
                         .font(.system(size: 14, weight: .medium))
@@ -1032,14 +1048,13 @@ struct AddExpenseSheet: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(
                         BuxLocalizedString.format(
-                            "ESTIMATED VALUE (%@)",
+                            "Estimated value (%@)",
                             locale: appSettingsManager.interfaceLocale,
                             appSettingsManager.selectedCurrency.id
                         )
                     )
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.subheadline.weight(.medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                        .kerning(0.5)
                     TextField(loc("Estimated monetary value"), text: $viewModel.barterEstimatedValue)
                         .keyboardType(.decimalPad)
                         .font(.system(size: 15, weight: .bold, design: .rounded))

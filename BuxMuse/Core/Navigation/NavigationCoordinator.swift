@@ -19,6 +19,7 @@ final class NavigationCoordinator: ObservableObject {
     @Published var isBalanceVisible: Bool = true
     /// Driven by bottom search accessory (iOS 26) or toolbar search button (iOS 18).
     @Published var isExpenseSearchPresented: Bool = false
+    @Published var pendingExpenseFilter: ExpenseFilterState?
 
     init() {}
 
@@ -33,6 +34,26 @@ final class NavigationCoordinator: ObservableObject {
             selectedTab = .expense
             isTransactionsExpanded = false
         }
+    }
+
+    func openExpensesForEnvelope(
+        categoryId: UUID?,
+        systemCategoryRaw: String?,
+        periodStart: Date?,
+        periodEnd: Date?
+    ) {
+        var filters = ExpenseFilterState()
+        filters.categoryId = categoryId
+        filters.systemCategoryRaw = systemCategoryRaw
+        filters.dateFrom = periodStart
+        filters.dateTo = periodEnd
+        pendingExpenseFilter = filters
+        openExpensesTab()
+    }
+
+    func consumePendingExpenseFilter() -> ExpenseFilterState? {
+        defer { pendingExpenseFilter = nil }
+        return pendingExpenseFilter
     }
 
     func openSubscriptionHub() {

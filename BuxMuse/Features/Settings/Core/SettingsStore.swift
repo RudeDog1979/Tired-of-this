@@ -86,6 +86,7 @@ public final class SettingsStore: ObservableObject {
     @Published public var incomeFundingSource: IncomeFundingSource = .salary
     @Published public var customBudgetLimit: Decimal = 50
     @Published public var customBudgetPeriod: DefaultBudgetPeriod = .weekly
+    @Published public var budgetApproachingThresholdPercent: Int = 80
     
     // MARK: - Freelance Settings
     @Published public var studioEnabled: Bool = false
@@ -398,7 +399,8 @@ public final class SettingsStore: ObservableObject {
         let incomeFundingSource: IncomeFundingSource?
         let customBudgetLimit: Decimal?
         let customBudgetPeriod: DefaultBudgetPeriod?
-        
+        let budgetApproachingThresholdPercent: Int?
+
         let studioEnabled: Bool
         let studioProfileId: UUID?
         let studioMode: StudioMode?
@@ -449,7 +451,7 @@ public final class SettingsStore: ObservableObject {
             case weekStartDay, budgetingMode, defaultBudgetPeriod
             case showBudgetWarnings, autoAdjustBudgetsFromHistory, customBudgetProfiles
             case simpleBudgetLimit, simpleBudgetCycle, simpleBudgetPeriodAnchor, incomeFundingSource
-            case customBudgetLimit, customBudgetPeriod
+            case customBudgetLimit, customBudgetPeriod, budgetApproachingThresholdPercent
             case studioEnabled, freelanceEnabled
             case studioProfileId, freelanceProfileId
             case studioMode, studioPersona, studioPersonaConfigured
@@ -515,6 +517,7 @@ public final class SettingsStore: ObservableObject {
             incomeFundingSource = try c.decodeIfPresent(IncomeFundingSource.self, forKey: .incomeFundingSource)
             customBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .customBudgetLimit)
             customBudgetPeriod = try c.decodeIfPresent(DefaultBudgetPeriod.self, forKey: .customBudgetPeriod)
+            budgetApproachingThresholdPercent = try c.decodeIfPresent(Int.self, forKey: .budgetApproachingThresholdPercent)
             studioEnabled = try c.decodeIfPresent(Bool.self, forKey: .studioEnabled)
                 ?? c.decodeIfPresent(Bool.self, forKey: .freelanceEnabled) ?? false
             studioProfileId = try c.decodeIfPresent(UUID.self, forKey: .studioProfileId)
@@ -583,6 +586,7 @@ public final class SettingsStore: ObservableObject {
             incomeFundingSource: IncomeFundingSource?,
             customBudgetLimit: Decimal?,
             customBudgetPeriod: DefaultBudgetPeriod?,
+            budgetApproachingThresholdPercent: Int?,
             studioEnabled: Bool,
             studioProfileId: UUID?,
             studioMode: StudioMode?,
@@ -645,6 +649,7 @@ public final class SettingsStore: ObservableObject {
             self.incomeFundingSource = incomeFundingSource
             self.customBudgetLimit = customBudgetLimit
             self.customBudgetPeriod = customBudgetPeriod
+            self.budgetApproachingThresholdPercent = budgetApproachingThresholdPercent
             self.studioEnabled = studioEnabled
             self.studioProfileId = studioProfileId
             self.studioMode = studioMode
@@ -710,6 +715,7 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(incomeFundingSource, forKey: .incomeFundingSource)
             try c.encodeIfPresent(customBudgetLimit, forKey: .customBudgetLimit)
             try c.encodeIfPresent(customBudgetPeriod, forKey: .customBudgetPeriod)
+            try c.encodeIfPresent(budgetApproachingThresholdPercent, forKey: .budgetApproachingThresholdPercent)
             try c.encode(studioEnabled, forKey: .studioEnabled)
             try c.encodeIfPresent(studioProfileId, forKey: .studioProfileId)
             try c.encodeIfPresent(studioMode, forKey: .studioMode)
@@ -799,7 +805,10 @@ public final class SettingsStore: ObservableObject {
                 self.incomeFundingSource = payload.incomeFundingSource ?? .salary
                 self.customBudgetLimit = payload.customBudgetLimit ?? 50
                 self.customBudgetPeriod = payload.customBudgetPeriod ?? .weekly
-                
+                self.budgetApproachingThresholdPercent = payload.budgetApproachingThresholdPercent ?? 80
+                migrateLegacyCustomBudgetModeIfNeeded()
+                normalizeEnvelopeCategoryStorageIfNeeded()
+
                 self.studioEnabled = payload.studioEnabled
                 self.studioProfileId = payload.studioProfileId
                 self.studioMode = payload.studioMode ?? .simple
@@ -898,6 +907,7 @@ public final class SettingsStore: ObservableObject {
         self.incomeFundingSource = .salary
         self.customBudgetLimit = 50
         self.customBudgetPeriod = .weekly
+        self.budgetApproachingThresholdPercent = 80
         self.customBackupIntervalDays = 3
         self.hasCompletedOnboarding = false
         self.greetingHeaderEnabled = true
@@ -961,6 +971,34 @@ public final class SettingsStore: ObservableObject {
         }
     }
     
+    /// Fixes envelope rows that stored a localized category label instead of English catalog keys.
+    func normalizeEnvelopeCategoryStorageIfNeeded() {
+        var changed = false
+        for profileIndex in customBudgetProfiles.indices {
+            for categoryIndex in customBudgetProfiles[profileIndex].categories.indices {
+                if customBudgetProfiles[profileIndex].categories[categoryIndex].normalizeStoredCategoryLink() {
+                    changed = true
+                }
+            }
+        }
+        if changed { save() }
+    }
+
+    /// Merges legacy Custom budgeting mode into Simple (weekly / monthly / daily caps).
+    func migrateLegacyCustomBudgetModeIfNeeded() {
+        guard budgetingMode == .custom else { return }
+        budgetingMode = .simple
+        simpleBudgetLimit = customBudgetLimit
+        switch customBudgetPeriod {
+        case .weekly:
+            simpleBudgetCycle = .weekly
+        case .monthly:
+            simpleBudgetCycle = .monthFirst
+        case .custom:
+            simpleBudgetCycle = .daily
+        }
+    }
+
     public func save() {
         persistInvoicePaymentPreferences()
         persistMileagePreferences()
@@ -989,6 +1027,7 @@ public final class SettingsStore: ObservableObject {
             incomeFundingSource: incomeFundingSource,
             customBudgetLimit: customBudgetLimit,
             customBudgetPeriod: customBudgetPeriod,
+            budgetApproachingThresholdPercent: budgetApproachingThresholdPercent,
             studioEnabled: studioEnabled,
             studioProfileId: studioProfileId,
             studioMode: studioMode,

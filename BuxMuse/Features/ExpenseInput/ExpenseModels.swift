@@ -327,10 +327,12 @@ struct ExpenseFilterState: Equatable {
     public var subscriptionLikeOnly: Bool = false
     public var refundsOnly: Bool = false
     public var heatZoneBucket: String?
+    public var systemCategoryRaw: String?
 
     public var isActive: Bool {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             || categoryId != nil
+            || systemCategoryRaw != nil
             || merchantId != nil
             || dateFrom != nil
             || dateTo != nil

@@ -182,7 +182,7 @@ struct ExpensesTopCarousel: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    BuxCatalogText.text("Total Spend")
+                    BuxCatalogText.text("Total spend")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
@@ -208,7 +208,7 @@ struct ExpensesTopCarousel: View {
                 HStack(spacing: 16) {
                     if !summary.categoryBreakdown.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
-                            BuxCatalogText.text("Top Categories")
+                            BuxCatalogText.text("Top categories")
                                 .font(.caption.bold())
                                 .foregroundColor(.gray)
                             CategoryBreakdownChart(
@@ -223,7 +223,7 @@ struct ExpensesTopCarousel: View {
 
                     if !summary.merchantBreakdown.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
-                            BuxCatalogText.text("Top Merchants")
+                            BuxCatalogText.text("Top merchants")
                                 .font(.caption.bold())
                                 .foregroundColor(.gray)
                             MerchantBreakdownChart(
@@ -300,10 +300,9 @@ struct ExpensesTopCarousel: View {
             : (isDown ? BuxChartColors.comparisonDown : .gray)
 
         return VStack(alignment: .trailing, spacing: 2) {
-            BuxCatalogText.text("vs last mo")
-                .font(.system(size: 10, weight: .bold))
+            BuxCatalogText.text("Vs last mo")
+                .font(.caption.weight(.medium))
                 .foregroundColor(colorScheme == .dark ? .white.opacity(0.35) : Color(red: 140/255, green: 145/255, blue: 160/255))
-                .kerning(0.4)
 
             HStack(spacing: 3) {
                 if isUp || isDown {

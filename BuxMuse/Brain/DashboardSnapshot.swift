@@ -27,6 +27,12 @@ public struct DashboardSnapshot: Equatable {
     public var activeBudgetName: String?
     public var activeBudgetLimit: Decimal
     public var activeBudgetSpent: Decimal
+    public var budgetingMode: BudgetingMode
+    public var incomePoolThisPeriod: Decimal
+    public var envelopeBudgets: [EnvelopeBudgetDisplay]
+    public var budgetPeriodStart: Date?
+    public var budgetPeriodEnd: Date?
+    public var approachingThresholdPercent: Int
 
     public static let empty = DashboardSnapshot(
         recentTransactions: [],
@@ -37,7 +43,13 @@ public struct DashboardSnapshot: Equatable {
         totalBalance: 0,
         activeBudgetName: nil,
         activeBudgetLimit: 0,
-        activeBudgetSpent: 0
+        activeBudgetSpent: 0,
+        budgetingMode: .simple,
+        incomePoolThisPeriod: 0,
+        envelopeBudgets: [],
+        budgetPeriodStart: nil,
+        budgetPeriodEnd: nil,
+        approachingThresholdPercent: 80
     )
 }
 

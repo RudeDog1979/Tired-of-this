@@ -67,12 +67,14 @@ struct RecentTransactionsSectionView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(tx.merchantName)
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.body.weight(.medium))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)
+                    .textCase(nil)
 
                 Text(tx.category.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.footnote)
+                    .textCase(nil)
                     .foregroundColor(
                         EmotionalTagAppearance.accent(for: tx.emotion, colorScheme: colorScheme)
                             ?? themeManager.current.accentColor

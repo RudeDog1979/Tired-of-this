@@ -45,13 +45,15 @@ struct ExpandableExpenseCard: View {
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text(expense.name)
-                                .font(.system(size: 16, weight: .bold))
+                                .font(.body.weight(.medium))
                                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                                .textCase(nil)
 
                             if let category = expense.category {
                                 Text(category)
-                                    .font(.system(size: 12, weight: .medium))
+                                    .font(.footnote)
                                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                    .textCase(nil)
                             }
 
                             if expense.isUnassignedWorkspace {
@@ -96,7 +98,7 @@ struct ExpandableExpenseCard: View {
                     Divider()
 
                     if let heatZone = expense.heatZone {
-                        insightRow(icon: "flame.fill", title: "Heat Zone", value: formatEnum(heatZone), color: .red)
+                        insightRow(icon: "flame.fill", title: "Heat zone", value: formatEnum(heatZone), color: .red)
                     }
                     if let habit = expense.habitSignature {
                         insightRow(icon: "arrow.triangle.2.circlepath", title: "Habit", value: formatEnum(habit), color: .blue)
@@ -119,7 +121,11 @@ struct ExpandableExpenseCard: View {
                     } label: {
                         HStack {
                             Spacer()
-                            Label("Edit Transaction", systemImage: "pencil.line")
+                            Label {
+                                BuxCatalogText.text("Edit transaction")
+                            } icon: {
+                                Image(systemName: "pencil.line")
+                            }
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(themeManager.current.accentColor)
                             Spacer()
@@ -143,6 +149,7 @@ struct ExpandableExpenseCard: View {
                 emotionSymbol: expense.emotionSymbol
             )
         )
+        .environment(\.textCase, nil)
     }
 
     private func insightRow(icon: String, title: String, value: String, color: Color) -> some View {
@@ -152,18 +159,18 @@ struct ExpandableExpenseCard: View {
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(color)
             BuxCatalogText.text(title)
-                .font(.system(size: 12, weight: .bold))
+                .font(.caption.weight(.medium))
                 .foregroundColor(.gray)
+                .textCase(nil)
             Spacer()
             Text(BuxCatalogLabel.string(value, locale: locale))
-                .font(.system(size: 12, weight: .medium))
+                .font(.caption.weight(.medium))
+                .textCase(nil)
         }
     }
 
     private func formatEnum(_ text: String) -> String {
-        BuxCatalogLabel.string(
-            text.replacingOccurrences(of: "_", with: " ").capitalized,
-            locale: appSettingsManager.interfaceLocale
-        )
+        let key = text.replacingOccurrences(of: "_", with: " ")
+        return BuxCatalogLabel.string(key, locale: appSettingsManager.interfaceLocale)
     }
 }

@@ -81,7 +81,8 @@ struct DashboardView: View {
                                     let spent = dashSnapshot.activeBudgetSpent
                                     let remaining = limit - spent
                                     let progress = limit > 0 ? min(1.0, max(0.0, Double(NSDecimalNumber(decimal: spent).doubleValue / NSDecimalNumber(decimal: limit).doubleValue))) : 0.0
-                                    let warnBudget = settingsStore.showBudgetWarnings && progress > 0.9
+                                    let warnThreshold = Double(max(1, min(100, dashSnapshot.approachingThresholdPercent))) / 100.0
+                                    let warnBudget = settingsStore.showBudgetWarnings && progress >= warnThreshold
                                     
                                     Button(action: {
                                         withAnimation {
@@ -191,6 +192,27 @@ struct DashboardView: View {
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
                                     .frame(maxWidth: .infinity, alignment: .leading)
+
+                                    if dashSnapshot.budgetingMode == .envelope, !dashSnapshot.envelopeBudgets.isEmpty {
+                                        VStack(alignment: .leading, spacing: 10) {
+                                            ForEach(dashSnapshot.envelopeBudgets) { envelope in
+                                                DashboardEnvelopeRow(
+                                                    envelope: envelope,
+                                                    thresholdPercent: dashSnapshot.approachingThresholdPercent,
+                                                    showWarnings: settingsStore.showBudgetWarnings,
+                                                    formatAmount: { appSettingsManager.format($0) },
+                                                    locale: appSettingsManager.interfaceLocale
+                                                ) {
+                                                    navigationCoordinator.openExpensesForEnvelope(
+                                                        categoryId: envelope.categoryId,
+                                                        systemCategoryRaw: envelope.systemCategoryRaw,
+                                                        periodStart: dashSnapshot.budgetPeriodStart,
+                                                        periodEnd: dashSnapshot.budgetPeriodEnd
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                 } else {
                                     // Empty state: No active budget profile
                                     Button(action: {
@@ -1252,5 +1274,64 @@ struct BuxPulsingSymbol: View {
                 )
                 .symbolEffect(.pulse, options: .repeat(3))
         }
+    }
+}
+
+private struct DashboardEnvelopeRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    let envelope: EnvelopeBudgetDisplay
+    let thresholdPercent: Int
+    let showWarnings: Bool
+    let formatAmount: (Decimal) -> String
+    let locale: Locale
+    let onTap: () -> Void
+
+    private var tint: Color {
+        guard showWarnings else { return themeManager.current.accentColor }
+        switch envelope.status {
+        case .over, .atLimit: return .red
+        case .approaching: return .orange
+        case .ok: return themeManager.current.accentColor
+        }
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(envelope.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                        .textCase(nil)
+                    Spacer()
+                    Text(
+                        BuxLocalizedString.format(
+                            "%@ / %@",
+                            locale: locale,
+                            formatAmount(envelope.spent),
+                            formatAmount(envelope.effectiveLimit)
+                        )
+                    )
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                }
+
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color(.systemGray5).opacity(colorScheme == .dark ? 0.35 : 0.55))
+                        Capsule()
+                            .fill(tint)
+                            .frame(width: geo.size.width * CGFloat(min(1, envelope.percentUsed)))
+                    }
+                }
+                .frame(height: 6)
+            }
+            .padding(12)
+            .dashboardMaterialCardChrome(.outlined)
+        }
+        .buttonStyle(BuxDashboardCardButtonStyle())
     }
 }

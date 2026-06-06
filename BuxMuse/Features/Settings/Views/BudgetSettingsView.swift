@@ -11,6 +11,7 @@ struct BudgetSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var brain: BuxMuseBrain
     @ObservedObject private var store = SettingsStore.shared
 
     @State private var editingProfile: CustomBudgetProfile? = nil
@@ -20,7 +21,7 @@ struct BudgetSettingsView: View {
         BuxThemedCardForm {
             BuxFormSection(title: "Budget method") {
                 Picker(selection: $store.budgetingMode) {
-                    ForEach(BudgetingMode.allCases) { mode in
+                    ForEach(BudgetingMode.allCases.filter { $0 != .custom }) { mode in
                         Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                     }
                 } label: {
@@ -28,48 +29,13 @@ struct BudgetSettingsView: View {
                 }
                 .buxThemedSegmentedPicker()
                 .buxFormFieldPadding()
-
-                if store.budgetingMode == .custom {
-                    BuxFormRowDivider()
-                    HStack {
-                        BuxCatalogDynamicText(key: "Spending cap")
-                            .font(.system(size: 15, weight: .semibold))
-                        Spacer()
-                        TextField(BuxCatalogLabel.string("Amount", locale: appSettingsManager.interfaceLocale), value: $store.customBudgetLimit, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .foregroundColor(themeManager.current.accentColor)
-                            .font(.system(size: 16, weight: .bold))
-                            .frame(width: 120)
-                    }
-                    .buxFormFieldPadding()
-                    BuxFormRowDivider()
-                    Picker(selection: $store.customBudgetPeriod) {
-                        ForEach(DefaultBudgetPeriod.allCases) { period in
-                            Text(period.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(period)
-                        }
-                    } label: {
-                        Text(BuxCatalogLabel.string("Budget Period", locale: appSettingsManager.interfaceLocale))
-                    }
-                    .pickerStyle(.menu)
-                    .tint(themeManager.current.accentColor)
-                    .buxFormFieldPadding()
-                } else if store.budgetingMode == .envelope {
-                    BuxFormRowDivider()
-                    Picker(selection: $store.defaultBudgetPeriod) {
-                        ForEach(DefaultBudgetPeriod.allCases) { period in
-                            Text(period.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(period)
-                        }
-                    } label: {
-                        Text(BuxCatalogLabel.string("Default Cycle", locale: appSettingsManager.interfaceLocale))
-                    }
-                    .pickerStyle(.menu)
-                    .tint(themeManager.current.accentColor)
-                    .buxFormFieldPadding()
+                .onAppear {
+                    store.migrateLegacyCustomBudgetModeIfNeeded()
+                    store.normalizeEnvelopeCategoryStorageIfNeeded()
                 }
             }
 
-            if store.budgetingMode == .simple {
+            if store.budgetingMode == .simple || store.budgetingMode == .envelope {
                 BuxFormSection(title: "Income & payday profile") {
                     Picker(selection: $store.incomeFundingSource) {
                         ForEach(IncomeFundingSource.allCases) { source in
@@ -134,6 +100,23 @@ struct BudgetSettingsView: View {
                 }
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
+                if store.budgetingMode == .simple {
+                    BuxFormRowDivider()
+                    Stepper(
+                        value: $store.budgetApproachingThresholdPercent,
+                        in: 50...95,
+                        step: 5
+                    ) {
+                        Text(
+                            BuxLocalizedString.format(
+                                "Approaching threshold: %lld%%",
+                                locale: appSettingsManager.interfaceLocale,
+                                Int64(store.budgetApproachingThresholdPercent)
+                            )
+                        )
+                    }
+                    .buxFormFieldPadding()
+                }
                 BuxFormRowDivider()
                 Toggle(isOn: $store.autoAdjustBudgetsFromHistory) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -230,6 +213,7 @@ struct BudgetSettingsView: View {
                     store.save()
                 }
             }
+            .environmentObject(brain)
             .buxThemedSheetContent()
             .environment(\.settingsEnhancedTint, true)
         }
@@ -245,10 +229,12 @@ struct BudgetSettingsView: View {
                 }
                 store.save()
             }
+            .environmentObject(brain)
             .buxThemedSheetContent()
             .environment(\.settingsEnhancedTint, true)
         }
         .onChange(of: store.budgetingMode) { _, _ in store.save() }
+        .onChange(of: store.budgetApproachingThresholdPercent) { _, _ in store.save() }
         .onChange(of: store.defaultBudgetPeriod) { _, newValue in
             store.customBudgetPeriod = newValue
             store.save()
@@ -284,17 +270,28 @@ struct BudgetSettingsView: View {
 
 // MARK: - Custom Budget Profile & Category Editor View
 
+private struct BudgetCategoryOption: Identifiable, Hashable {
+    let id: String
+    let label: String
+    /// Stable English key or custom user name — never a localized picker label.
+    let storageName: String
+    let categoryId: UUID?
+    let systemCategoryRaw: String?
+}
+
 struct BudgetProfileEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var brain: BuxMuseBrain
 
     @State var profile: CustomBudgetProfile
     let onSave: (CustomBudgetProfile) -> Void
 
-    @State private var newCategoryName = ""
+    @State private var selectedCategoryOptionID: String?
     @State private var newCategoryTarget = ""
+    @State private var showCreateCategory = false
 
     var body: some View {
         NavigationStack {
@@ -317,6 +314,21 @@ struct BudgetProfileEditorView: View {
                         }
                             .tint(themeManager.current.accentColor)
                             .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        Stepper(
+                            value: $profile.approachingThresholdPercent,
+                            in: 50...95,
+                            step: 5
+                        ) {
+                            Text(
+                                BuxLocalizedString.format(
+                                    "Approaching threshold: %lld%%",
+                                    locale: appSettingsManager.interfaceLocale,
+                                    Int64(profile.approachingThresholdPercent)
+                                )
+                            )
+                        }
+                        .buxFormFieldPadding()
                     }
 
                     BuxFormSection(title: "Envelope categories") {
@@ -329,7 +341,12 @@ struct BudgetProfileEditorView: View {
                             ForEach(Array(profile.categories.enumerated()), id: \.element.id) { index, category in
                                 if index > 0 { BuxFormRowDivider() }
                                 HStack {
-                                    Text(category.name)
+                                    Text(
+                                        category.localizedDisplayName(
+                                            categoryRecords: (try? brain.fetchAllCategoryRecords()) ?? [],
+                                            locale: appSettingsManager.interfaceLocale
+                                        )
+                                    )
                                         .font(.system(size: 14, weight: .bold))
                                     Spacer()
                                     Text(appSettingsManager.format(category.targetAmount))
@@ -348,8 +365,18 @@ struct BudgetProfileEditorView: View {
                     }
 
                     BuxFormSection(title: "Add category") {
-                        TextField(BuxCatalogLabel.string("Category Name", locale: appSettingsManager.interfaceLocale), text: $newCategoryName)
-                            .buxFormFieldPadding()
+                        Picker(
+                            BuxCatalogLabel.string("Expense category", locale: appSettingsManager.interfaceLocale),
+                            selection: $selectedCategoryOptionID
+                        ) {
+                            Text(BuxCatalogLabel.string("Choose category", locale: appSettingsManager.interfaceLocale)).tag(Optional<String>.none)
+                            ForEach(categoryOptions) { option in
+                                Text(option.label).tag(Optional(option.id))
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(themeManager.current.accentColor)
+                        .buxFormFieldPadding()
                         BuxFormRowDivider()
                         HStack {
                             TextField(BuxCatalogLabel.string("Target Limit Amount", locale: appSettingsManager.interfaceLocale), text: $newCategoryTarget)
@@ -360,8 +387,23 @@ struct BudgetProfileEditorView: View {
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(themeManager.current.accentColor)
                             }
-                            .disabled(newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || newCategoryTarget.isEmpty)
+                            .disabled(selectedCategoryOptionID == nil || newCategoryTarget.isEmpty)
                         }
+                        .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        Button {
+                            showCreateCategory = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 16, weight: .semibold))
+                                BuxCatalogText.text("Create category")
+                                    .font(.system(size: 15, weight: .semibold))
+                                Spacer()
+                            }
+                            .foregroundStyle(themeManager.current.accentColor)
+                        }
+                        .buttonStyle(.plain)
                         .buxFormFieldPadding()
                     }
 
@@ -394,14 +436,54 @@ struct BudgetProfileEditorView: View {
                 }
             }
         }
+        .sheet(isPresented: $showCreateCategory) {
+            ExpenseCategoryEditorSheet { name, icon, color in
+                if let created = try? brain.createCategory(name: name, icon: icon, color: color) {
+                    selectedCategoryOptionID = "custom-\(created.id.uuidString)"
+                }
+            }
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
+        }
+    }
+
+    private var categoryOptions: [BudgetCategoryOption] {
+        let locale = appSettingsManager.interfaceLocale
+        var options: [BudgetCategoryOption] = []
+        for system in TransactionCategory.allCases where system != .income {
+            options.append(BudgetCategoryOption(
+                id: "system-\(system.rawValue)",
+                label: system.localizedDisplayName(locale: locale),
+                storageName: system.catalogLabelKey,
+                categoryId: nil,
+                systemCategoryRaw: system.rawValue
+            ))
+        }
+        for custom in ((try? brain.fetchAllCategoryRecords()) ?? []).filter(\.isCustom) {
+            options.append(BudgetCategoryOption(
+                id: "custom-\(custom.id.uuidString)",
+                label: custom.localizedDisplayName(locale: locale),
+                storageName: custom.name,
+                categoryId: custom.id,
+                systemCategoryRaw: custom.systemCategoryRaw
+            ))
+        }
+        return options
     }
 
     private func addCategory() {
-        guard let amount = Decimal(string: newCategoryTarget) else { return }
-        let newCat = CustomBudgetCategory(name: newCategoryName, targetAmount: amount)
+        guard let amount = Decimal(string: newCategoryTarget),
+              let optionID = selectedCategoryOptionID,
+              let option = categoryOptions.first(where: { $0.id == optionID }) else { return }
+        let newCat = CustomBudgetCategory(
+            name: option.storageName,
+            targetAmount: amount,
+            categoryId: option.categoryId,
+            systemCategoryRaw: option.systemCategoryRaw
+        )
         profile.categories.append(newCat)
         profile.targetAmount = profile.categories.reduce(0) { $0 + $1.targetAmount }
-        newCategoryName = ""
+        selectedCategoryOptionID = nil
         newCategoryTarget = ""
     }
 

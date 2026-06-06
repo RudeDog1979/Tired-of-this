@@ -16,6 +16,7 @@ struct ExpenseSubscriptionFieldsView: View {
     @Binding var subscriptionStartDate: Date
     @Binding var trialEndDate: Date
     @Binding var renewalReminderDays: Int
+    var categoryImpliesSubscription: Bool = false
 
     private let reminderPresets = [1, 3, 7, 14]
 
@@ -27,7 +28,9 @@ struct ExpenseSubscriptionFieldsView: View {
 
     var body: some View {
         Group {
-            Toggle(loc("This is a subscription"), isOn: $isSubscription)
+            if !categoryImpliesSubscription {
+                Toggle(loc("This is a subscription"), isOn: $isSubscription)
+            }
 
             if isSubscription {
                 Toggle(loc("This is a trial"), isOn: $isTrial)
@@ -35,7 +38,9 @@ struct ExpenseSubscriptionFieldsView: View {
                 if isTrial {
                     DatePicker(loc("Trial end date"), selection: $trialEndDate, displayedComponents: .date)
                 } else {
-                    DatePicker(loc("Subscription start"), selection: $subscriptionStartDate, displayedComponents: .date)
+                    BuxCatalogText.text("Renewal is based on the expense date.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 reminderSection

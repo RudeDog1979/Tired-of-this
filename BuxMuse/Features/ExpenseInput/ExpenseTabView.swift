@@ -109,6 +109,7 @@ struct ExpenseTabView: View {
         .buxReportsContainerWidth()
         .onAppear {
             listModel.reloadCatalog(brain: brain)
+            applyPendingExpenseFilterIfNeeded()
             refreshExpenseListDisplay()
             listAppeared = true
             if !carouselSessionReady {
@@ -152,6 +153,10 @@ struct ExpenseTabView: View {
         }
         .onChange(of: HustleManager.shared.selectedHustleId) { _, _ in
             refreshExpenseListDisplay()
+        }
+        .onChange(of: navigationCoordinator.selectedTab) { _, tab in
+            guard tab == .expense else { return }
+            applyPendingExpenseFilterIfNeeded()
         }
         .onChange(of: SettingsStore.shared.sideHustleMatrixEnabled) { _, _ in
             refreshExpenseListDisplay()
@@ -441,21 +446,12 @@ struct ExpenseTabView: View {
                 }
 
                 ForEach(display.sections) { section in
-                    Section {
-                        ForEach(section.expenses) { expense in
-                            if let record = filteredRecords.first(where: { $0.id == expense.id }) {
-                                expenseRowContent(expense: expense, record: record)
-                            }
-                        }
-                    } header: {
+                    VStack(alignment: .leading, spacing: 0) {
                         HStack {
-                            Text(
-                                BuxCatalogLabel.string(section.title, locale: appSettingsManager.interfaceLocale)
-                                    .uppercased()
-                            )
-                                .font(.system(size: 11, weight: .bold))
+                            Text(section.title)
+                                .font(.subheadline.weight(.semibold))
                                 .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                .kerning(1.2)
+                                .textCase(nil)
 
                             Spacer()
 
@@ -464,10 +460,17 @@ struct ExpenseTabView: View {
                             }
                         }
                         .padding(.vertical, 8)
+
+                        ForEach(section.expenses) { expense in
+                            if let record = filteredRecords.first(where: { $0.id == expense.id }) {
+                                expenseRowContent(expense: expense, record: record)
+                            }
+                        }
                     }
                 }
             }
             .padding(.top, BuxTokens.tight)
+            .environment(\.textCase, nil)
         }
         .scrollDismissesKeyboard(.interactively)
         .buxRootTabScrollChrome()
@@ -552,6 +555,11 @@ struct ExpenseTabView: View {
                 Label("Delete", systemImage: "trash")
             }
         }
+    }
+
+    private func applyPendingExpenseFilterIfNeeded() {
+        guard let pending = navigationCoordinator.consumePendingExpenseFilter() else { return }
+        listModel.filters = pending
     }
 
     private func refreshExpenseListDisplay() {

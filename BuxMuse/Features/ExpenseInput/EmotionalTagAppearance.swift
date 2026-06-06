@@ -227,6 +227,7 @@ enum EmotionalTagAppearance {
     static func watermark(
         tag: EmotionalTag,
         colorScheme: ColorScheme,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
         scale: WatermarkScale = .listCard,
         opacity: Double = 1,
         includeLabel: Bool = false
@@ -237,10 +238,9 @@ enum EmotionalTagAppearance {
         Group {
             if includeLabel {
                 ZStack(alignment: .bottomTrailing) {
-                    Text(tag.label.uppercased())
-                        .font(.system(size: scale.labelSize, weight: .heavy, design: .rounded))
+                    Text(tag.localizedLabel(locale: locale))
+                        .font(.system(size: scale.labelSize, weight: .semibold, design: .rounded))
                         .foregroundColor(accent.opacity(scale.labelOpacity(dark: dark)))
-                        .kerning(1.6)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .padding(.trailing, 12)

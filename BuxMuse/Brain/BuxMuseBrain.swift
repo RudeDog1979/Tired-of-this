@@ -525,82 +525,62 @@ public final class BuxMuseBrain: ObservableObject {
         
         let calendar = Self.budgetCalendar()
         let now = Date()
+        let store = SettingsStore.shared
+        store.migrateLegacyCustomBudgetModeIfNeeded()
+        store.normalizeEnvelopeCategoryStorageIfNeeded()
         let budgetPeriod = BuxBudgetPeriodCalculator.currentPeriod(
             configuration: .fromSettings,
             now: now,
             calendar: calendar
         )
-        let simplePeriodTxs = txs.filter { $0.date >= budgetPeriod.start && $0.date < budgetPeriod.end }
-        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
-        let calendarMonthTxs = txs.filter { $0.date >= startOfMonth }
-        
-        let budgetingMode = SettingsStore.shared.budgetingMode
+        let periodTxs = txs.filter { $0.date >= budgetPeriod.start && $0.date < budgetPeriod.end }
+
+        let budgetingMode = store.budgetingMode
         let activeBudgetName: String?
         let activeBudgetLimit: Decimal
         let activeBudgetSpent: Decimal
-        
+        var envelopeBudgets: [EnvelopeBudgetDisplay] = []
         let locale = BuxInterfaceLocale.currentInterfaceLocale
+        let categoryRecords = (try? persistence.fetchAllCategoryRecords()) ?? []
+        let incomePool = BudgetEnvelopeEngine.incomePool(
+            records: (try? persistence.fetchAllExpenseRecords()) ?? [],
+            fundingSource: store.incomeFundingSource,
+            period: budgetPeriod,
+            locale: locale
+        )
+        let approachingThreshold = store.budgetApproachingThresholdPercent
+
         switch budgetingMode {
-        case .simple:
+        case .simple, .custom:
             activeBudgetName = BuxLocalizedString.format(
                 "Simple budget · %@",
                 locale: locale,
-                SettingsStore.shared.simpleBudgetCycle.catalogLabel(locale: locale)
+                store.simpleBudgetCycle.catalogLabel(locale: locale)
             )
-            if SettingsStore.shared.autoAdjustBudgetsFromHistory {
+            if store.autoAdjustBudgetsFromHistory {
                 activeBudgetLimit = Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
             } else {
-                activeBudgetLimit = SettingsStore.shared.simpleBudgetLimit
+                activeBudgetLimit = store.simpleBudgetLimit
             }
-            activeBudgetSpent = simplePeriodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
-            
+            activeBudgetSpent = periodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+
         case .envelope:
-            let activeProfile = SettingsStore.shared.customBudgetProfiles.first(where: { $0.isActive })
+            let activeProfile = store.customBudgetProfiles.first(where: { $0.isActive })
             activeBudgetName = activeProfile?.name
             activeBudgetLimit = activeProfile?.targetAmount ?? 0
 
-            let categoryRecords = (try? persistence.fetchAllCategoryRecords()) ?? []
-            let expenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
-            let recordsById = Self.recordsByID(expenseRecords)
-
-            var spent: Decimal = 0
             if let activeProfile {
-                for category in activeProfile.categories {
-                    let categorySpent = calendarMonthTxs
-                        .filter { tx in
-                            Self.transactionMatchesEnvelopeCategory(
-                                tx,
-                                envelopeName: category.name,
-                                recordsById: recordsById,
-                                categoryRecords: categoryRecords
-                            )
-                        }
-                        .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
-                    spent += categorySpent
-                }
+                envelopeBudgets = BudgetEnvelopeEngine.computeEnvelopes(
+                    profile: activeProfile,
+                    records: (try? persistence.fetchAllExpenseRecords()) ?? [],
+                    categoryRecords: categoryRecords,
+                    period: budgetPeriod,
+                    locale: locale
+                )
+                activeBudgetSpent = envelopeBudgets.reduce(0) { $0 + $1.spent }
+            } else {
+                activeBudgetSpent = 0
             }
-            activeBudgetSpent = spent
-            
-        case .custom:
-            let period = SettingsStore.shared.customBudgetPeriod
-            activeBudgetName = BuxLocalizedString.format(
-                "Custom %@ Budget",
-                locale: locale,
-                BuxCatalogLabel.string(period.rawValue, locale: locale)
-            )
-            activeBudgetLimit = SettingsStore.shared.customBudgetLimit
-            
-            let startOfPeriod: Date
-            switch period {
-            case .weekly:
-                startOfPeriod = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) ?? now
-            case .monthly:
-                startOfPeriod = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
-            case .custom: // Treat custom as daily pacing
-                startOfPeriod = calendar.startOfDay(for: now)
-            }
-            let customPeriodTxs = txs.filter { $0.date >= startOfPeriod }
-            activeBudgetSpent = customPeriodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
         }
 
         let hubSnapshot = SubscriptionHubSnapshot(
@@ -618,7 +598,15 @@ public final class BuxMuseBrain: ObservableObject {
             totalBalance: totalBalance,
             activeBudgetName: activeBudgetName,
             activeBudgetLimit: activeBudgetLimit,
-            activeBudgetSpent: activeBudgetSpent
+            activeBudgetSpent: activeBudgetSpent,
+            budgetingMode: budgetingMode,
+            incomePoolThisPeriod: incomePool,
+            envelopeBudgets: envelopeBudgets,
+            budgetPeriodStart: budgetPeriod.start,
+            budgetPeriodEnd: budgetPeriod.end,
+            approachingThresholdPercent: budgetingMode == .envelope
+                ? (store.customBudgetProfiles.first(where: { $0.isActive })?.approachingThresholdPercent ?? 80)
+                : approachingThreshold
         )
 
         dashboardSnapshot = dashSnapshot

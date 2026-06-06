@@ -33,7 +33,9 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published public var isMerchantFieldExpanded = true
     private var skipMerchantSuggestionRefresh = false
 
-    @Published public var amountString = ""
+    @Published public var amountString = "" {
+        didSet { refreshEnvelopeWarning() }
+    }
     @Published public var selectedCategory: TransactionCategory = .other
     @Published public var selectedCategoryId: UUID?
     @Published public var date = Date()
@@ -52,6 +54,7 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published public var saveError: String?
     @Published public var actionNotice: String?
     @Published public var smartHint: String?
+    @Published public var envelopeWarning: String?
     @Published public var shouldAutoTriggerScanner = false
 
     @Published public var isSubscription = false
@@ -75,6 +78,10 @@ public final class AddExpenseViewModel: ObservableObject {
     public var isEditing: Bool { editingId != nil }
     /// Logging income (Home → Log income), not an outflow expense.
     public let isIncomeEntry: Bool
+
+    public var isSubscriptionsCategorySelected: Bool {
+        selectedCategory == .subscriptions
+    }
 
     public var needsDisambiguatorLabel: Bool {
         brain.merchantBrain.needsDisambiguatorLabel(
@@ -139,7 +146,101 @@ public final class AddExpenseViewModel: ObservableObject {
             refreshMerchantSuggestions(resetSelection: true)
             let hasMerchant = !merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             isMerchantFieldExpanded = !(hasMerchant && editing != nil)
+            if selectedCategory == .subscriptions {
+                categorySelectionDidChange()
+            } else if isSubscription {
+                syncSubscriptionStartFromExpenseDate()
+            }
         }
+    }
+
+    public func categorySelectionDidChange() {
+        guard !isIncomeEntry else { return }
+        if selectedCategory == .subscriptions {
+            isSubscription = true
+            syncSubscriptionStartFromExpenseDate()
+        } else if isSubscription {
+            isSubscription = false
+            isTrial = false
+        }
+        refreshEnvelopeWarning()
+    }
+
+    public func refreshEnvelopeWarning() {
+        guard !isIncomeEntry else {
+            envelopeWarning = nil
+            return
+        }
+        let store = SettingsStore.shared
+        guard store.budgetingMode == .envelope,
+              store.showBudgetWarnings,
+              let profile = store.customBudgetProfiles.first(where: { $0.isActive }) else {
+            envelopeWarning = nil
+            return
+        }
+        let cleaned = amountString.replacingOccurrences(of: ",", with: ".")
+        guard let amount = Decimal(string: cleaned), amount > 0 else {
+            envelopeWarning = nil
+            return
+        }
+
+        let categoryRecords = (try? brain.fetchAllCategoryRecords()) ?? []
+        let preview = ExpenseRecord(
+            name: merchantName,
+            amountValue: -amount,
+            currencyCode: settingsManager.selectedCurrency.id,
+            categoryId: selectedCategoryId,
+            date: date,
+            categoryRaw: selectedCategory.rawValue,
+            merchantName: merchantName
+        )
+        guard let envelope = profile.categories.first(where: {
+            BudgetEnvelopeEngine.recordMatchesEnvelope(
+                preview,
+                envelope: $0,
+                categoryRecords: categoryRecords,
+                locale: locale
+            )
+        }) else {
+            envelopeWarning = nil
+            return
+        }
+
+        let period = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: .fromSettings,
+            calendar: {
+                var cal = Calendar.current
+                cal.firstWeekday = store.weekStartDay.calendarWeekday
+                return cal
+            }()
+        )
+        if let result = BudgetEnvelopeEngine.projectedEnvelopeStatus(
+            envelope: envelope,
+            profile: profile,
+            records: (try? brain.fetchAllExpenseRecords()) ?? [],
+            categoryRecords: categoryRecords,
+            period: period,
+            additionalAmount: amount,
+            locale: locale
+        ) {
+            envelopeWarning = BuxLocalizedString.format(
+                result.messageKey,
+                locale: locale,
+                envelope.name
+            )
+        } else {
+            envelopeWarning = nil
+        }
+    }
+
+    public func expenseDateDidChange() {
+        guard isSubscription else { return }
+        syncSubscriptionStartFromExpenseDate()
+    }
+
+    private func syncSubscriptionStartFromExpenseDate() {
+        guard isSubscription, !isTrial else { return }
+        subscriptionStartDate = date
     }
 
     public func prefillFromScan(merchant: String, amount: Decimal, date: Date, details: String?) {
@@ -151,6 +252,7 @@ public final class AddExpenseViewModel: ObservableObject {
             self.notes = details
         }
         refreshMerchantSuggestions(resetSelection: true)
+        expenseDateDidChange()
     }
 
     public func expandMerchantFieldForEditing() {
@@ -460,7 +562,7 @@ public final class AddExpenseViewModel: ObservableObject {
             notes: notes.isEmpty ? nil : notes,
             isSubscriptionLike: isSubscription,
             isTrial: isSubscription && isTrial,
-            subscriptionStartDate: isSubscription && !isTrial ? subscriptionStartDate : nil,
+            subscriptionStartDate: isSubscription && !isTrial ? date : nil,
             trialEndDate: isSubscription && isTrial ? trialEndDate : nil,
             renewalReminderDays: isSubscription ? renewalReminderDays : nil,
             categoryRaw: isSubscription ? TransactionCategory.subscriptions.rawValue : selectedCategory.rawValue,
@@ -489,7 +591,7 @@ public final class AddExpenseViewModel: ObservableObject {
         if isSubscription {
             record.nextExpectedDate = isTrial
                 ? trialEndDate
-                : Calendar.current.date(byAdding: .month, value: 1, to: subscriptionStartDate)
+                : Calendar.current.date(byAdding: .month, value: 1, to: date)
         }
 
         if isRecurring, !isSubscription {
@@ -556,6 +658,12 @@ public final class AddExpenseViewModel: ObservableObject {
         if let end = record.trialEndDate { trialEndDate = end }
         renewalReminderDays = record.renewalReminderDays ?? 3
         emotionTag = record.emotion ?? ""
+        if selectedCategory == .subscriptions {
+            isSubscription = true
+            syncSubscriptionStartFromExpenseDate()
+        } else if isSubscription {
+            syncSubscriptionStartFromExpenseDate()
+        }
     }
 
     /// `name` stays the user label; `merchantName` holds the linked store brand for logos when applicable.
