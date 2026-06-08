@@ -14,6 +14,12 @@ final class BuxNotificationInboxEngine {
     private let dismissedIdsKey = "buxmuse.notifications.dismissedIds"
     private let pushedIdsKey = "buxmuse.notifications.pushedIds"
 
+    static func purgePersistedState() {
+        UserDefaults.standard.removeObject(forKey: "buxmuse.notifications.readIds")
+        UserDefaults.standard.removeObject(forKey: "buxmuse.notifications.dismissedIds")
+        UserDefaults.standard.removeObject(forKey: "buxmuse.notifications.pushedIds")
+    }
+
     func rebuildInbox(
         settings: SettingsStore,
         dashSnapshot: DashboardSnapshot,

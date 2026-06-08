@@ -68,7 +68,7 @@ struct InvoicePartyEditorFields: View {
                         "%@ %@",
                         locale: locale,
                         country.flag,
-                        country.name
+                        CountryDisplayL10n.displayName(for: country, locale: locale)
                     )
                 )
                 .tag(country.id)
@@ -160,7 +160,7 @@ struct InvoicePartyEditorForm: View {
                             "%@ %@",
                             locale: locale,
                             country.flag,
-                            country.name
+                            CountryDisplayL10n.displayName(for: country, locale: locale)
                         )
                     )
                     .tag(country.id)

@@ -62,6 +62,16 @@ enum SimpleStudioScanImageStore {
         return scansDirectory.appendingPathComponent(storedPath)
     }
 
+    /// Removes every scan/business-card image from disk.
+    static func purgeAllStoredImages() {
+        let fm = FileManager.default
+        let dir = scansDirectory
+        guard let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return }
+        for file in files {
+            try? fm.removeItem(at: file)
+        }
+    }
+
     /// Converts legacy absolute paths to relative after load.
     static func normalizedStoredPath(_ storedPath: String?) -> String? {
         guard let storedPath, !storedPath.isEmpty else { return nil }

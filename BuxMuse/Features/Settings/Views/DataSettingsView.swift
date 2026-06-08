@@ -17,11 +17,13 @@ struct DataSettingsView: View {
     @EnvironmentObject private var goalsViewModel: GoalsViewModel
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @ObservedObject private var store = SettingsStore.shared
 
     @State private var showResetDialog = false
+    @State private var showFinalPurgeDialog = false
     @State private var showSuccessAlert = false
     @State private var showLogoCacheClearedAlert = false
     @State private var exportURL: URL? = nil
@@ -197,7 +199,7 @@ struct DataSettingsView: View {
             }
 
             BuxFormSection(title: "Merchant data") {
-                BuxCatalogDynamicText(key: "Merchant icons use your on-device cache first. When online, BuxMuse may fetch favicons from Google or DuckDuckGo. Your merchant choices are stored locally on this device.")
+                BuxCatalogDynamicText(key: "Merchant icons use your on-device cache first. When online, BuxMuse may refresh them automatically. Your merchant choices are stored locally on this device.")
                     .font(.system(size: 13, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
@@ -280,7 +282,7 @@ struct DataSettingsView: View {
         .alert(BuxCatalogLabel.string("Database Reset Complete", locale: appSettingsManager.interfaceLocale), isPresented: $showSuccessAlert) {
             Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
-            BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, merchants, and cached logos are removed.")
+            BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, Tax savings, merchants, Studio data, caches, and backups are removed.")
         }
         .alert(BuxCatalogLabel.string("Logo cache cleared", locale: appSettingsManager.interfaceLocale), isPresented: $showLogoCacheClearedAlert) {
             Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
@@ -288,12 +290,20 @@ struct DataSettingsView: View {
             BuxCatalogDynamicText(key: "Merchant favicons will download again the next time you view them.")
         }
         .confirmationDialog(BuxCatalogLabel.string("WARNING: Delete All Data?", locale: appSettingsManager.interfaceLocale), isPresented: $showResetDialog, titleVisibility: .visible) {
-            Button(BuxCatalogLabel.string("Confirm Complete Purge", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+            Button(BuxCatalogLabel.string("Continue to final warning", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                showFinalPurgeDialog = true
+            }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+        } message: {
+            BuxCatalogDynamicText(key: "This action is completely offline and irreversible. It will wipe expenses, goals, Tax savings, merchants, logo cache, Studio and Simple Studio records, receipts, scans, backups, and reset all settings.")
+        }
+        .alert(BuxCatalogLabel.string("Final warning: erase everything?", locale: appSettingsManager.interfaceLocale), isPresented: $showFinalPurgeDialog) {
+            Button(BuxCatalogLabel.string("Erase everything permanently", locale: appSettingsManager.interfaceLocale), role: .destructive) {
                 performFullPurge()
             }
             Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
-            BuxCatalogDynamicText(key: "This action is completely offline and irreversible. It will wipe all expenses, merchants, logo cache, Studio records, secure passcodes, and reset settings.")
+            BuxCatalogDynamicText(key: "Last chance: BuxMuse will permanently delete every piece of local data on this device. Nothing will remain. Are you absolutely sure?")
         }
         .onChange(of: store.allowLocalBackups) { _, _ in store.save() }
         .onChange(of: store.autoBackupFrequency) { _, _ in store.save() }
@@ -414,6 +424,20 @@ struct DataSettingsView: View {
     private func performFullPurge() {
         store.resetAllData()
         LightweightLogoCache.shared.clearCacheSynchronously()
+        BuxStorageAuditEngine.purgeAllUserGeneratedMedia()
+        SimpleStudioScanImageStore.purgeAllStoredImages()
+        TaxTranslationCache.clearAll()
+        HustleManager.shared.resetAllData()
+        MoneyMapLayoutStore.shared.resetAll()
+        BuxNotificationInboxEngine.purgePersistedState()
+        StudioTimerController.shared.reset()
+        UserDefaults.standard.removeObject(forKey: "buxmuse.cancelledSubscriptionMerchants")
+        UserDefaults.standard.removeObject(forKey: "buxmuse.moneymap.didPlayFirstFullOpen")
+        UserDefaults.standard.removeObject(forKey: "buxmuse.news.cache.v2")
+        UserDefaults.standard.removeObject(forKey: "buxmuse.news.lastFetchTipDay")
+        UserDefaults.standard.removeObject(forKey: "buxmuse.news.seenTipId")
+        UserDefaults.standard.removeObject(forKey: "buxmuse.tips.history")
+        exportURL = nil
 
         do {
             try persistence.purgeAllUserFinancialData()
@@ -421,6 +445,8 @@ struct DataSettingsView: View {
             studioStore.resetAllData()
             simpleStudioStore.resetAllData()
             brain.refreshExpenses()
+            taxEnvelopeBrain.refreshAll()
+            refreshStorageBreakdown()
             self.showSuccessAlert = true
         } catch {
             print("Database purge failed: \(error)")

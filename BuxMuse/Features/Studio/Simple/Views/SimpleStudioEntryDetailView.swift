@@ -46,10 +46,10 @@ struct SimpleStudioEntryDetailView: View {
                             }
 
                             if entry.kind == .job {
-                                StudioJobAgreementSummarySection(job: entry)
-                                    .environmentObject(studioStore)
-                                    .environmentObject(store)
-                                    .padding(.horizontal, BuxTokens.marginRegular)
+                                SimpleStudioJobDealSection(job: entry) {
+                                    showJobEditor = true
+                                }
+                                .padding(.horizontal, BuxTokens.marginRegular)
                             }
 
                             BuxThemedCardForm {

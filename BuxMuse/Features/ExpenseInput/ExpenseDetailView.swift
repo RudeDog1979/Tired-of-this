@@ -62,14 +62,16 @@ struct ExpenseDetailView: View {
                 }
                 .buxDetailScrollChrome()
             }
-            .navigationTitle(viewModel.record.name)
+            .navigationTitle(
+                ExpenseDisplayL10n.label(viewModel.record.name, locale: appSettingsManager.interfaceLocale)
+            )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     BuxToolbarBackButton { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Edit") { showEditSheet = true }
+                    Button(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale)) { showEditSheet = true }
                         .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
                 }
             }
@@ -333,7 +335,7 @@ struct ExpenseDetailView: View {
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                Button("Save note") {
+                Button(BuxCatalogLabel.string("Save note", locale: appSettingsManager.interfaceLocale)) {
                     try? viewModel.saveNotes()
                     onUpdated()
                 }
@@ -401,41 +403,42 @@ struct ExpenseDetailView: View {
     private var insightItems: [InsightItem] {
         var items: [InsightItem] = []
         let intel = viewModel.intelligence
+        let locale = appSettingsManager.interfaceLocale
         if let s = intel.duplicateSummary {
-            items.append(.init(title: "Duplicate", body: s, icon: "exclamationmark.triangle.fill", isWarning: true))
+            items.append(.init(title: BuxCatalogLabel.string("Duplicate", locale: locale), body: s, icon: "exclamationmark.triangle.fill", isWarning: true))
         }
         if let s = intel.refundSummary {
-            items.append(.init(title: "Refund", body: s, icon: "exclamationmark.triangle.fill", isWarning: true))
+            items.append(.init(title: BuxCatalogLabel.string("Refund", locale: locale), body: s, icon: "exclamationmark.triangle.fill", isWarning: true))
         }
         if let s = intel.recurrenceSummary {
-            items.append(.init(title: "Recurrence", body: s, icon: "arrow.triangle.2.circlepath", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Recurrence", locale: locale), body: s, icon: "arrow.triangle.2.circlepath", isWarning: false))
         }
         if let s = intel.subscriptionSummary {
-            items.append(.init(title: "Subscription", body: s, icon: "repeat.circle", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Subscription", locale: locale), body: s, icon: "repeat.circle", isWarning: false))
         }
         if let s = intel.heatZoneSummary {
-            items.append(.init(title: "Heat zone", body: s, icon: "flame", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Heat zone", locale: locale), body: s, icon: "flame", isWarning: false))
         }
         if let s = intel.futureImpactSummary {
-            items.append(.init(title: "Future impact", body: s, icon: "calendar.badge.clock", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Future impact", locale: locale), body: s, icon: "calendar.badge.clock", isWarning: false))
         }
         if let s = intel.habitSignatureSummary {
-            items.append(.init(title: "Habit signature", body: s, icon: "arrow.triangle.2.circlepath", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Habit signature", locale: locale), body: s, icon: "arrow.triangle.2.circlepath", isWarning: false))
         }
         if let s = intel.microCommitmentSummary {
-            items.append(.init(title: "Micro commitment", body: s, icon: "target", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Micro commitment", locale: locale), body: s, icon: "target", isWarning: false))
         }
         if let s = intel.emotionalTagSummary {
-            items.append(.init(title: "Emotional tag", body: s, icon: "face.smiling", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Emotional tag", locale: locale), body: s, icon: "face.smiling", isWarning: false))
         }
         if let s = intel.contextTagSummary {
-            items.append(.init(title: "Context", body: s, icon: "tag", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Context", locale: locale), body: s, icon: "tag", isWarning: false))
         }
         if let s = intel.categoryInsight {
-            items.append(.init(title: "Category", body: s, icon: "chart.bar", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Category", locale: locale), body: s, icon: "chart.bar", isWarning: false))
         }
         if let s = intel.merchantInsight {
-            items.append(.init(title: "Merchant", body: s, icon: "building.2", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Merchant", locale: locale), body: s, icon: "building.2", isWarning: false))
         }
         if let s = intel.goalsImpact {
             items.append(.init(title: "Goals", body: s, icon: "target", isWarning: false))

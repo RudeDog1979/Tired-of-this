@@ -12,6 +12,7 @@ struct ExpenseCategorySheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let transaction: Transaction
     let onSelect: (TransactionCategory, UUID?) -> Void
@@ -37,7 +38,7 @@ struct ExpenseCategorySheet: View {
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .padding(.top, 24)
 
-                Text(transaction.merchantName)
+                Text(ExpenseDisplayL10n.label(transaction.merchantName, locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
 

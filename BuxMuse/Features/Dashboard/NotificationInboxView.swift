@@ -58,7 +58,7 @@ struct NotificationInboxView: View {
                     }
                 }
             }
-            .navigationTitle("Notifications")
+            .buxCatalogNavigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.inline)
             .buxThemedSheetContent()
             .toolbar {

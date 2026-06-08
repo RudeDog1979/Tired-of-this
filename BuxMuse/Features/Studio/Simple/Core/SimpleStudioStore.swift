@@ -101,6 +101,13 @@ public final class SimpleStudioStore: ObservableObject {
         save()
     }
 
+    public func markEntryTaxSetAside(entryId: UUID, amount: Decimal, saved: Bool) {
+        guard var entry = entry(id: entryId) else { return }
+        entry.taxSetAsideAmount = amount
+        entry.taxSetAsideMarkedSaved = saved
+        updateEntry(entry)
+    }
+
     public func updateEntry(_ entry: SimpleStudioEntry) {
         guard let idx = entries.firstIndex(where: { $0.id == entry.id }) else { return }
         entries[idx] = entry

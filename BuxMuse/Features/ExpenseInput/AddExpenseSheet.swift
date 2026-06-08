@@ -348,7 +348,7 @@ struct AddExpenseSheet: View {
                                 ProgressView()
                                     .controlSize(.large)
                                     .tint(.white)
-                                Text("Parsing receipt details...")
+                                BuxCatalogText.text("Parsing receipt details...")
                                     .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.white)
                             }
@@ -711,7 +711,7 @@ struct AddExpenseSheet: View {
                     AsyncMerchantLogoView(merchantName: viewModel.merchantName, size: 32)
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(viewModel.merchantName)
+                    Text(ExpenseDisplayL10n.label(viewModel.merchantName, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .lineLimit(1)

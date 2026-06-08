@@ -352,7 +352,7 @@ struct ExpenseTabView: View {
 
                 if HustleWorkspaceFilter.isFilteringActive {
                     ContentUnavailableView {
-                        Label("No expenses in this workspace", systemImage: "rectangle.3.group")
+                        Label(BuxCatalogLabel.string("No expenses in this workspace", locale: appSettingsManager.interfaceLocale), systemImage: "rectangle.3.group")
                     } description: {
                         Text(
                             BuxLocalizedString.format(
@@ -370,7 +370,7 @@ struct ExpenseTabView: View {
                     }
                 } else {
                     ContentUnavailableView {
-                        Label("No expenses logged yet", systemImage: "creditcard")
+                        Label(BuxCatalogLabel.string("No expenses logged yet", locale: appSettingsManager.interfaceLocale), systemImage: "creditcard")
                     } description: {
                         BuxCatalogText.text("Your financial details are kept strictly offline and secure inside the BuxMuse Brain.")
                     } actions: {
@@ -456,7 +456,7 @@ struct ExpenseTabView: View {
 
     private var expenseNoMatchesState: some View {
         ContentUnavailableView {
-            Label("No matches", systemImage: "line.3.horizontal.decrease.circle")
+            Label(BuxCatalogLabel.string("No matches", locale: appSettingsManager.interfaceLocale), systemImage: "line.3.horizontal.decrease.circle")
         } description: {
             BuxCatalogText.text("Try a different merchant, note, or filter.")
         } actions: {
@@ -503,7 +503,7 @@ struct ExpenseTabView: View {
                 noteDraft = record.notes ?? ""
                 noteRecord = record
             } label: {
-                Label("Note", systemImage: "note.text")
+                Label(BuxCatalogLabel.string("Note", locale: appSettingsManager.interfaceLocale), systemImage: "note.text")
             }
 
             Button {
@@ -511,25 +511,25 @@ struct ExpenseTabView: View {
                     activeSheet = .edit(record.toTransaction())
                 }
             } label: {
-                Label("Edit", systemImage: "pencil")
+                Label(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale), systemImage: "pencil")
             }
 
             Button {
                 categorySheetTransaction = record.toTransaction()
             } label: {
-                Label("Category", systemImage: "tag")
+                Label(BuxCatalogLabel.string("Category", locale: appSettingsManager.interfaceLocale), systemImage: "tag")
             }
 
             Button {
                 duplicateExpense(record)
             } label: {
-                Label("Duplicate", systemImage: "plus.square.on.square")
+                Label(BuxCatalogLabel.string("Duplicate", locale: appSettingsManager.interfaceLocale), systemImage: "plus.square.on.square")
             }
 
             Button(role: .destructive) {
                 deleteExpense(record)
             } label: {
-                Label("Delete", systemImage: "trash")
+                Label(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
             }
         }
     }

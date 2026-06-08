@@ -18,6 +18,12 @@ struct BuxPDFSharePayload: Identifiable {
     }
 }
 
+/// SwiftUI sheet payload for native `UIActivityViewController` (avoids dismiss-before-present glitches).
+struct BuxShareItemsPayload: Identifiable {
+    let id = UUID()
+    let items: [Any]
+}
+
 struct BuxActivityShareSheet: UIViewControllerRepresentable {
     let items: [Any]
     var onComplete: (() -> Void)? = nil

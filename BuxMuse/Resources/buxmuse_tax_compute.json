@@ -53,7 +53,8 @@
           { "categoryId": "meals", "deductibility": 0.5 },
           { "categoryId": "travel", "deductibility": 1.0 }
         ],
-        "paymentSchedule": "quarterly"
+        "paymentSchedule": "quarterly",
+        "paymentCalendar": { "dueDay": 31, "dueMonths": [1, 7] }
       },
       "regionalOverrides": {
         "SCT": {
@@ -107,7 +108,8 @@
           "standardRate": 0,
           "registrationThreshold": null
         },
-        "paymentSchedule": "quarterly"
+        "paymentSchedule": "quarterly",
+        "paymentCalendar": { "dueDay": 15, "dueMonths": [4, 6, 9, 1] }
       },
       "regionalOverrides": {
         "CA": {

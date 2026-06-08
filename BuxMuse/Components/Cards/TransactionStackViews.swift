@@ -66,7 +66,7 @@ struct RecentTransactionsSectionView: View {
             AsyncMerchantLogoView(merchantName: dashboardLogoName(for: tx), size: 40)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(tx.merchantName)
+                Text(tx.localizedMerchantLabel(locale: appSettingsManager.interfaceLocale))
                     .font(.body.weight(.medium))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)

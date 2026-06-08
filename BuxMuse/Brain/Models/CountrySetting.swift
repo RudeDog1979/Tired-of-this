@@ -56,13 +56,12 @@ public enum CountryCatalog {
         return allCountries.first { $0.id == normalized }
     }
 
-    public static func filtered(matching query: String) -> [CountrySetting] {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return allCountries }
-        return allCountries.filter {
-            $0.name.lowercased().contains(q) ||
-            $0.id.lowercased().contains(q)
-        }
+    public static func filtered(matching query: String, locale: Locale = Locale(identifier: "en")) -> [CountrySetting] {
+        CountryDisplayL10n.filtered(allCountries, matching: query, locale: locale)
+    }
+
+    public static func sorted(for locale: Locale) -> [CountrySetting] {
+        CountryDisplayL10n.sorted(allCountries, locale: locale)
     }
 
     private static func normalizeRegionCode(_ raw: String) -> String {

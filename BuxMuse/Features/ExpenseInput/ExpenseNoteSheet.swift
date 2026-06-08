@@ -11,6 +11,7 @@ struct ExpenseNoteSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let merchantName: String
     @Binding var notes: String
@@ -24,7 +25,7 @@ struct ExpenseNoteSheet: View {
 
                 BuxThemedCardForm {
                     BuxFormSection {
-                        Text(merchantName)
+                        Text(ExpenseDisplayL10n.label(merchantName, locale: appSettingsManager.interfaceLocale))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .buxFormFieldPadding()
@@ -36,7 +37,7 @@ struct ExpenseNoteSheet: View {
                     }
                 }
             }
-            .navigationTitle("Add note")
+            .buxCatalogNavigationTitle("Add note")
             .navigationBarTitleDisplayMode(.inline)
             .buxThemedSheetContent()
             .toolbar {

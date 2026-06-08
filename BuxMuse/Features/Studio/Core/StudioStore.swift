@@ -23,6 +23,7 @@ public final class StudioStore: ObservableObject {
     @Published public var mileageEntries: [MileageEntry] = []
     @Published public var businessCardLibrary: ProBusinessCardLibrary = ProBusinessCardLibrary()
     @Published public var agreementDrafts: [AgreementDraft] = []
+    @Published public var taxEnvelope: TaxEnvelopeState = TaxEnvelopeState()
 
     private let saveQueue = DispatchQueue(label: "com.buxmuse.freelance.save", qos: .utility)
     private var isLoaded = false
@@ -128,7 +129,8 @@ public final class StudioStore: ObservableObject {
             invoiceSettings: invoiceSettings,
             mileageEntries: mileageEntries,
             businessCardLibrary: businessCardLibrary,
-            agreementDrafts: agreementDrafts
+            agreementDrafts: agreementDrafts,
+            taxEnvelope: taxEnvelope
         )
     }
 
@@ -143,6 +145,33 @@ public final class StudioStore: ObservableObject {
         mileageEntries = snapshot.mileageEntries
         businessCardLibrary = snapshot.businessCardLibrary
         agreementDrafts = snapshot.agreementDrafts
+        taxEnvelope = snapshot.taxEnvelope
+    }
+
+    // MARK: - Tax Envelope
+
+    public func updateTaxEnvelope(_ state: TaxEnvelopeState) {
+        taxEnvelope = state
+        save()
+    }
+
+    public func addTaxEnvelopeDeposit(amount: Decimal, linkedEntryId: UUID? = nil, note: String? = nil) {
+        var state = taxEnvelope
+        state.deposits.insert(
+            TaxEnvelopeDeposit(amount: amount, linkedEntryId: linkedEntryId, note: note),
+            at: 0
+        )
+        updateTaxEnvelope(state)
+    }
+
+    public func markTaxEnvelopePaymentPaid(periodKey: String, amount: Decimal) {
+        var state = taxEnvelope
+        guard !state.paymentMarks.contains(where: { $0.periodKey == periodKey }) else { return }
+        state.paymentMarks.insert(
+            TaxEnvelopePaymentMark(periodKey: periodKey, amount: amount),
+            at: 0
+        )
+        updateTaxEnvelope(state)
     }
 
     // MARK: - CRUD: Agreement drafts
@@ -510,6 +539,7 @@ public final class StudioStore: ObservableObject {
         mileageEntries = []
         businessCardLibrary = ProBusinessCardLibrary()
         agreementDrafts = []
+        taxEnvelope = TaxEnvelopeState()
     }
 
     public func resetAllData() {

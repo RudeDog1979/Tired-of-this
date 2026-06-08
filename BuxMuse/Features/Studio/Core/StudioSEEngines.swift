@@ -277,7 +277,13 @@ public enum QuarterlyTaxEngine {
         )
         let breakdown = WorldTaxEngine.compute(request).legacyBreakdown
 
-        let nextPayment = nextPaymentDate(schedule: taxProfile.paymentSchedule, now: now, calendar: calendar)
+        let nextPayment = TaxEnvelopePaymentSchedule.nextPaymentDate(
+            countryCode: countryCode,
+            regionCode: taxProfile.regionCode,
+            schedule: taxProfile.paymentSchedule,
+            reference: now,
+            calendar: calendar
+        )
         let setAside = breakdown.totalEstimatedTax + breakdown.indirectTaxNet
 
         return QuarterlyTaxEstimate(

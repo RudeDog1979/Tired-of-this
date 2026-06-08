@@ -51,7 +51,7 @@ struct MoneyMapFullView: View {
             .task(id: graphRefreshToken) {
                 graph = buildGraph()
             }
-            .navigationTitle("Money Map")
+            .buxCatalogNavigationTitle("Money Map")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

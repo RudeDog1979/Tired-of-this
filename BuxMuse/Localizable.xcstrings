@@ -1174,6 +1174,29 @@
         }
       }
     },
+    "%@ of ~%@ estimated tax this year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de ~%@ de impuesto estimado este año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de ~%@ de impuesto estimado este año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de ~%@ de impuesto estimado este año"
+          }
+        }
+      }
+    },
     "%@ of this month's spending isn't tied to a workspace. Tag expenses to see per-gig profit and tax-ready splits." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1308,6 +1331,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impuesto sobre ventas de %@ (est.)"
+          }
+        }
+      }
+    },
+    "%@ set aside — log pay to refresh your estimate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ apartado — registra pagos para actualizar la estimación"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ apartado — registra pagos para actualizar la estimación"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ apartado — registra pagos para actualizar la estimación"
           }
         }
       }
@@ -6380,6 +6426,7 @@
       }
     },
     "Add note" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -6608,6 +6655,29 @@
         }
       }
     },
+    "Add to my set-aside total" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sumar a mi total apartado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sumar a mi total apartado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sumar a mi total apartado"
+          }
+        }
+      }
+    },
     "Add values when logging" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6672,6 +6742,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Al final — políticas, tarifas o redacción de tu abogado."
+          }
+        }
+      }
+    },
+    "Added to set-aside total" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sumado al total apartado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sumado al total apartado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sumado al total apartado"
           }
         }
       }
@@ -6871,6 +6964,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Agrega esta sesión al trabajo."
+          }
+        }
+      }
+    },
+    "Adds to your set-aside total. BuxMuse does not move money for you." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suma a tu total apartado. BuxMuse no mueve tu dinero."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suma a tu total apartado. BuxMuse no mueve tu dinero."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suma a tu total apartado. BuxMuse no mueve tu dinero."
           }
         }
       }
@@ -7267,6 +7383,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "DESPUÉS DE DEDUCCIONES"
+          }
+        }
+      }
+    },
+    "After logging pay, tap Add — or use I set money aside anytime. BuxMuse tracks the total; it does not hold your money." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tras registrar pago, pulsa Sumar — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tras registrar pago, pulsa Sumar — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tras registrar pago, pulsa Sumar — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero."
           }
         }
       }
@@ -8734,19 +8873,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Monto"
+            "value" : "Importe"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Monto"
+            "value" : "Importe"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Monto"
+            "value" : "Importe"
           }
         }
       }
@@ -8818,6 +8957,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importe adeudado"
+          }
+        }
+      }
+    },
+    "Amounts come from your books and the monthly tax catalog — not fixed guesses." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los importes vienen de tus libros y el catálogo mensual — no suposiciones fijas."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los importes vienen de tus libros y el catálogo mensual — no suposiciones fijas."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los importes vienen de tus libros y el catálogo mensual — no suposiciones fijas."
           }
         }
       }
@@ -9154,6 +9316,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apariencia y temas"
+          }
+        }
+      }
+    },
+    "Appendix — not a tax return" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anexo — no es una declaración"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anexo — no es una declaración"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anexo — no es una declaración"
           }
         }
       }
@@ -9596,6 +9781,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Archivado"
+          }
+        }
+      }
+    },
+    "Are you self-employed?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Trabajas por cuenta propia?"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Trabajas por cuenta propia?"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Trabajas por cuenta propia?"
           }
         }
       }
@@ -10404,19 +10612,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reverso"
+            "value" : "Atrás"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reverso"
+            "value" : "Atrás"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reverso"
+            "value" : "Atrás"
           }
         }
       }
@@ -11386,6 +11594,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transacciones de trueque con isBarterExchange en true."
+          }
+        }
+      }
+    },
+    "Based on what you log and BuxMuse Intelligence for your country — kept on your device." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según lo que registras y BuxMuse Intelligence para tu país — guardado en tu dispositivo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según lo que registras y BuxMuse Intelligence para tu país — guardado en tu dispositivo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según lo que registras y BuxMuse Intelligence para tu país — guardado en tu dispositivo."
+          }
+        }
+      }
+    },
+    "Based on what you log and your country's tax rules — updated monthly." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según lo que registras y las normas fiscales de tu país — actualizado cada mes."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según lo que registras y las reglas fiscales de tu país — actualizado cada mes."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según lo que registras y las normas fiscales de tu país — actualizado cada mes."
+          }
+        }
+      }
+    },
+    "Based on your country's tax rules — about %lld%% is a good starting point." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según las normas fiscales de tu país — ~%lld%% es un buen punto de partida."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según las reglas fiscales de tu país — ~%lld%% es un buen punto de partida."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según las normas fiscales de tu país — ~%lld%% es un buen punto de partida."
           }
         }
       }
@@ -14045,6 +14322,75 @@
         }
       }
     },
+    "BuxMuse Intelligence suggests %@ for your country. Pick what matches you — estimates update right away." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence sugiere %@ para tu país. Elige lo que te corresponda — las estimaciones se actualizan al instante."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence sugiere %@ para tu país. Elige lo que te corresponda — las estimaciones se actualizan al instante."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence sugiere %@ para tu país. Elige lo que te corresponda — las estimaciones se actualizan al instante."
+          }
+        }
+      }
+    },
+    "BuxMuse Intelligence suggests about %lld%% for your country — a good starting point." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence sugiere ~%lld%% para tu país — un buen punto de partida."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence sugiere ~%lld%% para tu país — un buen punto de partida."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence sugiere ~%lld%% para tu país — un buen punto de partida."
+          }
+        }
+      }
+    },
+    "BuxMuse Intelligence uses tax rules for the country in your app settings — on your device." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence usa las normas fiscales del país en los ajustes de la app — en tu dispositivo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence usa las reglas fiscales del país en los ajustes de la app — en tu dispositivo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Intelligence usa las normas fiscales del país en los ajustes de la app — en tu dispositivo."
+          }
+        }
+      }
+    },
     "BuxMuse is built for everyone — from everyday spenders tracking their grocery budget, to self-employed professionals managing invoices and taxes. Private, 100% on-device, zero sign-in required." : {
       "comment" : "A description of BuxMuse's features.",
       "extractionState" : "stale",
@@ -14283,24 +14629,31 @@
     },
     "BuxMuse Vault Active" : {
       "comment" : "A message displayed when the BuxMuse Vault is active.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Vault Active"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BuxMuse Vault activo"
+            "value" : "Bóveda BuxMuse activa"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BuxMuse Vault activo"
+            "value" : "Bóveda BuxMuse activa"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BuxMuse Vault activo"
+            "value" : "Bóveda BuxMuse activa"
           }
         }
       }
@@ -15142,6 +15495,35 @@
         }
       }
     },
+    "Cash Deposit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cash Deposit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depósito en efectivo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depósito en efectivo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depósito en efectivo"
+          }
+        }
+      }
+    },
     "Cash drawer" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15311,6 +15693,35 @@
         }
       }
     },
+    "Cash Spend" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cash Spend"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto en efectivo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto en efectivo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto en efectivo"
+          }
+        }
+      }
+    },
     "Cash vs digital split" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15476,6 +15887,7 @@
     },
     "Categories" : {
       "comment" : "A heading for a list of expense categories.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "es" : {
@@ -16894,6 +17306,12 @@
     "Clear filters" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear filters"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17281,6 +17699,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alerta de cliente: %@"
+          }
+        }
+      }
+    },
+    "Client region (sales tax)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client region (sales tax)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Región del cliente (impuesto sobre ventas)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Región del cliente (impuesto sobre ventas)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Región del cliente (impuesto sobre ventas)"
           }
         }
       }
@@ -18409,6 +18856,12 @@
     "Context" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Context"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18471,6 +18924,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continuar a Apple Health"
+          }
+        }
+      }
+    },
+    "Continue to final warning" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue to final warning"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar a la advertencia final"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar a la advertencia final"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar a la advertencia final"
           }
         }
       }
@@ -20312,6 +20794,29 @@
         }
       }
     },
+    "Current month due" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este mes"
+          }
+        }
+      }
+    },
     "Current Pace" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -20358,6 +20863,29 @@
         }
       }
     },
+    "Current quarter due" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este trimestre"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este trimestre"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este trimestre"
+          }
+        }
+      }
+    },
     "Current saved" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -20400,6 +20928,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gasto semana actual: %@. Promedio semanal mensual: %@."
+          }
+        }
+      }
+    },
+    "Current year due" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vence este año"
           }
         }
       }
@@ -21906,6 +22457,58 @@
         }
       }
     },
+    "Default set-aside guide" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default set-aside guide"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía de apartado predeterminada"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía de apartado predeterminada"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía de apartado predeterminada"
+          }
+        }
+      }
+    },
+    "Default set-aside guide: %lld%%" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía de apartado predeterminada: %lld%%"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía de apartado predeterminada: %lld%%"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía de apartado predeterminada: %lld%%"
+          }
+        }
+      }
+    },
     "Default sleep hours" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -22208,6 +22811,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eliminar meta y descartar datos de ahorro"
+          }
+        }
+      }
+    },
+    "Delete invoice?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete invoice?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar factura?"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar factura?"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar factura?"
           }
         }
       }
@@ -23388,7 +24020,25 @@
     "Does not change Tax Profile — what-if only." : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Does not change Tax Profile — what-if only."
+          }
+        },
         "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cambia el perfil fiscal — solo simulación."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cambia el perfil fiscal — solo simulación."
+          }
+        },
+        "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No cambia el perfil fiscal — solo simulación."
@@ -23992,19 +24642,65 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fecha de vencimiento"
+            "value" : "Fecha límite"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fecha de vencimiento"
+            "value" : "Fecha límite"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fecha de vencimiento"
+            "value" : "Fecha límite"
+          }
+        }
+      }
+    },
+    "Due dates and amounts from your books and %@ tax rules." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechas e importes según tus registros y las normas fiscales de %@."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechas e importes según tus registros y las reglas fiscales de %@."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechas e importes según tus registros y las normas fiscales de %@."
+          }
+        }
+      }
+    },
+    "Due dates and amounts from your books and BuxMuse Intelligence for %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechas e importes según tus registros y BuxMuse Intelligence para %@."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechas e importes según tus registros y BuxMuse Intelligence para %@."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechas e importes según tus registros y BuxMuse Intelligence para %@."
           }
         }
       }
@@ -24028,6 +24724,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Al recibir"
+          }
+        }
+      }
+    },
+    "Due soon" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo pago"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo pago"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo pago"
           }
         }
       }
@@ -24057,22 +24776,28 @@
     },
     "Duplicate" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicate"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duplicar"
+            "value" : "Duplicado"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duplicar"
+            "value" : "Duplicado"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duplicar"
+            "value" : "Duplicado"
           }
         }
       }
@@ -25652,6 +26377,12 @@
     "Emotional tag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emotional tag"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26819,6 +27550,35 @@
         }
       }
     },
+    "Erase everything permanently" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase everything permanently"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar todo permanentemente"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar todo permanentemente"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar todo permanentemente"
+          }
+        }
+      }
+    },
     "esperando" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -27164,6 +27924,29 @@
         }
       }
     },
+    "Estimated amount" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importe estimado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importe estimado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importe estimado"
+          }
+        }
+      }
+    },
     "Estimated annual tax" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -27208,6 +27991,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "IMPUESTO ANUAL ESTIMADO"
+          }
+        }
+      }
+    },
+    "Estimated from your books and BuxMuse Intelligence on your device. Change schedule below if yours is different." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado según tus registros y BuxMuse Intelligence en tu dispositivo. Cambia el calendario abajo si el tuyo es distinto."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado según tus registros y BuxMuse Intelligence en tu dispositivo. Cambia el calendario abajo si el tuyo es distinto."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado según tus registros y BuxMuse Intelligence en tu dispositivo. Cambia el calendario abajo si el tuyo es distinto."
+          }
+        }
+      }
+    },
+    "Estimated from your books and your country's tax rules." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado según tus registros y las normas fiscales de tu país."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado según tus registros y las reglas fiscales de tu país."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado según tus registros y las normas fiscales de tu país."
           }
         }
       }
@@ -27417,6 +28246,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recordatorios de impuestos estimados"
+          }
+        }
+      }
+    },
+    "Estimated tax this month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este mes"
+          }
+        }
+      }
+    },
+    "Estimated tax this quarter" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este trimestre"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este trimestre"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este trimestre"
+          }
+        }
+      }
+    },
+    "Estimated tax this year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto estimado este año"
           }
         }
       }
@@ -28943,6 +29841,29 @@
         }
       }
     },
+    "Figures are estimates from your BuxMuse books and BuxMuse Intelligence on your device. File with your tax authority or accountant." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las cifras son estimaciones según tus registros de BuxMuse y BuxMuse Intelligence en tu dispositivo. Presenta ante tu autoridad fiscal o contador."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las cifras son estimaciones según tus registros de BuxMuse y BuxMuse Intelligence en tu dispositivo. Presenta ante tu autoridad fiscal o contador."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las cifras son estimaciones según tus registros de BuxMuse y BuxMuse Intelligence en tu dispositivo. Presenta ante tu autoridad fiscal o contador."
+          }
+        }
+      }
+    },
     "Fill" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -29219,6 +30140,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Filtros"
+          }
+        }
+      }
+    },
+    "Final warning: erase everything?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Final warning: erase everything?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advertencia final: ¿borrar todo?"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advertencia final: ¿borrar todo?"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advertencia final: ¿borrar todo?"
           }
         }
       }
@@ -30785,6 +31735,12 @@
     "Future impact" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Future impact"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -32220,6 +33176,29 @@
         }
       }
     },
+    "Gross income (YTD)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresos brutos (acumulado)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresos brutos (acumulado)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresos brutos (acumulado)"
+          }
+        }
+      }
+    },
     "Gross Projected Revenue:" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -32239,6 +33218,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ingresos brutos proyectados:"
+          }
+        }
+      }
+    },
+    "Guide rate: %lld%%" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasa guía: %lld%%"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasa guía: %lld%%"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasa guía: %lld%%"
+          }
+        }
+      }
+    },
+    "Guide: %lld%% from BuxMuse Intelligence" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% según BuxMuse Intelligence"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% según BuxMuse Intelligence"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% según BuxMuse Intelligence"
+          }
+        }
+      }
+    },
+    "Guide: %lld%% from catalog" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% del catálogo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% del catálogo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% del catálogo"
+          }
+        }
+      }
+    },
+    "Guide: %lld%% from your tax rules" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% según tus normas fiscales"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% según tus reglas fiscales"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guía: %lld%% según tus normas fiscales"
           }
         }
       }
@@ -32415,6 +33486,12 @@
     "Habit signature" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habit signature"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -32749,22 +33826,28 @@
     "Heat zone" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heat zone"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zona caliente"
+            "value" : "Zona de gasto"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zona caliente"
+            "value" : "Zona de gasto"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zona caliente"
+            "value" : "Zona de gasto"
           }
         }
       }
@@ -33629,6 +34712,29 @@
         }
       }
     },
+    "How often do you get paid?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Con qué frecuencia cobras?"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Con qué frecuencia cobras?"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Con qué frecuencia cobras?"
+          }
+        }
+      }
+    },
     "How they approved (text, call, etc.)" : {
       "comment" : "A label for a text field that describes how a client approved a deal.",
       "extractionState" : "stale",
@@ -33840,6 +34946,29 @@
         }
       }
     },
+    "I earn money on my own" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gano dinero por mi cuenta"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gano dinero por mi cuenta"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gano dinero por mi cuenta"
+          }
+        }
+      }
+    },
     "i lent" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -33953,6 +35082,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardé mi clave de recuperación en un lugar seguro"
+          }
+        }
+      }
+    },
+    "I saved this" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo guardé"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo guardé"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo guardé"
+          }
+        }
+      }
+    },
+    "I set money aside" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparté dinero"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparté dinero"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparté dinero"
           }
         }
       }
@@ -34461,7 +35636,25 @@
     "Include VAT in this simulation" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Include VAT in this simulation"
+          }
+        },
         "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir IVA en esta simulación"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir IVA en esta simulación"
+          }
+        },
+        "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Incluir IVA en esta simulación"
@@ -34701,10 +35894,28 @@
     "Income path" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income path"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vía de ingresos"
+            "value" : "Ruta de ingresos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta de ingresos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta de ingresos"
           }
         }
       }
@@ -34781,10 +35992,28 @@
     "Income tax and indirect tax (VAT/GST) are configured together. Invoices and calculators follow these settings." : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income tax and indirect tax (VAT/GST) are configured together. Invoices and calculators follow these settings."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El impuesto sobre la renta y el impuesto indirecto (IVA/IGIC) se configuran juntos. Las facturas y los cálculos siguen este perfil."
+            "value" : "El impuesto sobre la renta y el impuesto indirecto (IVA/IGV) se configuran juntos. Las facturas y calculadoras siguen estos ajustes."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta y el impuesto indirecto (IVA/IGV) se configuran juntos. Las facturas y calculadoras siguen estos ajustes."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta y el impuesto indirecto (IVA/IGV) se configuran juntos. Las facturas y calculadoras siguen estos ajustes."
           }
         }
       }
@@ -34792,10 +36021,28 @@
     "Income tax and indirect tax (VAT/GST) are set once here. Invoices and estimates follow this profile." : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income tax and indirect tax (VAT/GST) are set once here. Invoices and estimates follow this profile."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El impuesto sobre la renta y el indirecto (IVA/IGIC) se configuran una vez aquí. Facturas y estimaciones siguen este perfil."
+            "value" : "El impuesto sobre la renta y el impuesto indirecto (IVA/IGV) se definen aquí una vez. Las facturas y estimaciones siguen este perfil."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta y el impuesto indirecto (IVA/IGV) se definen aquí una vez. Las facturas y estimaciones siguen este perfil."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta y el impuesto indirecto (IVA/IGV) se definen aquí una vez. Las facturas y estimaciones siguen este perfil."
           }
         }
       }
@@ -34888,6 +36135,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TASA DE IMPUESTO SOBRE LA RENTA %"
+          }
+        }
+      }
+    },
+    "Income tax, social contributions, and VAT/GST are computed from structured rules in the monthly tax catalog. Manual effective % overrides are hidden while catalog brackets apply." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income tax, social contributions, and VAT/GST are computed from structured rules in the monthly tax catalog. Manual effective % overrides are hidden while catalog brackets apply."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta, las cotizaciones sociales y el IVA/IGV se calculan con reglas estructuradas del catálogo fiscal mensual. Los porcentajes manuales quedan ocultos mientras aplican los tramos del catálogo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta, las cotizaciones sociales y el IVA/IGV se calculan con reglas estructuradas del catálogo fiscal mensual. Los porcentajes manuales quedan ocultos mientras aplican los tramos del catálogo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta, las cotizaciones sociales y el IVA/IGV se calculan con reglas estructuradas del catálogo fiscal mensual. Los porcentajes manuales quedan ocultos mientras aplican los tramos del catálogo."
           }
         }
       }
@@ -35486,6 +36762,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reglas de inteligencia"
+          }
+        }
+      }
+    },
+    "Intelligence updated %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intelligence actualizada %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intelligence actualizada %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intelligence actualizada %@"
           }
         }
       }
@@ -37521,6 +38820,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compras más grandes"
+          }
+        }
+      }
+    },
+    "Last chance: BuxMuse will permanently delete every piece of local data on this device. Nothing will remain. Are you absolutely sure?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last chance: BuxMuse will permanently delete every piece of local data on this device. Nothing will remain. Are you absolutely sure?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última oportunidad: BuxMuse eliminará permanentemente todos los datos locales de este dispositivo. No quedará nada. ¿Estás completamente seguro?"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última oportunidad: BuxMuse eliminará permanentemente todos los datos locales de este dispositivo. No quedará nada. ¿Estás completamente seguro?"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última oportunidad: BuxMuse eliminará permanentemente todos los datos locales de este dispositivo. No quedará nada. ¿Estás completamente seguro?"
           }
         }
       }
@@ -39585,6 +40913,52 @@
         }
       }
     },
+    "Log pay this week to see how much to set aside" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra pago esta semana para ver cuánto apartar"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra pago esta semana para ver cuánto apartar"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra pago esta semana para ver cuánto apartar"
+          }
+        }
+      }
+    },
+    "Log pay to see estimated tax for the year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra pagos para ver el impuesto estimado del año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra pagos para ver el impuesto estimado del año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra pagos para ver el impuesto estimado del año"
+          }
+        }
+      }
+    },
     "Log Physical Cash" : {
       "comment" : "A title for a view that lets the user log cash transactions.",
       "isCommentAutoGenerated" : true,
@@ -41040,6 +42414,29 @@
         }
       }
     },
+    "Marked paid" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcado pagado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcado pagado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcado pagado"
+          }
+        }
+      }
+    },
     "Market stall" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -41649,6 +43046,35 @@
         }
       }
     },
+    "Merchant icons use your on-device cache first. When online, BuxMuse may refresh them automatically. Your merchant choices are stored locally on this device." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merchant icons use your on-device cache first. When online, BuxMuse may refresh them automatically. Your merchant choices are stored locally on this device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los iconos de comercios usan primero la caché del dispositivo. En línea, BuxMuse puede actualizarlos automáticamente. Tus comercios se guardan solo en este dispositivo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los iconos de comercios usan primero la caché del dispositivo. En línea, BuxMuse puede actualizarlos automáticamente. Tus comercios se guardan solo en este dispositivo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los iconos de comercios usan primero la caché del dispositivo. En línea, BuxMuse puede actualizarlos automáticamente. Tus comercios se guardan solo en este dispositivo."
+          }
+        }
+      }
+    },
     "Merchant keywords" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -41837,6 +43263,7 @@
     },
     "Merchants" : {
       "comment" : "The title of the merchant list screen.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "es" : {
@@ -41911,22 +43338,28 @@
       "comment" : "A button that merges a category into another.",
       "isCommentAutoGenerated" : true,
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge…"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fusionar…"
+            "value" : "Combinar…"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fusionar…"
+            "value" : "Combinar…"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fusionar…"
+            "value" : "Combinar…"
           }
         }
       }
@@ -42026,6 +43459,12 @@
     "Micro commitment" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Micro commitment"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -42736,6 +44175,7 @@
       }
     },
     "Money Map" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -42851,7 +44291,27 @@
     },
     "Month" : {
       "comment" : "Label for the x-axis in a tax forecast bar chart.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        }
+      }
     },
     "Month spend" : {
       "extractionState" : "stale",
@@ -43339,6 +44799,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mi dinero"
+          }
+        }
+      }
+    },
+    "My set-aside" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi apartado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi apartado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi apartado"
+          }
+        }
+      }
+    },
+    "My year summary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen del año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen del año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen del año"
           }
         }
       }
@@ -44072,6 +45578,29 @@
         }
       }
     },
+    "Next due" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo vencimiento"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo vencimiento"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo vencimiento"
+          }
+        }
+      }
+    },
     "Next due: %@ · %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -44641,6 +46170,35 @@
         }
       }
     },
+    "No country" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No country"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin país"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin país"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin país"
+          }
+        }
+      }
+    },
     "No currencies found" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -44783,8 +46341,15 @@
     },
     "No expenses in this workspace" : {
       "comment" : "A label describing the absence of expenses in the current workspace.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No expenses in this workspace"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -44830,24 +46395,31 @@
     },
     "No expenses logged yet" : {
       "comment" : "A label describing the state when the user has not yet logged any expenses.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No expenses logged yet"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aún no hay gastos"
+            "value" : "Aún no hay gastos registrados"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aún no hay gastos"
+            "value" : "Aún no hay gastos registrados"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aún no hay gastos"
+            "value" : "Aún no hay gastos registrados"
           }
         }
       }
@@ -44970,24 +46542,31 @@
     },
     "No matches" : {
       "comment" : "A label displayed when there are no search results.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matches"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay coincidencias"
+            "value" : "Sin coincidencias"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay coincidencias"
+            "value" : "Sin coincidencias"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay coincidencias"
+            "value" : "Sin coincidencias"
           }
         }
       }
@@ -45206,6 +46785,64 @@
         }
       }
     },
+    "No preset" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No preset"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin plantilla"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin plantilla"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin plantilla"
+          }
+        }
+      }
+    },
+    "No price on this job yet." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No price on this job yet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay precio en este trabajo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay precio en este trabajo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay precio en este trabajo."
+          }
+        }
+      }
+    },
     "No pricing or billing risks detected." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -45300,6 +46937,35 @@
         }
       }
     },
+    "No quote" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No quote"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin cotización"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin cotización"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin cotización"
+          }
+        }
+      }
+    },
     "No receipts scanned yet" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -45344,6 +47010,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aún no hay tarjetas guardadas"
+          }
+        }
+      }
+    },
+    "No set-asides logged yet. Log pay and tap Add, or use I set money aside." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin apartados registrados. Registra pago y pulsa Sumar, o usa Aparté dinero."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin apartados registrados. Registra pago y pulsa Sumar, o usa Aparté dinero."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin apartados registrados. Registra pago y pulsa Sumar, o usa Aparté dinero."
           }
         }
       }
@@ -45429,7 +47118,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin tarifa estándar de impuesto indirecto"
+            "value" : "Sin tasa indirecta estándar"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin tasa indirecta estándar"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin tasa indirecta estándar"
           }
         }
       }
@@ -45532,7 +47233,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin línea de impuesto: revisa el registro de IVA en el perfil fiscal."
+            "value" : "Sin línea fiscal — revisa el registro de IVA en el perfil fiscal."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin línea fiscal — revisa el registro de IVA en el perfil fiscal."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin línea fiscal — revisa el registro de IVA en el perfil fiscal."
           }
         }
       }
@@ -45572,7 +47285,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay tarifas de impuesto en esta factura."
+            "value" : "Sin tasas fiscales en esta factura."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin tasas fiscales en esta factura."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin tasas fiscales en esta factura."
           }
         }
       }
@@ -46109,6 +47834,18 @@
             "state" : "translated",
             "value" : "No registrado para impuesto indirecto"
           }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No registrado para impuesto indirecto"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No registrado para impuesto indirecto"
+          }
         }
       }
     },
@@ -46136,7 +47873,14 @@
       }
     },
     "Note" : {
+      "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -47186,6 +48930,58 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abrir Centro de suscripciones →"
+          }
+        }
+      }
+    },
+    "Open Tax Envelope" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Sobre fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Sobre fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Sobre fiscal"
+          }
+        }
+      }
+    },
+    "Open Tax profile to choose a country preset or enter your rules." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Tax profile to choose a country preset or enter your rules."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre el perfil fiscal para elegir un país o ingresar tus reglas."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre el perfil fiscal para elegir un país o ingresar tus reglas."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre el perfil fiscal para elegir un país o ingresar tus reglas."
           }
         }
       }
@@ -48627,6 +50423,29 @@
         }
       }
     },
+    "Paid it" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya lo pagué"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya lo pagué"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya lo pagué"
+          }
+        }
+      }
+    },
     "Paid so far" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -48883,6 +50702,7 @@
       }
     },
     "Parsing receipt details..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -49907,6 +51727,29 @@
         }
       }
     },
+    "Per job" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por trabajo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por trabajo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por trabajo"
+          }
+        }
+      }
+    },
     "Per month" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -50668,6 +52511,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Elige el trabajo abajo. Verás si el reloj es solo para tus registros o si cuenta para lo que te deben."
+          }
+        }
+      }
+    },
+    "Pick what matches you — due dates and reminders update right away." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige lo que te corresponda — las fechas y recordatorios se actualizan al instante."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige lo que te corresponda — las fechas y recordatorios se actualizan al instante."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige lo que te corresponda — las fechas y recordatorios se actualizan al instante."
           }
         }
       }
@@ -51591,6 +53457,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vista previa: %@"
+          }
+        }
+      }
+    },
+    "Price & quote" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Price & quote"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precio y cotización"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precio y cotización"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precio y cotización"
           }
         }
       }
@@ -53602,6 +55497,29 @@
         }
       }
     },
+    "Quarter" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trimestre"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trimestre"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trimestre"
+          }
+        }
+      }
+    },
     "Quarter Arc" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -54181,6 +56099,35 @@
         }
       }
     },
+    "Quote a job" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quote a job"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cotizar un trabajo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cotizar un trabajo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cotizar un trabajo"
+          }
+        }
+      }
+    },
     "Quote a job first — say if it's one price or paid by the hour." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -54630,7 +56577,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las tarifas se actualizan automáticamente cuando cambias el perfil fiscal."
+            "value" : "Las tasas se actualizan automáticamente al cambiar el perfil fiscal."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las tasas se actualizan automáticamente al cambiar el perfil fiscal."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las tasas se actualizan automáticamente al cambiar el perfil fiscal."
           }
         }
       }
@@ -55000,6 +56959,52 @@
         }
       }
     },
+    "Recent saves" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorros recientes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorros recientes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorros recientes"
+          }
+        }
+      }
+    },
+    "Recent set-asides" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apartados recientes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apartados recientes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apartados recientes"
+          }
+        }
+      }
+    },
     "Recent transactions" : {
       "comment" : "A label displayed above the user's recent transactions.",
       "extractionState" : "stale",
@@ -55090,6 +57095,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recomendaciones"
+          }
+        }
+      }
+    },
+    "Recommended save rate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasa de ahorro recomendada"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasa de ahorro recomendada"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasa de ahorro recomendada"
           }
         }
       }
@@ -55214,6 +57242,12 @@
     "Recurrence" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recurrence"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -56110,6 +58144,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frecuencia de recordatorio"
+          }
+        }
+      }
+    },
+    "Reminders" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorios"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorios"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorios"
           }
         }
       }
@@ -58534,6 +60591,29 @@
         }
       }
     },
+    "Save %lld%%" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorra %lld%%"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorra %lld%%"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorra %lld%%"
+          }
+        }
+      }
+    },
     "Save an extra %@/mo by packing your own lunch." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -58834,8 +60914,15 @@
     },
     "Save note" : {
       "comment" : "A button that saves a note.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save note"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -59088,10 +61175,51 @@
         }
       }
     },
-    "Saved indirect tax status" : {
+    "Saved in jar" : {
       "extractionState" : "stale",
       "localizations" : {
         "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado en la hucha"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado en la hucha"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado en la hucha"
+          }
+        }
+      }
+    },
+    "Saved indirect tax status" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved indirect tax status"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado de impuesto indirecto guardado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado de impuesto indirecto guardado"
+          }
+        },
+        "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Estado de impuesto indirecto guardado"
@@ -59120,6 +61248,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardado localmente en tu dispositivo."
+          }
+        }
+      }
+    },
+    "Saved to tax jar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado en la hucha"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado en la hucha"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado en la hucha"
           }
         }
       }
@@ -59515,6 +61666,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escaneando texto del recibo..."
+          }
+        }
+      }
+    },
+    "Schedule" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendario"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendario"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendario"
           }
         }
       }
@@ -61567,7 +63741,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elige un país en el perfil fiscal"
+            "value" : "Define un país en el perfil fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Define un país en el perfil fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Define un país en el perfil fiscal"
           }
         }
       }
@@ -61663,6 +63849,29 @@
         }
       }
     },
+    "Set aside" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta"
+          }
+        }
+      }
+    },
     "Set aside · forecast · stay compliant" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -61682,6 +63891,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aparta · proyecta · cumple"
+          }
+        }
+      }
+    },
+    "Set aside · track · due soon · year summary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta · registra · próximo pago · resumen anual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta · registra · próximo pago · resumen anual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta · registra · próximo pago · resumen anual"
+          }
+        }
+      }
+    },
+    "Set aside %@ from this week's pay" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta %@ del pago de esta semana"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta %@ del pago de esta semana"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta %@ del pago de esta semana"
           }
         }
       }
@@ -61751,6 +64006,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aparta %@ hoy para tu fondo trimestral de impuestos."
+          }
+        }
+      }
+    },
+    "Set aside for tax" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta para impuestos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta para impuestos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta para impuestos"
+          }
+        }
+      }
+    },
+    "Set aside target" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta de apartado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta de apartado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta de apartado"
+          }
+        }
+      }
+    },
+    "Set aside, tax jar, and quarterly reminders" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta dinero, hucha fiscal y recordatorios trimestrales"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta dinero, hucha fiscal y recordatorios trimestrales"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aparta dinero, hucha fiscal y recordatorios trimestrales"
           }
         }
       }
@@ -61985,6 +64309,52 @@
         }
       }
     },
+    "Set up Tax Envelope" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar Sobre fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar Sobre fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar Sobre fiscal"
+          }
+        }
+      }
+    },
+    "Set up tax savings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar ahorro fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar ahorro fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar ahorro fiscal"
+          }
+        }
+      }
+    },
     "Set up your baseline preferences" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -62073,6 +64443,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Establezca sus tasas efectivas de impuestos sobre la renta y para trabajadores por cuenta propia en el archivo Impuestos Pro para permitir los cálculos."
+          }
+        }
+      }
+    },
+    "Set-aside follows your tax profile rates (%lld%% guide)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado sigue las tasas de tu perfil fiscal (guía %lld%%)."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado sigue las tasas de tu perfil fiscal (guía %lld%%)."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado sigue las tasas de tu perfil fiscal (guía %lld%%)."
+          }
+        }
+      }
+    },
+    "Set-aside uses BuxMuse Intelligence for your country (%lld%% guide)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado usa BuxMuse Intelligence para tu país (guía %lld%%)."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado usa BuxMuse Intelligence para tu país (guía %lld%%)."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado usa BuxMuse Intelligence para tu país (guía %lld%%)."
+          }
+        }
+      }
+    },
+    "Set-aside uses your country's tax catalog (%lld%% guide)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado usa el catálogo fiscal de tu país (guía %lld%%)."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado usa el catálogo fiscal de tu país (guía %lld%%)."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El apartado usa el catálogo fiscal de tu país (guía %lld%%)."
           }
         }
       }
@@ -62591,6 +65030,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Parte del gasto"
+          }
+        }
+      }
+    },
+    "Share year summary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir resumen anual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir resumen anual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir resumen anual"
           }
         }
       }
@@ -66160,6 +68622,52 @@
         }
       }
     },
+    "Start Tax Envelope" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar Sobre fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar Sobre fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar Sobre fiscal"
+          }
+        }
+      }
+    },
+    "Start tax savings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar ahorro fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar ahorro fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar ahorro fiscal"
+          }
+        }
+      }
+    },
     "Start tracking" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -66225,6 +68733,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inicio"
+          }
+        }
+      }
+    },
+    "State" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "State"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado"
           }
         }
       }
@@ -67597,6 +70134,7 @@
       }
     },
     "Subscription Hub" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -67908,19 +70446,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reserva sugerida"
+            "value" : "Apartado sugerido"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reserva sugerida"
+            "value" : "Apartado sugerido"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reserva sugerida"
+            "value" : "Apartado sugerido"
           }
         }
       }
@@ -69365,7 +71903,33 @@
     },
     "Tax" : {
       "comment" : "Value of a tax-related metric.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto"
+          }
+        }
+      }
     },
     "Tax " : {
       "extractionState" : "stale",
@@ -69483,13 +72047,60 @@
         }
       }
     },
-    "Tax checks" : {
+    "Tax category" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax category"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comprobaciones fiscales"
+            "value" : "Categoría fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoría fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoría fiscal"
+          }
+        }
+      }
+    },
+    "Tax checks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax checks"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificaciones fiscales"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificaciones fiscales"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificaciones fiscales"
           }
         }
       }
@@ -69559,6 +72170,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Detalles fiscales"
+          }
+        }
+      }
+    },
+    "Tax Envelope" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre fiscal"
           }
         }
       }
@@ -69682,10 +72316,51 @@
     "Tax identity" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax identity"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Identidad fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identidad fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identidad fiscal"
+          }
+        }
+      }
+    },
+    "Tax jar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hucha fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hucha fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hucha fiscal"
           }
         }
       }
@@ -69970,6 +72645,35 @@
         }
       }
     },
+    "Tax rates from catalog" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax rates from catalog"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasas fiscales del catálogo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasas fiscales del catálogo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasas fiscales del catálogo"
+          }
+        }
+      }
+    },
     "Tax reference" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -70127,6 +72831,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configuración del sandbox fiscal"
+          }
+        }
+      }
+    },
+    "Tax savings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorro fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorro fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorro fiscal"
           }
         }
       }
@@ -71671,19 +74398,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta acción es completamente local e irreversible. Borrará todos los gastos, comercios, caché de logotipos, registros de Studio, contraseñas de seguridad y restablecerá la configuración."
+            "value" : "Esta acción es completamente local e irreversible. Borrará gastos, metas, Ahorro fiscal, comercios, caché de logotipos, registros de Studio y Simple Studio, recibos, escaneos, copias de seguridad y restablecerá toda la configuración."
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta acción es completamente local e irreversible. Borrará todos los gastos, comercios, caché de logotipos, registros de Studio, contraseñas de seguridad y restablecerá la configuración."
+            "value" : "Esta acción es completamente local e irreversible. Borrará gastos, metas, Ahorro fiscal, comercios, caché de logotipos, registros de Studio y Simple Studio, recibos, escaneos, copias de seguridad y restablecerá toda la configuración."
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta acción es completamente local e irreversible. Borrará todos los gastos, comercios, caché de logotipos, registros de Studio, contraseñas de seguridad y restablecerá la configuración."
+            "value" : "Esta acción es completamente local e irreversible. Borrará gastos, metas, Ahorro fiscal, comercios, caché de logotipos, registros de Studio y Simple Studio, recibos, escaneos, copias de seguridad y restablecerá toda la configuración."
           }
         }
       }
@@ -71709,6 +74436,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esta acción es totalmente offline e irreversible. Borrará todos los gastos, registros de Studio, códigos seguros y restablecerá todo."
+          }
+        }
+      }
+    },
+    "This action is completely offline and irreversible. It will wipe expenses, goals, Tax savings, merchants, logo cache, Studio and Simple Studio records, receipts, scans, backups, and reset all settings." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This action is completely offline and irreversible. It will wipe expenses, goals, Tax savings, merchants, logo cache, Studio and Simple Studio records, receipts, scans, backups, and reset all settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta acción es completamente local e irreversible. Borrará gastos, metas, Ahorro fiscal, comercios, caché de logotipos, registros de Studio y Simple Studio, recibos, escaneos, copias de seguridad y restablecerá toda la configuración."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta acción es completamente local e irreversible. Borrará gastos, metas, Ahorro fiscal, comercios, caché de logotipos, registros de Studio y Simple Studio, recibos, escaneos, copias de seguridad y restablecerá toda la configuración."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta acción es completamente local e irreversible. Borrará gastos, metas, Ahorro fiscal, comercios, caché de logotipos, registros de Studio y Simple Studio, recibos, escaneos, copias de seguridad y restablecerá toda la configuración."
           }
         }
       }
@@ -72509,6 +75265,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "este workspace"
+          }
+        }
+      }
+    },
+    "This year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este año"
           }
         }
       }
@@ -74450,6 +77229,52 @@
         }
       }
     },
+    "Tracks set-asides you log. BuxMuse is not a bank." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que apartas. BuxMuse no es un banco."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que apartas. BuxMuse no es un banco."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que apartas. BuxMuse no es un banco."
+          }
+        }
+      }
+    },
+    "Tracks what you log as set aside for tax. BuxMuse does not hold your money." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que apartas para impuestos. BuxMuse no guarda tu dinero."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que apartas para impuestos. BuxMuse no guarda tu dinero."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que apartas para impuestos. BuxMuse no guarda tu dinero."
+          }
+        }
+      }
+    },
     "Tracks workload, sleep, and stress signals into a Creative Energy score." : {
       "comment" : "A description of the Creative Energy feature.",
       "extractionState" : "stale",
@@ -75405,6 +78230,35 @@
         }
       }
     },
+    "Try a different merchant, note, or filter." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try a different merchant, note, or filter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba otro comercio, nota o filtro."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba otro comercio, nota o filtro."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba otro comercio, nota o filtro."
+          }
+        }
+      }
+    },
     "Try a name, “waiting on payment”, or “jobs this month”." : {
       "comment" : "A description of how to search for jobs.",
       "extractionState" : "stale",
@@ -75593,10 +78447,28 @@
     "Turn on only if you are registered to charge VAT, GST, ITBIS, or similar on invoices." : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on only if you are registered to charge VAT, GST, ITBIS, or similar on invoices."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actívalo solo si estás registrado para cobrar IVA, IGIC, ITBIS o similar en facturas."
+            "value" : "Actívalo solo si estás registrado para cobrar IVA, IGV, ITBIS o similar en facturas."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actívalo solo si estás registrado para cobrar IVA, IGV, ITBIS o similar en facturas."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actívalo solo si estás registrado para cobrar IVA, IGV, ITBIS o similar en facturas."
           }
         }
       }
@@ -75810,6 +78682,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Elegancia solo tipográfica"
+          }
+        }
+      }
+    },
+    "Typical in %@: %@. Pick what matches you." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo habitual en %@: %@. Elige lo que te corresponda."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo habitual en %@: %@. Elige lo que te corresponda."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo habitual en %@: %@. Elige lo que te corresponda."
           }
         }
       }
@@ -77415,6 +80310,29 @@
         }
       }
     },
+    "Using rates from your tax profile — about %lld%%." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usando tasas de tu perfil fiscal — ~%lld%%."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usando tasas de tu perfil fiscal — ~%lld%%."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usando tasas de tu perfil fiscal — ~%lld%%."
+          }
+        }
+      }
+    },
     "Utilities" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -78466,6 +81384,75 @@
         }
       }
     },
+    "We remind you before tax is due" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te avisamos antes del vencimiento"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te avisamos antes del vencimiento"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te avisamos antes del vencimiento"
+          }
+        }
+      }
+    },
+    "We suggest how much to set aside" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerimos cuánto apartar"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerimos cuánto apartar"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerimos cuánto apartar"
+          }
+        }
+      }
+    },
+    "We use your country's tax rules to suggest how much to set aside." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usamos las normas fiscales de tu país para sugerir cuánto apartar."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usamos las reglas fiscales de tu país para sugerir cuánto apartar."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usamos las normas fiscales de tu país para sugerir cuánto apartar."
+          }
+        }
+      }
+    },
     "Weak" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -79319,6 +82306,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Con un espacio seleccionado, los gastos sin etiqueta de espacio muestran la insignia Sin asignar."
+          }
+        }
+      }
+    },
+    "When do you pay tax?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuándo pagas impuestos?"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuándo pagas impuestos?"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuándo pagas impuestos?"
           }
         }
       }
@@ -80465,6 +83475,29 @@
         }
       }
     },
+    "Year target" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta anual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta anual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta anual"
+          }
+        }
+      }
+    },
     "Year to date" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -80844,6 +83877,52 @@
         }
       }
     },
+    "You can adjust this anytime in Tax Envelope settings." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes ajustarlo cuando quieras en ajustes del Sobre fiscal."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes ajustarlo cuando quieras en ajustes del Sobre fiscal."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes ajustarlo cuando quieras en ajustes del Sobre fiscal."
+          }
+        }
+      }
+    },
+    "You can adjust this anytime in tax savings settings." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes ajustarlo cuando quieras en ajustes de ahorro fiscal."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes ajustarlo cuando quieras en ajustes de ahorro fiscal."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes ajustarlo cuando quieras en ajustes de ahorro fiscal."
+          }
+        }
+      }
+    },
     "You captured about %@ in tax savings from deductions this week." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -80886,6 +83965,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cobras por hora: el reloj de trabajo multiplica las horas por tu tarifa."
+          }
+        }
+      }
+    },
+    "You chose to set aside %lld%% from each payment." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegiste apartar %lld%% de cada pago."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegiste apartar %lld%% de cada pago."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegiste apartar %lld%% de cada pago."
           }
         }
       }
@@ -80957,6 +84059,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Te emocionó esta compra. Disfrútala con conciencia."
+          }
+        }
+      }
+    },
+    "You get paid on your own" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cobras por tu cuenta"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cobras por tu cuenta"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cobras por tu cuenta"
           }
         }
       }
@@ -81191,6 +84316,29 @@
         }
       }
     },
+    "You log what you set aside" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registras lo que apartas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registras lo que apartas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registras lo que apartas"
+          }
+        }
+      }
+    },
     "You logged %.1fh non-billable — convert admin time or exclude it from client work." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -81233,6 +84381,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ganaste"
+          }
+        }
+      }
+    },
+    "You made this week" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganaste esta semana"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganaste esta semana"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganaste esta semana"
           }
         }
       }
@@ -81302,6 +84473,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pagaste más en %@."
+          }
+        }
+      }
+    },
+    "You pay tax" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagas impuestos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagas impuestos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagas impuestos"
+          }
+        }
+      }
+    },
+    "You pay tax: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagas impuestos: %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagas impuestos: %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagas impuestos: %@"
           }
         }
       }
@@ -81630,6 +84847,29 @@
         }
       }
     },
+    "You've set aside" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has apartado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has apartado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has apartado"
+          }
+        }
+      }
+    },
     "Your %@ spending fell to %@ this month compared to %@ historically, leaving you with an extra surplus of %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -81866,6 +85106,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu base de datos y configuración de BuxMuse se han restablecido con datos iniciales limpios. Se han eliminado gastos, comercios y logotipos en caché."
+          }
+        }
+      }
+    },
+    "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, Tax savings, merchants, Studio data, caches, and backups are removed." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, Tax savings, merchants, Studio data, caches, and backups are removed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu base de datos y configuración de BuxMuse se restablecieron a valores iniciales. Se eliminaron gastos, Ahorro fiscal, comercios, datos de Studio, cachés y copias de seguridad."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu base de datos y configuración de BuxMuse se restablecieron a valores iniciales. Se eliminaron gastos, Ahorro fiscal, comercios, datos de Studio, cachés y copias de seguridad."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu base de datos y configuración de BuxMuse se restablecieron a valores iniciales. Se eliminaron gastos, Ahorro fiscal, comercios, datos de Studio, cachés y copias de seguridad."
           }
         }
       }
@@ -82612,6 +85881,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tus suscripciones subieron %@ este mes."
+          }
+        }
+      }
+    },
+    "Your tax country" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu país fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu país fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu país fiscal"
+          }
+        }
+      }
+    },
+    "Your tax jar tracks money you set aside for estimated taxes." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu hucha registra el dinero que apartas para impuestos estimados."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu hucha registra el dinero que apartas para impuestos estimados."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu hucha registra el dinero que apartas para impuestos estimados."
           }
         }
       }

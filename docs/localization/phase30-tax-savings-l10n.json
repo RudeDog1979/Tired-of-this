@@ -1,0 +1,334 @@
+{
+  "BuxMuse Intelligence uses tax rules for the country in your app settings — on your device.": {
+    "es-419": "BuxMuse Intelligence usa las reglas fiscales del país en los ajustes de la app — en tu dispositivo.",
+    "es-ES": "BuxMuse Intelligence usa las normas fiscales del país en los ajustes de la app — en tu dispositivo."
+  },
+  "Based on what you log and BuxMuse Intelligence for your country — kept on your device.": {
+    "es-419": "Según lo que registras y BuxMuse Intelligence para tu país — guardado en tu dispositivo.",
+    "es-ES": "Según lo que registras y BuxMuse Intelligence para tu país — guardado en tu dispositivo."
+  },
+  "Due dates and amounts from your books and BuxMuse Intelligence for %@.": {
+    "es-419": "Fechas e importes según tus registros y BuxMuse Intelligence para %@.",
+    "es-ES": "Fechas e importes según tus registros y BuxMuse Intelligence para %@."
+  },
+  "When do you pay tax?": {
+    "es-419": "¿Cuándo pagas impuestos?",
+    "es-ES": "¿Cuándo pagas impuestos?"
+  },
+  "Typical in %@: %@. Pick what matches you.": {
+    "es-419": "Lo habitual en %@: %@. Elige lo que te corresponda.",
+    "es-ES": "Lo habitual en %@: %@. Elige lo que te corresponda."
+  },
+  "BuxMuse Intelligence suggests %@ for your country. Pick what matches you — estimates update right away.": {
+    "es-419": "BuxMuse Intelligence sugiere %@ para tu país. Elige lo que te corresponda — las estimaciones se actualizan al instante.",
+    "es-ES": "BuxMuse Intelligence sugiere %@ para tu país. Elige lo que te corresponda — las estimaciones se actualizan al instante."
+  },
+  "Pick what matches you — due dates and reminders update right away.": {
+    "es-419": "Elige lo que te corresponda — las fechas y recordatorios se actualizan al instante.",
+    "es-ES": "Elige lo que te corresponda — las fechas y recordatorios se actualizan al instante."
+  },
+  "Set-aside uses BuxMuse Intelligence for your country (%lld%% guide).": {
+    "es-419": "El apartado usa BuxMuse Intelligence para tu país (guía %lld%%).",
+    "es-ES": "El apartado usa BuxMuse Intelligence para tu país (guía %lld%%)."
+  },
+  "BuxMuse Intelligence suggests about %lld%% for your country — a good starting point.": {
+    "es-419": "BuxMuse Intelligence sugiere ~%lld%% para tu país — un buen punto de partida.",
+    "es-ES": "BuxMuse Intelligence sugiere ~%lld%% para tu país — un buen punto de partida."
+  },
+  "Guide: %lld%% from BuxMuse Intelligence": {
+    "es-419": "Guía: %lld%% según BuxMuse Intelligence",
+    "es-ES": "Guía: %lld%% según BuxMuse Intelligence"
+  },
+  "Estimated from your books and BuxMuse Intelligence on your device. Change schedule below if yours is different.": {
+    "es-419": "Estimado según tus registros y BuxMuse Intelligence en tu dispositivo. Cambia el calendario abajo si el tuyo es distinto.",
+    "es-ES": "Estimado según tus registros y BuxMuse Intelligence en tu dispositivo. Cambia el calendario abajo si el tuyo es distinto."
+  },
+  "Intelligence updated %@": {
+    "es-419": "Intelligence actualizada %@",
+    "es-ES": "Intelligence actualizada %@"
+  },
+  "Monthly": {
+    "es-419": "Mensual",
+    "es-ES": "Mensual"
+  },
+  "Quarterly": {
+    "es-419": "Trimestral",
+    "es-ES": "Trimestral"
+  },
+  "Yearly": {
+    "es-419": "Anual",
+    "es-ES": "Anual"
+  },
+  "Estimated tax this month": {
+    "es-419": "Impuesto estimado este mes",
+    "es-ES": "Impuesto estimado este mes"
+  },
+  "Estimated tax this year": {
+    "es-419": "Impuesto estimado este año",
+    "es-ES": "Impuesto estimado este año"
+  },
+  "Estimated tax this quarter": {
+    "es-419": "Impuesto estimado este trimestre",
+    "es-ES": "Impuesto estimado este trimestre"
+  },
+  "Month": {
+    "es-419": "Mes",
+    "es-ES": "Mes"
+  },
+  "Tax year": {
+    "es-419": "Año fiscal",
+    "es-ES": "Año fiscal"
+  },
+  "Quarter": {
+    "es-419": "Trimestre",
+    "es-ES": "Trimestre"
+  },
+  "Current month due": {
+    "es-419": "Vence este mes",
+    "es-ES": "Vence este mes"
+  },
+  "Current quarter due": {
+    "es-419": "Vence este trimestre",
+    "es-ES": "Vence este trimestre"
+  },
+  "Current year due": {
+    "es-419": "Vence este año",
+    "es-ES": "Vence este año"
+  },
+  "You pay tax": {
+    "es-419": "Pagas impuestos",
+    "es-ES": "Pagas impuestos"
+  },
+  "This year": {
+    "es-419": "Este año",
+    "es-ES": "Este año"
+  },
+  "Tax year %@": {
+    "es-419": "Año fiscal %@",
+    "es-ES": "Año fiscal %@"
+  },
+  "Share year summary": {
+    "es-419": "Compartir resumen anual",
+    "es-ES": "Compartir resumen anual"
+  },
+  "You pay tax: %@": {
+    "es-419": "Pagas impuestos: %@",
+    "es-ES": "Pagas impuestos: %@"
+  },
+  "Gross income (YTD)": {
+    "es-419": "Ingresos brutos (acumulado)",
+    "es-ES": "Ingresos brutos (acumulado)"
+  },
+  "Deductible expenses": {
+    "es-419": "Gastos deducibles",
+    "es-ES": "Gastos deducibles"
+  },
+  "Estimated tax": {
+    "es-419": "Impuesto estimado",
+    "es-ES": "Impuesto estimado"
+  },
+  "Appendix — not a tax return": {
+    "es-419": "Anexo — no es una declaración",
+    "es-ES": "Anexo — no es una declaración"
+  },
+  "Figures are estimates from your BuxMuse books and BuxMuse Intelligence on your device. File with your tax authority or accountant.": {
+    "es-419": "Las cifras son estimaciones según tus registros de BuxMuse y BuxMuse Intelligence en tu dispositivo. Presenta ante tu autoridad fiscal o contador.",
+    "es-ES": "Las cifras son estimaciones según tus registros de BuxMuse y BuxMuse Intelligence en tu dispositivo. Presenta ante tu autoridad fiscal o contador."
+  },
+  "Tax savings": {
+    "es-419": "Ahorro fiscal",
+    "es-ES": "Ahorro fiscal"
+  },
+  "Set up tax savings": {
+    "es-419": "Configurar ahorro fiscal",
+    "es-ES": "Configurar ahorro fiscal"
+  },
+  "My set-aside": {
+    "es-419": "Mi apartado",
+    "es-ES": "Mi apartado"
+  },
+  "Due soon": {
+    "es-419": "Próximo pago",
+    "es-ES": "Próximo pago"
+  },
+  "This week": {
+    "es-419": "Esta semana",
+    "es-ES": "Esta semana"
+  },
+  "You've set aside": {
+    "es-419": "Has apartado",
+    "es-ES": "Has apartado"
+  },
+  "I set money aside": {
+    "es-419": "Aparté dinero",
+    "es-ES": "Aparté dinero"
+  },
+  "Add to my set-aside total": {
+    "es-419": "Sumar a mi total apartado",
+    "es-ES": "Sumar a mi total apartado"
+  },
+  "Added to set-aside total": {
+    "es-419": "Sumado al total apartado",
+    "es-ES": "Sumado al total apartado"
+  },
+  "Skip": {
+    "es-419": "Omitir",
+    "es-ES": "Omitir"
+  },
+  "Paid it": {
+    "es-419": "Ya lo pagué",
+    "es-ES": "Ya lo pagué"
+  },
+  "Due date": {
+    "es-419": "Fecha límite",
+    "es-ES": "Fecha límite"
+  },
+  "Suggested set-aside": {
+    "es-419": "Apartado sugerido",
+    "es-ES": "Apartado sugerido"
+  },
+  "Recent set-asides": {
+    "es-419": "Apartados recientes",
+    "es-ES": "Apartados recientes"
+  },
+  "My year summary": {
+    "es-419": "Resumen del año",
+    "es-ES": "Resumen del año"
+  },
+  "Full Tax Studio": {
+    "es-419": "Tax Studio completo",
+    "es-ES": "Tax Studio completo"
+  },
+  "Set aside for tax": {
+    "es-419": "Aparta para impuestos",
+    "es-ES": "Aparta para impuestos"
+  },
+  "Set aside": {
+    "es-419": "Aparta",
+    "es-ES": "Aparta"
+  },
+  "Amount": {
+    "es-419": "Importe",
+    "es-ES": "Importe"
+  },
+  "Note": {
+    "es-419": "Nota",
+    "es-ES": "Nota"
+  },
+  "Optional": {
+    "es-419": "Opcional",
+    "es-ES": "Opcional"
+  },
+  "Back": {
+    "es-419": "Atrás",
+    "es-ES": "Atrás"
+  },
+  "Next": {
+    "es-419": "Siguiente",
+    "es-ES": "Siguiente"
+  },
+  "Start tax savings": {
+    "es-419": "Empezar ahorro fiscal",
+    "es-ES": "Empezar ahorro fiscal"
+  },
+  "You get paid on your own": {
+    "es-419": "Cobras por tu cuenta",
+    "es-ES": "Cobras por tu cuenta"
+  },
+  "I earn money on my own": {
+    "es-419": "Gano dinero por mi cuenta",
+    "es-ES": "Gano dinero por mi cuenta"
+  },
+  "We suggest how much to set aside": {
+    "es-419": "Sugerimos cuánto apartar",
+    "es-ES": "Sugerimos cuánto apartar"
+  },
+  "Weekly": {
+    "es-419": "Semanal",
+    "es-ES": "Semanal"
+  },
+  "Per job": {
+    "es-419": "Por trabajo",
+    "es-ES": "Por trabajo"
+  },
+  "You log what you set aside": {
+    "es-419": "Registras lo que apartas",
+    "es-ES": "Registras lo que apartas"
+  },
+  "After logging pay, tap Add — or use I set money aside anytime. BuxMuse tracks the total; it does not hold your money.": {
+    "es-419": "Tras registrar pago, pulsa Sumar — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero.",
+    "es-ES": "Tras registrar pago, pulsa Sumar — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero."
+  },
+  "We remind you before tax is due": {
+    "es-419": "Te avisamos antes del vencimiento",
+    "es-ES": "Te avisamos antes del vencimiento"
+  },
+  "Default set-aside guide: %lld%%": {
+    "es-419": "Guía de apartado predeterminada: %lld%%",
+    "es-ES": "Guía de apartado predeterminada: %lld%%"
+  },
+  "You made this week": {
+    "es-419": "Ganaste esta semana",
+    "es-ES": "Ganaste esta semana"
+  },
+  "Guide rate: %lld%%": {
+    "es-419": "Tasa guía: %lld%%",
+    "es-ES": "Tasa guía: %lld%%"
+  },
+  "Set aside %@ from this week's pay": {
+    "es-419": "Aparta %@ del pago de esta semana",
+    "es-ES": "Aparta %@ del pago de esta semana"
+  },
+  "%@ of ~%@ estimated tax this year": {
+    "es-419": "%@ de ~%@ de impuesto estimado este año",
+    "es-ES": "%@ de ~%@ de impuesto estimado este año"
+  },
+  "Log pay this week to see how much to set aside": {
+    "es-419": "Registra pago esta semana para ver cuánto apartar",
+    "es-ES": "Registra pago esta semana para ver cuánto apartar"
+  },
+  "Log pay to see estimated tax for the year": {
+    "es-419": "Registra pagos para ver el impuesto estimado del año",
+    "es-ES": "Registra pagos para ver el impuesto estimado del año"
+  },
+  "%@ set aside — log pay to refresh your estimate": {
+    "es-419": "%@ apartado — registra pagos para actualizar la estimación",
+    "es-ES": "%@ apartado — registra pagos para actualizar la estimación"
+  },
+  "Tracks set-asides you log. BuxMuse is not a bank.": {
+    "es-419": "Registra lo que apartas. BuxMuse no es un banco.",
+    "es-ES": "Registra lo que apartas. BuxMuse no es un banco."
+  },
+  "Tracks what you log as set aside for tax. BuxMuse does not hold your money.": {
+    "es-419": "Registra lo que apartas para impuestos. BuxMuse no guarda tu dinero.",
+    "es-ES": "Registra lo que apartas para impuestos. BuxMuse no guarda tu dinero."
+  },
+  "No set-asides logged yet. Log pay and tap Add, or use I set money aside.": {
+    "es-419": "Sin apartados registrados. Registra pago y pulsa Sumar, o usa Aparté dinero.",
+    "es-ES": "Sin apartados registrados. Registra pago y pulsa Sumar, o usa Aparté dinero."
+  },
+  "Adds to your set-aside total. BuxMuse does not move money for you.": {
+    "es-419": "Suma a tu total apartado. BuxMuse no mueve tu dinero.",
+    "es-ES": "Suma a tu total apartado. BuxMuse no mueve tu dinero."
+  },
+  "You chose to set aside %lld%% from each payment.": {
+    "es-419": "Elegiste apartar %lld%% de cada pago.",
+    "es-ES": "Elegiste apartar %lld%% de cada pago."
+  },
+  "Set-aside follows your tax profile rates (%lld%% guide).": {
+    "es-419": "El apartado sigue las tasas de tu perfil fiscal (guía %lld%%).",
+    "es-ES": "El apartado sigue las tasas de tu perfil fiscal (guía %lld%%)."
+  },
+  "You can adjust this anytime in tax savings settings.": {
+    "es-419": "Puedes ajustarlo cuando quieras en ajustes de ahorro fiscal.",
+    "es-ES": "Puedes ajustarlo cuando quieras en ajustes de ahorro fiscal."
+  },
+  "Using rates from your tax profile — about %lld%%.": {
+    "es-419": "Usando tasas de tu perfil fiscal — ~%lld%%.",
+    "es-ES": "Usando tasas de tu perfil fiscal — ~%lld%%."
+  },
+  "Set aside · track · due soon · year summary": {
+    "es-419": "Aparta · registra · próximo pago · resumen anual",
+    "es-ES": "Aparta · registra · próximo pago · resumen anual"
+  }
+}

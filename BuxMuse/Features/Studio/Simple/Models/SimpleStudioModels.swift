@@ -173,6 +173,8 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
     /// Pause the work clock when planned time is reached (default on).
     public var pauseWhenPlanEnds: Bool?
     public var sourcePhotoPath: String?
+    public var taxSetAsideAmount: Decimal?
+    public var taxSetAsideMarkedSaved: Bool?
     public var createdAt: Date
 
     public init(
@@ -200,6 +202,8 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
         plannedWorkSeconds: TimeInterval? = nil,
         pauseWhenPlanEnds: Bool? = nil,
         sourcePhotoPath: String? = nil,
+        taxSetAsideAmount: Decimal? = nil,
+        taxSetAsideMarkedSaved: Bool? = nil,
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -226,6 +230,8 @@ public struct SimpleStudioEntry: Identifiable, Codable, Equatable, Sendable {
         self.plannedWorkSeconds = plannedWorkSeconds
         self.pauseWhenPlanEnds = pauseWhenPlanEnds
         self.sourcePhotoPath = sourcePhotoPath
+        self.taxSetAsideAmount = taxSetAsideAmount
+        self.taxSetAsideMarkedSaved = taxSetAsideMarkedSaved
         self.createdAt = createdAt
     }
 

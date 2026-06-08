@@ -425,7 +425,7 @@ struct SimpleStudioWaitingSection: View {
                 )
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
-                if let chip = agreementChip(for: item) {
+                if let chip = quoteStatusChip(for: item) {
                     Text(chip)
                         .font(.system(size: 9, weight: .bold))
                         .padding(.horizontal, 6)
@@ -475,17 +475,15 @@ struct SimpleStudioWaitingSection: View {
         .onTapGesture { onTap?(item.id) }
     }
 
-    private func agreementChip(for item: SimpleWaitingItem) -> String? {
+    private func quoteStatusChip(for item: SimpleWaitingItem) -> String? {
         guard let entry = simpleStore.entry(id: item.id), entry.kind == .job else { return nil }
-        return StudioWorkDealHelpers.agreementStatusChip(
-            for: StudioWorkDealHelpers.agreement(forJob: entry, studioStore: studioStore)
-        )
+        if let agreed = entry.agreedPrice, agreed > 0 { return nil }
+        return BuxCatalogLabel.string("No quote", locale: appSettingsManager.interfaceLocale)
     }
 
     private func chipColor(_ label: String) -> Color {
-        if label.contains("clear") || label.contains("Signed") || label.contains("attached") { return .green }
-        if label == "No agreement" { return .orange }
-        return .secondary
+        _ = label
+        return .orange
     }
 }
 

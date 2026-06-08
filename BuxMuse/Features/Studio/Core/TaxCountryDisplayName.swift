@@ -2,27 +2,21 @@
 //  TaxCountryDisplayName.swift
 //  BuxMuse
 //
-//  Localized country names for tax preset picker, search, and labels.
+//  Tax preset picker — forwards to CountryDisplayL10n.
 //
 
 import Foundation
 
 enum TaxCountryDisplayName {
     static func displayName(for preset: TaxInfo, locale: Locale) -> String {
-        localizedRegionName(isoCode: preset.isoCode, locale: locale) ?? preset.name
+        CountryDisplayL10n.displayName(for: preset, locale: locale)
     }
 
     static func pickerLabel(for preset: TaxInfo, locale: Locale) -> String {
-        "\(displayName(for: preset, locale: locale)) (\(preset.isoCode))"
+        CountryDisplayL10n.pickerLabel(for: preset, locale: locale)
     }
 
     static func localizedRegionName(isoCode: String, locale: Locale) -> String? {
-        let normalized = TaxPresetLoader.normalizeCountryCode(isoCode)
-        guard let name = locale.localizedString(forRegionCode: normalized),
-              !name.isEmpty,
-              name.uppercased() != normalized else {
-            return nil
-        }
-        return name
+        CountryDisplayL10n.localizedRegionName(isoCode: isoCode, locale: locale)
     }
 }

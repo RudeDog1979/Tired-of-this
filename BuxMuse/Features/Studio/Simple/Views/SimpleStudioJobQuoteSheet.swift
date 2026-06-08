@@ -46,6 +46,7 @@ struct SimpleStudioJobQuoteSheet: View {
     @State private var planHours = 1
     @State private var planMinutes = 0
     @State private var pauseWhenTimeUp = true
+    @State private var sharePayload: BuxShareItemsPayload?
 
     private var breakdown: SimpleJobBreakdown? {
         draftEntry.jobBreakdown()
@@ -307,6 +308,13 @@ struct SimpleStudioJobQuoteSheet: View {
             .buxInterfaceLocale()
             .buxMeshSheetPresentation()
             .onAppear(perform: loadExisting)
+            .sheet(item: $sharePayload) { payload in
+                BuxActivityShareSheet(items: payload.items) {
+                    sharePayload = nil
+                }
+                .buxShareSheetPresentation()
+                .ignoresSafeArea()
+            }
         }
     }
 
@@ -494,16 +502,7 @@ struct SimpleStudioJobQuoteSheet: View {
             items.append(image)
         }
 
-        let phone = customerPhone.isEmpty ? store.customer(named: customerName)?.phone : customerPhone
-        SimpleStudioContactActions.present(
-            SimpleStudioContactActions.Options(
-                sheetTitle: BuxCatalogLabel.string("Send quote", locale: appSettingsManager.interfaceLocale),
-                message: message,
-                recipientPhone: phone,
-                shareItems: items
-            ),
-            openURL: openURL
-        )
+        sharePayload = BuxShareItemsPayload(items: items)
     }
 
     private func decimal(from text: String) -> Decimal? {

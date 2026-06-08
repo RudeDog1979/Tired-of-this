@@ -72,7 +72,7 @@ struct SubscriptionHubView: View {
                     }
                     .buxDetailScrollChrome()
                 }
-                .navigationTitle("Subscription Hub")
+                .buxCatalogNavigationTitle("Subscription Hub")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {

@@ -14,7 +14,8 @@ enum SimpleStudioEngine {
         businessTitle: String,
         persona: StudioPersona,
         format: (Decimal) -> String,
-        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
+        envelopeContext: TaxEnvelopeSourceContext? = nil
     ) -> SimpleStudioHubDisplay {
         let calendar = Calendar.current
         let now = Date()
@@ -55,7 +56,8 @@ enum SimpleStudioEngine {
                 spent: monthSpent,
                 persona: persona,
                 format: format,
-                locale: locale
+                locale: locale,
+                envelopeContext: envelopeContext
             ),
             isEmpty: snapshot.entries.isEmpty && snapshot.invoices.isEmpty
         )
@@ -65,7 +67,8 @@ enum SimpleStudioEngine {
         snapshot: SimpleStudioSnapshot,
         persona: StudioPersona,
         format: (Decimal) -> String,
-        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
+        envelopeContext: TaxEnvelopeSourceContext? = nil
     ) -> SimpleMyMoneyDisplay {
         let calendar = Calendar.current
         let now = Date()
@@ -89,7 +92,14 @@ enum SimpleStudioEngine {
             waitingItems: buildWaitingItems(snapshot: snapshot, format: format, locale: locale),
             iOweItems: buildIOweItems(snapshot: snapshot, format: format, locale: locale),
             jobPockets: buildJobPockets(entries: monthEntries, format: format, locale: locale),
-            taxTile: buildTaxTile(made: monthMade, spent: monthSpent, persona: persona, format: format, locale: locale)
+            taxTile: buildTaxTile(
+                made: monthMade,
+                spent: monthSpent,
+                persona: persona,
+                format: format,
+                locale: locale,
+                envelopeContext: envelopeContext
+            )
         )
     }
 
@@ -335,16 +345,24 @@ enum SimpleStudioEngine {
         spent: Decimal,
         persona: StudioPersona,
         format: (Decimal) -> String,
-        locale: Locale
+        locale: Locale,
+        envelopeContext: TaxEnvelopeSourceContext? = nil
     ) -> SimpleTaxTileDisplay {
         let keep = made - spent
-        let mightOwe = max(0, keep * Decimal(0.15))
+        let mightOwe = TaxEnvelopeEngine.taxTileMightOwe(
+            made: made,
+            spent: spent,
+            context: envelopeContext
+        )
+        let coach = envelopeContext?.envelope.isEnabled == true
+            ? TaxEnvelopeEngine.taxTileCoachLine(context: envelopeContext, persona: persona, locale: locale)
+            : legacyCoachLine(for: persona, locale: locale)
         return SimpleTaxTileDisplay(
             made: format(made),
             spent: format(spent),
             keep: format(keep),
             mightOwe: format(mightOwe),
-            coachLine: coachLine(for: persona, locale: locale)
+            coachLine: coach
         )
     }
 
@@ -376,7 +394,7 @@ enum SimpleStudioEngine {
         }
     }
 
-    static func coachLine(for persona: StudioPersona, locale: Locale) -> String {
+    static func legacyCoachLine(for persona: StudioPersona, locale: Locale) -> String {
         switch persona {
         case .tasksAndGigs:
             return SimpleStudioCopy.line(

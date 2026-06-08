@@ -35,7 +35,7 @@ struct ExpenseMerchantListSheet: View {
                 }
                 .buxDetailScrollChrome()
             }
-            .navigationTitle("Merchants")
+            .buxCatalogNavigationTitle("Merchants")
             .navigationBarTitleDisplayMode(.inline)
             .modifier(MerchantSheetSubtitleModifier())
             .toolbar {

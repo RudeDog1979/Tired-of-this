@@ -97,7 +97,26 @@ public enum BuxStorageAuditEngine {
         applicationSupportURL().appendingPathComponent(simpleScanFolder, isDirectory: true)
     }
 
+    public static func silentBackupsDirectory() -> URL {
+        applicationSupportURL().appendingPathComponent(silentBackupFolder, isDirectory: true)
+    }
+
+    /// Deletes user-generated media and local backup archives (not SwiftData or settings JSON).
+    public static func purgeAllUserGeneratedMedia() {
+        removeDirectoryContents(at: proReceiptsDirectory())
+        removeDirectoryContents(at: simpleScansDirectory())
+        removeDirectoryContents(at: silentBackupsDirectory())
+    }
+
     // MARK: - Private
+
+    private static func removeDirectoryContents(at url: URL) {
+        let fm = FileManager.default
+        guard let files = try? fm.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) else { return }
+        for file in files {
+            try? fm.removeItem(at: file)
+        }
+    }
 
     private static func applicationSupportURL() -> URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!

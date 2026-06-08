@@ -95,6 +95,16 @@ public struct TaxComputeVATRules: Codable, Equatable, Sendable {
     }
 }
 
+public struct TaxComputePaymentCalendar: Codable, Equatable, Sendable {
+    public var dueDay: Int
+    public var dueMonths: [Int]
+
+    public init(dueDay: Int, dueMonths: [Int]) {
+        self.dueDay = dueDay
+        self.dueMonths = dueMonths
+    }
+}
+
 public struct TaxComputeAdvancePayment: Codable, Equatable, Sendable {
     public var id: String
     public var labelKey: String
@@ -115,6 +125,8 @@ public struct TaxComputeBlock: Codable, Equatable, Sendable {
     public var advancePayments: [TaxComputeAdvancePayment]?
     public var deductions: [TaxComputeDeductionRule]?
     public var paymentSchedule: String?
+    /// Catalog payment due dates — updated monthly via buxmuse_tax_compute.json.
+    public var paymentCalendar: TaxComputePaymentCalendar?
     /// US state sales/use tax rate (decimal fraction) for invoice supplemental lines (Phase L).
     public var salesTaxRate: Decimal?
 
@@ -126,6 +138,7 @@ public struct TaxComputeBlock: Codable, Equatable, Sendable {
         advancePayments: [TaxComputeAdvancePayment]? = nil,
         deductions: [TaxComputeDeductionRule]? = nil,
         paymentSchedule: String? = nil,
+        paymentCalendar: TaxComputePaymentCalendar? = nil,
         salesTaxRate: Decimal? = nil
     ) {
         self.selfEmployed = selfEmployed
@@ -135,6 +148,7 @@ public struct TaxComputeBlock: Codable, Equatable, Sendable {
         self.advancePayments = advancePayments
         self.deductions = deductions
         self.paymentSchedule = paymentSchedule
+        self.paymentCalendar = paymentCalendar
         self.salesTaxRate = salesTaxRate
     }
 }
@@ -212,7 +226,9 @@ public struct TaxCountryComputeEntry: Codable, Equatable, Sendable {
             vat: override.vat ?? national.vat,
             advancePayments: override.advancePayments ?? national.advancePayments,
             deductions: override.deductions ?? national.deductions,
-            paymentSchedule: override.paymentSchedule ?? national.paymentSchedule
+            paymentSchedule: override.paymentSchedule ?? national.paymentSchedule,
+            paymentCalendar: override.paymentCalendar ?? national.paymentCalendar,
+            salesTaxRate: override.salesTaxRate ?? national.salesTaxRate
         )
     }
 

@@ -43,13 +43,10 @@ struct SimpleStudioInvoiceDetailView: View {
                             )
                             .padding(.horizontal, BuxTokens.marginRegular)
 
-                            StudioAgreementDealLinkButton(
-                                agreement: invoiceDealAgreement,
-                                linkedJob: invoiceLinkedJob,
-                                linkedProject: nil
-                            )
-                            .environmentObject(store)
-                            .padding(.horizontal, BuxTokens.marginRegular)
+                            if let job = invoiceLinkedJob {
+                                linkedJobCard(job)
+                                    .padding(.horizontal, BuxTokens.marginRegular)
+                            }
 
                             BuxThemedCardForm {
                                 BuxFormSection(title: "Invoice") {
@@ -137,13 +134,22 @@ struct SimpleStudioInvoiceDetailView: View {
         return StudioWorkDealHelpers.linkedJob(forSimpleInvoice: invoice, simpleStore: store)
     }
 
-    private var invoiceDealAgreement: AgreementDraft? {
-        guard let invoice else { return nil }
-        return StudioWorkDealHelpers.agreement(
-            forSimpleInvoice: invoice,
-            studioStore: studioStore,
-            simpleStore: store
-        )
+    private func linkedJobCard(_ job: SimpleStudioEntry) -> some View {
+        BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
+            VStack(alignment: .leading, spacing: BuxTokens.tight) {
+                BuxCatalogText.text("Linked job")
+                    .font(.system(size: 11, weight: .bold))
+                    .buxLabelSecondary()
+                Text(job.jobLabel ?? job.customerName)
+                    .font(.system(size: 14, weight: .semibold))
+                if let agreed = job.agreedPrice, agreed > 0 {
+                    Text(appSettingsManager.format(agreed))
+                        .font(.system(size: 13, weight: .medium))
+                        .buxLabelSecondary()
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     private func exportProPDF(_ invoice: StudioInvoice) {

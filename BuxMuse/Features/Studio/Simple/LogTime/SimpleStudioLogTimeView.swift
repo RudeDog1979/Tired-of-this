@@ -42,10 +42,9 @@ struct SimpleStudioLogTimeView: View {
 
     @ViewBuilder
     private var approvalBanner: some View {
-        if let job = selectedJob,
-           StudioWorkDealHelpers.needsClientApproval(job: job, studioStore: studioStore) {
-            StudioWorkDealApprovalBanner(
-                message: "No client approval recorded yet. You can still log time — set up the agreement when you can."
+        if let job = selectedJob, job.kind == .job, (job.agreedPrice ?? 0) <= 0 {
+            SimpleStudioQuoteReminderBanner(
+                message: "No price on this job yet — send a quote first. You can still log time."
             )
             .padding(.horizontal, BuxTokens.marginRegular)
         }

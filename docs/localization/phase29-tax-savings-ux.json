@@ -1,0 +1,158 @@
+{
+  "Tax savings": {
+    "es-419": "Ahorro fiscal",
+    "es-ES": "Ahorro fiscal"
+  },
+  "Set up tax savings": {
+    "es-419": "Configurar ahorro fiscal",
+    "es-ES": "Configurar ahorro fiscal"
+  },
+  "My set-aside": {
+    "es-419": "Mi apartado",
+    "es-ES": "Mi apartado"
+  },
+  "Due soon": {
+    "es-419": "Próximo pago",
+    "es-ES": "Próximo pago"
+  },
+  "You've set aside": {
+    "es-419": "Has apartado",
+    "es-ES": "Has apartado"
+  },
+  "Estimated tax this year": {
+    "es-419": "Impuesto estimado este año",
+    "es-ES": "Impuesto estimado este año"
+  },
+  "Estimated tax this quarter": {
+    "es-419": "Impuesto estimado este trimestre",
+    "es-ES": "Impuesto estimado este trimestre"
+  },
+  "I set money aside": {
+    "es-419": "Aparté dinero",
+    "es-ES": "Aparté dinero"
+  },
+  "Add to my set-aside total": {
+    "es-419": "Sumar a mi total apartado",
+    "es-ES": "Sumar a mi total apartado"
+  },
+  "Added to set-aside total": {
+    "es-419": "Sumado al total apartado",
+    "es-ES": "Sumado al total apartado"
+  },
+  "Skip": {
+    "es-419": "Omitir",
+    "es-ES": "Omitir"
+  },
+  "Paid it": {
+    "es-419": "Ya lo pagué",
+    "es-ES": "Ya lo pagué"
+  },
+  "Due date": {
+    "es-419": "Fecha límite",
+    "es-ES": "Fecha límite"
+  },
+  "Payment schedule": {
+    "es-419": "Calendario de pagos",
+    "es-ES": "Calendario de pagos"
+  },
+  "Suggested set-aside": {
+    "es-419": "Apartado sugerido",
+    "es-ES": "Apartado sugerido"
+  },
+  "Recent set-asides": {
+    "es-419": "Apartados recientes",
+    "es-ES": "Apartados recientes"
+  },
+  "Set aside %@ from this week's pay": {
+    "es-419": "Aparta %@ del pago de esta semana",
+    "es-ES": "Aparta %@ del pago de esta semana"
+  },
+  "%@ of ~%@ estimated tax this year": {
+    "es-419": "%@ de ~%@ de impuesto estimado este año",
+    "es-ES": "%@ de ~%@ de impuesto estimado este año"
+  },
+  "Log pay this week to see how much to set aside": {
+    "es-419": "Registra pago esta semana para ver cuánto apartar",
+    "es-ES": "Registra pago esta semana para ver cuánto apartar"
+  },
+  "Log pay to see estimated tax for the year": {
+    "es-419": "Registra pagos para ver el impuesto estimado del año",
+    "es-ES": "Registra pagos para ver el impuesto estimado del año"
+  },
+  "%@ set aside — log pay to refresh your estimate": {
+    "es-419": "%@ apartado — registra pagos para actualizar la estimación",
+    "es-ES": "%@ apartado — registra pagos para actualizar la estimación"
+  },
+  "Tracks set-asides you log. BuxMuse is not a bank.": {
+    "es-419": "Registra lo que apartas. BuxMuse no es un banco.",
+    "es-ES": "Registra lo que apartas. BuxMuse no es un banco."
+  },
+  "Tracks what you log as set aside for tax. BuxMuse does not hold your money.": {
+    "es-419": "Registra lo que apartas para impuestos. BuxMuse no guarda tu dinero.",
+    "es-ES": "Registra lo que apartas para impuestos. BuxMuse no guarda tu dinero."
+  },
+  "No set-asides logged yet. Log pay and tap Add, or use I set money aside.": {
+    "es-419": "Sin apartados registrados. Registra pago y pulsa Sumar, o usa Aparté dinero.",
+    "es-ES": "Sin apartados registrados. Registra pago y pulsa Sumar, o usa Aparté dinero."
+  },
+  "Estimated from your books and your country's tax rules.": {
+    "es-419": "Estimado según tus registros y las reglas fiscales de tu país.",
+    "es-ES": "Estimado según tus registros y las normas fiscales de tu país."
+  },
+  "Adds to your set-aside total. BuxMuse does not move money for you.": {
+    "es-419": "Suma a tu total apartado. BuxMuse no mueve tu dinero.",
+    "es-ES": "Suma a tu total apartado. BuxMuse no mueve tu dinero."
+  },
+  "You get paid on your own": {
+    "es-419": "Cobras por tu cuenta",
+    "es-ES": "Cobras por tu cuenta"
+  },
+  "We use your country's tax rules to suggest how much to set aside.": {
+    "es-419": "Usamos las reglas fiscales de tu país para sugerir cuánto apartar.",
+    "es-ES": "Usamos las normas fiscales de tu país para sugerir cuánto apartar."
+  },
+  "We suggest how much to set aside": {
+    "es-419": "Sugerimos cuánto apartar",
+    "es-ES": "Sugerimos cuánto apartar"
+  },
+  "Based on what you log and your country's tax rules — updated monthly.": {
+    "es-419": "Según lo que registras y las reglas fiscales de tu país — actualizado cada mes.",
+    "es-ES": "Según lo que registras y las normas fiscales de tu país — actualizado cada mes."
+  },
+  "You log what you set aside": {
+    "es-419": "Registras lo que apartas",
+    "es-ES": "Registras lo que apartas"
+  },
+  "After logging pay, tap Add — or use I set money aside anytime. BuxMuse tracks the total; it does not hold your money.": {
+    "es-419": "Tras registrar pago, pulsa Sumar — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero.",
+    "es-ES": "Tras registrar pago, pulsa Sumar — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero."
+  },
+  "We remind you before tax is due": {
+    "es-419": "Te avisamos antes del vencimiento",
+    "es-ES": "Te avisamos antes del vencimiento"
+  },
+  "Due dates and amounts from your books and %@ tax rules.": {
+    "es-419": "Fechas e importes según tus registros y las reglas fiscales de %@.",
+    "es-ES": "Fechas e importes según tus registros y las normas fiscales de %@."
+  },
+  "Default set-aside guide: %lld%%": {
+    "es-419": "Guía de apartado predeterminada: %lld%%",
+    "es-ES": "Guía de apartado predeterminada: %lld%%"
+  },
+  "Start tax savings": {
+    "es-419": "Empezar ahorro fiscal",
+    "es-ES": "Empezar ahorro fiscal"
+  },
+  "Guide: %lld%% from your tax rules": {
+    "es-419": "Guía: %lld%% según tus reglas fiscales",
+    "es-ES": "Guía: %lld%% según tus normas fiscales"
+  },
+  "Set aside · track · due soon · year summary": {
+    "es-419": "Aparta · registra · próximo pago · resumen anual",
+    "es-ES": "Aparta · registra · próximo pago · resumen anual"
+  },
+  "You can adjust this anytime in tax savings settings.": {
+    "es-419": "Puedes ajustarlo cuando quieras en ajustes de ahorro fiscal.",
+    "es-ES": "Puedes ajustarlo cuando quieras en ajustes de ahorro fiscal."
+  }
+}

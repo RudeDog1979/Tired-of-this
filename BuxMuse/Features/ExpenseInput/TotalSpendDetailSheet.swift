@@ -437,7 +437,7 @@ struct TotalSpendDetailSheet: View {
 
                             // Merchant Details
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(record.name)
+                                Text(record.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                                     .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 

@@ -9,8 +9,7 @@ import SwiftUI
 
 enum BuxCountrySubtitle {
     static func label(country: CountrySetting, locale: Locale) -> String {
-        let name = TaxCountryDisplayName.localizedRegionName(isoCode: country.id, locale: locale)
-            ?? country.name
+        let name = CountryDisplayL10n.displayName(for: country, locale: locale)
         return "\(country.flag) \(name)"
     }
 }

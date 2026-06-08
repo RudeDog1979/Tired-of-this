@@ -14,8 +14,10 @@ struct SimpleStudioHubView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var studioBrain: StudioBrain
+    @EnvironmentObject private var appDataManager: AppDataManager
     @EnvironmentObject private var simpleStudioBrain: SimpleStudioBrain
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var studioTimer = StudioTimerController.shared
@@ -40,6 +42,7 @@ struct SimpleStudioHubView: View {
     @State private var navigateToInvoiceArchive = false
     @State private var navigateToMileage = false
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
+    @State private var navigateTaxEnvelope = false
 
     private var display: SimpleStudioHubDisplay { simpleStudioBrain.hubDisplay }
 
@@ -144,13 +147,20 @@ struct SimpleStudioHubView: View {
                         }
                             .buxScreenEntrance(index: 7, isVisible: hubAppeared)
 
+                        if settingsStore.studioEnabled {
+                            TaxSavingsHubHeroSection(hero: taxEnvelopeBrain.display.hubHero) {
+                                navigateTaxEnvelope = true
+                            }
+                            .buxScreenEntrance(index: 8, isVisible: hubAppeared)
+                        }
+
                         SimpleStudioTaxSection(tile: display.taxTile) {
                             proUpsellFeature = .fullTax
                         }
-                            .buxScreenEntrance(index: 8, isVisible: hubAppeared)
+                            .buxScreenEntrance(index: 9, isVisible: hubAppeared)
 
                         simpleToolsSection
-                            .buxScreenEntrance(index: 9, isVisible: hubAppeared)
+                            .buxScreenEntrance(index: 10, isVisible: hubAppeared)
 
                         Spacer().frame(height: 100)
                     }
@@ -210,6 +220,15 @@ struct SimpleStudioHubView: View {
                     .environmentObject(studioStore)
                     .environmentObject(studioBrain)
                     .environment(\.studioEnhancedTint, true)
+            }
+            .navigationDestination(isPresented: $navigateTaxEnvelope) {
+                TaxEnvelopeRootView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+                    .environmentObject(studioBrain)
+                    .environmentObject(taxEnvelopeBrain)
+                    .environmentObject(appDataManager)
             }
             .sheet(item: $proUpsellFeature) { feature in
                 StudioProUpsellSheet(feature: feature)
@@ -539,6 +558,30 @@ struct SimpleStudioHubView: View {
                                 .foregroundColor(.cyan)
                         }
                         BuxCatalogText.text("Mileage Log")
+                            .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme).opacity(0.6))
+                    }
+                    .padding(.horizontal, BuxTokens.section)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                }
+
+                Divider().padding(.leading, 44)
+
+                BuxCardButton(action: { showQuoteJob = true }) {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: BuxTokens.tight, style: .continuous)
+                                .fill(themeManager.accentWash(for: colorScheme))
+                                .frame(width: 32, height: 32)
+                            Image(systemName: "doc.text.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                        }
+                        BuxCatalogText.text("Quote a job")
                             .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
                         Spacer()
                         Image(systemName: "chevron.right")

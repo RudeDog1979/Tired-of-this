@@ -164,6 +164,13 @@ public final class HustleManager: ObservableObject {
         return nil
     }
 
+    public func resetAllData() {
+        hustles = []
+        selectedHustleId = nil
+        UserDefaults.standard.removeObject(forKey: storeKey)
+        UserDefaults.standard.removeObject(forKey: activeHustleKey)
+    }
+
     /// Ensures at least one workspace exists after enabling the matrix (optional first workspace).
     @discardableResult
     public func ensureDefaultWorkspaceIfNeeded() -> Bool {

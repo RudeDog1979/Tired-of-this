@@ -831,7 +831,7 @@ public final class BuxMuseBrain: ObservableObject {
             let displayRows = group.records.map { r in
                 ExpenseRowDisplay(
                     id: r.id,
-                    name: IncomeSourceQuickPick.localizedDisplayName(for: r.name, locale: locale),
+                    name: ExpenseDisplayL10n.label(r.name, locale: locale),
                     amount: r.amountDouble,
                     amountFormatted: AppSettingsManager.format(
                         amount: abs(r.amountDouble),

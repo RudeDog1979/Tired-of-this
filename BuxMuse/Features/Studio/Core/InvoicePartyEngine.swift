@@ -124,7 +124,11 @@ public enum InvoicePartyEngine {
         }
         if !cityLine.isEmpty { lines.append(cityLine) }
         if includeCountry, !party.countryCode.isEmpty {
-            let name = CountryCatalog.country(for: party.countryCode)?.name ?? party.countryCode
+            let name = CountryDisplayL10n.displayName(
+                isoCode: party.countryCode,
+                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                englishFallback: CountryCatalog.country(for: party.countryCode)?.name
+            )
             lines.append(name)
         }
         return lines
@@ -189,7 +193,11 @@ public enum InvoicePartyEngine {
             }
         }
         if !issuer.countryCode.isEmpty {
-            let country = CountryCatalog.country(for: issuer.countryCode)?.name ?? issuer.countryCode
+            let country = CountryDisplayL10n.displayName(
+                isoCode: issuer.countryCode,
+                locale: locale,
+                englishFallback: CountryCatalog.country(for: issuer.countryCode)?.name
+            )
             lines.append("Registered in \(country)")
         }
 

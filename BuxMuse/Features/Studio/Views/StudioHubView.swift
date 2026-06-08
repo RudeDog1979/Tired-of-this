@@ -16,6 +16,7 @@ struct StudioHubView: View {
     @EnvironmentObject private var appDataManager: AppDataManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
     @EnvironmentObject private var financialBridge: FinancialEngineBridge
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var studioTimer = StudioTimerController.shared
@@ -41,6 +42,7 @@ struct StudioHubView: View {
     @State private var showProSearch = false
     @State private var showBusinessCardStudio = false
     @State private var navigateToInvoiceArchive = false
+    @State private var navigateTaxEnvelope = false
     @State private var hubAppeared = false
 
     private var display: StudioHubDisplay {
@@ -101,6 +103,14 @@ struct StudioHubView: View {
 
                         StudioHeroCard(display: display.hero)
                             .buxScreenEntrance(index: 1, isVisible: hubAppeared)
+
+                        if settingsStore.studioEnabled {
+                            TaxSavingsHubHeroSection(hero: taxEnvelopeBrain.display.hubHero) {
+                                navigateTaxEnvelope = true
+                            }
+                            .padding(.horizontal, BuxTokens.marginRegular)
+                            .buxScreenEntrance(index: 2, isVisible: hubAppeared)
+                        }
 
                         if settingsStore.studioEnabled {
                             StudioIntelligenceSummaryCard(
@@ -309,6 +319,17 @@ struct StudioHubView: View {
                     .environmentObject(appDataManager)
                     .environmentObject(store)
                     .environmentObject(studioBrain)
+                    .environmentObject(taxEnvelopeBrain)
+                    .environment(\.studioEnhancedTint, true)
+            }
+            .navigationDestination(isPresented: $navigateTaxEnvelope) {
+                TaxEnvelopeRootView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(store)
+                    .environmentObject(studioBrain)
+                    .environmentObject(taxEnvelopeBrain)
+                    .environmentObject(appDataManager)
                     .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToCashflow) {
@@ -420,6 +441,8 @@ struct StudioHubView: View {
                     navRow(title: "Studio Insights", icon: "chart.bar.xaxis", color: .mint) { navigateToInsights = true }
                     studioRowDivider
                     navRow(title: "Tax studio", icon: "percent", color: .red) { openTaxHub(.overview) }
+                    studioRowDivider
+                    navRow(title: "Tax savings", icon: "banknote.fill", color: .red) { navigateTaxEnvelope = true }
                     studioRowDivider
                     navRow(title: "Cashflow", icon: "chart.line.uptrend.xyaxis", color: .orange) { navigateToCashflow = true }
                     studioRowDivider

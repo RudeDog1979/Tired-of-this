@@ -1,0 +1,186 @@
+{
+  "Tax Envelope": {
+    "es-419": "Sobre fiscal",
+    "es-ES": "Sobre fiscal"
+  },
+  "This week": {
+    "es-419": "Esta semana",
+    "es-ES": "Esta semana"
+  },
+  "Tax jar": {
+    "es-419": "Hucha fiscal",
+    "es-ES": "Hucha fiscal"
+  },
+  "Reminders": {
+    "es-419": "Recordatorios",
+    "es-ES": "Recordatorios"
+  },
+  "My year summary": {
+    "es-419": "Resumen del año",
+    "es-ES": "Resumen del año"
+  },
+  "Full Tax Studio": {
+    "es-419": "Tax Studio completo",
+    "es-ES": "Tax Studio completo"
+  },
+  "Set aside for tax": {
+    "es-419": "Aparta para impuestos",
+    "es-ES": "Aparta para impuestos"
+  },
+  "Guide: %lld%% from catalog": {
+    "es-419": "Guía: %lld%% del catálogo",
+    "es-ES": "Guía: %lld%% del catálogo"
+  },
+  "I saved this": {
+    "es-419": "Lo guardé",
+    "es-ES": "Lo guardé"
+  },
+  "Saved to tax jar": {
+    "es-419": "Guardado en la hucha",
+    "es-ES": "Guardado en la hucha"
+  },
+  "Not now": {
+    "es-419": "Ahora no",
+    "es-ES": "Ahora no"
+  },
+  "Set aside": {
+    "es-419": "Aparta",
+    "es-ES": "Aparta"
+  },
+  "Are you self-employed?": {
+    "es-419": "¿Trabajas por cuenta propia?",
+    "es-ES": "¿Trabajas por cuenta propia?"
+  },
+  "I earn money on my own": {
+    "es-419": "Gano dinero por mi cuenta",
+    "es-ES": "Gano dinero por mi cuenta"
+  },
+  "How often do you get paid?": {
+    "es-419": "¿Con qué frecuencia cobras?",
+    "es-ES": "¿Con qué frecuencia cobras?"
+  },
+  "Weekly": {
+    "es-419": "Semanal",
+    "es-ES": "Semanal"
+  },
+  "Per job": {
+    "es-419": "Por trabajo",
+    "es-ES": "Por trabajo"
+  },
+  "Your tax country": {
+    "es-419": "Tu país fiscal",
+    "es-ES": "Tu país fiscal"
+  },
+  "Recommended save rate": {
+    "es-419": "Tasa de ahorro recomendada",
+    "es-ES": "Tasa de ahorro recomendada"
+  },
+  "Save %lld%%": {
+    "es-419": "Ahorra %lld%%",
+    "es-ES": "Ahorra %lld%%"
+  },
+  "Start Tax Envelope": {
+    "es-419": "Empezar Sobre fiscal",
+    "es-ES": "Empezar Sobre fiscal"
+  },
+  "Next": {
+    "es-419": "Siguiente",
+    "es-ES": "Siguiente"
+  },
+  "Back": {
+    "es-419": "Atrás",
+    "es-ES": "Atrás"
+  },
+  "Open Tax Envelope": {
+    "es-419": "Abrir Sobre fiscal",
+    "es-ES": "Abrir Sobre fiscal"
+  },
+  "Set up Tax Envelope": {
+    "es-419": "Configurar Sobre fiscal",
+    "es-ES": "Configurar Sobre fiscal"
+  },
+  "You made this week": {
+    "es-419": "Ganaste esta semana",
+    "es-ES": "Ganaste esta semana"
+  },
+  "Set aside target": {
+    "es-419": "Meta de apartado",
+    "es-ES": "Meta de apartado"
+  },
+  "Guide rate: %lld%%": {
+    "es-419": "Tasa guía: %lld%%",
+    "es-ES": "Tasa guía: %lld%%"
+  },
+  "Saved in jar": {
+    "es-419": "Guardado en la hucha",
+    "es-ES": "Guardado en la hucha"
+  },
+  "Year target": {
+    "es-419": "Meta anual",
+    "es-ES": "Meta anual"
+  },
+  "Recent saves": {
+    "es-419": "Ahorros recientes",
+    "es-ES": "Ahorros recientes"
+  },
+  "Quarter": {
+    "es-419": "Trimestre",
+    "es-ES": "Trimestre"
+  },
+  "Schedule": {
+    "es-419": "Calendario",
+    "es-ES": "Calendario"
+  },
+  "Next due": {
+    "es-419": "Próximo vencimiento",
+    "es-ES": "Próximo vencimiento"
+  },
+  "Estimated amount": {
+    "es-419": "Importe estimado",
+    "es-ES": "Importe estimado"
+  },
+  "Mark paid": {
+    "es-419": "Marcar pagado",
+    "es-ES": "Marcar pagado"
+  },
+  "Marked paid": {
+    "es-419": "Marcado pagado",
+    "es-ES": "Marcado pagado"
+  },
+  "Set aside, tax jar, and quarterly reminders": {
+    "es-419": "Aparta dinero, hucha fiscal y recordatorios trimestrales",
+    "es-ES": "Aparta dinero, hucha fiscal y recordatorios trimestrales"
+  },
+  "Set-aside uses your country's tax catalog (%lld%% guide).": {
+    "es-419": "El apartado usa el catálogo fiscal de tu país (guía %lld%%).",
+    "es-ES": "El apartado usa el catálogo fiscal de tu país (guía %lld%%)."
+  },
+  "You chose to set aside %lld%% from each payment.": {
+    "es-419": "Elegiste apartar %lld%% de cada pago.",
+    "es-ES": "Elegiste apartar %lld%% de cada pago."
+  },
+  "Set-aside follows your tax profile rates (%lld%% guide).": {
+    "es-419": "El apartado sigue las tasas de tu perfil fiscal (guía %lld%%).",
+    "es-ES": "El apartado sigue las tasas de tu perfil fiscal (guía %lld%%)."
+  },
+  "Based on your country's tax rules — about %lld%% is a good starting point.": {
+    "es-419": "Según las reglas fiscales de tu país — ~%lld%% es un buen punto de partida.",
+    "es-ES": "Según las normas fiscales de tu país — ~%lld%% es un buen punto de partida."
+  },
+  "You can adjust this anytime in Tax Envelope settings.": {
+    "es-419": "Puedes ajustarlo cuando quieras en ajustes del Sobre fiscal.",
+    "es-ES": "Puedes ajustarlo cuando quieras en ajustes del Sobre fiscal."
+  },
+  "Using rates from your tax profile — about %lld%%.": {
+    "es-419": "Usando tasas de tu perfil fiscal — ~%lld%%.",
+    "es-ES": "Usando tasas de tu perfil fiscal — ~%lld%%."
+  },
+  "Your tax jar tracks money you set aside for estimated taxes.": {
+    "es-419": "Tu hucha registra el dinero que apartas para impuestos estimados.",
+    "es-ES": "Tu hucha registra el dinero que apartas para impuestos estimados."
+  },
+  "Amounts come from your books and the monthly tax catalog — not fixed guesses.": {
+    "es-419": "Los importes vienen de tus libros y el catálogo mensual — no suposiciones fijas.",
+    "es-ES": "Los importes vienen de tus libros y el catálogo mensual — no suposiciones fijas."
+  }
+}

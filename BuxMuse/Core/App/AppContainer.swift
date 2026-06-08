@@ -34,6 +34,7 @@ final class AppContainer: ObservableObject {
     public let studioBrain: StudioBrain
     public let simpleStudioStore: SimpleStudioStore
     public let simpleStudioBrain: SimpleStudioBrain
+    public let taxEnvelopeBrain: TaxEnvelopeBrain
     public let appDataManager: AppDataManager
 
     init() {
@@ -58,6 +59,12 @@ final class AppContainer: ObservableObject {
             store: simpleStudioStore,
             settings: settingsStore,
             studioStore: studioStore,
+            appSettings: appSettingsManager
+        )
+        taxEnvelopeBrain = TaxEnvelopeBrain(
+            studioStore: studioStore,
+            simpleStore: simpleStudioStore,
+            settings: settingsStore,
             appSettings: appSettingsManager
         )
         appDataManager = AppDataManager(
@@ -103,6 +110,7 @@ final class AppContainer: ObservableObject {
         wireWorkspaceNexusLifecycle()
         migrateLegacyFreelanceLocale()
         studioBrain.refreshAll()
+        taxEnvelopeBrain.refreshAll()
         scheduleEngagementRefresh()
         scheduleTaxCatalogRefresh()
         LocalBackupCoordinator.shared.reschedule(

@@ -1383,6 +1383,7 @@ public struct StudioSnapshot: Codable, Equatable {
     public var mileageEntries: [MileageEntry]
     public var businessCardLibrary: ProBusinessCardLibrary
     public var agreementDrafts: [AgreementDraft]
+    public var taxEnvelope: TaxEnvelopeState
 
     public init(
         profile: StudioProfile,
@@ -1394,7 +1395,8 @@ public struct StudioSnapshot: Codable, Equatable {
         invoiceSettings: StudioInvoiceSettings = StudioInvoiceSettings(),
         mileageEntries: [MileageEntry] = [],
         businessCardLibrary: ProBusinessCardLibrary = ProBusinessCardLibrary(),
-        agreementDrafts: [AgreementDraft] = []
+        agreementDrafts: [AgreementDraft] = [],
+        taxEnvelope: TaxEnvelopeState = TaxEnvelopeState()
     ) {
         self.profile = profile
         self.clients = clients
@@ -1406,10 +1408,11 @@ public struct StudioSnapshot: Codable, Equatable {
         self.mileageEntries = mileageEntries
         self.businessCardLibrary = businessCardLibrary
         self.agreementDrafts = agreementDrafts
+        self.taxEnvelope = taxEnvelope
     }
 
     private enum CodingKeys: String, CodingKey {
-        case profile, clients, invoices, projects, receipts, taxProfile, invoiceSettings, mileageEntries, businessCardLibrary, agreementDrafts
+        case profile, clients, invoices, projects, receipts, taxProfile, invoiceSettings, mileageEntries, businessCardLibrary, agreementDrafts, taxEnvelope
     }
 
     public init(from decoder: Decoder) throws {
@@ -1424,6 +1427,7 @@ public struct StudioSnapshot: Codable, Equatable {
         mileageEntries = try c.decodeIfPresent([MileageEntry].self, forKey: .mileageEntries) ?? []
         businessCardLibrary = try c.decodeIfPresent(ProBusinessCardLibrary.self, forKey: .businessCardLibrary) ?? ProBusinessCardLibrary()
         agreementDrafts = try c.decodeIfPresent([AgreementDraft].self, forKey: .agreementDrafts) ?? []
+        taxEnvelope = try c.decodeIfPresent(TaxEnvelopeState.self, forKey: .taxEnvelope) ?? TaxEnvelopeState()
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -1438,5 +1442,6 @@ public struct StudioSnapshot: Codable, Equatable {
         try c.encode(mileageEntries, forKey: .mileageEntries)
         try c.encode(businessCardLibrary, forKey: .businessCardLibrary)
         try c.encode(agreementDrafts, forKey: .agreementDrafts)
+        try c.encode(taxEnvelope, forKey: .taxEnvelope)
     }
 }

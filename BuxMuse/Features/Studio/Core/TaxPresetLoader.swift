@@ -62,20 +62,12 @@ public enum TaxPresetLoader {
     }
 
     private static func matchesSearch(query: String, info: TaxInfo, locale: Locale) -> Bool {
-        if TaxCountryDisplayName.displayName(for: info, locale: locale).lowercased().contains(query) { return true }
-        if info.name.lowercased().contains(query) { return true }
-        if info.isoCode.lowercased().contains(query) { return true }
+        if CountryDisplayL10n.matchesSearch(query: query, info: info, locale: locale) { return true }
         if let region = info.region?.lowercased(), region.contains(query) { return true }
-
-        for (alias, code) in countryAliases where code == info.isoCode {
-            if alias.lowercased().contains(query) { return true }
-        }
-
         if let resolved = countryAliases.first(where: { $0.key.lowercased() == query })?.value,
            resolved == info.isoCode {
             return true
         }
-
         return false
     }
 }

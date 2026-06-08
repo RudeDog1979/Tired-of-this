@@ -179,10 +179,41 @@ struct TaxStudioOverviewView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
+    @EnvironmentObject private var studioStore: StudioStore
+    @EnvironmentObject private var studioBrain: StudioBrain
+    @EnvironmentObject private var appDataManager: AppDataManager
     let display: TaxStudioDisplay
 
     var body: some View {
         taxStudioTabStack(spacing: BuxTokens.section) {
+            NavigationLink {
+                TaxEnvelopeRootView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+                    .environmentObject(studioBrain)
+                    .environmentObject(taxEnvelopeBrain)
+                    .environmentObject(appDataManager)
+            } label: {
+                BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: BuxTokens.section) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            BuxCatalogText.text("Tax savings")
+                                .font(.system(size: 15, weight: .bold))
+                            BuxCatalogText.text("Set aside · track · due soon · year summary")
+                                .font(.system(size: 11, weight: .medium))
+                                .buxLabelSecondary()
+                        }
+                        Spacer()
+                        Image(systemName: "envelope.fill")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+
             TaxStudioHeroCard(hero: display.hero)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)

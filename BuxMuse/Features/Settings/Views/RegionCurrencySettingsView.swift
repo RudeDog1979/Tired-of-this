@@ -44,7 +44,12 @@ struct RegionCurrencySettingsView: View {
                 }
                 .buttonStyle(.plain)
                 .buxFormFieldPadding()
-                Text(appSettingsManager.selectedCountry.name)
+                Text(
+                    CountryDisplayL10n.displayName(
+                        for: appSettingsManager.selectedCountry,
+                        locale: appSettingsManager.interfaceLocale
+                    )
+                )
                     .font(.system(size: 12))
                     .buxLabelSecondary()
                     .buxFormFieldPadding()
@@ -215,7 +220,7 @@ struct CountryPickerView: View {
     let onSelect: (CountrySetting) -> Void
 
     private var filteredCountries: [CountrySetting] {
-        CountryCatalog.filtered(matching: searchText)
+        CountryCatalog.filtered(matching: searchText, locale: appSettingsManager.interfaceLocale)
     }
 
     var body: some View {
@@ -264,7 +269,12 @@ struct CountryPickerView: View {
                             HStack(spacing: 12) {
                                 Text(country.flag).font(.system(size: 24))
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(country.name)
+                                    Text(
+                                        CountryDisplayL10n.displayName(
+                                            for: country,
+                                            locale: appSettingsManager.interfaceLocale
+                                        )
+                                    )
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                     Text(

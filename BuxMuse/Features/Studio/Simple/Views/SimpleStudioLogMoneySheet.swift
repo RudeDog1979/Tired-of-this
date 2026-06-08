@@ -11,11 +11,15 @@ struct SimpleStudioLogMoneySheet: View {
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var studioStore: StudioStore
+    @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
     @ObservedObject private var settings = SettingsStore.shared
 
     @ObservedObject var store: SimpleStudioStore
 
     let initialKind: SimpleEntryKind?
+
+    @State private var pendingSetAside: PendingSetAside?
 
     @State private var kind: SimpleEntryKind = .income
     @State private var amountText = ""
@@ -142,7 +146,21 @@ struct SimpleStudioLogMoneySheet: View {
             .onAppear {
                 if let initialKind { kind = initialKind }
             }
+            .sheet(item: $pendingSetAside, onDismiss: { dismiss() }) { pending in
+                TaxEnvelopeSetAsideSheet(entryId: pending.entryId, incomeAmount: pending.amount)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+                    .environmentObject(taxEnvelopeBrain)
+                    .environmentObject(store)
+            }
         }
+    }
+
+    private struct PendingSetAside: Identifiable {
+        var id: UUID { entryId }
+        let entryId: UUID
+        let amount: Decimal
     }
 
     @ViewBuilder
@@ -199,7 +217,14 @@ struct SimpleStudioLogMoneySheet: View {
         )
         store.addEntry(entry)
         BuxSaveFeedback.success()
-        dismiss()
+        let isIncome = kind == .income || kind == .job || kind == .repaymentReceived
+        if isIncome,
+           studioStore.taxEnvelope.isEnabled,
+           TaxEnvelopeContextBridge.incomeAmount(for: entry) > 0 {
+            pendingSetAside = PendingSetAside(entryId: entry.id, amount: entry.amount + (entry.tip ?? 0))
+        } else {
+            dismiss()
+        }
     }
 
     private func decimal(from text: String) -> Decimal? {

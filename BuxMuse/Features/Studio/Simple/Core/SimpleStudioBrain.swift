@@ -44,18 +44,31 @@ public final class SimpleStudioBrain: ObservableObject {
             : studioStore.profile.businessName
         let format: (Decimal) -> String = { [appSettings] in appSettings.format($0) }
         let locale = appSettings.interfaceLocale
+        let envelopeContext = TaxEnvelopeSourceContext(
+            profile: studioStore.profile,
+            taxProfile: studioStore.taxProfile,
+            proInvoices: studioStore.invoices,
+            proReceipts: studioStore.receipts,
+            mileageEntries: studioStore.mileageEntries,
+            simpleEntries: store.snapshot.entries,
+            envelope: studioStore.taxEnvelope,
+            mileageRatePerUnit: settings.mileageRatePerUnit,
+            locale: locale
+        )
         hubDisplay = SimpleStudioEngine.buildHubDisplay(
             snapshot: store.snapshot,
             businessTitle: title,
             persona: settings.studioPersona,
             format: format,
-            locale: locale
+            locale: locale,
+            envelopeContext: envelopeContext
         )
         myMoneyDisplay = SimpleStudioEngine.buildMyMoneyDisplay(
             snapshot: store.snapshot,
             persona: settings.studioPersona,
             format: format,
-            locale: locale
+            locale: locale,
+            envelopeContext: envelopeContext
         )
     }
 
@@ -88,6 +101,16 @@ public final class SimpleStudioBrain: ObservableObject {
             .store(in: &cancellables)
 
         studioStore.$profile
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshAll() }
+            .store(in: &cancellables)
+
+        studioStore.$taxEnvelope
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshAll() }
+            .store(in: &cancellables)
+
+        studioStore.$taxProfile
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.refreshAll() }
             .store(in: &cancellables)

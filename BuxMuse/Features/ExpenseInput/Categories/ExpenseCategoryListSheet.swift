@@ -55,7 +55,7 @@ struct ExpenseCategoryListSheet: View {
                 .buxListContentMargins()
                 .buxSoftScrollChrome()
             }
-            .navigationTitle("Categories")
+            .buxCatalogNavigationTitle("Categories")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
