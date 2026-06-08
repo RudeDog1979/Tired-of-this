@@ -18,7 +18,7 @@ struct GoalPriorityPicker: View {
             ForEach([1, 2, 3], id: \.self) { prio in
                 let isSelected = priority == prio
                 let labelKey = prio == 1 ? "High" : (prio == 2 ? "Medium" : "Low")
-                let activeColor = prio == 1 ? Color.red : (prio == 2 ? themeManager.current.accentColor : Color.gray)
+                let activeColor = prio == 1 ? Color.red : (prio == 2 ? themeManager.contrastAccentColor(for: colorScheme) : Color.gray)
 
                 Button {
                     withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {

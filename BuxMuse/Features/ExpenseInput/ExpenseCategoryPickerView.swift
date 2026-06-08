@@ -145,7 +145,7 @@ struct ExpenseCategoryPickerView: View {
                 Text(cat.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .semibold))
             }
-            .foregroundColor(isSelected ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
+            .foregroundColor(isSelected ? themeManager.contrastAccentColor(for: colorScheme) : themeManager.labelSecondary(for: colorScheme))
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .background(
@@ -174,7 +174,7 @@ struct ExpenseCategoryPickerView: View {
                 BuxCatalogText.text("New")
                     .font(.system(size: 13, weight: .semibold))
             }
-            .foregroundColor(themeManager.current.accentColor)
+            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .background(

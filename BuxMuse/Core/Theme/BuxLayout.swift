@@ -39,6 +39,12 @@ enum BuxLayout {
     /// Nudge Studio branded `.largeTitle` down vs system default (tune here only).
     static let studioRootTabNavTitleTopInset: CGFloat = 16
 
+    /// Simple Studio iOS 26 — nudge scroll content below custom title + subtitle (tune here only).
+    static let simpleStudioRootTabScrollTopInset: CGFloat = 28
+
+    /// Home dashboard — no visible nav bar; reserve large-title band so greeting aligns with Expenses (tune here only).
+    static let dashboardRootTabScrollTopInset: CGFloat = 52
+
     static let sheetBottomClearance: CGFloat = BuxTokens.sheetBottomClearance
 
     static func horizontalMargin(for width: CGFloat) -> CGFloat {

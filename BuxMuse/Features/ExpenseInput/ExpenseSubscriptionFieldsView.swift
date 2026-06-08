@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ExpenseSubscriptionFieldsView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
@@ -46,7 +47,7 @@ struct ExpenseSubscriptionFieldsView: View {
                 reminderSection
             }
         }
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
         .animation(nil, value: isSubscription)
         .animation(nil, value: isTrial)
     }
@@ -72,7 +73,7 @@ struct ExpenseSubscriptionFieldsView: View {
                             )
                         )
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(renewalReminderDays == days ? .white : themeManager.current.accentColor)
+                            .foregroundColor(renewalReminderDays == days ? .white : themeManager.contrastAccentColor(for: colorScheme))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(
@@ -94,7 +95,7 @@ struct ExpenseSubscriptionFieldsView: View {
                         )
                     )
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         .frame(minWidth: 36)
                 }
             }

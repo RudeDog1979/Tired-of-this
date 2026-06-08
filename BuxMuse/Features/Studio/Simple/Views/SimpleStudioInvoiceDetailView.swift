@@ -39,7 +39,7 @@ struct SimpleStudioInvoiceDetailView: View {
                                 amountFormatted: appSettingsManager.format(invoice.amount),
                                 description: invoice.jobDescription,
                                 isPaid: invoice.status == .paid,
-                                accent: themeManager.current.accentColor
+                                accent: themeManager.contrastAccentColor(for: colorScheme)
                             )
                             .padding(.horizontal, BuxTokens.marginRegular)
 
@@ -227,7 +227,7 @@ struct SimpleStudioInvoiceDetailView: View {
                 jobLabel: invoice.jobDescription,
                 businessName: businessName,
                 phone: phone,
-                accent: themeManager.current.accentColor
+                accent: themeManager.contrastAccentColor(for: colorScheme)
             ),
             openURL: openURL
         )

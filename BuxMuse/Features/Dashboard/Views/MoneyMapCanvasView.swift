@@ -259,7 +259,7 @@ struct MoneyMapCanvasView: View {
         let liveBlend = mode == .full ? blend : 0
         ZStack {
             MoneyMapTopoWavesView(
-                accent: themeManager.current.accentColor,
+                accent: themeManager.contrastAccentColor(for: colorScheme),
                 isDark: colorScheme == .dark
             )
             .offset(MoneyMapMotionMath.backgroundParallaxShift(tilt: tilt, blend: liveBlend))
@@ -327,7 +327,7 @@ struct MoneyMapCanvasView: View {
     private var miniFooter: some View {
         HStack(spacing: 8) {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             Text(
                 BuxLocalizedString.format(
                     "%lld territories · tap to open full map",
@@ -344,7 +344,7 @@ struct MoneyMapCanvasView: View {
     private var hintRow: some View {
         HStack(spacing: 8) {
             Image(systemName: "hand.tap.fill")
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             BuxCatalogText.text("Long-press & drag to weave the web · tap for territory detail")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))

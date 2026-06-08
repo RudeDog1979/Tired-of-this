@@ -60,10 +60,7 @@ struct TaxStudioHubView: View {
                     TaxStudioNavigationTitle(style: .large)
                         .environmentObject(themeManager)
                         .environmentObject(appSettingsManager)
-                        .studioHubEmbeddedHorizontalPadding()
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 4, trailing: 0))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
+                        .studioProToolScreenHeaderRow()
                 }
 
                 Section {
@@ -80,7 +77,7 @@ struct TaxStudioHubView: View {
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 }
             }
-            .contentMargins(.top, BuxLayout.invoicesNavChromeScrollInset, for: .scrollContent)
+            .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
             .studioThemedListRows()
         }
         .navigationTitle("")
@@ -160,7 +157,7 @@ struct TaxStudioDisclaimerBanner: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: BuxTokens.tight) {
                 Image(systemName: "calendar.badge.clock")
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 BuxCatalogDynamicText(key: TaxReferenceCopy.monthlyDataBanner)
                     .buxCaptionStyle(color: themeManager.labelPrimary(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
@@ -458,7 +455,7 @@ struct TaxStudioCoachView: View {
                         BuxCatalogLabel.string(card.category, locale: appSettingsManager.interfaceLocale)
                     )
                         .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.2 : 0.12))

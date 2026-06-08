@@ -131,6 +131,7 @@ public struct ImageCropView: View {
 // MARK: - Embeddable crop editor (no sheet — for Bux Canvas background)
 
 public struct ImageCropEditorContent: View {
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
 
     public let inputImage: UIImage
@@ -189,7 +190,7 @@ public struct ImageCropEditorContent: View {
                 Image(systemName: "minus.magnifyingglass")
                     .foregroundStyle(.secondary)
                 Slider(value: $scale, in: 1...4)
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                 Image(systemName: "plus.magnifyingglass")
                     .foregroundStyle(.secondary)
             }
@@ -446,7 +447,7 @@ public struct PhotoPickCropRow: View {
                     .frame(width: previewSize, height: previewSize)
                 Image(systemName: "camera.fill")
                     .font(.system(size: previewSize * 0.32))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
         }
     }

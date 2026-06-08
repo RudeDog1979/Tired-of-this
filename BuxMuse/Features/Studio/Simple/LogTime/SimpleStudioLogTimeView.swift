@@ -23,7 +23,7 @@ struct SimpleStudioLogTimeView: View {
     @State private var displayElapsed: TimeInterval = 0
     @State private var showFinishConfirm = false
 
-    private var accent: Color { themeManager.current.accentColor }
+    private var accent: Color { themeManager.contrastAccentColor(for: colorScheme) }
 
     private var locale: Locale { appSettingsManager.interfaceLocale }
 

@@ -293,13 +293,13 @@ struct StudioTaxReferenceView: View {
                         if let catalogUpdatedLabel {
                             Text(catalogUpdatedLabel)
                                 .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(themeManager.current.accentColor.opacity(0.85))
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme).opacity(0.85))
                         }
                     }
                     Spacer()
                     Image(systemName: "chevron.down")
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .padding(14)
                 .buxThemedInputPlate(cornerRadius: 12)

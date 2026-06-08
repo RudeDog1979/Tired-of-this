@@ -43,7 +43,7 @@ struct MerchantAutocompleteView: View {
                                 if candidate.matchKind == .newMerchant {
                                     BuxCatalogText.text("New")
                                         .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
                                         .background(themeManager.pillActiveChipFill(for: colorScheme))
@@ -51,7 +51,7 @@ struct MerchantAutocompleteView: View {
                                 } else if candidate.matchKind == .knownRetailer {
                                     BuxCatalogText.text("Popular")
                                         .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
                                         .background(themeManager.pillActiveChipFill(for: colorScheme).opacity(0.65))

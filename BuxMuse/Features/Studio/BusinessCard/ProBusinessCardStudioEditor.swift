@@ -686,7 +686,7 @@ struct ProBusinessCardEditorView: View {
                         Image(systemName: tab.icon).font(.system(size: 14, weight: .semibold))
                         Text(tab.title).font(.system(size: 10, weight: .bold))
                     }
-                    .foregroundColor(activeTab == tab ? themeManager.current.accentColor : .secondary)
+                    .foregroundColor(activeTab == tab ? themeManager.contrastAccentColor(for: colorScheme) : .secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                 }
@@ -1332,7 +1332,7 @@ struct ProBusinessCardEditorView: View {
 
     private func toggle(_ title: String, _ b: Binding<Bool>, onChange: ((Bool) -> Void)? = nil) -> some View {
         Toggle(BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale), isOn: b)
-            .tint(themeManager.current.accentColor)
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
             .buxFormFieldPadding()
             .onChange(of: b.wrappedValue) { _, v in onChange?(v); syncDraftChanges() }
     }
@@ -1341,7 +1341,7 @@ struct ProBusinessCardEditorView: View {
         let label = BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale)
         return VStack(alignment: .leading, spacing: 4) {
             Text(label).font(.system(size: 12, weight: .medium))
-            Slider(value: b, in: range).tint(themeManager.current.accentColor)
+            Slider(value: b, in: range).tint(themeManager.contrastAccentColor(for: colorScheme))
         }
         .buxFormFieldPadding()
     }

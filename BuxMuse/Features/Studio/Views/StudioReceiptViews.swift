@@ -21,14 +21,10 @@ struct StudioReceiptsListView: View {
     
     var body: some View {
         StudioThemedListBackdrop {
-            if store.receipts.isEmpty {
-                emptyState
-            } else {
-                receiptList
-            }
+            receiptsList
         }
-        .buxCatalogNavigationTitle("Expenses & Receipts")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -54,9 +50,23 @@ struct StudioReceiptsListView: View {
         }
     }
 
-    private var receiptList: some View {
+    private var receiptsList: some View {
         List {
-            ForEach(store.receipts) { receipt in
+            Section {
+                StudioProToolScreenHeader(titleKey: "Expenses & Receipts")
+                    .studioProToolScreenHeaderRow()
+            }
+
+            if store.receipts.isEmpty {
+                Section {
+                    emptyState
+                        .frame(maxWidth: .infinity)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
+            } else {
+                ForEach(store.receipts) { receipt in
                 NavigationLink(
                     destination: StudioReceiptDetailView(receipt: receipt)
                         .environmentObject(themeManager)
@@ -66,8 +76,10 @@ struct StudioReceiptsListView: View {
                 }
                 .studioThemedListRowChrome()
             }
-            .onDelete(perform: deleteReceipt)
+                .onDelete(perform: deleteReceipt)
+            }
         }
+        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
         .studioThemedListRows()
     }
 
@@ -237,7 +249,7 @@ struct StudioReceiptScannerView: View {
                                 VStack(spacing: 16) {
                                     Image(systemName: "doc.text.viewfinder")
                                         .font(.system(size: 48))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                     
                                     BuxCatalogDynamicText(key: "Receipt Scanner")
                                         .font(.system(size: 15, weight: .bold))
@@ -255,7 +267,7 @@ struct StudioReceiptScannerView: View {
                             
                             if isScanning {
                                 ProgressView("Scanning receipt text...")
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                             } else {
                                 VStack(spacing: 12) {
                                     BuxButton(
@@ -311,7 +323,7 @@ struct StudioReceiptScannerView: View {
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
                                 DatePicker(loc("Date"), selection: $date, displayedComponents: .date)
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                                     .buxFormFieldPadding()
                             }
 
@@ -322,11 +334,11 @@ struct StudioReceiptScannerView: View {
                                     BuxCatalogDynamicText(key: "Hardware Assets").tag("Hardware Assets")
                                     BuxCatalogDynamicText(key: "Travel & Lodging").tag("Travel & Lodging")
                                 }
-                                .tint(themeManager.current.accentColor)
+                                .tint(themeManager.contrastAccentColor(for: colorScheme))
                                 .buxFormFieldPadding()
                                 BuxFormRowDivider()
                                 Toggle(loc("Eligible for Write-off"), isOn: $isDeductible)
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
                                 Picker(loc("Deduction Strength"), selection: $strength) {
@@ -334,7 +346,7 @@ struct StudioReceiptScannerView: View {
                                         Text(st.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(st)
                                     }
                                 }
-                                .tint(themeManager.current.accentColor)
+                                .tint(themeManager.contrastAccentColor(for: colorScheme))
                                 .buxFormFieldPadding()
                             }
                         }
@@ -356,7 +368,7 @@ struct StudioReceiptScannerView: View {
                             dismiss()
                         }
                         .disabled(merchant.isEmpty || amount.isEmpty)
-                        .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
+                        .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
             }
@@ -546,7 +558,7 @@ struct StudioReceiptDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") { showEdit = true }
-                    .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
+                    .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
             }
         }
         .sheet(isPresented: $showEdit) {

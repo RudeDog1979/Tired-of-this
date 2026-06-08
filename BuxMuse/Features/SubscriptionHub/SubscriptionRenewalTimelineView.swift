@@ -99,7 +99,7 @@ struct SubscriptionRenewalTimelineView: View {
             HStack(spacing: 6) {
                 Image(systemName: "clock.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                 Text(Self.renewalDateFormatter.string(from: sub.nextRenewalDate))
                     .font(.system(size: 12, weight: .semibold))
@@ -109,7 +109,7 @@ struct SubscriptionRenewalTimelineView: View {
 
             Text(sub.billingCycle.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .padding(.horizontal, BuxLayout.tight)
                 .padding(.vertical, 4)
                 .background(themeManager.current.accentColor.opacity(0.12))

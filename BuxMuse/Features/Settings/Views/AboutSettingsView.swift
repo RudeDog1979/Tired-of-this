@@ -37,7 +37,7 @@ struct AboutSettingsView: View {
 
                             Image(systemName: "banknote.fill")
                                 .font(.system(size: 38))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                         .padding(.top, 24)
 
@@ -111,7 +111,7 @@ struct AboutSettingsView: View {
                                         BuxCatalogDynamicText(key: "Share diagnostic report")
                                     }
                                     .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                                 .padding(.horizontal, BuxLayout.section)
@@ -130,7 +130,7 @@ struct AboutSettingsView: View {
                                         BuxCatalogDynamicText(key: "Export diagnostic report")
                                     }
                                     .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                                 .disabled(isExportingDiagnostic)

@@ -23,7 +23,7 @@ struct InvoicePaymentSettingsView: View {
         BuxThemedCardForm {
             BuxFormSection {
                 Toggle(loc("Auto-detect bank account type"), isOn: $store.autoDetectInvoiceBankAccountType)
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 BuxCatalogDynamicText(key: "Uses your region to pick IBAN, UK sort code, US routing, and other fields on invoices.")
                     .font(.system(size: 12))
@@ -38,7 +38,7 @@ struct InvoicePaymentSettingsView: View {
                             Text(loc(type.displayName)).tag(type)
                         }
                     }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 }
             }

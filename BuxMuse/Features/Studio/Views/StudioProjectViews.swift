@@ -19,14 +19,10 @@ struct StudioProjectsListView: View {
     
     var body: some View {
         StudioThemedListBackdrop {
-            if store.projects.isEmpty {
-                emptyState
-            } else {
-                projectList
-            }
+            projectsList
         }
-        .buxCatalogNavigationTitle("Projects")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -46,9 +42,23 @@ struct StudioProjectsListView: View {
         }
     }
 
-    private var projectList: some View {
+    private var projectsList: some View {
         List {
-            ForEach(store.projects) { project in
+            Section {
+                StudioProToolScreenHeader(titleKey: "Projects")
+                    .studioProToolScreenHeaderRow()
+            }
+
+            if store.projects.isEmpty {
+                Section {
+                    emptyState
+                        .frame(maxWidth: .infinity)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
+            } else {
+                ForEach(store.projects) { project in
                 let client = store.clients.first { $0.id == project.clientId }
                 let analysis = StudioProjectEngine.analyzeProject(project: project, receipts: store.receipts)
 
@@ -68,8 +78,10 @@ struct StudioProjectsListView: View {
                 }
                 .studioThemedListRowChrome()
             }
-            .onDelete(perform: deleteProject)
+                .onDelete(perform: deleteProject)
+            }
         }
+        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
         .studioThemedListRows()
     }
 
@@ -136,7 +148,7 @@ struct StudioProjectsListView: View {
 
     private func statusTint(_ status: StudioProjectStatus) -> Color {
         switch status {
-        case .active: return themeManager.current.accentColor
+        case .active: return themeManager.contrastAccentColor(for: colorScheme)
         case .onHold: return .orange
         case .completed: return .green
         }
@@ -439,7 +451,7 @@ struct StudioProjectDetailView: View {
 
     private func statusColor(_ status: StudioProjectStatus) -> Color {
         switch status {
-        case .active: return themeManager.current.accentColor
+        case .active: return themeManager.contrastAccentColor(for: colorScheme)
         case .onHold: return .orange
         case .completed: return .green
         }
@@ -521,7 +533,7 @@ struct StudioProjectDetailView: View {
                         Spacer()
                         Text(appSettingsManager.format(suggestion.amount))
                             .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .foregroundStyle(themeManager.current.accentColor)
+                            .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .padding(BuxLayout.section)
                     .studioThemedCardChrome(cornerRadius: 16)
@@ -677,7 +689,7 @@ struct StudioProjectDetailView: View {
                         .buxLabelSecondary()
                     Text(appSettingsManager.format(analysis.projectedProfit))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
             }
             .padding(.vertical, 8)
@@ -843,7 +855,7 @@ struct ActiveTimeTrackerView: View {
     @State private var showFinishEarlyConfirm = false
     @FocusState private var notesFieldFocused: Bool
 
-    private var accent: Color { themeManager.current.accentColor }
+    private var accent: Color { themeManager.contrastAccentColor(for: colorScheme) }
     private var isRunning: Bool { timer.isRunning }
     private var estimateLocked: Bool { timer.estimateLocked }
     private var sessionProgress: Double { timer.session?.progress() ?? 0 }
@@ -1543,7 +1555,7 @@ struct StudioProjectEditorSheet: View {
                                     Spacer()
                                     Button(BuxCatalogLabel.string("Manage", locale: appSettingsManager.interfaceLocale)) { showMilestonesEditor = true }
                                         .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 }
                                 .buxFormFieldPadding()
                             }

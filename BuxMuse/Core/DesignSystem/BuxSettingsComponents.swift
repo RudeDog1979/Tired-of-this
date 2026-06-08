@@ -70,14 +70,14 @@ struct BuxSettingsToggleRow: View {
                     labelBlock
                     Toggle("", isOn: $isOn)
                         .labelsHidden()
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                 }
             } else {
                 Toggle(isOn: $isOn) {
                     labelBlock
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
             }
         }
         .buxFormFieldPadding()
@@ -156,13 +156,14 @@ struct BuxSettingsMenuPickerRow<Selection: Hashable, Options: View>: View {
             Text(BuxCatalogLabel.string(titleKey, locale: appSettingsManager.interfaceLocale))
         }
         .pickerStyle(.menu)
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
     }
 }
 
 // MARK: - Segmented enum row (menu fallback on narrow screens)
 
 struct BuxSettingsSegmentedEnumRow<Selection: Hashable, Options: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.buxSettingsUsesStackedRows) private var usesStackedRows
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
@@ -185,7 +186,7 @@ struct BuxSettingsSegmentedEnumRow<Selection: Hashable, Options: View>: View {
                         Text(BuxCatalogLabel.string(titleKey, locale: appSettingsManager.interfaceLocale))
                     }
                     .pickerStyle(.menu)
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .buxFormFieldPadding()

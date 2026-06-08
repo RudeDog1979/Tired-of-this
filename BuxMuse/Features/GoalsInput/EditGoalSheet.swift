@@ -43,7 +43,7 @@ struct EditGoalSheet: View {
                         HStack(spacing: 8) {
                             Text(appSettingsManager.selectedCurrency.symbol)
                                 .font(.title2.bold())
-                                .foregroundStyle(themeManager.current.accentColor)
+                                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                             TextField(
                                 BuxCatalogLabel.string("Target amount", locale: locale),
                                 text: $targetString
@@ -92,7 +92,7 @@ struct EditGoalSheet: View {
             }
             .onAppear { hydrate() }
         }
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
         .buxInterfaceLocale()
     }
 

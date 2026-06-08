@@ -148,7 +148,7 @@ struct BusinessCardFeaturedCarousel: View {
                 .lineLimit(2)
             BuxCatalogDynamicText(key: "Tap to open")
                 .font(.system(size: 10, weight: .heavy, design: .rounded))
-                .foregroundStyle(themeManager.current.accentColor)
+                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
         }
         .frame(maxWidth: cardWidth)
         .opacity(template == featuredTemplate ? 1 : 0.6)
@@ -212,7 +212,7 @@ struct BusinessCardTemplateShowcase: View {
         return VStack(alignment: .leading, spacing: 8) {
             Text(collection.catalogTitle(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundStyle(themeManager.current.accentColor)
+                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                 .padding(.leading, 2)
 
             BusinessCardLayeredCarousel(

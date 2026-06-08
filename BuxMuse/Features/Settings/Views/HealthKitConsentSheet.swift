@@ -95,7 +95,7 @@ struct HealthKitConsentSheet: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .frame(width: 22)
             BuxCatalogDynamicText(key: text)
                 .font(.system(size: 13, weight: .medium))

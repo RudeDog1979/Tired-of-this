@@ -78,7 +78,7 @@ struct ProFeatureHeader: View {
         HStack(alignment: .center, spacing: 14) {
             Image(systemName: systemImage)
                 .font(.system(size: 32))
-                .foregroundColor(tint ?? themeManager.current.accentColor)
+                .foregroundColor(tint ?? themeManager.contrastAccentColor(for: colorScheme))
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {

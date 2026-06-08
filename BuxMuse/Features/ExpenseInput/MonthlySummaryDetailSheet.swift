@@ -96,7 +96,7 @@ struct MonthlySummaryDetailSheet: View {
                 HStack(spacing: 8) {
                     Image(systemName: "chart.line.uptrend.xyaxis")
                         .font(.caption.bold())
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     
                     Text(prediction)
                         .font(.caption.bold())

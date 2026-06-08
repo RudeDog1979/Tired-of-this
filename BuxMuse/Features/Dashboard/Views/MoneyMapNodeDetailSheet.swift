@@ -228,7 +228,7 @@ struct MoneyMapNodeDetailSheet: View {
                     Spacer()
                     Image(systemName: "arrow.right.circle.fill")
                 }
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .padding(14)
                 .background(themeManager.current.accentColor.opacity(0.1))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -409,7 +409,7 @@ struct MoneyMapNodeFullDetailView: View {
                             systemImage: "checkmark.circle"
                         )
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
                 Button {
@@ -420,7 +420,7 @@ struct MoneyMapNodeFullDetailView: View {
                 } label: {
                     BuxCatalogText.text("Open insight detail")
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buttonStyle(.plain)
             }

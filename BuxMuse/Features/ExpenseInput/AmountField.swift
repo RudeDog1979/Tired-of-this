@@ -22,7 +22,7 @@ struct AmountField: View {
 
     private var accent: Color {
         switch kind {
-        case .expense: return themeManager.current.accentColor
+        case .expense: return themeManager.contrastAccentColor(for: colorScheme)
         case .income: return Color.mint
         }
     }

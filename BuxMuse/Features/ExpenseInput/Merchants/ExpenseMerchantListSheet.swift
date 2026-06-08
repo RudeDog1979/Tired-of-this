@@ -82,7 +82,7 @@ struct ExpenseMerchantListSheet: View {
                     if merchant.isSubscriptionMerchant {
                         Image(systemName: "arrow.triangle.2.circlepath")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
 
                     Image(systemName: isOpen ? "chevron.up" : "chevron.down")
@@ -208,7 +208,7 @@ private struct MerchantInlineEditor: View {
 
             Toggle(BuxCatalogLabel.string("Subscription merchant", locale: appSettingsManager.interfaceLocale), isOn: subscriptionBinding)
                 .font(.system(size: 15, weight: .semibold))
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
 
             if let risk = working.riskScore {
                 Text(

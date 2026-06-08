@@ -65,7 +65,7 @@ public struct BurnoutDashboardWidget: View {
                             BuxCatalogText.text(isEditingSliders ? "Done" : "Tune")
                         }
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .buttonStyle(BuxMicroShrinkStyle())
                 } else {
@@ -125,7 +125,7 @@ public struct BurnoutDashboardWidget: View {
                     HStack(spacing: 8) {
                         Image(systemName: "hourglass")
                             .font(.system(size: 11))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         Text(
                             BuxLocalizedString.format(
                                 "Work logged: %@ hrs",
@@ -191,10 +191,10 @@ public struct BurnoutDashboardWidget: View {
                                 )
                             )
                                 .font(.system(size: 11, weight: .black, design: .rounded))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                         Slider(value: $localSleepHours, in: 4.0...10.0, step: 0.5)
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {

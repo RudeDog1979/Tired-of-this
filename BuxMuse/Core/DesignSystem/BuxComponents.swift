@@ -186,18 +186,19 @@ struct BuxQuickActionButton: View {
         }
     }
 
-    private var tintColor: Color { themeManager.current.accentColor }
+    private var displayAccent: Color { themeManager.current.accentColor }
+    private var readableAccent: Color { themeManager.contrastAccentColor(for: colorScheme) }
 
     private var foregroundColor: Color {
         switch role {
         case .primary, .destructive: return .white
-        case .secondary, .tinted: return tintColor
+        case .secondary, .tinted: return readableAccent
         }
     }
 
     private var backgroundColor: Color {
         switch role {
-        case .primary: return tintColor
+        case .primary: return displayAccent
         case .destructive: return BuxTokens.destructive
         case .secondary, .tinted: return themeManager.accentWash(for: colorScheme)
         }
@@ -211,12 +212,12 @@ struct BuxQuickActionButton: View {
     }
 
     private var borderColor: Color {
-        tintColor.opacity(colorScheme == .dark ? 0.45 : 0.32)
+        readableAccent.opacity(colorScheme == .dark ? 0.45 : 0.32)
     }
 
     private var shadowColor: Color {
         if case .primary = role {
-            return tintColor.opacity(colorScheme == .dark ? 0.18 : 0.14)
+            return displayAccent.opacity(colorScheme == .dark ? 0.18 : 0.14)
         }
         return .clear
     }

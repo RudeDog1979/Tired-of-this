@@ -72,7 +72,7 @@ struct NotificationInboxView: View {
                                 brain.dismissAllNotifications()
                             }
                         }
-                        .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
+                        .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
             }
@@ -127,7 +127,7 @@ struct NotificationInboxView: View {
     }
 
     private func iconColor(for item: AppNotificationItem) -> Color {
-        item.severity == "high" ? .red : themeManager.current.accentColor
+        item.severity == "high" ? .red : themeManager.contrastAccentColor(for: colorScheme)
     }
 
     private func relativeDate(_ date: Date) -> String {

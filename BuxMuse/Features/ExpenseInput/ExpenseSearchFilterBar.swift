@@ -55,19 +55,19 @@ struct ExpenseFilterSheet: View {
                     Toggle(isOn: $filters.recurringOnly) {
                         BuxCatalogText.text("Recurring only")
                     }
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     Toggle(isOn: $filters.subscriptionLikeOnly) {
                         BuxCatalogText.text("Subscription-like")
                     }
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     Toggle(isOn: $filters.refundsOnly) {
                         BuxCatalogText.text("Refunds only")
                     }
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                 }
 
@@ -82,7 +82,7 @@ struct ExpenseFilterSheet: View {
                                 Text(category.name).tag(UUID?.some(category.id))
                             }
                         }
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     }
                 }
@@ -103,7 +103,7 @@ struct ExpenseFilterSheet: View {
                                     .tag(String?.some(zone))
                             }
                         }
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     }
                 }
@@ -132,7 +132,7 @@ struct ExpenseFilterSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
         .buxInterfaceLocale()
     }
 
@@ -227,7 +227,7 @@ struct ExpenseFilterSheet: View {
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
             }
         }

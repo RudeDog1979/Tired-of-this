@@ -174,6 +174,7 @@ struct StudioProjectMilestonesEditorSheet: View {
 
 private struct StudioProjectMilestoneFormSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
@@ -201,11 +202,11 @@ private struct StudioProjectMilestoneFormSheet: View {
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     DatePicker(loc("Due date"), selection: $dueDate, displayedComponents: .date)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     Toggle(loc("Completed"), isOn: $isCompleted)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     TextField(loc("Notes (optional)"), text: $notes, axis: .vertical)

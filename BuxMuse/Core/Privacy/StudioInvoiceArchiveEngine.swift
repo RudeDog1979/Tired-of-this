@@ -222,7 +222,7 @@ public enum StudioInvoiceArchiveEngine {
             amountFormatted: appSettings.format(invoice.amount),
             description: invoice.jobDescription,
             isPaid: invoice.status == .paid,
-            accent: themeManager.current.accentColor,
+            accent: themeManager.contrastAccentColor(for: .light),
             locale: appSettings.interfaceLocale
         )
     }

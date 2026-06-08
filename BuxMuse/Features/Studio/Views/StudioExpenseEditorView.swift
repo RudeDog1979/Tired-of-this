@@ -86,7 +86,7 @@ struct StudioExpenseEditorView: View {
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         DatePicker(loc("Date"), selection: $date, displayedComponents: .date)
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                     }
 
@@ -124,7 +124,7 @@ struct StudioExpenseEditorView: View {
                         .buxFormFieldPadding()
                         BuxFormRowDivider()
                         Toggle(loc("Deductible"), isOn: $isDeductible)
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .disabled(businessUse == .personal)
                             .buxFormFieldPadding()
 
@@ -144,7 +144,7 @@ struct StudioExpenseEditorView: View {
                                         .font(.system(size: 13, weight: .bold))
                                 }
                                 Slider(value: $deductiblePercentage, in: 0...100, step: 5)
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                             }
                             .buxFormFieldPadding()
                         }

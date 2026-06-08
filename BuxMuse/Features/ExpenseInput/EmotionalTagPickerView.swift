@@ -29,7 +29,7 @@ struct EmotionalTagPickerView: View {
     private func chip(for tag: EmotionalTag) -> some View {
         let isSelected = selection == tag.id
         let palette = EmotionalTagAppearance.palette(for: tag.id, colorScheme: colorScheme)
-        let accent = palette?.accent ?? themeManager.current.accentColor
+        let accent = palette?.accent ?? themeManager.contrastAccentColor(for: colorScheme)
 
         return Button {
             withAnimation(isSelected ? BuxMotion.emotionFadeOut : BuxMotion.emotionFadeIn) {

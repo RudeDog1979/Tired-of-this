@@ -18,7 +18,7 @@ struct StudioProjectPlannerSection: View {
 
     @State private var dragMilestoneId: UUID?
 
-    private var accent: Color { themeManager.current.accentColor }
+    private var accent: Color { themeManager.contrastAccentColor(for: colorScheme) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {

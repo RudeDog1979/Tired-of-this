@@ -49,6 +49,7 @@ struct StudioAgreementExternalPrivacySheet: View {
 
 struct StudioAgreementImportSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
@@ -117,7 +118,7 @@ struct StudioAgreementImportSheet: View {
             Text(StudioAgreementL10n.line(title, locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 15, weight: .semibold))
         }
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
         .buxFormFieldPadding()
     }
 
@@ -205,7 +206,7 @@ struct StudioAgreementApprovalSection: View {
                         systemImage: "paperplane"
                     )
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buxFormFieldPadding()
             } else {
@@ -244,7 +245,7 @@ struct StudioAgreementApprovalSection: View {
                 BuxCatalogDynamicText(key: "Client clear to go ahead")
                     .font(.system(size: 15, weight: .semibold))
             }
-            .tint(themeManager.current.accentColor)
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
             .buxFormFieldPadding()
             .onChange(of: draft.clientClearToProceed) { _, on in
                 if on, draft.clientClearAt == nil { draft.clientClearAt = Date() }
@@ -265,7 +266,7 @@ struct StudioAgreementApprovalSection: View {
                 } label: {
                     BuxCatalogDynamicText(key: "Privacy notice")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buxFormFieldPadding()
                 if let onExportAgreementPDF {
@@ -276,7 +277,7 @@ struct StudioAgreementApprovalSection: View {
                             systemImage: "square.and.arrow.up"
                         )
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .buxFormFieldPadding()
                 }
@@ -322,7 +323,7 @@ struct StudioAgreementApprovalSection: View {
                             systemImage: "square.and.arrow.up"
                         )
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .buxFormFieldPadding()
                 }
@@ -343,7 +344,7 @@ struct StudioAgreementApprovalSection: View {
                     systemImage: "doc.badge.plus"
                 )
                 .font(.system(size: 15, weight: .bold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
             .buxFormFieldPadding()
         }

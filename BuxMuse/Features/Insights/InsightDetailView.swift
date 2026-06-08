@@ -23,7 +23,7 @@ struct InsightDetailView: View {
         case "orange": return .orange
         case "blue": return .blue
         case "purple": return .purple
-        default: return themeManager.current.accentColor
+        default: return themeManager.contrastAccentColor(for: colorScheme)
         }
     }
 

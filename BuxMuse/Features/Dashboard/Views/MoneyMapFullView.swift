@@ -223,7 +223,7 @@ struct MoneyMapFullView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     BuxCatalogText.text("FULL TERRITORY VIEW")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         .kerning(0.8)
                     Text(graph.centerValue)
                         .font(.system(size: 30, weight: .black, design: .rounded))

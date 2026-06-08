@@ -28,6 +28,7 @@ private enum BuxPhotoStudioTab: String, CaseIterable, Identifiable {
 
 struct BuxPhotoStudioView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
@@ -206,7 +207,7 @@ struct BuxPhotoStudioView: View {
 
             Toggle(BusinessCardL10n.line("Alignment guides", locale: appSettingsManager.interfaceLocale), isOn: $showGuides)
                 .font(.system(size: 13, weight: .medium))
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .padding(.horizontal, 20)
 
             VStack(spacing: 12) {
@@ -360,7 +361,7 @@ struct BuxPhotoStudioView: View {
             Slider(value: value, in: range) { editing in
                 if !editing { onEnd?() }
             }
-            .tint(themeManager.current.accentColor)
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
             Image(systemName: iconRight).foregroundStyle(Color.white.opacity(0.55))
         }
     }
@@ -374,7 +375,7 @@ struct BuxPhotoStudioView: View {
         HStack {
             Image(systemName: iconLeft).foregroundStyle(Color.white.opacity(0.55))
             Slider(value: value, in: range)
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
             Image(systemName: iconRight).foregroundStyle(Color.white.opacity(0.55))
         }
     }
@@ -389,7 +390,7 @@ struct BuxPhotoStudioView: View {
                     .foregroundStyle(Color.white.opacity(0.55))
             }
             Slider(value: value, in: range)
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
         }
     }
 

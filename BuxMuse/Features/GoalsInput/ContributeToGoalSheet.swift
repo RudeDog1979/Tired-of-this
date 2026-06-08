@@ -64,7 +64,7 @@ struct ContributeToGoalSheet: View {
                         HStack(spacing: 8) {
                             Text(appSettingsManager.selectedCurrency.symbol)
                                 .font(.title2.bold())
-                                .foregroundStyle(themeManager.current.accentColor)
+                                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                             TextField(
                                 BuxCatalogLabel.string("Contribution amount", locale: locale),
                                 text: $amountString
@@ -85,7 +85,7 @@ struct ContributeToGoalSheet: View {
                         DatePicker(selection: $date, displayedComponents: .date) {
                             BuxCatalogText.text("Contribution date")
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                     }
                 }
@@ -110,7 +110,7 @@ struct ContributeToGoalSheet: View {
                 setupMicroSuggestions()
             }
         }
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
         .buxInterfaceLocale()
     }
 

@@ -58,7 +58,7 @@ struct SimpleStudioMyMoneyView: View {
                                 }
                             }
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                     }
                 }
@@ -175,7 +175,7 @@ struct SimpleStudioMyMoneyView: View {
                                         )
                                     )
                                         .font(.system(size: 10, weight: .semibold))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 }
                             }
                         }
@@ -358,7 +358,7 @@ struct SimpleStudioMyMoneyView: View {
                 jobLabel: item.jobLabel,
                 businessName: businessName,
                 phone: phone,
-                accent: themeManager.current.accentColor
+                accent: themeManager.contrastAccentColor(for: colorScheme)
             ),
             openURL: openURL
         )

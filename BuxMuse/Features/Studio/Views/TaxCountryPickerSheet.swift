@@ -70,7 +70,7 @@ struct TaxCountryPickerSheet: View {
                                 )
                             )
                                 .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(themeManager.current.accentColor.opacity(0.85))
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme).opacity(0.85))
                         }
                     }
                     .padding(.horizontal, BuxLayout.marginHorizontal)

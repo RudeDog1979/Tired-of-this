@@ -37,26 +37,34 @@ struct ProStudioSearchView: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BuxTokens.block) {
-                heroCard
+        StudioThemedListBackdrop {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: BuxTokens.block) {
+                    StudioProToolScreenHeader(titleKey: "Pro Search")
+                        .studioProToolScrollPlacement()
 
-                if query.isEmpty {
-                    quickFiltersSection
-                    suggestionsSection
-                } else if results.isEmpty {
-                    emptyResults
-                } else {
-                    resultsSection
+                    Group {
+                        heroCard
+
+                        if query.isEmpty {
+                            quickFiltersSection
+                            suggestionsSection
+                        } else if results.isEmpty {
+                            emptyResults
+                        } else {
+                            resultsSection
+                        }
+                    }
+                    .padding(.horizontal, BuxTokens.marginRegular)
                 }
+                .studioProToolScreenScrollChrome()
+                .padding(.bottom, BuxTokens.sheetBottomClearance)
             }
-            .padding(.horizontal, BuxTokens.marginRegular)
-            .padding(.vertical, BuxTokens.section)
-            .padding(.bottom, BuxTokens.sheetBottomClearance)
+            .buxSoftScrollChrome()
         }
-        .background(themeManager.screenBackground(for: colorScheme))
-        .buxCatalogNavigationTitle("Pro Search")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .buxRootNavigationChrome()
         .searchable(
             text: $query,
             prompt: Text(
@@ -177,7 +185,7 @@ struct ProStudioSearchView: View {
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(themeManager.accentWash(for: colorScheme))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
@@ -208,7 +216,7 @@ struct ProStudioSearchView: View {
             HStack(spacing: 10) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 Text(suggestion)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -282,7 +290,7 @@ struct ProStudioSearchView: View {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: icon(for: result))
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .frame(width: 28, height: 28)
                     .background(themeManager.accentWash(for: colorScheme))
                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -310,7 +318,7 @@ struct ProStudioSearchView: View {
                         )
                     )
                         .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 Spacer(minLength: 8)
                 if let amount = result.amountFormatted {

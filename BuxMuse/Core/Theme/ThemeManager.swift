@@ -8,6 +8,9 @@
 
 import SwiftUI
 import Combine
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // MARK: - App Theme Definition
 
@@ -575,29 +578,36 @@ public final class ThemeManager: ObservableObject {
         materialScheme(for: colorScheme).surfaceContainerHighest
     }
     
-    /// Returns a deeper, high-contrast version of the accent color for bright/neon themes in Light mode.
+    /// Readable accent for text, icons, toggles, and links — same hue family as `accentColor`, deeper when needed.
+    /// Display chrome (swatches, glows, gradients, filled buttons) keeps `current.accentColor`.
+    func readableAccentColor(for colorScheme: ColorScheme) -> Color {
+        contrastAccentColor(for: colorScheme)
+    }
+
+    /// Returns a deeper, high-contrast version of the accent color for bright/neon themes.
     /// This ensures critical interactive icons, toolbars, outlines, and buttons remain highly visible.
     func contrastAccentColor(for colorScheme: ColorScheme) -> Color {
         let store = SettingsStore.shared
         guard store.brandThemesEnabled || workspaceThemeOverrideActive else {
             return store.resolvedSystemAccentColor(for: colorScheme)
         }
-        guard colorScheme == .light else { return current.accentColor }
-        
-        switch current.id {
-        case "abyssalGlow":
-            return Color(red: 0/255, green: 140/255, blue: 60/255) // Rich forest green (#008C3C)
-        case "galacticPlasma":
-            return Color(red: 0/255, green: 120/255, blue: 170/255) // Rich ocean teal (#0078AA)
-        case "sakuraDream":
-            return Color(red: 215/255, green: 75/255, blue: 105/255) // Rich dark rose (#D74B69)
-        case "goldPrestige":
-            return Color(red: 185/255, green: 130/255, blue: 0/255) // Rich dark gold/amber (#B98200)
-        case "emeraldCyber":
-            return Color(red: 0/255, green: 135/255, blue: 70/255) // Deeper green (#008746)
-        default:
-            return current.accentColor
+
+        let accent = current.accentColor
+        let surface = materialScheme(for: colorScheme).surface
+
+        if let tuned = BuxReadableAccent.tunedOverride(themeId: current.id, colorScheme: colorScheme) {
+            return tuned
         }
+
+        if BuxReadableAccent.meetsContrast(accent, on: surface) {
+            return accent
+        }
+
+        return BuxReadableAccent.adjustedAccent(
+            accent,
+            colorScheme: colorScheme,
+            surface: surface
+        )
     }
 
     /// M3 outline-variant — decorative card boundary.
@@ -670,6 +680,137 @@ public final class ThemeManager: ObservableObject {
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
+    }
+}
+
+// MARK: - Readable accent tuning (text / tint only — display accent unchanged)
+
+private enum BuxReadableAccent {
+    private static let targetContrast: CGFloat = 4.5
+
+    static func tunedOverride(themeId: String, colorScheme: ColorScheme) -> Color? {
+        switch (themeId, colorScheme) {
+        case ("abyssalGlow", .light):
+            return Color(red: 0/255, green: 140/255, blue: 60/255)
+        case ("abyssalGlow", .dark):
+            return Color(red: 36/255, green: 210/255, blue: 118/255)
+        case ("galacticPlasma", .light):
+            return Color(red: 0/255, green: 120/255, blue: 170/255)
+        case ("galacticPlasma", .dark):
+            return Color(red: 72/255, green: 210/255, blue: 228/255)
+        case ("sakuraDream", .light):
+            return Color(red: 215/255, green: 75/255, blue: 105/255)
+        case ("sakuraDream", .dark):
+            return Color(red: 255/255, green: 148/255, blue: 168/255)
+        case ("goldPrestige", .light):
+            return Color(red: 185/255, green: 130/255, blue: 0/255)
+        case ("goldPrestige", .dark):
+            return Color(red: 255/255, green: 198/255, blue: 48/255)
+        case ("emeraldCyber", .light):
+            return Color(red: 0/255, green: 135/255, blue: 70/255)
+        case ("emeraldCyber", .dark):
+            return Color(red: 48/255, green: 220/255, blue: 148/255)
+        case ("liquidTitanium", .light):
+            return Color(red: 74/255, green: 95/255, blue: 128/255)
+        case ("liquidTitanium", .dark):
+            return Color(red: 168/255, green: 182/255, blue: 210/255)
+        default:
+            return nil
+        }
+    }
+
+    static func meetsContrast(_ accent: Color, on surface: Color) -> Bool {
+        contrastRatio(accent, surface) >= targetContrast
+    }
+
+    static func adjustedAccent(
+        _ accent: Color,
+        colorScheme: ColorScheme,
+        surface: Color
+    ) -> Color {
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+        guard rgbaComponents(accent, hue: &hue, saturation: &saturation, brightness: &brightness, alpha: &alpha) else {
+            return accent
+        }
+
+        let steps = 14
+        for step in 1...steps {
+            let progress = CGFloat(step) / CGFloat(steps)
+            let candidate: Color
+            if colorScheme == .light {
+                let newBrightness = max(0.20, brightness * (1 - progress * 0.55))
+                let newSaturation = min(1, max(saturation, 0.42 + progress * 0.18))
+                candidate = Color(hue: Double(hue), saturation: Double(newSaturation), brightness: Double(newBrightness), opacity: Double(alpha))
+            } else {
+                let newBrightness = min(0.94, brightness + progress * (0.94 - brightness))
+                let newSaturation = min(1, max(saturation, 0.35))
+                candidate = Color(hue: Double(hue), saturation: Double(newSaturation), brightness: Double(newBrightness), opacity: Double(alpha))
+            }
+            if meetsContrast(candidate, on: surface) {
+                return candidate
+            }
+        }
+
+        if colorScheme == .light {
+            return Color(hue: Double(hue), saturation: Double(min(1, max(saturation, 0.5))), brightness: 0.28, opacity: Double(alpha))
+        }
+        return Color(hue: Double(hue), saturation: Double(min(1, max(saturation, 0.45))), brightness: 0.88, opacity: Double(alpha))
+    }
+
+    private static func contrastRatio(_ foreground: Color, _ background: Color) -> CGFloat {
+        let fg = relativeLuminance(foreground)
+        let bg = relativeLuminance(background)
+        let lighter = max(fg, bg)
+        let darker = min(fg, bg)
+        return (lighter + 0.05) / (darker + 0.05)
+    }
+
+    private static func relativeLuminance(_ color: Color) -> CGFloat {
+        var r: CGFloat = 0
+        var g: CGFloat = 0
+        var b: CGFloat = 0
+        var a: CGFloat = 0
+        guard rgbComponents(color, red: &r, green: &g, blue: &b, alpha: &a) else { return 0 }
+
+        func channel(_ value: CGFloat) -> CGFloat {
+            if value <= 0.03928 { return value / 12.92 }
+            return pow((value + 0.055) / 1.055, 2.4)
+        }
+
+        return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+    }
+
+    private static func rgbComponents(
+        _ color: Color,
+        red: inout CGFloat,
+        green: inout CGFloat,
+        blue: inout CGFloat,
+        alpha: inout CGFloat
+    ) -> Bool {
+        #if canImport(UIKit)
+        let ui = UIColor(color)
+        return ui.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        #else
+        return false
+        #endif
+    }
+
+    private static func rgbaComponents(
+        _ color: Color,
+        hue: inout CGFloat,
+        saturation: inout CGFloat,
+        brightness: inout CGFloat,
+        alpha: inout CGFloat
+    ) -> Bool {
+        #if canImport(UIKit)
+        let ui = UIColor(color)
+        return ui.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+        #else
+        return false
+        #endif
     }
 }
 

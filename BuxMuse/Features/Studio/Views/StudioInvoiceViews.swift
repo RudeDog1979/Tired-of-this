@@ -35,14 +35,10 @@ struct StudioInvoicesListView: View {
 
     var body: some View {
         StudioThemedListBackdrop {
-            if store.invoices.isEmpty {
-                emptyState
-            } else {
-                invoiceList
-            }
+            invoicesList
         }
-        .buxCatalogNavigationTitle("Invoices")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()
         .toolbar { invoiceToolbar }
         .modifier(BuxDrawerSearchModifier(
@@ -50,12 +46,6 @@ struct StudioInvoicesListView: View {
             prompt: "Search invoices or clients",
             isPresented: $isInvoiceSearchPresented
         ))
-        .onAppear {
-            isInvoiceSearchPresented = true
-        }
-        .onDisappear {
-            isInvoiceSearchPresented = false
-        }
         .fullScreenCover(isPresented: $showEditor) {
             StudioInvoiceEditorView(invoiceToEdit: nil)
                 .environmentObject(themeManager)
@@ -94,43 +84,58 @@ struct StudioInvoicesListView: View {
         StudioInvoiceSuggestionEngine.proSuggestions(store: store)
     }
 
-    private var invoiceList: some View {
+    private var invoicesList: some View {
         List {
-            if !proSuggestions.isEmpty {
-                Section {
-                    StudioProInvoiceSuggestionsSection(suggestions: proSuggestions) { suggestion in
-                        prefillSuggestion = suggestion
-                    }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                }
-            }
-
             Section {
-                invoiceFilterBar
-                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                StudioProToolScreenHeader(titleKey: "Invoices")
+                    .studioProToolScreenHeaderRow()
             }
 
-            ForEach(filteredInvoices) { invoice in
-                let client = store.clients.first { $0.id == invoice.clientId }
-
-                NavigationLink(
-                    destination: StudioInvoiceDetailView(invoice: invoice)
-                        .environmentObject(themeManager)
-                        .environmentObject(appSettingsManager)
-                ) {
-                    invoiceRowCard(invoice: invoice, client: client)
+            if store.invoices.isEmpty {
+                Section {
+                    emptyState
+                        .frame(maxWidth: .infinity)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                 }
-                .studioThemedListRowChrome()
-            }
-            .onDelete { offsets in
-                pendingDeleteOffsets = offsets
+            } else {
+                if !proSuggestions.isEmpty {
+                    Section {
+                        StudioProInvoiceSuggestionsSection(suggestions: proSuggestions) { suggestion in
+                            prefillSuggestion = suggestion
+                        }
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    }
+                }
+
+                Section {
+                    invoiceFilterBar
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
+
+                ForEach(filteredInvoices) { invoice in
+                    let client = store.clients.first { $0.id == invoice.clientId }
+
+                    NavigationLink(
+                        destination: StudioInvoiceDetailView(invoice: invoice)
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                    ) {
+                        invoiceRowCard(invoice: invoice, client: client)
+                    }
+                    .studioThemedListRowChrome()
+                }
+                .onDelete { offsets in
+                    pendingDeleteOffsets = offsets
+                }
             }
         }
-        .contentMargins(.top, BuxLayout.invoicesNavChromeScrollInset, for: .scrollContent)
+        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
         .studioThemedListRows()
     }
 
@@ -204,7 +209,7 @@ struct StudioInvoicesListView: View {
             if let statusFilter {
                 Text(statusFilter.catalogLabel(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(themeManager.current.accentColor.opacity(0.12))
@@ -254,10 +259,10 @@ struct StudioInvoicesListView: View {
     private func statusColor(_ status: InvoiceStatus) -> Color {
         switch status {
         case .paid: return .green
-        case .sent: return themeManager.current.accentColor
+        case .sent: return themeManager.contrastAccentColor(for: colorScheme)
         case .overdue: return .red
         case .cancelled: return themeManager.labelTertiary(for: colorScheme)
-        case .draft: return themeManager.current.accentColor.opacity(0.85)
+        case .draft: return themeManager.contrastAccentColor(for: colorScheme).opacity(0.85)
         }
     }
 }
@@ -521,7 +526,7 @@ struct StudioInvoiceDetailView: View {
                                     .buxLabelSecondary()
                                 Text(appSettingsManager.format(invoice.total))
                                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             }
                         }
 
@@ -553,7 +558,7 @@ struct StudioInvoiceDetailView: View {
                             ? "paintbrush.pointed.fill"
                             : "square.and.arrow.up.fill",
                         role: .primary,
-                        accent: themeManager.current.accentColor,
+                        accent: themeManager.contrastAccentColor(for: colorScheme),
                         expands: true,
                         action: exportPDF
                     )
@@ -563,7 +568,7 @@ struct StudioInvoiceDetailView: View {
                             title: "Mark Paid",
                             systemImage: "checkmark.circle.fill",
                             role: .tinted(.green),
-                            accent: themeManager.current.accentColor,
+                            accent: themeManager.contrastAccentColor(for: colorScheme),
                             expands: true,
                             action: { updateStatus(.paid) }
                         )
@@ -571,7 +576,7 @@ struct StudioInvoiceDetailView: View {
                             title: "Mark Sent",
                             systemImage: "paperplane.fill",
                             role: .tinted(.blue),
-                            accent: themeManager.current.accentColor,
+                            accent: themeManager.contrastAccentColor(for: colorScheme),
                             expands: true,
                             action: { updateStatus(.sent) }
                         )
@@ -585,7 +590,7 @@ struct StudioInvoiceDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") { showEdit = true }
-                    .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
+                    .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
             }
         }
         .fullScreenCover(isPresented: $showEdit) {

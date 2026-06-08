@@ -23,7 +23,7 @@ struct MileageSettingsView: View {
         BuxThemedCardForm {
             BuxFormSection(title: "Auto-location for mileage") {
                 Toggle(loc("Auto-location for mileage"), isOn: $store.autoLocationForMileage)
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 BuxCatalogDynamicText(key: "When enabled, trip sheets can capture your current place name for start or end.")
                     .font(.system(size: 12))

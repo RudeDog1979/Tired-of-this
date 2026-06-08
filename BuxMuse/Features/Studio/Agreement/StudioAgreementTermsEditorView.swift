@@ -104,7 +104,7 @@ struct StudioAgreementTermsEditorView: View {
                 Spacer()
                 Image(systemName: replace ? "arrow.triangle.2.circlepath" : "plus.circle")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
             .buxFormFieldPadding()
         }
@@ -145,7 +145,7 @@ struct StudioAgreementTermsEditorView: View {
         return HStack(alignment: .top, spacing: 10) {
             Toggle("", isOn: toggleBinding(for: clause.id))
                 .labelsHidden()
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
             VStack(alignment: .leading, spacing: 4) {
                 Text(clause.catalogTitle(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 14, weight: .semibold))
@@ -183,7 +183,7 @@ struct StudioAgreementTermsEditorView: View {
             Button { showPreview = true } label: {
                 Label("Preview full terms", systemImage: "doc.text.magnifyingglass")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
             .buxFormFieldPadding()
             BuxFormRowDivider()
@@ -205,7 +205,7 @@ struct StudioAgreementTermsEditorView: View {
             } label: {
                 Label("Save as my default terms", systemImage: "bookmark.fill")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
             .buxFormFieldPadding()
         }
@@ -252,6 +252,7 @@ struct StudioAgreementTermsEditorView: View {
 }
 
 private struct StudioAgreementTermsClauseEditSheet: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
@@ -281,7 +282,7 @@ private struct StudioAgreementTermsClauseEditSheet: View {
                         dismiss()
                     }
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 }
             }

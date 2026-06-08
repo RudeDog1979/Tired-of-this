@@ -47,7 +47,7 @@ struct SubscriptionDetailView: View {
 
                 Text(detail.info.billingCycle.localizedDisplayName(locale: appSettingsManager.interfaceLocale))
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(themeManager.pillActiveChipFill(for: colorScheme))
@@ -168,7 +168,7 @@ struct SubscriptionDetailView: View {
 
             HStack(spacing: 16) {
                 BudgetImpactItem(label: "Monthly Savings", amount: appSettingsManager.format(abs(detail.budgetImpactMonthly.value)), color: .green)
-                BudgetImpactItem(label: "Yearly Savings", amount: appSettingsManager.format(abs(detail.budgetImpactYearly.value)), color: themeManager.current.accentColor)
+                BudgetImpactItem(label: "Yearly Savings", amount: appSettingsManager.format(abs(detail.budgetImpactYearly.value)), color: themeManager.contrastAccentColor(for: colorScheme))
             }
         }
     }
@@ -192,7 +192,7 @@ struct SubscriptionDetailView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text(detail.usageInsights)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                 if !detail.alternatives.isEmpty {
                     Divider().opacity(0.08)
@@ -204,7 +204,7 @@ struct SubscriptionDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "arrow.right.circle.fill")
                                 .font(.system(size: 12))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             Text(alt)
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(secondary)

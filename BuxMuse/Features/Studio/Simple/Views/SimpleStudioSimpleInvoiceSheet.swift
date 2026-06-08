@@ -58,7 +58,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
                                 DatePicker(BuxCatalogLabel.string("Due by", locale: appSettingsManager.interfaceLocale), selection: $dueDate, displayedComponents: .date)
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                                     .buxFormFieldPadding()
                                 BuxFormRowDivider()
                                 TextField(BuxCatalogLabel.string("Note (optional)", locale: appSettingsManager.interfaceLocale), text: $note, axis: .vertical)
@@ -122,7 +122,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
     private func agreementHintBanner(_ text: String) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "signature")
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             Text(text)
                 .font(.system(size: 12, weight: .semibold))
                 .buxLabelSecondary()
@@ -236,7 +236,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .background(themeManager.accentWash(for: colorScheme))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         .clipShape(Capsule())
                     }
                 }
@@ -270,7 +270,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
             amountFormatted: appSettingsManager.format(Decimal(string: amountText) ?? 0),
             description: jobDescription.isEmpty ? "Work completed" : jobDescription,
             isPaid: false,
-            accent: themeManager.current.accentColor,
+            accent: themeManager.contrastAccentColor(for: colorScheme),
             dueDateLabel: "\(BuxCatalogLabel.string("Due by", locale: appSettingsManager.interfaceLocale)) \(formattedDueDate)",
             note: note.isEmpty ? nil : note,
             locale: appSettingsManager.interfaceLocale

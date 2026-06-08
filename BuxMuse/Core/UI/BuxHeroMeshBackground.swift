@@ -105,7 +105,7 @@ struct BuxHeroMeshBackground: View {
     @ViewBuilder
     private var auroraWash: some View {
         let pair = themeManager.current.heroDarkGradient
-        let lead = pair.first ?? themeManager.current.accentColor
+        let lead = pair.first ?? themeManager.contrastAccentColor(for: colorScheme)
         let trail = pair.dropFirst().first ?? themeManager.current.glowColor
 
         let leadOpacity = 0.85

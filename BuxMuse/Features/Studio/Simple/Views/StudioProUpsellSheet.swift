@@ -145,7 +145,7 @@ struct StudioProUpsellSheet: View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             Text(text)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))

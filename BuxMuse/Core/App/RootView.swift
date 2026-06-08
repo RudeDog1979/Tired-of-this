@@ -265,7 +265,7 @@ struct RootView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "lock.shield.fill")
                             .font(.system(size: 48))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         Text("BuxMuse Vault Active")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))

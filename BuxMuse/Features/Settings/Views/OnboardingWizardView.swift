@@ -230,7 +230,7 @@ struct OnboardingWizardView: View {
                             .frame(width: 80, height: 80)
                         Image(systemName: "globe")
                             .font(.system(size: 36, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
 
                     BuxCatalogText.text("Regional & Budget")
@@ -255,7 +255,7 @@ struct OnboardingWizardView: View {
                             Spacer()
                             Text("\(appSettingsManager.selectedCountry.flag) \(appSettingsManager.selectedCountry.id)")
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(themeManager.chevronMuted(for: colorScheme))
@@ -273,7 +273,7 @@ struct OnboardingWizardView: View {
                             Spacer()
                             Text("\(appSettingsManager.selectedCurrency.flag) \(appSettingsManager.selectedCurrency.id)")
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(themeManager.chevronMuted(for: colorScheme))
@@ -307,7 +307,7 @@ struct OnboardingWizardView: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .frame(width: 80)
                             .toolbar {
                                 ToolbarItemGroup(placement: .keyboard) {
@@ -330,7 +330,7 @@ struct OnboardingWizardView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "info.circle")
                         .font(.system(size: 16))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     
                     BuxCatalogText.text("You can adjust budgeting start dates, income sources, and weekly tracking targets at any time in Settings.")
                         .font(.system(size: 12))
@@ -425,7 +425,7 @@ struct OnboardingWizardView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "gearshape.fill")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     Text(BuxCatalogLabel.string("Activate Studio in Settings → Studio. Choose Simple or unlock Pro Studio.", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -479,7 +479,7 @@ struct OnboardingWizardView: View {
                             }
                         }
                     ))
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .labelsHidden()
                 }
                 .padding(16)
@@ -532,7 +532,7 @@ struct OnboardingWizardView: View {
                                 ), in: 1...30) {
                                     Text("\(store.customBackupIntervalDays) ") + Text(BuxCatalogLabel.string(store.customBackupIntervalDays == 1 ? "day" : "days", locale: appSettingsManager.interfaceLocale))
                                         .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 }
                             }
                             .padding(.top, 4)
@@ -548,7 +548,7 @@ struct OnboardingWizardView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "lock.shield.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     VStack(alignment: .leading, spacing: 4) {
                         BuxCatalogText.text("Encrypted Backups")
                             .font(.system(size: 13, weight: .bold))
@@ -579,7 +579,7 @@ struct OnboardingWizardView: View {
                             .frame(width: 80, height: 80)
                         Image(systemName: sym("info.bubble.fill", or: "info.circle.fill"))
                             .font(.system(size: 36, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
 
                     BuxCatalogText.text("Guided Tour")
@@ -598,7 +598,7 @@ struct OnboardingWizardView: View {
                 VStack(spacing: 20) {
                     tutorialRow(
                         symbol: "plus.circle.fill",
-                        color: themeManager.current.accentColor,
+                        color: themeManager.contrastAccentColor(for: colorScheme),
                         headline: "1. Rapid Entry FAB (+)",
                         bodyText: "Tap the floating action button at the bottom of the home tab. This opens a rapid entry panel allowing you to log transactions manually in seconds."
                     )
@@ -689,7 +689,7 @@ struct OnboardingWizardView: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .frame(width: 18, height: 18)
                 .padding(.top, 1)
 
@@ -754,7 +754,7 @@ struct OnboardingWizardView: View {
                             .foregroundColor(proHighlight ? themeManager.current.accentColor : themeManager.labelSecondary(for: colorScheme))
                         Image(systemName: "crown.fill")
                             .font(.system(size: 8))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     Text(BuxCatalogLabel.string(pro, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 12, weight: .semibold))

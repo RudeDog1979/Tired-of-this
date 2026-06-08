@@ -129,7 +129,7 @@ struct BusinessCardPhotoLabView: View {
             Slider(value: value, in: range) { editing in
                 if !editing { Task { await render() } }
             }
-            .tint(themeManager.current.accentColor)
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
         }
     }
 

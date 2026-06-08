@@ -112,7 +112,7 @@ struct AddExpenseSheet: View {
                                 HStack(spacing: 12) {
                                     Image(systemName: "doc.text.viewfinder")
                                         .font(.system(size: 20, weight: .bold))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                     
                                     VStack(alignment: .leading, spacing: 2) {
                                         BuxCatalogText.text("Scan paper receipt")
@@ -276,7 +276,7 @@ struct AddExpenseSheet: View {
                         }) {
                             Image(systemName: "doc.text.viewfinder")
                                 .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                     }
                 }
@@ -358,7 +358,7 @@ struct AddExpenseSheet: View {
                 }
             }
             .animation(.easeInOut, value: isScanning)
-            .tint(isIncomeMode ? incomeAccent : themeManager.current.accentColor)
+            .tint(isIncomeMode ? incomeAccent : themeManager.contrastAccentColor(for: colorScheme))
         }
     }
 
@@ -755,7 +755,7 @@ struct AddExpenseSheet: View {
                     )
                         .font(.system(size: 13, weight: .semibold))
                 }
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
             .buttonStyle(.plain)
         }
@@ -790,7 +790,7 @@ struct AddExpenseSheet: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .tint(themeManager.current.accentColor)
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
             .padding(BuxLayout.section)
             .expensesThemedCardChrome(cornerRadius: 20)
         }
@@ -831,7 +831,7 @@ struct AddExpenseSheet: View {
 
             DatePicker("", selection: $viewModel.date, displayedComponents: .date)
                 .labelsHidden()
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .padding(BuxLayout.section)
                 .expensesThemedCardChrome(cornerRadius: 20)
         }
@@ -849,7 +849,7 @@ struct AddExpenseSheet: View {
 
             HStack {
                 Image(systemName: "briefcase.fill")
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                 Picker(loc("Workspace"), selection: workspaceSelection) {
                     BuxCatalogText.text("No specific workspace").tag(Optional<UUID>.none)
@@ -869,7 +869,7 @@ struct AddExpenseSheet: View {
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.triangle.branch")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     Text(
                         BuxLocalizedString.format(
                             "Will auto-route to %@ on save",
@@ -921,7 +921,7 @@ struct AddExpenseSheet: View {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                         Slider(value: $viewModel.bridgeSplitSharePercent, in: 1...99, step: 1)
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
 
@@ -966,7 +966,7 @@ struct AddExpenseSheet: View {
 
             HStack {
                 Image(systemName: viewModel.isBarterExchange ? "arrow.left.arrow.right" : "banknote.fill")
-                    .foregroundColor(viewModel.isBarterExchange ? .orange : themeManager.current.accentColor)
+                    .foregroundColor(viewModel.isBarterExchange ? .orange : themeManager.contrastAccentColor(for: colorScheme))
 
                 Picker(loc("Cash & barter"), selection: operationalPaymentSelection) {
                     BuxCatalogText.text("Not cash or barter").tag("")
@@ -1045,7 +1045,7 @@ struct AddExpenseSheet: View {
                        !method.hasPrefix("Cash (") {
                         Text(method)
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     Image(systemName: showOptionalPaymentSection ? "chevron.up" : "chevron.down")
                         .font(.system(size: 12, weight: .bold))
@@ -1067,7 +1067,7 @@ struct AddExpenseSheet: View {
                         } label: {
                             HStack(spacing: 10) {
                                 Image(systemName: option.systemImage)
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                     .frame(width: 20)
                                 Text(option.label)
                                     .font(.system(size: 14, weight: .semibold))
@@ -1075,7 +1075,7 @@ struct AddExpenseSheet: View {
                                 Spacer()
                                 if viewModel.paymentMethod == option.label {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 }
                             }
                         }

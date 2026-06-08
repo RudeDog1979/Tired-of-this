@@ -13,6 +13,7 @@ struct SimpleStudioHubView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
+    @EnvironmentObject private var studioBrain: StudioBrain
     @EnvironmentObject private var simpleStudioBrain: SimpleStudioBrain
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
@@ -37,6 +38,7 @@ struct SimpleStudioHubView: View {
     @State private var navigateMyMoney = false
     @State private var showSearch = false
     @State private var navigateToInvoiceArchive = false
+    @State private var navigateToMileage = false
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
 
     private var display: SimpleStudioHubDisplay { simpleStudioBrain.hubDisplay }
@@ -154,7 +156,7 @@ struct SimpleStudioHubView: View {
                     }
                     .padding(.top, BuxTokens.tight)
                 }
-                .buxRootTabScrollChrome()
+                .modifier(SimpleStudioRootTabScrollChromeModifier())
 
                 fabLayer
             }
@@ -167,7 +169,7 @@ struct SimpleStudioHubView: View {
                             showSearch = true
                         } label: {
                             Image(systemName: "magnifyingglass")
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                         .accessibilityLabel(BuxCatalogLabel.string("Search", locale: locale))
 
@@ -183,7 +185,7 @@ struct SimpleStudioHubView: View {
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                     }
                 }
@@ -200,6 +202,14 @@ struct SimpleStudioHubView: View {
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
                     .environmentObject(simpleStudioStore)
+            }
+            .navigationDestination(isPresented: $navigateToMileage) {
+                StudioMileageLogView()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(studioStore)
+                    .environmentObject(studioBrain)
+                    .environment(\.studioEnhancedTint, true)
             }
             .sheet(item: $proUpsellFeature) { feature in
                 StudioProUpsellSheet(feature: feature)
@@ -402,7 +412,7 @@ struct SimpleStudioHubView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .frame(width: 36, height: 36)
                     .background(themeManager.accentWash(for: colorScheme))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .clipShape(Circle())
                 BuxCatalogText.text(titleKey)
                     .font(.system(size: 15, weight: .bold))
@@ -518,6 +528,30 @@ struct SimpleStudioHubView: View {
             BuxSectionHeader(title: "Tools")
 
             BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: 0) {
+                BuxCardButton(action: { navigateToMileage = true }) {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: BuxTokens.tight, style: .continuous)
+                                .fill(Color.cyan.opacity(0.14))
+                                .frame(width: 32, height: 32)
+                            Image(systemName: "car.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.cyan)
+                        }
+                        BuxCatalogText.text("Mileage Log")
+                            .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme).opacity(0.6))
+                    }
+                    .padding(.horizontal, BuxTokens.section)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                }
+
+                Divider().padding(.leading, 44)
+
                 BuxCardButton(action: { navigateToInvoiceArchive = true }) {
                     HStack(spacing: 12) {
                         ZStack {
@@ -603,9 +637,21 @@ struct SimpleStudioHubView: View {
                 jobLabel: item.jobLabel,
                 businessName: display.businessTitle,
                 phone: phone,
-                accent: themeManager.current.accentColor
+                accent: themeManager.contrastAccentColor(for: colorScheme)
             ),
             openURL: openURL
         )
+    }
+}
+
+private struct SimpleStudioRootTabScrollChromeModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .buxRootTabScrollChrome()
+                .contentMargins(.top, BuxLayout.simpleStudioRootTabScrollTopInset, for: .scrollContent)
+        } else {
+            content.buxRootTabScrollChrome()
+        }
     }
 }

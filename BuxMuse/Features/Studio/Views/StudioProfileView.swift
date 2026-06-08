@@ -30,6 +30,10 @@ struct StudioProfileView: View {
     var body: some View {
         StudioThemedListBackdrop {
             BuxThemedCardForm {
+                StudioProToolScreenHeader(titleKey: "Business Profile")
+                    .studioProToolScrollPlacementEmbedded()
+                    .padding(.top, StudioProToolHeaderLayout.topInset - BuxLayout.tight)
+
                 BuxFormSection(title: "Business details") {
                     PhotoPickCropRow(
                         title: loc("Company Logo"),
@@ -56,7 +60,7 @@ struct StudioProfileView: View {
                             Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
                         }
                     }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 }
 
@@ -99,7 +103,7 @@ struct StudioProfileView: View {
                         in: 0...120,
                         step: 1
                     )
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     HStack {
@@ -114,8 +118,9 @@ struct StudioProfileView: View {
                 }
             }
         }
-        .buxCatalogNavigationTitle("Business Profile")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .buxRootNavigationChrome()
         .onAppear { loadProfile() }
         .onChange(of: displayName) { _, _ in saveProfile() }
         .onChange(of: businessName) { _, _ in saveProfile() }

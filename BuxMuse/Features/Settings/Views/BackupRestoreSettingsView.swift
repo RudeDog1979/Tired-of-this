@@ -103,14 +103,14 @@ struct BackupRestoreSettingsView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
 
                 BuxFormRowDivider()
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "lock.shield.fill")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     BuxCatalogDynamicText(key: "BuxMuse never saves your password or recovery key on this device. You hold both — store them in a password manager, secure note, or offline copy.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
@@ -138,7 +138,7 @@ struct BackupRestoreSettingsView: View {
                             BuxCatalogDynamicText(key: "Share backup file")
                         }
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .buxFormFieldPadding()
                 }
@@ -166,7 +166,7 @@ struct BackupRestoreSettingsView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
 
                 if store.autoBackupFrequency != .off {
@@ -187,7 +187,7 @@ struct BackupRestoreSettingsView: View {
                         BuxCatalogText.text("Custom").tag(AutoBackupFrequency.custom)
                     }
                     .pickerStyle(.segmented)
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
 
                     if store.autoBackupFrequency == .custom {
@@ -213,7 +213,7 @@ struct BackupRestoreSettingsView: View {
                                             : BuxCatalogLabel.string("days", locale: appSettingsManager.interfaceLocale)
                                     )
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             }
                         }
                         .buxFormFieldPadding()
@@ -259,7 +259,7 @@ struct BackupRestoreSettingsView: View {
                     operation: operation,
                     step: activeStep,
                     progress: stepProgress,
-                    accent: themeManager.current.accentColor,
+                    accent: themeManager.contrastAccentColor(for: colorScheme),
                     pulse: progressPulse
                 )
                 .interactiveDismissDisabled()
@@ -414,7 +414,7 @@ struct BackupRestoreSettingsView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "key.viewfinder")
                             .font(.system(size: 40, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         BuxCatalogDynamicText(key: "Save your recovery key")
                             .font(.system(size: 22, weight: .black, design: .rounded))
                         BuxCatalogDynamicText(key: "This key is shown once. BuxMuse does not store it. Paste it when restoring if you forget your password.")
@@ -444,7 +444,7 @@ struct BackupRestoreSettingsView: View {
                                     .padding(.vertical, 12)
                             }
                             .buttonStyle(.borderedProminent)
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
 
                             if archiveURL != nil {
                                 ShareLink(item: "BuxMuse recovery key (keep private):\n\(key)\n\nBackup file saved separately.") {
@@ -462,7 +462,7 @@ struct BackupRestoreSettingsView: View {
                         BuxCatalogDynamicText(key: "I saved my recovery key in a safe place")
                             .font(.system(size: 14, weight: .semibold))
                     }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
 
                     Button {
                         issuedRecoveryKey = nil
@@ -493,7 +493,7 @@ struct BackupRestoreSettingsView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .bold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)

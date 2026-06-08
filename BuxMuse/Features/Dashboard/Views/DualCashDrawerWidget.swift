@@ -38,7 +38,7 @@ struct DualCashDrawerWidget: View {
                     
                     Image(systemName: "arrow.up.left.and.arrow.down.right.circle.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 
                 // Balances Grid
@@ -169,6 +169,7 @@ struct DualCashDrawerWidget: View {
 
 struct QuickCashDrawerAdjustSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var brain: BuxMuseBrain
@@ -273,7 +274,7 @@ struct QuickCashDrawerAdjustSheet: View {
                         TextField("0.00", text: $amountText)
                             .font(.system(size: 24, weight: .black))
                             .keyboardType(.decimalPad)
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .padding()
                     .background(Color.gray.opacity(0.08))

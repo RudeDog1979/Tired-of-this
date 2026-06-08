@@ -26,7 +26,7 @@ struct StudioInsightsHubSection: View {
                     } label: {
                         BuxCatalogText.text("See all")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
             }
@@ -97,7 +97,7 @@ struct StudioInsightsHubSection: View {
         VStack(alignment: .leading, spacing: 4) {
             Image(systemName: row.systemImage)
                 .font(.system(size: 14))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             Text(row.value)
                 .font(.system(size: 15, weight: .bold, design: .rounded))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -132,9 +132,13 @@ struct StudioInsightsDashboardView: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BuxTokens.block) {
-                Text(snapshot.headline)
+        StudioThemedListBackdrop {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: BuxTokens.block) {
+                    StudioProToolScreenHeader(titleKey: "Studio Insights")
+                        .studioProToolScrollPlacement()
+
+                    Text(snapshot.headline)
                     .font(.system(size: 16, weight: .bold))
                     .padding(.horizontal, BuxTokens.marginRegular)
 
@@ -153,7 +157,7 @@ struct StudioInsightsDashboardView: View {
                     HStack(spacing: 14) {
                         Image(systemName: row.systemImage)
                             .font(.system(size: 22))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .frame(width: 36)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(row.title)
@@ -171,11 +175,13 @@ struct StudioInsightsDashboardView: View {
                     .studioThemedCardChrome(cornerRadius: 16)
                     .padding(.horizontal, BuxTokens.marginRegular)
                 }
+                }
+                .studioProToolScreenScrollChrome()
             }
-            .padding(.vertical, BuxTokens.section)
+            .buxSoftScrollChrome()
         }
-        .background(themeManager.screenBackground(for: colorScheme).ignoresSafeArea())
-        .buxCatalogNavigationTitle("Studio Insights")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .buxRootNavigationChrome()
     }
 }

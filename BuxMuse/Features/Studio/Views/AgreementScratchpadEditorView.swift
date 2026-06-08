@@ -17,56 +17,65 @@ struct AgreementScratchpadListView: View {
     @State private var showNewDraft = false
 
     var body: some View {
-        BuxThemedCardForm {
-            BuxFormSection(title: "Agreement drafts") {
-                if store.agreementDrafts.isEmpty {
-                    BuxCatalogDynamicText(key: "No drafts yet. Create one for a client or project before work starts.")
-                        .font(.system(size: 13, weight: .medium))
-                        .buxLabelSecondary()
-                        .fixedSize(horizontal: false, vertical: true)
-                        .buxFormFieldPadding()
-                } else {
-                    ForEach(Array(store.agreementDrafts.sorted { $0.updatedAt > $1.updatedAt }.enumerated()), id: \.element.id) { index, draft in
-                        NavigationLink {
-                            AgreementScratchpadEditorView(draft: draft)
-                                .environmentObject(store)
-                                .environmentObject(themeManager)
-                                .environmentObject(simpleStudioStore)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack {
-                                    Text(draft.title)
-                                        .font(.system(size: 15, weight: .semibold))
-                                    Spacer(minLength: 8)
-                                    agreementStatusChip(draft)
-                                }
-                                Text(draftSubtitle(draft))
-                                    .font(.system(size: 11, weight: .medium))
-                                    .buxLabelSecondary()
-                                    .lineLimit(1)
-                            }
-                            .buxFormFieldPadding()
-                        }
-                        if index < store.agreementDrafts.count - 1 {
-                            BuxFormRowDivider()
-                        }
-                    }
-                }
+        StudioThemedListBackdrop {
+            BuxThemedCardForm {
+                StudioProToolScreenHeader(titleKey: "Agreements")
+                    .studioProToolScrollPlacementEmbedded()
+                    .padding(.top, StudioProToolHeaderLayout.topInset - BuxLayout.tight)
 
-                BuxFormRowDivider()
-                Button(action: { showNewDraft = true }) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                        BuxCatalogDynamicText(key: "New agreement draft")
+                BuxFormSection(title: "Agreement drafts") {
+                    if store.agreementDrafts.isEmpty {
+                        BuxCatalogDynamicText(key: "No drafts yet. Create one for a client or project before work starts.")
+                            .font(.system(size: 13, weight: .medium))
+                            .buxLabelSecondary()
+                            .fixedSize(horizontal: false, vertical: true)
+                            .buxFormFieldPadding()
+                    } else {
+                        ForEach(Array(store.agreementDrafts.sorted { $0.updatedAt > $1.updatedAt }.enumerated()), id: \.element.id) { index, draft in
+                            NavigationLink {
+                                AgreementScratchpadEditorView(draft: draft)
+                                    .environmentObject(store)
+                                    .environmentObject(themeManager)
+                                    .environmentObject(appSettingsManager)
+                                    .environmentObject(simpleStudioStore)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(draft.title)
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                                        Spacer(minLength: 8)
+                                        agreementStatusChip(draft)
+                                    }
+                                    Text(draftSubtitle(draft))
+                                        .font(.system(size: 11, weight: .medium))
+                                        .buxLabelSecondary()
+                                        .lineLimit(1)
+                                }
+                                .buxFormFieldPadding()
+                            }
+                            if index < store.agreementDrafts.count - 1 {
+                                BuxFormRowDivider()
+                            }
+                        }
                     }
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+
+                    BuxFormRowDivider()
+                    Button(action: { showNewDraft = true }) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                            BuxCatalogDynamicText(key: "New agreement draft")
+                        }
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                    }
+                    .buxFormFieldPadding()
                 }
-                .buxFormFieldPadding()
             }
         }
-        .buxCatalogNavigationTitle("Agreements")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .buxRootNavigationChrome()
         .sheet(isPresented: $showNewDraft) {
             NavigationStack {
                 AgreementScratchpadEditorView(
@@ -74,6 +83,7 @@ struct AgreementScratchpadListView: View {
                 )
                 .environmentObject(store)
                 .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
                 .environmentObject(simpleStudioStore)
             }
             .buxStudioSheetContent()
@@ -165,10 +175,11 @@ struct AgreementScratchpadEditorView: View {
     }
 
     var body: some View {
-        BuxThemedCardForm {
-            statusBanner
+        StudioThemedListBackdrop {
+            BuxThemedCardForm {
+                statusBanner
 
-            BuxFormSection(title: "Basics") {
+                BuxFormSection(title: "Basics") {
                 TextField(BuxCatalogLabel.string("Title", locale: appSettingsManager.interfaceLocale), text: $draft.title)
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
@@ -192,7 +203,7 @@ struct AgreementScratchpadEditorView: View {
                                 .buxLabelSecondary()
                         }
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .buxFormFieldPadding()
                     BuxFormRowDivider()
@@ -209,7 +220,7 @@ struct AgreementScratchpadEditorView: View {
                             .buxLabelSecondary()
                     }
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
@@ -291,7 +302,7 @@ struct AgreementScratchpadEditorView: View {
                             .buxLabelSecondary()
                     }
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buxFormFieldPadding()
             }
@@ -359,7 +370,7 @@ struct AgreementScratchpadEditorView: View {
                     BuxCatalogDynamicText(key: "Approval date recorded")
                         .font(.system(size: 15, weight: .semibold))
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
                 if draft.signOffDate != nil {
                     BuxFormRowDivider()
@@ -387,6 +398,7 @@ struct AgreementScratchpadEditorView: View {
                     exportRowLabel("Share agreement text", systemImage: "square.and.arrow.up")
                 }
                 .buxFormFieldPadding()
+            }
             }
         }
         .buxCatalogNavigationTitle("Agreement")
@@ -454,7 +466,7 @@ struct AgreementScratchpadEditorView: View {
                         .foregroundColor(.green)
                 } else if draft.hasProviderSignature {
                     Image(systemName: "signature")
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
             }
             .buxFormFieldPadding()
@@ -674,7 +686,7 @@ struct AgreementScratchpadEditorView: View {
                 Spacer()
                 Image(systemName: hasSignature ? "signature" : "pencil.and.scribble")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
             .buxFormFieldPadding()
         }
@@ -687,7 +699,7 @@ struct AgreementScratchpadEditorView: View {
             Text(title)
         }
         .font(.system(size: 15, weight: .bold))
-        .foregroundColor(themeManager.current.accentColor)
+        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
     }
 }
 

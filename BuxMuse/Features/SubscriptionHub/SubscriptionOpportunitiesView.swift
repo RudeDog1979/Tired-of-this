@@ -26,7 +26,7 @@ struct SubscriptionOpportunitiesView: View {
                 HStack(spacing: BuxLayout.section) {
                     Image(systemName: "sparkles")
                         .font(.system(size: 20))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                     BuxCatalogText.text("Your subscriptions are fully optimized.")
                         .font(.system(size: 13, weight: .semibold))
@@ -72,7 +72,7 @@ struct SubscriptionOpportunitiesView: View {
 
                     Image(systemName: "sparkles")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -105,7 +105,7 @@ struct SubscriptionOpportunitiesView: View {
             HStack(alignment: .center, spacing: 8) {
                 Text(item.savingsPhrase)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 8)

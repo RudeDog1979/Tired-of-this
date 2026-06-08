@@ -273,7 +273,7 @@ struct TotalSpendDetailSheet: View {
             }
         }
         .pickerStyle(.segmented)
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
     }
 
     // MARK: - Chart Section

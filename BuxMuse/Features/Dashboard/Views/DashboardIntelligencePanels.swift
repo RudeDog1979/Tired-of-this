@@ -65,7 +65,7 @@ struct DashboardFeatureInsightStrips: View {
                 Button(action: { onOpenStudioSettings?() }) {
                     Text(BuxInsightCopy.copy(cta, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                 }
@@ -85,7 +85,7 @@ struct DashboardFeatureInsightStrips: View {
         case "orange": return .orange
         case "blue": return .blue
         case "purple": return .purple
-        default: return themeManager.current.accentColor
+        default: return themeManager.contrastAccentColor(for: colorScheme)
         }
     }
 }
@@ -198,7 +198,7 @@ struct DashboardInsightsPanel: View {
         case "orange": return .orange
         case "blue": return .blue
         case "purple": return .purple
-        default: return themeManager.current.accentColor
+        default: return themeManager.contrastAccentColor(for: colorScheme)
         }
     }
 }

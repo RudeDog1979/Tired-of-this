@@ -25,7 +25,7 @@ struct PaymentSourceSettingsView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
 

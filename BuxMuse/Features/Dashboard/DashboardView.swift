@@ -101,7 +101,7 @@ struct DashboardView: View {
                                                 HStack(spacing: 6) {
                                                     Image(systemName: "chart.bar.fill")
                                                         .font(.system(size: 10))
-                                                        .foregroundColor(themeManager.current.accentColor)
+                                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                                     
                                                     Text(
                                                         BuxLocalizedString.format(
@@ -111,7 +111,7 @@ struct DashboardView: View {
                                                         )
                                                     )
                                                     .font(.system(size: 10, weight: .bold))
-                                                    .foregroundColor(themeManager.current.accentColor)
+                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                                 }
                                                 .padding(.horizontal, 8)
                                                 .padding(.vertical, 4)
@@ -238,7 +238,7 @@ struct DashboardView: View {
                                                 
                                                 Image(systemName: "chart.pie.fill")
                                                     .font(.system(size: 18))
-                                                    .foregroundColor(themeManager.current.accentColor)
+                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                             }
                                             .padding(.leading, 4)
                                             
@@ -338,7 +338,7 @@ struct DashboardView: View {
                                             trendText: changeTrend,
                                             trendColor: changeColor,
                                             icon: "creditcard.fill",
-                                            iconColor: themeManager.current.accentColor,
+                                            iconColor: themeManager.contrastAccentColor(for: colorScheme),
                                             includesDashboardChrome: false
                                         )
                                         .dashboardMaterialPillCardLabel()
@@ -374,9 +374,9 @@ struct DashboardView: View {
                                             } ?? BuxLocalizedString.string("All merchants", locale: appSettingsManager.interfaceLocale),
                                             trendText: expenseHeader.microInsight
                                                 ?? BuxLocalizedString.string("On track", locale: appSettingsManager.interfaceLocale),
-                                            trendColor: themeManager.current.accentColor,
+                                            trendColor: themeManager.contrastAccentColor(for: colorScheme),
                                             icon: "list.bullet.rectangle.fill",
-                                            iconColor: themeManager.current.accentColor,
+                                            iconColor: themeManager.contrastAccentColor(for: colorScheme),
                                             includesDashboardChrome: false
                                         )
                                         .dashboardMaterialPillCardLabel()
@@ -398,7 +398,7 @@ struct DashboardView: View {
                                     if activeSubs.isEmpty {
                                         HStack {
                                             Image(systemName: "sparkles")
-                                                .foregroundColor(themeManager.current.accentColor)
+                                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                                 BuxCatalogText.text("No active subscriptions. Tapping quick action opens Subscription Hub.")
                                                 .font(.system(size: 11, weight: .bold))
                                                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
@@ -457,7 +457,7 @@ struct DashboardView: View {
                                                 BuxCatalogText.text("Add Goal")
                                                     .font(.system(size: 12, weight: .bold))
                                             }
-                                            .foregroundColor(themeManager.current.accentColor)
+                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                         }
                                         .buttonStyle(BuxMicroShrinkStyle())
                                     }
@@ -531,7 +531,7 @@ struct DashboardView: View {
                                             HStack {
                                                 Image(systemName: "chart.bar.fill")
                                                     .font(.system(size: 16))
-                                                    .foregroundColor(themeManager.current.accentColor)
+                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                                 
                                                 VStack(alignment: .leading, spacing: 2) {
                                                     BuxCatalogText.text("See your progress")
@@ -615,9 +615,10 @@ struct DashboardView: View {
                     Spacer().frame(height: BuxTokens.tight)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, BuxTokens.section)
+                .padding(.top, BuxTokens.tight)
                 .environment(\.dashboardEnhancedTint, true)
             }
+            .contentMargins(.top, BuxLayout.dashboardRootTabScrollTopInset, for: .scrollContent)
             .buxRootTabScrollChrome()
             .buxScrollCollapseCoordinateSpace()
             .onTapGesture {
@@ -859,6 +860,20 @@ private struct DashboardHeroSection: View {
 
                 HStack(spacing: 0) {
                     BuxHeroQuickActionButton(
+                        action: { activeSheet = .addExpense(.addIncome) },
+                        diameter: heroActionDiameter,
+                        title: "Income",
+                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                    ) { isPressed in
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.system(size: heroActionIconSize + 2))
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                            .buxHeroActionIcon(.income, isPressed: isPressed)
+                    }
+                    .buxScreenEntrance(index: 0, isVisible: navigationCoordinator.isScreenLoaded)
+
+                    BuxHeroQuickActionButton(
                         action: {
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.62)) {
                                 isFabMenuExpanded.toggle()
@@ -873,20 +888,6 @@ private struct DashboardHeroSection: View {
                             .font(.system(size: heroActionIconSize, weight: .semibold))
                             .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .buxHeroActionIcon(.plus(isExpanded: isFabMenuExpanded), isPressed: isPressed)
-                    }
-                    .buxScreenEntrance(index: 0, isVisible: navigationCoordinator.isScreenLoaded)
-
-                    BuxHeroQuickActionButton(
-                        action: { activeSheet = .addExpense(.addIncome) },
-                        diameter: heroActionDiameter,
-                        title: "Income",
-                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                        titleColor: themeManager.labelSecondary(for: colorScheme)
-                    ) { isPressed in
-                        Image(systemName: "arrow.down.circle.fill")
-                            .font(.system(size: heroActionIconSize + 2))
-                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                            .buxHeroActionIcon(.income, isPressed: isPressed)
                     }
                     .buxScreenEntrance(index: 1, isVisible: navigationCoordinator.isScreenLoaded)
 
@@ -1296,11 +1297,11 @@ private struct DashboardEnvelopeRow: View {
     let onTap: () -> Void
 
     private var tint: Color {
-        guard showWarnings else { return themeManager.current.accentColor }
+        guard showWarnings else { return themeManager.contrastAccentColor(for: colorScheme) }
         switch envelope.status {
         case .over, .atLimit: return .red
         case .approaching: return .orange
-        case .ok: return themeManager.current.accentColor
+        case .ok: return themeManager.contrastAccentColor(for: colorScheme)
         }
     }
 

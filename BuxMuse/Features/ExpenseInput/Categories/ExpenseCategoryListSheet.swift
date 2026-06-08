@@ -176,7 +176,7 @@ struct ExpenseCategoryEditorSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
     }
 
     private var previewSection: some View {

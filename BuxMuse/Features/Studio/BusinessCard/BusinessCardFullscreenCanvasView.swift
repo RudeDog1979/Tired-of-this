@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BusinessCardFullscreenCanvasView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
@@ -356,8 +357,8 @@ struct BusinessCardFullscreenCanvasView: View {
             }
 
             HStack {
-                Toggle(BusinessCardL10n.line("Safe zone", locale: appSettingsManager.interfaceLocale), isOn: $showSafeZone).tint(themeManager.current.accentColor)
-                Toggle(BusinessCardL10n.line("Snap guides", locale: appSettingsManager.interfaceLocale), isOn: $snapGuides).tint(themeManager.current.accentColor)
+                Toggle(BusinessCardL10n.line("Safe zone", locale: appSettingsManager.interfaceLocale), isOn: $showSafeZone).tint(themeManager.contrastAccentColor(for: colorScheme))
+                Toggle(BusinessCardL10n.line("Snap guides", locale: appSettingsManager.interfaceLocale), isOn: $snapGuides).tint(themeManager.contrastAccentColor(for: colorScheme))
             }
             .font(.system(size: 12, weight: .medium))
             .foregroundStyle(.white.opacity(0.85))

@@ -130,7 +130,7 @@ struct SimpleStudioScanView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "camera.viewfinder")
                         .font(.system(size: 44, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                     BuxCatalogDynamicText(key: "Snap a payment or receipt")
                         .font(.system(size: 16, weight: .bold))
@@ -148,7 +148,7 @@ struct SimpleStudioScanView: View {
 
             if isScanning {
                 ProgressView("Reading photo…")
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
             } else {
                 VStack(spacing: BuxTokens.tight) {
                     BuxButton(

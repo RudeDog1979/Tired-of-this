@@ -17,14 +17,10 @@ struct StudioClientsListView: View {
     
     var body: some View {
         StudioThemedListBackdrop {
-            if store.clients.isEmpty {
-                emptyState
-            } else {
-                clientList
-            }
+            clientsList
         }
-        .buxCatalogNavigationTitle("Clients CRM")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -43,27 +39,43 @@ struct StudioClientsListView: View {
         }
     }
 
-    private var clientList: some View {
+    private var clientsList: some View {
         List {
-            ForEach(store.clients) { client in
-                let analysis = StudioClientEngine.analyze(
-                    client: client,
-                    invoices: store.invoices,
-                    projects: store.projects,
-                    receipts: store.receipts
-                )
-
-                NavigationLink(
-                    destination: StudioClientDetailView(client: client)
-                        .environmentObject(themeManager)
-                        .environmentObject(appSettingsManager)
-                ) {
-                    clientRowCard(client: client, lifetimeValue: analysis.lifetimeValue, health: analysis.health)
-                }
-                .studioThemedListRowChrome()
+            Section {
+                StudioProToolScreenHeader(titleKey: "Clients")
+                    .studioProToolScreenHeaderRow()
             }
-            .onDelete(perform: deleteClient)
+
+            if store.clients.isEmpty {
+                Section {
+                    emptyState
+                        .frame(maxWidth: .infinity)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
+            } else {
+                ForEach(store.clients) { client in
+                    let analysis = StudioClientEngine.analyze(
+                        client: client,
+                        invoices: store.invoices,
+                        projects: store.projects,
+                        receipts: store.receipts
+                    )
+
+                    NavigationLink(
+                        destination: StudioClientDetailView(client: client)
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                    ) {
+                        clientRowCard(client: client, lifetimeValue: analysis.lifetimeValue, health: analysis.health)
+                    }
+                    .studioThemedListRowChrome()
+                }
+                .onDelete(perform: deleteClient)
+            }
         }
+        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
         .studioThemedListRows()
     }
 
@@ -399,7 +411,7 @@ struct StudioClientDetailView: View {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 12))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .frame(width: 16)
             
             Text(label)

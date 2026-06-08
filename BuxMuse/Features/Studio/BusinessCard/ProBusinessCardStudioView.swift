@@ -51,6 +51,8 @@ struct ProBusinessCardStudioView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .buxRootNavigationChrome()
+        .environment(\.studioEnhancedTint, true)
         .navigationDestination(item: $editorRoute) { route in
             ProBusinessCardEditorView(designID: route.designID)
                 .environmentObject(themeManager)
@@ -130,7 +132,7 @@ struct ProBusinessCardStudioView: View {
     private func heroPill(_ title: String, icon: String) -> some View {
         Label(title, systemImage: icon)
             .font(.system(size: 10, weight: .bold))
-            .foregroundStyle(themeManager.current.accentColor)
+            .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(themeManager.current.accentColor.opacity(0.12))
@@ -246,7 +248,7 @@ struct ProBusinessCardStudioView: View {
                                 Image(systemName: "arrow.right.circle.fill")
                                     .font(.system(size: 16, weight: .semibold))
                             }
-                            .foregroundStyle(themeManager.current.accentColor)
+                            .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -523,7 +525,7 @@ struct BusinessCardDesignGridTile: View {
                     if isPrimaryBrand {
                         BuxCatalogDynamicText(key: "Invoice brand")
                             .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(themeManager.current.accentColor)
+                            .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
                 Spacer(minLength: 0)

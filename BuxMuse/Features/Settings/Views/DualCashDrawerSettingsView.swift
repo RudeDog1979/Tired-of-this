@@ -43,7 +43,7 @@ struct DualCashDrawerSettingsView: View {
                             .buxLabelSecondary()
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
             
@@ -60,7 +60,7 @@ struct DualCashDrawerSettingsView: View {
                                 
                                 TextField(loc("e.g. DOP, USD, EUR"), text: $primaryInput)
                                     .font(.system(size: 15, weight: .semibold))
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                                     .textFieldStyle(.plain)
                                     .onChange(of: primaryInput) { _, val in
                                         store.primaryLocalCurrency = val.uppercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -76,7 +76,7 @@ struct DualCashDrawerSettingsView: View {
                                 
                                 TextField(loc("e.g. USD, DOP"), text: $secondaryInput)
                                     .font(.system(size: 15, weight: .semibold))
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                                     .textFieldStyle(.plain)
                                     .onChange(of: secondaryInput) { _, val in
                                         store.secondaryTradingCurrency = val.uppercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -110,7 +110,7 @@ struct DualCashDrawerSettingsView: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .keyboardType(.decimalPad)
                                     .textFieldStyle(.plain)
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                                     .onChange(of: localBalanceInput) { _, val in
                                         if let d = Double(val) {
                                             store.cashLocalBalanceValue = d
@@ -142,7 +142,7 @@ struct DualCashDrawerSettingsView: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .keyboardType(.decimalPad)
                                     .textFieldStyle(.plain)
-                                    .tint(themeManager.current.accentColor)
+                                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                                     .onChange(of: secondaryBalanceInput) { _, val in
                                         if let d = Double(val) {
                                             store.cashSecondaryBalanceValue = d

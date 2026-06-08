@@ -49,7 +49,7 @@ struct StudioIncomeTaxCalculatorView: View {
                 .buxLabelSecondary()
             Text(snapshot.totalEstimatedTaxFormatted)
                 .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             Text(
                 BuxLocalizedString.format(
                     "Effective rate %lld%% on recorded income",
@@ -144,7 +144,7 @@ struct StudioQuarterlyTaxView: View {
                             .buxLabelSecondary()
                         Text(snapshot.nextPaymentLabel)
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(BuxLayout.section)

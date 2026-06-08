@@ -24,7 +24,7 @@ struct MonthlyTrendChart: View {
             if let prediction {
                 Text(prediction)
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .lineLimit(1)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)

@@ -54,7 +54,7 @@ struct DataSettingsView: View {
                 } label: {
                     HStack {
                         Image(systemName: photoStatus == .limited ? "photo.badge.checkmark" : "photo.on.rectangle.angled")
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         Text(
                             BuxLocalizedString.format(
                                 "Photos: %@",
@@ -67,10 +67,10 @@ struct DataSettingsView: View {
                         Spacer()
                         BuxCatalogDynamicText(key: "Manage photo access")
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         Image(systemName: "arrow.up.forward.app.fill")
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
                 .buxFormFieldPadding()
@@ -80,7 +80,7 @@ struct DataSettingsView: View {
                 Toggle(isOn: $store.allowLocalBackups) {
                     Text(BuxCatalogLabel.string("Allow Local Backups", locale: appSettingsManager.interfaceLocale))
                 }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
 
                 if store.allowLocalBackups {
@@ -93,7 +93,7 @@ struct DataSettingsView: View {
                         Text(BuxCatalogLabel.string("Backup Frequency", locale: appSettingsManager.interfaceLocale))
                     }
                     .pickerStyle(.menu)
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
 
                     if store.autoBackupFrequency == .custom {
@@ -111,7 +111,7 @@ struct DataSettingsView: View {
                             ), in: 1...30) {
                                 Text("\(store.customBackupIntervalDays) ") + Text(BuxCatalogLabel.string(store.customBackupIntervalDays == 1 ? "day" : "days", locale: appSettingsManager.interfaceLocale))
                                     .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             }
                         }
                         .buxFormFieldPadding()
@@ -192,7 +192,7 @@ struct DataSettingsView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
 
@@ -213,7 +213,7 @@ struct DataSettingsView: View {
                         BuxCatalogDynamicText(key: "Clear merchant logo cache")
                     }
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buxFormFieldPadding()
             }
@@ -222,13 +222,13 @@ struct DataSettingsView: View {
                 Toggle(isOn: $store.includeStudioDataInExports) {
                     Text(BuxCatalogLabel.string("Include Studio data", locale: appSettingsManager.interfaceLocale))
                 }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
                 Toggle(isOn: $store.includeAnalyticsInExports) {
                     Text(BuxCatalogLabel.string("Include local performance metadata", locale: appSettingsManager.interfaceLocale))
                 }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
 
                 if let url = exportURL {
@@ -239,7 +239,7 @@ struct DataSettingsView: View {
                             BuxCatalogDynamicText(key: "Save JSON backup archive")
                         }
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .buxFormFieldPadding()
                 } else {
@@ -250,7 +250,7 @@ struct DataSettingsView: View {
                             BuxCatalogDynamicText(key: "Compile JSON data export")
                         }
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                     .buxFormFieldPadding()
                 }

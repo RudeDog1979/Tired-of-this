@@ -351,7 +351,7 @@ struct InvoiceDesignerHubView: View {
                             title: "Next #",
                             systemImage: "number",
                             role: .secondary,
-                            accent: themeManager.current.accentColor,
+                            accent: themeManager.contrastAccentColor(for: colorScheme),
                             size: .compact,
                             action: { invoiceNumber = store.nextInvoiceNumber() }
                         )
@@ -419,7 +419,7 @@ struct InvoiceDesignerHubView: View {
                         title: "Add line item",
                         systemImage: "plus.circle.fill",
                         role: .secondary,
-                        accent: themeManager.current.accentColor,
+                        accent: themeManager.contrastAccentColor(for: colorScheme),
                         expands: true,
                         size: .regular,
                         action: { showAddItemSheet = true }
@@ -473,7 +473,7 @@ struct InvoiceDesignerHubView: View {
                         TemplateStyleCard(
                             style: style,
                             isSelected: engine.templateConfig.style == style,
-                            accentColor: themeManager.current.accentColor
+                            accentColor: themeManager.contrastAccentColor(for: colorScheme)
                         ) {
                             applyBrandingMutation {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -676,7 +676,7 @@ struct InvoiceDesignerHubView: View {
                         title: "Add Tax Rate",
                         systemImage: "plus.circle.fill",
                         role: .secondary,
-                        accent: themeManager.current.accentColor,
+                        accent: themeManager.contrastAccentColor(for: colorScheme),
                         expands: true,
                         size: .regular,
                         action: { showAddRateSheet = true }
@@ -714,7 +714,7 @@ struct InvoiceDesignerHubView: View {
             designerSection("Bank Transfer") {
                 VStack(spacing: 10) {
                     Toggle(loc("Show bank details"), isOn: $engine.paymentConfig.showBankBlock)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
 
                     if engine.paymentConfig.showBankBlock {
                         Picker(loc("Account type"), selection: bankTypeBinding) {
@@ -732,7 +732,7 @@ struct InvoiceDesignerHubView: View {
             designerSection("QR Code") {
                 VStack(spacing: 10) {
                     Toggle(loc("Show QR code block"), isOn: $engine.paymentConfig.showQRBlock)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
 
                     if engine.paymentConfig.showQRBlock {
                         paymentField("QR Payload (URL, IBAN, etc.)", text: $engine.paymentConfig.qrPayload)
@@ -756,7 +756,7 @@ struct InvoiceDesignerHubView: View {
             designerSection("Payment Link") {
                 VStack(spacing: 10) {
                     Toggle(loc("Show payment link"), isOn: $engine.paymentConfig.showPaymentLink)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                     if engine.paymentConfig.showPaymentLink {
                         paymentField("URL (e.g. https://pay.stripe.com/…)", text: $engine.paymentConfig.paymentLinkURL)
                             .keyboardType(.URL)
@@ -780,7 +780,7 @@ struct InvoiceDesignerHubView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(loc(title).uppercased())
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .tracking(0.8)
             content()
                 .padding(BuxLayout.section)
@@ -835,7 +835,7 @@ struct InvoiceDesignerHubView: View {
         }) {
             HStack(spacing: 10) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(isSelected ? themeManager.current.accentColor : .gray)
+                    .foregroundColor(isSelected ? themeManager.contrastAccentColor(for: colorScheme) : .gray)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
@@ -869,7 +869,7 @@ struct InvoiceDesignerHubView: View {
                 if rate.isCompounding {
                     BuxCatalogDynamicText(key: "Compounding")
                         .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
             }
             Spacer()
@@ -948,7 +948,7 @@ struct InvoiceDesignerHubView: View {
                 )
             )
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
         }
     }
 
@@ -960,7 +960,7 @@ struct InvoiceDesignerHubView: View {
                 title: "Save Default",
                 systemImage: "star.fill",
                 role: .secondary,
-                accent: themeManager.current.accentColor,
+                accent: themeManager.contrastAccentColor(for: colorScheme),
                 expands: true,
                 action: saveAsDefault
             )
@@ -968,7 +968,7 @@ struct InvoiceDesignerHubView: View {
                 title: "Save Invoice",
                 systemImage: "checkmark.seal.fill",
                 role: .primary,
-                accent: themeManager.current.accentColor,
+                accent: themeManager.contrastAccentColor(for: colorScheme),
                 expands: true,
                 isEnabled: canSave,
                 action: saveInvoice
@@ -983,7 +983,7 @@ struct InvoiceDesignerHubView: View {
                 title: "Save Default",
                 systemImage: "star.fill",
                 role: .secondary,
-                accent: themeManager.current.accentColor,
+                accent: themeManager.contrastAccentColor(for: colorScheme),
                 expands: true,
                 action: saveAsDefault
             )
@@ -991,7 +991,7 @@ struct InvoiceDesignerHubView: View {
                 title: "Save Invoice",
                 systemImage: "checkmark.seal.fill",
                 role: .primary,
-                accent: themeManager.current.accentColor,
+                accent: themeManager.contrastAccentColor(for: colorScheme),
                 expands: true,
                 isEnabled: canSave,
                 action: saveInvoice
@@ -1328,7 +1328,7 @@ private struct AddTaxRateSheet: View {
                     }
                     BuxFormSection(title: "Options") {
                         Toggle(loc("Compounding (stacks on previous rate)"), isOn: $compounding)
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                         BuxCatalogDynamicText(key: "Compounding rates apply to the running total including previous taxes.")
                             .font(.system(size: 11))

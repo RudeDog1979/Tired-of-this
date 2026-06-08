@@ -329,7 +329,7 @@ struct SimpleStudioJobQuoteSheet: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .background(themeManager.accentWash(for: colorScheme))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         .clipShape(Capsule())
                     }
                 }
@@ -346,13 +346,13 @@ struct SimpleStudioJobQuoteSheet: View {
                     .font(.system(size: 13, weight: .bold))
                     .buxSectionLabelStyle(color: themeManager.labelSecondary(for: colorScheme))
 
-                calcRow("Agreed with customer", appSettingsManager.format(b.agreed), accent: themeManager.current.accentColor)
+                calcRow("Agreed with customer", appSettingsManager.format(b.agreed), accent: themeManager.contrastAccentColor(for: colorScheme))
                 calcRow("Spent on job", appSettingsManager.format(b.spent), accent: .orange)
                 calcRow("Paid so far", appSettingsManager.format(b.paidSoFar), accent: .green)
                 calcRow("Still waiting", appSettingsManager.format(b.balanceDue), accent: .yellow)
                 Divider().opacity(0.1)
                 calcRow("You keep (so far)", appSettingsManager.format(b.keptSoFar), accent: .green, bold: true)
-                calcRow("You'll keep (when paid)", appSettingsManager.format(b.projectedKept), accent: themeManager.current.accentColor, bold: true)
+                calcRow("You'll keep (when paid)", appSettingsManager.format(b.projectedKept), accent: themeManager.contrastAccentColor(for: colorScheme), bold: true)
             }
         }
     }
@@ -485,7 +485,7 @@ struct SimpleStudioJobQuoteSheet: View {
             jobLabel: jobLabel,
             agreedFormatted: agreed,
             note: note.isEmpty ? nil : note,
-            accent: themeManager.current.accentColor
+            accent: themeManager.contrastAccentColor(for: colorScheme)
         )
         .frame(width: 340)
 

@@ -77,7 +77,7 @@ struct SimpleStudioLogMoneySheet: View {
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 8)
                                         .background(themeManager.accentWash(for: colorScheme))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                         .clipShape(Capsule())
                                     }
                                 }
@@ -100,7 +100,7 @@ struct SimpleStudioLogMoneySheet: View {
                             Toggle(isOn: $isUnpaid) {
                                 BuxCatalogDynamicText(key: "Not paid yet")
                             }
-                                .tint(themeManager.current.accentColor)
+                                .tint(themeManager.contrastAccentColor(for: colorScheme))
                                 .buxFormFieldPadding()
                         }
                     }
@@ -219,7 +219,7 @@ struct SimpleStudioLogMoneySheet: View {
             amountFormatted: formatted,
             description: what,
             isPaid: !isUnpaid,
-            accent: themeManager.current.accentColor,
+            accent: themeManager.contrastAccentColor(for: colorScheme),
             dueDateLabel: isUnpaid ? "Waiting on payment" : nil,
             note: note.isEmpty ? nil : note
         )

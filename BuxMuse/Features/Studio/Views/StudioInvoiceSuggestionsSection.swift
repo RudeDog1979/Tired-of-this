@@ -43,7 +43,7 @@ struct StudioProInvoiceSuggestionsSection: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "sparkles")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(themeManager.current.accentColor)
+                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                 .frame(width: 28)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -59,7 +59,7 @@ struct StudioProInvoiceSuggestionsSection: View {
             Spacer(minLength: 8)
             Text(appSettingsManager.format(suggestion.amount))
                 .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(themeManager.current.accentColor)
+                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(themeManager.labelTertiary(for: colorScheme))
@@ -105,7 +105,7 @@ struct SimpleStudioInvoiceSuggestionsSection: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "doc.text.fill")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(themeManager.current.accentColor)
+                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                 .frame(width: 28)
 
             VStack(alignment: .leading, spacing: 4) {

@@ -35,7 +35,7 @@ struct SimpleStudioHeroCard: View {
                             .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                         Text(display.todayKeptFormatted)
                             .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
             }
@@ -98,7 +98,7 @@ struct SimpleStudioThisMonthCard: View {
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     BuxCatalogDynamicText(key: "Tap to open My money")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
 
                 SimpleStudioDonutChart(
@@ -443,7 +443,7 @@ struct SimpleStudioWaitingSection: View {
                         )
                     )
                         .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
             }
             Spacer(minLength: 0)
@@ -464,7 +464,7 @@ struct SimpleStudioWaitingSection: View {
                             onRemind?(item)
                         }
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
             }
@@ -696,7 +696,7 @@ struct SimpleStudioTaxSection: View {
                                 Image(systemName: "arrow.up.right")
                                     .font(.system(size: 11, weight: .bold))
                             }
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .padding(.top, 4)
                         }
                         .buttonStyle(.plain)
@@ -728,7 +728,7 @@ struct SimpleStudioEmptyState: View {
             VStack(spacing: 12) {
                 Image(systemName: "camera.viewfinder")
                     .font(.system(size: 32, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 BuxCatalogDynamicText(key: "Track every job. Every payment.")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))

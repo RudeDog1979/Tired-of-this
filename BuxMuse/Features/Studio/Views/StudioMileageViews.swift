@@ -35,6 +35,7 @@ struct StudioMileageLogView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var studioBrain: StudioBrain
+    @ObservedObject private var settingsStore = SettingsStore.shared
 
     var highlightEntryID: UUID? = nil
 
@@ -47,14 +48,10 @@ struct StudioMileageLogView: View {
 
     var body: some View {
         StudioThemedListBackdrop {
-            if store.mileageEntries.isEmpty {
-                emptyState
-            } else {
-                mileageList
-            }
+            mileageContentList
         }
-        .buxCatalogNavigationTitle("Mileage Log")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -99,35 +96,59 @@ struct StudioMileageLogView: View {
         mileageSheetMode = .edit(highlightEntryID)
     }
 
-    private var mileageList: some View {
+    @ViewBuilder
+    private var mileageLogScreenHeader: some View {
+        if settingsStore.studioMode == .pro {
+            StudioProToolScreenHeader(titleKey: "Mileage Log")
+        } else {
+            StudioSimpleToolScreenHeader(titleKey: "Mileage Log")
+        }
+    }
+
+    private var mileageContentList: some View {
         List {
-            if summary.entryCount > 0 {
+            Section {
+                mileageLogScreenHeader
+                    .studioProToolScreenHeaderRow()
+            }
+
+            if store.mileageEntries.isEmpty {
                 Section {
-                    mileageSummaryCard
-                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 8, trailing: 0))
+                    emptyState
+                        .frame(maxWidth: .infinity)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                 }
-            }
-
-            ForEach(MileageBrain.sortedEntries(store.mileageEntries)) { entry in
-                Button {
-                    mileageSheetMode = .edit(entry.id)
-                } label: {
-                    mileageRowCard(entry)
-                }
-                .studioThemedListRowChrome()
-                .contextMenu {
-                    Button {
-                        addReturnTrip(from: entry)
-                    } label: {
-                        Label("Same trip back", systemImage: "arrow.left.arrow.right.circle")
+            } else {
+                if summary.entryCount > 0 {
+                    Section {
+                        mileageSummaryCard
+                            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 8, trailing: 0))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                     }
                 }
+
+                ForEach(MileageBrain.sortedEntries(store.mileageEntries)) { entry in
+                    Button {
+                        mileageSheetMode = .edit(entry.id)
+                    } label: {
+                        mileageRowCard(entry)
+                    }
+                    .studioThemedListRowChrome()
+                    .contextMenu {
+                        Button {
+                            addReturnTrip(from: entry)
+                        } label: {
+                            Label("Same trip back", systemImage: "arrow.left.arrow.right.circle")
+                        }
+                    }
+                }
+                .onDelete(perform: deleteEntries)
             }
-            .onDelete(perform: deleteEntries)
         }
-        .contentMargins(.top, BuxLayout.invoicesNavChromeScrollInset, for: .scrollContent)
+        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
         .studioThemedListRows()
     }
 
@@ -158,7 +179,7 @@ struct StudioMileageLogView: View {
         VStack(spacing: 16) {
             Image(systemName: "car.fill")
                 .font(.system(size: 40))
-                .foregroundColor(themeManager.current.accentColor.opacity(0.8))
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme).opacity(0.8))
             BuxCatalogDynamicText(key: "No trips logged yet")
                 .font(.system(size: 16, weight: .semibold))
             BuxCatalogDynamicText(key: "Add business mileage to include allowances in your deduction estimate.")
@@ -187,7 +208,7 @@ struct StudioMileageLogView: View {
                     .frame(width: 36, height: 36)
                 Image(systemName: "car.fill")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
 
             VStack(alignment: .leading, spacing: 4) {
@@ -298,7 +319,7 @@ private struct MileageAddressSearchField: View {
                             .font(.system(size: 14, weight: .semibold))
                     }
                     .buttonStyle(.borderless)
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
             }
 
@@ -311,7 +332,7 @@ private struct MileageAddressSearchField: View {
                             HStack(alignment: .top, spacing: 10) {
                                 Image(systemName: "mappin.circle.fill")
                                     .font(.system(size: 14))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(completion.title)
                                         .font(.system(size: 13, weight: .semibold))
@@ -574,7 +595,7 @@ struct MileageEntrySheet: View {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.left.arrow.right")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     BuxCatalogDynamicText(key: "There and back")
                         .font(.system(size: 14, weight: .semibold))
                 }
@@ -590,11 +611,11 @@ struct MileageEntrySheet: View {
                 if includeReturnJourney, canShowReturnRoutePreview {
                     Text(returnRoutePreview)
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(themeManager.current.accentColor.opacity(0.9))
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme).opacity(0.9))
                 }
             }
         }
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
         .padding(BuxLayout.section)
         .buxFormSectionCard(cornerRadius: 16)
     }
@@ -602,7 +623,7 @@ struct MileageEntrySheet: View {
     private var dateNotesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             DatePicker(loc("Date"), selection: $date, displayedComponents: .date)
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
             TextField(BuxCatalogLabel.string("Notes (optional)", locale: appSettingsManager.interfaceLocale), text: $notes, axis: .vertical)
                 .lineLimit(2...4)
                 .focused($focusedField, equals: .notes)

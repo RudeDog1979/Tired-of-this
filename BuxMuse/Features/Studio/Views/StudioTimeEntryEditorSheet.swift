@@ -7,6 +7,7 @@ import SwiftUI
 
 struct StudioTimeEntryEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
@@ -43,7 +44,7 @@ struct StudioTimeEntryEditorSheet: View {
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     Toggle(loc("Billable"), isOn: $isBillable)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     DatePicker(loc("Start"), selection: $startTime)

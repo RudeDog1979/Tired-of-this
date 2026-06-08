@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BuxPhotoFocalEditorView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
 
     let title: String
@@ -41,12 +42,12 @@ struct BuxPhotoFocalEditorView: View {
                     VStack(spacing: 12) {
                         HStack {
                             Image(systemName: "minus.magnifyingglass").foregroundStyle(Color.white.opacity(0.55))
-                            Slider(value: $scale, in: 1...4).tint(themeManager.current.accentColor)
+                            Slider(value: $scale, in: 1...4).tint(themeManager.contrastAccentColor(for: colorScheme))
                             Image(systemName: "plus.magnifyingglass").foregroundStyle(Color.white.opacity(0.55))
                         }
                         HStack {
                             Image(systemName: "rotate.left").foregroundStyle(Color.white.opacity(0.55))
-                            Slider(value: $rotation, in: -180...180).tint(themeManager.current.accentColor)
+                            Slider(value: $rotation, in: -180...180).tint(themeManager.contrastAccentColor(for: colorScheme))
                             Image(systemName: "rotate.right").foregroundStyle(Color.white.opacity(0.55))
                         }
                         BuxCatalogDynamicText(key: "Drag to reposition · pinch or slide to zoom")

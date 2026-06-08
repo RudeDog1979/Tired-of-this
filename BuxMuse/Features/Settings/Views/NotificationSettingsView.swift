@@ -26,7 +26,7 @@ struct NotificationSettingsView: View {
                                 .buxLabelSecondary()
                         }
                     }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 }
 
@@ -35,25 +35,25 @@ struct NotificationSettingsView: View {
                         Toggle(isOn: $store.budgetAlertsEnabled) {
                             Text(BuxCatalogLabel.string("Budget threshold warnings", locale: appSettingsManager.interfaceLocale))
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         Toggle(isOn: $store.billRemindersEnabled) {
                             Text(BuxCatalogLabel.string("Upcoming bill reminders", locale: appSettingsManager.interfaceLocale))
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         Toggle(isOn: $store.studioInvoiceRemindersEnabled) {
                             Text(BuxCatalogLabel.string("Invoice status updates", locale: appSettingsManager.interfaceLocale))
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         Toggle(isOn: $store.taxDeadlineRemindersEnabled) {
                             Text(BuxCatalogLabel.string("Estimated tax reminders", locale: appSettingsManager.interfaceLocale))
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                     }
 
@@ -67,7 +67,7 @@ struct NotificationSettingsView: View {
                                     .buxLabelSecondary()
                             }
                         }
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     }
 
@@ -78,7 +78,7 @@ struct NotificationSettingsView: View {
                         ) {
                             Text(BuxCatalogLabel.string("Silence starts", locale: appSettingsManager.interfaceLocale))
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         DatePicker(
@@ -87,7 +87,7 @@ struct NotificationSettingsView: View {
                         ) {
                             Text(BuxCatalogLabel.string("Silence ends", locale: appSettingsManager.interfaceLocale))
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                     }
                 }

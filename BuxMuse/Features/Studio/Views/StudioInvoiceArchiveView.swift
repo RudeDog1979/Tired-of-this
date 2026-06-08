@@ -59,40 +59,45 @@ struct StudioInvoiceArchiveView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxTokens.block) {
-                    heroCard
+                    StudioProToolScreenHeader(titleKey: "Backup invoices")
+                        .studioProToolScrollPlacement()
 
-                    if !hasAnyInvoices {
-                        emptyStateCard
-                    } else {
-                        if !simpleRows.isEmpty {
-                            tierSection(
-                                titleKey: "Simple Studio",
-                                icon: "leaf.fill",
-                                tint: .orange,
-                                rows: simpleRows
-                            )
+                    Group {
+                        heroCard
+
+                        if !hasAnyInvoices {
+                            emptyStateCard
+                        } else {
+                            if !simpleRows.isEmpty {
+                                tierSection(
+                                    titleKey: "Simple Studio",
+                                    icon: "leaf.fill",
+                                    tint: .orange,
+                                    rows: simpleRows
+                                )
+                            }
+                            if !proRows.isEmpty {
+                                tierSection(
+                                    titleKey: "Pro Studio",
+                                    icon: "sparkles",
+                                    tint: accent,
+                                    rows: proRows
+                                )
+                            }
                         }
-                        if !proRows.isEmpty {
-                            tierSection(
-                                titleKey: "Pro Studio",
-                                icon: "sparkles",
-                                tint: accent,
-                                rows: proRows
-                            )
-                        }
+
+                        privacyFootnote
                     }
-
-                    privacyFootnote
+                    .padding(.horizontal, BuxTokens.marginRegular)
                 }
-                .padding(.horizontal, BuxTokens.marginRegular)
-                .padding(.top, BuxTokens.tight)
+                .studioProToolScreenScrollChrome()
                 .padding(.bottom, 100)
             }
 
             exportFAB
         }
         .environment(\.studioEnhancedTint, true)
-        .buxCatalogNavigationTitle("Backup invoices")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()
         .toolbar { navigationToolbar }

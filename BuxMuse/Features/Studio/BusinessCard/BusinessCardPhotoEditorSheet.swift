@@ -50,13 +50,13 @@ struct BusinessCardPhotoEditorSheet: View {
                         HStack {
                             Image(systemName: "minus.magnifyingglass").foregroundStyle(Color.white.opacity(0.55))
                             Slider(value: $scale, in: 1...4)
-                                .tint(themeManager.current.accentColor)
+                                .tint(themeManager.contrastAccentColor(for: colorScheme))
                             Image(systemName: "plus.magnifyingglass").foregroundStyle(Color.white.opacity(0.55))
                         }
                         HStack {
                             Image(systemName: "rotate.left").foregroundStyle(Color.white.opacity(0.55))
                             Slider(value: $rotation, in: -180...180)
-                                .tint(themeManager.current.accentColor)
+                                .tint(themeManager.contrastAccentColor(for: colorScheme))
                             Image(systemName: "rotate.right").foregroundStyle(Color.white.opacity(0.55))
                         }
                         BuxCatalogDynamicText(key: "Drag to move · pinch or slide to zoom · rotate to straighten")

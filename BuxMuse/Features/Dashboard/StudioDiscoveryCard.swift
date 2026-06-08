@@ -19,7 +19,7 @@ struct StudioDiscoveryCard: View {
             HStack(alignment: .top) {
                 Image(systemName: "briefcase.fill")
                     .font(.system(size: BuxToolbarMetrics.iconPointSize, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                 VStack(alignment: .leading, spacing: 4) {
                     BuxCatalogText.text("Self-employed?")
@@ -60,7 +60,7 @@ struct StudioDiscoveryCard: View {
                 Capsule(style: .continuous)
                     .fill(themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.22 : 0.14))
             }
-            .foregroundColor(themeManager.current.accentColor)
+            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
         }
         .padding(14)
         .dashboardMaterialCardChrome(.outlined)

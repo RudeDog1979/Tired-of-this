@@ -49,7 +49,7 @@ struct SecuritySettingsView: View {
                             .buxLabelSecondary()
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
 
                 if store.biometricLockEnabled {
@@ -57,7 +57,7 @@ struct SecuritySettingsView: View {
                     Toggle(isOn: $store.requireBiometricOnLaunch) {
                         Text(BuxCatalogLabel.string("Require lock on app launch", locale: appSettingsManager.interfaceLocale))
                     }
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     Picker(selection: $store.lockAfterInactivityMinutes) {
@@ -69,7 +69,7 @@ struct SecuritySettingsView: View {
                         Text(BuxCatalogLabel.string("Lock after inactivity", locale: appSettingsManager.interfaceLocale))
                     }
                     .pickerStyle(.menu)
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 }
             }
@@ -98,7 +98,7 @@ struct SecuritySettingsView: View {
                         Button(action: { showPasscodeSetup = true }) {
                             BuxCatalogDynamicText(key: "Enable PIN")
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                         .buttonStyle(.plain)
                     }
@@ -116,7 +116,7 @@ struct SecuritySettingsView: View {
                             .buxLabelSecondary()
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
         }
@@ -274,7 +274,7 @@ struct PasscodeSetupSheet: View {
     private func indicatorColor(for index: Int) -> Color {
         let currentString = passcodeStep == 1 ? enteredPIN : confirmedPIN
         if index < currentString.count {
-            return themeManager.current.accentColor
+            return themeManager.contrastAccentColor(for: colorScheme)
         } else {
             return Color.clear
         }

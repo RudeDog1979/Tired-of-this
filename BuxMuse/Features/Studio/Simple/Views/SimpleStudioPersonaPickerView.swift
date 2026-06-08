@@ -60,7 +60,7 @@ struct SimpleStudioPersonaPickerView: View {
                         .frame(width: 44, height: 44)
                     Image(systemName: persona.systemImage)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(persona.localizedTitle(locale: appSettingsManager.interfaceLocale))

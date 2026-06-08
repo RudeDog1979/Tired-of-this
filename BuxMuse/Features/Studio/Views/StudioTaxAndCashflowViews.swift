@@ -67,12 +67,12 @@ struct StudioTaxOverviewView: View {
                 Spacer()
                 Text(snapshot.currencyCode)
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
 
             Text(snapshot.incomeTypeLabel)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
             Text(snapshot.countryLabel)
                 .font(.system(size: 13, weight: .bold))
@@ -118,7 +118,7 @@ struct StudioTaxOverviewView: View {
             HStack {
                 metricColumn(title: "Gross income", value: snapshot.base.grossIncomeFormatted, color: themeManager.labelPrimary(for: colorScheme))
                 Spacer()
-                metricColumn(title: "Deductions", value: snapshot.base.deductionsFormatted, color: themeManager.current.accentColor)
+                metricColumn(title: "Deductions", value: snapshot.base.deductionsFormatted, color: themeManager.contrastAccentColor(for: colorScheme))
                 Spacer()
                 metricColumn(title: "After deductions", value: snapshot.base.netIncomeFormatted, color: .green)
             }
@@ -268,7 +268,7 @@ struct StudioTaxOverviewView: View {
                     .font(.system(size: 12, weight: .bold))
             }
             Slider(value: value, in: range, step: step)
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
         }
     }
 
@@ -295,12 +295,13 @@ struct StudioCashflowView: View {
     var body: some View {
         let forecast = studioBrain.cashflowDisplay
 
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
-
+        StudioThemedListBackdrop {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
+                    StudioProToolScreenHeader(titleKey: "Cashflow")
+                        .studioProToolScrollPlacement()
+
+                    Group {
                     VStack(alignment: .leading, spacing: 12) {
                         BuxCatalogDynamicText(key: "CASH RUNWAY TRAJECTORY")
                             .font(.system(size: 11, weight: .bold))
@@ -330,7 +331,7 @@ struct StudioCashflowView: View {
 
                         Text(forecast.survivalIncomeFormatted)
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                         BuxCatalogDynamicText(key: "Minimum monthly inflow needed to comfortably clear direct costs, tax obligations, and hit standard savings cushions.")
                             .font(.system(size: 12))
@@ -338,13 +339,17 @@ struct StudioCashflowView: View {
                     }
                     .padding(BuxLayout.section)
                     .studioThemedCardChrome(cornerRadius: 24)
+                    }
+                    .padding(.horizontal, BuxTokens.marginRegular)
                 }
-                .padding(.horizontal, BuxLayout.marginHorizontal)
-                .padding(.top, BuxLayout.tight)
+                .studioProToolScreenScrollChrome()
                 .environment(\.studioEnhancedTint, true)
             }
+            .buxSoftScrollChrome()
         }
-        .buxCatalogNavigationTitle("Cashflow forecaster")
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .buxRootNavigationChrome()
     }
 }
 
@@ -360,12 +365,13 @@ struct StudioDeductionsView: View {
     var body: some View {
         let snapshot = studioBrain.deductionsDisplay
 
-        ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
-
+        StudioThemedListBackdrop {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
+                    StudioProToolScreenHeader(titleKey: "Deductions")
+                        .studioProToolScrollPlacement()
+
+                    Group {
                     VStack(alignment: .leading, spacing: 12) {
                         BuxCatalogDynamicText(key: "TOTAL ACTIVE WRITE-OFF DEDUCTIONS")
                             .font(.system(size: 11, weight: .bold))
@@ -432,12 +438,16 @@ struct StudioDeductionsView: View {
                             .studioThemedCardChrome(cornerRadius: 20)
                         }
                     }
+                    }
+                    .padding(.horizontal, BuxTokens.marginRegular)
                 }
-                .padding(.horizontal, BuxLayout.marginHorizontal)
-                .padding(.top, BuxLayout.tight)
+                .studioProToolScreenScrollChrome()
                 .environment(\.studioEnhancedTint, true)
             }
+            .buxSoftScrollChrome()
         }
-        .buxCatalogNavigationTitle("Deductions Sandbox")
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .buxRootNavigationChrome()
     }
 }

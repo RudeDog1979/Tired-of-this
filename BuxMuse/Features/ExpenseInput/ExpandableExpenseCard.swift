@@ -60,7 +60,7 @@ struct ExpandableExpenseCard: View {
                                 if let workspace = expense.workspaceLabel {
                                     Text(workspace)
                                         .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                         .padding(.horizontal, 6)
                                         .padding(.vertical, 2)
                                         .background(themeManager.current.accentColor.opacity(0.12))
@@ -147,7 +147,7 @@ struct ExpandableExpenseCard: View {
                                 Image(systemName: "pencil.line")
                             }
                                 .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             Spacer()
                         }
                         .padding(.vertical, 10)

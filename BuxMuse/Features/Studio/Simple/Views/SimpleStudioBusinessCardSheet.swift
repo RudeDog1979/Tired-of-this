@@ -224,7 +224,7 @@ struct SimpleStudioBusinessCardSheet: View {
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: "sparkles")
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 VStack(alignment: .leading, spacing: 2) {
                     BuxCatalogDynamicText(key: "Pro card extras")
                         .font(.system(size: 14, weight: .bold))
@@ -278,7 +278,7 @@ struct SimpleStudioBusinessCardSheet: View {
             email: email,
             skills: skills,
             photo: cardPhoto,
-            accent: themeManager.current.accentColor,
+            accent: themeManager.contrastAccentColor(for: colorScheme),
             isProStyle: isProStudio,
             qrImage: qrImage,
             brandLogo: brandLogo
@@ -339,7 +339,7 @@ struct SimpleStudioBusinessCardSheet: View {
                 email: email,
                 skills: skills,
                 photo: cardPhoto,
-                accent: themeManager.current.accentColor,
+                accent: themeManager.contrastAccentColor(for: colorScheme),
                 isProStyle: isProStudio,
                 qrImage: qrImage,
                 brandLogo: brandLogo
@@ -359,7 +359,7 @@ struct SimpleStudioBusinessCardSheet: View {
             email: email,
             skills: skills,
             photo: cardPhoto,
-            accent: themeManager.current.accentColor,
+            accent: themeManager.contrastAccentColor(for: colorScheme),
             isProStyle: true,
             qrImage: qrImage,
             brandLogo: brandLogo

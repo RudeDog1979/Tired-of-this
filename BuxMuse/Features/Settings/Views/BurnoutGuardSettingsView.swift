@@ -33,7 +33,7 @@ struct BurnoutGuardSettingsView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
 
@@ -54,10 +54,10 @@ struct BurnoutGuardSettingsView: View {
                                     )
                                 )
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             }
                             Slider(value: $store.manualSleepHours, in: 4...10, step: 0.5)
-                                .tint(themeManager.current.accentColor)
+                                .tint(themeManager.contrastAccentColor(for: colorScheme))
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
@@ -120,7 +120,7 @@ struct BurnoutGuardSettingsView: View {
                                     BuxCatalogDynamicText(key: "Open Health settings")
                                 }
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             }
                             .buxFormFieldPadding()
                         }

@@ -52,7 +52,7 @@ struct StudioSettingsView: View {
                             .buxLabelSecondary()
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
 
@@ -107,7 +107,7 @@ struct StudioSettingsView: View {
                     } label: {
                         Text(BuxCatalogLabel.string("Persona", locale: appSettingsManager.interfaceLocale))
                     }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                     .onChange(of: store.studioPersona) { _, _ in
                         store.studioPersonaConfigured = true
@@ -171,7 +171,7 @@ struct StudioSettingsView: View {
                     } label: {
                         Text(BuxCatalogLabel.string("Business Type", locale: appSettingsManager.interfaceLocale))
                     }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 }
 
@@ -237,7 +237,7 @@ struct StudioSettingsView: View {
                         in: 0...120,
                         step: 1
                     )
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     HStack {
@@ -374,7 +374,7 @@ struct StudioSettingsView: View {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))

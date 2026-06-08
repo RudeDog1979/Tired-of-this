@@ -51,7 +51,7 @@ struct BusinessCard3DLookView: View {
                 cardStage(textures: textures)
             } else {
                 ProgressView("Rendering card…")
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
             }
 
             chromeOverlay

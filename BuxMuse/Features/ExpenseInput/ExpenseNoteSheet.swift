@@ -52,6 +52,6 @@ struct ExpenseNoteSheet: View {
             }
         }
         .presentationDetents([.medium])
-        .tint(themeManager.current.accentColor)
+        .tint(themeManager.contrastAccentColor(for: colorScheme))
     }
 }

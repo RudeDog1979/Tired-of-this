@@ -23,6 +23,12 @@ enum StudioListMetrics {
     static let rowInsets = EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0)
 }
 
+/// Shared Tier-2 Pro tool title inset — matches Studio Insights scroll layout.
+enum StudioProToolHeaderLayout {
+    static let topInset: CGFloat = BuxTokens.section
+    static let bottomSpacing: CGFloat = BuxLayout.tight
+}
+
 /// M3 canvas behind Studio pushed screens.
 struct StudioThemedListBackdrop<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -67,6 +73,19 @@ extension View {
     /// Pushed Studio screens keep their own inset; embedded Tax tabs rely on the hub `List` margins.
     func studioHubEmbeddedHorizontalPadding() -> some View {
         modifier(StudioHubEmbeddedHorizontalPaddingModifier())
+    }
+
+    /// First list row for Tier-2 Pro tool headers (Invoices, Clients, …).
+    /// Horizontal inset comes from `buxListContentMargins()` — do not pad the row again.
+    func studioProToolScreenHeaderRow() -> some View {
+        listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: StudioProToolHeaderLayout.bottomSpacing, trailing: 0))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+    }
+
+    /// Scroll / form content chrome — same top spacing as Studio Insights.
+    func studioProToolScreenScrollChrome() -> some View {
+        padding(.vertical, StudioProToolHeaderLayout.topInset)
     }
 }
 

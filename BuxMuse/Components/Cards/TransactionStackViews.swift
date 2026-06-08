@@ -53,7 +53,7 @@ struct RecentTransactionsSectionView: View {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .bold))
                 }
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
             }
@@ -77,7 +77,7 @@ struct RecentTransactionsSectionView: View {
                     .textCase(nil)
                     .foregroundColor(
                         EmotionalTagAppearance.accent(for: tx.emotion, colorScheme: colorScheme)
-                            ?? themeManager.current.accentColor
+                            ?? themeManager.contrastAccentColor(for: colorScheme)
                     )
             }
 

@@ -70,7 +70,7 @@ struct ProfileSettingsView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
 
@@ -96,7 +96,7 @@ struct ProfileSettingsView: View {
                 } label: {
                     HStack {
                         Image(systemName: photoStatus == .limited ? "photo.badge.checkmark" : "photo.on.rectangle.angled")
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         Text(
                             BuxLocalizedString.format(
                                 "Photos: %@",
@@ -109,10 +109,10 @@ struct ProfileSettingsView: View {
                         Spacer()
                         BuxCatalogDynamicText(key: "Manage photo access")
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         Image(systemName: "arrow.up.forward.app.fill")
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
                 .buxFormFieldPadding()
@@ -193,7 +193,7 @@ struct ProfileSettingsView: View {
                     .frame(width: 72, height: 72)
                 Image(systemName: "person.fill")
                     .font(.system(size: 32))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
         }
     }

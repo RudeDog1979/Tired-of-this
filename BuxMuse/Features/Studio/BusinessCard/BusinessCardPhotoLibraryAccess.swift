@@ -104,7 +104,7 @@ struct BusinessCardPhotoAccessBanner: View {
         } else {
             HStack {
                 Image(systemName: status == .limited ? "photo.badge.checkmark" : "photo.on.rectangle.angled")
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 Text(
                     BuxLocalizedString.format(
                         "Photos: %@",

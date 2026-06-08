@@ -31,7 +31,7 @@ struct BuxAppLockOverlay: View {
             VStack(spacing: 24) {
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: 48))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                 BuxCatalogDynamicText(key: "BuxMuse Vault Active")
                     .font(.system(size: 18, weight: .bold))

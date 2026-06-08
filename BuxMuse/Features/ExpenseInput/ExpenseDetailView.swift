@@ -70,7 +70,7 @@ struct ExpenseDetailView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Edit") { showEditSheet = true }
-                        .buxToolbarTextActionStyle(accent: themeManager.current.accentColor)
+                        .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
                 }
             }
             .buxDetailNavigationChrome()
@@ -154,7 +154,7 @@ struct ExpenseDetailView: View {
         let emotion = presentedEmotionId
         let emotionTag = emotion.flatMap { EmotionalTaggingEngine.tag(for: $0) }
         let moodAccent = EmotionalTagAppearance.accent(for: emotion, colorScheme: colorScheme)
-        let brandAccent = themeManager.current.accentColor
+        let brandAccent = themeManager.contrastAccentColor(for: colorScheme)
         let cornerRadius: CGFloat = 28
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         let chrome = themeManager.cardChrome(for: .hero, colorScheme: colorScheme, branded: settings.brandThemesEnabled)
@@ -221,7 +221,7 @@ struct ExpenseDetailView: View {
                 Button { showCategorySheet = true } label: {
                     BuxCatalogText.text("Change category")
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buttonStyle(BuxMicroShrinkStyle())
             }
@@ -300,7 +300,7 @@ struct ExpenseDetailView: View {
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: item.icon)
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 .frame(width: 22)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(localizedInsightTitle(item.title))
@@ -338,7 +338,7 @@ struct ExpenseDetailView: View {
                     onUpdated()
                 }
                 .font(.system(size: 14, weight: .bold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .buttonStyle(BuxMicroShrinkStyle())
             }
             .padding(20)

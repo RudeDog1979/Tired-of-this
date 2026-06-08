@@ -79,7 +79,7 @@ struct GoalDetailView: View {
 
                 Image(systemName: "target")
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
 
             VStack(spacing: 6) {
@@ -244,7 +244,7 @@ struct GoalDetailView: View {
                         VStack(alignment: .trailing, spacing: 4) {
                             Text(formatDate(scenario.projectedDate))
                                 .font(.system(size: 14, weight: .bold, design: .rounded))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                             Text(
                                 BuxLocalizedString.format(
@@ -402,7 +402,7 @@ struct GoalDetailView: View {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "bolt.fill")
                                 .font(.system(size: 12))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 .padding(.top, 2)
 
                             Text(act)
@@ -424,7 +424,7 @@ struct GoalDetailView: View {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "arrow.right.circle.fill")
                                 .font(.system(size: 12))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 .padding(.top, 2)
 
                             Text(act)

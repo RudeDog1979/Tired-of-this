@@ -76,7 +76,7 @@ struct WorkspaceDetailEditorSheet: View {
                     text: $draft.name
                 )
                 .font(.system(size: 15, weight: .semibold))
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .textFieldStyle(.plain)
 
                 Divider().opacity(0.1)
@@ -130,7 +130,7 @@ struct WorkspaceDetailEditorSheet: View {
                         Spacer()
                         if draft.themeName == nil {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                     }
                     .font(.system(size: 14, weight: .semibold))
@@ -232,7 +232,7 @@ struct WorkspaceDetailEditorSheet: View {
                 BuxCatalogDynamicText(key: "Active workspace")
                     .font(.system(size: 15, weight: .semibold))
             }
-            .tint(themeManager.current.accentColor)
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
             .buxFormFieldPadding()
         }
     }
@@ -303,7 +303,7 @@ struct WorkspaceDetailEditorSheet: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 22))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buttonStyle(.plain)
                 .disabled(newText.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)

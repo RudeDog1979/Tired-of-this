@@ -276,7 +276,7 @@ struct TaxStudioInsightChip: View {
         switch tone {
         case .positive: return .green
         case .warning: return .orange
-        case .info: return themeManager.current.accentColor
+        case .info: return themeManager.contrastAccentColor(for: colorScheme)
         }
     }
 
@@ -368,7 +368,7 @@ struct TaxStudioMetricCard: View {
     private var metricColor: Color {
         TaxStudioMetricPalette.color(
             for: metric.id,
-            accent: themeManager.current.accentColor,
+            accent: themeManager.contrastAccentColor(for: colorScheme),
             healthBand: healthBand
         )
     }
@@ -505,10 +505,10 @@ struct TaxStudioHealthFactorRow: View {
                 Spacer(minLength: 8)
                 Text(factor.valueLabel)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
             ProgressView(value: min(max(factor.progress, 0), 1))
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .scaleEffect(x: 1, y: 1.35, anchor: .center)
         }
         .padding(12)
@@ -571,7 +571,7 @@ struct TaxStudioSanityAlertCard: View {
                 .fixedSize(horizontal: false, vertical: true)
             Text(warning.suggestion)
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
@@ -721,7 +721,7 @@ struct TaxStudioTimelineRailRow: View {
                 if event.isNextHighlight {
                     BuxCatalogDynamicText(key: "Next up")
                         .font(.system(size: 9, weight: .heavy, design: .rounded))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(themeManager.current.accentColor.opacity(colorScheme == .dark ? 0.22 : 0.12))
@@ -754,7 +754,7 @@ struct TaxStudioTimelineEmptyCard: View {
             VStack(spacing: 12) {
                 Image(systemName: "calendar.badge.clock")
                     .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor.opacity(0.85))
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme).opacity(0.85))
                 BuxCatalogDynamicText(key: "No tax deadlines yet")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))

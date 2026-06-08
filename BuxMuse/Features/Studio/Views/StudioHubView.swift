@@ -68,6 +68,7 @@ struct StudioHubView: View {
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(store)
+                    .environmentObject(studioBrain)
                     .environmentObject(navigationCoordinator)
             }
         }
@@ -178,7 +179,7 @@ struct StudioHubView: View {
                             showProSearch = true
                         } label: {
                             Image(systemName: "sparkle.magnifyingglass")
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                         .accessibilityLabel(
                             BuxCatalogLabel.string("Pro Search", locale: appSettingsManager.interfaceLocale)
@@ -281,6 +282,7 @@ struct StudioHubView: View {
             .navigationDestination(isPresented: $navigateToAgreements) {
                 AgreementScratchpadListView()
                     .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
                     .environmentObject(store)
                     .environmentObject(simpleStudioStore)
                     .environment(\.studioEnhancedTint, true)
@@ -342,6 +344,7 @@ struct StudioHubView: View {
             .navigationDestination(isPresented: $showBusinessCardStudio) {
                 ProBusinessCardStudioView()
                     .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
                     .environmentObject(store)
                     .environmentObject(simpleStudioStore)
                     .environment(\.studioEnhancedTint, true)

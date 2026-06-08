@@ -325,7 +325,7 @@ struct SimpleStudioEntryDetailView: View {
                     jobLabel: entry.jobLabel ?? entry.kind.logTitle,
                     businessName: businessName,
                     phone: phone,
-                    accent: themeManager.current.accentColor
+                    accent: themeManager.contrastAccentColor(for: colorScheme)
                 ),
                 openURL: openURL
             )
@@ -344,7 +344,7 @@ struct SimpleStudioEntryDetailView: View {
                 amountFormatted: appSettingsManager.format(amount),
                 description: entry.jobLabel ?? entry.kind.logTitle,
                 isPaid: entry.paymentStatus == .paid,
-                accent: themeManager.current.accentColor
+                accent: themeManager.contrastAccentColor(for: colorScheme)
             )
             if let rendered = SimpleStudioShareHelper.renderCard(card) {
                 items.append(rendered)

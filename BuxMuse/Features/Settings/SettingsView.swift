@@ -70,7 +70,7 @@ struct SettingsView: View {
                                     SettingsRow(
                                         icon: "sparkles",
                                         label: "Replay Onboarding Guide",
-                                        color: themeManager.current.accentColor,
+                                        color: themeManager.contrastAccentColor(for: colorScheme),
                                         trailingText: nil,
                                         showsProBadge: false
                                     )
@@ -289,7 +289,7 @@ struct SettingsRow: View {
             if let trailing = trailingText {
                 BuxCatalogText.text(trailing)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     .lineLimit(2)
                     .multilineTextAlignment(.trailing)
                     .fixedSize(horizontal: false, vertical: true)
@@ -612,7 +612,7 @@ struct CurrencyRowCard: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 } else {
                     Circle()
                         .stroke(colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.1), lineWidth: 1.5)

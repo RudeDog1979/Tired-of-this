@@ -91,13 +91,13 @@ struct StudioInvoiceSettingsView: View {
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     Toggle(loc("Show tax ID on PDF"), isOn: $showTaxID)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                 }
 
                 BuxFormSection(title: "Payment") {
                     Toggle(loc("Show bank details"), isOn: $showBankDetails)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     TextField(loc("Bank / payment details"), text: $bankDetails, axis: .vertical)
@@ -107,7 +107,7 @@ struct StudioInvoiceSettingsView: View {
 
                 BuxFormSection(title: "Legal footer") {
                     Toggle(loc("Show registration footer on PDF"), isOn: $showLegalFooter)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     BuxCatalogDynamicText(key: "Displays company address and registration at the bottom of designed invoices.")
                         .font(.system(size: 11))

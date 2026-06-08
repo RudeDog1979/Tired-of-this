@@ -449,7 +449,7 @@ struct CardProCanvasView: View {
 
                 BuxCanvasSelectionChrome(
                     frame: frame,
-                    accent: themeManager.current.accentColor,
+                    accent: themeManager.contrastAccentColor(for: colorScheme),
                     rotation: layer.transform.rotation,
                     onMove: { applyMove(layerID: layerID, translation: $0, cardSize: cardSize) },
                     onMoveEnd: { finishMoveGesture() },
@@ -842,7 +842,7 @@ struct CardProCanvasView: View {
                     Spacer()
                     Button("Apply") { applyInlineEdit(layerID: layerID) }
                         .fontWeight(.semibold)
-                        .foregroundStyle(themeManager.current.accentColor)
+                        .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
             }

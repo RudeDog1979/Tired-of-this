@@ -33,7 +33,7 @@ struct StudioHeroCard: View {
                             .frame(width: 54, height: 54)
                         Image(systemName: "briefcase.fill")
                             .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
 
@@ -52,7 +52,7 @@ struct StudioHeroCard: View {
                             )
                         )
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
                 Spacer(minLength: 0)
@@ -146,7 +146,7 @@ struct StudioHubEmptyState: View {
             VStack(spacing: 12) {
                 Image(systemName: "briefcase")
                     .font(.system(size: 32))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 BuxCatalogText.text("Your Studio workspace is empty")
                     .buxHeadlineStyle(color: themeManager.labelPrimary(for: colorScheme))
                 BuxCatalogText.text("Add a client, invoice, or receipt to start tracking tax, cashflow, and deductions.")
@@ -216,7 +216,7 @@ struct StudioInvoicesSection: View {
                             )
                         )
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
                 .contentShape(Rectangle())
@@ -498,7 +498,7 @@ struct StudioDeductionsSection: View {
                         BuxCardButton(action: onTap) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(item.title)
-                                    .buxHeadlineStyle(color: themeManager.current.accentColor)
+                                    .buxHeadlineStyle(color: themeManager.contrastAccentColor(for: colorScheme))
                                 Text(item.description)
                                     .buxCaptionStyle(color: themeManager.labelSecondary(for: colorScheme))
                                     .fixedSize(horizontal: false, vertical: true)
@@ -569,7 +569,7 @@ struct StudioHubPulseCard: View {
                         Spacer()
                         Text(cashflow.projectedInflowFormatted)
                             .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     }
 
                     SparklineChart(
@@ -601,7 +601,7 @@ struct StudioInvoiceStatusBar: View {
         GeometryReader { geo in
             HStack(spacing: 2) {
                 segment(count: draft, color: .gray, width: geo.size.width * CGFloat(draft) / total)
-                segment(count: sent, color: themeManager.current.accentColor, width: geo.size.width * CGFloat(sent) / total)
+                segment(count: sent, color: themeManager.contrastAccentColor(for: colorScheme), width: geo.size.width * CGFloat(sent) / total)
                 segment(count: paid, color: .green, width: geo.size.width * CGFloat(paid) / total)
                 segment(count: overdue, color: .red, width: geo.size.width * CGFloat(overdue) / total)
             }

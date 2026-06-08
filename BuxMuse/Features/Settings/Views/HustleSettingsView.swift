@@ -47,7 +47,7 @@ struct HustleSettingsView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
                 .onChange(of: store.sideHustleMatrixEnabled) { _, enabled in
                     if enabled, hustleManager.hustles.isEmpty {
@@ -69,7 +69,7 @@ struct HustleSettingsView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
-                    .tint(themeManager.current.accentColor)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
                 }
 
@@ -98,7 +98,7 @@ struct HustleSettingsView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         TextField(BuxCatalogLabel.string("Workspace Name (e.g. Design Studio, Consulting)", locale: appSettingsManager.interfaceLocale), text: $newHustleName)
                             .font(.system(size: 15, weight: .semibold))
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .textFieldStyle(.plain)
                         
                         Divider().opacity(0.1)
@@ -208,7 +208,7 @@ struct HustleSettingsView: View {
                 if hustleManager.selectedHustleId == hustle.id {
                     BuxCatalogDynamicText(key: "Current active ledger context")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 } else {
                     Text(BuxCatalogLabel.string(hustle.isActive ? "Active" : "Archived", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 11, weight: .medium))
@@ -237,7 +237,7 @@ struct HustleSettingsView: View {
                     }) {
                         BuxCatalogDynamicText(key: "Select")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .padding(.horizontal, 10)
                             .padding(.vertical, 5)
                             .background(themeManager.current.accentColor.opacity(0.1))
@@ -246,7 +246,7 @@ struct HustleSettingsView: View {
                     .buttonStyle(.plain)
                 } else {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(themeManager.current.accentColor)
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         .font(.system(size: 18))
                 }
                 
@@ -276,7 +276,7 @@ struct HustleSettingsView: View {
         HStack(alignment: .center, spacing: 14) {
             Image(systemName: "briefcase.circle.fill")
                 .font(.system(size: 32))
-                .foregroundColor(themeManager.current.accentColor)
+                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {

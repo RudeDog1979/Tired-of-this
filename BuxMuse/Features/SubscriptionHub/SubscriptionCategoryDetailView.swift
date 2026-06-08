@@ -99,7 +99,7 @@ struct SubscriptionCategoryDetailView: View {
         case .groceries: return .green
         case .restaurants: return .orange
         case .transport: return .blue
-        case .subscriptions: return themeManager.current.accentColor
+        case .subscriptions: return themeManager.contrastAccentColor(for: colorScheme)
         case .housing: return .red
         case .entertainment: return .pink
         case .shopping: return .indigo

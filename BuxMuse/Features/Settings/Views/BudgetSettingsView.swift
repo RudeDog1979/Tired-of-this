@@ -54,7 +54,7 @@ struct BudgetSettingsView: View {
                         ) {
                             Text(BuxCatalogLabel.string("Period starts on", locale: appSettingsManager.interfaceLocale))
                         }
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                     }
 
@@ -67,7 +67,7 @@ struct BudgetSettingsView: View {
                         TextField(BuxCatalogLabel.string("Amount", locale: appSettingsManager.interfaceLocale), value: $store.simpleBudgetLimit, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .font(.system(size: 16, weight: .bold))
                             .frame(minWidth: 120, maxWidth: 160)
                     }
@@ -149,7 +149,7 @@ struct BudgetSettingsView: View {
                             Button(action: { editingProfile = profile }) {
                                 Image(systemName: "pencil")
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             }
                             .buttonStyle(.plain)
 
@@ -172,7 +172,7 @@ struct BudgetSettingsView: View {
                         BuxCatalogDynamicText(key: "Add custom envelope profile")
                     }
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(themeManager.current.accentColor)
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
                 .buxFormFieldPadding()
             }
@@ -282,13 +282,13 @@ struct BudgetProfileEditorView: View {
                         Toggle(isOn: $profile.isActive) {
                             Text(BuxCatalogLabel.string("Active Budget Rule", locale: appSettingsManager.interfaceLocale))
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         Toggle(isOn: $profile.rolloverEnabled) {
                             Text(BuxCatalogLabel.string("Enable Category Rollover", locale: appSettingsManager.interfaceLocale))
                         }
-                            .tint(themeManager.current.accentColor)
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
                         BuxFormRowDivider()
                         Stepper(
@@ -351,7 +351,7 @@ struct BudgetProfileEditorView: View {
                             }
                         }
                         .pickerStyle(.menu)
-                        .tint(themeManager.current.accentColor)
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
                         BuxFormRowDivider()
                         HStack {
@@ -361,7 +361,7 @@ struct BudgetProfileEditorView: View {
                             Button(action: addCategory) {
                                 BuxCatalogDynamicText(key: "Add")
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(themeManager.current.accentColor)
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             }
                             .disabled(selectedCategoryOptionID == nil || newCategoryTarget.isEmpty)
                         }
@@ -377,7 +377,7 @@ struct BudgetProfileEditorView: View {
                                     .font(.system(size: 15, weight: .semibold))
                                 Spacer()
                             }
-                            .foregroundStyle(themeManager.current.accentColor)
+                            .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                         }
                         .buttonStyle(.plain)
                         .buxFormFieldPadding()
@@ -390,7 +390,7 @@ struct BudgetProfileEditorView: View {
                             Spacer()
                             Text(appSettingsManager.format(profile.targetAmount))
                                 .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(themeManager.current.accentColor)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
                         .buxFormFieldPadding()
                     }

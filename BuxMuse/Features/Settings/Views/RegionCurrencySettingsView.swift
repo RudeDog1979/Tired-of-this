@@ -36,7 +36,7 @@ struct RegionCurrencySettingsView: View {
                             )
                         )
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         Image(systemName: "chevron.right")
                             .font(.system(size: 12, weight: .semibold))
                             .buxChevronMuted()
@@ -66,7 +66,7 @@ struct RegionCurrencySettingsView: View {
                             )
                         )
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         Image(systemName: "chevron.right")
                             .font(.system(size: 12, weight: .semibold))
                             .buxChevronMuted()
@@ -95,7 +95,7 @@ struct RegionCurrencySettingsView: View {
                     Text(BuxCatalogLabel.string("Start of week", locale: appSettingsManager.interfaceLocale))
                 }
                 .pickerStyle(.menu)
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
 
@@ -108,7 +108,7 @@ struct RegionCurrencySettingsView: View {
                     BuxCatalogText.text("App language")
                 }
                 .pickerStyle(.menu)
-                .tint(themeManager.current.accentColor)
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
                 BuxCatalogDynamicText(key: "Choose UI language independently of country. Example: United Kingdom region with Spanish UI. Currency formatting still follows your preferred currency above.")
@@ -281,7 +281,7 @@ struct CountryPickerView: View {
                                 Spacer()
                                 if appSettingsManager.selectedCountry.id == country.id {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(themeManager.current.accentColor)
+                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                 }
                             }
                             .padding(.horizontal, 16)

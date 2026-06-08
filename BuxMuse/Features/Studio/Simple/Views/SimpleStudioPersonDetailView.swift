@@ -141,7 +141,7 @@ struct SimpleStudioPersonDetailView: View {
                 }
             }
             if SimpleStudioContactHelper.telURL(phone: phone) != nil {
-                contactButton(title: "Call", icon: "phone.fill", color: themeManager.current.accentColor) {
+                contactButton(title: "Call", icon: "phone.fill", color: themeManager.contrastAccentColor(for: colorScheme)) {
                     openContact(channel: .call)
                 }
             }
@@ -245,7 +245,7 @@ struct SimpleStudioPersonDetailView: View {
                 jobLabel: customer.lastJobLabel ?? "outstanding work",
                 businessName: businessName,
                 phone: phone.isEmpty ? customer.phone : phone,
-                accent: themeManager.current.accentColor
+                accent: themeManager.contrastAccentColor(for: colorScheme)
             ),
             openURL: openURL
         )

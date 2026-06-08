@@ -79,11 +79,11 @@ struct SubscriptionBurnRateView: View {
                     HStack(spacing: BuxLayout.tight) {
                         Image(systemName: "sparkles")
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
                         Text(projectionText)
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(themeManager.current.accentColor)
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .lineLimit(2)
 
                         Spacer(minLength: 0)
