@@ -13,6 +13,8 @@ extension PersistenceController {
     // MARK: - Seed
 
     func seedExpenseCatalogIfNeeded() throws {
+        if didRunSeedAndMigration { return }
+
         let categoryCount = try context.fetchCount(FetchDescriptor<CategoryEntity>())
         if categoryCount == 0 {
             for def in ExpenseCategoryCatalog.systemDefinitions {
@@ -24,6 +26,8 @@ extension PersistenceController {
         try syncMissingSystemCategoriesIfNeeded()
         try migrateLegacyExpenseRowsIfNeeded()
         try sanitizeMerchantEntitiesIfNeeded()
+
+        didRunSeedAndMigration = true
     }
 
     /// Removes blank merchant rows and clears broken store links so list avatars do not trap the UI.
@@ -147,8 +151,7 @@ extension PersistenceController {
     }
 
     func fetchExpenseRecord(id: UUID) throws -> ExpenseRecord? {
-        let all = try fetchAllExpenseRecords()
-        return all.first(where: { $0.id == id })
+        try fetchExpenseEntity(id: id).map { ExpenseRecord.from($0) }
     }
 
     func upsertExpenseRecord(_ record: ExpenseRecord, merchantSelection: MerchantSelection? = nil) throws -> ExpenseRecord {
@@ -216,7 +219,13 @@ extension PersistenceController {
                 isBarterExchange: saved.isBarterExchange,
                 barterGoodsGiven: saved.barterGoodsGiven,
                 barterGoodsReceived: saved.barterGoodsReceived,
-                barterEstimatedValue: saved.barterEstimatedValue
+                barterEstimatedValue: saved.barterEstimatedValue,
+                bridgeGroupId: saved.bridgeGroupId,
+                bridgeKind: saved.bridgeKind,
+                bridgeRole: saved.bridgeRole,
+                bridgeSharePercent: saved.bridgeSharePercent,
+                bridgePeerExpenseId: saved.bridgePeerExpenseId,
+                bridgeCounterpartyHustleId: saved.bridgeCounterpartyHustleId
             )
             context.insert(entity)
         }
@@ -258,6 +267,12 @@ extension PersistenceController {
         entity.barterGoodsGiven = record.barterGoodsGiven
         entity.barterGoodsReceived = record.barterGoodsReceived
         entity.barterEstimatedValue = record.barterEstimatedValue
+        entity.bridgeGroupId = record.bridgeGroupId
+        entity.bridgeKind = record.bridgeKind
+        entity.bridgeRole = record.bridgeRole
+        entity.bridgeSharePercent = record.bridgeSharePercent
+        entity.bridgePeerExpenseId = record.bridgePeerExpenseId
+        entity.bridgeCounterpartyHustleId = record.bridgeCounterpartyHustleId
         entity.updatedAt = updatedAt
     }
 
@@ -480,17 +495,20 @@ extension PersistenceController {
     // MARK: - Safe Entity Fetch Helpers
 
     private func fetchExpenseEntity(id: UUID) throws -> ExpenseEntity? {
-        let all = try context.fetch(FetchDescriptor<ExpenseEntity>())
-        return all.first(where: { $0.id == id })
+        var descriptor = FetchDescriptor<ExpenseEntity>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
     }
 
     private func fetchCategoryEntity(id: UUID) throws -> CategoryEntity? {
-        let all = try context.fetch(FetchDescriptor<CategoryEntity>())
-        return all.first(where: { $0.id == id })
+        var descriptor = FetchDescriptor<CategoryEntity>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
     }
 
     private func fetchMerchantEntity(id: UUID) throws -> MerchantEntity? {
-        let all = try context.fetch(FetchDescriptor<MerchantEntity>())
-        return all.first(where: { $0.id == id })
+        var descriptor = FetchDescriptor<MerchantEntity>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
     }
 }

@@ -10,7 +10,6 @@ import SwiftUI
 
 struct ExpenseTabView: View {
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var brain: BuxMuseBrain
@@ -20,12 +19,6 @@ struct ExpenseTabView: View {
     @State private var activeSheet: ExpenseSheetMode?
     @State private var categorySheetTransaction: Transaction?
     @State private var listAppeared = false
-    @State private var carouselPlayRequest = UUID()
-    @State private var carouselPlayedPages: Set<Int> = []
-    @State private var carouselPageProgress: [Int: Double] = [:]
-    @State private var carouselSessionReady = false
-    @State private var lastAnimatedHeroDataToken: String?
-    @State private var didEnterBackground = false
     @State private var removedRowIds: Set<UUID> = []
     @State private var expandedExpenseId: UUID?
     @State private var selectedRecord: ExpenseRecord?
@@ -47,18 +40,14 @@ struct ExpenseTabView: View {
         brain.expenseRecords.map { "\($0.id.uuidString)-\($0.updatedAt.timeIntervalSince1970)" }.joined(separator: "|")
     }
 
-    /// Fingerprint for hero carousel charts — re-animate only when these values change.
-    private var heroDataToken: String {
-        let display = brain.expenseInteractionSnapshot
-        var parts: [String] = []
-        parts.append(String(display.header.totalSpent))
-        parts.append(String(display.header.changeVsLastMonth))
-        parts.append(String(display.header.monthlyTransactionCount))
-        parts.append(display.header.sparklinePoints.map { String(format: "%.4f", $0) }.joined(separator: ","))
-        parts.append(display.summary.categoryBreakdown.map { "\($0.0):\(String(format: "%.4f", $0.1))" }.joined(separator: ","))
-        parts.append(display.summary.merchantBreakdown.map { "\($0.0):\(String(format: "%.4f", $0.1))" }.joined(separator: ","))
-        parts.append(display.summary.trendPoints.map { String(format: "%.4f", $0) }.joined(separator: ","))
-        return parts.joined(separator: "|")
+    /// Stable fingerprint for carousel replays — tied to records, not rebuilt chart snapshots.
+    private var carouselDataToken: String {
+        [
+            expenseDataToken,
+            HustleManager.shared.selectedHustleId?.uuidString ?? "all",
+            appSettingsManager.selectedCurrency.id,
+            listModel.filters.isActive ? "filtered" : "all"
+        ].joined(separator: "|")
     }
 
     private var expenseListRowInsets: EdgeInsets {
@@ -110,24 +99,15 @@ struct ExpenseTabView: View {
         .onAppear {
             listModel.reloadCatalog(brain: brain)
             applyPendingExpenseFilterIfNeeded()
-            refreshExpenseListDisplay()
             listAppeared = true
-            if !carouselSessionReady {
-                bumpCarouselAnimationIfNeeded()
-                carouselSessionReady = true
+            ExpenseCarouselSession.shared.playInitialIfNeeded(dataToken: carouselDataToken)
+            Task { @MainActor in
+                refreshExpenseListDisplay()
             }
         }
-        .onChange(of: heroDataToken) { old, new in
-            guard old != new else { return }
-            bumpCarouselAnimationIfNeeded()
-        }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .background {
-                didEnterBackground = true
-            } else if phase == .active, didEnterBackground {
-                didEnterBackground = false
-                bumpCarouselAnimation(force: true)
-            }
+        .onChange(of: carouselDataToken) { old, new in
+            guard !old.isEmpty, old != new else { return }
+            ExpenseCarouselSession.shared.bumpForDataChange(dataToken: new)
         }
         .onDisappear {
             navigationCoordinator.dismissExpenseSearch()
@@ -422,14 +402,11 @@ struct ExpenseTabView: View {
 
         return ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 0) {
-                if showHero, carouselSessionReady, !isListFocusMode {
-                    ExpensesTopCarousel(
+                if showHero, !isListFocusMode {
+                    ExpensesHeroCarouselHost(
                         header: display.header,
                         summary: display.summary,
-                        formatAmount: { appSettingsManager.format($0) },
-                        playRequest: carouselPlayRequest,
-                        playedPages: $carouselPlayedPages,
-                        pageProgress: $carouselPageProgress
+                        formatAmount: { appSettingsManager.format($0) }
                     )
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
@@ -598,19 +575,25 @@ struct ExpenseTabView: View {
             print("Category change failed: \(error)")
         }
     }
+}
 
-    /// Plays hero carousel charts once per data fingerprint; replays when data changes or app returns from background.
-    private func bumpCarouselAnimationIfNeeded() {
-        bumpCarouselAnimation(force: false)
-    }
+/// Isolates carousel `playRequest` updates so the expense list does not re-render every animation frame.
+private struct ExpensesHeroCarouselHost: View {
+    @ObservedObject private var session = ExpenseCarouselSession.shared
 
-    private func bumpCarouselAnimation(force: Bool) {
-        let token = heroDataToken
-        guard force || lastAnimatedHeroDataToken != token else { return }
-        lastAnimatedHeroDataToken = token
-        carouselPlayedPages.removeAll()
-        carouselPageProgress.removeAll()
-        carouselPlayRequest = UUID()
+    let header: ExpensesHeaderDisplay
+    let summary: ExpensesSummaryDisplay
+    let formatAmount: (Decimal) -> String
+
+    var body: some View {
+        ExpensesTopCarousel(
+            header: header,
+            summary: summary,
+            formatAmount: formatAmount,
+            playRequest: session.playRequest,
+            session: session
+        )
+        .id(session.playRequest)
     }
 }
 

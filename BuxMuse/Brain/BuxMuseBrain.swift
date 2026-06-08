@@ -15,6 +15,7 @@ public final class BuxMuseBrain: ObservableObject {
     @Published public private(set) var expenseInteractionSnapshot: ExpenseInteractionDisplay = .empty
     /// Expenses tab list source — always loaded on the main actor (never via background `@Query`).
     @Published private(set) var expenseRecords: [ExpenseRecord] = []
+    @Published private(set) var categoryRecords: [ExpenseCategoryRecord] = []
     @Published public private(set) var isHydrated: Bool = false
     @Published var expenseUndoOffer: ExpenseRecord?
 
@@ -76,7 +77,7 @@ public final class BuxMuseBrain: ObservableObject {
         HustleManager.shared.$selectedHustleId
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.refreshExpenses()
+                self?.refreshForActiveWorkspaceChange()
             }
             .store(in: &cancellables)
 
@@ -144,6 +145,7 @@ public final class BuxMuseBrain: ObservableObject {
         }
 
         reloadExpenseRecordsFromStore()
+        categoryRecords = (try? fetchAllCategoryRecords()) ?? []
         refreshSnapshotsImmediately()
         if !expenseRecords.isEmpty {
             updateExpenseInteractionSnapshot(records: expenseRecords, currency: appSettings.selectedCurrency)
@@ -200,6 +202,18 @@ public final class BuxMuseBrain: ObservableObject {
         } catch {
             print("refreshExpenses failed: \(error)")
         }
+    }
+
+    /// Workspace pill changes only re-filter in-memory data — engine already scopes via `HustleWorkspaceFilter`.
+    public func refreshForActiveWorkspaceChange() {
+        reloadExpenseRecordsFromStore()
+        refreshSnapshotsImmediately()
+        financialBridge.objectWillChange.send()
+        let globalCurrency = AppSettingsManager.currencySetting(for: AppSettingsManager.preferredCurrencyCode)
+        updateExpenseInteractionSnapshot(
+            records: expenseRecords,
+            currency: WorkspaceCurrencyContext.activeDisplayCurrency(global: globalCurrency)
+        )
     }
 
     private func reloadExpenseRecordsFromStore() {
@@ -286,10 +300,23 @@ public final class BuxMuseBrain: ObservableObject {
         }
         working.heatZoneBucket = analysis.heatZoneBucket
 
+        let isNewRecord = (try? persistence.fetchExpenseRecord(id: working.id)) == nil
+        WorkspaceAutoRouter.applyCreateOnlyRouting(to: &working, isNewRecord: isNewRecord)
+
         let saved = try persistence.upsertExpenseRecord(working, merchantSelection: merchantSelection)
         refreshExpenses()
         Task { @MainActor in
             await ExpenseRenewalReminderScheduler.schedule(for: saved)
+        }
+        return saved
+    }
+
+    @discardableResult
+    func saveBridgeRecords(_ records: [ExpenseRecord], merchantSelection: MerchantSelection? = nil) throws -> [ExpenseRecord] {
+        var saved: [ExpenseRecord] = []
+        for (index, record) in records.enumerated() {
+            let selection = index == 0 ? merchantSelection : nil
+            saved.append(try saveExpenseRecord(record, merchantSelection: selection))
         }
         return saved
     }
@@ -428,19 +455,24 @@ public final class BuxMuseBrain: ObservableObject {
     }
 
     func createCategory(name: String, icon: String, color: String) throws -> ExpenseCategoryRecord {
-        try persistence.createCategory(name: name, icon: icon, color: color)
+        let created = try persistence.createCategory(name: name, icon: icon, color: color)
+        categoryRecords = (try? fetchAllCategoryRecords()) ?? []
+        return created
     }
 
     func updateCategory(_ record: ExpenseCategoryRecord) throws {
         try persistence.updateCategory(record)
+        categoryRecords = (try? fetchAllCategoryRecords()) ?? []
     }
 
     func deleteCategory(id: UUID) throws {
         try persistence.deleteCategory(id: id)
+        categoryRecords = (try? fetchAllCategoryRecords()) ?? []
     }
 
     func mergeCategories(sourceId: UUID, into targetId: UUID) throws {
         try persistence.mergeCategories(sourceId: sourceId, into: targetId)
+        categoryRecords = (try? fetchAllCategoryRecords()) ?? []
         refreshExpenses()
     }
 
@@ -552,15 +584,24 @@ public final class BuxMuseBrain: ObservableObject {
 
         switch budgetingMode {
         case .simple, .custom:
-            activeBudgetName = BuxLocalizedString.format(
-                "Simple budget · %@",
-                locale: locale,
-                store.simpleBudgetCycle.catalogLabel(locale: locale)
-            )
-            if store.autoAdjustBudgetsFromHistory {
-                activeBudgetLimit = Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
+            if let workspaceBudget = WorkspaceCurrencyContext.activeWorkspaceBudget() {
+                activeBudgetName = BuxLocalizedString.format(
+                    "Workspace budget · %@",
+                    locale: locale,
+                    workspaceBudget.workspaceName
+                )
+                activeBudgetLimit = workspaceBudget.limit
             } else {
-                activeBudgetLimit = store.simpleBudgetLimit
+                activeBudgetName = BuxLocalizedString.format(
+                    "Simple budget · %@",
+                    locale: locale,
+                    store.simpleBudgetCycle.catalogLabel(locale: locale)
+                )
+                if store.autoAdjustBudgetsFromHistory {
+                    activeBudgetLimit = Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
+                } else {
+                    activeBudgetLimit = store.simpleBudgetLimit
+                }
             }
             activeBudgetSpent = periodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
 
@@ -589,6 +630,11 @@ public final class BuxMuseBrain: ObservableObject {
             healthScore: health,
             currencyCode: currency
         )
+        let allExpenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
+        let workspaceSynergy = store.sideHustleMatrixEnabled
+            ? WorkspaceROIEngine.summarize(records: allExpenseRecords, hustles: HustleManager.shared.hustles)
+            : .empty
+
         let dashSnapshot = DashboardSnapshot(
             recentTransactions: recent,
             subscriptionMonthlyTotal: monthly,
@@ -606,7 +652,8 @@ public final class BuxMuseBrain: ObservableObject {
             budgetPeriodEnd: budgetPeriod.end,
             approachingThresholdPercent: budgetingMode == .envelope
                 ? (store.customBudgetProfiles.first(where: { $0.isActive })?.approachingThresholdPercent ?? 80)
-                : approachingThreshold
+                : approachingThreshold,
+            workspaceSynergy: workspaceSynergy
         )
 
         dashboardSnapshot = dashSnapshot
@@ -723,9 +770,10 @@ public final class BuxMuseBrain: ObservableObject {
     public func generateExpenseInteractionDisplay() async -> ExpenseInteractionDisplay {
         let allRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
         let scoped = HustleWorkspaceFilter.filter(allRecords) { $0.hustleId }
+        let globalCurrency = AppSettingsManager.currencySetting(for: AppSettingsManager.preferredCurrencyCode)
         return buildExpenseInteractionDisplay(
             from: scoped,
-            currency: AppSettingsManager.currencySetting(for: AppSettingsManager.preferredCurrencyCode)
+            currency: WorkspaceCurrencyContext.activeDisplayCurrency(global: globalCurrency)
         )
     }
 
@@ -778,6 +826,7 @@ public final class BuxMuseBrain: ObservableObject {
         let timelineGroups = ExpenseTimelineGrouper.group(allRecords)
         var sections = [ExpenseSectionDisplay]()
 
+        let hustles = HustleManager.shared.hustles
         for group in timelineGroups {
             let displayRows = group.records.map { r in
                 ExpenseRowDisplay(
@@ -797,7 +846,9 @@ public final class BuxMuseBrain: ObservableObject {
                     emotionSymbol: r.emotion.flatMap { EmotionalTaggingEngine.tag(for: $0)?.symbol },
                     context: r.contextTag,
                     hustleId: r.hustleId,
-                    isUnassignedWorkspace: HustleWorkspaceFilter.isFilteringActive && HustleWorkspaceFilter.isUnassigned(r.hustleId)
+                    isUnassignedWorkspace: SettingsStore.shared.sideHustleMatrixEnabled && HustleWorkspaceFilter.isUnassigned(r.hustleId),
+                    workspaceLabel: WorkspaceExpenseRowChrome.workspaceLabel(for: r.hustleId, hustles: hustles),
+                    bridgeBadge: WorkspaceExpenseRowChrome.bridgeBadge(for: r, hustles: hustles)
                 )
             }
             sections.append(ExpenseSectionDisplay(

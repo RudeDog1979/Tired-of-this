@@ -22,7 +22,7 @@ struct ScopeCreepRadarSettingsView: View {
             )
 
             BuxFormSection(title: "Status") {
-                Toggle(isOn: $store.antiScopeCreepEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
+                Toggle(isOn: $store.antiScopeCreepEnabled) {
                     VStack(alignment: .leading, spacing: 3) {
                         BuxCatalogDynamicText(key: "Enable scope radar")
                             .font(.system(size: 15, weight: .semibold))
@@ -48,12 +48,12 @@ struct ScopeCreepRadarSettingsView: View {
                     }
                     .buxFormFieldPadding()
                 }
+                .transaction { $0.animation = nil }
             }
         }
         .buxCatalogNavigationTitle("Scope creep radar")
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.isSettingsContext, true)
-        .onChange(of: store.antiScopeCreepEnabled) { _, _ in store.save() }
     }
 
     private func infoRow(icon: String, color: Color, title: String, body: String) -> some View {

@@ -471,6 +471,7 @@ extension AppTheme {
 
 public final class ThemeManager: ObservableObject {
     @Published var current: AppTheme = .buxDefault
+    @Published private(set) var workspaceThemeOverrideActive: Bool = false
     var onThemeChanged: ((AppTheme) -> Void)?
 
     public init() {
@@ -498,6 +499,48 @@ public final class ThemeManager: ObservableObject {
     }
 
     func applyTheme(_ theme: AppTheme) {
+        setCurrentThemeWithoutPersistence(theme)
+        onThemeChanged?(theme)
+    }
+
+    /// Virtual-desktop theme — does not persist to Appearance settings or SwiftData.
+    @MainActor
+    func applyTransientTheme(_ theme: AppTheme) {
+        workspaceThemeOverrideActive = true
+        setCurrentThemeWithoutPersistence(theme)
+    }
+
+    @MainActor
+    func restoreGlobalAppearance() {
+        workspaceThemeOverrideActive = false
+        let store = SettingsStore.shared
+        if store.brandThemesEnabled {
+            setCurrentThemeWithoutPersistence(store.resolvedBrandTheme())
+        } else {
+            setCurrentThemeWithoutPersistence(AppTheme.standardNeutral(accent: store.resolvedSystemAccent()))
+        }
+    }
+
+    @MainActor
+    func updateThemeForActiveWorkspace() {
+        let store = SettingsStore.shared
+        guard store.sideHustleMatrixEnabled,
+              let activeId = HustleManager.shared.selectedHustleId,
+              let hustle = HustleManager.shared.hustles.first(where: { $0.id == activeId }),
+              let themeId = hustle.themeName else {
+            restoreGlobalAppearance()
+            return
+        }
+        let theme = AppTheme.all.first(where: { $0.id == themeId })
+            ?? AppTheme.all.first(where: { $0.name == themeId })
+        guard let theme else {
+            restoreGlobalAppearance()
+            return
+        }
+        applyTransientTheme(theme)
+    }
+
+    private func setCurrentThemeWithoutPersistence(_ theme: AppTheme) {
         if SettingsStore.shared.reducedMotion {
             current = theme
         } else {
@@ -505,7 +548,6 @@ public final class ThemeManager: ObservableObject {
                 current = theme
             }
         }
-        onThemeChanged?(theme)
     }
 
     // MARK: - Unified surfaces (M3 material roles)
@@ -536,8 +578,9 @@ public final class ThemeManager: ObservableObject {
     /// Returns a deeper, high-contrast version of the accent color for bright/neon themes in Light mode.
     /// This ensures critical interactive icons, toolbars, outlines, and buttons remain highly visible.
     func contrastAccentColor(for colorScheme: ColorScheme) -> Color {
-        guard SettingsStore.shared.brandThemesEnabled else {
-            return SettingsStore.shared.resolvedSystemAccentColor(for: colorScheme)
+        let store = SettingsStore.shared
+        guard store.brandThemesEnabled || workspaceThemeOverrideActive else {
+            return store.resolvedSystemAccentColor(for: colorScheme)
         }
         guard colorScheme == .light else { return current.accentColor }
         

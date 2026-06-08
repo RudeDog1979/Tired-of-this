@@ -339,6 +339,16 @@ private struct InvoiceBrandBorderOverlay: View {
 
 // MARK: - Shared Sub-Views
 
+/// PDF-safe catalog label — no `@EnvironmentObject` (ImageRenderer has no view hierarchy).
+private struct InvoiceCatalogText: View {
+    let key: String
+    let locale: Locale
+
+    var body: some View {
+        Text(BuxCatalogLabel.string(key, locale: locale))
+    }
+}
+
 /// Line-items table shared across templates.
 private struct InvoiceLineItemsTable: View {
     let context: InvoiceRenderContext
@@ -355,13 +365,13 @@ private struct InvoiceLineItemsTable: View {
                     Text("#")
                         .frame(width: 20, alignment: .leading)
                 }
-                BuxCatalogDynamicText(key: "Description")
+                InvoiceCatalogText(key: "Description", locale: context.interfaceLocale)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                BuxCatalogDynamicText(key: "Qty")
+                InvoiceCatalogText(key: "Qty", locale: context.interfaceLocale)
                     .frame(width: 36, alignment: .trailing)
-                BuxCatalogDynamicText(key: "Rate")
+                InvoiceCatalogText(key: "Rate", locale: context.interfaceLocale)
                     .frame(width: 72, alignment: .trailing)
-                BuxCatalogDynamicText(key: "Amount")
+                InvoiceCatalogText(key: "Amount", locale: context.interfaceLocale)
                     .frame(width: 80, alignment: .trailing)
             }
             .font(context.templateConfig.typography.bodyFont(size: 8, weight: .semibold))
@@ -538,7 +548,7 @@ private struct InvoicePaymentFooter: View {
 
     private var bankBlock: some View {
         VStack(alignment: .leading, spacing: 2) {
-            BuxCatalogDynamicText(key: "PAYMENT DETAILS")
+            InvoiceCatalogText(key: "PAYMENT DETAILS", locale: context.interfaceLocale)
                 .font(context.templateConfig.typography.bodyFont(size: 7, weight: .semibold))
                 .foregroundColor(accentColor)
                 .tracking(0.8)
@@ -568,7 +578,7 @@ private struct InvoicePaymentFooter: View {
 
     private var qrBlock: some View {
         VStack(alignment: .leading, spacing: 3) {
-            BuxCatalogDynamicText(key: "SCAN TO PAY")
+            InvoiceCatalogText(key: "SCAN TO PAY", locale: context.interfaceLocale)
                 .font(context.templateConfig.typography.bodyFont(size: 7, weight: .semibold))
                 .foregroundColor(accentColor)
                 .tracking(0.8)
@@ -583,7 +593,7 @@ private struct InvoicePaymentFooter: View {
 
     private var linkBlock: some View {
         VStack(alignment: .leading, spacing: 3) {
-            BuxCatalogDynamicText(key: "PAY ONLINE")
+            InvoiceCatalogText(key: "PAY ONLINE", locale: context.interfaceLocale)
                 .font(context.templateConfig.typography.bodyFont(size: 7, weight: .semibold))
                 .foregroundColor(accentColor)
                 .tracking(0.8)
@@ -597,7 +607,7 @@ private struct InvoicePaymentFooter: View {
 
     private var notesBlock: some View {
         VStack(alignment: .leading, spacing: 2) {
-            BuxCatalogDynamicText(key: "NOTES & TERMS")
+            InvoiceCatalogText(key: "NOTES & TERMS", locale: context.interfaceLocale)
                 .font(context.templateConfig.typography.bodyFont(size: 7, weight: .semibold))
                 .foregroundColor(Color(UIColor.secondaryLabel))
                 .tracking(0.8)
@@ -856,13 +866,13 @@ public struct MinimalistInvoiceTemplateView: View {
 
                 // ── Column headers ───────────────────────────────────
                 HStack(spacing: 0) {
-                    BuxCatalogDynamicText(key: "Description")
+                    InvoiceCatalogText(key: "Description", locale: context.interfaceLocale)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    BuxCatalogDynamicText(key: "Qty")
+                    InvoiceCatalogText(key: "Qty", locale: context.interfaceLocale)
                         .frame(width: 36, alignment: .trailing)
-                    BuxCatalogDynamicText(key: "Rate")
+                    InvoiceCatalogText(key: "Rate", locale: context.interfaceLocale)
                         .frame(width: 72, alignment: .trailing)
-                    BuxCatalogDynamicText(key: "Amount")
+                    InvoiceCatalogText(key: "Amount", locale: context.interfaceLocale)
                         .frame(width: 80, alignment: .trailing)
                 }
                 .font(typo.bodyFont(size: 7.5, weight: .semibold))
@@ -1135,7 +1145,7 @@ public struct ExecutiveInvoiceTemplateView: View {
             // Subtotal + tax breakdown
             HStack(spacing: 20) {
                 VStack(alignment: .leading, spacing: 2) {
-                    BuxCatalogDynamicText(key: "Subtotal")
+                    InvoiceCatalogText(key: "Subtotal", locale: context.interfaceLocale)
                         .font(typo.bodyFont(size: 7.5))
                         .foregroundColor(Color(UIColor.secondaryLabel))
                     Text(context.formatAmount(context.totals.subtotal))
@@ -1160,7 +1170,7 @@ public struct ExecutiveInvoiceTemplateView: View {
 
             // Grand total accent block
             HStack(spacing: 10) {
-                BuxCatalogDynamicText(key: "TOTAL DUE")
+                InvoiceCatalogText(key: "TOTAL DUE", locale: context.interfaceLocale)
                     .font(typo.bodyFont(size: 8, weight: .bold))
                     .foregroundColor(.white.opacity(0.8))
                     .tracking(1)

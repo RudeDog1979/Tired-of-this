@@ -58,8 +58,8 @@ struct DataSettingsView: View {
                         Text(
                             BuxLocalizedString.format(
                                 "Photos: %@",
-                                locale: BuxInterfaceLocale.currentInterfaceLocale,
-                                photoStatus.label
+                                locale: appSettingsManager.interfaceLocale,
+                                photoStatus.localizedLabel(locale: appSettingsManager.interfaceLocale)
                             )
                         )
                         .font(.system(size: 15, weight: .bold))

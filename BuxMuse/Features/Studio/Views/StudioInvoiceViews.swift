@@ -431,9 +431,6 @@ struct StudioInvoiceDetailView: View {
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @State private var showEdit = false
-    @State private var pdfData: Data? = nil
-    @State private var shareURL: URL? = nil
-    @State private var showShareSheet = false
     
     var invoice: StudioInvoice
 
@@ -613,7 +610,8 @@ struct StudioInvoiceDetailView: View {
                 taxProfile: store.taxProfile,
                 currencyCode: invoice.currencyCode,
                 autoDetectBankType: settingsStore.autoDetectInvoiceBankAccountType,
-                bankTypeOverride: settingsStore.invoiceBankAccountTypeOverride
+                bankTypeOverride: settingsStore.invoiceBankAccountTypeOverride,
+                interfaceLocale: appSettingsManager.interfaceLocale
             )
             data = InvoiceDesignerEngine.generatePDF(context: ctx)
         } else {
@@ -627,15 +625,8 @@ struct StudioInvoiceDetailView: View {
             )
         }
 
-        pdfData = data
-        let cleanNum = invoice.invoiceNumber.replacingOccurrences(of: "/", with: "_")
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("Invoice_\(cleanNum).pdf")
-        do {
-            try data.write(to: tempURL)
-            presentShareSheet(items: [tempURL])
-        } catch {
-            print("Error writing PDF to temporary directory: \(error)")
-        }
+        let cleanNum = invoice.invoiceNumber.replacingOccurrences(of: "/", with: "-")
+        SimpleStudioShareHelper.presentPDF(data: data, fileName: "Invoice_\(cleanNum)")
     }
     
     private func updateStatus(_ st: InvoiceStatus) {
@@ -656,26 +647,5 @@ struct StudioInvoiceDetailView: View {
         case .cancelled: return .gray
         case .draft: return .orange
         }
-    }
-}
-
-// MARK: - UIKit Share Sheet Helper
-
-extension View {
-    func presentShareSheet(items: [Any]) {
-        guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-              let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
-            return
-        }
-        
-        let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        
-        if let popover = activityVC.popoverPresentationController {
-            popover.sourceView = rootVC.view
-            popover.sourceRect = CGRect(x: rootVC.view.bounds.midX, y: rootVC.view.bounds.midY, width: 0, height: 0)
-            popover.permittedArrowDirections = []
-        }
-        
-        rootVC.present(activityVC, animated: true)
     }
 }

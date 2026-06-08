@@ -12,250 +12,112 @@ struct AppearanceSettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
-    
-    private var bgColor: Color {
-        themeManager.screenBackground(for: colorScheme)
+
+    private var glassChromeSubtitle: String {
+        BuxCatalogLabel.string(
+            store.brandThemesEnabled
+                ? "Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)"
+                : "Liquid Glass tab bar and icon buttons (cards stay neutral)",
+            locale: appSettingsManager.interfaceLocale
+        )
     }
 
-    let themeColumns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
-    ]
-
-    let accentColumns = [
-        GridItem(.adaptive(minimum: 56), spacing: 12)
-    ]
-    
     var body: some View {
-        ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
+        BuxThemedCardForm {
+            if store.brandThemesEnabled {
+                VStack(alignment: .leading, spacing: BuxLayout.tight) {
+                    BuxFormSectionLabel(title: "Brand design presets")
+                    BuxThemePickerCarousel()
+                }
+            } else {
+                BuxFormSection(title: "Accent color") {
+                    BuxAccentPickerCarousel()
+                }
+            }
 
-                    if store.brandThemesEnabled {
-                        VStack(alignment: .leading, spacing: 12) {
-                            BuxSectionHeader(title: "Brand design presets")
-                                .padding(.horizontal, 20)
+            BuxFormSection(title: "Interface") {
+                BuxSettingsToggleRow(
+                    titleKey: "Brand themes",
+                    subtitleKey: "Full themed surfaces and presets — off uses standard iOS light/dark",
+                    isOn: $store.brandThemesEnabled
+                )
 
-                            LazyVGrid(columns: themeColumns, spacing: 16) {
-                                ForEach(AppTheme.all) { theme in
-                                    ThemeSwatchCard(theme: theme, isSelected: themeManager.current.id == theme.id) {
-                                        store.persistThemeSelection(theme, themeManager: themeManager)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                        .padding(.top, 16)
-                    } else {
-                        VStack(alignment: .leading, spacing: 12) {
-                            BuxSectionHeader(title: "Accent color")
-                                .padding(.horizontal, 20)
+                BuxFormRowDivider()
 
-                            BuxCatalogDynamicText(key: "Neutral Apple surfaces with your chosen accent on buttons and controls.")
-                                .font(.system(size: 12))
-                                .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                                .padding(.horizontal, 20)
-
-                            LazyVGrid(columns: accentColumns, spacing: 12) {
-                                ForEach(BuxSystemAccent.allCases) { accent in
-                                    AccentSwatchButton(
-                                        accent: accent,
-                                        isSelected: store.neutralAccentId == accent.rawValue
-                                    ) {
-                                        store.neutralAccentId = accent.rawValue
-                                        store.save()
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                        .padding(.top, 16)
+                BuxSettingsMenuPickerRow(titleKey: "Display mode", selection: $store.themeMode) {
+                    ForEach(ThemeMode.allCases) { mode in
+                        Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                     }
+                }
 
-                    // UI Preference Rules
-                    VStack(alignment: .leading, spacing: 12) {
-                        BuxSectionHeader(title: "Interface")
-                            .padding(.horizontal, 20)
-                        
-                        VStack(spacing: 0) {
-                            Toggle(isOn: $store.brandThemesEnabled) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "Brand themes")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    BuxCatalogDynamicText(key: "Full themed surfaces and presets — off uses standard iOS light/dark")
-                                        .font(.system(size: 11))
-                                        .buxLabelSecondary()
-                                }
-                            }
-                            .padding(.horizontal, BuxLayout.section)
-                            .padding(.vertical, 12)
+                if !store.brandThemesEnabled {
+                    BuxFormRowDivider()
 
-                            Divider().opacity(0.08)
+                    BuxSettingsToggleRow(
+                        titleKey: "Landing backdrop glow",
+                        subtitleKey: "Top-left ambient light and card edge shine — off uses plain iOS surfaces",
+                        isOn: $store.landingBackdropEnabled
+                    )
+                }
 
-                            // Theme mode selector
-                            HStack {
-                                BuxCatalogDynamicText(key: "Display mode")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                Spacer()
-                                Picker(selection: $store.themeMode) {
-                                    ForEach(ThemeMode.allCases) { mode in
-                                        Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
-                                    }
-                                } label: {
-                                    Text(BuxCatalogLabel.string("Display mode", locale: appSettingsManager.interfaceLocale))
-                                }
-                                .pickerStyle(.menu)
-                            }
-                            .padding(.horizontal, BuxLayout.section)
-                            .padding(.vertical, 14)
-                            
-                            Divider().opacity(0.08)
+                BuxFormRowDivider()
 
-                            if !store.brandThemesEnabled {
-                                Toggle(isOn: $store.landingBackdropEnabled) {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        BuxCatalogDynamicText(key: "Landing backdrop glow")
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                        BuxCatalogDynamicText(key: "Top-left ambient light and card edge shine — off uses plain iOS surfaces")
-                                            .font(.system(size: 11))
-                                            .buxLabelSecondary()
-                                    }
-                                }
-                                .padding(.horizontal, BuxLayout.section)
-                                .padding(.vertical, 12)
+                BuxSettingsToggleRow(
+                    titleKey: "Glass navigation chrome",
+                    subtitleText: glassChromeSubtitle,
+                    isOn: $store.useGlassmorphism
+                )
 
-                                Divider().opacity(0.08)
-                            }
+                BuxFormRowDivider()
 
-                            // Glassmorphism Toggle
-                            Toggle(isOn: $store.useGlassmorphism) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "Glass navigation chrome")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Text(BuxCatalogLabel.string(store.brandThemesEnabled
-                                         ? "Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)"
-                                         : "Liquid Glass tab bar and icon buttons (cards stay neutral)", locale: appSettingsManager.interfaceLocale))
-                                        .font(.system(size: 11))
-                                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                                }
-                            }
-                            .padding(.horizontal, BuxLayout.section)
-                            .padding(.vertical, 12)
-                            
-                            Divider().opacity(0.08)
-                            
-                            // Reduced Motion Toggle
-                            Toggle(isOn: $store.reducedMotion) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "Reduced motion")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    BuxCatalogDynamicText(key: "Simplify transition animations for comfort")
-                                        .font(.system(size: 11))
-                                        .buxLabelSecondary()
-                                }
-                            }
-                            .padding(.horizontal, BuxLayout.section)
-                            .padding(.vertical, 12)
-                            
-                            Divider().opacity(0.08)
-                            
-                            // Solar Contrast Mode Toggle
-                            Toggle(isOn: $store.solarContrastModeEnabled) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "Solar contrast mode")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    BuxCatalogDynamicText(key: "Optimize contrast and text weight for direct tropical sunlight")
-                                        .font(.system(size: 11))
-                                        .buxLabelSecondary()
-                                }
-                            }
-                            .padding(.horizontal, BuxLayout.section)
-                            .padding(.vertical, 12)
+                BuxSettingsToggleRow(
+                    titleKey: "Reduced motion",
+                    subtitleKey: "Simplify transition animations for comfort",
+                    isOn: $store.reducedMotion
+                )
 
-                            Divider().opacity(0.08)
+                BuxFormRowDivider()
 
-                            // Visual Horizon Toggle
-                            Toggle(isOn: $store.showVisualHorizonBackground) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "visual horizon background")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    BuxCatalogDynamicText(key: "show spending trend lines in the dashboard wallet card")
-                                        .font(.system(size: 11))
-                                        .buxLabelSecondary()
-                                }
-                            }
-                            .padding(.horizontal, BuxLayout.section)
-                            .padding(.vertical, 12)
+                BuxSettingsToggleRow(
+                    titleKey: "Solar contrast mode",
+                    subtitleKey: "Optimize contrast and text weight for direct tropical sunlight",
+                    isOn: $store.solarContrastModeEnabled
+                )
+
+                BuxFormRowDivider()
+
+                BuxSettingsToggleRow(
+                    titleKey: "visual horizon background",
+                    subtitleKey: "show spending trend lines in the dashboard wallet card",
+                    isOn: $store.showVisualHorizonBackground
+                )
+            }
+
+            BuxFormSection(title: "Dashboard greeting") {
+                BuxSettingsToggleRow(
+                    titleKey: "Show greeting header on dashboard",
+                    isOn: $store.greetingHeaderEnabled
+                )
+
+                if store.greetingHeaderEnabled {
+                    BuxFormRowDivider()
+
+                    BuxSettingsToggleRow(
+                        titleKey: "Show greeting icon",
+                        subtitleKey: "Show animated time icon beside text",
+                        isOn: $store.greetingShowIcon
+                    )
+
+                    BuxFormRowDivider()
+
+                    BuxSettingsMenuPickerRow(titleKey: "Greeting style", selection: $store.greetingFontStyle) {
+                        ForEach(GreetingFontStyle.allCases) { style in
+                            Text(style.localizedDisplayName(locale: appSettingsManager.interfaceLocale)).tag(style)
                         }
-                        .settingsThemedCardChrome(cornerRadius: 20)
-                        .padding(.horizontal, 20)
-                    }
-
-                    // Dashboard Greeting Settings
-                    VStack(alignment: .leading, spacing: 12) {
-                        BuxSectionHeader(title: "Dashboard greeting")
-                            .padding(.horizontal, 20)
-                        
-                        VStack(spacing: 0) {
-                            Toggle(isOn: $store.greetingHeaderEnabled) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    BuxCatalogDynamicText(key: "Show greeting header on dashboard")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                }
-                            }
-                            .padding(.horizontal, BuxLayout.section)
-                            .padding(.vertical, 12)
-
-                            if store.greetingHeaderEnabled {
-                                Divider().opacity(0.08)
-
-                                Toggle(isOn: $store.greetingShowIcon) {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        BuxCatalogDynamicText(key: "Show greeting icon")
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                        BuxCatalogDynamicText(key: "Show animated time icon beside text")
-                                            .font(.system(size: 11))
-                                            .buxLabelSecondary()
-                                    }
-                                }
-                                .padding(.horizontal, BuxLayout.section)
-                                .padding(.vertical, 12)
-
-                                Divider().opacity(0.08)
-
-                                HStack {
-                                    BuxCatalogDynamicText(key: "Greeting style")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                    Spacer()
-                                    Picker(selection: $store.greetingFontStyle) {
-                                        ForEach(GreetingFontStyle.allCases) { style in
-                                            Text(style.localizedDisplayName(locale: appSettingsManager.interfaceLocale)).tag(style)
-                                        }
-                                    } label: {
-                                        Text(BuxCatalogLabel.string("Greeting style", locale: appSettingsManager.interfaceLocale))
-                                    }
-                                    .pickerStyle(.menu)
-                                }
-                                .padding(.horizontal, BuxLayout.section)
-                                .padding(.vertical, 14)
-                            }
-                        }
-                        .settingsThemedCardChrome(cornerRadius: 20)
-                        .padding(.horizontal, 20)
                     }
                 }
             }
-            .buxScrollContentMargins()
-            .buxSoftScrollChrome()
+        }
         .buxCatalogNavigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -281,7 +143,7 @@ struct AppearanceSettingsView: View {
     }
 }
 
-// MARK: - Accent swatch (neutral mode)
+// MARK: - Accent swatch (neutral mode) — preserved for grid layouts
 
 private struct AccentSwatchButton: View {
     @Environment(\.colorScheme) private var colorScheme

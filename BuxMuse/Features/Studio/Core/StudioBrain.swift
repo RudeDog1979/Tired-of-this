@@ -26,6 +26,8 @@ public final class StudioBrain: ObservableObject {
     private let settings: SettingsStore
     let appSettings: AppSettingsManager
     private var cancellables = Set<AnyCancellable>()
+    private var refreshAllWork: DispatchWorkItem?
+    private static let refreshCoalesceInterval: TimeInterval = 0.08
 
     init(store: StudioStore, settings: SettingsStore, appSettings: AppSettingsManager) {
         self.store = store
@@ -45,6 +47,16 @@ public final class StudioBrain: ObservableObject {
         refreshCompliance()
         refreshSelfEmployedDashboard()
         refreshTaxStudio()
+    }
+
+    /// Coalesces burst store/settings updates into a single full refresh pass.
+    func scheduleRefreshAll() {
+        refreshAllWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.refreshAll()
+        }
+        refreshAllWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.refreshCoalesceInterval, execute: work)
     }
 
     func refreshIncomeTax() {
@@ -75,6 +87,10 @@ public final class StudioBrain: ObservableObject {
         deductionsDisplay = buildDeductionsDisplay()
     }
 
+    func refreshHubDisplay() {
+        hubDisplay = buildHubDisplay()
+    }
+
     func setTaxSandboxParams(_ params: TaxSandboxParams) {
         taxSandboxParams = params
         refreshTaxSandbox()
@@ -85,29 +101,38 @@ public final class StudioBrain: ObservableObject {
     private func wireRefreshTriggers() {
         store.objectWillChange
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.refreshAll() }
+            .sink { [weak self] _ in self?.scheduleRefreshAll() }
             .store(in: &cancellables)
 
-        settings.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.refreshAll() }
-            .store(in: &cancellables)
+        Publishers.MergeMany(
+            settings.$studioEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$studioMode.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$studioPersona.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$mileageRatePerUnitValue.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$autoLocationForMileage.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in self?.scheduleRefreshAll() }
+        .store(in: &cancellables)
 
         appSettings.$selectedCurrency
             .dropFirst()
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.refreshAll() }
+            .sink { [weak self] _ in self?.scheduleRefreshAll() }
             .store(in: &cancellables)
 
         appSettings.$selectedCountry
             .dropFirst()
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.refreshAll() }
+            .sink { [weak self] _ in self?.scheduleRefreshAll() }
             .store(in: &cancellables)
 
         HustleManager.shared.$selectedHustleId
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.refreshAll() }
+            .sink { [weak self] _ in
+                self?.refreshAllWork?.cancel()
+                self?.refreshHubDisplay()
+            }
             .store(in: &cancellables)
     }
 

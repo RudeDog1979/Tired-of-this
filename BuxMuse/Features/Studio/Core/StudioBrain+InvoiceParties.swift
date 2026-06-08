@@ -37,7 +37,8 @@ extension StudioBrain {
             snapshotRecipient: snapshot?.recipientPartySnapshot,
             countryCode: country,
             autoDetectBankType: settingsStore.autoDetectInvoiceBankAccountType,
-            manualOverride: settingsStore.invoiceBankAccountTypeOverride
+            manualOverride: settingsStore.invoiceBankAccountTypeOverride,
+            interfaceLocale: appSettings.interfaceLocale
         )
     }
 

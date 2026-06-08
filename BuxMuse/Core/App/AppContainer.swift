@@ -12,6 +12,13 @@ import Combine
 @MainActor
 final class AppContainer: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
+    private var expenseRefreshWork: DispatchWorkItem?
+    private var studioInsightsWork: DispatchWorkItem?
+    private var engagementRefreshWork: DispatchWorkItem?
+    private var engagementRefreshTask: Task<Void, Never>?
+    private static let expenseRefreshCoalesceInterval: TimeInterval = 0.35
+    private static let studioInsightsCoalesceInterval: TimeInterval = 0.05
+    private static let engagementRefreshCoalesceInterval: TimeInterval = 0.25
     public let persistence: PersistenceController
     public let themeManager: ThemeManager
     public let appSettingsManager: AppSettingsManager
@@ -93,6 +100,7 @@ final class AppContainer: ObservableObject {
         )
 
         wirePersistenceSideEffects()
+        wireWorkspaceNexusLifecycle()
         migrateLegacyFreelanceLocale()
         studioBrain.refreshAll()
         scheduleEngagementRefresh()
@@ -105,19 +113,54 @@ final class AppContainer: ObservableObject {
         Task {
             await BackupNotificationScheduler.reschedule(frequency: settingsStore.autoBackupFrequency)
         }
+
+        themeManager.updateThemeForActiveWorkspace()
+    }
+
+    private func wireWorkspaceNexusLifecycle() {
+        HustleManager.shared.$selectedHustleId
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.themeManager.updateThemeForActiveWorkspace()
+                self?.brain.scheduleSnapshotRefresh()
+            }
+            .store(in: &cancellables)
+
+        SettingsStore.shared.$sideHustleMatrixEnabled
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.themeManager.updateThemeForActiveWorkspace()
+                self?.brain.scheduleSnapshotRefresh()
+            }
+            .store(in: &cancellables)
+
+        HustleManager.shared.$hustles
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.themeManager.updateThemeForActiveWorkspace()
+                self?.brain.scheduleSnapshotRefresh()
+            }
+            .store(in: &cancellables)
     }
 
     func scheduleEngagementRefresh() {
-        Task { @MainActor in
-            await brain.refreshEngagement(
-                countryCode: appSettingsManager.selectedCountry.id,
-                settings: SettingsStore.shared,
-                appSettings: appSettingsManager,
-                studioAlerts: studioBrain.hubDisplay.alerts,
-                studioInvoices: studioStore.invoices,
-                taxDeadlineDays: studioBrain.hubDisplay.taxSummary.taxDeadlineDays
-            )
+        engagementRefreshWork?.cancel()
+        engagementRefreshTask?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.engagementRefreshTask = Task { @MainActor in
+                await self.brain.refreshEngagement(
+                    countryCode: self.appSettingsManager.selectedCountry.id,
+                    settings: SettingsStore.shared,
+                    appSettings: self.appSettingsManager,
+                    studioAlerts: self.studioBrain.hubDisplay.alerts,
+                    studioInvoices: self.studioStore.invoices,
+                    taxDeadlineDays: self.studioBrain.hubDisplay.taxSummary.taxDeadlineDays
+                )
+            }
         }
+        engagementRefreshWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.engagementRefreshCoalesceInterval, execute: work)
     }
 
     func scheduleTaxCatalogRefresh(force: Bool = false) {
@@ -136,25 +179,47 @@ final class AppContainer: ObservableObject {
         }
     }
 
-    private func wirePersistenceSideEffects() {
-        brain.$dashboardSnapshot
-            .dropFirst()
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.scheduleEngagementRefresh()
-            }
-            .store(in: &cancellables)
+    private func scheduleDebouncedExpenseRefresh() {
+        expenseRefreshWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.brain.refreshExpenses()
+        }
+        expenseRefreshWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.expenseRefreshCoalesceInterval, execute: work)
+    }
 
-        navigationCoordinator.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                self.brain.persistPreferences(
-                    navigation: self.navigationCoordinator,
-                    appSettings: self.appSettingsManager
-                )
-            }
-            .store(in: &cancellables)
+    private func rescheduleLocalBackup() {
+        LocalBackupCoordinator.shared.reschedule(
+            persistence: persistence,
+            studioStore: studioStore,
+            simpleStudioStore: simpleStudioStore
+        )
+    }
+
+    private func scheduleStudioInsightsRefresh() {
+        studioInsightsWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.insightsViewModel.recalculate()
+        }
+        studioInsightsWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.studioInsightsCoalesceInterval, execute: work)
+    }
+
+    private func wirePersistenceSideEffects() {
+        Publishers.MergeMany(
+            navigationCoordinator.$selectedTab.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            navigationCoordinator.$activeCategoryPill.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            navigationCoordinator.$isBalanceVisible.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            guard let self else { return }
+            self.brain.persistPreferences(
+                navigation: self.navigationCoordinator,
+                appSettings: self.appSettingsManager
+            )
+        }
+        .store(in: &cancellables)
 
         themeManager.onThemeChanged = { [weak self] theme in
             self?.brain.persistTheme(theme)
@@ -177,6 +242,8 @@ final class AppContainer: ObservableObject {
                     navigation: self.navigationCoordinator,
                     appSettings: self.appSettingsManager
                 )
+                self.brain.scheduleSnapshotRefresh()
+                self.insightsViewModel.recalculate()
             }
             .store(in: &cancellables)
 
@@ -212,35 +279,108 @@ final class AppContainer: ObservableObject {
             }
             .store(in: &cancellables)
 
-        studioStore.objectWillChange
+        Publishers.MergeMany(
+            studioStore.$invoices.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            studioStore.$projects.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            studioStore.$clients.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            studioStore.$receipts.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            studioStore.$profile.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            studioStore.$taxProfile.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            self?.scheduleStudioInsightsRefresh()
+        }
+        .store(in: &cancellables)
+
+        let settings = SettingsStore.shared
+        wireSettingsExpenseRefreshTriggers(settings)
+        wireSettingsBackupTriggers(settings)
+        wireSettingsEngagementTriggers(settings)
+
+        navigationCoordinator.$selectedTab
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] tab in
+                guard tab == .expense else { return }
+                self?.expenseRefreshWork?.cancel()
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .buxMuseFinancialDataDidChange)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.scheduleEngagementRefresh()
-                self?.insightsViewModel.recalculate()
             }
             .store(in: &cancellables)
+    }
 
-        SettingsStore.shared.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                self.brain.refreshExpenses()
-                self.scheduleEngagementRefresh()
-                LocalBackupCoordinator.shared.reschedule(
-                    persistence: self.persistence,
-                    studioStore: self.studioStore,
-                    simpleStudioStore: self.simpleStudioStore
-                )
-            }
-            .store(in: &cancellables)
+    private func wireSettingsExpenseRefreshTriggers(_ settings: SettingsStore) {
+        Publishers.MergeMany(
+            settings.$budgetingMode.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$defaultBudgetPeriod.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$showBudgetWarnings.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$autoAdjustBudgetsFromHistory.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$customBudgetProfiles.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$simpleBudgetLimit.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$simpleBudgetCycle.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$simpleBudgetPeriodAnchor.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$incomeFundingSource.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            self?.scheduleDebouncedExpenseRefresh()
+        }
+        .store(in: &cancellables)
 
-        appSettingsManager.objectWillChange
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.brain.scheduleSnapshotRefresh()
-                self?.insightsViewModel.recalculate()
-            }
-            .store(in: &cancellables)
+        Publishers.MergeMany(
+            settings.$customBudgetLimit.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$customBudgetPeriod.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$budgetApproachingThresholdPercent.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$paymentSourceTrackingEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$dualCashDrawerEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$primaryLocalCurrency.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$secondaryTradingCurrency.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$cashLocalBalanceValue.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$cashSecondaryBalanceValue.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            self?.scheduleDebouncedExpenseRefresh()
+        }
+        .store(in: &cancellables)
+    }
+
+    private func wireSettingsBackupTriggers(_ settings: SettingsStore) {
+        Publishers.MergeMany(
+            settings.$allowLocalBackups.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$autoBackupFrequency.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$customBackupIntervalDays.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$includeStudioDataInExports.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$includeAnalyticsInExports.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            self?.rescheduleLocalBackup()
+        }
+        .store(in: &cancellables)
+    }
+
+    private func wireSettingsEngagementTriggers(_ settings: SettingsStore) {
+        Publishers.MergeMany(
+            settings.$notificationsEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$budgetAlertsEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$billRemindersEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$studioInvoiceRemindersEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$taxDeadlineRemindersEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$dailySummaryEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$studioEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            self?.scheduleEngagementRefresh()
+        }
+        .store(in: &cancellables)
     }
 
     private func migrateLegacyFreelanceLocale() {

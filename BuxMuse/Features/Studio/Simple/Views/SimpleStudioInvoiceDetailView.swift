@@ -19,7 +19,6 @@ struct SimpleStudioInvoiceDetailView: View {
     let invoiceId: UUID
 
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
-
     private var isProStudio: Bool { settingsStore.studioMode == .pro }
 
     private var invoice: SimpleInvoice? {
@@ -158,7 +157,8 @@ struct SimpleStudioInvoiceDetailView: View {
                 settings: studioStore.invoiceSettings,
                 snapshot: snapshot,
                 taxProfile: studioStore.taxProfile,
-                currencyCode: appSettingsManager.selectedCurrency.id
+                currencyCode: appSettingsManager.selectedCurrency.id,
+                interfaceLocale: appSettingsManager.interfaceLocale
             )
             data = InvoiceDesignerEngine.generatePDF(context: ctx)
         } else {
@@ -171,20 +171,9 @@ struct SimpleStudioInvoiceDetailView: View {
                 countryCode: appSettingsManager.selectedCountry.id
             )
         }
-        guard let data,
-              let url = writeTemporaryPDF(data, invoiceNumber: invoice.invoiceNumber) else { return }
-        SimpleStudioShareHelper.present(items: [url])
-    }
-
-    private func writeTemporaryPDF(_ data: Data, invoiceNumber: String) -> URL? {
-        let clean = invoiceNumber.isEmpty ? "Invoice" : invoiceNumber.replacingOccurrences(of: "/", with: "-")
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(clean).pdf")
-        do {
-            try data.write(to: url, options: .atomic)
-            return url
-        } catch {
-            return nil
-        }
+        guard let data else { return }
+        let clean = invoice.invoiceNumber.isEmpty ? "Invoice" : invoice.invoiceNumber.replacingOccurrences(of: "/", with: "-")
+        SimpleStudioShareHelper.presentPDF(data: data, fileName: clean)
     }
 
     private var businessName: String {

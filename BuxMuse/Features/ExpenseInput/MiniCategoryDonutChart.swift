@@ -25,9 +25,7 @@ struct MiniCategoryDonutChart: View {
                 DonutChartLayer(breakdown: breakdown, customCategories: customCategories)
                     .equatable()
                     .compositingGroup()
-                    .mask(alignment: .center) {
-                        DonutRoundSweepMask(progress: progress)
-                    }
+                    .buxGPUChartReveal(progress: progress, axis: .radial)
             } else {
                 DonutChartLayer(breakdown: breakdown, customCategories: customCategories)
                     .equatable()
@@ -53,51 +51,6 @@ struct MiniCategoryDonutChart: View {
         .accessibilityValue(
             segments.map { "\($0.name) \(Int(($0.amount / total) * 100)) percent" }.joined(separator: ", ")
         )
-    }
-}
-
-// MARK: - Clockwise ring reveal (donut only — not shared with bar/sparkline masks)
-
-private struct DonutRoundSweepMask: View, Animatable {
-    var progress: Double
-
-    var animatableData: Double {
-        get { progress }
-        set { progress = newValue }
-    }
-
-    var body: some View {
-        DonutSweepWedge(progress: progress)
-            .fill(.white)
-    }
-}
-
-private struct DonutSweepWedge: Shape {
-    var progress: Double
-
-    var animatableData: Double {
-        get { progress }
-        set { progress = newValue }
-    }
-
-    func path(in rect: CGRect) -> Path {
-        let clamped = min(max(progress, 0), 1)
-        var path = Path()
-        guard clamped > 0.0001 else { return path }
-
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let radius = hypot(rect.width, rect.height) * 0.5 + 2
-
-        path.move(to: center)
-        path.addArc(
-            center: center,
-            radius: radius,
-            startAngle: .degrees(-90),
-            endAngle: .degrees(-90 + 360 * clamped),
-            clockwise: false
-        )
-        path.closeSubpath()
-        return path
     }
 }
 

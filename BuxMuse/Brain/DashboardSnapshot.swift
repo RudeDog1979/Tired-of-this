@@ -33,6 +33,7 @@ public struct DashboardSnapshot: Equatable {
     public var budgetPeriodStart: Date?
     public var budgetPeriodEnd: Date?
     public var approachingThresholdPercent: Int
+    public var workspaceSynergy: WorkspaceSynergySummary
 
     public static let empty = DashboardSnapshot(
         recentTransactions: [],
@@ -49,7 +50,8 @@ public struct DashboardSnapshot: Equatable {
         envelopeBudgets: [],
         budgetPeriodStart: nil,
         budgetPeriodEnd: nil,
-        approachingThresholdPercent: 80
+        approachingThresholdPercent: 80,
+        workspaceSynergy: .empty
     )
 }
 

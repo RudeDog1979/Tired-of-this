@@ -253,6 +253,7 @@ struct StudioHubView: View {
                 StudioProfileView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .environmentObject(store)
                     .environment(\.studioEnhancedTint, true)
             }
             .navigationDestination(isPresented: $navigateToInvoices) {
@@ -399,6 +400,10 @@ struct StudioHubView: View {
 
             BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.card, padding: 0) {
                 VStack(spacing: 0) {
+                    navRow(title: "Business Profile", icon: "building.2.fill", color: Color(hex: "#FF5E5B")) {
+                        navigateToProfile = true
+                    }
+                    studioRowDivider
                     navRow(title: "Invoices", icon: "doc.text.fill", color: .green) { navigateToInvoices = true }
                     studioRowDivider
                     navRow(title: "Clients", icon: "person.2.fill", color: .blue) { navigateToClients = true }

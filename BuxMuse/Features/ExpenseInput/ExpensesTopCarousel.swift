@@ -17,11 +17,30 @@ struct ExpensesTopCarousel: View {
     let summary: ExpensesSummaryDisplay
     let formatAmount: (Decimal) -> String
     let playRequest: UUID
-    @Binding var playedPages: Set<Int>
-    @Binding var pageProgress: [Int: Double]
+    let session: ExpenseCarouselSession
 
+    @State private var playedPages: Set<Int>
+    @State private var pageProgress: [Int: Double]
     @State private var pageIndex: Int? = 0
     @State private var activeDetailSheet: HeroSheetType?
+    @State private var cachedCustomCategories: [ExpenseCategoryRecord] = []
+
+    init(
+        header: ExpensesHeaderDisplay,
+        summary: ExpensesSummaryDisplay,
+        formatAmount: @escaping (Decimal) -> String,
+        playRequest: UUID,
+        session: ExpenseCarouselSession? = nil
+    ) {
+        self.header = header
+        self.summary = summary
+        self.formatAmount = formatAmount
+        self.playRequest = playRequest
+        let resolvedSession = session ?? ExpenseCarouselSession.shared
+        self.session = resolvedSession
+        _playedPages = State(initialValue: resolvedSession.playedPages)
+        _pageProgress = State(initialValue: resolvedSession.pageProgress)
+    }
 
     private enum HeroSheetType: String, Identifiable {
         case totalSpend
@@ -45,7 +64,7 @@ struct ExpensesTopCarousel: View {
     }
 
     private var customCategories: [ExpenseCategoryRecord] {
-        ((try? brain.fetchAllCategoryRecords()) ?? []).filter(\.isCustom)
+        cachedCustomCategories
     }
 
     private var slotHeight: CGFloat {
@@ -126,10 +145,19 @@ struct ExpensesTopCarousel: View {
                 }
             }
         }
-        .onChange(of: playRequest, initial: true) { _, _ in
-            animatePage(activePageIndex)
+        .onAppear {
+            if cachedCustomCategories.isEmpty {
+                cachedCustomCategories = ((try? brain.fetchAllCategoryRecords()) ?? []).filter(\.isCustom)
+            }
+            if !playedPages.contains(activePageIndex) {
+                animatePage(activePageIndex)
+            }
         }
-        .onChange(of: activePageIndex) { _, index in
+        .onDisappear {
+            session.syncPlaybackState(playedPages: playedPages, pageProgress: pageProgress)
+        }
+        .onChange(of: activePageIndex) { old, index in
+            guard old != index else { return }
             animatePage(index)
         }
         .sheet(item: $activeDetailSheet) { sheetType in
@@ -159,7 +187,10 @@ struct ExpensesTopCarousel: View {
     }
 
     private func pageProgressValue(_ index: Int) -> Double {
-        pageProgress[index] ?? 0
+        if playedPages.contains(index) {
+            return pageProgress[index] ?? 1
+        }
+        return pageProgress[index] ?? 0
     }
 
     private func animatePage(_ index: Int) {
@@ -189,7 +220,7 @@ struct ExpensesTopCarousel: View {
                     Text(formatAmount(Decimal(header.totalSpent)))
                         .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        .contentTransition(.numericText())
+                        .transaction { $0.animation = nil }
                 }
 
                 Spacer(minLength: 8)

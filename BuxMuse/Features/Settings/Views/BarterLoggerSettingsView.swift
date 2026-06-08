@@ -16,7 +16,7 @@ struct BarterLoggerSettingsView: View {
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Barter & trade logger") {
-                Toggle(isOn: $store.barterLoggerEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
+                Toggle(isOn: $store.barterLoggerEnabled) {
                     VStack(alignment: .leading, spacing: 3) {
                         BuxCatalogDynamicText(key: "Enable barter logger")
                             .font(.system(size: 15, weight: .semibold))
@@ -57,6 +57,7 @@ struct BarterLoggerSettingsView: View {
                     }
                     .buxFormFieldPadding()
                 }
+                .transaction { $0.animation = nil }
             }
         }
         .buxCatalogNavigationTitle("Barter & trade logger")

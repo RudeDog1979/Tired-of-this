@@ -184,7 +184,7 @@ final class ExpenseInputTests: XCTestCase {
         XCTAssertEqual(result.details, expectedDetails)
     }
 
-    func testSubscriptionsCategoryAutoEnablesSubscriptionAndUsesExpenseDate() {
+    func testSubscriptionsCategoryAutoEnablesSubscriptionAndUsesExpenseDate() throws {
         let expenseDate = Calendar.current.date(from: DateComponents(year: 2026, month: 3, day: 15))!
         viewModel.date = expenseDate
         viewModel.merchantName = "Netflix"

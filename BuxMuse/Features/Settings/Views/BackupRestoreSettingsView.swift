@@ -278,6 +278,7 @@ struct BackupRestoreSettingsView: View {
                     showBackupFileShareSheet = false
                     presentRecoveryKeyIfNeeded()
                 }
+                .buxShareSheetPresentation()
             }
         }
         .fileImporter(

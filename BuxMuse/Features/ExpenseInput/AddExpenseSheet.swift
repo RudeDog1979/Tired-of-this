@@ -146,6 +146,9 @@ struct AddExpenseSheet: View {
 
                         if settingsStore.sideHustleMatrixEnabled {
                             workspaceCard
+                            if !viewModel.isEditing {
+                                synergyBridgeCard
+                            }
                         }
 
                         if !isIncomeMode, showOperationalPaymentCard {
@@ -861,7 +864,92 @@ struct AddExpenseSheet: View {
             }
             .padding(BuxLayout.section)
             .expensesThemedCardChrome(cornerRadius: 20)
+
+            if let preview = viewModel.workspaceAutoRoutePreviewName {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.triangle.branch")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(themeManager.current.accentColor)
+                    Text(
+                        BuxLocalizedString.format(
+                            "Will auto-route to %@ on save",
+                            locale: appSettingsManager.interfaceLocale,
+                            preview
+                        )
+                    )
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                }
+                .padding(.horizontal, 4)
+            }
         }
+    }
+
+    private var synergyBridgeCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            BuxCatalogText.text("Nexus bridge")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            VStack(alignment: .leading, spacing: 12) {
+                Picker(loc("Nexus bridge"), selection: $viewModel.bridgeEntryMode) {
+                    BuxCatalogText.text("Standard entry").tag(SynergyBridgeEntryMode.standard)
+                    if !isIncomeMode {
+                        BuxCatalogText.text("Split across workspaces").tag(SynergyBridgeEntryMode.split)
+                    }
+                    BuxCatalogText.text("Owner transfer").tag(SynergyBridgeEntryMode.dividendTransfer)
+                }
+                .pickerStyle(.segmented)
+
+                if viewModel.bridgeEntryMode == .split {
+                    Picker(loc("Secondary workspace"), selection: bridgeSecondarySelection) {
+                        BuxCatalogText.text("Choose workspace").tag(Optional<UUID>.none)
+                        ForEach(HustleManager.shared.hustles.filter { $0.isActive }) { hustle in
+                            Text(hustle.name).tag(Optional(hustle.id))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(themeManager.labelPrimary(for: colorScheme))
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(
+                            BuxLocalizedString.format(
+                                "Secondary share: %lld%%",
+                                locale: appSettingsManager.interfaceLocale,
+                                Int(viewModel.bridgeSplitSharePercent.rounded())
+                            )
+                        )
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                        Slider(value: $viewModel.bridgeSplitSharePercent, in: 1...99, step: 1)
+                            .tint(themeManager.current.accentColor)
+                    }
+                }
+
+                if viewModel.bridgeEntryMode == .dividendTransfer {
+                    BuxCatalogText.text("Source workspace uses the picker above.")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+
+                    Picker(loc("Target workspace"), selection: bridgeSecondarySelection) {
+                        BuxCatalogText.text("Choose workspace").tag(Optional<UUID>.none)
+                        ForEach(HustleManager.shared.hustles.filter { $0.isActive }) { hustle in
+                            Text(hustle.name).tag(Optional(hustle.id))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(themeManager.labelPrimary(for: colorScheme))
+                }
+            }
+            .padding(BuxLayout.section)
+            .expensesThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var bridgeSecondarySelection: Binding<UUID?> {
+        Binding(
+            get: { viewModel.bridgeSecondaryHustleId },
+            set: { viewModel.bridgeSecondaryHustleId = $0 }
+        )
     }
 
     private var workspaceSelection: Binding<UUID?> {

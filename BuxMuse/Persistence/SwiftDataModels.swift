@@ -54,6 +54,12 @@ final class ExpenseEntity {
     var barterGoodsReceived: String?
     /// Manually estimated monetary equivalent of the barter.
     var barterEstimatedValue: Decimal?
+    var bridgeGroupId: UUID?
+    var bridgeKind: String?
+    var bridgeRole: String?
+    var bridgeSharePercent: Double?
+    var bridgePeerExpenseId: UUID?
+    var bridgeCounterpartyHustleId: UUID?
 
     init(
         id: UUID = UUID(),
@@ -91,7 +97,13 @@ final class ExpenseEntity {
         isBarterExchange: Bool = false,
         barterGoodsGiven: String? = nil,
         barterGoodsReceived: String? = nil,
-        barterEstimatedValue: Decimal? = nil
+        barterEstimatedValue: Decimal? = nil,
+        bridgeGroupId: UUID? = nil,
+        bridgeKind: String? = nil,
+        bridgeRole: String? = nil,
+        bridgeSharePercent: Double? = nil,
+        bridgePeerExpenseId: UUID? = nil,
+        bridgeCounterpartyHustleId: UUID? = nil
     ) {
         self.id = id
         self.name = name
@@ -129,6 +141,12 @@ final class ExpenseEntity {
         self.barterGoodsGiven = barterGoodsGiven
         self.barterGoodsReceived = barterGoodsReceived
         self.barterEstimatedValue = barterEstimatedValue
+        self.bridgeGroupId = bridgeGroupId
+        self.bridgeKind = bridgeKind
+        self.bridgeRole = bridgeRole
+        self.bridgeSharePercent = bridgeSharePercent
+        self.bridgePeerExpenseId = bridgePeerExpenseId
+        self.bridgeCounterpartyHustleId = bridgeCounterpartyHustleId
     }
 }
 
@@ -429,7 +447,13 @@ extension ExpenseEntity {
             isBarterExchange: isBarterExchange,
             barterGoodsGiven: barterGoodsGiven,
             barterGoodsReceived: barterGoodsReceived,
-            barterEstimatedValue: barterEstimatedValue
+            barterEstimatedValue: barterEstimatedValue,
+            bridgeGroupId: bridgeGroupId,
+            bridgeKind: bridgeKind,
+            bridgeRole: bridgeRole,
+            bridgeSharePercent: bridgeSharePercent,
+            bridgePeerExpenseId: bridgePeerExpenseId,
+            bridgeCounterpartyHustleId: bridgeCounterpartyHustleId
         )
     }
 }

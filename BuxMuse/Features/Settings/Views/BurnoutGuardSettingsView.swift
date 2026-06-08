@@ -23,7 +23,7 @@ struct BurnoutGuardSettingsView: View {
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Creative energy widget") {
-                Toggle(isOn: $store.burnoutGuardEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
+                Toggle(isOn: $store.burnoutGuardEnabled) {
                     VStack(alignment: .leading, spacing: 3) {
                         BuxCatalogDynamicText(key: "Show on Home dashboard")
                             .font(.system(size: 15, weight: .semibold))
@@ -37,8 +37,9 @@ struct BurnoutGuardSettingsView: View {
                 .buxFormFieldPadding()
             }
 
-            if store.burnoutGuardEnabled {
-                BuxFormSection(title: "Manual tuning (Simple & Pro)") {
+            Group {
+                if store.burnoutGuardEnabled {
+                    BuxFormSection(title: "Manual tuning (Simple & Pro)") {
                     VStack(alignment: .leading, spacing: 14) {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
@@ -152,7 +153,9 @@ struct BurnoutGuardSettingsView: View {
                         .buttonStyle(.plain)
                     }
                 }
+                }
             }
+            .transaction { $0.animation = nil }
         }
         .buxCatalogNavigationTitle("Creative energy")
         .navigationBarTitleDisplayMode(.inline)

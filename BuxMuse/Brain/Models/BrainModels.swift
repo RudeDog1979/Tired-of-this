@@ -79,6 +79,12 @@ public struct Transaction: Identifiable, Codable, Equatable {
     public let barterGoodsReceived: String?
     /// Manually estimated monetary value of the barter in the user's primary currency.
     public let barterEstimatedValue: Decimal?
+    public let bridgeGroupId: UUID?
+    public let bridgeKind: String?
+    public let bridgeRole: String?
+    public let bridgeSharePercent: Double?
+    public let bridgePeerExpenseId: UUID?
+    public let bridgeCounterpartyHustleId: UUID?
 
     public init(
         id: UUID = UUID(),
@@ -98,7 +104,13 @@ public struct Transaction: Identifiable, Codable, Equatable {
         isBarterExchange: Bool = false,
         barterGoodsGiven: String? = nil,
         barterGoodsReceived: String? = nil,
-        barterEstimatedValue: Decimal? = nil
+        barterEstimatedValue: Decimal? = nil,
+        bridgeGroupId: UUID? = nil,
+        bridgeKind: String? = nil,
+        bridgeRole: String? = nil,
+        bridgeSharePercent: Double? = nil,
+        bridgePeerExpenseId: UUID? = nil,
+        bridgeCounterpartyHustleId: UUID? = nil
     ) {
         self.id = id
         self.date = date
@@ -118,6 +130,12 @@ public struct Transaction: Identifiable, Codable, Equatable {
         self.barterGoodsGiven = barterGoodsGiven
         self.barterGoodsReceived = barterGoodsReceived
         self.barterEstimatedValue = barterEstimatedValue
+        self.bridgeGroupId = bridgeGroupId
+        self.bridgeKind = bridgeKind
+        self.bridgeRole = bridgeRole
+        self.bridgeSharePercent = bridgeSharePercent
+        self.bridgePeerExpenseId = bridgePeerExpenseId
+        self.bridgeCounterpartyHustleId = bridgeCounterpartyHustleId
     }
 }
 

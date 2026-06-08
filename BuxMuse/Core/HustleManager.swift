@@ -14,12 +14,34 @@ public struct Hustle: Codable, Identifiable, Equatable, Hashable {
     public var name: String
     public var colorHex: String
     public var isActive: Bool
-    
-    public init(id: UUID = UUID(), name: String, colorHex: String = "#5A55F5", isActive: Bool = true) {
+
+    // Workspace Nexus — optional; nil decodes from legacy saves.
+    public var themeName: String?
+    public var currencyCode: String?
+    public var cardRules: [String]?
+    public var merchantRules: [String]?
+    public var budgetLimit: Decimal?
+
+    public init(
+        id: UUID = UUID(),
+        name: String,
+        colorHex: String = "#5A55F5",
+        isActive: Bool = true,
+        themeName: String? = nil,
+        currencyCode: String? = nil,
+        cardRules: [String]? = nil,
+        merchantRules: [String]? = nil,
+        budgetLimit: Decimal? = nil
+    ) {
         self.id = id
         self.name = name
         self.colorHex = colorHex
         self.isActive = isActive
+        self.themeName = themeName
+        self.currencyCode = currencyCode
+        self.cardRules = cardRules
+        self.merchantRules = merchantRules
+        self.budgetLimit = budgetLimit
     }
 }
 
@@ -70,7 +92,6 @@ public final class HustleManager: ObservableObject {
     public func selectHustle(_ id: UUID?) {
         selectedHustleId = id
         saveHustles()
-        objectWillChange.send()
     }
     
     public var activeHustlesCount: Int {
@@ -115,11 +136,39 @@ public final class HustleManager: ObservableObject {
         saveHustles()
     }
 
+    /// Evaluates auto-routing rules for unassigned expenses. First active workspace match wins.
+    public func routeHustleId(merchantName: String, notes: String?, paymentMethod: String?) -> UUID? {
+        let cleanMerchant = merchantName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let cleanNotes = (notes ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let cleanPM = (paymentMethod ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        for hustle in hustles where hustle.isActive {
+            if let cardRules = hustle.cardRules {
+                for suffix in cardRules {
+                    let clean = suffix.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                    if !clean.isEmpty, cleanPM.contains(clean) {
+                        return hustle.id
+                    }
+                }
+            }
+            if let merchantRules = hustle.merchantRules {
+                for keyword in merchantRules {
+                    let clean = keyword.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                    if !clean.isEmpty,
+                       cleanMerchant.contains(clean) || cleanNotes.contains(clean) {
+                        return hustle.id
+                    }
+                }
+            }
+        }
+        return nil
+    }
+
     /// Ensures at least one workspace exists after enabling the matrix (optional first workspace).
     @discardableResult
     public func ensureDefaultWorkspaceIfNeeded() -> Bool {
         guard hustles.isEmpty else { return false }
-        let workspace = Hustle(name: "Primary Workspace", colorHex: "#5A55F5", isActive: true)
+        let workspace = Hustle(name: "Personal", colorHex: "#30D158", isActive: true)
         hustles = [workspace]
         saveHustles()
         return true

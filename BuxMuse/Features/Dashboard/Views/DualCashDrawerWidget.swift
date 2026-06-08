@@ -13,6 +13,7 @@ struct DualCashDrawerWidget: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var brain: BuxMuseBrain
     @ObservedObject private var store = SettingsStore.shared
     
     @State private var showingQuickCashSheet = false
@@ -151,6 +152,7 @@ struct DualCashDrawerWidget: View {
             QuickCashDrawerAdjustSheet(isIncome: $quickCashIsIncome)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .environmentObject(brain)
         }
     }
     
@@ -169,6 +171,7 @@ struct QuickCashDrawerAdjustSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var brain: BuxMuseBrain
     @ObservedObject private var store = SettingsStore.shared
     
     @Binding var isIncome: Bool
@@ -352,10 +355,8 @@ struct QuickCashDrawerAdjustSheet: View {
             store.cashSecondaryBalanceValue += NSDecimalNumber(decimal: amountVal).doubleValue
         }
         
-        // Post transaction into standard engines
         Task { @MainActor in
-            let controller = PersistenceController.shared
-            try? controller.upsertExpense(t)
+            _ = try? brain.saveExpense(t)
             NotificationCenter.default.post(name: .buxMuseFinancialDataDidChange, object: nil)
             dismiss()
         }

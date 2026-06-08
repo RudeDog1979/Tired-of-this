@@ -306,6 +306,8 @@ public final class SettingsStore: ObservableObject {
     }
     
     private let saveQueue = DispatchQueue(label: "com.buxmuse.settings.save", qos: .utility)
+    private var pendingSaveWork: DispatchWorkItem?
+    private static let saveDebounceInterval: TimeInterval = 0.4
     private var isLoaded = false
     
     private init() {
@@ -999,7 +1001,24 @@ public final class SettingsStore: ObservableObject {
         }
     }
 
+    /// Coalesces rapid edits (sliders, typing) into one disk write — same payload as before.
     public func save() {
+        pendingSaveWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.performSave()
+        }
+        pendingSaveWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.saveDebounceInterval, execute: work)
+    }
+
+    /// Flushes any pending debounced save and writes immediately (export, import, reset).
+    public func saveImmediately() {
+        pendingSaveWork?.cancel()
+        pendingSaveWork = nil
+        performSave()
+    }
+
+    private func performSave() {
         persistInvoicePaymentPreferences()
         persistMileagePreferences()
         let payload = StorePayload(
@@ -1085,7 +1104,7 @@ public final class SettingsStore: ObservableObject {
     }
 
     public func exportArchiveSettingsData() -> Data? {
-        save()
+        saveImmediately()
         return try? Data(contentsOf: storeURL)
     }
 

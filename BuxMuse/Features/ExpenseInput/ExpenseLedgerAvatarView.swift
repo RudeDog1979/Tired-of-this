@@ -115,7 +115,7 @@ struct ExpenseLedgerAvatarView: View {
         }
 
         if let categoryId = record.categoryId,
-           let custom = (try? brain.fetchAllCategoryRecords())?.first(where: { $0.id == categoryId }) {
+           let custom = brain.categoryRecords.first(where: { $0.id == categoryId }) {
             return (
                 custom.icon,
                 ExpenseCategoryStyle.foreground(for: custom.color),

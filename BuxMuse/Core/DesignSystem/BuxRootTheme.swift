@@ -106,7 +106,8 @@ struct BuxSemanticTheme: Equatable {
 
     static func resolve(themeManager: ThemeManager, colorScheme: ColorScheme) -> BuxSemanticTheme {
         let settings = SettingsStore.shared
-        let scheme = themeManager.materialScheme(for: colorScheme, branded: settings.brandThemesEnabled)
+        let branded = settings.brandThemesEnabled || themeManager.workspaceThemeOverrideActive
+        let scheme = themeManager.materialScheme(for: colorScheme, branded: branded)
         let accent = themeManager.contrastAccentColor(for: colorScheme)
         return BuxSemanticTheme(
             accent: accent,
@@ -159,14 +160,15 @@ struct BuxRootBrandThemeModifier: ViewModifier {
     func body(content: Content) -> some View {
         // Observe theme id so semantic + material environments refresh on every pick.
         let _ = themeManager.current.id
+        let branded = settings.brandThemesEnabled || themeManager.workspaceThemeOverrideActive
         let semantic = BuxSemanticTheme.resolve(themeManager: themeManager, colorScheme: colorScheme)
-        let material = themeManager.materialScheme(for: colorScheme, branded: settings.brandThemesEnabled)
+        let material = themeManager.materialScheme(for: colorScheme, branded: branded)
         content
             .tint(semantic.accent)
             .accentColor(semantic.accent)
             .environment(\.buxSemanticTheme, semantic)
             .environment(\.buxMaterialScheme, material)
-            .environment(\.buxBrandSurfaces, settings.brandThemesEnabled)
+            .environment(\.buxBrandSurfaces, branded)
             .animation(BuxMotion.themeCrossfade, value: themeManager.current.id)
     }
 }
@@ -331,9 +333,29 @@ extension View {
             .environment(\.studioEnhancedTint, true)
     }
 
+    /// Sheets hosting `BuxActivityShareSheet` — iOS 26 system chrome; iOS 18 detents + corner radius.
+    func buxShareSheetPresentation() -> some View {
+        modifier(BuxShareSheetPresentationModifier())
+    }
+
     /// Detail / hub sheets — flat M3 canvas behind sheet chrome.
     func buxMeshSheetPresentation() -> some View {
         modifier(BuxMeshSheetPresentationModifier())
+    }
+}
+
+private struct BuxShareSheetPresentationModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        } else {
+            content
+                .presentationDetents([.medium, .large])
+                .presentationCornerRadius(28)
+                .presentationDragIndicator(.visible)
+        }
     }
 }
 

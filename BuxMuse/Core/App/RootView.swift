@@ -137,13 +137,6 @@ struct RootView: View {
                 if newTab != .expense {
                     navigationCoordinator.dismissExpenseSearch()
                 }
-                brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
-            }
-            .onChange(of: navigationCoordinator.activeCategoryPill) { _, _ in
-                brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
-            }
-            .onChange(of: navigationCoordinator.isBalanceVisible) { _, _ in
-                brain.persistPreferences(navigation: navigationCoordinator, appSettings: appSettingsManager)
             }
             .onChange(of: settingsStore.studioEnabled) { _, enabled in
                 if !enabled && navigationCoordinator.selectedTab == .studio {

@@ -498,6 +498,8 @@ public struct InvoiceRenderContext {
     public var recipientBlock: InvoicePartyBlockDisplay
     public var legalFooter: InvoiceLegalFooterDisplay
     public var paymentDetailLines: [InvoicePaymentLineDisplay]
+    /// Settings → Country interface locale for PDF-safe catalog strings.
+    public var interfaceLocale: Locale
 
     public init(
         invoice: StudioInvoice,
@@ -512,7 +514,8 @@ public struct InvoiceRenderContext {
         issuerBlock: InvoicePartyBlockDisplay = .empty,
         recipientBlock: InvoicePartyBlockDisplay = .empty,
         legalFooter: InvoiceLegalFooterDisplay = .hidden,
-        paymentDetailLines: [InvoicePaymentLineDisplay] = []
+        paymentDetailLines: [InvoicePaymentLineDisplay] = [],
+        interfaceLocale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) {
         self.invoice        = invoice
         self.client         = client
@@ -527,6 +530,7 @@ public struct InvoiceRenderContext {
         self.recipientBlock = recipientBlock
         self.legalFooter    = legalFooter
         self.paymentDetailLines = paymentDetailLines
+        self.interfaceLocale = interfaceLocale
     }
 }
 

@@ -241,7 +241,8 @@ public enum StudioInvoiceArchiveEngine {
                 settings: studioStore.invoiceSettings,
                 snapshot: snapshot,
                 taxProfile: studioStore.taxProfile,
-                currencyCode: appSettings.selectedCurrency.id
+                currencyCode: appSettings.selectedCurrency.id,
+                interfaceLocale: appSettings.interfaceLocale
             )
             return InvoiceDesignerEngine.generatePDF(context: ctx)
         }

@@ -23,7 +23,7 @@ struct AgreementScratchpadSettingsView: View {
             )
 
             BuxFormSection(title: "Status") {
-                Toggle(isOn: $store.agreementScratchpadEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
+                Toggle(isOn: $store.agreementScratchpadEnabled) {
                     VStack(alignment: .leading, spacing: 3) {
                         BuxCatalogDynamicText(key: "Enable agreement scratchpad")
                             .font(.system(size: 15, weight: .semibold))
@@ -96,12 +96,12 @@ struct AgreementScratchpadSettingsView: View {
                     }
                     .buxFormFieldPadding()
                 }
+                .transaction { $0.animation = nil }
             }
         }
         .buxCatalogNavigationTitle("Agreement scratchpad")
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.isSettingsContext, true)
-        .onChange(of: store.agreementScratchpadEnabled) { _, _ in store.save() }
     }
 
     private func infoRow(icon: String, color: Color, title: String, body: String) -> some View {

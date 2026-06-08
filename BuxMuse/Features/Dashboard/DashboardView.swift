@@ -75,6 +75,13 @@ struct DashboardView: View {
                         HustleSelectorBar()
                             .padding(.bottom, 4)
 
+                        if settingsStore.sideHustleMatrixEnabled {
+                            WorkspaceSynergyROIPanel(summary: dashSnapshot.workspaceSynergy)
+                                .environmentObject(themeManager)
+                                .environmentObject(appSettingsManager)
+                                .padding(.bottom, 4)
+                        }
+
                         VStack(alignment: .leading, spacing: BuxTokens.tight) {
                                 if let budgetName = dashSnapshot.activeBudgetName {
                                     let limit = dashSnapshot.activeBudgetLimit

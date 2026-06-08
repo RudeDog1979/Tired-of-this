@@ -211,7 +211,8 @@ private struct SettingsDrillInBackdrop<Content: View>: View {
 
     var body: some View {
         ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+            BuxLandingTintBackground()
+                .ignoresSafeArea()
             content()
         }
         .buxPushedNavigationChrome()
@@ -261,9 +262,10 @@ struct SettingsRow: View {
     var body: some View {
         HStack(spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(color)
-                    .frame(width: 32, height: 32)
+                    .frame(width: 34, height: 34)
+                    .shadow(color: color.opacity(0.35), radius: 5, x: 0, y: 2)
                 Image(systemName: icon)
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
@@ -272,8 +274,12 @@ struct SettingsRow: View {
             BuxCatalogText.text(label)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .layoutPriority(1)
 
-            Spacer()
+            Spacer(minLength: 8)
 
             if showsProBadge {
                 ProFeatureBadge(compact: true)
@@ -282,8 +288,11 @@ struct SettingsRow: View {
 
             if let trailing = trailingText {
                 BuxCatalogText.text(trailing)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(themeManager.current.accentColor)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.trailing)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.trailing, 4)
             }
 
@@ -304,11 +313,6 @@ struct AppearanceThemePickerView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) var dismiss
     @ObservedObject private var store = SettingsStore.shared
-
-    let columns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
-    ]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -331,17 +335,8 @@ struct AppearanceThemePickerView: View {
             .padding(.bottom, 20)
             
             if store.brandThemesEnabled {
-                ScrollView(showsIndicators: false) {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(AppTheme.all) { theme in
-                            ThemeSwatchCard(theme: theme, isSelected: themeManager.current.id == theme.id) {
-                                store.persistThemeSelection(theme, themeManager: themeManager)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, BuxLayout.marginHorizontal)
-                    .padding(.vertical, 8)
-                }
+                BuxThemePickerCarousel()
+                    .padding(.bottom, 8)
             } else {
                 BuxCatalogDynamicText(key: "Turn on Brand Themes in Appearance to choose a preset.")
                     .font(.system(size: 14, weight: .medium))
@@ -370,59 +365,107 @@ struct ThemeSwatchCard: View {
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     let theme: AppTheme
     let isSelected: Bool
+    var layout: ThemeSwatchCardLayout = .grid
     let onTap: () -> Void
+
+    private var heroGradient: [Color] {
+        colorScheme == .dark ? theme.heroDarkGradient : theme.heroLightGradient
+    }
+
+    private var cardCornerRadius: CGFloat {
+        layout == .carousel ? 20 : 22
+    }
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: theme.heroDarkGradient,
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+            VStack(spacing: layout == .carousel ? 10 : 12) {
+                if layout == .carousel {
+                    ZStack(alignment: .bottomTrailing) {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: heroGradient,
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
                             )
-                        )
-                        .frame(width: 56, height: 56)
-                        .shadow(color: theme.accentColor.opacity(0.3), radius: 8, x: 0, y: 3)
+                            .frame(height: 72)
+                            .overlay {
+                                Image(systemName: theme.icon)
+                                    .font(.system(size: 22, weight: .semibold))
+                                    .foregroundStyle(.white.opacity(isSelected ? 1 : 0.9))
+                            }
 
-                    if isSelected {
                         Circle()
-                            .stroke(Color.white, lineWidth: 3)
+                            .fill(theme.accentColor)
+                            .frame(width: 14, height: 14)
+                            .overlay {
+                                Circle()
+                                    .strokeBorder(Color.white.opacity(0.9), lineWidth: 1.5)
+                            }
+                            .padding(8)
+                    }
+                    .padding(.horizontal, 4)
+                } else {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: theme.heroDarkGradient,
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                             .frame(width: 56, height: 56)
+                            .shadow(color: theme.accentColor.opacity(0.3), radius: 8, x: 0, y: 3)
 
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                    } else {
-                        Image(systemName: theme.icon)
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.95))
+                        if isSelected {
+                            Circle()
+                                .stroke(Color.white, lineWidth: 3)
+                                .frame(width: 56, height: 56)
+
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                        } else {
+                            Image(systemName: theme.icon)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.95))
+                        }
                     }
                 }
 
                 Text(theme.localizedName(locale: appSettingsManager.interfaceLocale))
-                    .font(.system(size: 13, weight: .bold))
+                    .font(.system(size: layout == .carousel ? 12 : 13, weight: .bold))
                     .foregroundColor(isSelected
                         ? themeManager.labelPrimary(for: colorScheme)
                         : themeManager.labelSecondary(for: colorScheme))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 6)
+
+                if layout == .carousel, isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(theme.accentColor)
+                }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
-            .settingsThemedCardChrome(cornerRadius: 22)
-            .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(isSelected ? theme.accentColor : Color.clear, lineWidth: 2)
-            )
-            .shadow(
-                color: isSelected ? theme.accentColor.opacity(0.2) : Color.black.opacity(0.04),
-                radius: isSelected ? 12 : 6,
-                x: 0, y: 4
+            .padding(.vertical, layout == .carousel ? 12 : 20)
+            .padding(.horizontal, layout == .carousel ? 12 : 0)
+            .modifier(
+                ThemeSwatchCardChromeModifier(
+                    layout: layout,
+                    cornerRadius: cardCornerRadius,
+                    isSelected: isSelected,
+                    accentColor: theme.accentColor
+                )
             )
         }
         .buttonStyle(BuxMicroShrinkStyle())
-        .scaleEffect(isSelected ? 1.03 : 1.0)
+        .padding(.vertical, layout == .carousel ? 4 : 0)
+        .scaleEffect(isSelected ? (layout == .carousel ? 1.03 : 1.02) : 1.0)
         .animation(.buxBounce, value: isSelected)
     }
 }

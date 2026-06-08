@@ -15,7 +15,7 @@ struct PaymentSourceSettingsView: View {
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Payment source tracking") {
-                Toggle(isOn: $store.paymentSourceTrackingEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
+                Toggle(isOn: $store.paymentSourceTrackingEnabled) {
                     VStack(alignment: .leading, spacing: 3) {
                         BuxCatalogDynamicText(key: "Enable on add expense")
                             .font(.system(size: 15, weight: .semibold))
@@ -27,7 +27,6 @@ struct PaymentSourceSettingsView: View {
                 }
                 .tint(themeManager.current.accentColor)
                 .buxFormFieldPadding()
-                .onChange(of: store.paymentSourceTrackingEnabled) { _, _ in store.save() }
             }
 
             if store.paymentSourceTrackingEnabled {
@@ -52,6 +51,7 @@ struct PaymentSourceSettingsView: View {
                     }
                     .buxFormFieldPadding()
                 }
+                .transaction { $0.animation = nil }
             }
         }
         .buxCatalogNavigationTitle("Payment sources")

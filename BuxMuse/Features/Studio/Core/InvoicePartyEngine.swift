@@ -270,7 +270,8 @@ public enum InvoicePartyEngine {
         snapshotRecipient: InvoicePartyDetails? = nil,
         countryCode: String,
         autoDetectBankType: Bool,
-        manualOverride: BankAccountType?
+        manualOverride: BankAccountType?,
+        interfaceLocale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> InvoiceRenderContext {
         let issuerDetails = snapshotIssuer ?? profile.resolvedPartyDetails()
         let recipientDetails = snapshotRecipient ?? client?.resolvedPartyDetails() ?? InvoicePartyDetails()
@@ -294,7 +295,8 @@ public enum InvoicePartyEngine {
                 countryCode: countryCode,
                 autoDetectBankType: autoDetectBankType,
                 manualOverride: manualOverride
-            )
+            ),
+            interfaceLocale: interfaceLocale
         )
     }
 }

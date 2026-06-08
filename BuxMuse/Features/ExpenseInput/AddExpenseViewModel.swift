@@ -65,6 +65,9 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published public var renewalReminderDays = 3
     @Published public var emotionTag = ""
     @Published public var selectedHustleId: UUID? = nil
+    @Published public var bridgeEntryMode: SynergyBridgeEntryMode = .standard
+    @Published public var bridgeSecondaryHustleId: UUID?
+    @Published public var bridgeSplitSharePercent: Double = 50
     @Published public var paymentMethod: String? = nil
     // MARK: - Barter Logger Fields
     @Published public var isBarterExchange: Bool = false
@@ -76,6 +79,21 @@ public final class AddExpenseViewModel: ObservableObject {
     private var categoryIdBeforeSubscription: UUID?
 
     public var isEditing: Bool { editingId != nil }
+
+    public var workspaceAutoRoutePreviewName: String? {
+        guard SettingsStore.shared.sideHustleMatrixEnabled,
+              !isEditing,
+              bridgeEntryMode == .standard,
+              selectedHustleId == nil else { return nil }
+        let merchant = merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !merchant.isEmpty else { return nil }
+        guard let id = HustleManager.shared.routeHustleId(
+            merchantName: merchant,
+            notes: notes.isEmpty ? nil : notes,
+            paymentMethod: paymentMethod
+        ) else { return nil }
+        return HustleManager.shared.hustles.first(where: { $0.id == id })?.name
+    }
     /// Logging income (Home → Log income), not an outflow expense.
     public let isIncomeEntry: Bool
 
@@ -513,7 +531,7 @@ public final class AddExpenseViewModel: ObservableObject {
         let decimalValue = Decimal(doubleVal)
         let treatsAsIncome = isIncomeEntry || selectedCategory == .income
         let finalValue = treatsAsIncome ? abs(decimalValue) : -abs(decimalValue)
-        let amount = MoneyAmount(value: finalValue, currencyCode: settingsManager.selectedCurrency.id)
+        let amount = MoneyAmount(value: finalValue, currencyCode: resolvedCurrencyCodeForSave())
 
         // Adjust Cash Drawer Balances if needed
         let oldRecord = editingId.flatMap { try? brain.fetchExpenseRecord(id: $0) }
@@ -609,13 +627,78 @@ public final class AddExpenseViewModel: ObservableObject {
         }()
 
         do {
-            _ = try brain.saveExpenseRecord(record, merchantSelection: selection)
+            if !isEditing,
+               SettingsStore.shared.sideHustleMatrixEnabled,
+               bridgeEntryMode != .standard {
+                try saveBridgeTransaction(record: record, selection: selection, cleanName: cleanName, amount: decimalValue)
+            } else {
+                _ = try brain.saveExpenseRecord(record, merchantSelection: selection)
+            }
             return true
+        } catch is BridgeSaveError {
+            return false
         } catch {
             saveError = loc("Could not save. Try again.")
             print("Expense save failed: \(error)")
             return false
         }
+    }
+
+    private func saveBridgeTransaction(
+        record: ExpenseRecord,
+        selection: MerchantSelection?,
+        cleanName: String,
+        amount: Decimal
+    ) throws {
+        switch bridgeEntryMode {
+        case .standard:
+            _ = try brain.saveExpenseRecord(record, merchantSelection: selection)
+        case .split:
+            guard !isIncomeEntry else {
+                saveError = loc("Splits are only available for expenses.")
+                throw BridgeSaveError.invalidMode
+            }
+            let primaryId = record.hustleId ?? HustleManager.shared.routeHustleId(
+                merchantName: record.merchantName,
+                notes: record.notes,
+                paymentMethod: record.paymentMethod
+            )
+            guard let primaryId,
+                  let secondaryId = bridgeSecondaryHustleId,
+                  primaryId != secondaryId else {
+                saveError = loc("Choose two different workspaces for a split.")
+                throw BridgeSaveError.missingWorkspaces
+            }
+            let pair = SynergyBridgeEngine.makeSplitPair(
+                base: record,
+                primaryHustleId: primaryId,
+                secondaryHustleId: secondaryId,
+                secondarySharePercent: bridgeSplitSharePercent
+            )
+            _ = try brain.saveBridgeRecords(pair, merchantSelection: selection)
+        case .dividendTransfer:
+            guard let sourceId = selectedHustleId,
+                  let targetId = bridgeSecondaryHustleId,
+                  sourceId != targetId else {
+                saveError = loc("Choose source and target workspaces for the transfer.")
+                throw BridgeSaveError.missingWorkspaces
+            }
+            let pair = SynergyBridgeEngine.makeDividendTransferPair(
+                amount: amount,
+                currencyCode: record.currencyCode,
+                date: record.date,
+                label: cleanName,
+                sourceHustleId: sourceId,
+                targetHustleId: targetId,
+                notes: record.notes
+            )
+            _ = try brain.saveBridgeRecords(pair)
+        }
+    }
+
+    private enum BridgeSaveError: Error {
+        case invalidMode
+        case missingWorkspaces
     }
 
     // MARK: - Private
@@ -634,6 +717,13 @@ public final class AddExpenseViewModel: ObservableObject {
             return nil
         }
         return selectedHustleId
+    }
+
+    private func resolvedCurrencyCodeForSave() -> String {
+        if let editingId, let record = try? brain.fetchExpenseRecord(id: editingId) {
+            return record.currencyCode
+        }
+        return WorkspaceCurrencyContext.activeDisplayCurrency(global: settingsManager.selectedCurrency).id
     }
 
     private func reloadEditingRecord() {

@@ -22,6 +22,7 @@ struct HustleSettingsView: View {
     @State private var selectedColorHex = "#9C27B0"
     @State private var isCreating = false
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
+    @State private var editingHustle: Hustle?
     
     // Premium color options
     private let premiumColors = [
@@ -36,7 +37,7 @@ struct HustleSettingsView: View {
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Workspace mode") {
-                Toggle(isOn: $store.sideHustleMatrixEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
+                Toggle(isOn: $store.sideHustleMatrixEnabled) {
                     VStack(alignment: .leading, spacing: 3) {
                         BuxCatalogDynamicText(key: "Enable workspace switching")
                             .font(.system(size: 15, weight: .semibold))
@@ -52,7 +53,7 @@ struct HustleSettingsView: View {
                     if enabled, hustleManager.hustles.isEmpty {
                         _ = hustleManager.ensureDefaultWorkspaceIfNeeded()
                     }
-                    store.save()
+                    themeManager.updateThemeForActiveWorkspace()
                 }
             }
 
@@ -70,7 +71,6 @@ struct HustleSettingsView: View {
                     }
                     .tint(themeManager.current.accentColor)
                     .buxFormFieldPadding()
-                    .onChange(of: store.showUnassignedExpensesInWorkspace) { _, _ in store.save() }
                 }
 
                 hustleWorkspaceTierBanner
@@ -168,6 +168,16 @@ struct HustleSettingsView: View {
                 .environmentObject(studioStore)
                 .environmentObject(simpleStudioStore)
         }
+        .sheet(item: $editingHustle) { hustle in
+            WorkspaceDetailEditorSheet(hustle: hustle) { updated in
+                hustleManager.updateHustle(updated)
+                if hustleManager.selectedHustleId == updated.id {
+                    themeManager.updateThemeForActiveWorkspace()
+                }
+            }
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
+        }
     }
     
     // Sort hustles: active gig context first
@@ -209,6 +219,16 @@ struct HustleSettingsView: View {
             Spacer()
             
             HStack(spacing: 16) {
+                Button {
+                    editingHustle = hustle
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(BuxCatalogLabel.string("Edit workspace", locale: appSettingsManager.interfaceLocale))
+
                 if hustleManager.selectedHustleId != hustle.id {
                     Button(action: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
@@ -246,6 +266,10 @@ struct HustleSettingsView: View {
             }
         }
         .buxFormFieldPadding()
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) {
+            editingHustle = hustle
+        }
     }
     
     private var hustleWorkspaceTierBanner: some View {

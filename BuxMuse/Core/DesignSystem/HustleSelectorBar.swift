@@ -37,6 +37,11 @@ public struct HustleSelectorBar: View {
                                 .font(.system(size: 11, weight: .medium))
                                 .opacity(0.75)
                         }
+                        if let currencyCode = activeWorkspaceCurrencyCode {
+                            Text("· \(currencyCode)")
+                                .font(.system(size: 11, weight: .semibold))
+                                .opacity(0.85)
+                        }
                     }
                     .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                     .padding(.horizontal, BuxLayout.marginHorizontal)
@@ -44,7 +49,11 @@ public struct HustleSelectorBar: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        hustlePill(title: "All Workspaces", id: nil, colorHex: "#5A55F5")
+                        hustlePill(
+                            title: BuxCatalogLabel.string("All Workspaces", locale: appSettingsManager.interfaceLocale),
+                            id: nil,
+                            colorHex: "#5A55F5"
+                        )
 
                         ForEach(hustleManager.hustles.filter { $0.isActive }) { hustle in
                             hustlePill(
@@ -62,6 +71,14 @@ public struct HustleSelectorBar: View {
         }
     }
     
+    private var activeWorkspaceCurrencyCode: String? {
+        guard let selectedId = hustleManager.selectedHustleId,
+              let hustle = hustleManager.hustles.first(where: { $0.id == selectedId }),
+              let code = hustle.currencyCode
+        else { return nil }
+        return code
+    }
+
     private func hustlePill(title: String, id: UUID?, colorHex: String) -> some View {
         let isSelected = hustleManager.selectedHustleId == id
         let accentColor = Color(hex: colorHex)

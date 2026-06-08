@@ -14,10 +14,7 @@ struct NotificationSettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
-        ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-
-            BuxThemedCardForm {
+        BuxThemedCardForm {
                 BuxFormSection(title: "Switchboard") {
                     Toggle(isOn: $store.notificationsEnabled) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -95,7 +92,6 @@ struct NotificationSettingsView: View {
                     }
                 }
             }
-        }
         .buxCatalogNavigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.settingsEnhancedTint, true)

@@ -106,7 +106,8 @@ struct InvoiceDesignerHubView: View {
             taxProfile: store.taxProfile,
             currencyCode: currency,
             autoDetectBankType: settingsStore.autoDetectInvoiceBankAccountType,
-            bankTypeOverride: settingsStore.invoiceBankAccountTypeOverride
+            bankTypeOverride: settingsStore.invoiceBankAccountTypeOverride,
+            interfaceLocale: appSettingsManager.interfaceLocale
         )
     }
 

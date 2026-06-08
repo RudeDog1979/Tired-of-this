@@ -33,7 +33,7 @@ struct DualCashDrawerSettingsView: View {
             
             // Section 2: Main Activation toggle
             BuxFormSection(title: "Status & activation") {
-                Toggle(isOn: $store.dualCashDrawerEnabled.animation(.spring(response: 0.3, dampingFraction: 0.75))) {
+                Toggle(isOn: $store.dualCashDrawerEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
                         BuxCatalogDynamicText(key: "Enable cash drawer")
                             .font(.system(size: 15, weight: .bold))
@@ -47,9 +47,10 @@ struct DualCashDrawerSettingsView: View {
                 .buxFormFieldPadding()
             }
             
-            if store.dualCashDrawerEnabled {
-                // Section 3: Currency Setup
-                BuxFormSection(title: "Currency configuration") {
+            Group {
+                if store.dualCashDrawerEnabled {
+                    // Section 3: Currency Setup
+                    BuxFormSection(title: "Currency configuration") {
                     VStack(alignment: .leading, spacing: 14) {
                         HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 6) {
@@ -152,7 +153,9 @@ struct DualCashDrawerSettingsView: View {
                         .buxFormFieldPadding()
                     }
                 }
+                }
             }
+            .transaction { $0.animation = nil }
         }
         .buxCatalogNavigationTitle("Dual-cash drawer")
         .navigationBarTitleDisplayMode(.inline)

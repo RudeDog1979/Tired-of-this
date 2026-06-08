@@ -46,6 +46,16 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
     public var barterGoodsGiven: String?
     public var barterGoodsReceived: String?
     public var barterEstimatedValue: Decimal?
+    public var bridgeGroupId: UUID?
+    public var bridgeKind: String?
+    public var bridgeRole: String?
+    public var bridgeSharePercent: Double?
+    public var bridgePeerExpenseId: UUID?
+    public var bridgeCounterpartyHustleId: UUID?
+
+    public var synergyBridgeKind: SynergyBridgeKind? {
+        bridgeKind.flatMap { SynergyBridgeKind(rawValue: $0) }
+    }
 
     public var amountDouble: Double {
         NSDecimalNumber(decimal: amountValue).doubleValue
@@ -107,7 +117,13 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         isBarterExchange: Bool = false,
         barterGoodsGiven: String? = nil,
         barterGoodsReceived: String? = nil,
-        barterEstimatedValue: Decimal? = nil
+        barterEstimatedValue: Decimal? = nil,
+        bridgeGroupId: UUID? = nil,
+        bridgeKind: String? = nil,
+        bridgeRole: String? = nil,
+        bridgeSharePercent: Double? = nil,
+        bridgePeerExpenseId: UUID? = nil,
+        bridgeCounterpartyHustleId: UUID? = nil
     ) {
         self.id = id
         self.name = name
@@ -145,6 +161,12 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         self.barterGoodsGiven = barterGoodsGiven
         self.barterGoodsReceived = barterGoodsReceived
         self.barterEstimatedValue = barterEstimatedValue
+        self.bridgeGroupId = bridgeGroupId
+        self.bridgeKind = bridgeKind
+        self.bridgeRole = bridgeRole
+        self.bridgeSharePercent = bridgeSharePercent
+        self.bridgePeerExpenseId = bridgePeerExpenseId
+        self.bridgeCounterpartyHustleId = bridgeCounterpartyHustleId
     }
 
     public func toTransaction() -> Transaction {
@@ -166,7 +188,13 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
             isBarterExchange: isBarterExchange,
             barterGoodsGiven: barterGoodsGiven,
             barterGoodsReceived: barterGoodsReceived,
-            barterEstimatedValue: barterEstimatedValue
+            barterEstimatedValue: barterEstimatedValue,
+            bridgeGroupId: bridgeGroupId,
+            bridgeKind: bridgeKind,
+            bridgeRole: bridgeRole,
+            bridgeSharePercent: bridgeSharePercent,
+            bridgePeerExpenseId: bridgePeerExpenseId,
+            bridgeCounterpartyHustleId: bridgeCounterpartyHustleId
         )
     }
 
@@ -207,7 +235,13 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
             isBarterExchange: entity.isBarterExchange,
             barterGoodsGiven: entity.barterGoodsGiven,
             barterGoodsReceived: entity.barterGoodsReceived,
-            barterEstimatedValue: entity.barterEstimatedValue
+            barterEstimatedValue: entity.barterEstimatedValue,
+            bridgeGroupId: entity.bridgeGroupId,
+            bridgeKind: entity.bridgeKind,
+            bridgeRole: entity.bridgeRole,
+            bridgeSharePercent: entity.bridgeSharePercent,
+            bridgePeerExpenseId: entity.bridgePeerExpenseId,
+            bridgeCounterpartyHustleId: entity.bridgeCounterpartyHustleId
         )
     }
 
@@ -228,7 +262,13 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
             isBarterExchange: transaction.isBarterExchange,
             barterGoodsGiven: transaction.barterGoodsGiven,
             barterGoodsReceived: transaction.barterGoodsReceived,
-            barterEstimatedValue: transaction.barterEstimatedValue
+            barterEstimatedValue: transaction.barterEstimatedValue,
+            bridgeGroupId: transaction.bridgeGroupId,
+            bridgeKind: transaction.bridgeKind,
+            bridgeRole: transaction.bridgeRole,
+            bridgeSharePercent: transaction.bridgeSharePercent,
+            bridgePeerExpenseId: transaction.bridgePeerExpenseId,
+            bridgeCounterpartyHustleId: transaction.bridgeCounterpartyHustleId
         )
     }
 }
@@ -541,6 +581,8 @@ public struct ExpenseRowDisplay: Identifiable {
     public var context: String?
     public var hustleId: UUID?
     public var isUnassignedWorkspace: Bool
+    public var workspaceLabel: String?
+    public var bridgeBadge: String?
 }
 
 public struct ExpensesSummaryDisplay {

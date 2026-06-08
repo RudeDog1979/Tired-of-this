@@ -168,10 +168,11 @@ struct BuxThemedCardForm<Content: View>: View {
             VStack(alignment: .leading, spacing: BuxLayout.section) {
                 content()
             }
-            .padding(.horizontal, BuxLayout.marginHorizontal)
+            .buxScreenContentMargins()
             .padding(.top, BuxLayout.tight)
             .padding(.bottom, 32)
         }
+        .buxSettingsDrillInChrome()
         .scrollDismissesKeyboard(.interactively)
     }
 }

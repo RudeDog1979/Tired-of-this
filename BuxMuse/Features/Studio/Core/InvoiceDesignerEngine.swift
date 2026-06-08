@@ -162,7 +162,8 @@ public final class InvoiceDesignerEngine: ObservableObject {
         currencyCode: String,
         snapshot: InvoiceDesignerSnapshot? = nil,
         autoDetectBankType: Bool = true,
-        bankTypeOverride: BankAccountType? = nil
+        bankTypeOverride: BankAccountType? = nil,
+        interfaceLocale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> InvoiceRenderContext {
         let formatter = Self.makeCurrencyFormatter(code: currencyCode)
         let display   = Self.computeTotals(
@@ -185,7 +186,8 @@ public final class InvoiceDesignerEngine: ObservableObject {
             snapshotRecipient: snapshot?.recipientPartySnapshot,
             countryCode: profile.countryCode.isEmpty ? currencyCode : profile.countryCode,
             autoDetectBankType: autoDetectBankType,
-            manualOverride: bankTypeOverride
+            manualOverride: bankTypeOverride,
+            interfaceLocale: interfaceLocale
         )
     }
 
@@ -199,7 +201,8 @@ public final class InvoiceDesignerEngine: ObservableObject {
         taxProfile: StudioTaxProfile,
         currencyCode: String,
         autoDetectBankType: Bool = true,
-        bankTypeOverride: BankAccountType? = nil
+        bankTypeOverride: BankAccountType? = nil,
+        interfaceLocale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> InvoiceRenderContext {
         let formatter = makeCurrencyFormatter(code: currencyCode)
         let display   = computeTotals(
@@ -222,7 +225,8 @@ public final class InvoiceDesignerEngine: ObservableObject {
             snapshotRecipient: snapshot.recipientPartySnapshot,
             countryCode: profile.countryCode,
             autoDetectBankType: autoDetectBankType,
-            manualOverride: bankTypeOverride
+            manualOverride: bankTypeOverride,
+            interfaceLocale: interfaceLocale
         )
     }
 

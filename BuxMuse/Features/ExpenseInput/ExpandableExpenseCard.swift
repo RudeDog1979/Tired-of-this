@@ -56,14 +56,34 @@ struct ExpandableExpenseCard: View {
                                     .textCase(nil)
                             }
 
-                            if expense.isUnassignedWorkspace {
-                                BuxCatalogText.text("Unassigned")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.orange)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color.orange.opacity(0.12))
-                                    .clipShape(Capsule())
+                            HStack(spacing: 6) {
+                                if let workspace = expense.workspaceLabel {
+                                    Text(workspace)
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(themeManager.current.accentColor)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(themeManager.current.accentColor.opacity(0.12))
+                                        .clipShape(Capsule())
+                                } else if expense.isUnassignedWorkspace {
+                                    BuxCatalogText.text("Unassigned")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.orange)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.orange.opacity(0.12))
+                                        .clipShape(Capsule())
+                                }
+
+                                if let bridge = expense.bridgeBadge {
+                                    Text(bridge)
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.purple)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.purple.opacity(0.12))
+                                        .clipShape(Capsule())
+                                }
                             }
                         }
 

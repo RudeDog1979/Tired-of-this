@@ -20,15 +20,11 @@ struct BudgetSettingsView: View {
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Budget method") {
-                Picker(selection: $store.budgetingMode) {
+                BuxSettingsSegmentedEnumRow(titleKey: "Budgeting Mode", selection: $store.budgetingMode) {
                     ForEach(BudgetingMode.allCases.filter { $0 != .custom }) { mode in
                         Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                     }
-                } label: {
-                    Text(BuxCatalogLabel.string("Budgeting Mode", locale: appSettingsManager.interfaceLocale))
                 }
-                .buxThemedSegmentedPicker()
-                .buxFormFieldPadding()
                 .onAppear {
                     store.migrateLegacyCustomBudgetModeIfNeeded()
                     store.normalizeEnvelopeCategoryStorageIfNeeded()
@@ -37,27 +33,18 @@ struct BudgetSettingsView: View {
 
             if store.budgetingMode == .simple || store.budgetingMode == .envelope {
                 BuxFormSection(title: "Income & payday profile") {
-                    Picker(selection: $store.incomeFundingSource) {
+                    BuxSettingsSegmentedEnumRow(titleKey: "Income Source", selection: $store.incomeFundingSource) {
                         ForEach(IncomeFundingSource.allCases) { source in
                             Text(source.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(source)
                         }
-                    } label: {
-                        Text(BuxCatalogLabel.string("Income Source", locale: appSettingsManager.interfaceLocale))
                     }
-                    .buxThemedSegmentedPicker()
-                    .buxFormFieldPadding()
 
                     BuxFormRowDivider()
-                    Picker(selection: $store.simpleBudgetCycle) {
+                    BuxSettingsMenuPickerRow(titleKey: "Payday Schedule", selection: $store.simpleBudgetCycle) {
                         ForEach(SimpleBudgetCycle.allCases) { cycle in
                             Text(cycle.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(cycle)
                         }
-                    } label: {
-                        Text(BuxCatalogLabel.string("Payday Schedule", locale: appSettingsManager.interfaceLocale))
                     }
-                    .pickerStyle(.menu)
-                    .tint(themeManager.current.accentColor)
-                    .buxFormFieldPadding()
 
                     if store.simpleBudgetCycle.needsAnchorDate {
                         BuxFormRowDivider()
@@ -72,34 +59,29 @@ struct BudgetSettingsView: View {
                     }
 
                     BuxFormRowDivider()
-                    HStack {
+                    BuxSettingsLabeledValueRow {
                         BuxCatalogDynamicText(key: "Spending limit this period")
                             .font(.system(size: 15, weight: .semibold))
-                        Spacer()
+                            .fixedSize(horizontal: false, vertical: true)
+                    } value: {
                         TextField(BuxCatalogLabel.string("Amount", locale: appSettingsManager.interfaceLocale), value: $store.simpleBudgetLimit, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .foregroundColor(themeManager.current.accentColor)
                             .font(.system(size: 16, weight: .bold))
-                            .frame(width: 120)
+                            .frame(minWidth: 120, maxWidth: 160)
                     }
-                    .buxFormFieldPadding()
 
                     BuxFormRowDivider()
-                    BuxCatalogDynamicText(key: "Your simple budget tracks expenses starting on your pay cycle—allowing you to measure spending relative to when your income arrives, rather than just the calendar month.")
-                        .font(.system(size: 12, weight: .medium))
-                        .buxLabelSecondary()
-                        .fixedSize(horizontal: false, vertical: true)
-                        .buxFormFieldPadding()
+                    BuxSettingsFootnote(key: "Your simple budget tracks expenses starting on your pay cycle—allowing you to measure spending relative to when your income arrives, rather than just the calendar month.")
                 }
             }
 
             BuxFormSection(title: "Intelligence rules") {
-                Toggle(isOn: $store.showBudgetWarnings) {
-                    Text(BuxCatalogLabel.string("Show Budget Warnings", locale: appSettingsManager.interfaceLocale))
-                }
-                    .tint(themeManager.current.accentColor)
-                    .buxFormFieldPadding()
+                BuxSettingsToggleRow(
+                    titleKey: "Show Budget Warnings",
+                    isOn: $store.showBudgetWarnings
+                )
                 if store.budgetingMode == .simple {
                     BuxFormRowDivider()
                     Stepper(
@@ -118,17 +100,11 @@ struct BudgetSettingsView: View {
                     .buxFormFieldPadding()
                 }
                 BuxFormRowDivider()
-                Toggle(isOn: $store.autoAdjustBudgetsFromHistory) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        BuxCatalogDynamicText(key: "Auto-adjust from history")
-                            .font(.system(size: 15, weight: .semibold))
-                        BuxCatalogDynamicText(key: "BuxMuse Brain will adjust limits based on seasonal spend trends")
-                            .font(.system(size: 11))
-                            .buxLabelSecondary()
-                    }
-                }
-                .tint(themeManager.current.accentColor)
-                .buxFormFieldPadding()
+                BuxSettingsToggleRow(
+                    titleKey: "Auto-adjust from history",
+                    subtitleKey: "BuxMuse Brain will adjust limits based on seasonal spend trends",
+                    isOn: $store.autoAdjustBudgetsFromHistory
+                )
             }
 
             BuxFormSection(title: "Custom envelope profiles") {

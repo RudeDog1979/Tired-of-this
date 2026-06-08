@@ -17,6 +17,8 @@ public final class PersistenceController: ObservableObject {
     /// App-wide main-queue context (`container.mainContext`). Never use from background queues.
     public private(set) var context: ModelContext
 
+    public var didRunSeedAndMigration = false
+
     /// Bumped when SwiftData models change incompatibly (avoids loadIssueModelContainer on old stores).
     private static let storeName = "BuxMuse_v3"
 

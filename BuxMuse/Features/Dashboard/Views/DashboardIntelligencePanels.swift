@@ -444,3 +444,78 @@ struct StudioIntelligenceSummaryCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
+
+// MARK: - Workspace Nexus ROI
+
+struct WorkspaceSynergyROIPanel: View {
+    let summary: WorkspaceSynergySummary
+
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BuxCatalogText.text("Cross-workspace flows")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+                .padding(.horizontal, 4)
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 16) {
+                    metricColumn(
+                        titleKey: "Splits this month",
+                        value: "\(summary.splitGroupsThisMonth)"
+                    )
+                    metricColumn(
+                        titleKey: "Transfer lanes",
+                        value: "\(summary.flows.count)"
+                    )
+                }
+
+                if summary.flows.isEmpty {
+                    BuxCatalogText.text("No owner transfers logged yet. Use Nexus bridge when adding an entry.")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                } else {
+                    ForEach(summary.flows.prefix(3)) { flow in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(flow.sourceName) → \(flow.targetName)")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                Text(
+                                    BuxLocalizedString.format(
+                                        "%lld transfers",
+                                        locale: appSettingsManager.interfaceLocale,
+                                        flow.eventCount
+                                    )
+                                )
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                            }
+                            Spacer()
+                            Text(appSettingsManager.format(flow.totalAmount))
+                            .font(.system(size: 14, weight: .black, design: .rounded))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        }
+                    }
+                }
+            }
+            .padding(BuxTokens.section)
+            .dashboardMaterialCardChrome(.outlined)
+        }
+    }
+
+    private func metricColumn(titleKey: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            BuxCatalogText.text(titleKey)
+                .font(.system(size: 9, weight: .bold))
+                .textCase(.uppercase)
+                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+            Text(value)
+                .font(.system(size: 18, weight: .black, design: .rounded))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}

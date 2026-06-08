@@ -16,18 +16,21 @@ enum BusinessCardPhotoLibraryAccess {
         case restricted
 
         var label: String {
-            let locale = BuxInterfaceLocale.currentInterfaceLocale
+            localizedLabel(locale: BuxInterfaceLocale.currentInterfaceLocale)
+        }
+
+        func localizedLabel(locale: Locale) -> String {
             switch self {
             case .notDetermined:
-                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Not asked yet"), locale: locale)
+                return BuxLocalizedString.string("Not asked yet", locale: locale)
             case .limited:
-                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Limited access"), locale: locale)
+                return BuxLocalizedString.string("Limited access", locale: locale)
             case .authorized:
-                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Full access"), locale: locale)
+                return BuxLocalizedString.string("Full access", locale: locale)
             case .denied:
-                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Denied"), locale: locale)
+                return BuxLocalizedString.string("Denied", locale: locale)
             case .restricted:
-                return BuxLocalizedString.string(String.LocalizationValue(stringLiteral: "Restricted"), locale: locale)
+                return BuxLocalizedString.string("Restricted", locale: locale)
             }
         }
     }

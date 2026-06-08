@@ -66,7 +66,7 @@ final class BuxNotificationInboxEngine {
                         continue
                     }
                     items.append(AppNotificationItem(
-                        id: "envelope-\(envelope.id.uuidString)-\(envelope.status.rawValue)",
+                        id: "envelope-\(envelope.id.uuidString)",
                         title: title,
                         message: format(
                             "%@: %@ of %@.",
@@ -88,7 +88,7 @@ final class BuxNotificationInboxEngine {
                     let ratio = NSDecimalNumber(decimal: spent / limit).doubleValue
                     if ratio >= threshold {
                         items.append(AppNotificationItem(
-                            id: "budget-warning-\(budgetName)",
+                            id: "budget-warning-active",
                             title: line("Budget nearly exhausted", locale: locale),
                             message: format(
                                 "%@: %@ spent of %@.",
@@ -172,10 +172,13 @@ final class BuxNotificationInboxEngine {
             ))
         }
 
+        let studioIncludesTaxDeadline = studioAlerts.contains { $0.id == "tax-deadline" }
+
         if settings.studioEnabled {
             for alert in studioAlerts {
+                let inboxId = alert.id == "tax-deadline" ? "tax-deadline" : "studio-\(alert.id)"
                 items.append(AppNotificationItem(
-                    id: "studio-\(alert.id)",
+                    id: inboxId,
                     title: alert.title,
                     message: alert.message,
                     date: now,
@@ -208,9 +211,12 @@ final class BuxNotificationInboxEngine {
                 }
             }
 
-            if settings.taxDeadlineRemindersEnabled, let days = taxDeadlineDays, days <= 30 {
+            if settings.taxDeadlineRemindersEnabled,
+               let days = taxDeadlineDays,
+               days <= 30,
+               !studioIncludesTaxDeadline {
                 items.append(AppNotificationItem(
-                    id: "tax-deadline-\(days)",
+                    id: "tax-deadline",
                     title: line("Tax deadline approaching", locale: locale),
                     message: format(
                         "%lld day(s) until your next scheduled tax payment.",
@@ -229,7 +235,12 @@ final class BuxNotificationInboxEngine {
         let dismissedIds = Set(UserDefaults.standard.stringArray(forKey: dismissedIdsKey) ?? [])
         items = items.map { item in
             var copy = item
-            copy.isRead = readIds.contains(item.id)
+            if item.id.hasPrefix("tip-") {
+                // Historical tips are inbox archive rows — not actionable unread alerts.
+                copy.isRead = true
+            } else {
+                copy.isRead = readIds.contains(item.id)
+            }
             return copy
         }
         .filter { !dismissedIds.contains($0.id) }
@@ -278,13 +289,19 @@ final class BuxNotificationInboxEngine {
         }
         guard await requestAuthorizationIfNeeded() else { return }
 
-        let eligible = inbox.items.filter { !$0.isRead && isSchedulableCategory($0.category) }
+        let eligible = inbox.items.filter { shouldScheduleLocalPush(for: $0) }
         let desiredNotificationIds = Set(eligible.map { managedNotificationId($0.id) })
 
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
+        let allPendingIds = Set(pending.map(\.identifier))
         let managedPendingIds = Set(
             pending.map(\.identifier).filter { $0.hasPrefix("buxmuse.inbox.") }
+        )
+        let delivered = await center.deliveredNotifications()
+        let allDeliveredIds = Set(delivered.map(\.request.identifier))
+        let managedDeliveredIds = Set(
+            delivered.map(\.request.identifier).filter { $0.hasPrefix("buxmuse.inbox.") }
         )
 
         let stalePending = managedPendingIds.subtracting(desiredNotificationIds)
@@ -296,10 +313,30 @@ final class BuxNotificationInboxEngine {
         let activeItemIds = Set(inbox.items.map(\.id))
         pushedIds = pushedIds.intersection(activeItemIds)
 
+        for deliveredId in managedDeliveredIds {
+            pushedIds.insert(inboxItemId(fromManagedNotificationId: deliveredId))
+        }
+
         for item in eligible {
-            guard !pushedIds.contains(item.id) else { continue }
+            if pushedIds.contains(item.id) { continue }
+
+            if let expenseId = billExpenseId(from: item.id) {
+                let renewalId = expenseRenewalNotificationId(expenseId)
+                if allPendingIds.contains(renewalId) || allDeliveredIds.contains(renewalId) {
+                    pushedIds.insert(item.id)
+                    continue
+                }
+            }
+
             let notificationId = managedNotificationId(item.id)
-            guard !managedPendingIds.contains(notificationId) else { continue }
+            if managedPendingIds.contains(notificationId) {
+                pushedIds.insert(item.id)
+                continue
+            }
+            if managedDeliveredIds.contains(notificationId) {
+                pushedIds.insert(item.id)
+                continue
+            }
             if await schedule(item: item, settings: settings) {
                 pushedIds.insert(item.id)
             }
@@ -374,6 +411,12 @@ final class BuxNotificationInboxEngine {
         }
     }
 
+    private func shouldScheduleLocalPush(for item: AppNotificationItem) -> Bool {
+        guard !item.isRead else { return false }
+        if item.id.hasPrefix("tip-") { return false }
+        return isSchedulableCategory(item.category)
+    }
+
     private func isSchedulableCategory(_ category: AppNotificationCategory) -> Bool {
         switch category {
         case .invoice, .tax, .budget, .bill, .studio, .digest:
@@ -394,16 +437,31 @@ final class BuxNotificationInboxEngine {
         return now.addingTimeInterval(180)
     }
 
+    /// Daily digest fires once per calendar day at 8:00 PM local time.
     private func dailySummaryFireDate(from now: Date) -> Date? {
         let calendar = Calendar.current
         var components = calendar.dateComponents([.year, .month, .day], from: now)
         components.hour = 20
         components.minute = 0
-        guard var target = calendar.date(from: components) else { return nil }
-        if target <= now {
-            target = calendar.date(byAdding: .day, value: 1, to: target) ?? target
+        components.second = 0
+        guard let todayAtEight = calendar.date(from: components) else { return nil }
+        if now < todayAtEight {
+            return todayAtEight
         }
-        return target
+        return calendar.date(byAdding: .day, value: 1, to: todayAtEight)
+    }
+
+    private func inboxItemId(fromManagedNotificationId notificationId: String) -> String {
+        String(notificationId.dropFirst("buxmuse.inbox.".count))
+    }
+
+    private func billExpenseId(from itemId: String) -> UUID? {
+        guard itemId.hasPrefix("bill-") else { return nil }
+        return UUID(uuidString: String(itemId.dropFirst(5)))
+    }
+
+    private func expenseRenewalNotificationId(_ expenseId: UUID) -> String {
+        "buxmuse.expense.renewal.\(expenseId.uuidString)"
     }
 
     private func pushedIdsSet() -> Set<String> {
