@@ -251,8 +251,11 @@ public final class StudioBrain: ObservableObject {
         let simResult = StudioTaxEngine.simulate(
             profile: store.profile,
             taxProfile: store.taxProfile,
-            baseResult: baseResult,
-            vatToggled: taxSandboxParams.indirectTaxRegistered,
+            invoices: store.invoices,
+            receipts: store.receipts,
+            mileageEntries: store.mileageEntries,
+            mileageRatePerUnit: mileageRate,
+            vatToggled: taxSandboxParams.simulateVATInScenario,
             hypotheticalRateIncrease: Decimal(taxSandboxParams.rateIncrease),
             hypotheticalHoursCount: taxSandboxParams.billableHours,
             newPurchasesAmount: Decimal(taxSandboxParams.newPurchases)
@@ -298,25 +301,15 @@ public final class StudioBrain: ObservableObject {
     private func buildIncomeTaxDisplay() -> IncomeTaxDisplay {
         guard settings.studioEnabled else { return .empty }
         let mileageRate = SettingsStore.shared.mileageRatePerUnit
-        let breakdown = StudioIncomeTaxEngine.compute(
+        return IncomeTaxDisplayBuilder.build(
+            profile: store.profile,
+            taxProfile: store.taxProfile,
             invoices: store.invoices,
             receipts: store.receipts,
-            taxProfile: store.taxProfile,
             mileageEntries: store.mileageEntries,
-            mileageRatePerUnit: mileageRate
-        )
-        let ratesConfigured = store.taxProfile.estimatedIncomeTaxRatePercent != nil
-            || store.taxProfile.estimatedSelfEmployedRatePercent != nil
-        return IncomeTaxDisplay(
-            totalIncomeFormatted: appSettings.format(breakdown.totalIncome),
-            deductibleExpensesFormatted: appSettings.format(breakdown.deductibleExpenses),
-            taxableIncomeFormatted: appSettings.format(breakdown.taxableIncome),
-            incomeTaxFormatted: appSettings.format(breakdown.incomeTax),
-            selfEmployedTaxFormatted: appSettings.format(breakdown.selfEmployedTax),
-            indirectTaxNetFormatted: appSettings.format(breakdown.indirectTaxNet),
-            totalEstimatedTaxFormatted: appSettings.format(breakdown.totalEstimatedTax),
-            effectiveRatePercent: Int(breakdown.effectiveRate * 100),
-            ratesConfigured: ratesConfigured
+            mileageRatePerUnit: mileageRate,
+            format: { appSettings.format($0) },
+            locale: appSettings.interfaceLocale
         )
     }
 
@@ -346,18 +339,8 @@ public final class StudioBrain: ObservableObject {
         } else {
             nextLabel = BuxCatalogLabel.string("Configure payment schedule in Tax Profile", locale: locale)
         }
-        let calendar = Calendar.current
-        let qMonth = calendar.component(.month, from: estimate.periodStart)
-        let qYear = calendar.component(.year, from: estimate.periodStart)
-        let quarterNumber = ((qMonth - 1) / 3) + 1
-        let localizedQuarter = BuxLocalizedString.format(
-            "Q%lld %lld",
-            locale: locale,
-            Int64(quarterNumber),
-            Int64(qYear)
-        )
         return QuarterlyTaxDisplay(
-            quarterLabel: localizedQuarter,
+            quarterLabel: estimate.quarterLabel,
             periodRangeLabel: range,
             incomeTaxFormatted: appSettings.format(estimate.incomeTax),
             selfEmployedTaxFormatted: appSettings.format(estimate.selfEmployedTax),
@@ -372,6 +355,11 @@ public final class StudioBrain: ObservableObject {
     private func formatIncomeBreakdown(_ breakdown: IncomeTaxBreakdown) -> IncomeTaxDisplay {
         let ratesConfigured = store.taxProfile.estimatedIncomeTaxRatePercent != nil
             || store.taxProfile.estimatedSelfEmployedRatePercent != nil
+            || !store.taxProfile.incomeTaxRules.isEmpty
+        let netAfterTax = max(
+            0,
+            breakdown.totalIncome - breakdown.totalEstimatedTax - breakdown.indirectTaxNet
+        )
         return IncomeTaxDisplay(
             totalIncomeFormatted: appSettings.format(breakdown.totalIncome),
             deductibleExpensesFormatted: appSettings.format(breakdown.deductibleExpenses),
@@ -379,9 +367,18 @@ public final class StudioBrain: ObservableObject {
             incomeTaxFormatted: appSettings.format(breakdown.incomeTax),
             selfEmployedTaxFormatted: appSettings.format(breakdown.selfEmployedTax),
             indirectTaxNetFormatted: appSettings.format(breakdown.indirectTaxNet),
-            totalEstimatedTaxFormatted: appSettings.format(breakdown.totalEstimatedTax),
+            totalEstimatedTaxFormatted: appSettings.format(breakdown.totalEstimatedTax + breakdown.indirectTaxNet),
             effectiveRatePercent: Int(breakdown.effectiveRate * 100),
-            ratesConfigured: ratesConfigured
+            ratesConfigured: ratesConfigured,
+            netAfterTaxFormatted: appSettings.format(netAfterTax),
+            marginalRatePercent: nil,
+            periodLabel: BuxCatalogLabel.string("Current quarter", locale: appSettings.interfaceLocale),
+            coverageTierLabel: TaxComputeCatalogStore.shared
+                .coverageTier(for: store.taxProfile.selectedTaxCountry ?? store.profile.countryCode)
+                .catalogLabelKey,
+            rulesAsOfLabel: nil,
+            detailLines: [],
+            usesCatalogEngine: false
         )
     }
 
@@ -413,10 +410,11 @@ public final class StudioBrain: ObservableObject {
     private func buildSelfEmployedDashboardDisplay() -> SelfEmployedDashboardDisplay {
         guard settings.studioEnabled else { return .empty }
         let mileageRate = SettingsStore.shared.mileageRatePerUnit
-        let breakdown = StudioIncomeTaxEngine.compute(
+        let breakdown = WorldTaxEngine.incomeTaxBreakdown(
+            profile: store.profile,
+            taxProfile: store.taxProfile,
             invoices: store.invoices,
             receipts: store.receipts,
-            taxProfile: store.taxProfile,
             mileageEntries: store.mileageEntries,
             mileageRatePerUnit: mileageRate
         )
@@ -956,6 +954,9 @@ public final class StudioBrain: ObservableObject {
         let sparkline = TaxStudioChartEngine.taxPressureSparkline(
             invoices: store.invoices,
             receipts: store.receipts,
+            mileageEntries: store.mileageEntries,
+            mileageRatePerUnit: SettingsStore.shared.mileageRatePerUnit,
+            catalogRules: store.taxProfile.deductionCategories,
             effectiveRate: intel.breakdown.effectiveRate,
             now: ctx.now
         )

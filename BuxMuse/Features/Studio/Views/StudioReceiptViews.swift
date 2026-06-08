@@ -40,12 +40,14 @@ struct StudioReceiptsListView: View {
             StudioExpenseEditorView(receiptToEdit: nil)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .environmentObject(store)
                 .buxStudioSheetContent()
         }
         .sheet(isPresented: $showScanner) {
             StudioReceiptScannerView()
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .environmentObject(store)
                 .buxStudioSheetContent()
         }
     }
@@ -218,11 +220,24 @@ struct StudioReceiptScannerView: View {
     @State private var merchant = ""
     @State private var amount = ""
     @State private var date = Date()
-    @State private var category = "Office Expenses"
+    @State private var category = ""
     @State private var isDeductible = true
-    @State private var strength: DeductionStrength = .strong
+    @State private var deductiblePercentage: Double = 100
 
     private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private var categoryOptions: [ReceiptDeductionCategoryOption] {
+        ReceiptDeductionCategoryResolver.pickerOptions(catalogRules: store.taxProfile.deductionCategories)
+    }
+
+    private var categoryHint: (strength: DeductionStrength, note: String) {
+        ReceiptDeductionCategoryResolver.hint(
+            for: category,
+            catalogRules: store.taxProfile.deductionCategories,
+            countryCode: appSettingsManager.selectedCountry.id,
+            locale: locale
+        )
+    }
 
     private func loc(_ key: String) -> String {
         BuxCatalogLabel.string(key, locale: locale)
@@ -329,10 +344,18 @@ struct StudioReceiptScannerView: View {
 
                             BuxFormSection(title: "Tax sandbox settings") {
                                 Picker(loc("Deduction Category"), selection: $category) {
-                                    BuxCatalogDynamicText(key: "Office Expenses").tag("Office Expenses")
-                                    BuxCatalogDynamicText(key: "Software Subscriptions").tag("Software Subscriptions")
-                                    BuxCatalogDynamicText(key: "Hardware Assets").tag("Hardware Assets")
-                                    BuxCatalogDynamicText(key: "Travel & Lodging").tag("Travel & Lodging")
+                                    ForEach(categoryOptions) { option in
+                                        HStack {
+                                            Text(BuxCatalogLabel.string(option.labelKey, locale: locale))
+                                            if option.deductibilityPercent < 100 {
+                                                Text("(\(option.deductibilityPercent)%)")
+                                            }
+                                        }
+                                        .tag(option.storageValue)
+                                    }
+                                }
+                                .onChange(of: category) { _, newValue in
+                                    applySuggestedDeductibility(for: newValue)
                                 }
                                 .tint(themeManager.contrastAccentColor(for: colorScheme))
                                 .buxFormFieldPadding()
@@ -340,13 +363,31 @@ struct StudioReceiptScannerView: View {
                                 Toggle(loc("Eligible for Write-off"), isOn: $isDeductible)
                                     .tint(themeManager.contrastAccentColor(for: colorScheme))
                                     .buxFormFieldPadding()
-                                BuxFormRowDivider()
-                                Picker(loc("Deduction Strength"), selection: $strength) {
-                                    ForEach(DeductionStrength.allCases) { st in
-                                        Text(st.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(st)
-                                    }
+                                if isDeductible {
+                                    BuxFormRowDivider()
+                                    infoRow(
+                                        label: loc("Deductible %"),
+                                        value: BuxLocalizedString.format(
+                                            "%lld%%",
+                                            locale: locale,
+                                            Int64(deductiblePercentage)
+                                        )
+                                    )
+                                    .buxFormFieldPadding()
                                 }
-                                .tint(themeManager.contrastAccentColor(for: colorScheme))
+                                BuxFormRowDivider()
+                                HStack {
+                                    Text(categoryHint.strength.catalogLabel(locale: locale))
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(studioReceiptDeductionColor(categoryHint.strength))
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(studioReceiptDeductionColor(categoryHint.strength).opacity(0.12))
+                                        .clipShape(Capsule())
+                                    Text(categoryHint.note)
+                                        .font(.system(size: 11))
+                                        .buxLabelSecondary()
+                                }
                                 .buxFormFieldPadding()
                             }
                         }
@@ -412,26 +453,21 @@ struct StudioReceiptScannerView: View {
                     amount = "\(data.amount)"
                     date = data.date
                     
-                    // Simple categorization heuristic
-                    let lowerMerchant = data.merchant.lowercased()
-                    if lowerMerchant.contains("apple") || lowerMerchant.contains("best buy") {
-                        category = "Hardware Assets"
-                        strength = .medium
-                    } else if lowerMerchant.contains("adobe") || lowerMerchant.contains("figma") || lowerMerchant.contains("microsoft") {
-                        category = "Software Subscriptions"
-                        strength = .strong
-                    } else {
-                        category = "Office Expenses"
-                        strength = .strong
-                    }
+                    category = ReceiptDeductionCategoryResolver.suggestedCategory(
+                        merchant: data.merchant,
+                        catalogRules: store.taxProfile.deductionCategories
+                    )
+                    applySuggestedDeductibility(for: category)
                     
                 case .failure:
                     // Fallback to manual entry with filled fields
                     merchant = "Manual Receipt scan"
                     amount = "0.00"
                     date = Date()
-                    category = "Office Expenses"
-                    strength = .strong
+                    category = ReceiptDeductionCategoryResolver.defaultCategory(
+                        catalogRules: store.taxProfile.deductionCategories
+                    )
+                    applySuggestedDeductibility(for: category)
                 }
             }
         }
@@ -447,9 +483,12 @@ struct StudioReceiptScannerView: View {
             
             merchant = "Apple Store Fifth Ave"
             amount = "2999.00"
-            category = "Hardware Assets"
+            category = ReceiptDeductionCategoryResolver.suggestedCategory(
+                merchant: "Apple Store Fifth Ave",
+                catalogRules: store.taxProfile.deductionCategories
+            )
             isDeductible = true
-            strength = .medium
+            applySuggestedDeductibility(for: category)
             date = Date()
         }
     }
@@ -461,6 +500,10 @@ struct StudioReceiptScannerView: View {
         if let img = scannedImage {
             localPath = persistReceiptImage(img, id: receiptId)
         }
+        let strength = ReceiptDeductionCategoryResolver.deductionStrength(
+            for: category,
+            catalogRules: store.taxProfile.deductionCategories
+        )
         let r = StudioReceipt(
             id: receiptId,
             date: date,
@@ -470,9 +513,30 @@ struct StudioReceiptScannerView: View {
             category: category,
             isDeductible: isDeductible,
             deductionStrength: strength,
-            localImagePath: localPath
+            localImagePath: localPath,
+            deductiblePercentage: isDeductible ? deductiblePercentage : 0
         )
         store.addReceipt(r)
+    }
+
+    private func applySuggestedDeductibility(for newCategory: String) {
+        guard let suggested = ReceiptDeductionCategoryResolver.suggestedDeductiblePercentage(
+            for: newCategory,
+            catalogRules: store.taxProfile.deductionCategories
+        ) else { return }
+        deductiblePercentage = suggested
+        isDeductible = suggested > 0
+    }
+
+    private func infoRow(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 13))
+                .buxLabelSecondary()
+            Spacer()
+            Text(value)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+        }
     }
 
     private func persistReceiptImage(_ image: UIImage, id: UUID) -> String? {
@@ -496,9 +560,36 @@ struct StudioReceiptDetailView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
-    
+    @EnvironmentObject private var store: StudioStore
+
     var receipt: StudioReceipt
     @State private var showEdit = false
+
+    private var effectiveDeductibleAmount: Decimal {
+        StudioDeductionMath.deductibleAmount(
+            for: receipt,
+            catalogRules: store.taxProfile.deductionCategories
+        )
+    }
+
+    private var catalogDeductibilityNote: String? {
+        guard let rule = ReceiptDeductionCategoryResolver.matchingRule(
+            for: receipt.category,
+            rules: store.taxProfile.deductionCategories
+        ) else { return nil }
+        let pct = ReceiptDeductionCategoryResolver.deductibilityPercent(for: rule)
+        let locale = appSettingsManager.interfaceLocale
+        let ruleName = BuxCatalogLabel.string(rule.name, locale: locale)
+        if pct < 100 {
+            return BuxLocalizedString.format(
+                "Tax profile applies %lld%% for %@.",
+                locale: locale,
+                Int64(pct),
+                ruleName
+            )
+        }
+        return BuxCatalogLabel.string("Fully deductible per tax profile.", locale: locale)
+    }
     
     var body: some View {
         ZStack {
@@ -537,7 +628,15 @@ struct StudioReceiptDetailView: View {
                         )
                         infoRow(label: "DEDUCTIBLE", value: receipt.isDeductible ? "\(Int(receipt.deductiblePercentage))%" : "Non-Deductible")
                         if receipt.isDeductible {
-                            infoRow(label: "DEDUCTIBLE AMOUNT", value: appSettingsManager.format(receipt.deductibleAmount))
+                            infoRow(
+                                label: "DEDUCTIBLE AMOUNT",
+                                value: appSettingsManager.format(effectiveDeductibleAmount)
+                            )
+                        }
+                        if let catalogDeductibilityNote {
+                            Text(catalogDeductibilityNote)
+                                .font(.system(size: 11))
+                                .buxLabelSecondary()
                         }
                     }
                     .padding(BuxLayout.section)
@@ -565,6 +664,7 @@ struct StudioReceiptDetailView: View {
             StudioExpenseEditorView(receiptToEdit: receipt)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
+                .environmentObject(store)
                 .buxStudioSheetContent()
         }
     }
@@ -596,5 +696,14 @@ struct StudioReceiptDetailView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
+    }
+}
+
+private func studioReceiptDeductionColor(_ strength: DeductionStrength) -> Color {
+    switch strength {
+    case .strong: return .green
+    case .medium: return .blue
+    case .weak: return .orange
+    case .risky: return .red
     }
 }

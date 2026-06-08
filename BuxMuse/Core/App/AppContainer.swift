@@ -166,6 +166,7 @@ final class AppContainer: ObservableObject {
     func scheduleTaxCatalogRefresh(force: Bool = false) {
         Task { @MainActor in
             await TaxManager.shared.ensureCatalogLoaded(force: force)
+            await TaxComputeCatalogStore.shared.ensureCatalogLoaded(force: force)
         }
     }
 

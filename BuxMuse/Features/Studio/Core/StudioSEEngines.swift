@@ -63,22 +63,52 @@ public enum ExpenseBusinessUse: String, Codable, CaseIterable, Identifiable {
 // MARK: - Deduction math
 
 public enum StudioDeductionMath {
-    public static func deductibleAmount(for receipt: StudioReceipt) -> Decimal {
+    public static func deductibleAmount(
+        for receipt: StudioReceipt,
+        catalogRules: [DeductionCategoryRule] = []
+    ) -> Decimal {
         guard receipt.isBusiness, receipt.isDeductible else { return 0 }
-        let pct = Decimal(receipt.deductiblePercentage / 100.0)
-        return receipt.amount * pct
+        let manualPct = Decimal(receipt.deductiblePercentage / 100.0)
+        if let catalogPct = catalogDeductibilityFraction(for: receipt.category, rules: catalogRules) {
+            return receipt.amount * catalogPct
+        }
+        return receipt.amount * manualPct
     }
 
-    public static func totalDeductible(receipts: [StudioReceipt]) -> Decimal {
-        receipts.reduce(Decimal(0)) { $0 + deductibleAmount(for: $1) }
+    public static func totalDeductible(
+        receipts: [StudioReceipt],
+        catalogRules: [DeductionCategoryRule] = []
+    ) -> Decimal {
+        receipts.reduce(Decimal(0)) { $0 + deductibleAmount(for: $1, catalogRules: catalogRules) }
     }
 
     public static func totalDeductible(
         receipts: [StudioReceipt],
         mileageEntries: [MileageEntry],
-        mileageRatePerUnit: Decimal
+        mileageRatePerUnit: Decimal,
+        catalogRules: [DeductionCategoryRule] = []
     ) -> Decimal {
-        totalDeductible(receipts: receipts) + MileageBrain.deductionAmount(entries: mileageEntries, ratePerUnit: mileageRatePerUnit)
+        totalDeductible(receipts: receipts, catalogRules: catalogRules)
+            + MileageBrain.deductionAmount(entries: mileageEntries, ratePerUnit: mileageRatePerUnit)
+    }
+
+    /// Maps receipt category text to catalog `deductionCategories` (Phase D).
+    public static func catalogDeductibilityFraction(
+        for category: String,
+        rules: [DeductionCategoryRule]
+    ) -> Decimal? {
+        let lower = category.lowercased()
+        guard let rule = rules.first(where: {
+            lower.contains($0.categoryId.lowercased())
+                || lower.contains($0.name.lowercased())
+        }) else {
+            return nil
+        }
+        switch rule.deductibilityType {
+        case .full: return 1
+        case .partial: return 0.5
+        case .limited: return 0.25
+        }
     }
 
     public static func totalCashflowExpenses(receipts: [StudioReceipt]) -> Decimal {
@@ -134,7 +164,8 @@ public enum StudioIncomeTaxEngine {
         let deductions = StudioDeductionMath.totalDeductible(
             receipts: filteredReceipts,
             mileageEntries: filteredMileage,
-            mileageRatePerUnit: mileageRatePerUnit
+            mileageRatePerUnit: mileageRatePerUnit,
+            catalogRules: taxProfile.deductionCategories
         )
         let taxable = max(0, income - deductions)
 
@@ -218,24 +249,41 @@ public enum QuarterlyTaxEngine {
         now: Date = Date()
     ) -> QuarterlyTaxEstimate {
         let calendar = Calendar.current
-        let (start, end, label) = quarterBounds(now: now, calendar: calendar)
-        let breakdown = StudioIncomeTaxEngine.compute(
+        let countryCode = TaxManager.normalizeCountryCode(
+            taxProfile.selectedTaxCountry ?? taxProfile.countryCode
+        )
+        let period = WorldTaxEngine.defaultQuarterPeriod(countryCode: countryCode, reference: now)
+        let incomePath: TaxEngineIncomePath = switch taxProfile.taxIncomeType {
+        case .employed: .employedHypothetical
+        case .oneOff: .gig
+        case .selfEmployed: .selfEmployed
+        }
+        let request = TaxComputationRequest(
+            profile: StudioProfile(taxYearStartMonth: taxYearStartMonth),
+            taxProfile: taxProfile,
             invoices: invoices,
             receipts: receipts,
-            taxProfile: taxProfile,
             mileageEntries: mileageEntries,
             mileageRatePerUnit: mileageRatePerUnit,
-            periodStart: start,
-            periodEnd: end
+            incomePath: incomePath,
+            period: period,
+            now: now
         )
+        let (start, end) = WorldTaxEngine.periodBounds(for: request)
+        let label = WorldTaxEngine.quarterLabel(
+            countryCode: countryCode,
+            reference: now,
+            calendar: calendar
+        )
+        let breakdown = WorldTaxEngine.compute(request).legacyBreakdown
 
         let nextPayment = nextPaymentDate(schedule: taxProfile.paymentSchedule, now: now, calendar: calendar)
         let setAside = breakdown.totalEstimatedTax + breakdown.indirectTaxNet
 
         return QuarterlyTaxEstimate(
             quarterLabel: label,
-            periodStart: start,
-            periodEnd: end,
+            periodStart: start ?? now,
+            periodEnd: end ?? now,
             incomeTax: breakdown.incomeTax,
             selfEmployedTax: breakdown.selfEmployedTax,
             indirectTaxCollected: breakdown.indirectTaxNet,
@@ -244,18 +292,6 @@ public enum QuarterlyTaxEngine {
             suggestedSetAside: setAside,
             breakdown: breakdown
         )
-    }
-
-    private static func quarterBounds(now: Date, calendar: Calendar) -> (Date, Date, String) {
-        let month = calendar.component(.month, from: now)
-        let year = calendar.component(.year, from: now)
-        let q = ((month - 1) / 3) + 1
-        let startMonth = (q - 1) * 3 + 1
-        let startComps = DateComponents(year: year, month: startMonth, day: 1)
-        let start = calendar.date(from: startComps) ?? now
-        let endComps = DateComponents(year: year, month: startMonth + 3, day: 1)
-        let end = calendar.date(from: endComps)?.addingTimeInterval(-1) ?? now
-        return (start, end, "Q\(q) \(year)")
     }
 
     private static func nextPaymentDate(schedule: String, now: Date, calendar: Calendar) -> Date? {
@@ -455,6 +491,8 @@ public struct StudioInvoiceSettings: Codable, Equatable {
     public var bankDetails: String
     public var showLegalFooter: Bool
     public var defaultTaxRatePercent: Decimal?
+    /// Default invoice tax source — Tax Profile auto-fill unless user picks Custom.
+    public var defaultInvoiceTaxSource: InvoiceTaxSource
     /// Persisted designer template config. Loaded as default on every new invoice.
     public var defaultTemplateConfig: InvoiceTemplateConfig?
     /// Persisted designer payment config. Loaded as default on every new invoice.
@@ -478,6 +516,7 @@ public struct StudioInvoiceSettings: Codable, Equatable {
         bankDetails: String = "",
         showLegalFooter: Bool = true,
         defaultTaxRatePercent: Decimal? = nil,
+        defaultInvoiceTaxSource: InvoiceTaxSource = .taxProfile,
         defaultTemplateConfig: InvoiceTemplateConfig? = nil,
         defaultPaymentConfig: InvoicePaymentConfig? = nil,
         brandSyncFromPrimaryCard: Bool = true,
@@ -495,6 +534,7 @@ public struct StudioInvoiceSettings: Codable, Equatable {
         self.bankDetails           = bankDetails
         self.showLegalFooter       = showLegalFooter
         self.defaultTaxRatePercent = defaultTaxRatePercent
+        self.defaultInvoiceTaxSource = defaultInvoiceTaxSource
         self.defaultTemplateConfig = defaultTemplateConfig
         self.defaultPaymentConfig  = defaultPaymentConfig
         self.brandSyncFromPrimaryCard = brandSyncFromPrimaryCard
@@ -524,6 +564,7 @@ extension StudioInvoiceSettings {
         bankDetails = try c.decode(String.self, forKey: .bankDetails)
         showLegalFooter = try c.decodeIfPresent(Bool.self, forKey: .showLegalFooter) ?? true
         defaultTaxRatePercent = try c.decodeIfPresent(Decimal.self, forKey: .defaultTaxRatePercent)
+        defaultInvoiceTaxSource = try c.decodeIfPresent(InvoiceTaxSource.self, forKey: .defaultInvoiceTaxSource) ?? .taxProfile
         defaultTemplateConfig = try c.decodeIfPresent(InvoiceTemplateConfig.self, forKey: .defaultTemplateConfig)
         defaultPaymentConfig = try c.decodeIfPresent(InvoicePaymentConfig.self, forKey: .defaultPaymentConfig)
         brandSyncFromPrimaryCard = try c.decodeIfPresent(Bool.self, forKey: .brandSyncFromPrimaryCard) ?? true

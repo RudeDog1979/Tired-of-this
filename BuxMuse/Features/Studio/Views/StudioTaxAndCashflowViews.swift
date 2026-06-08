@@ -36,7 +36,12 @@ struct StudioTaxOverviewView: View {
         }
         .onAppear {
             var params = studioBrain.taxSandboxParams
-            params.indirectTaxRegistered = store.taxProfile.vatRegistered
+            params.simulateVATInScenario = store.taxProfile.vatRegistered
+            studioBrain.setTaxSandboxParams(params)
+        }
+        .onChange(of: store.taxProfile.vatRegistered) { _, registered in
+            var params = studioBrain.taxSandboxParams
+            params.simulateVATInScenario = registered
             studioBrain.setTaxSandboxParams(params)
         }
     }
@@ -45,6 +50,8 @@ struct StudioTaxOverviewView: View {
 
     private func taxOverviewContent(_ snapshot: TaxSandboxDisplay) -> some View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
+            taxIdentityCard(snapshot)
+            complianceNoticesCard
             primaryRulesCard(snapshot)
             estimatesCard(snapshot)
             simulatorSandboxCard(snapshot)
@@ -170,6 +177,57 @@ struct StudioTaxOverviewView: View {
         }
     }
 
+    private var complianceNoticesCard: some View {
+        let notices = TaxComplianceAdvisor.notices(
+            taxProfile: store.taxProfile,
+            invoices: store.invoices,
+            locale: appSettingsManager.interfaceLocale
+        )
+        return Group {
+            if !notices.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    BuxCatalogDynamicText(key: "Tax checks")
+                        .font(.system(size: 11, weight: .bold))
+                        .buxLabelSecondary()
+                    ForEach(notices) { notice in
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: notice.severity == .warning ? "exclamationmark.triangle.fill" : "info.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(notice.severity == .warning ? .orange : themeManager.contrastAccentColor(for: colorScheme))
+                            Text(BuxCatalogLabel.string(notice.messageKey, locale: appSettingsManager.interfaceLocale))
+                                .font(.system(size: 12))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                .padding(BuxLayout.section)
+                .studioThemedCardChrome(cornerRadius: 24)
+            }
+        }
+    }
+
+    private func taxIdentityCard(_ snapshot: TaxSandboxDisplay) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            BuxCatalogDynamicText(key: "Tax identity")
+                .font(.system(size: 11, weight: .bold))
+                .buxLabelSecondary()
+            Text(
+                TaxComplianceAdvisor.identitySummary(
+                    taxProfile: store.taxProfile,
+                    locale: appSettingsManager.interfaceLocale
+                )
+            )
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            BuxCatalogDynamicText(key: "Income tax and indirect tax (VAT/GST) are set once here. Invoices and estimates follow this profile.")
+                .font(.system(size: 11))
+                .buxLabelSecondary()
+        }
+        .padding(BuxLayout.section)
+        .studioThemedCardChrome(cornerRadius: 24)
+    }
+
     private func simulatorSandboxCard(_ snapshot: TaxSandboxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             BuxCatalogDynamicText(key: "Interactive tax simulator")
@@ -177,15 +235,31 @@ struct StudioTaxOverviewView: View {
                 .buxLabelSecondary()
 
             VStack(spacing: 12) {
-                Toggle(snapshot.indirectTaxRegistrationLabel, isOn: Binding(
-                    get: { studioBrain.taxSandboxParams.indirectTaxRegistered },
+                HStack {
+                    BuxCatalogDynamicText(key: "Saved indirect tax status")
+                        .font(.system(size: 12))
+                        .buxLabelSecondary()
+                    Spacer()
+                    Text(snapshot.indirectTaxRegistrationLabel)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                }
+
+                Toggle(isOn: Binding(
+                    get: { studioBrain.taxSandboxParams.simulateVATInScenario },
                     set: { newValue in
                         var params = studioBrain.taxSandboxParams
-                        params.indirectTaxRegistered = newValue
+                        params.simulateVATInScenario = newValue
                         studioBrain.setTaxSandboxParams(params)
                     }
-                ))
-                .font(.system(size: 13, weight: .semibold))
+                )) {
+                    BuxCatalogDynamicText(key: "Include VAT in this simulation")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                BuxCatalogDynamicText(key: "Does not change Tax Profile — what-if only.")
+                    .font(.system(size: 10))
+                    .buxLabelSecondary()
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 Divider()
 

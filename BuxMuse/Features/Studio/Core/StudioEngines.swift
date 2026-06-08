@@ -461,13 +461,18 @@ public final class StudioTaxEngine {
         // 3. Taxable Income
         let taxableIncome = max(Decimal(0), totalGross - totalDeductions)
         
-        // 4. Income tax estimate from user-set effective rates
-        let breakdown = StudioIncomeTaxEngine.compute(
+        let countryCode = taxProfile.selectedTaxCountry ?? profile.countryCode
+        let period = WorldTaxEngine.defaultHubPeriod(countryCode: countryCode)
+
+        // 4. Income tax estimate — WorldTaxEngine v2 with legacy fallback
+        let breakdown = WorldTaxEngine.incomeTaxBreakdown(
+            profile: profile,
+            taxProfile: taxProfile,
             invoices: invoices,
             receipts: receipts,
-            taxProfile: taxProfile,
             mileageEntries: mileageEntries,
-            mileageRatePerUnit: mileageRatePerUnit
+            mileageRatePerUnit: mileageRatePerUnit,
+            period: period
         )
         let tax = breakdown.totalEstimatedTax
         
@@ -498,45 +503,83 @@ public final class StudioTaxEngine {
     public static func simulate(
         profile: StudioProfile,
         taxProfile: StudioTaxProfile,
-        baseResult: TaxSimulationResult,
+        invoices: [StudioInvoice],
+        receipts: [StudioReceipt],
+        mileageEntries: [MileageEntry] = [],
+        mileageRatePerUnit: Decimal = 0,
         vatToggled: Bool,
-        hypotheticalRateIncrease: Decimal, // in currency units hourly
-        hypotheticalHoursCount: Double,     // simulated billed hours
+        hypotheticalRateIncrease: Decimal,
+        hypotheticalHoursCount: Double,
         newPurchasesAmount: Decimal
     ) -> TaxSimulationResult {
-        
-        // Extra Simulated Income
         let extraIncome = hypotheticalRateIncrease * Decimal(hypotheticalHoursCount)
-        let totalSimGross = baseResult.totalGrossIncome + extraIncome
-        
-        // Extra Deductions
-        let extraDeductions = newPurchasesAmount
-        let totalSimDeductions = baseResult.totalDeductions + extraDeductions
-        
-        let taxableIncome = max(Decimal(0), totalSimGross - totalSimDeductions)
-        
-        let incomeRate = (taxProfile.estimatedIncomeTaxRatePercent ?? 0) / 100
-        let seRate = (taxProfile.estimatedSelfEmployedRatePercent ?? 0) / 100
-        let tax = taxableIncome * (incomeRate + seRate)
-        
-        // VAT calculation
-        var vatOwed: Decimal = 0
-        if vatToggled {
-            // Apply standard VAT rate (e.g. 20%) to new simulated income
-            let simulatedInvoiceVat = baseResult.estimatedVat + (extraIncome * 0.20)
-            vatOwed = max(0, simulatedInvoiceVat)
+
+        var simInvoices = invoices
+        if extraIncome > 0 {
+            var vatAmount: Decimal = 0
+            if vatToggled,
+               let pct = InvoiceTaxProfileResolver.config(
+                   taxProfile: taxProfile,
+                   settings: StudioInvoiceSettings(),
+                   source: .taxProfile
+               ).rates.first?.percentage,
+               pct > 0 {
+                vatAmount = TaxComputeKernel.rounded(extraIncome * pct / 100, scale: 2)
+            }
+            simInvoices.append(
+                StudioInvoice(
+                    clientId: UUID(),
+                    status: .paid,
+                    subtotal: extraIncome,
+                    taxAmount: vatAmount,
+                    total: extraIncome + vatAmount
+                )
+            )
         }
-        
-        let net = totalSimGross - tax - vatOwed - totalSimDeductions
-        let overallTaxFraction = totalSimGross > 0 ? Double(truncating: (tax / totalSimGross) as NSDecimalNumber) : 0
-        
+
+        var simReceipts = receipts
+        if newPurchasesAmount > 0 {
+            simReceipts.append(
+                StudioReceipt(
+                    amount: newPurchasesAmount,
+                    merchant: "Simulator",
+                    category: "Equipment",
+                    isDeductible: true,
+                    isBusiness: true
+                )
+            )
+        }
+
+        var simProfile = taxProfile
+        simProfile.vatRegistered = vatToggled
+
+        let countryCode = taxProfile.selectedTaxCountry ?? profile.countryCode
+        let period = WorldTaxEngine.defaultHubPeriod(countryCode: countryCode)
+        let breakdown = WorldTaxEngine.incomeTaxBreakdown(
+            profile: profile,
+            taxProfile: simProfile,
+            invoices: simInvoices,
+            receipts: simReceipts,
+            mileageEntries: mileageEntries,
+            mileageRatePerUnit: mileageRatePerUnit,
+            period: period
+        )
+
+        let net = breakdown.totalIncome
+            - breakdown.totalEstimatedTax
+            - breakdown.indirectTaxNet
+            - breakdown.deductibleExpenses
+        let overallTaxFraction = breakdown.totalIncome > 0
+            ? breakdown.effectiveRate
+            : 0
+
         return TaxSimulationResult(
-            totalGrossIncome: totalSimGross,
-            totalDeductions: totalSimDeductions,
-            taxableIncome: taxableIncome,
-            estimatedTax: tax,
-            estimatedVat: vatOwed,
-            netIncome: net,
+            totalGrossIncome: breakdown.totalIncome,
+            totalDeductions: breakdown.deductibleExpenses,
+            taxableIncome: breakdown.taxableIncome,
+            estimatedTax: breakdown.totalEstimatedTax,
+            estimatedVat: breakdown.indirectTaxNet,
+            netIncome: max(0, net),
             effectiveTaxRate: overallTaxFraction
         )
     }

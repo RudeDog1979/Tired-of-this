@@ -334,6 +334,11 @@ public final class StudioStore: ObservableObject {
 
     public func updateTaxProfile(_ updated: StudioTaxProfile) {
         taxProfile = updated
+        InvoiceTaxProfileResolver.syncInvoiceSettings(
+            taxProfile: updated,
+            settings: &invoiceSettings
+        )
+        TaxIdentitySync.applyCanonicalIdentity(taxProfile: updated, to: &profile)
         save()
     }
 

@@ -129,6 +129,9 @@
         }
       }
     },
+    "(%lld%%)" : {
+
+    },
     "(Your ballpark quote was \\(formatMoney(cap)) — check with the customer if hours ran over.)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1117,6 +1120,29 @@
         }
       }
     },
+    "%@ mi" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ mi"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ mi"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ mi"
+          }
+        }
+      }
+    },
     "%@ of %@" : {
       "comment" : "A title that shows the current amount saved and the target amount for a goal. The first argument is the formatted current amount saved. The second argument is the formatted target amount.",
       "extractionState" : "stale",
@@ -1259,6 +1285,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ se renueva pronto. Toca para revisar en BuxMuse."
+          }
+        }
+      }
+    },
+    "%@ sales tax (est.)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto sobre ventas de %@ (est.)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto sobre ventas de %@ (est.)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto sobre ventas de %@ (est.)"
+          }
+        }
+      }
+    },
+    "%@ tax (est.)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto de %@ (est.)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto de %@ (est.)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto de %@ (est.)"
           }
         }
       }
@@ -2392,6 +2464,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld hito(s)"
+          }
+        }
+      }
+    },
+    "%lld min" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
           }
         }
       }
@@ -7011,6 +7106,29 @@
         }
       }
     },
+    "Advance tax payment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pago anticipado de impuestos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pago anticipado de impuestos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pago anticipado de impuestos"
+          }
+        }
+      }
+    },
     "Advanced diagnostics" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8280,6 +8398,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todos los comercios"
+          }
+        }
+      }
+    },
+    "All recorded transactions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todas las transacciones registradas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todas las transacciones registradas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todas las transacciones registradas"
           }
         }
       }
@@ -10326,6 +10467,29 @@
         }
       }
     },
+    "Back: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuelta: %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuelta: %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuelta: %@"
+          }
+        }
+      }
+    },
     "Background" : {
       "comment" : "A label for the background style picker.",
       "extractionState" : "stale",
@@ -10779,6 +10943,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Datos bancarios / de pago"
+          }
+        }
+      }
+    },
+    "Bank Fees" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comisiones bancarias"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comisiones bancarias"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comisiones bancarias"
           }
         }
       }
@@ -15241,6 +15428,52 @@
         }
       }
     },
+    "Catalog engine" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor del catálogo fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor del catálogo fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor del catálogo fiscal"
+          }
+        }
+      }
+    },
+    "Catalog rule allows %lld%% deductibility for %@ in %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El catálogo permite deducir %lld%% de %@ en %@."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El catálogo permite deducir %lld%% de %@ en %@."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El catálogo permite deducir %lld%% de %@ en %@."
+          }
+        }
+      }
+    },
     "Categories" : {
       "comment" : "A heading for a list of expense categories.",
       "isCommentAutoGenerated" : true,
@@ -15824,6 +16057,29 @@
         }
       }
     },
+    "Choose exact address" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige la dirección exacta"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige la dirección exacta"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige la dirección exacta"
+          }
+        }
+      }
+    },
     "Choose from photos" : {
       "localizations" : {
         "es" : {
@@ -15957,6 +16213,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Elija preestablecido"
+          }
+        }
+      }
+    },
+    "Choose route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir ruta"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir ruta"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir ruta"
           }
         }
       }
@@ -16306,6 +16585,121 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Marca de sello circular"
+          }
+        }
+      }
+    },
+    "Class 1 National Insurance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 1"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 1"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 1"
+          }
+        }
+      }
+    },
+    "Class 1 National Insurance (additional)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 1 (adicional)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 1 (adicional)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 1 (adicional)"
+          }
+        }
+      }
+    },
+    "Class 2 National Insurance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 2"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 2"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 2"
+          }
+        }
+      }
+    },
+    "Class 4 National Insurance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 4"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 4"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 4"
+          }
+        }
+      }
+    },
+    "Class 4 National Insurance (additional)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 4 (adicional)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 4 (adicional)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguro Nacional clase 4 (adicional)"
           }
         }
       }
@@ -17484,6 +17878,29 @@
         }
       }
     },
+    "Compute rules updated %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas de cálculo actualizadas %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas de cálculo actualizadas %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas de cálculo actualizadas %@"
+          }
+        }
+      }
+    },
     "Confidentiality" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18422,6 +18839,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "¿Podría entrar en un tramo más alto?"
+          }
+        }
+      }
+    },
+    "Could not calculate a route. Enter distance manually." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo calcular una ruta. Introduce la distancia manualmente."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo calcular una ruta. Ingresa la distancia manualmente."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo calcular una ruta. Introduce la distancia manualmente."
           }
         }
       }
@@ -19895,6 +20335,29 @@
         }
       }
     },
+    "Current quarter" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trimestre actual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trimestre actual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trimestre actual"
+          }
+        }
+      }
+    },
     "Current saved" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -20197,6 +20660,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Perfil personalizado (sin preset)"
+          }
+        }
+      }
+    },
+    "Custom rates" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom rates"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarifas personalizadas"
           }
         }
       }
@@ -22344,6 +22824,29 @@
         }
       }
     },
+    "Diesel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diésel"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diésel"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diésel"
+          }
+        }
+      }
+    },
     "Digital & QR" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -22432,6 +22935,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dirige el excedente a otros objetivos para acelerarlos."
+          }
+        }
+      }
+    },
+    "Direct route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta directa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta directa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta directa"
           }
         }
       }
@@ -22855,6 +23381,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "DocuSign, correo, WhatsApp y servicios similares pueden procesar el nombre, datos de contacto y documento de tu cliente en sus servidores, no solo en tu dispositivo."
+          }
+        }
+      }
+    },
+    "Does not change Tax Profile — what-if only." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cambia el perfil fiscal — solo simulación."
           }
         }
       }
@@ -24874,6 +25411,29 @@
         }
       }
     },
+    "Electric" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eléctrico"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eléctrico"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eléctrico"
+          }
+        }
+      }
+    },
     "Elements" : {
       "comment" : "A label displayed above the list of elements.",
       "extractionState" : "stale",
@@ -26232,6 +26792,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sobre por encima del límite"
+          }
+        }
+      }
+    },
+    "Equipment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Equipamiento"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Equipamiento"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Equipamiento"
           }
         }
       }
@@ -28828,6 +29411,52 @@
         }
       }
     },
+    "Fiscal year to date" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal hasta la fecha"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal hasta la fecha"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal hasta la fecha"
+          }
+        }
+      }
+    },
+    "Fiscal year to date: %@ – %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal hasta la fecha: %@ – %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal hasta la fecha: %@ – %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal hasta la fecha: %@ – %@"
+          }
+        }
+      }
+    },
     "Fix: %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -29561,6 +30190,23 @@
         }
       }
     },
+    "From Tax Profile" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From Tax Profile"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desde el perfil fiscal"
+          }
+        }
+      }
+    },
     "Front" : {
       "comment" : "A label for moving a layer to the front of the canvas.",
       "isCommentAutoGenerated" : true,
@@ -29604,6 +30250,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Panel de vidrio esmerilado"
+          }
+        }
+      }
+    },
+    "Fuel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combustible"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combustible"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combustible"
           }
         }
       }
@@ -29673,6 +30342,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recibo de combustible"
+          }
+        }
+      }
+    },
+    "Fuel type" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de combustible"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de combustible"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de combustible"
           }
         }
       }
@@ -29992,6 +30684,52 @@
         }
       }
     },
+    "Fully deductible per tax profile." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totalmente deducible según el perfil fiscal."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totalmente deducible según el perfil fiscal."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totalmente deducible según el perfil fiscal."
+          }
+        }
+      }
+    },
+    "Fully deductible per your tax profile rules." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totalmente deducible según las reglas de tu perfil fiscal."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totalmente deducible según las reglas de tu perfil fiscal."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totalmente deducible según las reglas de tu perfil fiscal."
+          }
+        }
+      }
+    },
     "Fully functional offline, zero cloud dependencies" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -30132,6 +30870,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "gané"
+          }
+        }
+      }
+    },
+    "Gas" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasolina"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasolina"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasolina"
           }
         }
       }
@@ -32519,6 +33280,29 @@
         }
       }
     },
+    "Home Office" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oficina en casa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oficina en casa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oficina en casa"
+          }
+        }
+      }
+    },
     "Honeycomb accent" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -33006,6 +33790,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Matiz"
+          }
+        }
+      }
+    },
+    "Hybrid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Híbrido"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Híbrido"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Híbrido"
+          }
+        }
+      }
+    },
+    "Hypothetical annual" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anual hipotético"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anual hipotético"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anual hipotético"
           }
         }
       }
@@ -33628,6 +34458,17 @@
         }
       }
     },
+    "Include VAT in this simulation" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir IVA en esta simulación"
+          }
+        }
+      }
+    },
     "Included revisions" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -33857,6 +34698,17 @@
         }
       }
     },
+    "Income path" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vía de ingresos"
+          }
+        }
+      }
+    },
     "Income Source" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -33922,6 +34774,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impuesto sobre la renta"
+          }
+        }
+      }
+    },
+    "Income tax and indirect tax (VAT/GST) are configured together. Invoices and calculators follow these settings." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta y el impuesto indirecto (IVA/IGIC) se configuran juntos. Las facturas y los cálculos siguen este perfil."
+          }
+        }
+      }
+    },
+    "Income tax and indirect tax (VAT/GST) are set once here. Invoices and estimates follow this profile." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El impuesto sobre la renta y el indirecto (IVA/IGIC) se configuran una vez aquí. Facturas y estimaciones siguen este perfil."
           }
         }
       }
@@ -34225,6 +35099,29 @@
         }
       }
     },
+    "Indirect tax (VAT/GST)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto indirecto (IVA/IGIC)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto indirecto (IVA/IGIC)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto indirecto (IVA/IGIC)"
+          }
+        }
+      }
+    },
     "Indirect tax paid (optional)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -34520,6 +35417,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Instantáneo"
+          }
+        }
+      }
+    },
+    "Insurance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguros"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguros"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguros"
           }
         }
       }
@@ -35366,6 +36286,17 @@
         }
       }
     },
+    "Invoices include tax but your Tax Profile says you are not registered for indirect tax. Update Tax Profile or remove tax from invoices." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las facturas incluyen impuesto pero tu perfil dice que no estás registrado. Actualiza el perfil o quita el impuesto de las facturas."
+          }
+        }
+      }
+    },
     "Invoices selected" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -36121,6 +37052,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mantén este impulso activo ahorrando al inicio de la semana."
+          }
+        }
+      }
+    },
+    "Keep typing a house number, name, or business — or pick from the list." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sigue escribiendo el número, nombre o negocio — o elige de la lista."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sigue escribiendo el número, nombre o negocio — o elige de la lista."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sigue escribiendo el número, nombre o negocio — o elige de la lista."
           }
         }
       }
@@ -37850,6 +38804,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "LLC"
+          }
+        }
+      }
+    },
+    "Loading addresses…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando direcciones…"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando direcciones…"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando direcciones…"
           }
         }
       }
@@ -39810,6 +40787,29 @@
         }
       }
     },
+    "Marginal tax rate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo marginal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo marginal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo marginal"
+          }
+        }
+      }
+    },
     "Mark as paid?" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -40059,6 +41059,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Puesto en el mercado"
+          }
+        }
+      }
+    },
+    "Marketing" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marketing"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marketing"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marketing"
           }
         }
       }
@@ -40383,6 +41406,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Materiales, anticipos, sitios de trabajo"
+          }
+        }
+      }
+    },
+    "Meals" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comidas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comidas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comidas"
           }
         }
       }
@@ -41328,6 +42374,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Minutos"
+          }
+        }
+      }
+    },
+    "Misc" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varios"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varios"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varios"
           }
         }
       }
@@ -42366,6 +43435,29 @@
         }
       }
     },
+    "National default" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nacional (predeterminado)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nacional (predeterminado)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nacional (predeterminado)"
+          }
+        }
+      }
+    },
     "Need more time?" : {
       "comment" : "A label displayed under the \"+30m\" and \"+1h\" buttons.",
       "extractionState" : "stale",
@@ -42456,6 +43548,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Neto"
+          }
+        }
+      }
+    },
+    "Net after tax" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neto después de impuestos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neto después de impuestos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neto después de impuestos"
+          }
+        }
+      }
+    },
+    "Net after tax: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neto después de impuestos: %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neto después de impuestos: %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neto después de impuestos: %@"
           }
         }
       }
@@ -44279,6 +45417,46 @@
         }
       }
     },
+    "No standard indirect tax rate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No standard indirect tax rate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin tarifa estándar de impuesto indirecto"
+          }
+        }
+      }
+    },
+    "No street addresses found for this postcode. Type a house number or use postcode area only." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron direcciones para este código postal. Escribe un número o usa solo la zona del código postal."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron direcciones para este código postal. Escribe un número o usa solo la zona del código postal."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron direcciones para este código postal. Escribe un número o usa solo la zona del código postal."
+          }
+        }
+      }
+    },
     "No stroke" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -44298,6 +45476,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sin trazo"
+          }
+        }
+      }
+    },
+    "No tax" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No tax"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin impuestos"
           }
         }
       }
@@ -44325,6 +45520,23 @@
         }
       }
     },
+    "No tax line — check VAT registration in Tax Profile." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No tax line — check VAT registration in Tax Profile."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin línea de impuesto: revisa el registro de IVA en el perfil fiscal."
+          }
+        }
+      }
+    },
     "No tax profile saved yet" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -44344,6 +45556,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aún no hay perfil fiscal guardado"
+          }
+        }
+      }
+    },
+    "No tax rates on this invoice." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No tax rates on this invoice."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay tarifas de impuesto en esta factura."
           }
         }
       }
@@ -44862,6 +46091,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No registrado"
+          }
+        }
+      }
+    },
+    "Not registered for indirect tax" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not registered for indirect tax"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No registrado para impuesto indirecto"
           }
         }
       }
@@ -46130,6 +47376,29 @@
         }
       }
     },
+    "Optional — for your records. Allowance still uses your per-mile rate." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional — para tus registros. La deducción sigue usando tu tarifa por milla."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional — para tus registros. La deducción sigue usando tu tarifa por milla."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional — para tus registros. La deducción sigue usando tu tarifa por milla."
+          }
+        }
+      }
+    },
     "Optional details" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -46496,6 +47765,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fuera de alcance"
+          }
+        }
+      }
+    },
+    "Outbound: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ida: %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ida: %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ida: %@"
           }
         }
       }
@@ -48870,6 +50162,29 @@
         }
       }
     },
+    "Petrol" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasolina"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasolina"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasolina"
+          }
+        }
+      }
+    },
     "Petrol / gas" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -48935,6 +50250,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Teléfono / WhatsApp"
+          }
+        }
+      }
+    },
+    "Phone & Internet" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teléfono e internet"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teléfono e internet"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teléfono e internet"
           }
         }
       }
@@ -49786,6 +51124,29 @@
         }
       }
     },
+    "Plug-in hybrid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Híbrido enchufable"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Híbrido enchufable"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Híbrido enchufable"
+          }
+        }
+      }
+    },
     "Popular" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -49874,6 +51235,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Posible cargo duplicado — revisa esta transacción."
+          }
+        }
+      }
+    },
+    "Postcode area only" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo zona del código postal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo zona del código postal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo zona del código postal"
           }
         }
       }
@@ -53211,6 +54595,46 @@
         }
       }
     },
+    "Rates" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasas"
+          }
+        }
+      }
+    },
+    "Rates update automatically when you change Tax Profile." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rates update automatically when you change Tax Profile."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las tarifas se actualizan automáticamente cuando cambias el perfil fiscal."
+          }
+        }
+      }
+    },
     "Re-engage today by allocating just %@ to this goal." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -56367,6 +57791,52 @@
         }
       }
     },
+    "Route %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta %lld"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta %lld"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta %lld"
+          }
+        }
+      }
+    },
+    "Rules as of %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas vigentes desde %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas vigentes desde %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas vigentes desde %@"
+          }
+        }
+      }
+    },
     "Run-rate: %@/day. Predicted: %@. Historical: %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -56763,6 +58233,7 @@
     },
     "Same trip back" : {
       "comment" : "A context menu item that adds a return trip to the selected trip.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "es" : {
@@ -57613,6 +59084,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardado · %@ · %@ · %@"
+          }
+        }
+      }
+    },
+    "Saved indirect tax status" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado de impuesto indirecto guardado"
           }
         }
       }
@@ -59561,6 +61043,29 @@
         }
       }
     },
+    "Self-employment tax (SECA)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto de trabajo por cuenta propia (SECA)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto de trabajo por cuenta propia (SECA)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto de trabajo por cuenta propia (SECA)"
+          }
+        }
+      }
+    },
     "Semi-Annual" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -60046,6 +61551,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pon un recordatorio semanal en el calendario para revisar tus metas."
+          }
+        }
+      }
+    },
+    "Set a country in Tax Profile" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set a country in Tax Profile"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige un país en el perfil fiscal"
           }
         }
       }
@@ -61253,6 +62775,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compras"
+          }
+        }
+      }
+    },
+    "Show addresses in this postcode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar direcciones de este código postal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar direcciones de este código postal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar direcciones de este código postal"
+          }
+        }
+      }
+    },
+    "Show all addresses here" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar todas las direcciones aquí"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar todas las direcciones aquí"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar todas las direcciones aquí"
           }
         }
       }
@@ -63106,6 +64674,29 @@
         }
       }
     },
+    "Social contributions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cotizaciones sociales"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cotizaciones sociales"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cotizaciones sociales"
+          }
+        }
+      }
+    },
     "Social square" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -63125,6 +64716,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "plaza social"
+          }
+        }
+      }
+    },
+    "Software" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Software"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Software"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Software"
           }
         }
       }
@@ -65890,6 +67504,29 @@
         }
       }
     },
+    "Subcontractors" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcontratistas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcontratistas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcontratistas"
+          }
+        }
+      }
+    },
     "Subjective stress zone" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -67199,6 +68836,29 @@
         }
       }
     },
+    "Tap a route on the map or below — distance updates from your choice." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca una ruta en el mapa o abajo — la distancia se actualiza según tu elección."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca una ruta en el mapa o abajo — la distancia se actualiza según tu elección."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca una ruta en el mapa o abajo — la distancia se actualiza según tu elección."
+          }
+        }
+      }
+    },
     "Tap a territory to explore" : {
       "comment" : "A description of the map's functionality.",
       "isCommentAutoGenerated" : true,
@@ -67823,6 +69483,17 @@
         }
       }
     },
+    "Tax checks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprobaciones fiscales"
+          }
+        }
+      }
+    },
     "Tax data updates monthly. Always verify with your local tax authority for accuracy." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -68004,6 +69675,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ID fiscal"
+          }
+        }
+      }
+    },
+    "Tax identity" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identidad fiscal"
           }
         }
       }
@@ -68219,6 +69901,29 @@
         }
       }
     },
+    "Tax profile applies %lld%% for %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El perfil fiscal aplica %lld%% para %@."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El perfil fiscal aplica %lld%% para %@."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El perfil fiscal aplica %lld%% para %@."
+          }
+        }
+      }
+    },
     "Tax profile incomplete" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -68288,6 +69993,75 @@
         }
       }
     },
+    "Tax region" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Región fiscal"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Región fiscal"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Región fiscal"
+          }
+        }
+      }
+    },
+    "Tax rules manual override" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales — ajuste manual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales — ajuste manual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales — ajuste manual"
+          }
+        }
+      }
+    },
+    "Tax rules structured estimate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales — estimación estructurada"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales — estimación estructurada"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales — estimación estructurada"
+          }
+        }
+      }
+    },
     "Tax rules vary by country. Always verify with your local tax authority." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -68311,6 +70085,29 @@
         }
       }
     },
+    "Tax rules verified" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales verificadas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales verificadas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normas fiscales verificadas"
+          }
+        }
+      }
+    },
     "Tax sandbox settings" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -68330,6 +70127,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configuración del sandbox fiscal"
+          }
+        }
+      }
+    },
+    "Tax Source" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax Source"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Origen del impuesto"
           }
         }
       }
@@ -68445,6 +70259,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Año fiscal"
+          }
+        }
+      }
+    },
+    "Tax year %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año fiscal %@"
           }
         }
       }
@@ -71988,6 +73825,29 @@
         }
       }
     },
+    "Total estimated tax" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto total estimado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto total estimado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impuesto total estimado"
+          }
+        }
+      }
+    },
     "Total Paid In" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -73451,6 +75311,29 @@
         }
       }
     },
+    "Trip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viaje"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viaje"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viaje"
+          }
+        }
+      }
+    },
     "Trips, fuel, fares" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -73703,6 +75586,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Activa Temas de marca en Apariencia para elegir un preset."
+          }
+        }
+      }
+    },
+    "Turn on only if you are registered to charge VAT, GST, ITBIS, or similar on invoices." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actívalo solo si estás registrado para cobrar IVA, IGIC, ITBIS o similar en facturas."
           }
         }
       }
@@ -75222,6 +77116,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Usar predeterminado de la app"
+          }
+        }
+      }
+    },
+    "Use Custom Rates" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Custom Rates"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar tarifas personalizadas"
           }
         }
       }
@@ -78876,6 +80787,17 @@
         }
       }
     },
+    "You are registered for indirect tax but recent invoices have no tax lines. New invoices will auto-fill from Tax Profile." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estás registrado para impuesto indirecto pero las facturas recientes no tienen impuesto. Las nuevas facturas se rellenarán desde el perfil."
+          }
+        }
+      }
+    },
     "You are within your safe historical limits." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -80120,6 +82042,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu último cargo de %@ en %@ supera el anterior de %@. Subida de %@."
+          }
+        }
+      }
+    },
+    "Your manual indirect tax % overrides the catalog rate. Clear it in Tax Profile to use the standard rate automatically." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu % manual de impuesto indirecto anula la tarifa del catálogo. Bórralo en el perfil para usar la tarifa estándar."
           }
         }
       }

@@ -100,7 +100,8 @@ public enum MileageBrain {
             startLatitude: outbound.endLatitude,
             startLongitude: outbound.endLongitude,
             endLatitude: outbound.startLatitude,
-            endLongitude: outbound.startLongitude
+            endLongitude: outbound.startLongitude,
+            fuelType: outbound.fuelType
         )
     }
 }

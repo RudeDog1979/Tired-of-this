@@ -326,12 +326,24 @@ struct StudioInvoiceEditorView: View {
         .environmentObject(store)
         .onAppear {
             setupInitialFields()
+            let clientRegion = store.clients.first(where: { $0.id == selectedClientId })?.regionCode
             designerEngine.loadDefaults(
                 settings: store.invoiceSettings,
                 taxProfile: store.taxProfile,
                 existingSnapshot: invoiceToEdit?.designerSnapshot,
-                lineItems: lineItems
+                lineItems: lineItems,
+                clientRegionCode: clientRegion,
+                locale: appSettingsManager.interfaceLocale
             )
+            if designerEngine.taxConfig.source == .taxProfile {
+                designerEngine.applyTaxSource(
+                    .taxProfile,
+                    taxProfile: store.taxProfile,
+                    settings: store.invoiceSettings,
+                    clientRegionCode: clientRegion,
+                    locale: appSettingsManager.interfaceLocale
+                )
+            }
         }
     }
 

@@ -653,9 +653,6 @@ struct DashboardView: View {
                         FabSubmenuItem(title: "Manual Entry", icon: "square.and.pencil", delay: 0.04) {
                             closeFabAnd { activeSheet = .addExpense(.add) }
                         }
-                        FabSubmenuItem(title: "Select Category", icon: "tag.fill", delay: 0.08) {
-                            closeFabAnd { activeSheet = .addExpense(.addWithCategoryFocus) }
-                        }
                         FabSubmenuItem(title: "Manage Categories", icon: "folder.fill", delay: 0.09) {
                             closeFabAnd { activeSheet = .categoryList }
                         }

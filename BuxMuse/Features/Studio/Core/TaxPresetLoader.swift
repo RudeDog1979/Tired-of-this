@@ -22,6 +22,11 @@ public enum TaxPresetLoader {
     /// Loads bundled/cache catalog, then refreshes from remote when the monthly window allows.
     public static func ensureCatalogLoaded(force: Bool = false) async {
         await TaxManager.shared.ensureCatalogLoaded(force: force)
+        await TaxComputeCatalogStore.shared.ensureCatalogLoaded(force: force)
+    }
+
+    public static func ensureComputeCatalogLoaded(force: Bool = false) async {
+        await TaxComputeCatalogStore.shared.ensureCatalogLoaded(force: force)
     }
 
     public static func preset(for code: String) -> TaxInfo? {

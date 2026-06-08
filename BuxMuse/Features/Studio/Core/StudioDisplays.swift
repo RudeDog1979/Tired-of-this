@@ -188,13 +188,14 @@ public enum TaxReferenceCopy {
 // MARK: - Brain snapshots (views read these — no inline engine calls)
 
 public struct TaxSandboxParams: Equatable {
-    public var indirectTaxRegistered: Bool
+    /// What-if only — does not change saved Tax Profile registration.
+    public var simulateVATInScenario: Bool
     public var rateIncrease: Double
     public var billableHours: Double
     public var newPurchases: Double
 
     public static let `default` = TaxSandboxParams(
-        indirectTaxRegistered: false,
+        simulateVATInScenario: false,
         rateIncrease: 0,
         billableHours: 0,
         newPurchases: 0
@@ -269,6 +270,13 @@ public struct IncomeTaxDisplay: Equatable {
     public var totalEstimatedTaxFormatted: String
     public var effectiveRatePercent: Int
     public var ratesConfigured: Bool
+    public var netAfterTaxFormatted: String
+    public var marginalRatePercent: Int?
+    public var periodLabel: String
+    public var coverageTierLabel: String
+    public var rulesAsOfLabel: String?
+    public var detailLines: [IncomeTaxLineDisplay]
+    public var usesCatalogEngine: Bool
 
     public static let empty = IncomeTaxDisplay(
         totalIncomeFormatted: "—",
@@ -279,7 +287,14 @@ public struct IncomeTaxDisplay: Equatable {
         indirectTaxNetFormatted: "—",
         totalEstimatedTaxFormatted: "—",
         effectiveRatePercent: 0,
-        ratesConfigured: false
+        ratesConfigured: false,
+        netAfterTaxFormatted: "—",
+        marginalRatePercent: nil,
+        periodLabel: "—",
+        coverageTierLabel: "—",
+        rulesAsOfLabel: nil,
+        detailLines: [],
+        usesCatalogEngine: false
     )
 }
 

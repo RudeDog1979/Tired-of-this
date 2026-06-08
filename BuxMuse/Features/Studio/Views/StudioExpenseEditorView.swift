@@ -20,7 +20,7 @@ struct StudioExpenseEditorView: View {
     @State private var merchant = ""
     @State private var amount = ""
     @State private var date = Date()
-    @State private var category = BusinessExpenseCategory.software.rawValue
+    @State private var category = ""
     @State private var businessUse: ExpenseBusinessUse = .business
     @State private var isDeductible = true
     @State private var deductiblePercentage: Double = 100
@@ -30,10 +30,16 @@ struct StudioExpenseEditorView: View {
     @State private var attachedImage: UIImage?
     @State private var lastSavedDraft: ExpenseEditorDraft?
 
+    private var categoryOptions: [ReceiptDeductionCategoryOption] {
+        ReceiptDeductionCategoryResolver.pickerOptions(catalogRules: store.taxProfile.deductionCategories)
+    }
+
     private var categoryHint: (strength: DeductionStrength, note: String) {
-        StudioDeductionMath.categoryHint(
+        ReceiptDeductionCategoryResolver.hint(
             for: category,
-            countryCode: appSettingsManager.selectedCountry.id
+            catalogRules: store.taxProfile.deductionCategories,
+            countryCode: appSettingsManager.selectedCountry.id,
+            locale: appSettingsManager.interfaceLocale
         )
     }
 
@@ -92,9 +98,18 @@ struct StudioExpenseEditorView: View {
 
                     BuxFormSection(title: "Business classification") {
                         Picker(loc("Category"), selection: $category) {
-                            ForEach(BusinessExpenseCategory.allCases) { cat in
-                                Text(cat.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(cat.rawValue)
+                            ForEach(categoryOptions) { option in
+                                HStack {
+                                    Text(BuxCatalogLabel.string(option.labelKey, locale: appSettingsManager.interfaceLocale))
+                                    if option.deductibilityPercent < 100 {
+                                        Text("(\(option.deductibilityPercent)%)")
+                                    }
+                                }
+                                .tag(option.storageValue)
                             }
+                        }
+                        .onChange(of: category) { _, newValue in
+                            applySuggestedDeductibility(for: newValue)
                         }
                         .buxFormFieldPadding()
                         BuxFormRowDivider()
@@ -211,9 +226,26 @@ struct StudioExpenseEditorView: View {
                     }
                 }
             }
-            .onAppear { hydrate() }
+            .onAppear {
+                hydrate()
+                if category.isEmpty {
+                    category = ReceiptDeductionCategoryResolver.defaultCategory(
+                        catalogRules: store.taxProfile.deductionCategories
+                    )
+                }
+            }
             .buxStudioSheetContent()
         }
+    }
+
+    private func applySuggestedDeductibility(for newCategory: String) {
+        guard businessUse != .personal,
+              let suggested = ReceiptDeductionCategoryResolver.suggestedDeductiblePercentage(
+                  for: newCategory,
+                  catalogRules: store.taxProfile.deductionCategories
+              ) else { return }
+        deductiblePercentage = suggested
+        isDeductible = suggested > 0
     }
 
     private func hydrate() {

@@ -59,9 +59,24 @@ struct InvoiceDesignerHubView: View {
     @State private var newItemDesc = ""
     @State private var newItemQty = "1.0"
     @State private var newItemPrice = ""
+    @State private var newItemTaxCategory: InvoiceLineTaxCategory = .standard
+    @State private var clientRegionSelection = ""
 
     private var client: StudioClient? {
         store.clients.first { $0.id == selectedClientId }
+    }
+
+    private var invoiceCountryCode: String {
+        let code = store.taxProfile.selectedTaxCountry ?? store.taxProfile.countryCode
+        return TaxManager.normalizeCountryCode(code)
+    }
+
+    private var clientRegionOptions: [TaxComputeRegion] {
+        TaxComputeCatalogStore.shared.regions(for: invoiceCountryCode)
+    }
+
+    private var showClientRegionPicker: Bool {
+        invoiceCountryCode == "US" && !clientRegionOptions.isEmpty && client != nil
     }
 
     private var draftInvoice: StudioInvoice {
@@ -146,6 +161,9 @@ struct InvoiceDesignerHubView: View {
         .buxStudioSheetContent()
         .onAppear {
             selectedTab = initialTab
+            clientRegionSelection = client?.regionCode ?? ""
+            engine.updateClientRegion(clientRegionSelection.isEmpty ? nil : clientRegionSelection)
+            refreshTaxFromProfile()
             engine.totalsDisplay = InvoiceDesignerEngine.computeTotals(
                 items: lineItems,
                 taxConfig: engine.taxConfig,
@@ -154,6 +172,11 @@ struct InvoiceDesignerHubView: View {
         }
         .onChange(of: lineItems) { _, items in
             engine.updateLineItems(items)
+        }
+        .onChange(of: selectedClientId) { _, _ in
+            clientRegionSelection = client?.regionCode ?? ""
+            engine.updateClientRegion(clientRegionSelection.isEmpty ? nil : clientRegionSelection)
+            refreshTaxFromProfile()
         }
     }
 
@@ -388,10 +411,11 @@ struct InvoiceDesignerHubView: View {
                                     .font(.system(size: 13, weight: .semibold))
                                 Text(
                                     BuxLocalizedString.format(
-                                        "Qty %.1f · %@",
+                                        "Qty %.1f · %@ · %@",
                                         locale: appSettingsManager.interfaceLocale,
                                         item.quantity,
-                                        formatCurrency(item.unitPrice)
+                                        formatCurrency(item.unitPrice),
+                                        item.taxCategory.catalogLabel(locale: appSettingsManager.interfaceLocale)
                                     )
                                 )
                                     .font(.system(size: 10))
@@ -654,8 +678,112 @@ struct InvoiceDesignerHubView: View {
 
     // MARK: Tax Controls
 
+    @ViewBuilder
+    private var invoiceTaxComplianceBanner: some View {
+        let notices = TaxComplianceAdvisor.notices(
+            taxProfile: store.taxProfile,
+            invoices: store.invoices,
+            locale: appSettingsManager.interfaceLocale
+        ).filter { $0.id == "invoice-vat-unregistered" || $0.id == "registered-no-invoice-vat" }
+        if !notices.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(notices) { notice in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text(BuxCatalogLabel.string(notice.messageKey, locale: appSettingsManager.interfaceLocale))
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(UIColor.label))
+                    }
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.orange.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .padding(.horizontal, 16)
+        }
+    }
+
     private var taxControls: some View {
         VStack(alignment: .leading, spacing: 20) {
+
+            invoiceTaxComplianceBanner
+
+            designerSection("Tax Source") {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 6) {
+                        ForEach(InvoiceTaxSource.allCases) { source in
+                            let isSelected = engine.taxConfig.source == source
+                            Button(action: {
+                                refreshTaxFromProfile(source: source)
+                            }) {
+                                Text(source.catalogLabel(locale: appSettingsManager.interfaceLocale))
+                                    .font(.system(size: 11, weight: isSelected ? .bold : .medium))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.85)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buxNativeButtonStyle(.secondary)
+                        }
+                    }
+                    .buxNativeGlassButtonRowContainer(spacing: 6)
+                    .buxNativeButtonRowChrome(
+                        accent: themeManager.contrastAccentColor(for: colorScheme),
+                        role: .secondary
+                    )
+
+                    if engine.taxConfig.source == .taxProfile {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                            Text(
+                                InvoiceTaxProfileResolver.profileSummary(
+                                    taxProfile: store.taxProfile,
+                                    settings: store.invoiceSettings,
+                                    locale: appSettingsManager.interfaceLocale,
+                                    clientRegionCode: clientRegionSelection.isEmpty ? nil : clientRegionSelection
+                                )
+                            )
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color(UIColor.label))
+                        }
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(themeManager.current.accentColor.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                        BuxCatalogDynamicText(key: "Rates update automatically when you change Tax Profile.")
+                            .font(.system(size: 10))
+                            .buxLabelSecondary()
+                    }
+
+                    if showClientRegionPicker {
+                        VStack(alignment: .leading, spacing: 6) {
+                            BuxCatalogDynamicText(key: "Client region (sales tax)")
+                                .font(.system(size: 10, weight: .bold))
+                                .buxLabelSecondary()
+                            Picker(
+                                BuxCatalogLabel.string("State", locale: appSettingsManager.interfaceLocale),
+                                selection: $clientRegionSelection
+                            ) {
+                                Text(BuxCatalogLabel.string("None", locale: appSettingsManager.interfaceLocale)).tag("")
+                                ForEach(clientRegionOptions, id: \.code) { region in
+                                    Text(region.name).tag(region.code)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .onChange(of: clientRegionSelection) { _, _ in
+                                applyClientRegionSelection()
+                            }
+                        }
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+            }
 
             // Tax Mode
             designerSection("Tax Mode") {
@@ -666,12 +794,22 @@ struct InvoiceDesignerHubView: View {
                 }
             }
 
-            // Tax Rates
+            // Tax Rates — hidden when Tax Profile already shows the applied rate above (avoids duplicate rows).
+            if engine.taxConfig.source != .taxProfile {
             designerSection("Tax Rates") {
                 VStack(spacing: 6) {
+                    if engine.taxConfig.rates.isEmpty {
+                        BuxCatalogDynamicText(key: "No tax rates on this invoice.")
+                        .font(.system(size: 12))
+                        .buxLabelSecondary()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 4)
+                    }
+
                     ForEach(Array(engine.taxConfig.rates.enumerated()), id: \.element.id) { idx, rate in
                         taxRateRow(rate: rate, index: idx)
                     }
+
                     BuxActionButton(
                         title: "Add Tax Rate",
                         systemImage: "plus.circle.fill",
@@ -680,6 +818,40 @@ struct InvoiceDesignerHubView: View {
                         expands: true,
                         size: .regular,
                         action: { showAddRateSheet = true }
+                    )
+                }
+            }
+            } else if engine.taxConfig.rates.isEmpty {
+                designerSection("Tax Rates") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        BuxCatalogDynamicText(key: "No tax line — check VAT registration in Tax Profile.")
+                            .font(.system(size: 12))
+                            .buxLabelSecondary()
+                        BuxActionButton(
+                            title: "Use Custom Rates",
+                            systemImage: "slider.horizontal.3",
+                            role: .secondary,
+                            accent: themeManager.contrastAccentColor(for: colorScheme),
+                            expands: true,
+                            size: .regular,
+                            action: {
+                                refreshTaxFromProfile(source: .custom)
+                            }
+                        )
+                    }
+                }
+            } else {
+                designerSection("Tax Rates") {
+                    BuxActionButton(
+                        title: "Use Custom Rates",
+                        systemImage: "slider.horizontal.3",
+                        role: .secondary,
+                        accent: themeManager.contrastAccentColor(for: colorScheme),
+                        expands: true,
+                        size: .regular,
+                        action: {
+                            refreshTaxFromProfile(source: .custom)
+                        }
                     )
                 }
             }
@@ -767,6 +939,28 @@ struct InvoiceDesignerHubView: View {
             }
         }
         .padding(.horizontal, 16)
+    }
+
+    // MARK: - Tax refresh
+
+    private func refreshTaxFromProfile(source: InvoiceTaxSource? = nil) {
+        let resolved = source ?? engine.taxConfig.source
+        engine.applyTaxSource(
+            resolved,
+            taxProfile: store.taxProfile,
+            settings: store.invoiceSettings,
+            clientRegionCode: clientRegionSelection.isEmpty ? nil : clientRegionSelection,
+            locale: appSettingsManager.interfaceLocale
+        )
+    }
+
+    private func applyClientRegionSelection() {
+        let code = clientRegionSelection.isEmpty ? nil : clientRegionSelection
+        engine.updateClientRegion(code)
+        refreshTaxFromProfile()
+        guard var updated = client else { return }
+        updated.regionCode = code
+        store.updateClient(updated)
     }
 
     // MARK: - Shared Sub-Views
@@ -873,15 +1067,20 @@ struct InvoiceDesignerHubView: View {
                 }
             }
             Spacer()
-            Button(action: {
-                withAnimation {
-                    engine.taxConfig.rates.remove(at: index)
-                    engine.recomputeTotals()
+            if engine.taxConfig.source != .taxProfile {
+                Button(action: {
+                    withAnimation {
+                        engine.taxConfig.rates.remove(at: index)
+                        if engine.taxConfig.rates.isEmpty {
+                            engine.taxConfig.source = .none
+                        }
+                        engine.recomputeTotals()
+                    }
+                }) {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundColor(.red.opacity(0.7))
+                        .font(.system(size: 18))
                 }
-            }) {
-                Image(systemName: "minus.circle.fill")
-                    .foregroundColor(.red.opacity(0.7))
-                    .font(.system(size: 18))
             }
         }
         .padding(10)
@@ -1048,6 +1247,16 @@ struct InvoiceDesignerHubView: View {
                         TextField(loc("Unit price"), text: $newItemPrice)
                             .keyboardType(.decimalPad)
                             .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        Picker(
+                            loc("Tax category"),
+                            selection: $newItemTaxCategory
+                        ) {
+                            ForEach(InvoiceLineTaxCategory.allCases) { category in
+                                Text(category.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(category)
+                            }
+                        }
+                        .buxFormFieldPadding()
                     }
                 }
             }
@@ -1065,12 +1274,19 @@ struct InvoiceDesignerHubView: View {
                         let qty = Double(newItemQty) ?? 1
                         let price = Decimal(string: newItemPrice) ?? 0
                         lineItems.append(
-                            StudioInvoiceLineItem(description: newItemDesc, quantity: qty, unitPrice: price)
+                            StudioInvoiceLineItem(
+                                description: newItemDesc,
+                                quantity: qty,
+                                unitPrice: price,
+                                isTaxable: newItemTaxCategory != .exempt && newItemTaxCategory != .zeroRated,
+                                taxCategory: newItemTaxCategory
+                            )
                         )
                         showAddItemSheet = false
                         newItemDesc = ""
                         newItemQty = "1.0"
                         newItemPrice = ""
+                        newItemTaxCategory = .standard
                     }
                 }
             }
@@ -1081,6 +1297,7 @@ struct InvoiceDesignerHubView: View {
     private var addRateSheet: some View {
         AddTaxRateSheet { newRate in
             withAnimation {
+                engine.taxConfig.source = .custom
                 engine.taxConfig.rates.append(newRate)
                 engine.recomputeTotals()
             }

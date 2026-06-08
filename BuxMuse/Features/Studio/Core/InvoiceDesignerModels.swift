@@ -326,20 +326,37 @@ public struct InvoiceTemplateConfig: Codable, Equatable {
 }
 
 public struct InvoiceTaxEngineConfig: Codable, Equatable {
+    public var source: InvoiceTaxSource
     public var mode: InvoiceTaxMode
     public var rates: [InvoiceTaxRate]
     public var localizedLabel: String // e.g. "VAT", "GST"
 
     public static let `default` = InvoiceTaxEngineConfig(
+        source: .taxProfile,
         mode: .exclusive,
         rates: [],
         localizedLabel: "Tax"
     )
 
-    public init(mode: InvoiceTaxMode, rates: [InvoiceTaxRate], localizedLabel: String) {
+    public init(
+        source: InvoiceTaxSource = .taxProfile,
+        mode: InvoiceTaxMode,
+        rates: [InvoiceTaxRate],
+        localizedLabel: String
+    ) {
+        self.source = source
         self.mode = mode
         self.rates = rates
         self.localizedLabel = localizedLabel
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        mode = try container.decode(InvoiceTaxMode.self, forKey: .mode)
+        rates = try container.decode([InvoiceTaxRate].self, forKey: .rates)
+        localizedLabel = try container.decode(String.self, forKey: .localizedLabel)
+        source = try container.decodeIfPresent(InvoiceTaxSource.self, forKey: .source)
+            ?? (rates.isEmpty ? .taxProfile : .custom)
     }
 }
 

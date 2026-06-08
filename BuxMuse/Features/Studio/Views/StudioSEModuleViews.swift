@@ -25,11 +25,14 @@ struct StudioIncomeTaxCalculatorView: View {
                 VStack(alignment: .leading, spacing: BuxLayout.section) {
                     heroCard(snapshot)
 
-                    if !snapshot.ratesConfigured {
+                    metadataCard(snapshot)
+
+                    if !snapshot.ratesConfigured && !snapshot.usesCatalogEngine {
                         ratesHintCard
                     }
 
                     breakdownCard(snapshot)
+                    ratesCard(snapshot)
                     TaxReferenceDisclaimerNote()
                     Spacer().frame(height: 40)
                 }
@@ -44,12 +47,21 @@ struct StudioIncomeTaxCalculatorView: View {
 
     private func heroCard(_ snapshot: IncomeTaxDisplay) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            BuxCatalogDynamicText(key: "Estimated annual tax")
+            BuxCatalogDynamicText(key: "Estimated tax")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
             Text(snapshot.totalEstimatedTaxFormatted)
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+            Text(
+                BuxLocalizedString.format(
+                    "Net after tax: %@",
+                    locale: appSettingsManager.interfaceLocale,
+                    snapshot.netAfterTaxFormatted
+                )
+            )
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             Text(
                 BuxLocalizedString.format(
                     "Effective rate %lld%% on recorded income",
@@ -63,6 +75,44 @@ struct StudioIncomeTaxCalculatorView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)
         .seCard(colorScheme: colorScheme, themeManager: themeManager)
+    }
+
+    private func metadataCard(_ snapshot: IncomeTaxDisplay) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                coverageBadge(snapshot.coverageTierLabel)
+                if snapshot.usesCatalogEngine {
+                    BuxCatalogDynamicText(key: "Catalog engine")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.green.opacity(0.12))
+                        .clipShape(Capsule())
+                }
+            }
+            Text(snapshot.periodLabel)
+                .font(.system(size: 12, weight: .semibold))
+                .buxLabelSecondary()
+            if let rulesAsOf = snapshot.rulesAsOfLabel {
+                Text(rulesAsOf)
+                    .font(.system(size: 11))
+                    .buxLabelSecondary()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BuxLayout.section)
+        .seCard(colorScheme: colorScheme, themeManager: themeManager)
+    }
+
+    private func coverageBadge(_ labelKey: String) -> some View {
+        Text(BuxCatalogLabel.string(labelKey, locale: appSettingsManager.interfaceLocale))
+            .font(.system(size: 10, weight: .bold))
+            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(themeManager.contrastAccentColor(for: colorScheme).opacity(0.12))
+            .clipShape(Capsule())
     }
 
     private var ratesHintCard: some View {
@@ -91,16 +141,64 @@ struct StudioIncomeTaxCalculatorView: View {
             BuxCatalogDynamicText(key: "Breakdown")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
-            seRow("Gross income", snapshot.totalIncomeFormatted)
-            seRow("Deductible expenses", snapshot.deductibleExpensesFormatted, color: .green)
-            seRow("Taxable income", snapshot.taxableIncomeFormatted)
-            Divider()
-            seRow("Income tax", snapshot.incomeTaxFormatted)
-            seRow("Self-employed tax", snapshot.selfEmployedTaxFormatted)
-            seRow("Indirect tax (net)", snapshot.indirectTaxNetFormatted)
+            if snapshot.detailLines.isEmpty {
+                seRow("Gross income", snapshot.totalIncomeFormatted)
+                seRow("Deductible expenses", snapshot.deductibleExpensesFormatted, color: .green)
+                seRow("Taxable income", snapshot.taxableIncomeFormatted)
+                Divider()
+                seRow("Income tax", snapshot.incomeTaxFormatted)
+                seRow("Self-employed tax", snapshot.selfEmployedTaxFormatted)
+                seRow("Indirect tax (net)", snapshot.indirectTaxNetFormatted)
+            } else {
+                ForEach(snapshot.detailLines) { line in
+                    if line.id == "total" || line.id == "net" {
+                        Divider()
+                    }
+                    seRow(line.labelKey, line.formattedValue, color: lineColor(for: line))
+                }
+            }
         }
         .padding(BuxLayout.section)
         .seCard(colorScheme: colorScheme, themeManager: themeManager)
+    }
+
+    private func ratesCard(_ snapshot: IncomeTaxDisplay) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            BuxCatalogDynamicText(key: "Rates")
+                .font(.system(size: 11, weight: .bold))
+                .buxLabelSecondary()
+            seRow(
+                "Effective tax rate",
+                BuxLocalizedString.format(
+                    "%lld%%",
+                    locale: appSettingsManager.interfaceLocale,
+                    snapshot.effectiveRatePercent
+                )
+            )
+            if let marginal = snapshot.marginalRatePercent {
+                seRow(
+                    "Marginal tax rate",
+                    BuxLocalizedString.format(
+                        "%lld%%",
+                        locale: appSettingsManager.interfaceLocale,
+                        marginal
+                    )
+                )
+            }
+        }
+        .padding(BuxLayout.section)
+        .seCard(colorScheme: colorScheme, themeManager: themeManager)
+    }
+
+    private func lineColor(for line: IncomeTaxLineDisplay) -> Color? {
+        switch line.id {
+        case "deductions", "net":
+            return .green
+        case "total", "income-tax", "social-total", "indirect":
+            return themeManager.contrastAccentColor(for: colorScheme)
+        default:
+            return nil
+        }
     }
 
     private func seRow(_ title: String, _ value: String, color: Color? = nil) -> some View {

@@ -127,7 +127,9 @@ public struct StudioClient: Codable, Identifiable, Hashable, Equatable {
     public var partyDetails: InvoicePartyDetails?
     /// Optional workspace tag when Side-Hustle Matrix is enabled.
     public var hustleId: UUID?
-    
+    /// Client jurisdiction region (US state, etc.) — drives regional invoice tax (Phase C).
+    public var regionCode: String?
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -140,7 +142,8 @@ public struct StudioClient: Codable, Identifiable, Hashable, Equatable {
         paymentTermsDays: Int? = nil,
         isFlaggedForStress: Bool = false,
         partyDetails: InvoicePartyDetails? = nil,
-        hustleId: UUID? = nil
+        hustleId: UUID? = nil,
+        regionCode: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -154,6 +157,40 @@ public struct StudioClient: Codable, Identifiable, Hashable, Equatable {
         self.isFlaggedForStress = isFlaggedForStress
         self.partyDetails = partyDetails
         self.hustleId = hustleId
+        self.regionCode = regionCode
+    }
+}
+
+// MARK: - Invoice line tax treatment (Phase D)
+
+public enum InvoiceLineTaxCategory: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
+    case standard
+    case reduced
+    case exempt
+    case zeroRated
+
+    public var id: String { rawValue }
+
+    /// Multiplier applied to each tax rate percentage for this line.
+    public var rateMultiplier: Decimal {
+        switch self {
+        case .standard: return 1
+        case .reduced: return 0.5
+        case .exempt, .zeroRated: return 0
+        }
+    }
+
+    public var catalogKey: String {
+        switch self {
+        case .standard: return "Standard rate"
+        case .reduced: return "Reduced rate (50%)"
+        case .exempt: return "Exempt"
+        case .zeroRated: return "Zero-rated"
+        }
+    }
+
+    public func catalogLabel(locale: Locale) -> String {
+        BuxCatalogLabel.string(catalogKey, locale: locale)
     }
 }
 
@@ -166,18 +203,24 @@ public struct StudioInvoiceLineItem: Codable, Identifiable, Hashable, Equatable 
     public var unitPrice: Decimal
     public var isTaxable: Bool
     public var category: String?
-    
+    public var taxCategory: InvoiceLineTaxCategory
+
     public var total: Decimal {
         Decimal(quantity) * unitPrice
     }
-    
+
+    public var effectiveTaxMultiplier: Decimal {
+        taxCategory.rateMultiplier
+    }
+
     public init(
         id: UUID = UUID(),
         description: String,
         quantity: Double = 1.0,
         unitPrice: Decimal = 0.0,
         isTaxable: Bool = true,
-        category: String? = nil
+        category: String? = nil,
+        taxCategory: InvoiceLineTaxCategory? = nil
     ) {
         self.id = id
         self.description = description
@@ -185,6 +228,41 @@ public struct StudioInvoiceLineItem: Codable, Identifiable, Hashable, Equatable 
         self.unitPrice = unitPrice
         self.isTaxable = isTaxable
         self.category = category
+        if let taxCategory {
+            self.taxCategory = taxCategory
+        } else {
+            self.taxCategory = isTaxable ? .standard : .exempt
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, description, quantity, unitPrice, isTaxable, category, taxCategory
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        description = try c.decode(String.self, forKey: .description)
+        quantity = try c.decode(Double.self, forKey: .quantity)
+        unitPrice = try c.decode(Decimal.self, forKey: .unitPrice)
+        isTaxable = try c.decode(Bool.self, forKey: .isTaxable)
+        category = try c.decodeIfPresent(String.self, forKey: .category)
+        if let decoded = try c.decodeIfPresent(InvoiceLineTaxCategory.self, forKey: .taxCategory) {
+            taxCategory = decoded
+        } else {
+            taxCategory = isTaxable ? .standard : .exempt
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(description, forKey: .description)
+        try c.encode(quantity, forKey: .quantity)
+        try c.encode(unitPrice, forKey: .unitPrice)
+        try c.encode(isTaxable, forKey: .isTaxable)
+        try c.encodeIfPresent(category, forKey: .category)
+        try c.encode(taxCategory, forKey: .taxCategory)
     }
 }
 
@@ -839,6 +917,41 @@ public enum MileagePurpose: String, Codable, CaseIterable, Identifiable, Sendabl
     }
 }
 
+/// Vehicle fuel / powertrain for Pro mileage trips (metadata — allowance math unchanged).
+public enum MileageFuelType: String, Codable, CaseIterable, Identifiable, Sendable {
+    case petrol
+    case diesel
+    case electric
+    case hybrid
+    case plugInHybrid
+    case gas
+
+    public var id: String { rawValue }
+
+    public var catalogKey: String {
+        switch self {
+        case .petrol: return "Petrol"
+        case .diesel: return "Diesel"
+        case .electric: return "Electric"
+        case .hybrid: return "Hybrid"
+        case .plugInHybrid: return "Plug-in hybrid"
+        case .gas: return "Gas"
+        }
+    }
+
+    public var systemImage: String {
+        switch self {
+        case .petrol, .diesel, .gas: return "fuelpump.fill"
+        case .electric: return "bolt.car.fill"
+        case .hybrid, .plugInHybrid: return "leaf.fill"
+        }
+    }
+
+    public func catalogLabel(locale: Locale) -> String {
+        BuxCatalogLabel.string(catalogKey, locale: locale)
+    }
+}
+
 public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
     public var id: UUID
     public var date: Date
@@ -853,6 +966,11 @@ public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
     public var endLatitude: Double?
     public var endLongitude: Double?
     public var hustleId: UUID?
+    /// Pro — MapKit route label the user selected (optional).
+    public var selectedRouteName: String?
+    public var selectedRouteIndex: Int?
+    /// Pro — fuel / powertrain metadata (optional).
+    public var fuelType: MileageFuelType?
 
     public init(
         id: UUID = UUID(),
@@ -866,7 +984,10 @@ public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
         startLongitude: Double? = nil,
         endLatitude: Double? = nil,
         endLongitude: Double? = nil,
-        hustleId: UUID? = nil
+        hustleId: UUID? = nil,
+        selectedRouteName: String? = nil,
+        selectedRouteIndex: Int? = nil,
+        fuelType: MileageFuelType? = nil
     ) {
         self.id = id
         self.date = date
@@ -880,6 +1001,9 @@ public struct MileageEntry: Codable, Identifiable, Equatable, Sendable {
         self.endLatitude = endLatitude
         self.endLongitude = endLongitude
         self.hustleId = hustleId
+        self.selectedRouteName = selectedRouteName
+        self.selectedRouteIndex = selectedRouteIndex
+        self.fuelType = fuelType
     }
 
     public var startCoordinate: CLLocationCoordinate2D? {

@@ -13,13 +13,11 @@ public enum TaxIntelligenceEngine {
     public static func compute(_ ctx: TaxStudioContext) -> TaxIntelligenceSnapshot {
         let locale = ctx.locale
         let mileageRate = SettingsStore.shared.mileageRatePerUnit
-        let breakdown = StudioIncomeTaxEngine.compute(
-            invoices: ctx.invoices,
-            receipts: ctx.receipts,
-            taxProfile: ctx.taxProfile,
-            mileageEntries: ctx.mileageEntries,
-            mileageRatePerUnit: mileageRate
+        let computation = WorldTaxEngine.compute(
+            from: ctx,
+            period: WorldTaxEngine.defaultHubPeriod(for: ctx)
         )
+        let breakdown = computation.legacyBreakdown
         let simulation = StudioTaxEngine.computeEstimatedTax(
             profile: ctx.profile,
             taxProfile: ctx.taxProfile,
@@ -38,9 +36,13 @@ public enum TaxIntelligenceEngine {
             now: ctx.now
         )
 
-        let combinedRate = ((ctx.taxProfile.estimatedIncomeTaxRatePercent ?? 0)
-            + (ctx.taxProfile.estimatedSelfEmployedRatePercent ?? 0)) / 100
-        let deductibleSavings = breakdown.deductibleExpenses * combinedRate
+        let savingsRate: Decimal = if computation.source != .legacyManualRates, breakdown.taxableIncome > 0 {
+            breakdown.totalEstimatedTax / breakdown.taxableIncome
+        } else {
+            ((ctx.taxProfile.estimatedIncomeTaxRatePercent ?? 0)
+                + (ctx.taxProfile.estimatedSelfEmployedRatePercent ?? 0)) / 100
+        }
+        let deductibleSavings = breakdown.deductibleExpenses * savingsRate
         let social = breakdown.selfEmployedTax
 
         let (bracketLabel, proximity) = bracketProximity(
@@ -158,7 +160,8 @@ public enum TaxIntelligenceEngine {
         }
         if breakdown.taxableIncome > 0,
            ctx.taxProfile.estimatedIncomeTaxRatePercent == nil,
-           ctx.taxProfile.estimatedSelfEmployedRatePercent == nil {
+           ctx.taxProfile.estimatedSelfEmployedRatePercent == nil,
+           ctx.taxProfile.incomeTaxRules.isEmpty {
             items.append(
                 TaxStudioL10n.line(
                     "Set effective tax rates in Tax Studio Settings for accurate estimates.",
@@ -843,7 +846,8 @@ public enum TaxSanityCheckEngine {
             ))
         }
 
-        if ctx.taxProfile.estimatedIncomeTaxRatePercent == nil {
+        if ctx.taxProfile.estimatedIncomeTaxRatePercent == nil,
+           ctx.taxProfile.incomeTaxRules.isEmpty {
             warnings.append(.init(
                 id: "rate-inc",
                 title: TaxStudioL10n.line("Missing income tax %", locale: locale),
@@ -905,6 +909,9 @@ public enum TaxStudioChartEngine {
     public static func taxPressureSparkline(
         invoices: [StudioInvoice],
         receipts: [StudioReceipt],
+        mileageEntries: [MileageEntry] = [],
+        mileageRatePerUnit: Decimal = 0,
+        catalogRules: [DeductionCategoryRule] = [],
         effectiveRate: Double,
         months: Int = 6,
         now: Date = Date()
@@ -919,12 +926,20 @@ public enum TaxStudioChartEngine {
                 let monthEnd = calendar.date(byAdding: .month, value: 1, to: monthStart)
             else { return 0 }
 
-            let gross = invoices
-                .filter { $0.issueDate >= monthStart && $0.issueDate < monthEnd }
-                .reduce(Decimal(0)) { $0 + $1.total }
-            let deduct = receipts
-                .filter { $0.date >= monthStart && $0.date < monthEnd && $0.isDeductible }
-                .reduce(Decimal(0)) { $0 + $1.amount }
+            let monthInvoices = invoices.filter {
+                ($0.status == .paid || $0.status == .sent || $0.status == .overdue)
+                    && $0.issueDate >= monthStart
+                    && $0.issueDate < monthEnd
+            }
+            let gross = monthInvoices.reduce(Decimal(0)) { $0 + $1.subtotal }
+            let monthReceipts = receipts.filter { $0.date >= monthStart && $0.date < monthEnd }
+            let monthMileage = mileageEntries.filter { $0.date >= monthStart && $0.date < monthEnd }
+            let deduct = StudioDeductionMath.totalDeductible(
+                receipts: monthReceipts,
+                mileageEntries: monthMileage,
+                mileageRatePerUnit: mileageRatePerUnit,
+                catalogRules: catalogRules
+            )
             let taxable = max(0, gross - deduct)
             let tax = taxable * rate
             return Double(truncating: NSDecimalNumber(decimal: tax))

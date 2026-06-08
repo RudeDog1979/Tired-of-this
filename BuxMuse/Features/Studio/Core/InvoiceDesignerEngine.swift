@@ -24,6 +24,9 @@ public final class InvoiceDesignerEngine: ObservableObject {
     @Published public var totalsDisplay: InvoiceTotalsDisplay   = .zero
     @Published public var isConfigured: Bool = false
 
+    private var clientRegionCode: String?
+    private var taxLocale: Locale = .current
+
     // MARK: Init (parameterless for @StateObject compatibility)
     public init() {}
 
@@ -34,8 +37,12 @@ public final class InvoiceDesignerEngine: ObservableObject {
         settings: StudioInvoiceSettings,
         taxProfile: StudioTaxProfile,
         existingSnapshot: InvoiceDesignerSnapshot?,
-        lineItems: [StudioInvoiceLineItem] = []
+        lineItems: [StudioInvoiceLineItem] = [],
+        clientRegionCode: String? = nil,
+        locale: Locale = .current
     ) {
+        self.clientRegionCode = clientRegionCode
+        self.taxLocale = locale
         if let snap = existingSnapshot {
             // Restore from historical snapshot (editing a previously designed invoice)
             templateConfig = snap.templateConfig
@@ -45,20 +52,12 @@ public final class InvoiceDesignerEngine: ObservableObject {
             // Seed from global settings
             templateConfig = settings.defaultTemplateConfig ?? .default
 
-            // Build tax config from invoice settings + tax profile
-            let label = IndirectTaxLabelResolver.shortName(from: taxProfile.effectiveIndirectTax)
-            var rates: [InvoiceTaxRate] = []
-            if let rate = settings.defaultTaxRatePercent {
-                rates = [InvoiceTaxRate(
-                    label: label.isEmpty ? "Tax" : label,
-                    percentage: rate
-                )]
-            }
-            let mode: InvoiceTaxMode = settings.defaultTaxBehavior == .taxIncluded ? .inclusive : .exclusive
-            taxConfig = InvoiceTaxEngineConfig(
-                mode: mode,
-                rates: rates,
-                localizedLabel: label.isEmpty ? "Tax" : label
+            taxConfig = InvoiceTaxProfileResolver.config(
+                taxProfile: taxProfile,
+                settings: settings,
+                source: settings.defaultInvoiceTaxSource,
+                clientRegionCode: clientRegionCode,
+                locale: locale
             )
 
             // Seed payment config from settings bank details
@@ -82,6 +81,31 @@ public final class InvoiceDesignerEngine: ObservableObject {
         recomputeTotals()
     }
 
+    /// Re-applies tax lines from Tax Profile, custom defaults, or clears tax.
+    public func applyTaxSource(
+        _ source: InvoiceTaxSource,
+        taxProfile: StudioTaxProfile,
+        settings: StudioInvoiceSettings,
+        clientRegionCode: String? = nil,
+        locale: Locale? = nil
+    ) {
+        if let clientRegionCode { self.clientRegionCode = clientRegionCode }
+        if let locale { self.taxLocale = locale }
+        taxConfig = InvoiceTaxProfileResolver.config(
+            taxProfile: taxProfile,
+            settings: settings,
+            source: source,
+            existingRates: source == .custom ? taxConfig.rates : [],
+            clientRegionCode: self.clientRegionCode,
+            locale: self.taxLocale
+        )
+        recomputeTotals()
+    }
+
+    public func updateClientRegion(_ code: String?) {
+        clientRegionCode = code
+    }
+
     // MARK: - Math Engine
 
     /// Recomputes `totalsDisplay` from current state. Decimal-precise, no Double money math.
@@ -100,29 +124,25 @@ public final class InvoiceDesignerEngine: ObservableObject {
     ) -> InvoiceTotalsDisplay {
 
         let subtotalAll = items.reduce(Decimal(0)) { $0 + $1.total }
-        let taxableSum  = items.filter(\.isTaxable).reduce(Decimal(0)) { $0 + $1.total }
+        let weightedTaxableBase = InvoiceLineTaxMath.weightedTaxableSum(items: items)
 
         var taxLines: [InvoiceTotalsDisplay.TaxLineItem] = []
         var runningTotal: Decimal = subtotalAll
 
         if taxConfig.mode == .exclusive {
-            // Add tax on top
             for rate in taxConfig.rates {
-                let base        = rate.isCompounding ? runningTotal : taxableSum
-                let amount      = (base * rate.percentage / 100).rounded(scale: 2)
+                let base = rate.isCompounding ? runningTotal : weightedTaxableBase
+                let amount = (base * rate.percentage / 100).rounded(scale: 2)
                 taxLines.append(.init(id: rate.id, label: "\(rate.label) \(rate.percentage)%", amount: amount))
-                runningTotal   += amount
+                runningTotal += amount
             }
         } else {
-            // Extract tax from gross (inclusive)
             for rate in taxConfig.rates {
-                let grossBase   = rate.isCompounding ? runningTotal : taxableSum
-                let divisor     = 1 + rate.percentage / 100
-                let extracted   = (grossBase - grossBase / divisor).rounded(scale: 2)
+                let grossBase = rate.isCompounding ? runningTotal : weightedTaxableBase
+                let divisor = 1 + rate.percentage / 100
+                let extracted = (grossBase - grossBase / divisor).rounded(scale: 2)
                 taxLines.append(.init(id: rate.id, label: "\(rate.label) \(rate.percentage)% (incl.)", amount: extracted))
-                // Note: inclusive mode does not add to total — tax is already embedded
             }
-            // Grand total stays as subtotalAll in inclusive mode
             runningTotal = subtotalAll
         }
 
@@ -288,6 +308,17 @@ public final class InvoiceDesignerEngine: ObservableObject {
         f.maximumFractionDigits = 2
         f.minimumFractionDigits = 2
         return f
+    }
+}
+
+// MARK: - Line tax math (Phase D)
+
+public enum InvoiceLineTaxMath {
+    /// Per-line tax weighting — standard 100%, reduced 50%, exempt/zero 0%.
+    public static func weightedTaxableSum(items: [StudioInvoiceLineItem]) -> Decimal {
+        items.reduce(Decimal(0)) { sum, item in
+            sum + item.total * item.effectiveTaxMultiplier
+        }
     }
 }
 

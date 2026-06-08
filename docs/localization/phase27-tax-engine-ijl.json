@@ -1,0 +1,134 @@
+{
+  "Catalog engine": {
+    "es-419": "Motor del catálogo fiscal",
+    "es-ES": "Motor del catálogo fiscal"
+  },
+  "Net after tax: %@": {
+    "es-419": "Neto después de impuestos: %@",
+    "es-ES": "Neto después de impuestos: %@"
+  },
+  "Rates": {
+    "es-419": "Tasas",
+    "es-ES": "Tasas"
+  },
+  "Fiscal year to date: %@ – %@": {
+    "es-419": "Año fiscal hasta la fecha: %@ – %@",
+    "es-ES": "Año fiscal hasta la fecha: %@ – %@"
+  },
+  "Fiscal year to date": {
+    "es-419": "Año fiscal hasta la fecha",
+    "es-ES": "Año fiscal hasta la fecha"
+  },
+  "Rules as of %@": {
+    "es-419": "Normas vigentes desde %@",
+    "es-ES": "Normas vigentes desde %@"
+  },
+  "Tax year %@": {
+    "es-419": "Año fiscal %@",
+    "es-ES": "Año fiscal %@"
+  },
+  "Current quarter": {
+    "es-419": "Trimestre actual",
+    "es-ES": "Trimestre actual"
+  },
+  "All recorded transactions": {
+    "es-419": "Todas las transacciones registradas",
+    "es-ES": "Todas las transacciones registradas"
+  },
+  "Hypothetical annual": {
+    "es-419": "Anual hipotético",
+    "es-ES": "Anual hipotético"
+  },
+  "%@ sales tax (est.)": {
+    "es-419": "Impuesto sobre ventas de %@ (est.)",
+    "es-ES": "Impuesto sobre ventas de %@ (est.)"
+  },
+  "%@ tax (est.)": {
+    "es-419": "Impuesto de %@ (est.)",
+    "es-ES": "Impuesto de %@ (est.)"
+  },
+  "Software": {
+    "es-419": "Software",
+    "es-ES": "Software"
+  },
+  "Fuel": {
+    "es-419": "Combustible",
+    "es-ES": "Combustible"
+  },
+  "Home Office": {
+    "es-419": "Oficina en casa",
+    "es-ES": "Oficina en casa"
+  },
+  "Subcontractors": {
+    "es-419": "Subcontratistas",
+    "es-ES": "Subcontratistas"
+  },
+  "Meals": {
+    "es-419": "Comidas",
+    "es-ES": "Comidas"
+  },
+  "Phone & Internet": {
+    "es-419": "Teléfono e internet",
+    "es-ES": "Teléfono e internet"
+  },
+  "Equipment": {
+    "es-419": "Equipamiento",
+    "es-ES": "Equipamiento"
+  },
+  "Marketing": {
+    "es-419": "Marketing",
+    "es-ES": "Marketing"
+  },
+  "Insurance": {
+    "es-419": "Seguros",
+    "es-ES": "Seguros"
+  },
+  "Bank Fees": {
+    "es-419": "Comisiones bancarias",
+    "es-ES": "Comisiones bancarias"
+  },
+  "Misc": {
+    "es-419": "Varios",
+    "es-ES": "Varios"
+  },
+  "Catalog rule allows %lld%% deductibility for %@ in %@.": {
+    "es-419": "El catálogo permite deducir %lld%% de %@ en %@.",
+    "es-ES": "El catálogo permite deducir %lld%% de %@ en %@."
+  },
+  "Fully deductible per your tax profile rules.": {
+    "es-419": "Totalmente deducible según las reglas de tu perfil fiscal.",
+    "es-ES": "Totalmente deducible según las reglas de tu perfil fiscal."
+  },
+  "Tax profile applies %lld%% for %@.": {
+    "es-419": "El perfil fiscal aplica %lld%% para %@.",
+    "es-ES": "El perfil fiscal aplica %lld%% para %@."
+  },
+  "Fully deductible per tax profile.": {
+    "es-419": "Totalmente deducible según el perfil fiscal.",
+    "es-ES": "Totalmente deducible según el perfil fiscal."
+  },
+  "Class 2 National Insurance": {
+    "es-419": "Seguro Nacional clase 2",
+    "es-ES": "Seguro Nacional clase 2"
+  },
+  "Class 4 National Insurance": {
+    "es-419": "Seguro Nacional clase 4",
+    "es-ES": "Seguro Nacional clase 4"
+  },
+  "Class 4 National Insurance (additional)": {
+    "es-419": "Seguro Nacional clase 4 (adicional)",
+    "es-ES": "Seguro Nacional clase 4 (adicional)"
+  },
+  "Class 1 National Insurance": {
+    "es-419": "Seguro Nacional clase 1",
+    "es-ES": "Seguro Nacional clase 1"
+  },
+  "Class 1 National Insurance (additional)": {
+    "es-419": "Seguro Nacional clase 1 (adicional)",
+    "es-ES": "Seguro Nacional clase 1 (adicional)"
+  },
+  "Self-employment tax (SECA)": {
+    "es-419": "Impuesto de trabajo por cuenta propia (SECA)",
+    "es-ES": "Impuesto de trabajo por cuenta propia (SECA)"
+  }
+}

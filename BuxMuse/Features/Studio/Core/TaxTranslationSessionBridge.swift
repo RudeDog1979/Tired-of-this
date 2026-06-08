@@ -14,14 +14,26 @@ final class TaxTranslationSessionBridge: ObservableObject {
     static let shared = TaxTranslationSessionBridge()
 
     @Published private(set) var configuration: TranslationSession.Configuration?
-    private var pending: [PendingJob] = []
-    private var targetTag: String?
+    private var pending: [PendingWork] = []
+    private var configurationKey: String?
 
-    private struct PendingJob {
+    private enum PendingWork {
+        case preset(PresetJob)
+        case text(TextJob)
+    }
+
+    private struct PresetJob {
         let preset: TaxInfo
         let catalogUpdatedAt: String?
         let interfaceLocale: Locale
         let continuation: CheckedContinuation<TaxLocalizedPresetResult, Never>
+    }
+
+    private struct TextJob {
+        let text: String
+        let sourceTag: String
+        let targetTag: String
+        let continuation: CheckedContinuation<String, Never>
     }
 
     private init() {}
@@ -32,28 +44,58 @@ final class TaxTranslationSessionBridge: ObservableObject {
         interfaceLocale: Locale
     ) async -> TaxLocalizedPresetResult {
         guard TaxPresetTranslator.translationTargetTag(for: interfaceLocale) != nil else {
+            configuration = nil
+            configurationKey = nil
             return TaxLocalizedPresetResult(preset: preset, usedEnglishFallback: false)
         }
 
         return await withCheckedContinuation { continuation in
             pending.append(
-                PendingJob(
-                    preset: preset,
-                    catalogUpdatedAt: catalogUpdatedAt,
-                    interfaceLocale: interfaceLocale,
-                    continuation: continuation
+                .preset(
+                    PresetJob(
+                        preset: preset,
+                        catalogUpdatedAt: catalogUpdatedAt,
+                        interfaceLocale: interfaceLocale,
+                        continuation: continuation
+                    )
                 )
             )
-            let tag = TaxPresetTranslator.translationTargetTag(for: interfaceLocale)
-            targetTag = tag
-            if configuration == nil, let tag {
-                configuration = TranslationSession.Configuration(
-                    source: Locale.Language(identifier: "en"),
-                    target: Locale.Language(identifier: tag)
-                )
-            } else {
-                configuration?.invalidate()
+            if let tag = TaxPresetTranslator.translationTargetTag(for: interfaceLocale) {
+                prepareConfiguration(sourceTag: TaxPresetTranslator.canonicalSourceTag, targetTag: tag)
             }
+        }
+    }
+
+    func translate(_ text: String, sourceTag: String, targetTag: String) async -> String {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return text }
+        if sourceTag == targetTag { return text }
+
+        return await withCheckedContinuation { continuation in
+            pending.append(
+                .text(
+                    TextJob(
+                        text: trimmed,
+                        sourceTag: sourceTag,
+                        targetTag: targetTag,
+                        continuation: continuation
+                    )
+                )
+            )
+            prepareConfiguration(sourceTag: sourceTag, targetTag: targetTag)
+        }
+    }
+
+    private func prepareConfiguration(sourceTag: String, targetTag: String) {
+        let key = "\(sourceTag)|\(targetTag)"
+        if configurationKey != key {
+            configurationKey = key
+            configuration = TranslationSession.Configuration(
+                source: Locale.Language(identifier: sourceTag),
+                target: Locale.Language(identifier: targetTag)
+            )
+        } else {
+            configuration?.invalidate()
         }
     }
 
@@ -61,13 +103,23 @@ final class TaxTranslationSessionBridge: ObservableObject {
         let jobs = pending
         pending.removeAll()
         for job in jobs {
-            let result = await TaxPresetTranslator.localizedPreset(
-                job.preset,
-                catalogUpdatedAt: job.catalogUpdatedAt,
-                interfaceLocale: job.interfaceLocale,
-                session: session
-            )
-            job.continuation.resume(returning: result)
+            switch job {
+            case .preset(let presetJob):
+                let result = await TaxPresetTranslator.localizedPreset(
+                    presetJob.preset,
+                    catalogUpdatedAt: presetJob.catalogUpdatedAt,
+                    interfaceLocale: presetJob.interfaceLocale,
+                    session: session
+                )
+                presetJob.continuation.resume(returning: result)
+            case .text(let textJob):
+                do {
+                    let response = try await session.translate(textJob.text)
+                    textJob.continuation.resume(returning: response.targetText)
+                } catch {
+                    textJob.continuation.resume(returning: textJob.text)
+                }
+            }
         }
     }
 }

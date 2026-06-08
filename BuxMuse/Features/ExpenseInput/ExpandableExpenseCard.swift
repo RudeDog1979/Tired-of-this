@@ -48,42 +48,13 @@ struct ExpandableExpenseCard: View {
                                 .font(.body.weight(.medium))
                                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                                 .textCase(nil)
+                                .lineLimit(1)
 
-                            if let category = expense.category {
-                                Text(category)
-                                    .font(.footnote)
-                                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                    .textCase(nil)
-                            }
-
-                            HStack(spacing: 6) {
-                                if let workspace = expense.workspaceLabel {
-                                    Text(workspace)
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(themeManager.current.accentColor.opacity(0.12))
-                                        .clipShape(Capsule())
-                                } else if expense.isUnassignedWorkspace {
-                                    BuxCatalogText.text("Unassigned")
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(.orange)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color.orange.opacity(0.12))
-                                        .clipShape(Capsule())
-                                }
-
-                                if let bridge = expense.bridgeBadge {
-                                    Text(bridge)
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(.purple)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color.purple.opacity(0.12))
-                                        .clipShape(Capsule())
-                                }
+                            if expense.category != nil
+                                || expense.workspaceLabel != nil
+                                || expense.isUnassignedWorkspace
+                                || expense.bridgeBadge != nil {
+                                metadataRow
                             }
                         }
 
@@ -170,6 +141,53 @@ struct ExpandableExpenseCard: View {
             )
         )
         .environment(\.textCase, nil)
+    }
+
+    private var metadataRow: some View {
+        HStack(spacing: 6) {
+            if let category = expense.category {
+                Text(category)
+                    .font(.footnote)
+                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                    .textCase(nil)
+                    .lineLimit(1)
+                    .layoutPriority(1)
+            }
+
+            if let workspace = expense.workspaceLabel {
+                Text(workspace)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                    .lineLimit(1)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(themeManager.current.accentColor.opacity(0.12))
+                    .clipShape(Capsule())
+                    .fixedSize(horizontal: true, vertical: false)
+            } else if expense.isUnassignedWorkspace {
+                BuxCatalogText.text("Unassigned")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.orange)
+                    .lineLimit(1)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.orange.opacity(0.12))
+                    .clipShape(Capsule())
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+
+            if let bridge = expense.bridgeBadge {
+                Text(bridge)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.purple)
+                    .lineLimit(1)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.purple.opacity(0.12))
+                    .clipShape(Capsule())
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+        }
     }
 
     private func insightRow(icon: String, title: String, value: String, color: Color) -> some View {

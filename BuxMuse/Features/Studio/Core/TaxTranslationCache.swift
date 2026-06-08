@@ -115,6 +115,26 @@ extension TaxPresetTranslationField {
         }
     }
 
+    func profileText(from fields: TaxProfileTextFields) -> String {
+        switch self {
+        case .vat: return fields.indirectTax
+        case .income_tax: return fields.incomeTax
+        case .self_employed_tax: return fields.selfEmployedTax
+        case .notes: return fields.notes
+        }
+    }
+
+    func apply(_ value: String, to fields: TaxProfileTextFields) -> TaxProfileTextFields {
+        var updated = fields
+        switch self {
+        case .vat: updated.indirectTax = value
+        case .income_tax: updated.incomeTax = value
+        case .self_employed_tax: updated.selfEmployedTax = value
+        case .notes: updated.notes = value
+        }
+        return updated
+    }
+
     func apply(_ value: String, to preset: TaxInfo) -> TaxInfo {
         switch self {
         case .vat:

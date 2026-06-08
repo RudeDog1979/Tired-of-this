@@ -1,0 +1,36 @@
+name: Monthly Tax Catalog Update
+
+on:
+  schedule:
+    # 28th of each month, 06:00 UTC
+    - cron: "0 6 28 * *"
+  workflow_dispatch:
+
+jobs:
+  update-tax-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run global tax updater
+        env:
+          GIST_ID_TAX: ${{ secrets.GIST_ID_TAX }}
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python3 scripts/global_tax_updater.py --resume
+
+      - name: Commit bundled compute if changed
+        run: |
+          if git diff --quiet BuxMuse/Resources/buxmuse_tax_compute.json; then
+            echo "No bundled compute changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add BuxMuse/Resources/buxmuse_tax_compute.json
+          git commit -m "chore(tax): refresh bundled buxmuse_tax_compute.json from monthly updater"
+          git push

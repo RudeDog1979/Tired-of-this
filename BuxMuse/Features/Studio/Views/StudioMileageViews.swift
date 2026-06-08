@@ -57,7 +57,10 @@ struct StudioMileageLogView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 BuxToolbarButton(
                     systemName: "plus",
-                    accessibilityLabel: "Add mileage entry",
+                    accessibilityLabel: BuxCatalogLabel.string(
+                        "Add mileage entry",
+                        locale: appSettingsManager.interfaceLocale
+                    ),
                     action: { mileageSheetMode = .add(openToken: UUID()) }
                 )
             }
@@ -66,6 +69,7 @@ struct StudioMileageLogView: View {
             MileageEntrySheet(
                 mode: mode,
                 countryCode: appSettingsManager.selectedCountry.id,
+                proRouteFeatures: settingsStore.studioMode == .pro,
                 onSave: { outbound, returnLeg in
                     switch mode {
                     case .edit:
@@ -141,7 +145,14 @@ struct StudioMileageLogView: View {
                         Button {
                             addReturnTrip(from: entry)
                         } label: {
-                            Label("Same trip back", systemImage: "arrow.left.arrow.right.circle")
+                            Label {
+                                Text(BuxCatalogLabel.string(
+                                    "Same trip back",
+                                    locale: appSettingsManager.interfaceLocale
+                                ))
+                            } icon: {
+                                Image(systemName: "arrow.left.arrow.right.circle")
+                            }
                         }
                     }
                 }
@@ -216,9 +227,20 @@ struct StudioMileageLogView: View {
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(2)
-                Text(entry.purpose.catalogLabel(locale: appSettingsManager.interfaceLocale))
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(purposeColor(entry.purpose))
+                HStack(spacing: 6) {
+                    Text(entry.purpose.catalogLabel(locale: appSettingsManager.interfaceLocale))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(purposeColor(entry.purpose))
+                    if let fuel = entry.fuelType {
+                        HStack(spacing: 3) {
+                            Image(systemName: fuel.systemImage)
+                                .font(.system(size: 9, weight: .bold))
+                            Text(fuel.catalogLabel(locale: appSettingsManager.interfaceLocale))
+                                .font(.system(size: 9, weight: .bold))
+                        }
+                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                    }
+                }
             }
 
             Spacer(minLength: 8)
@@ -238,7 +260,9 @@ struct StudioMileageLogView: View {
     private func routeLabel(_ entry: MileageEntry) -> String {
         let start = entry.startLocation.trimmingCharacters(in: .whitespacesAndNewlines)
         let end = entry.endLocation.trimmingCharacters(in: .whitespacesAndNewlines)
-        if start.isEmpty && end.isEmpty { return "Trip" }
+        if start.isEmpty && end.isEmpty {
+            return BuxCatalogLabel.string("Trip", locale: appSettingsManager.interfaceLocale)
+        }
         if start.isEmpty { return end }
         if end.isEmpty { return start }
         return "\(start) → \(end)"
@@ -293,25 +317,58 @@ private struct MileageAddressSearchField: View {
     @Binding var text: String
     @ObservedObject var autocomplete: MileageAddressAutocompleteModel
     let onSelect: (MileageResolvedPlace) -> Void
+    var onTextEdited: (() -> Void)?
     var onUseCurrentLocation: (() -> Void)?
     var showLocationButton: Bool = false
     var focusedField: FocusState<MileageTripField?>.Binding
     let focusValue: MileageTripField
 
+    @State private var isResolvingAddresses = false
+    @State private var addressLookupErrorKey: String?
+    @State private var suppressTextEdited = false
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
+
+    private func loc(_ key: String) -> String {
+        BuxCatalogLabel.string(key, locale: locale)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale).uppercased())
+            Text(loc(title).uppercased())
                 .font(.system(size: 10, weight: .bold))
                 .buxLabelSecondary()
 
             HStack(spacing: 8) {
-                TextField(BuxCatalogLabel.string("Address or postcode", locale: appSettingsManager.interfaceLocale), text: $text)
+                TextField(loc("Address or postcode"), text: $text)
                     .textInputAutocapitalization(.words)
                     .autocorrectionDisabled()
                     .focused(focusedField, equals: focusValue)
-                    .onChange(of: text) { _, value in
-                        autocomplete.updateQuery(value)
+                    .submitLabel(.search)
+                    .onSubmit {
+                        resolveTypedAddress()
                     }
+                    .onChange(of: text) { _, value in
+                        if suppressTextEdited {
+                            suppressTextEdited = false
+                            return
+                        }
+                        addressLookupErrorKey = nil
+                        autocomplete.updateQuery(value)
+                        onTextEdited?()
+                    }
+
+                if !text.isEmpty {
+                    Button {
+                        clearField()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel(loc("Clear"))
+                }
 
                 if showLocationButton, let onUseCurrentLocation {
                     Button(action: onUseCurrentLocation) {
@@ -323,9 +380,33 @@ private struct MileageAddressSearchField: View {
                 }
             }
 
-            if focusedField.wrappedValue == focusValue, !autocomplete.completions.isEmpty {
+            if isResolvingAddresses {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    BuxCatalogDynamicText(key: "Loading addresses…")
+                        .font(.system(size: 11, weight: .medium))
+                        .buxLabelSecondary()
+                }
+            }
+
+            if let addressLookupErrorKey {
+                Text(loc(addressLookupErrorKey))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !autocomplete.completions.isEmpty {
                 VStack(spacing: 0) {
-                    ForEach(Array(autocomplete.completions.prefix(6).enumerated()), id: \.offset) { _, completion in
+                    BuxCatalogDynamicText(key: "Keep typing a house number, name, or business — or pick from the list.")
+                        .font(.system(size: 10, weight: .medium))
+                        .buxLabelSecondary()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 12)
+                        .padding(.top, 10)
+                        .padding(.bottom, 6)
+
+                    ForEach(Array(autocomplete.completions.prefix(15).enumerated()), id: \.offset) { _, completion in
                         Button {
                             select(completion)
                         } label: {
@@ -352,7 +433,7 @@ private struct MileageAddressSearchField: View {
                         }
                         .buttonStyle(.plain)
 
-                        if completion.title != autocomplete.completions.last?.title {
+                        if completion.title != autocomplete.completions.prefix(15).last?.title {
                             Divider().opacity(0.12)
                         }
                     }
@@ -365,11 +446,80 @@ private struct MileageAddressSearchField: View {
     private func select(_ completion: MKLocalSearchCompletion) {
         focusedField.wrappedValue = nil
         autocomplete.clear()
+        addressLookupErrorKey = nil
+        resolveAndApply(completion)
+    }
+
+    private func resolveAndApply(_ completion: MKLocalSearchCompletion) {
+        isResolvingAddresses = true
         Task {
-            if let resolved = await MileageRouteBrain.resolve(completion: completion) {
-                await MainActor.run {
-                    text = resolved.label
-                    onSelect(resolved)
+            let place = await MileageRouteBrain.resolve(
+                completion: completion,
+                countryCode: autocomplete.countryCode,
+                interfaceLocale: locale
+            )
+            await MainActor.run {
+                isResolvingAddresses = false
+                if let place {
+                    applyPlace(place)
+                } else {
+                    addressLookupErrorKey =
+                        "No street addresses found for this postcode. Type a house number or use postcode area only."
+                }
+            }
+        }
+    }
+
+    private func applyPlace(_ place: MileageResolvedPlace) {
+        isResolvingAddresses = false
+        onSelect(place)
+        setTextProgrammatically(place.label)
+        Task {
+            let localized = await MileageRouteBrain.relabelSelectedPlace(
+                place,
+                interfaceLocale: locale,
+                countryCode: autocomplete.countryCode
+            )
+            await MainActor.run {
+                guard localized.id == place.id else { return }
+                setTextProgrammatically(localized.label)
+            }
+        }
+    }
+
+    private func setTextProgrammatically(_ value: String) {
+        suppressTextEdited = true
+        text = value
+    }
+
+    private func clearField() {
+        text = ""
+        addressLookupErrorKey = nil
+        isResolvingAddresses = false
+        autocomplete.clear()
+        onTextEdited?()
+    }
+
+    private func resolveTypedAddress() {
+        let query = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return }
+        focusedField.wrappedValue = nil
+        autocomplete.clear()
+        isResolvingAddresses = true
+        addressLookupErrorKey = nil
+        Task {
+            let place = await MileageRouteBrain.resolve(
+                query: query,
+                countryCode: autocomplete.countryCode,
+                interfaceLocale: locale
+            )
+            await MainActor.run {
+                isResolvingAddresses = false
+                if let place {
+                    applyPlace(place)
+                } else {
+                    addressLookupErrorKey =
+                        "No street addresses found for this postcode. Type a house number or use postcode area only."
                 }
             }
         }
@@ -392,6 +542,7 @@ struct MileageEntrySheet: View {
 
     let mode: MileageSheetMode
     let countryCode: String
+    var proRouteFeatures: Bool = false
     /// Outbound entry, then optional return leg when logging there-and-back in one save.
     let onSave: (_ outbound: MileageEntry, _ returnLeg: MileageEntry?) -> Void
 
@@ -406,7 +557,12 @@ struct MileageEntrySheet: View {
     @State private var purpose: MileagePurpose = .business
     @State private var notes = ""
     @State private var isCalculatingRoute = false
-    @State private var routeError: String?
+    @State private var routeErrorKey: String?
+    @State private var routeOptions: [MileageRouteOption] = []
+    @State private var selectedRouteID: Int?
+    @State private var selectedRouteName: String?
+    @State private var fuelType: MileageFuelType?
+    @State private var suppressDistanceManualEdit = false
 
     @FocusState private var focusedField: MileageTripField?
 
@@ -428,6 +584,24 @@ struct MileageEntrySheet: View {
                 ScrollView {
                     VStack(spacing: BuxLayout.section) {
                         routeCard
+                        if proRouteFeatures, let start = startCoordinate, let end = endCoordinate, !routeOptions.isEmpty {
+                            MileageRoutePickerSection(
+                                start: start,
+                                end: end,
+                                routes: routeOptions,
+                                selectedRouteID: $selectedRouteID
+                            )
+                            .padding(BuxLayout.section)
+                            .studioThemedCardChrome(cornerRadius: 20)
+                            .onChange(of: selectedRouteID) { _, newValue in
+                                applyRouteSelection(newValue)
+                            }
+                        }
+                        if proRouteFeatures {
+                            MileageFuelTypePickerSection(selection: $fuelType)
+                                .padding(BuxLayout.section)
+                                .studioThemedCardChrome(cornerRadius: 20)
+                        }
                         distanceHero
                         purposePicker
                         if !isEditing, canLogReturnLeg {
@@ -449,7 +623,7 @@ struct MileageEntrySheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     BuxToolbarConfirmButton(
-                        accessibilityLabel: "Save",
+                        accessibilityLabel: loc("Save"),
                         isEnabled: parsedDistance > 0
                     ) {
                         save(includeReturn: false)
@@ -475,8 +649,8 @@ struct MileageEntrySheet: View {
             .buxStableNavigationBarWithKeyboard()
             .buxStudioSheetContent()
             .onAppear {
-                startAutocomplete.configure(countryCode: countryCode)
-                endAutocomplete.configure(countryCode: countryCode)
+                startAutocomplete.configure(countryCode: countryCode, interfaceLocale: locale)
+                endAutocomplete.configure(countryCode: countryCode, interfaceLocale: locale)
                 reloadFormFromStore()
             }
             .onChange(of: mode.id) { _, _ in
@@ -499,6 +673,7 @@ struct MileageEntrySheet: View {
                     startCoordinate = place.coordinate
                     recalculateRouteIfPossible()
                 },
+                onTextEdited: clearStartRouteState,
                 onUseCurrentLocation: startLocationCaptureAction,
                 showLocationButton: settingsStore.autoLocationForMileage,
                 focusedField: $focusedField,
@@ -513,6 +688,7 @@ struct MileageEntrySheet: View {
                     endCoordinate = place.coordinate
                     recalculateRouteIfPossible()
                 },
+                onTextEdited: clearEndRouteState,
                 onUseCurrentLocation: endLocationCaptureAction,
                 showLocationButton: settingsStore.autoLocationForMileage,
                 focusedField: $focusedField,
@@ -526,8 +702,8 @@ struct MileageEntrySheet: View {
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                 }
-            } else if let routeError {
-                Text(routeError)
+            } else if let routeErrorKey {
+                Text(loc(routeErrorKey))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.orange)
             }
@@ -549,6 +725,7 @@ struct MileageEntrySheet: View {
                     .frame(maxWidth: 160)
                     .focused($focusedField, equals: .distance)
                     .onChange(of: distanceText) { _, _ in
+                        guard !suppressDistanceManualEdit else { return }
                         distanceManuallyEdited = true
                     }
                 BuxCatalogDynamicText(key: "mi")
@@ -612,6 +789,7 @@ struct MileageEntrySheet: View {
                     Text(returnRoutePreview)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme).opacity(0.9))
+                        .multilineTextAlignment(.leading)
                 }
             }
         }
@@ -642,7 +820,9 @@ struct MileageEntrySheet: View {
         let to = endLocation.trimmingCharacters(in: .whitespacesAndNewlines)
         let outbound = routePreviewLabel(from: from, to: to)
         let inbound = routePreviewLabel(from: to, to: from)
-        return "Outbound: \(outbound)\nBack: \(inbound)"
+        let outboundLine = BuxLocalizedString.format("Outbound: %@", locale: locale, outbound)
+        let backLine = BuxLocalizedString.format("Back: %@", locale: locale, inbound)
+        return "\(outboundLine)\n\(backLine)"
     }
 
     private func routePreviewLabel(from: String, to: String) -> String {
@@ -688,7 +868,11 @@ struct MileageEntrySheet: View {
     }
 
     private func resolveTypedAddress(_ query: String, isStart: Bool) async {
-        guard let resolved = await MileageRouteBrain.resolve(query: query, countryCode: countryCode) else { return }
+        guard let resolved = await MileageRouteBrain.resolve(
+            query: query,
+            countryCode: countryCode,
+            interfaceLocale: locale
+        ) else { return }
         await MainActor.run {
             if isStart {
                 startLocation = resolved.label
@@ -701,22 +885,74 @@ struct MileageEntrySheet: View {
         }
     }
 
-    private func recalculateRouteIfPossible() {
+    private func recalculateRouteIfPossible(preferredRouteID: Int? = nil) {
         guard let start = startCoordinate, let end = endCoordinate else { return }
-        routeError = nil
+        routeErrorKey = nil
         isCalculatingRoute = true
+        routeOptions = []
+        selectedRouteID = nil
+        selectedRouteName = nil
         Task {
-            let miles = await MileageRouteBrain.drivingDistanceMiles(from: start, to: end)
-            await MainActor.run {
-                isCalculatingRoute = false
-                if let miles, miles > 0 {
-                    if !distanceManuallyEdited {
-                        distanceText = String(format: "%.1f", miles)
+            if proRouteFeatures {
+                let options = await MileageRouteBrain.drivingRouteOptions(from: start, to: end)
+                await MainActor.run {
+                    isCalculatingRoute = false
+                    guard !options.isEmpty else {
+                        routeErrorKey = "Could not calculate a route. Enter distance manually."
+                        return
                     }
-                } else {
-                    routeError = "Could not calculate a route. Enter distance manually."
+                    routeOptions = options
+                    let routeID = preferredRouteID.flatMap { id in
+                        options.contains(where: { $0.id == id }) ? id : nil
+                    } ?? options.first?.id
+                    selectedRouteID = routeID
+                    applyRouteSelection(routeID)
+                }
+            } else {
+                let miles = await MileageRouteBrain.drivingDistanceMiles(from: start, to: end)
+                await MainActor.run {
+                    isCalculatingRoute = false
+                    if let miles, miles > 0 {
+                        if !distanceManuallyEdited {
+                            suppressDistanceManualEdit = true
+                            distanceText = String(format: "%.1f", miles)
+                            suppressDistanceManualEdit = false
+                        }
+                    } else {
+                        routeErrorKey = "Could not calculate a route. Enter distance manually."
+                    }
                 }
             }
+        }
+    }
+
+    private func clearStartRouteState() {
+        startCoordinate = nil
+        clearPendingRouteState()
+    }
+
+    private func clearEndRouteState() {
+        endCoordinate = nil
+        clearPendingRouteState()
+    }
+
+    private func clearPendingRouteState() {
+        routeOptions = []
+        selectedRouteID = nil
+        selectedRouteName = nil
+        isCalculatingRoute = false
+        routeErrorKey = nil
+    }
+
+    private func applyRouteSelection(_ routeID: Int?) {
+        guard let routeID,
+              let route = routeOptions.first(where: { $0.id == routeID }) else { return }
+        selectedRouteName = route.name
+        suppressDistanceManualEdit = true
+        distanceText = String(format: "%.1f", route.distanceMiles)
+        suppressDistanceManualEdit = false
+        if proRouteFeatures {
+            distanceManuallyEdited = false
         }
     }
 
@@ -741,7 +977,11 @@ struct MileageEntrySheet: View {
         purpose = .business
         notes = ""
         isCalculatingRoute = false
-        routeError = nil
+        routeErrorKey = nil
+        routeOptions = []
+        selectedRouteID = nil
+        selectedRouteName = nil
+        fuelType = nil
     }
 
     private func applyEntryToForm(_ entry: MileageEntry) {
@@ -754,9 +994,16 @@ struct MileageEntrySheet: View {
         endCoordinate = entry.endCoordinate
         purpose = entry.purpose
         notes = entry.notes
+        fuelType = entry.fuelType
+        selectedRouteID = entry.selectedRouteIndex
+        selectedRouteName = entry.selectedRouteName
         includeReturnJourney = false
         isCalculatingRoute = false
-        routeError = nil
+        routeErrorKey = nil
+        routeOptions = []
+        if proRouteFeatures, entry.startCoordinate != nil, entry.endCoordinate != nil {
+            recalculateRouteIfPossible(preferredRouteID: entry.selectedRouteIndex)
+        }
     }
 
     private func buildOutboundEntry() -> MileageEntry {
@@ -775,6 +1022,11 @@ struct MileageEntrySheet: View {
         entry.notes = notes
         entry.setStartCoordinate(startCoordinate)
         entry.setEndCoordinate(endCoordinate)
+        if proRouteFeatures {
+            entry.fuelType = fuelType
+            entry.selectedRouteIndex = selectedRouteID
+            entry.selectedRouteName = selectedRouteName
+        }
         return entry
     }
 

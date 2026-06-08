@@ -20,6 +20,7 @@ struct StudioTaxReferenceView: View {
     @State private var pickerSearchQuery = ""
     @State private var taxIncomeType: TaxIncomeType = .selfEmployed
     @State private var selectedPresetCode = ""
+    @State private var selectedRegionCode = ""
     @State private var customIncomeTax = ""
     @State private var customSelfEmployedTax = ""
     @State private var customIndirectTax = ""
@@ -59,9 +60,21 @@ struct StudioTaxReferenceView: View {
         }
     }
 
+    private var computeCatalogUpdatedLabel: String? {
+        TaxComputeCatalogStore.shared.catalogUpdatedAt.map {
+            BuxLocalizedString.format("Compute rules updated %@", locale: appSettingsManager.interfaceLocale, $0)
+        }
+    }
+
+    private var availableTaxRegions: [TaxComputeRegion] {
+        guard !selectedPresetCode.isEmpty else { return [] }
+        return TaxComputeCatalogStore.shared.regions(for: selectedPresetCode)
+    }
+
     private var currentDraft: TaxProfileDraft {
         TaxProfileDraft(
             selectedPresetCode: selectedPresetCode,
+            selectedRegionCode: selectedRegionCode,
             taxIncomeType: taxIncomeType,
             customIncomeTax: customIncomeTax,
             customSelfEmployedTax: customSelfEmployedTax,
@@ -104,6 +117,9 @@ struct StudioTaxReferenceView: View {
                 }
             }
         }
+        .background {
+            TaxTranslationSessionBridgeView()
+        }
         .onAppear {
             hydrateFromStore()
             if studioHubEmbedded, let bridge = taxStudioProfileSaveBridge {
@@ -122,14 +138,22 @@ struct StudioTaxReferenceView: View {
             catalogReady = true
             await refreshSavedPresetSummary()
         }
+        .onChange(of: taxIncomeType) { _, _ in
+            if selectedRegionCode.isEmpty, let first = availableTaxRegions.first?.code {
+                selectedRegionCode = first
+            }
+        }
         .onChange(of: selectedPresetCode) { _, _ in
             Task { await refreshSavedPresetSummary() }
         }
         .onChange(of: appDataManager.taxManagerRef.catalogUpdatedAt) { _, _ in
             Task { await refreshSavedPresetSummary() }
         }
-        .onChange(of: appSettingsManager.interfaceLocale.identifier) { _, _ in
-            Task { await refreshSavedPresetSummary() }
+        .onChange(of: appSettingsManager.interfaceLocale.identifier) { oldID, _ in
+            Task {
+                await relocalizeTaxFields(from: Locale(identifier: oldID))
+                await refreshSavedPresetSummary()
+            }
         }
         .sheet(isPresented: $showCountryPicker, onDismiss: {
             guard let staged = stagingPreset else { return }
@@ -143,8 +167,8 @@ struct StudioTaxReferenceView: View {
             .buxStudioSheetContent()
         }
         .sheet(item: $presetToReview) { preset in
-            TaxPresetReviewSheet(preset: preset) { localized in
-                applyPreset(localized)
+            TaxPresetReviewSheet(preset: preset) { englishPreset in
+                applyPreset(englishPreset)
                 presetToReview = nil
                 Task { await refreshSavedPresetSummary() }
             } onCancel: {
@@ -163,16 +187,23 @@ struct StudioTaxReferenceView: View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
             currencyBanner
             presetDropdownSection
-            incomeTypeSection
-            registrationSection
+            if !availableTaxRegions.isEmpty {
+                taxRegionSection
+            }
+            taxIdentitySection
             paymentScheduleSection
+            complianceNoticesSection
 
             if appDataManager.taxManagerRef.isLoading && !catalogReady {
                 loadingCatalogCard
             }
 
             editableFieldsSection
-            effectiveRatesSection
+            if showManualEffectiveRates {
+                effectiveRatesSection
+            } else {
+                catalogRatesInfoCard
+            }
 
             if let saveBanner {
                 Text(saveBanner)
@@ -219,12 +250,47 @@ struct StudioTaxReferenceView: View {
         .referenceCard
     }
 
-    private var registrationSection: some View {
+    private var taxRegionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            BuxCatalogDynamicText(key: "Indirect tax status")
+            BuxCatalogDynamicText(key: "Tax region")
                 .font(.system(size: 11, weight: .bold))
                 .buxLabelSecondary()
                 .kerning(0.8)
+
+            Picker(
+                BuxCatalogLabel.string("Tax region", locale: appSettingsManager.interfaceLocale),
+                selection: $selectedRegionCode
+            ) {
+                BuxCatalogDynamicText(key: "National default").tag("")
+                ForEach(availableTaxRegions, id: \.code) { region in
+                    Text(region.name).tag(region.code)
+                }
+            }
+            .pickerStyle(.menu)
+
+            if let computeCatalogUpdatedLabel {
+                Text(computeCatalogUpdatedLabel)
+                    .font(.system(size: 10, weight: .medium))
+                    .buxLabelSecondary()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BuxLayout.section)
+        .referenceCard
+    }
+
+    private var taxIdentitySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            BuxCatalogDynamicText(key: "Tax identity")
+                .font(.system(size: 11, weight: .bold))
+                .buxLabelSecondary()
+                .kerning(0.8)
+
+            BuxCatalogDynamicText(key: "Income tax and indirect tax (VAT/GST) are configured together. Invoices and calculators follow these settings.")
+                .font(.system(size: 11))
+                .buxLabelSecondary()
+
+            incomeTypeSectionInline
 
             Toggle(isOn: $indirectTaxRegistered) {
                 Text(registrationToggleLabel)
@@ -232,13 +298,61 @@ struct StudioTaxReferenceView: View {
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
             }
 
-            BuxCatalogDynamicText(key: "Label updates from your indirect tax rules above (VAT, GST, ITBIS, etc.).")
+            BuxCatalogDynamicText(key: "Turn on only if you are registered to charge VAT, GST, ITBIS, or similar on invoices.")
                 .font(.system(size: 11))
                 .buxLabelSecondary()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)
         .referenceCard
+    }
+
+    private var incomeTypeSectionInline: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            BuxCatalogDynamicText(key: "Income path")
+                .font(.system(size: 10, weight: .bold))
+                .buxLabelSecondary()
+            Picker("", selection: $taxIncomeType) {
+                ForEach(TaxIncomeType.allCases) { type in
+                    Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
+                }
+            }
+            .pickerStyle(.segmented)
+            .buxThemedSegmentedPicker()
+            Text(taxIncomeType.catalogSummaryLabel(locale: appSettingsManager.interfaceLocale))
+                .font(.system(size: 11, weight: .medium))
+                .buxLabelSecondary()
+        }
+    }
+
+    private var complianceNoticesSection: some View {
+        let notices = TaxComplianceAdvisor.notices(
+            taxProfile: store.taxProfile,
+            invoices: store.invoices,
+            locale: appSettingsManager.interfaceLocale
+        )
+        return Group {
+            if !notices.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    BuxCatalogDynamicText(key: "Tax checks")
+                        .font(.system(size: 11, weight: .bold))
+                        .buxLabelSecondary()
+                    ForEach(notices) { notice in
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: notice.severity == .warning ? "exclamationmark.triangle.fill" : "info.circle.fill")
+                                .foregroundColor(notice.severity == .warning ? .orange : themeManager.contrastAccentColor(for: colorScheme))
+                            Text(BuxCatalogLabel.string(notice.messageKey, locale: appSettingsManager.interfaceLocale))
+                                .font(.system(size: 12))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(BuxLayout.section)
+                .referenceCard
+            }
+        }
     }
 
     private var paymentScheduleSection: some View {
@@ -320,30 +434,6 @@ struct StudioTaxReferenceView: View {
         .referenceCard
     }
 
-    private var incomeTypeSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            BuxCatalogDynamicText(key: "How you earn")
-                .font(.system(size: 11, weight: .bold))
-                .buxLabelSecondary()
-                .kerning(0.8)
-
-            Picker(BuxCatalogLabel.string("Income type", locale: appSettingsManager.interfaceLocale), selection: $taxIncomeType) {
-                ForEach(TaxIncomeType.allCases) { type in
-                    Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
-                }
-            }
-            .pickerStyle(.segmented)
-            .buxThemedSegmentedPicker()
-
-            Text(taxIncomeType.catalogSummaryLabel(locale: appSettingsManager.interfaceLocale))
-                .font(.system(size: 11, weight: .medium))
-                .buxLabelSecondary()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BuxLayout.section)
-        .referenceCard
-    }
-
     private var loadingCatalogCard: some View {
         HStack(spacing: 10) {
             ProgressView()
@@ -370,6 +460,44 @@ struct StudioTaxReferenceView: View {
         }
     }
 
+    private var showManualEffectiveRates: Bool {
+        let profile = draftTaxProfileForVisibility
+        return TaxCatalogProfileHydrator.shouldShowManualIncomeRate(for: profile)
+            || TaxCatalogProfileHydrator.shouldShowManualSelfEmployedRate(for: profile)
+            || TaxCatalogProfileHydrator.shouldShowManualIndirectRate(for: profile)
+    }
+
+    private var draftTaxProfileForVisibility: StudioTaxProfile {
+        var profile = store.taxProfile
+        profile.selectedTaxCountry = selectedPresetCode.isEmpty ? nil : selectedPresetCode
+        profile.regionCode = selectedRegionCode.isEmpty ? nil : selectedRegionCode
+        profile.taxIncomeType = taxIncomeType
+        if !selectedPresetCode.isEmpty {
+            TaxCatalogProfileHydrator.applyCatalogRules(
+                to: &profile,
+                countryCode: selectedPresetCode,
+                regionCode: profile.regionCode
+            )
+        }
+        return profile
+    }
+
+    private var catalogRatesInfoCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.section) {
+            BuxCatalogDynamicText(key: "Tax rates from catalog")
+                .font(.system(size: 11, weight: .bold))
+                .buxLabelSecondary()
+                .kerning(0.8)
+
+            BuxCatalogDynamicText(key: "Income tax, social contributions, and VAT/GST are computed from structured rules in the monthly tax catalog. Manual effective % overrides are hidden while catalog brackets apply.")
+                .font(.system(size: 11))
+                .buxLabelSecondary()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BuxLayout.section)
+        .referenceCard
+    }
+
     private var effectiveRatesSection: some View {
         VStack(alignment: .leading, spacing: BuxLayout.section) {
             BuxCatalogDynamicText(key: "Effective tax rates (for calculator)")
@@ -377,47 +505,53 @@ struct StudioTaxReferenceView: View {
                 .buxLabelSecondary()
                 .kerning(0.8)
 
-            VStack(alignment: .leading, spacing: 8) {
-                BuxCatalogDynamicText(key: "Income tax rate %")
-                    .font(.system(size: 10, weight: .bold))
-                    .buxLabelSecondary()
-                TextField(BuxCatalogLabel.string("e.g. 22", locale: appSettingsManager.interfaceLocale), text: $estimatedIncomeRate)
-                    .keyboardType(.decimalPad)
-                    .padding(10)
-                    .buxThemedInputPlate(cornerRadius: 12)
+            if TaxCatalogProfileHydrator.shouldShowManualIncomeRate(for: draftTaxProfileForVisibility) {
+                VStack(alignment: .leading, spacing: 8) {
+                    BuxCatalogDynamicText(key: "Income tax rate %")
+                        .font(.system(size: 10, weight: .bold))
+                        .buxLabelSecondary()
+                    TextField(BuxCatalogLabel.string("e.g. 22", locale: appSettingsManager.interfaceLocale), text: $estimatedIncomeRate)
+                        .keyboardType(.decimalPad)
+                        .padding(10)
+                        .buxThemedInputPlate(cornerRadius: 12)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(BuxLayout.section)
+                .referenceCard
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BuxLayout.section)
-            .referenceCard
 
-            VStack(alignment: .leading, spacing: 8) {
-                BuxCatalogDynamicText(key: "Self-employed tax rate %")
-                    .font(.system(size: 10, weight: .bold))
-                    .buxLabelSecondary()
-                TextField(BuxCatalogLabel.string("e.g. 15.3", locale: appSettingsManager.interfaceLocale), text: $estimatedSERate)
-                    .keyboardType(.decimalPad)
-                    .padding(10)
-                    .buxThemedInputPlate(cornerRadius: 12)
-                BuxCatalogDynamicText(key: "These rates power the Income Tax Calculator and quarterly estimates. They are never auto-filled from JSON presets.")
-                    .font(.system(size: 11))
-                    .buxLabelSecondary()
+            if TaxCatalogProfileHydrator.shouldShowManualSelfEmployedRate(for: draftTaxProfileForVisibility) {
+                VStack(alignment: .leading, spacing: 8) {
+                    BuxCatalogDynamicText(key: "Self-employed tax rate %")
+                        .font(.system(size: 10, weight: .bold))
+                        .buxLabelSecondary()
+                    TextField(BuxCatalogLabel.string("e.g. 15.3", locale: appSettingsManager.interfaceLocale), text: $estimatedSERate)
+                        .keyboardType(.decimalPad)
+                        .padding(10)
+                        .buxThemedInputPlate(cornerRadius: 12)
+                    BuxCatalogDynamicText(key: "These rates power the Income Tax Calculator and quarterly estimates. They are never auto-filled from JSON presets.")
+                        .font(.system(size: 11))
+                        .buxLabelSecondary()
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(BuxLayout.section)
+                .referenceCard
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BuxLayout.section)
-            .referenceCard
 
-            VStack(alignment: .leading, spacing: 8) {
-                BuxCatalogDynamicText(key: "Indirect tax rate % (VAT/GST)")
-                    .font(.system(size: 10, weight: .bold))
-                    .buxLabelSecondary()
-                TextField(BuxCatalogLabel.string("e.g. 20", locale: appSettingsManager.interfaceLocale), text: $estimatedIndirectRate)
-                    .keyboardType(.decimalPad)
-                    .padding(10)
-                    .buxThemedInputPlate(cornerRadius: 12)
+            if TaxCatalogProfileHydrator.shouldShowManualIndirectRate(for: draftTaxProfileForVisibility) {
+                VStack(alignment: .leading, spacing: 8) {
+                    BuxCatalogDynamicText(key: "Indirect tax rate % (VAT/GST)")
+                        .font(.system(size: 10, weight: .bold))
+                        .buxLabelSecondary()
+                    TextField(BuxCatalogLabel.string("e.g. 20", locale: appSettingsManager.interfaceLocale), text: $estimatedIndirectRate)
+                        .keyboardType(.decimalPad)
+                        .padding(10)
+                        .buxThemedInputPlate(cornerRadius: 12)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(BuxLayout.section)
+                .referenceCard
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BuxLayout.section)
-            .referenceCard
         }
     }
 
@@ -426,25 +560,90 @@ struct StudioTaxReferenceView: View {
     private func hydrateFromStore() {
         let profile = store.taxProfile
         selectedPresetCode = profile.selectedTaxCountry ?? ""
+        selectedRegionCode = profile.regionCode ?? ""
         taxIncomeType = profile.taxIncomeType
-        customIncomeTax = profile.customIncomeTax ?? ""
-        customSelfEmployedTax = profile.customSelfEmployedTax ?? ""
-        customIndirectTax = profile.customIndirectTax ?? ""
-        customNotes = profile.customNotes ?? ""
         indirectTaxRegistered = profile.vatRegistered
         paymentSchedule = profile.paymentSchedule
         if let rate = profile.estimatedIncomeTaxRatePercent { estimatedIncomeRate = "\(rate)" }
         if let rate = profile.estimatedSelfEmployedRatePercent { estimatedSERate = "\(rate)" }
         if let rate = profile.estimatedIndirectTaxRatePercent { estimatedIndirectRate = "\(rate)" }
-        lastSavedDraft = currentDraft
+        Task { await refreshDisplayedTaxFields() }
     }
 
     private func applyPreset(_ preset: TaxInfo) {
         selectedPresetCode = preset.isoCode
-        customIncomeTax = preset.income_tax
-        customSelfEmployedTax = preset.self_employed_tax
-        customIndirectTax = preset.vat
-        customNotes = preset.notes
+        let regions = TaxComputeCatalogStore.shared.regions(for: preset.isoCode)
+        selectedRegionCode = regions.count == 1 ? (regions.first?.code ?? "") : ""
+        if let schedule = TaxCatalogProfileHydrator.catalogPaymentSchedule(
+            countryCode: preset.isoCode,
+            regionCode: selectedRegionCode.isEmpty ? nil : selectedRegionCode
+        ) {
+            paymentSchedule = schedule
+        }
+        Task { await applyPresetFields(preset) }
+    }
+
+    @MainActor
+    private func applyDisplayedFields(_ fields: TaxProfileTextFields, syncSavedDraft: Bool = false) {
+        customIncomeTax = fields.incomeTax
+        customSelfEmployedTax = fields.selfEmployedTax
+        customIndirectTax = fields.indirectTax
+        customNotes = fields.notes
+        if syncSavedDraft {
+            lastSavedDraft = currentDraft
+        }
+    }
+
+    private func refreshDisplayedTaxFields() async {
+        var canonical = TaxProfileTextFields(profile: store.taxProfile)
+        canonical = await TaxPresetTranslator.recoverEnglishFromLegacyTranslation(
+            canonical,
+            presetCode: store.taxProfile.selectedTaxCountry,
+            catalogUpdatedAt: appDataManager.taxManagerRef.catalogUpdatedAt
+        )
+        let display = await TaxPresetTranslator.localizedProfileFields(
+            canonical,
+            interfaceLocale: appSettingsManager.interfaceLocale
+        )
+        await MainActor.run {
+            applyDisplayedFields(display, syncSavedDraft: true)
+        }
+    }
+
+    private func applyPresetFields(_ preset: TaxInfo) async {
+        let canonical = TaxProfileTextFields(
+            incomeTax: preset.income_tax,
+            selfEmployedTax: preset.self_employed_tax,
+            indirectTax: preset.vat,
+            notes: preset.notes
+        )
+        let display = await TaxPresetTranslator.localizedProfileFields(
+            canonical,
+            interfaceLocale: appSettingsManager.interfaceLocale
+        )
+        await MainActor.run {
+            applyDisplayedFields(display)
+        }
+    }
+
+    private func relocalizeTaxFields(from previousLocale: Locale) async {
+        let current = TaxProfileTextFields(
+            incomeTax: customIncomeTax,
+            selfEmployedTax: customSelfEmployedTax,
+            indirectTax: customIndirectTax,
+            notes: customNotes
+        )
+        let canonical = await TaxPresetTranslator.canonicalProfileFields(
+            current,
+            interfaceLocale: previousLocale
+        )
+        let display = await TaxPresetTranslator.localizedProfileFields(
+            canonical,
+            interfaceLocale: appSettingsManager.interfaceLocale
+        )
+        await MainActor.run {
+            applyDisplayedFields(display)
+        }
     }
 
     private func refreshSavedPresetSummary() async {
@@ -462,33 +661,72 @@ struct StudioTaxReferenceView: View {
     }
 
     private func saveProfile() {
-        var profile = store.taxProfile
-        profile.selectedTaxCountry = selectedPresetCode.isEmpty ? nil : selectedPresetCode
-        profile.taxIncomeType = taxIncomeType
-        profile.customIncomeTax = customIncomeTax.isEmpty ? nil : customIncomeTax
-        profile.customSelfEmployedTax = customSelfEmployedTax.isEmpty ? nil : customSelfEmployedTax
-        profile.customIndirectTax = customIndirectTax.isEmpty ? nil : customIndirectTax
-        profile.customNotes = customNotes.isEmpty ? nil : customNotes
-        profile.vatRegistered = indirectTaxRegistered
-        profile.paymentSchedule = paymentSchedule
-        profile.estimatedIncomeTaxRatePercent = Decimal(string: estimatedIncomeRate)
-        profile.estimatedSelfEmployedRatePercent = Decimal(string: estimatedSERate)
-        profile.estimatedIndirectTaxRatePercent = Decimal(string: estimatedIndirectRate)
+        Task {
+            let display = TaxProfileTextFields(
+                incomeTax: customIncomeTax,
+                selfEmployedTax: customSelfEmployedTax,
+                indirectTax: customIndirectTax,
+                notes: customNotes
+            )
+            let canonical = await TaxPresetTranslator.canonicalProfileFields(
+                display,
+                interfaceLocale: appSettingsManager.interfaceLocale
+            )
 
-        store.updateTaxProfile(profile)
-        lastSavedDraft = currentDraft
-        BuxSaveFeedback.success()
+            await MainActor.run {
+                var profile = store.taxProfile
+                profile.selectedTaxCountry = selectedPresetCode.isEmpty ? nil : selectedPresetCode
+                profile.taxIncomeType = taxIncomeType
+                profile.customIncomeTax = canonical.incomeTax.isEmpty ? nil : canonical.incomeTax
+                profile.customSelfEmployedTax = canonical.selfEmployedTax.isEmpty ? nil : canonical.selfEmployedTax
+                profile.customIndirectTax = canonical.indirectTax.isEmpty ? nil : canonical.indirectTax
+                profile.customNotes = canonical.notes.isEmpty ? nil : canonical.notes
+                profile.vatRegistered = indirectTaxRegistered
+                profile.regionCode = selectedRegionCode.isEmpty ? nil : selectedRegionCode
 
-        let countryPart = selectedPresetCode.isEmpty
-            ? BuxCatalogLabel.string("Custom profile", locale: appSettingsManager.interfaceLocale)
-            : savedCountryLabel
-        saveBanner = BuxLocalizedString.format(
-            "Saved · %@ · %@ · %@",
-            locale: appSettingsManager.interfaceLocale,
-            countryPart,
-            taxIncomeType.catalogLabel(locale: appSettingsManager.interfaceLocale),
-            appSettingsManager.selectedCurrency.id
-        )
+                if !selectedPresetCode.isEmpty {
+                    TaxCatalogProfileHydrator.applyCatalogRules(
+                        to: &profile,
+                        countryCode: selectedPresetCode,
+                        regionCode: profile.regionCode
+                    )
+                }
+
+                profile.paymentSchedule = paymentSchedule
+
+                if TaxCatalogProfileHydrator.shouldShowManualIncomeRate(for: profile) {
+                    profile.estimatedIncomeTaxRatePercent = Decimal(string: estimatedIncomeRate)
+                } else {
+                    profile.estimatedIncomeTaxRatePercent = nil
+                }
+                if TaxCatalogProfileHydrator.shouldShowManualSelfEmployedRate(for: profile) {
+                    profile.estimatedSelfEmployedRatePercent = Decimal(string: estimatedSERate)
+                } else {
+                    profile.estimatedSelfEmployedRatePercent = nil
+                }
+                if TaxCatalogProfileHydrator.shouldShowManualIndirectRate(for: profile) {
+                    profile.estimatedIndirectTaxRatePercent = Decimal(string: estimatedIndirectRate)
+                } else {
+                    profile.estimatedIndirectTaxRatePercent = nil
+                }
+
+                store.updateTaxProfile(profile)
+
+                lastSavedDraft = currentDraft
+                BuxSaveFeedback.success()
+
+                let countryPart = selectedPresetCode.isEmpty
+                    ? BuxCatalogLabel.string("Custom profile", locale: appSettingsManager.interfaceLocale)
+                    : savedCountryLabel
+                saveBanner = BuxLocalizedString.format(
+                    "Saved · %@ · %@ · %@",
+                    locale: appSettingsManager.interfaceLocale,
+                    countryPart,
+                    taxIncomeType.catalogLabel(locale: appSettingsManager.interfaceLocale),
+                    appSettingsManager.selectedCurrency.id
+                )
+            }
+        }
     }
 
     // MARK: - UI helpers
@@ -514,6 +752,7 @@ struct StudioTaxReferenceView: View {
 
 private struct TaxProfileDraft: Equatable {
     var selectedPresetCode: String
+    var selectedRegionCode: String
     var taxIncomeType: TaxIncomeType
     var customIncomeTax: String
     var customSelfEmployedTax: String
@@ -651,7 +890,7 @@ struct TaxPresetReviewSheet: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     BuxToolbarConfirmButton(accessibilityLabel: "Apply") {
-                        onConfirm(displayPreset)
+                        onConfirm(preset)
                         dismiss()
                     }
                 }
