@@ -161,7 +161,7 @@ struct SimpleStudioHubView: View {
                             .buxScreenEntrance(index: 7, isVisible: hubAppeared)
 
                         if settingsStore.studioEnabled {
-                            TaxSavingsHubHeroSection(hero: taxEnvelopeBrain.display.hubHero) {
+                            TaxSavingsHubHeroSection {
                                 navigateTaxEnvelope = true
                             }
                             .buxScreenEntrance(index: 8, isVisible: hubAppeared)

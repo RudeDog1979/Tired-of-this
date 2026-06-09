@@ -9,9 +9,11 @@ struct TaxSavingsHubHeroSection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
 
-    let hero: TaxSavingsHubHeroDisplay
     var onOpenTaxSavings: () -> Void
+
+    private var hero: TaxSavingsHubHeroDisplay { taxEnvelopeBrain.display.hubHero }
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxTokens.tight) {

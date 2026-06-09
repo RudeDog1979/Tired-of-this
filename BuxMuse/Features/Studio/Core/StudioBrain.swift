@@ -127,6 +127,12 @@ public final class StudioBrain: ObservableObject {
             .sink { [weak self] _ in self?.scheduleRefreshAll() }
             .store(in: &cancellables)
 
+        appSettings.$interfaceLanguage
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.scheduleRefreshAll() }
+            .store(in: &cancellables)
+
         HustleManager.shared.$selectedHustleId
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in

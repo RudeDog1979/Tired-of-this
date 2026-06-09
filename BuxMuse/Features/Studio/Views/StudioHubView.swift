@@ -112,7 +112,7 @@ struct StudioHubView: View {
                             .buxScreenEntrance(index: 1, isVisible: hubAppeared)
 
                         if settingsStore.studioEnabled {
-                            TaxSavingsHubHeroSection(hero: taxEnvelopeBrain.display.hubHero) {
+                            TaxSavingsHubHeroSection {
                                 navigateTaxEnvelope = true
                             }
                             .padding(.horizontal, BuxTokens.marginRegular)

@@ -126,5 +126,11 @@ public final class SimpleStudioBrain: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.refreshAll() }
             .store(in: &cancellables)
+
+        appSettings.$interfaceLanguage
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshAll() }
+            .store(in: &cancellables)
     }
 }

@@ -70,7 +70,9 @@ public final class TaxEnvelopeBrain: ObservableObject {
             studioStore.$mileageEntries.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             simpleStore.$entries.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$studioEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
-            appSettings.$selectedCountry.dropFirst().map { _ in () }.eraseToAnyPublisher()
+            appSettings.$selectedCountry.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            appSettings.$interfaceLanguage.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            appSettings.$selectedCurrency.dropFirst().map { _ in () }.eraseToAnyPublisher()
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] _ in self?.refreshAll() }
