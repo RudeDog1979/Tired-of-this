@@ -9,11 +9,14 @@ import SwiftUI
 struct AgreementImportedSignatureCaptureSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let role: AgreementSignatureRole
     let onCapture: (Data) -> Void
 
     @State private var drawing = PKDrawing()
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
 
     private var canvasHeight: CGFloat {
         BuxPadIdiom.isPad ? 240 : 180
@@ -22,7 +25,7 @@ struct AgreementImportedSignatureCaptureSheet: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: BuxTokens.section) {
-                Text(role.prompt)
+                Text(role.catalogPrompt(locale: locale))
                     .font(.system(size: 13, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
@@ -48,7 +51,7 @@ struct AgreementImportedSignatureCaptureSheet: View {
                     )
 
                     if drawing.bounds.isEmpty {
-                        Text("Sign here")
+                        BuxCatalogDynamicText(key: "Sign here")
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(.secondary.opacity(0.7))
                             .padding(12)
@@ -62,24 +65,28 @@ struct AgreementImportedSignatureCaptureSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(BuxTokens.marginRegular)
-            .navigationTitle(role.title)
+            .buxCatalogNavigationTitle(role.catalogTitle(locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .bottomBar) {
-                    Button("Clear pad") {
+                    Button {
                         drawing = PKDrawing()
+                    } label: {
+                        BuxCatalogDynamicText(key: "Clear pad")
                     }
                     .font(.system(size: 15, weight: .semibold))
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button {
                         guard let png = AgreementImportedSignatureRasterizer.transparentPNG(from: drawing) else { return }
                         onCapture(png)
                         BuxSaveFeedback.success()
                         dismiss()
+                    } label: {
+                        BuxCatalogDynamicText(key: "Save")
                     }
                     .font(.system(size: 15, weight: .bold))
                     .disabled(drawing.bounds.isEmpty)

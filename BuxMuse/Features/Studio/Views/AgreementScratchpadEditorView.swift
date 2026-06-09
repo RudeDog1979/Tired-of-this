@@ -97,7 +97,7 @@ struct AgreementScratchpadListView: View {
                                         .buxLabelSecondary()
                                         .lineLimit(1)
                                     if draft.hasImportedSource {
-                                        Text("Imported document")
+                                        BuxCatalogDynamicText(key: "Imported document")
                                             .font(.system(size: 10, weight: .bold))
                                             .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                     }
@@ -129,7 +129,12 @@ struct AgreementScratchpadListView: View {
         .sheet(isPresented: $showNewDraft) {
             NavigationStack {
                 AgreementScratchpadEditorView(
-                    draft: AgreementDraft(title: "New agreement")
+                    draft: AgreementDraft(
+                        title: BuxCatalogLabel.string(
+                            "New agreement",
+                            locale: BuxInterfaceLocale.currentInterfaceLocale
+                        )
+                    )
                 )
                 .environmentObject(store)
                 .environmentObject(themeManager)
@@ -180,7 +185,7 @@ struct AgreementScratchpadListView: View {
 
         var draft = AgreementDraft(
             title: url.deletingPathExtension().lastPathComponent.isEmpty
-                ? "Imported agreement"
+                ? StudioAgreementL10n.line("Imported agreement", locale: locale)
                 : url.deletingPathExtension().lastPathComponent
         )
 
@@ -203,7 +208,14 @@ struct AgreementScratchpadListView: View {
 
     @ViewBuilder
     private func agreementStatusChip(_ draft: AgreementDraft) -> some View {
-        Text(draft.hasApprovalProof ? "OK" : (draft.agreementSentAt != nil ? "Sent" : "Draft"))
+        Text(
+            StudioAgreementL10n.line(
+                draft.hasApprovalProof
+                    ? "OK"
+                    : (draft.agreementSentAt != nil ? "Sent" : "Draft"),
+                locale: locale
+            )
+        )
             .font(.system(size: 9, weight: .bold))
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
@@ -265,8 +277,9 @@ struct AgreementScratchpadEditorView: View {
         if let existingDraft {
             _draft = State(initialValue: existingDraft)
         } else {
+            let locale = BuxInterfaceLocale.currentInterfaceLocale
             _draft = State(initialValue: AgreementDraft(
-                title: "\(project.name) agreement",
+                title: StudioAgreementL10n.format("%@ agreement", locale: locale, project.name),
                 clientId: project.clientId,
                 projectId: project.id
             ))
@@ -279,8 +292,10 @@ struct AgreementScratchpadEditorView: View {
         if let existingDraft {
             _draft = State(initialValue: existingDraft)
         } else {
+            let locale = BuxInterfaceLocale.currentInterfaceLocale
+            let titleBase = job.jobLabel ?? job.customerName
             _draft = State(initialValue: AgreementDraft(
-                title: job.jobLabel.map { "\($0) agreement" } ?? "\(job.customerName) agreement",
+                title: StudioAgreementL10n.format("%@ agreement", locale: locale, titleBase),
                 linkedJobEntryId: job.id
             ))
         }
@@ -436,7 +451,7 @@ struct AgreementScratchpadEditorView: View {
                     .buxFormFieldPadding()
                 BuxFormRowDivider()
                 signatureRow(
-                    title: draft.providerSignatoryName.isEmpty ? "Your signature" : draft.providerSignatoryName,
+                    title: draft.providerSignatoryName.isEmpty ? loc("Your signature") : draft.providerSignatoryName,
                     hasSignature: draft.providerSignaturePNG != nil,
                     signedAt: draft.providerSignedAt,
                     action: { signatureRole = .provider }
@@ -465,7 +480,7 @@ struct AgreementScratchpadEditorView: View {
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
                     signatureRow(
-                        title: draft.signOffName.isEmpty ? "Client" : draft.signOffName,
+                        title: draft.signOffName.isEmpty ? loc("Client") : draft.signOffName,
                         hasSignature: draft.clientSignaturePNG != nil,
                         signedAt: draft.clientSignedAt,
                         action: { signatureRole = .client }
@@ -579,6 +594,7 @@ struct AgreementScratchpadEditorView: View {
                     )
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .buxInterfaceLocale()
                 }
             }
         }
@@ -595,6 +611,7 @@ struct AgreementScratchpadEditorView: View {
                 }
             }
             .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
         }
         .onDisappear {
             if !didSave, hasMeaningfulContent {
@@ -606,7 +623,7 @@ struct AgreementScratchpadEditorView: View {
     private var statusBanner: some View {
         BuxFormSection(title: "Status") {
             HStack {
-                Text(draft.statusDisplayLabel)
+                Text(loc(draft.statusDisplayLabel))
                     .font(.system(size: 15, weight: .bold))
                 Spacer()
                 if draft.hasClientApprovalProof {
@@ -670,13 +687,26 @@ struct AgreementScratchpadEditorView: View {
 
     private var termsSummary: String {
         if !draft.hasTermsContent {
-            return "No terms yet. Add deposits, cancellations, liability, and your own policies."
+            return loc("No terms yet. Add deposits, cancellations, liability, and your own policies.")
         }
         let count = draft.enabledTermsClauseIds.count
         let custom = !draft.termsCustomText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        if count == 0, custom { return "Custom terms only" }
-        if custom { return "\(count) clauses + your custom terms" }
-        return "\(count) clause\(count == 1 ? "" : "s") included in PDF & share"
+        if count == 0, custom { return loc("Custom terms only") }
+        if custom {
+            return StudioAgreementL10n.format(
+                "%d clauses + your custom terms",
+                locale: locale,
+                count
+            )
+        }
+        if count == 1 {
+            return loc("1 clause included in PDF & share")
+        }
+        return StudioAgreementL10n.format(
+            "%d clauses included in PDF & share",
+            locale: locale,
+            count
+        )
     }
 
     private var shareText: String {
@@ -842,10 +872,10 @@ struct AgreementScratchpadEditorView: View {
         .buttonStyle(.plain)
     }
 
-    private func exportRowLabel(_ title: String, systemImage: String) -> some View {
+    private func exportRowLabel(_ titleKey: String, systemImage: String) -> some View {
         HStack {
             Image(systemName: systemImage)
-            Text(title)
+            BuxCatalogDynamicText(key: titleKey)
         }
         .font(.system(size: 15, weight: .bold))
         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))

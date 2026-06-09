@@ -18,6 +18,7 @@ extension EnvironmentValues {
 }
 
 struct BuxPadDetailEmptyState: View {
+    /// Catalog keys — resolved via Settings → App language.
     let title: String
     let systemImage: String
     let message: String
@@ -27,9 +28,9 @@ struct BuxPadDetailEmptyState: View {
             Image(systemName: systemImage)
                 .font(.system(size: 48, weight: .light))
                 .foregroundStyle(.secondary)
-            Text(title)
+            BuxCatalogDynamicText(key: title)
                 .font(.title2.weight(.semibold))
-            Text(message)
+            BuxCatalogDynamicText(key: message)
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

@@ -32,6 +32,7 @@ final class AgreementImportedSignatureDrawingUndo: ObservableObject {
 struct AgreementImportedInlineSignaturePad: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let role: AgreementSignatureRole
     @Binding var drawing: PKDrawing
@@ -39,6 +40,8 @@ struct AgreementImportedInlineSignaturePad: View {
     var onSave: (Data) -> Void
 
     @StateObject private var drawingUndo = AgreementImportedSignatureDrawingUndo()
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
 
     private var accent: Color {
         themeManager.contrastAccentColor(for: colorScheme)
@@ -61,7 +64,7 @@ struct AgreementImportedInlineSignaturePad: View {
 
     private var headerRow: some View {
         HStack {
-            Text(role.title)
+            Text(role.catalogTitle(locale: locale))
                 .font(.system(size: 15, weight: .bold))
             Spacer()
             BuxActionButton(
@@ -129,7 +132,7 @@ struct AgreementImportedInlineSignaturePad: View {
                 )
 
             if drawing.bounds.isEmpty {
-                Text("Sign here")
+                BuxCatalogDynamicText(key: "Sign here")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.secondary.opacity(0.7))
                     .padding(12)

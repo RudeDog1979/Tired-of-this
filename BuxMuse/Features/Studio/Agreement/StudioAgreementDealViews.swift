@@ -33,9 +33,11 @@ struct StudioAgreementExternalPrivacySheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button {
                         StudioAgreementApprovalSection.markPrivacySeen()
                         dismiss()
+                    } label: {
+                        BuxCatalogDynamicText(key: "Done")
                     }
                     .font(.system(size: 15, weight: .bold))
                 }
@@ -406,10 +408,13 @@ struct StudioAgreementApprovalSection: View {
 struct StudioJobAgreementSummarySection: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
     let job: SimpleStudioEntry
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
 
     @State private var showAgreementEditor = false
 
@@ -429,7 +434,7 @@ struct StudioJobAgreementSummarySection: View {
                         .buxLabelSecondary()
                     Spacer()
                     if let draft {
-                        Text(draft.statusDisplayLabel)
+                        Text(StudioAgreementL10n.line(draft.statusDisplayLabel, locale: locale))
                             .font(.system(size: 10, weight: .bold))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)

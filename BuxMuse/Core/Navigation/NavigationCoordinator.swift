@@ -164,7 +164,7 @@ final class NavigationCoordinator: ObservableObject {
 
     func openAppearanceSettings() {
         pendingSettingsDestination = .appearance
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+        withAnimation(BuxMotion.appearanceSettingsEntry) {
             selectedTab = .settings
             openAppearanceSettingsRequest = true
         }

@@ -32,7 +32,10 @@ private struct BuxSettingsStackedRowsModifier: ViewModifier {
             .onPreferenceChange(BuxContainerWidthKey.self) { width in
                 guard width > 0 else { return }
                 let stacked = width < BuxLayout.compactWidthThreshold + 24
-                if stacked != usesStackedRows { usesStackedRows = stacked }
+                guard stacked != usesStackedRows else { return }
+                Task { @MainActor in
+                    usesStackedRows = stacked
+                }
             }
     }
 }

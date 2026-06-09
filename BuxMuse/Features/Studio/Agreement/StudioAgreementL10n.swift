@@ -36,3 +36,31 @@ enum StudioAgreementL10n {
         BuxLocalizedString.format(key, locale: locale, arguments)
     }
 }
+
+extension AgreementSignatureRole {
+    func catalogTitle(locale: Locale) -> String {
+        switch self {
+        case .client: StudioAgreementL10n.line("Client signature", locale: locale)
+        case .provider: StudioAgreementL10n.line("Your signature", locale: locale)
+        }
+    }
+
+    func catalogShortLabel(locale: Locale) -> String {
+        switch self {
+        case .client: StudioAgreementL10n.line("Client", locale: locale)
+        case .provider: StudioAgreementL10n.line("You", locale: locale)
+        }
+    }
+
+    func catalogPrompt(locale: Locale) -> String {
+        switch self {
+        case .client:
+            StudioAgreementL10n.line(
+                "Hand the device to your client to sign with a finger or stylus.",
+                locale: locale
+            )
+        case .provider:
+            StudioAgreementL10n.line("Sign to confirm you agree to the terms above.", locale: locale)
+        }
+    }
+}

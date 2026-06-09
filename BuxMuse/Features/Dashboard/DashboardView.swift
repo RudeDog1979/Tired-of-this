@@ -719,7 +719,8 @@ struct DashboardView: View {
 
     private func closeFabAnd(_ action: @escaping () -> Void) {
         isFabMenuExpanded = false
-        let retractDelay = BuxPadIdiom.isPad ? 0.38 : 0.15
+        let padDelay: TimeInterval = settingsStore.ipadFabShortcut == .themes ? 0.2 : 0.32
+        let retractDelay = BuxPadIdiom.isPad ? padDelay : 0.15
         DispatchQueue.main.asyncAfter(deadline: .now() + retractDelay) {
             action()
         }
@@ -727,8 +728,8 @@ struct DashboardView: View {
 
     private func handleIPadFabShortcut() {
         if BuxPadIdiom.isPad, settingsStore.ipadFabShortcut == .themes {
-            navigationCoordinator.openAppearanceSettings()
             isFabMenuExpanded = false
+            navigationCoordinator.openAppearanceSettings()
             return
         }
         closeFabAnd { performIPadFabShortcut() }

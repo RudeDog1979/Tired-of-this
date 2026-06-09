@@ -8,15 +8,22 @@ import SwiftUI
 private struct BuxContainerMetricsModifier: ViewModifier {
     @State private var containerSize: CGSize = .zero
 
+    private func applyContainerSize(_ newSize: CGSize) {
+        guard newSize != containerSize else { return }
+        DispatchQueue.main.async {
+            containerSize = newSize
+        }
+    }
+
     func body(content: Content) -> some View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background {
                 GeometryReader { geo in
                     Color.clear
-                        .onAppear { containerSize = geo.size }
+                        .onAppear { applyContainerSize(geo.size) }
                         .onChange(of: geo.size) { _, newSize in
-                            containerSize = newSize
+                            applyContainerSize(newSize)
                         }
                 }
             }

@@ -40,8 +40,10 @@ struct StudioAgreementTermsEditorView: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .font(.system(size: 15, weight: .bold))
+                    Button { dismiss() } label: {
+                        BuxCatalogDynamicText(key: "Done")
+                    }
+                    .font(.system(size: 15, weight: .bold))
                 }
             }
             .sheet(item: $editingClause) { clause in
@@ -157,7 +159,9 @@ struct StudioAgreementTermsEditorView: View {
             }
             Spacer(minLength: 8)
             if isOn {
-                Button("Edit") { editingClause = clause }
+                Button { editingClause = clause } label: {
+                    BuxCatalogDynamicText(key: "Edit")
+                }
                     .font(.system(size: 13, weight: .bold))
             }
         }
@@ -293,9 +297,11 @@ private struct StudioAgreementTermsClauseEditSheet: View {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button {
                         overrideText = draftText
                         dismiss()
+                    } label: {
+                        BuxCatalogDynamicText(key: "Save")
                     }
                     .font(.system(size: 15, weight: .bold))
                 }
@@ -324,8 +330,10 @@ private struct StudioAgreementTermsPreviewSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .font(.system(size: 15, weight: .bold))
+                    Button { dismiss() } label: {
+                        BuxCatalogDynamicText(key: "Done")
+                    }
+                    .font(.system(size: 15, weight: .bold))
                 }
             }
         }

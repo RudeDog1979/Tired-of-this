@@ -83,7 +83,10 @@ struct AgreementImportedSourceSection: View {
         }
 
         VStack(alignment: .leading, spacing: 4) {
-            Text(draft.importedSourceFilename ?? "Imported document")
+            Text(
+                draft.importedSourceFilename
+                    ?? StudioAgreementL10n.line("Imported document", locale: locale)
+            )
                 .font(.system(size: 15, weight: .semibold))
             Text(documentSubtitle)
                 .font(.system(size: 11, weight: .medium))
@@ -172,11 +175,18 @@ struct AgreementImportedSourceSection: View {
     }
 
     private var documentSubtitle: String {
-        let kindLabel = draft.importedSourceKindValue == .pdf ? "PDF" : "Photo"
+        let kindLabel = draft.importedSourceKindValue == .pdf
+            ? StudioAgreementL10n.line("PDF", locale: locale)
+            : StudioAgreementL10n.line("Photo", locale: locale)
         if pageCount <= 1 {
             return kindLabel
         }
-        return "\(kindLabel) · \(pageCount) pages"
+        return StudioAgreementL10n.format(
+            "%@ · %d pages",
+            locale: locale,
+            kindLabel,
+            pageCount
+        )
     }
 
     private var firstPagePreview: UIImage? {

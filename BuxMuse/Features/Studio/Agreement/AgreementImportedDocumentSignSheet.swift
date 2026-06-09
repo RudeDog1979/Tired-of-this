@@ -13,10 +13,10 @@ struct AgreementImportedDocumentSignSheet: View {
 
         var id: String { rawValue }
 
-        var title: String {
+        func catalogTitle(locale: Locale) -> String {
             switch self {
-            case .sign: "Sign"
-            case .ink: "Markup"
+            case .sign: StudioAgreementL10n.line("Sign", locale: locale)
+            case .ink: StudioAgreementL10n.line("Markup", locale: locale)
             }
         }
     }
@@ -115,6 +115,7 @@ struct AgreementImportedDocumentSignSheet: View {
                 .transition(.move(edge: .bottom))
             }
         }
+        .buxInterfaceLocale()
         .onAppear(perform: loadPage)
         .onChange(of: pageIndex) { oldIndex, _ in
             savePage(at: oldIndex)
@@ -157,9 +158,11 @@ struct AgreementImportedDocumentSignSheet: View {
             Spacer(minLength: 8)
 
             if canMarkUpCurrentPage {
-                Picker("Signer", selection: $activeRole) {
-                    Text("Client").tag(AgreementSignatureRole.client)
-                    Text("You").tag(AgreementSignatureRole.provider)
+                Picker(StudioAgreementL10n.line("Signer", locale: locale), selection: $activeRole) {
+                    Text(AgreementSignatureRole.client.catalogShortLabel(locale: locale))
+                        .tag(AgreementSignatureRole.client)
+                    Text(AgreementSignatureRole.provider.catalogShortLabel(locale: locale))
+                        .tag(AgreementSignatureRole.provider)
                 }
                 .pickerStyle(.menu)
                 .tint(.white)
@@ -175,7 +178,7 @@ struct AgreementImportedDocumentSignSheet: View {
                 BuxSaveFeedback.success()
                 dismiss()
             } label: {
-                Text("Done")
+                BuxCatalogDynamicText(key: "Done")
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 14)
@@ -321,9 +324,9 @@ struct AgreementImportedDocumentSignSheet: View {
 
     private var topSignModeControls: some View {
         HStack(spacing: 8) {
-            Picker("Mode", selection: $editorMode) {
+            Picker(StudioAgreementL10n.line("Mode", locale: locale), selection: $editorMode) {
                 ForEach(EditorMode.allCases) { mode in
-                    Text(mode.title).tag(mode)
+                    Text(mode.catalogTitle(locale: locale)).tag(mode)
                 }
             }
             .pickerStyle(.segmented)
@@ -344,7 +347,7 @@ struct AgreementImportedDocumentSignSheet: View {
             .frame(width: 36, height: 32)
             .disabled(editorMode != .sign || annotation.signaturePlacements.isEmpty)
             .opacity(editorMode == .sign && !annotation.signaturePlacements.isEmpty ? 1 : 0.35)
-            .accessibilityLabel("Undo")
+            .accessibilityLabel(StudioAgreementL10n.line("Undo", locale: locale))
         }
         .frame(width: 200, alignment: .center)
     }
@@ -375,7 +378,11 @@ struct AgreementImportedDocumentSignSheet: View {
                     Button {
                         drawing = PKDrawing()
                     } label: {
-                        Label("Clear markup", systemImage: "trash")
+                        Label {
+                            BuxCatalogDynamicText(key: "Clear markup")
+                        } icon: {
+                            Image(systemName: "trash")
+                        }
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 14)
@@ -452,7 +459,7 @@ struct AgreementImportedDocumentSignSheet: View {
                     selectedPlacementID = nil
                 }
             }
-            .accessibilityLabel(role.title)
+            .accessibilityLabel(role.catalogTitle(locale: locale))
             .accessibilityAddTraits(isSelected ? .isSelected : [])
         }
     }

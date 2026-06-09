@@ -8,7 +8,10 @@ import SwiftUI
 struct BuxPadSimpleStudioSidebar: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @Binding var selection: BuxPadSimpleStudioDestination?
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
 
     var body: some View {
         List {
@@ -18,10 +21,10 @@ struct BuxPadSimpleStudioSidebar: View {
                     .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 12, trailing: 0))
             }
 
-            sidebarSection(title: "Overview", items: BuxPadSimpleStudioDestination.overviewSection)
-            sidebarSection(title: "Work", items: BuxPadSimpleStudioDestination.workSection)
-            sidebarSection(title: "Money", items: BuxPadSimpleStudioDestination.moneySection)
-            sidebarSection(title: "Tools", items: BuxPadSimpleStudioDestination.toolsSection)
+            sidebarSection(titleKey: "Overview", items: BuxPadSimpleStudioDestination.overviewSection)
+            sidebarSection(titleKey: "Work", items: BuxPadSimpleStudioDestination.workSection)
+            sidebarSection(titleKey: "Money", items: BuxPadSimpleStudioDestination.moneySection)
+            sidebarSection(titleKey: "Tools", items: BuxPadSimpleStudioDestination.toolsSection)
         }
         .listStyle(.sidebar)
         .scrollContentBackground(.hidden)
@@ -34,8 +37,8 @@ struct BuxPadSimpleStudioSidebar: View {
     }
 
     @ViewBuilder
-    private func sidebarSection(title: String, items: [BuxPadSimpleStudioDestination]) -> some View {
-        Section(title) {
+    private func sidebarSection(titleKey: String, items: [BuxPadSimpleStudioDestination]) -> some View {
+        Section {
             ForEach(items) { item in
                 Button {
                     BuxPadSidebarSelection.select(item, into: $selection)
@@ -54,6 +57,8 @@ struct BuxPadSimpleStudioSidebar: View {
                 .listRowSeparator(.hidden)
                 .buxPadStudioOpenInNewWindowContextMenu(destination: item.rawValue)
             }
+        } header: {
+            BuxCatalogDynamicText(key: titleKey)
         }
     }
 
@@ -71,7 +76,7 @@ struct BuxPadSimpleStudioSidebar: View {
             .scaleEffect(isSelected ? 1.04 : 1)
             .animation(BuxPadSidebarSelection.selectionAnimation, value: isSelected)
 
-            Text(item.title)
+            Text(item.catalogTitle(locale: locale))
                 .font(.body.weight(isSelected ? .semibold : .regular))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                 .animation(BuxPadSidebarSelection.selectionAnimation, value: isSelected)

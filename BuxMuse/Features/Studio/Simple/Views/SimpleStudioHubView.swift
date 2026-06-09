@@ -67,6 +67,7 @@ struct SimpleStudioHubView: View {
                 }
             }
         }
+        .buxInterfaceLocale()
     }
 
     private var simpleHubLayer: some View {

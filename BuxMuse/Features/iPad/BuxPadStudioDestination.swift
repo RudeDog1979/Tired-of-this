@@ -25,6 +25,7 @@ enum BuxPadStudioDestination: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
+    /// English catalog key — use `catalogTitle(locale:)` in UI.
     var title: String {
         switch self {
         case .commandCenter: return "Command Center"
@@ -44,6 +45,10 @@ enum BuxPadStudioDestination: String, CaseIterable, Identifiable, Hashable {
         case .businessProfile: return "Business Profile"
         case .proSearch: return "Pro Search"
         }
+    }
+
+    func catalogTitle(locale: Locale) -> String {
+        BuxCatalogLabel.string(title, locale: locale)
     }
 
     var systemImage: String {

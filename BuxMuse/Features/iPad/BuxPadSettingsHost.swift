@@ -73,9 +73,14 @@ struct BuxPadSettingsHost: View {
                     .buxPadSplitSidebarColumnWidth(layoutMode: layoutMode)
             } detail: {
                 settingsDetailColumn
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .opacity
+                    ))
                     .environment(\.buxPadSettingsUsesSplitLayout, true)
                     .buxPadStudioSplitDetailChrome()
             }
+            .animation(BuxMotion.appearanceSettingsEntry, value: selectedDestination)
             .navigationSplitViewStyle(.balanced)
             .toolbarBackground(.hidden, for: .navigationBar)
             .ignoresSafeArea(edges: .top)
@@ -207,15 +212,17 @@ struct BuxPadSettingsHost: View {
     }
 
     private func routeToPendingSettingsDestination() {
-        if let destination = navigationCoordinator.takePendingSettingsDestination() {
-            selectedDestination = destination
-            padNavigationBrain.selectedSettingsPath = destination.rawValue
-        }
+        withAnimation(BuxMotion.appearanceSettingsEntry) {
+            if let destination = navigationCoordinator.takePendingSettingsDestination() {
+                selectedDestination = destination
+                padNavigationBrain.selectedSettingsPath = destination.rawValue
+            }
 
-        if navigationCoordinator.openAppearanceSettingsRequest {
-            selectedDestination = .appearance
-            padNavigationBrain.selectedSettingsPath = SettingsDestinationType.appearance.rawValue
-            _ = navigationCoordinator.consumeAppearanceSettingsRequest()
+            if navigationCoordinator.openAppearanceSettingsRequest {
+                selectedDestination = .appearance
+                padNavigationBrain.selectedSettingsPath = SettingsDestinationType.appearance.rawValue
+                _ = navigationCoordinator.consumeAppearanceSettingsRequest()
+            }
         }
     }
 }

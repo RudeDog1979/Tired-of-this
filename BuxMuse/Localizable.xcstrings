@@ -711,6 +711,23 @@
         }
       }
     },
+    "%@ · %d pages" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %d páginas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %d páginas"
+          }
+        }
+      }
+    },
     "%@ · %lldd" : {
       "comment" : "A job title and the number of days a customer has been waiting for a task. The first argument is the job title. The second argument is the number of days.",
       "extractionState" : "stale",
@@ -923,6 +940,23 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ → %2$@"
+          }
+        }
+      }
+    },
+    "%@ agreement" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acuerdo de %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acuerdo de %@"
           }
         }
       }
@@ -1791,6 +1825,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%+.1f"
+          }
+        }
+      }
+    },
+    "%d clauses + your custom terms" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d cláusulas + tus términos personalizados"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d cláusulas + tus términos personalizados"
+          }
+        }
+      }
+    },
+    "%d clauses included in PDF & share" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d cláusulas incluidas en PDF y compartir"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d cláusulas incluidas en PDF y compartir"
           }
         }
       }
@@ -3940,6 +4008,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "0.6948 ETH"
+          }
+        }
+      }
+    },
+    "1 clause included in PDF & share" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 cláusula incluida en PDF y compartir"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 cláusula incluida en PDF y compartir"
           }
         }
       }
@@ -6914,6 +6999,12 @@
     "Adds Pro receipt images and Simple scan photos from this device." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade imágenes de recibos de Pro y fotos de escaneos de Simple de este dispositivo."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8485,6 +8576,12 @@
     "All invoices will be included." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se incluirán todas las facturas."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10892,6 +10989,12 @@
     "Backup invoices" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia de seguridad de facturas"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13224,6 +13327,12 @@
     "Building archive…" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creando archivo…"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15188,6 +15297,23 @@
         }
       }
     },
+    "Captured — open Sign & mark up and tap where to place it" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturada — abre Firmar y marcar y toca dónde colocarla"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturada — abre Firmar y marcar y toca dónde colocarla"
+          }
+        }
+      }
+    },
     "Captured scan preview" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16401,6 +16527,23 @@
         }
       }
     },
+    "Choose a tool from the sidebar." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una herramienta de la barra lateral."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una herramienta de la barra lateral."
+          }
+        }
+      }
+    },
     "Choose background photo" : {
       "localizations" : {
         "es" : {
@@ -17333,7 +17476,21 @@
     },
     "Clear markup" : {
       "comment" : "A button that clears the drawing in a receipt markup sheet.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar anotaciones"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar anotaciones"
+          }
+        }
+      }
     },
     "Clear merchant logo cache" : {
       "extractionState" : "stale",
@@ -17359,6 +17516,7 @@
       }
     },
     "Clear pad" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -17475,6 +17633,7 @@
       }
     },
     "Client" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -17734,6 +17893,23 @@
         }
       }
     },
+    "Client signature" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firma del cliente"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firma del cliente"
+          }
+        }
+      }
+    },
     "Client signature (in person only)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -17977,7 +18153,21 @@
     },
     "Collapse Studio" : {
       "comment" : "A label displayed in the center of the Studio button.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contraer Studio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contraer Studio"
+          }
+        }
+      }
     },
     "Collected − paid" : {
       "extractionState" : "manual",
@@ -18066,6 +18256,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Colores"
+          }
+        }
+      }
+    },
+    "Command Center" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Centro de mando"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Centro de mando"
           }
         }
       }
@@ -19400,6 +19607,23 @@
         }
       }
     },
+    "Could not import this file. Use a PDF or photo." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo importar este archivo. Usa un PDF o una foto."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo importar este archivo. Usa un PDF o una foto."
+          }
+        }
+      }
+    },
     "Could not mark as recurring." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -19887,6 +20111,12 @@
     "Create invoices in Simple or Pro Studio, then export PDF and PNG backups here. You can also include receipt photos when you export." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea facturas en Simple o Pro Studio y exporta copias de seguridad en PDF y PNG aquí. También puedes incluir fotos de recibos al exportar."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19992,6 +20222,12 @@
     "Create ZIP" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear ZIP"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21280,6 +21516,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Términos y condiciones personalizados"
+          }
+        }
+      }
+    },
+    "Custom terms only" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo términos personalizados"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo términos personalizados"
           }
         }
       }
@@ -22853,6 +23106,12 @@
     "Delete invoices?" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar facturas?"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23745,7 +24004,21 @@
     },
     "Dismiss Overlay" : {
       "comment" : "A button that dismisses an overlay.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar superposición"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar superposición"
+          }
+        }
+      }
     },
     "Display currency" : {
       "extractionState" : "stale",
@@ -24196,6 +24469,7 @@
     },
     "Draft" : {
       "comment" : "A label displayed in a chip.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "es" : {
@@ -24379,6 +24653,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arrastre para mover · pellizque o deslice para hacer zoom · gire para enderezar"
+          }
+        }
+      }
+    },
+    "Drag to move. Corner boxes to resize. Top handle to rotate." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrastra para mover. Esquinas para redimensionar. Asa superior para rotar."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrastra para mover. Esquinas para redimensionar. Asa superior para rotar."
           }
         }
       }
@@ -25101,6 +25392,12 @@
     "Each invoice is exported as PDF and PNG. Use Share to save to Files, iCloud, or send to yourself." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada factura se exporta en PDF y PNG. Usa Compartir para guardar en Archivos, iCloud o enviártela."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26994,6 +27291,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Activa Studio primero"
+          }
+        }
+      }
+    },
+    "Enable Studio in Settings to use this window." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa Studio en Ajustes para usar esta ventana."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa Studio en Ajustes para usar esta ventana."
           }
         }
       }
@@ -29100,6 +29414,12 @@
     "Export" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29272,6 +29592,12 @@
     "Export invoices (PDF + PNG) and optional receipt photos from Studio → Tools → Backup invoices." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporta facturas (PDF + PNG) y fotos de recibos opcionales desde Studio → Herramientas → Copia de seguridad de facturas."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29283,6 +29609,12 @@
     "Export options" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones de exportación"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29340,6 +29672,12 @@
     "Export PDF + PNG backups on this device. Add receipt photos only if you want them." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporta copias de seguridad PDF y PNG en este dispositivo. Añade fotos de recibos solo si las quieres."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29420,6 +29758,12 @@
     "Export receipt photos only" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar solo fotos de recibos"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29431,6 +29775,12 @@
     "Export selected" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar seleccionadas"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29442,6 +29792,12 @@
     "Exports stay on this device until you share them. Each invoice includes PDF and PNG. Optionally add receipt and scan photos to the same ZIP." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las exportaciones permanecen en este dispositivo hasta que las compartas. Cada factura incluye PDF y PNG. Opcionalmente añade fotos de recibos y escaneos al mismo ZIP."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29475,7 +29831,21 @@
     },
     "External Display" : {
       "comment" : "A label for the external display menu.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pantalla externa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pantalla externa"
+          }
+        }
+      }
     },
     "Extra revisions" : {
       "extractionState" : "stale",
@@ -30235,7 +30605,21 @@
     },
     "Find" : {
       "comment" : "A menu that contains commands for finding items.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar"
+          }
+        }
+      }
     },
     "Find a customer" : {
       "extractionState" : "stale",
@@ -32124,6 +32508,23 @@
         }
       }
     },
+    "Generate signed PDF" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generar PDF firmado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generar PDF firmado"
+          }
+        }
+      }
+    },
     "Geo Grid" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -33572,6 +33973,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Medios bloques + chevrón"
+          }
+        }
+      }
+    },
+    "Hand the device to your client to sign with a finger or stylus." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrega el dispositivo a tu cliente para que firme con el dedo o un lápiz óptico."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrega el dispositivo a tu cliente para que firme con el dedo o un lápiz óptico."
           }
         }
       }
@@ -35406,6 +35824,40 @@
         }
       }
     },
+    "Import PDF or photo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar PDF o foto"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar PDF o foto"
+          }
+        }
+      }
+    },
+    "Import your agreement" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importa tu acuerdo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importa tu acuerdo"
+          }
+        }
+      }
+    },
     "Important" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -35429,9 +35881,41 @@
         }
       }
     },
+    "Imported agreement" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acuerdo importado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acuerdo importado"
+          }
+        }
+      }
+    },
     "Imported document" : {
       "comment" : "A label displayed next to a draft that was imported from a document.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "stale",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documento importado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documento importado"
+          }
+        }
+      }
     },
     "Imported from Simple Studio — waiting on payment." : {
       "extractionState" : "stale",
@@ -35599,6 +36083,12 @@
     "Include receipt photos" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir fotos de recibos"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37621,6 +38111,12 @@
     "Invoices selected" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturas seleccionadas"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -39970,7 +40466,21 @@
     },
     "List" : {
       "comment" : "A menu that lists the available list navigation commands.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lista"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lista"
+          }
+        }
+      }
     },
     "List icon" : {
       "comment" : "A label displayed above the icon of a merchant or category.",
@@ -42419,7 +42929,21 @@
     },
     "Mark up with Apple Pencil" : {
       "comment" : "A label for a pencil icon button.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar con Apple Pencil"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar con Apple Pencil"
+          }
+        }
+      }
     },
     "Marked as recurring monthly. Expense date stays the same." : {
       "extractionState" : "stale",
@@ -42515,11 +43039,39 @@
     },
     "Markup" : {
       "comment" : "A button that opens a sheet for adding markup to a receipt.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotaciones"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotaciones"
+          }
+        }
+      }
     },
     "Markup saved" : {
       "comment" : "A label indicating that a markup has been saved.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotaciones guardadas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotaciones guardadas"
+          }
+        }
+      }
     },
     "Master BuxMuse in 3 simple steps" : {
       "extractionState" : "stale",
@@ -43948,6 +44500,7 @@
       }
     },
     "Mode" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -45500,7 +46053,21 @@
     },
     "New Expense Window" : {
       "comment" : "A menu item that opens a new window for entering a new expense.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva ventana de Gastos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva ventana de Gastos"
+          }
+        }
+      }
     },
     "New from template" : {
       "extractionState" : "stale",
@@ -45598,7 +46165,21 @@
     },
     "New Studio Window" : {
       "comment" : "A menu item that opens a new window for the Studio app.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva ventana de Studio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva ventana de Studio"
+          }
+        }
+      }
     },
     "Next" : {
       "extractionState" : "stale",
@@ -45677,7 +46258,21 @@
     },
     "Next Item" : {
       "comment" : "A button that selects the next item in a list.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siguiente elemento"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siguiente elemento"
+          }
+        }
+      }
     },
     "Next payment: %@" : {
       "extractionState" : "stale",
@@ -46570,6 +47165,12 @@
     "No invoices to include." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay facturas para incluir."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -46581,6 +47182,12 @@
     "No invoices yet" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay facturas"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -47347,6 +47954,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sin tasas fiscales en esta factura."
+          }
+        }
+      }
+    },
+    "No terms yet. Add deposits, cancellations, liability, and your own policies." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay términos. Añade depósitos, cancelaciones, responsabilidad y tus propias políticas."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay términos. Agrega depósitos, cancelaciones, responsabilidad y tus propias políticas."
           }
         }
       }
@@ -48257,6 +48881,7 @@
       }
     },
     "OK" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -48659,7 +49284,21 @@
     },
     "Open" : {
       "comment" : "A label for opening a settings destination.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir"
+          }
+        }
+      }
     },
     "Open agreement drafts" : {
       "extractionState" : "stale",
@@ -48732,7 +49371,21 @@
     },
     "Open Expenses in New Window" : {
       "comment" : "A button that opens a new window for viewing expenses.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Gastos en nueva ventana"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Gastos en nueva ventana"
+          }
+        }
+      }
     },
     "Open full Money Map" : {
       "comment" : "A button that opens the full Money Map.",
@@ -48807,7 +49460,21 @@
     },
     "Open in New Window" : {
       "comment" : "A button that opens the Studio tool in a new window.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir en nueva ventana"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir en nueva ventana"
+          }
+        }
+      }
     },
     "Open insight detail" : {
       "comment" : "A button label that opens the detail of an insight.",
@@ -48974,7 +49641,21 @@
     },
     "Open Studio in New Window" : {
       "comment" : "A button that opens a new window for the Studio app.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Studio en nueva ventana"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Studio en nueva ventana"
+          }
+        }
+      }
     },
     "Open Subscription Hub →" : {
       "extractionState" : "stale",
@@ -49139,6 +49820,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abre Espacios en Ajustes de Studio"
+          }
+        }
+      }
+    },
+    "Opens full-screen signing" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre la firma a pantalla completa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre la firma a pantalla completa"
           }
         }
       }
@@ -50228,6 +50926,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "pagado"
+          }
+        }
+      }
+    },
+    "Page %d of %d" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página %d de %d"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página %d de %d"
           }
         }
       }
@@ -51648,6 +52363,23 @@
         }
       }
     },
+    "PDF" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF"
+          }
+        }
+      }
+    },
     "PDF invoice designer & export" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -51719,6 +52451,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Facturas en PDF"
+          }
+        }
+      }
+    },
+    "PDFs up to %d pages can be stored. Mark up and sign up to %d pages in BuxMuse — PDF and photos only." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los PDF de hasta %d páginas se pueden guardar. Marca y firma hasta %d páginas en BuxMuse — solo PDF y fotos."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los PDF de hasta %d páginas se pueden guardar. Marca y firma hasta %d páginas en BuxMuse — solo PDF y fotos."
           }
         }
       }
@@ -52796,6 +53545,23 @@
         }
       }
     },
+    "Place signature" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colocar firma"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colocar firma"
+          }
+        }
+      }
+    },
     "Plan free or low-cost activities for Saturday afternoons." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -53358,11 +54124,39 @@
     },
     "Present Invoice on Display" : {
       "comment" : "A button that presents an invoice on the external display.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar factura en pantalla"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar factura en pantalla"
+          }
+        }
+      }
     },
     "Present Money Map on Display" : {
       "comment" : "A button that presents a money map on the user's external display.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar mapa del dinero en pantalla"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar mapa del dinero en pantalla"
+          }
+        }
+      }
     },
     "Preset" : {
       "extractionState" : "stale",
@@ -53536,7 +54330,21 @@
     },
     "Previous Item" : {
       "comment" : "A button that selects the previous item in a list.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elemento anterior"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elemento anterior"
+          }
+        }
+      }
     },
     "Price & quote" : {
       "extractionState" : "stale",
@@ -55148,7 +55956,21 @@
     },
     "Provider signature" : {
       "comment" : "A label for the signature of the provider.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firma del proveedor"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firma del proveedor"
+          }
+        }
+      }
     },
     "Pull fields from job “%@”." : {
       "extractionState" : "manual",
@@ -56890,6 +57712,12 @@
     "Ready" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -56925,11 +57753,39 @@
     },
     "Receipt Markup" : {
       "comment" : "A title for a screen that allows the user to draw on a receipt.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotaciones del recibo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotaciones del recibo"
+          }
+        }
+      }
     },
     "Receipt scan" : {
       "comment" : "A label describing a receipt scan.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneo de recibo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneo de recibo"
+          }
+        }
+      }
     },
     "Receipt Scanner" : {
       "extractionState" : "stale",
@@ -58305,6 +59161,23 @@
         }
       }
     },
+    "Remove imported document" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar documento importado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar documento importado"
+          }
+        }
+      }
+    },
     "Remove Passcode" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -58401,6 +59274,12 @@
     "Removes the selected Simple or Pro copies only. Linked invoices in the other tier stay on this device." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina solo las copias seleccionadas de Simple o Pro. Las facturas vinculadas en el otro nivel permanecen en este dispositivo."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -58567,6 +59446,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Se repite regularmente"
+          }
+        }
+      }
+    },
+    "Replace document" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reemplazar documento"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reemplazar documento"
           }
         }
       }
@@ -61242,7 +62138,21 @@
     },
     "Saved" : {
       "comment" : "A label displayed next to a signature that has been saved.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado"
+          }
+        }
+      }
     },
     "Saved · %@ · %@ · %@" : {
       "extractionState" : "stale",
@@ -62928,6 +63838,12 @@
     "Select all" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleccionar todo"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -62939,6 +63855,12 @@
     "Select at least one invoice or include receipt photos to export." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona al menos una factura o incluye fotos de recibos para exportar."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -63087,6 +64009,12 @@
     "Selected invoices will be removed from this device. This cannot be undone." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las facturas seleccionadas se eliminarán de este dispositivo. Esta acción no se puede deshacer."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -63588,6 +64516,7 @@
     },
     "Sent" : {
       "comment" : "A label displayed next to the date a user's agreement was sent.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "es" : {
@@ -64980,6 +65909,12 @@
     "Share archive" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir archivo"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -65121,6 +66056,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Parte del gasto"
+          }
+        }
+      }
+    },
+    "Share signed PDF" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir PDF firmado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir PDF firmado"
           }
         }
       }
@@ -65970,6 +66922,40 @@
         }
       }
     },
+    "Sign" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firmar"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firmar"
+          }
+        }
+      }
+    },
+    "Sign & mark up document" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firmar y marcar documento"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firmar y marcar documento"
+          }
+        }
+      }
+    },
     "Sign anytime — included when you export a PDF. Client approval uses the channel you chose above." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -65995,7 +66981,22 @@
     },
     "Sign here" : {
       "comment" : "A label displayed inside the pencil-drawing box.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "stale",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firma aquí"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firma aquí"
+          }
+        }
+      }
     },
     "Sign inside the box. Use Clear to start over." : {
       "extractionState" : "stale",
@@ -66016,6 +67017,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Firma dentro del recuadro. Usa Limpiar para empezar de nuevo."
+          }
+        }
+      }
+    },
+    "Sign to confirm you agree to the terms above." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firma para confirmar que aceptas los términos anteriores."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firma para confirmar que aceptas los términos anteriores."
           }
         }
       }
@@ -66231,7 +67249,22 @@
     },
     "Signer" : {
       "comment" : "A label that describes the signer of an agreement.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "stale",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firmante"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Firmante"
+          }
+        }
+      }
     },
     "Signing outside BuxMuse" : {
       "extractionState" : "stale",
@@ -66566,13 +67599,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Simple Studio"
+            "value" : "Studio Simple"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Simple Studio"
+            "value" : "Studio Simple"
           }
         },
         "es-ES" : {
@@ -71812,6 +72845,23 @@
         }
       }
     },
+    "Tap where you want to sign. Tap a signature to move or resize it." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca donde quieras firmar. Toca una firma para moverla o cambiar su tamaño."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca donde quieras firmar. Toca una firma para moverla o cambiar su tamaño."
+          }
+        }
+      }
+    },
     "Target" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -74823,6 +75873,12 @@
     "This invoice will be removed from Pro Studio on this device. A linked Simple copy stays if one exists." : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta factura se eliminará de Pro Studio en este dispositivo. Una copia vinculada en Simple permanece si existe."
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -75015,6 +76071,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Este mes vs anterior"
+          }
+        }
+      }
+    },
+    "This PDF has %d pages. The limit is %d pages — split the file or use a shorter version." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este PDF tiene %d páginas. El límite es %d páginas — divide el archivo o usa una versión más corta."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este PDF tiene %d páginas. El límite es %d páginas — divide el archivo o usa una versión más corta."
           }
         }
       }
@@ -80114,7 +81187,22 @@
     },
     "Use Apple Pencil or your finger in the box below." : {
       "comment" : "A description of how to sign.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "stale",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa Apple Pencil o el dedo en el recuadro de abajo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa Apple Pencil o el dedo en el recuadro de abajo."
+          }
+        }
+      }
     },
     "Use Custom Rates" : {
       "extractionState" : "stale",
@@ -82831,7 +83919,21 @@
     },
     "Window" : {
       "comment" : "A menu that opens a new window.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ventana"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ventana"
+          }
+        }
+      }
     },
     "Wire transfer screenshot" : {
       "extractionState" : "stale",
@@ -83766,7 +84868,22 @@
     },
     "You" : {
       "comment" : "A label for the user's signature.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "stale",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tú"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tú"
+          }
+        }
+      }
     },
     "You agreed \\(formatMoney(agreed)) for the whole job. Use the clock to remember how long you spent." : {
       "extractionState" : "stale",
@@ -85094,6 +86211,23 @@
         }
       }
     },
+    "Your agreement document" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu documento de acuerdo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu documento de acuerdo"
+          }
+        }
+      }
+    },
     "Your backup is encrypted on this device. Without the password you choose now, the file cannot be opened — not by BuxMuse, not by support, not by anyone." : {
       "comment" : "A description of the security of a backup.",
       "extractionState" : "stale",
@@ -85393,6 +86527,12 @@
     "Your invoice vault" : {
       "extractionState" : "stale",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu bóveda de facturas"
+          }
+        },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
@@ -85783,6 +86923,23 @@
         }
       }
     },
+    "Your signature" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu firma"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu firma"
+          }
+        }
+      }
+    },
     "Your signature (worker)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -85802,6 +86959,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu firma (trabajador)"
+          }
+        }
+      }
+    },
+    "Your signature is saved without a background and placed where you tapped." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu firma se guarda sin fondo y se coloca donde tocaste."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu firma se guarda sin fondo y se coloca donde tocaste."
           }
         }
       }

@@ -66,10 +66,17 @@ private struct BuxAdaptiveHorizontalPaddingModifier: ViewModifier {
         content
             .padding(.horizontal, margin)
             .onPreferenceChange(BuxContainerWidthKey.self) { width in
-                guard width > 0 else { return }
-                let next = BuxLayout.horizontalMargin(for: width)
-                if abs(next - margin) > 0.5 { margin = next }
+                scheduleContainerMargin(width)
             }
+    }
+
+    private func scheduleContainerMargin(_ width: CGFloat) {
+        guard width > 0 else { return }
+        let next = BuxLayout.horizontalMargin(for: width)
+        guard abs(next - margin) > 0.5 else { return }
+        Task { @MainActor in
+            margin = next
+        }
     }
 }
 
@@ -80,10 +87,17 @@ private struct BuxListContentMarginsModifier: ViewModifier {
         content
             .contentMargins(.horizontal, margin, for: .scrollContent)
             .onPreferenceChange(BuxContainerWidthKey.self) { width in
-                guard width > 0 else { return }
-                let next = BuxLayout.horizontalMargin(for: width)
-                if abs(next - margin) > 0.5 { margin = next }
+                scheduleContainerMargin(width)
             }
+    }
+
+    private func scheduleContainerMargin(_ width: CGFloat) {
+        guard width > 0 else { return }
+        let next = BuxLayout.horizontalMargin(for: width)
+        guard abs(next - margin) > 0.5 else { return }
+        Task { @MainActor in
+            margin = next
+        }
     }
 }
 

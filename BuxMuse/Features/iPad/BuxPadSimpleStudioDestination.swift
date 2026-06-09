@@ -32,6 +32,10 @@ enum BuxPadSimpleStudioDestination: String, CaseIterable, Identifiable, Hashable
         }
     }
 
+    func catalogTitle(locale: Locale) -> String {
+        BuxCatalogLabel.string(title, locale: locale)
+    }
+
     var systemImage: String {
         switch self {
         case .home: return "house.fill"
