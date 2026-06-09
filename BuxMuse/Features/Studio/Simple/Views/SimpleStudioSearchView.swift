@@ -7,6 +7,7 @@ import SwiftUI
 
 struct SimpleStudioSearchView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
@@ -45,8 +46,13 @@ struct SimpleStudioSearchView: View {
             .padding(.horizontal, BuxTokens.marginRegular)
             .padding(.vertical, BuxTokens.section)
             .padding(.bottom, BuxTokens.sheetBottomClearance)
+            .environment(\.studioEnhancedTint, true)
         }
-        .background(themeManager.screenBackground(for: colorScheme))
+        .background {
+            if !usesPadSplitLayout {
+                themeManager.screenBackground(for: colorScheme)
+            }
+        }
         .buxCatalogNavigationTitle(isProSearch ? "Pro Search" : "Search")
         .navigationBarTitleDisplayMode(.large)
         .searchable(

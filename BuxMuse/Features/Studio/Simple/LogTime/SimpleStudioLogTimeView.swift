@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SimpleStudioLogTimeView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var themeManager: ThemeManager
@@ -82,40 +83,57 @@ struct SimpleStudioLogTimeView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: BuxLayout.section) {
-                        introCard
-                        approvalBanner
-                        jobPicker
-                        if let snapshot = paySnapshot {
-                            payContextCard(snapshot)
-                        }
-                        simplePlanSection
-                        notesSection
-
-                        BuxStopwatchFace(
-                            elapsed: displayElapsed,
-                            isRunning: isRunning,
-                            timerAnchor: stopwatchTimerAnchor,
-                            accent: accent
-                        )
-                        .padding(.vertical, 8)
-
-                        controlRow
-                        finishSection
-                        Spacer().frame(height: BuxTokens.block)
-                    }
-                    .padding(.top, BuxLayout.tight)
+        Group {
+            if usesPadSplitLayout {
+                workClockLayer
+            } else {
+                NavigationStack {
+                    workClockLayer
                 }
-                .buxScrollContentMargins()
             }
-            .buxCatalogNavigationTitle("Work clock")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+        }
+        .tint(accent)
+    }
+
+    private var workClockLayer: some View {
+        ZStack {
+            if !usesPadSplitLayout {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
+            }
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: BuxLayout.section) {
+                    introCard
+                    approvalBanner
+                    jobPicker
+                    if let snapshot = paySnapshot {
+                        payContextCard(snapshot)
+                    }
+                    simplePlanSection
+                    notesSection
+
+                    BuxStopwatchFace(
+                        elapsed: displayElapsed,
+                        isRunning: isRunning,
+                        timerAnchor: stopwatchTimerAnchor,
+                        accent: accent
+                    )
+                    .padding(.vertical, 8)
+
+                    controlRow
+                    finishSection
+                    Spacer().frame(height: BuxTokens.block)
+                }
+                .padding(.top, BuxLayout.tight)
+                .environment(\.studioEnhancedTint, true)
+            }
+            .buxScrollContentMargins()
+        }
+        .buxCatalogNavigationTitle("Work clock")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !usesPadSplitLayout {
                 ToolbarItem(placement: .navigationBarLeading) {
                     BuxToolbarCancelButton {
                         syncNotesToController()
@@ -123,54 +141,55 @@ struct SimpleStudioLogTimeView: View {
                     }
                 }
             }
-            .onAppear {
-                timer.attach(simpleStore: simpleStore)
-                hydrateFromSession()
-                if scenePhase == .active {
-                    timer.syncLiveActivityOnForeground()
-                }
+        }
+        .onAppear {
+            timer.attach(simpleStore: simpleStore)
+            hydrateFromSession()
+            if scenePhase == .active {
+                timer.syncLiveActivityOnForeground()
             }
-            .onChange(of: scenePhase) { _, phase in
-                if phase == .active {
-                    refreshElapsed()
-                    timer.syncLiveActivityOnForeground()
-                }
-            }
-            .task(id: scenePhase) {
-                guard scenePhase == .active else { return }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
                 refreshElapsed()
-                while !Task.isCancelled {
-                    try? await Task.sleep(for: .seconds(1))
-                    guard !Task.isCancelled else { return }
-                    refreshElapsed()
-                    if timer.session?.isRunning == true {
-                        timer.evaluateJobMilestones()
-                    }
+                timer.syncLiveActivityOnForeground()
+            }
+        }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            refreshElapsed()
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                refreshElapsed()
+                if timer.session?.isRunning == true {
+                    timer.evaluateJobMilestones()
                 }
             }
-            .onChange(of: selectedJobId) { _, id in
-                guard let id else { return }
-                timer.updateSimpleJobId(id)
-            }
-            .onChange(of: notes) { _, value in
-                timer.updateNotes(value)
-            }
-            .confirmationDialog(
-                finishDialogTitle,
-                isPresented: $showFinishConfirm,
-                titleVisibility: .visible
-            ) {
-                Button(finishDialogAction) {
-                    if timer.finishEarly(simpleStore: simpleStore) {
+        }
+        .onChange(of: selectedJobId) { _, id in
+            guard let id else { return }
+            timer.updateSimpleJobId(id)
+        }
+        .onChange(of: notes) { _, value in
+            timer.updateNotes(value)
+        }
+        .confirmationDialog(
+            finishDialogTitle,
+            isPresented: $showFinishConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(finishDialogAction) {
+                if timer.finishEarly(simpleStore: simpleStore) {
+                    if !usesPadSplitLayout {
                         dismiss()
                     }
                 }
-                Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
-            } message: {
-                Text(finishDialogMessage)
             }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+        } message: {
+            Text(finishDialogMessage)
         }
-        .tint(accent)
     }
 
     private var introCard: some View {

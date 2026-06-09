@@ -122,6 +122,7 @@ struct SimpleStudioInvoiceDetailView: View {
                     .environmentObject(studioStore)
                     .environmentObject(store)
             }
+            .buxPadInvoiceSignatureChrome(invoiceId: invoiceId)
         }
     }
 
@@ -179,7 +180,10 @@ struct SimpleStudioInvoiceDetailView: View {
         }
         guard let data else { return }
         let clean = invoice.invoiceNumber.isEmpty ? "Invoice" : invoice.invoiceNumber.replacingOccurrences(of: "/", with: "-")
-        SimpleStudioShareHelper.presentPDF(data: data, fileName: clean)
+        SimpleStudioShareHelper.presentPDF(
+            data: BuxPadInvoicePDFExport.finalizePDF(data, invoiceId: invoice.id),
+            fileName: clean
+        )
     }
 
     private var businessName: String {

@@ -285,6 +285,26 @@ public final class SettingsStore: ObservableObject {
     @Published public var enableDebugOverlay: Bool = false
     @Published public var showPerformanceMetrics: Bool = false
     
+    // MARK: - Dashboard FAB (iPad)
+    @Published public var ipadFabShortcut: DashboardFabPadShortcut = {
+        if let raw = UserDefaults.standard.string(forKey: "buxmuse.ipadFabShortcut") {
+            if raw == "tips" { return .themes }
+            if let value = DashboardFabPadShortcut(rawValue: raw) {
+                return value
+            }
+        }
+        return .themes
+    }() {
+        didSet {
+            guard isLoaded else { return }
+            if studioEnabled,
+               ipadFabShortcut == .scanReceipt || ipadFabShortcut == .newInvoice {
+                ipadFabShortcut = .themes
+            }
+            UserDefaults.standard.set(ipadFabShortcut.rawValue, forKey: "buxmuse.ipadFabShortcut")
+        }
+    }
+
     // MARK: - Dashboard Greeting Settings
     @Published public var greetingHeaderEnabled: Bool = true
     @Published public var greetingShowIcon: Bool = true

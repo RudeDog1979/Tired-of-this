@@ -84,12 +84,13 @@ struct SubscriptionBurnRateView: View {
                         Text(projectionText)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .multilineTextAlignment(.leading)
 
                         Spacer(minLength: 0)
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 12)
                     .background(themeManager.current.accentColor.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                 }

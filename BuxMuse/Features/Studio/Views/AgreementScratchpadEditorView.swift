@@ -15,6 +15,12 @@ struct AgreementScratchpadListView: View {
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
 
     @State private var showNewDraft = false
+    @State private var showImportImporter = false
+    @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
+    @State private var importError: String?
+    @State private var importedDraftSheet: AgreementDraft?
+
+    private var locale: Locale { appSettingsManager.interfaceLocale }
 
     var body: some View {
         StudioThemedListBackdrop {
@@ -22,6 +28,45 @@ struct AgreementScratchpadListView: View {
                 StudioProToolScreenHeader(titleKey: "Agreements")
                     .studioProToolScrollPlacementEmbedded()
                     .padding(.top, StudioProToolHeaderLayout.topInset - BuxLayout.tight)
+
+                BuxFormSection(title: "Import your agreement") {
+                    Text(AgreementImportedDocumentLimits.limitsNotice(locale: locale))
+                        .font(.system(size: 12, weight: .medium))
+                        .buxLabelSecondary()
+                        .fixedSize(horizontal: false, vertical: true)
+                        .buxFormFieldPadding()
+
+                    if let importError {
+                        BuxFormRowDivider()
+                        Text(importError)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.red)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .buxFormFieldPadding()
+                    }
+
+                    BuxFormRowDivider()
+                    Button {
+                        guard StudioFeatureGate.isPro else {
+                            proUpsellFeature = .agreementScratchpad
+                            return
+                        }
+                        importError = nil
+                        showImportImporter = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "doc.badge.arrow.up.fill")
+                            BuxCatalogDynamicText(key: "Import PDF or photo")
+                            if !StudioFeatureGate.isPro {
+                                Spacer(minLength: 8)
+                                ProFeatureBadge()
+                            }
+                        }
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                    }
+                    .buxFormFieldPadding()
+                }
 
                 BuxFormSection(title: "Agreement drafts") {
                     if store.agreementDrafts.isEmpty {
@@ -51,6 +96,11 @@ struct AgreementScratchpadListView: View {
                                         .font(.system(size: 11, weight: .medium))
                                         .buxLabelSecondary()
                                         .lineLimit(1)
+                                    if draft.hasImportedSource {
+                                        Text("Imported document")
+                                            .font(.system(size: 10, weight: .bold))
+                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                    }
                                 }
                                 .buxFormFieldPadding()
                             }
@@ -88,6 +138,67 @@ struct AgreementScratchpadListView: View {
             }
             .buxStudioSheetContent()
         }
+        .sheet(item: $importedDraftSheet) { draft in
+            NavigationStack {
+                AgreementScratchpadEditorView(draft: draft)
+                    .environmentObject(store)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(simpleStudioStore)
+            }
+            .buxStudioSheetContent()
+        }
+        .sheet(item: $proUpsellFeature) { feature in
+            StudioProUpsellSheet(feature: feature)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(store)
+                .environmentObject(simpleStudioStore)
+        }
+        .fileImporter(
+            isPresented: $showImportImporter,
+            allowedContentTypes: AgreementDocumentStore.importContentTypes,
+            allowsMultipleSelection: false
+        ) { result in
+            handleListImport(result)
+        }
+    }
+
+    private func handleListImport(_ result: Result<[URL], Error>) {
+        importError = nil
+        guard case .success(let urls) = result, let url = urls.first else { return }
+        guard url.startAccessingSecurityScopedResource() else { return }
+        defer { url.stopAccessingSecurityScopedResource() }
+
+        if let exceeded = AgreementDocumentStore.importedSourcePageCountExceeded(at: url) {
+            importError = AgreementImportedDocumentLimits.pageCountExceededMessage(
+                pageCount: exceeded,
+                locale: locale
+            )
+            return
+        }
+
+        var draft = AgreementDraft(
+            title: url.deletingPathExtension().lastPathComponent.isEmpty
+                ? "Imported agreement"
+                : url.deletingPathExtension().lastPathComponent
+        )
+
+        guard let saved = AgreementDocumentStore.saveImportedSource(at: url, agreementId: draft.id) else {
+            importError = StudioAgreementL10n.line(
+                "Could not import this file. Use a PDF or photo.",
+                locale: locale
+            )
+            return
+        }
+
+        draft.importedSourcePath = saved.path
+        draft.importedSourceKind = saved.kind.rawValue
+        draft.importedSourceFilename = url.lastPathComponent
+        draft.updatedAt = Date()
+        store.upsertAgreementDraft(draft, simpleStore: simpleStudioStore)
+        importedDraftSheet = draft
+        BuxSaveFeedback.success()
     }
 
     @ViewBuilder
@@ -131,6 +242,7 @@ struct AgreementScratchpadEditorView: View {
     @State private var showTermsEditor = false
     @State private var signatureRole: AgreementSignatureRole?
     @State private var pdfShareURL: URL?
+    @State private var importedSignStudio: AgreementImportedSignStudioPresentation?
 
     private let linkedProject: StudioProject?
     private let linkedJob: SimpleStudioEntry?
@@ -178,6 +290,14 @@ struct AgreementScratchpadEditorView: View {
         StudioThemedListBackdrop {
             BuxThemedCardForm {
                 statusBanner
+
+                if StudioFeatureGate.isPro {
+                    AgreementImportedSourceSection(
+                        draft: $draft,
+                        onPersist: persistDraft,
+                        onOpenSignStudio: { importedSignStudio = $0 }
+                    )
+                }
 
                 BuxFormSection(title: "Basics") {
                 TextField(BuxCatalogLabel.string("Title", locale: appSettingsManager.interfaceLocale), text: $draft.title)
@@ -266,9 +386,10 @@ struct AgreementScratchpadEditorView: View {
             StudioAgreementApprovalSection(
                 draft: $draft,
                 workAlreadyStarted: workAlreadyStarted,
-                onExportAgreementPDF: exportPDF
+                onExportAgreementPDF: draft.hasImportedSource ? nil : { exportPDF() }
             )
 
+            if !draft.hasImportedSource {
             BuxFormSection(title: "Scope & deliverables") {
                 scratchpadField("What's included (scope bullets)", text: $draft.scopeBullets)
                 BuxFormRowDivider()
@@ -400,6 +521,7 @@ struct AgreementScratchpadEditorView: View {
                 .buxFormFieldPadding()
             }
             }
+            }
         }
         .buxCatalogNavigationTitle("Agreement")
         .navigationBarTitleDisplayMode(.inline)
@@ -442,9 +564,35 @@ struct AgreementScratchpadEditorView: View {
         .onAppear {
             draft.applyDefaultTermsFromSettings()
         }
+        .fullScreenCover(item: $importedSignStudio) { presentation in
+            if let path = draft.importedSourcePath,
+               let kind = draft.importedSourceKindValue {
+                let count = AgreementDocumentStore.pageCount(path: path)
+                if count > 0 {
+                    AgreementImportedDocumentSignSheet(
+                        draft: $draft,
+                        sourcePath: path,
+                        sourceKind: kind,
+                        pageCount: count,
+                        initialRole: presentation.initialRole,
+                        onPersist: persistDraft
+                    )
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                }
+            }
+        }
         .sheet(item: $signatureRole) { role in
-            AgreementSignatureCaptureSheet(role: role) { png in
-                applySignature(png, role: role)
+            Group {
+                if BuxPadIdiom.isPad {
+                    BuxPadAgreementSignatureCaptureSheet(role: role) { png in
+                        applySignature(png, role: role)
+                    }
+                } else {
+                    AgreementSignatureCaptureSheet(role: role) { png in
+                        applySignature(png, role: role)
+                    }
+                }
             }
             .environmentObject(themeManager)
         }
@@ -506,7 +654,8 @@ struct AgreementScratchpadEditorView: View {
     }
 
     private var hasMeaningfulContent: Bool {
-        !draft.scopeBullets.isEmpty
+        draft.hasImportedSource
+            || !draft.scopeBullets.isEmpty
             || !draft.deliverables.isEmpty
             || !draft.outOfScope.isEmpty
             || !draft.signOffName.isEmpty

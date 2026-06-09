@@ -141,6 +141,12 @@ enum StudioSyncCoordinator {
         if let path = draft.signedDocumentPath {
             draft.signedDocumentPath = AgreementDocumentStore.normalizedStoredPath(path)
         }
+        if let path = draft.importedSourcePath {
+            draft.importedSourcePath = AgreementDocumentStore.normalizedStoredPath(path)
+        }
+        if let path = draft.importedSignedExportPath {
+            draft.importedSignedExportPath = AgreementDocumentStore.normalizedStoredPath(path)
+        }
         draft.refreshAgreementStatus()
     }
 

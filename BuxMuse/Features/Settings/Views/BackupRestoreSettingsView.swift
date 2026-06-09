@@ -527,7 +527,7 @@ struct BackupRestoreSettingsView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             }
-            .buttonStyle(.plain)
+            .buxSettingsRowInteraction()
             .accessibilityLabel(isVisible.wrappedValue ? "Hide password" : "Show password")
         }
     }

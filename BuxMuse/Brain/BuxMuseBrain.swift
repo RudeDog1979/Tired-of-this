@@ -237,9 +237,11 @@ public final class BuxMuseBrain: ObservableObject {
     }
 
     public func deleteExpense(id: UUID) throws {
+        let padUndoSnapshot = BuxPadExpenseUndoBridge.snapshotBeforeDelete(id: id, brain: self)
         ExpenseRenewalReminderScheduler.cancel(for: id)
         try persistence.deleteExpenseRecord(id: id)
         refreshExpenses()
+        BuxPadExpenseUndoBridge.offerUndoAfterDelete(padUndoSnapshot, brain: self)
     }
 
     // MARK: - Expense records (full SwiftData model)

@@ -52,7 +52,7 @@ struct StudioProUpsellSheet: View {
             case .scopeCreepRadar:
                 return "Track budgeted hours and revision limits per Studio project. Get alerts and scope-change email templates before work goes off-rails."
             case .agreementScratchpad:
-                return "Draft lightweight client agreements, scope bullets, and sign-off notes — stored locally on your device."
+                return "Draft lightweight client agreements, import your own PDF or photo to mark up and sign, and keep sign-off records on your device."
             case .hustleUnlimited:
                 return "Simple Studio supports 3 active gig workspaces. Pro unlocks unlimited side-hustle ledgers with full filtering across Home, Expenses, and Studio."
             case .burnoutHealthKit:

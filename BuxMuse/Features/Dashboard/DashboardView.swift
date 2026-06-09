@@ -11,6 +11,7 @@ import SwiftUI
 
 struct DashboardView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.buxContainerWidth) private var containerWidth
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var financialBridge: FinancialEngineBridge
@@ -30,6 +31,8 @@ struct DashboardView: View {
     @State private var isPillSectionExpanded = false
     @State private var expensesPillScale: CGFloat = 1.0
     @State private var isFabMenuExpanded = false
+    @State private var showFabMenuOverlay = false
+    @State private var fabAnchor: CGPoint?
     @State private var categorySlideDirection: Int = 1
     @State private var categoryMotionToken = UUID()
     @State private var activeSheet: DashboardActiveSheet?
@@ -39,9 +42,10 @@ struct DashboardView: View {
 
     private var dashSnapshot: DashboardSnapshot { brain.dashboardSnapshot }
 
-    /// Keeps hero sizing proportional on narrow phones (fixed 82×4 slots were overflowing the card).
+    /// Keeps hero sizing proportional on narrow windows (Stage Manager, phones).
     private var heroLayoutScale: CGFloat {
-        min(1, UIScreen.main.bounds.width / 430)
+        let layoutWidth = containerWidth > 0 ? containerWidth : UIScreen.main.bounds.width
+        return min(1, layoutWidth / 430)
     }
 
     var body: some View {
@@ -615,6 +619,7 @@ struct DashboardView: View {
                     Spacer().frame(height: BuxTokens.tight)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .buxPadDashboardCardRail()
                 .padding(.top, BuxTokens.tight)
                 .environment(\.dashboardEnhancedTint, true)
             }
@@ -636,40 +641,18 @@ struct DashboardView: View {
                 }
             }
             
-            // FAB Submenu
-            if isFabMenuExpanded {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            isFabMenuExpanded = false
-                        }
-                    }
-                    .zIndex(5)
-
-                VStack(spacing: 12) {
-                    Spacer()
-                    VStack(spacing: 12) {
-                        FabSubmenuItem(title: "Manual Entry", icon: "square.and.pencil", delay: 0.04) {
-                            closeFabAnd { activeSheet = .addExpense(.add) }
-                        }
-                        FabSubmenuItem(title: "Manage Categories", icon: "folder.fill", delay: 0.09) {
-                            closeFabAnd { activeSheet = .categoryList }
-                        }
-
-                        if settingsStore.studioEnabled {
-                            FabSubmenuDivider(title: "Studio", delay: 0.10)
-
-                            FabSubmenuItem(title: "Scan Receipt", icon: "camera.fill", delay: 0.12) {
-                                closeFabAnd { activeSheet = .addExpense(.addWithAutoScan) }
-                            }
-                            FabSubmenuItem(title: "New Invoice", icon: "plus.rectangle.fill.on.folder.fill", delay: 0.16) {
-                                closeFabAnd { showQuickNewInvoice = true }
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, BuxLayout.marginHorizontal)
+            if showFabMenuOverlay {
+                DashboardFabMenuOverlay(
+                    isExpanded: $isFabMenuExpanded,
+                    studioEnabled: settingsStore.studioEnabled,
+                    onManualEntry: { closeFabAnd { activeSheet = .addExpense(.add) } },
+                    onScanReceipt: { closeFabAnd { activeSheet = .addExpense(.addWithAutoScan) } },
+                    onNewInvoice: { closeFabAnd { showQuickNewInvoice = true } },
+                    onShortcut: { handleIPadFabShortcut() },
+                    onDismiss: { isFabMenuExpanded = false },
+                    onFullyClosed: { showFabMenuOverlay = false },
+                    fabAnchor: fabAnchor
+                )
                 .zIndex(6)
             }
 
@@ -679,6 +662,13 @@ struct DashboardView: View {
                     brain.markDailyTipSeen()
                 }
                 .zIndex(20)
+            }
+        }
+        .coordinateSpace(name: "dashboardOverlay")
+        .onPreferenceChange(DashboardFabAnchorPreferenceKey.self) { fabAnchor = $0 }
+        .onChange(of: isFabMenuExpanded) { _, expanded in
+            if expanded {
+                showFabMenuOverlay = true
             }
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -728,11 +718,34 @@ struct DashboardView: View {
     }
 
     private func closeFabAnd(_ action: @escaping () -> Void) {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            isFabMenuExpanded = false
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        isFabMenuExpanded = false
+        let retractDelay = BuxPadIdiom.isPad ? 0.38 : 0.15
+        DispatchQueue.main.asyncAfter(deadline: .now() + retractDelay) {
             action()
+        }
+    }
+
+    private func handleIPadFabShortcut() {
+        if BuxPadIdiom.isPad, settingsStore.ipadFabShortcut == .themes {
+            navigationCoordinator.openAppearanceSettings()
+            isFabMenuExpanded = false
+            return
+        }
+        closeFabAnd { performIPadFabShortcut() }
+    }
+
+    private func performIPadFabShortcut() {
+        switch settingsStore.ipadFabShortcut {
+        case .scanReceipt:
+            activeSheet = .addExpense(.addWithAutoScan)
+        case .newInvoice:
+            showQuickNewInvoice = true
+        case .categories:
+            activeSheet = .categoryList
+        case .themes:
+            navigationCoordinator.openAppearanceSettings()
+        case .addIncome:
+            activeSheet = .addExpense(.addIncome)
         }
     }
 
@@ -861,7 +874,8 @@ private struct DashboardHeroSection: View {
                         diameter: heroActionDiameter,
                         title: "Income",
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                        titleColor: themeManager.labelSecondary(for: colorScheme),
+                        usesReleaseBounce: true
                     ) { isPressed in
                         Image(systemName: "arrow.down.circle.fill")
                             .font(.system(size: heroActionIconSize + 2))
@@ -886,6 +900,7 @@ private struct DashboardHeroSection: View {
                             .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .buxHeroActionIcon(.plus(isExpanded: isFabMenuExpanded), isPressed: isPressed)
                     }
+                    .dashboardFabAnchor(circleDiameter: heroActionDiameter)
                     .buxScreenEntrance(index: 1, isVisible: navigationCoordinator.isScreenLoaded)
 
                     BuxHeroQuickActionButton(
@@ -899,7 +914,8 @@ private struct DashboardHeroSection: View {
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
                         titleColor: themeManager.labelSecondary(for: colorScheme),
                         circleShadowColor: brain.tipNeedsAttention && tipGlowPhase ? Color.yellow.opacity(0.55) : .clear,
-                        circleShadowRadius: 12
+                        circleShadowRadius: 12,
+                        usesReleaseBounce: true
                     ) { isPressed in
                         Image(systemName: "lightbulb.fill")
                             .font(.system(size: heroActionIconSize))
@@ -926,7 +942,8 @@ private struct DashboardHeroSection: View {
                         diameter: heroActionDiameter,
                         title: "Subscriptions",
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                        titleColor: themeManager.labelSecondary(for: colorScheme)
+                        titleColor: themeManager.labelSecondary(for: colorScheme),
+                        usesReleaseBounce: true
                     ) { isPressed in
                         Image(systemName: "arrow.triangle.2.circlepath")
                             .font(.system(size: heroActionIconSize, weight: .semibold))
@@ -1035,80 +1052,6 @@ private enum DashboardActiveSheet: Identifiable {
         case .categoryList: return "categoryList"
         case .scanReceipt: return "scanReceipt"
         case .notificationInbox: return "notificationInbox"
-        }
-    }
-}
-
-// MARK: - FAB Submenu Item Component
-struct FabSubmenuItem: View {
-    @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var themeManager: ThemeManager
-    let title: String
-    let icon: String
-    let delay: Double
-    let action: () -> Void
-
-    @State private var animateIn = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Spacer()
-
-                BuxCatalogDynamicText(key: title)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(colorScheme == .dark ? Color(red: 24/255, green: 26/255, blue: 32/255) : .white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-
-                ZStack {
-                    Circle()
-                        .fill(themeManager.current.accentColor)
-                        .frame(width: 40, height: 40)
-
-                    Image(systemName: icon)
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
-                }
-            }
-        }
-        .buttonStyle(.plain)
-        .offset(y: animateIn ? 0 : 30)
-        .opacity(animateIn ? 1.0 : 0.0)
-        .onAppear {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.75).delay(delay)) {
-                animateIn = true
-            }
-        }
-    }
-}
-
-struct FabSubmenuDivider: View {
-    @Environment(\.colorScheme) var colorScheme
-    let title: String
-    let delay: Double
-
-    @State private var animateIn = false
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Spacer()
-            BuxCatalogDynamicText(key: title)
-                .buxSectionLabelStyle(color: colorScheme == .dark ? .white.opacity(0.45) : .gray)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.04))
-                .clipShape(Capsule())
-        }
-        .offset(y: animateIn ? 0 : 20)
-        .opacity(animateIn ? 1.0 : 0.0)
-        .onAppear {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.75).delay(delay)) {
-                animateIn = true
-            }
         }
     }
 }

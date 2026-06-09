@@ -36,7 +36,7 @@ struct ProfileSettingsView: View {
                     Button(action: { showNativePicker = true }) {
                         avatarPreview
                     }
-                    .buttonStyle(.plain)
+                    .buxSettingsRowInteraction()
 
                     VStack(alignment: .leading, spacing: 4) {
                         BuxCatalogDynamicText(key: "Profile photo")

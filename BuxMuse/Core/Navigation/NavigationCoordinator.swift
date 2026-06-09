@@ -72,6 +72,28 @@ final class NavigationCoordinator: ObservableObject {
         isExpenseSearchPresented = false
     }
 
+    // MARK: - iPad keyboard routing (UI only — no-op on iPhone)
+
+    @Published private(set) var padKeyboardNewExpenseToken: Int = 0
+    @Published private(set) var padKeyboardFocusSearchToken: Int = 0
+
+    func requestPadNewExpense() {
+        guard BuxPadIdiom.isPad else { return }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            selectedTab = .expense
+        }
+        padKeyboardNewExpenseToken &+= 1
+    }
+
+    func requestPadFocusSearch() {
+        guard BuxPadIdiom.isPad else { return }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            selectedTab = .expense
+            isExpenseSearchPresented = true
+        }
+        padKeyboardFocusSearchToken &+= 1
+    }
+
     /// Set when the Studio timer Live Activity is tapped (`buxmuse://studio/log-time`).
     @Published var openStudioLogTimeRequest = false
 
@@ -96,6 +118,10 @@ final class NavigationCoordinator: ObservableObject {
 
     /// Set when Home hero avatar opens Profile settings.
     @Published var openProfileSettingsRequest = false
+
+    /// Set when FAB shortcut opens Appearance & Themes settings.
+    @Published var openAppearanceSettingsRequest = false
+    @Published var pendingSettingsDestination: SettingsDestinationType?
 
     func openStudioSettings() {
         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
@@ -134,6 +160,25 @@ final class NavigationCoordinator: ObservableObject {
         guard openProfileSettingsRequest else { return false }
         openProfileSettingsRequest = false
         return true
+    }
+
+    func openAppearanceSettings() {
+        pendingSettingsDestination = .appearance
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            selectedTab = .settings
+            openAppearanceSettingsRequest = true
+        }
+    }
+
+    func consumeAppearanceSettingsRequest() -> Bool {
+        guard openAppearanceSettingsRequest else { return false }
+        openAppearanceSettingsRequest = false
+        return true
+    }
+
+    func takePendingSettingsDestination() -> SettingsDestinationType? {
+        defer { pendingSettingsDestination = nil }
+        return pendingSettingsDestination
     }
 
     @Published var openTipPopupRequest = false

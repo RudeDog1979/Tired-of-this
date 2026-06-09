@@ -7,6 +7,7 @@ import SwiftUI
 
 struct SimpleStudioPeopleView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
@@ -72,7 +73,12 @@ struct SimpleStudioPeopleView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(themeManager.screenBackground(for: colorScheme))
+        .background {
+            if !usesPadSplitLayout {
+                themeManager.screenBackground(for: colorScheme)
+            }
+        }
+        .environment(\.studioEnhancedTint, true)
         .buxCatalogNavigationTitle("People")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $nameFilter, prompt: Text(BuxCatalogLabel.string("Find by name or phone", locale: appSettingsManager.interfaceLocale)))

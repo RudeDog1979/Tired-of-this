@@ -129,6 +129,37 @@ struct BuxHeroCardPlateBackground: View {
 
 // MARK: - Modifiers
 
+/// Apple contact + ambient pair — dashboard hero card only (smallest lift, no scroll stack).
+private struct BuxHeroDoubleShadowModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject private var settings = SettingsStore.shared
+
+    func body(content: Content) -> some View {
+        if settings.solarContrastModeEnabled {
+            content
+        } else {
+            let isDark = colorScheme == .dark
+            content
+                .shadow(
+                    color: .black.opacity(
+                        isDark ? BuxTokens.Shadow.heroContactOpacityDark : BuxTokens.Shadow.heroContactOpacityLight
+                    ),
+                    radius: BuxTokens.Shadow.heroContactRadius,
+                    x: 0,
+                    y: BuxTokens.Shadow.heroContactY
+                )
+                .shadow(
+                    color: .black.opacity(
+                        isDark ? BuxTokens.Shadow.heroAmbientOpacityDark : BuxTokens.Shadow.heroAmbientOpacityLight
+                    ),
+                    radius: BuxTokens.Shadow.heroAmbientRadius,
+                    x: 0,
+                    y: BuxTokens.Shadow.heroAmbientY
+                )
+        }
+    }
+}
+
 struct BuxHeroCardChromeModifier: ViewModifier {
     let cornerRadius: CGFloat
     var useMeshPlate: Bool = true
@@ -137,6 +168,7 @@ struct BuxHeroCardChromeModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .buxMaterialCardChrome(.elevated, cornerRadius: cornerRadius, castsShadow: false)
+            .modifier(BuxHeroDoubleShadowModifier())
             .modifier(BuxLandingLightRimWhenEnabled(
                 cornerRadius: cornerRadius,
                 enabled: settings.showsLandingCardShine

@@ -536,9 +536,14 @@ struct CardProCanvasView: View {
                 _ = await BusinessCardPhotoLibraryAccess.requestAccess()
             }
             await MainActor.run {
-                GlobalImagePickerCoordinator.shared.present { image in
+                let handlePicked: (UIImage?) -> Void = { image in
                     guard let image else { return }
                     presentBackgroundPhotoEditor(image: image)
+                }
+                if BuxPadIdiom.isPad {
+                    BuxCanvasBackgroundPhotoPicker.present(onPicked: handlePicked)
+                } else {
+                    GlobalImagePickerCoordinator.shared.present(onPicked: handlePicked)
                 }
             }
         }

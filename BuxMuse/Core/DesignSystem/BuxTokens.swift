@@ -30,12 +30,20 @@ enum BuxTokens {
         static let sheet = BuxMaterialShape.extraLarge
     }
 
-    /// Apple Music–style soft shadow — hero / floating only. GPU-friendly single layer.
+    /// Apple double-shadow — contact + ambient (dashboard hero card only).
     enum Shadow {
         static let heroColorOpacityLight: Double = 0.055
         static let heroColorOpacityDark: Double = 0.28
         static let heroRadius: CGFloat = 14
         static let heroY: CGFloat = 5
+        static let heroContactOpacityLight: Double = 0.04
+        static let heroContactOpacityDark: Double = 0.30
+        static let heroContactRadius: CGFloat = 1
+        static let heroContactY: CGFloat = 1
+        static let heroAmbientOpacityLight: Double = 0.028
+        static let heroAmbientOpacityDark: Double = 0.16
+        static let heroAmbientRadius: CGFloat = 6
+        static let heroAmbientY: CGFloat = 3
         static let ctaRadius: CGFloat = 5
         static let ctaY: CGFloat = 2
     }

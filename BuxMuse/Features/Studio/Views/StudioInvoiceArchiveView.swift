@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StudioInvoiceArchiveView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
@@ -54,8 +55,13 @@ struct StudioInvoiceArchiveView: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
+            if usesPadSplitLayout {
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
+            } else {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
+            }
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxTokens.block) {

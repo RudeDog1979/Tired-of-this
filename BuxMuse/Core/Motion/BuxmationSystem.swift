@@ -152,10 +152,11 @@ struct BuxPressFeedbackStyle: ButtonStyle {
     var pressedOpacity: CGFloat = 0.96
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? pressedScale : 1.0)
-            .opacity(configuration.isPressed ? pressedOpacity : 1.0)
-            .animation(.buxSoftPress, value: configuration.isPressed)
+        BuxPointerButtonStyleBody(
+            configuration: configuration,
+            pressedScale: pressedScale,
+            pressedOpacity: pressedOpacity
+        )
     }
 }
 
@@ -183,14 +184,41 @@ struct BuxMicroShrinkStyle: ButtonStyle {
 /// Lifts the element and compresses its shadow on press.
 struct BuxMicroLiftStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
+        BuxMicroLiftPointerBody(configuration: configuration)
+    }
+}
+
+private struct BuxMicroLiftPointerBody: View {
+    let configuration: ButtonStyle.Configuration
+
+    @State private var isHovered = false
+
+    var body: some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 1.02 : 1.0)
+            .scaleEffect(displayScale)
             .shadow(
-                color: Color.black.opacity(configuration.isPressed ? 0.04 : 0.10),
-                radius: configuration.isPressed ? 3 : 10,
-                x: 0, y: configuration.isPressed ? 2 : 6
+                color: Color.black.opacity(configuration.isPressed ? 0.04 : isHovered ? 0.08 : 0.10),
+                radius: configuration.isPressed ? 3 : isHovered ? 7 : 10,
+                x: 0,
+                y: configuration.isPressed ? 2 : isHovered ? 4 : 6
             )
             .animation(.buxSnap, value: configuration.isPressed)
+            .animation(BuxPointerFeedback.hoverAnimation, value: isHovered)
+            .onContinuousHover { phase in
+                guard BuxPointerFeedback.isEnabled else { return }
+                switch phase {
+                case .active:
+                    isHovered = true
+                case .ended:
+                    isHovered = false
+                }
+            }
+    }
+
+    private var displayScale: CGFloat {
+        if configuration.isPressed { return 1.02 }
+        if isHovered && BuxPointerFeedback.isEnabled { return BuxPointerFeedback.hoverScale }
+        return 1
     }
 }
 
@@ -352,9 +380,8 @@ private struct BuxHeroActionIconModifier: ViewModifier {
                 .animation(BuxMotion.heroPress, value: isPressed)
         case .income:
             content
-                .offset(y: isPressed ? 4 : 0)
-                .scaleEffect(isPressed ? 0.88 : 1.0)
-                .animation(BuxMotion.heroPress, value: isPressed)
+                .scaleEffect(isPressed ? 0.82 : 1.0)
+                .animation(.spring(response: 0.28, dampingFraction: 0.45), value: isPressed)
         case .tips:
             content
                 .scaleEffect(isPressed ? 0.82 : 1.0)
@@ -387,10 +414,27 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
     let titleColor: Color
     var circleShadowColor: Color = .clear
     var circleShadowRadius: CGFloat = 0
+    var usesReleaseBounce: Bool = false
     @ViewBuilder var icon: (_ isPressed: Bool) -> Icon
 
     @State private var isPressed = false
+    @State private var isHovered = false
     @State private var dragExceeded = false
+    @State private var releaseBounce: CGFloat = 1
+
+    private var pressAnimation: Animation {
+        usesReleaseBounce
+            ? .spring(response: 0.26, dampingFraction: 0.52)
+            : BuxMotion.heroPress
+    }
+
+    private var hoverScale: CGFloat {
+        isHovered && BuxPointerFeedback.isEnabled ? BuxPointerFeedback.hoverScale : 1
+    }
+
+    private var combinedScale: CGFloat {
+        (isPressed ? (usesReleaseBounce ? 0.9 : 0.93) : 1.0) * releaseBounce * hoverScale
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -408,8 +452,19 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
-        .scaleEffect(isPressed ? 0.93 : 1.0)
-        .animation(BuxMotion.heroPress, value: isPressed)
+        .scaleEffect(combinedScale)
+        .animation(pressAnimation, value: isPressed)
+        .animation(pressAnimation, value: releaseBounce)
+        .animation(BuxPointerFeedback.hoverAnimation, value: isHovered)
+        .onContinuousHover { phase in
+            guard BuxPointerFeedback.isEnabled else { return }
+            switch phase {
+            case .active:
+                isHovered = true
+            case .ended:
+                isHovered = false
+            }
+        }
         .simultaneousGesture(
             DragGesture(minimumDistance: 12)
                 .onChanged { _ in dragExceeded = true }
@@ -421,7 +476,7 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
                 if pressing {
                     dragExceeded = false
                 }
-                withAnimation(BuxMotion.heroPress) {
+                withAnimation(pressAnimation) {
                     isPressed = pressing
                 }
                 if pressing {
@@ -430,7 +485,11 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
             },
             perform: {
                 guard !dragExceeded else { return }
-                action()
+                if usesReleaseBounce {
+                    playReleaseBounce(completion: action)
+                } else {
+                    action()
+                }
             }
         )
         .accessibilityLabel(
@@ -438,14 +497,29 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
         )
         .accessibilityAddTraits(.isButton)
     }
+
+    private func playReleaseBounce(completion: @escaping () -> Void) {
+        guard !BuxMotion.reducedMotion else {
+            completion()
+            return
+        }
+        releaseBounce = 0.94
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.46)) {
+            releaseBounce = 1.07
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.13) {
+            completion()
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) {
+                releaseBounce = 1
+            }
+        }
+    }
 }
 
 /// Legacy ButtonStyle — prefer `BuxHeroQuickActionButton` for hero row.
 struct BuxHeroQuickActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.93 : 1.0)
-            .animation(BuxMotion.heroPress, value: configuration.isPressed)
+        BuxPointerButtonStyleBody(configuration: configuration, pressedScale: 0.93)
             .onChange(of: configuration.isPressed) { _, pressed in
                 guard pressed else { return }
                 BuxHeroActionHaptic.fireOnPressDown()
@@ -464,19 +538,18 @@ struct BuxmationPressCardStyle: ButtonStyle {
 /// Home dashboard cards: no system button chrome; press feedback only.
 struct BuxDashboardCardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .opacity(configuration.isPressed ? 0.90 : 1)
-            .animation(.buxSoftPress, value: configuration.isPressed)
+        BuxPointerButtonStyleBody(
+            configuration: configuration,
+            pressedScale: 0.96,
+            pressedOpacity: 0.90
+        )
     }
 }
 
 // MARK: - MorphingPillButtonStyle (kept for Pill compatibility)
 struct MorphingPillButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.985 : 1.0)
-            .animation(.buxSoftPress, value: configuration.isPressed)
+        BuxPointerButtonStyleBody(configuration: configuration, pressedScale: 0.985)
     }
 }
 
@@ -562,20 +635,29 @@ struct BuxPrimaryFillButtonStyle: ButtonStyle {
     var isEnabled: Bool = true
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(isEnabled && configuration.isPressed ? 0.985 : 1.0)
-            .opacity(isEnabled ? (configuration.isPressed ? 0.96 : 1.0) : 0.55)
-            .animation(.buxSoftPress, value: configuration.isPressed)
+        Group {
+            if isEnabled {
+                BuxPointerButtonStyleBody(
+                    configuration: configuration,
+                    pressedScale: 0.985,
+                    pressedOpacity: 0.96
+                )
+            } else {
+                configuration.label
+                    .opacity(0.55)
+            }
+        }
     }
 }
 
 /// Outlined / secondary actions (Save Default, Mark Sent).
 struct BuxSecondaryFillButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.985 : 1.0)
-            .opacity(configuration.isPressed ? 0.92 : 1.0)
-            .animation(.buxSoftPress, value: configuration.isPressed)
+        BuxPointerButtonStyleBody(
+            configuration: configuration,
+            pressedScale: 0.985,
+            pressedOpacity: 0.92
+        )
     }
 }
 
@@ -655,18 +737,47 @@ private struct BuxActionPressStyle: ButtonStyle {
     var isEnabled: Bool = true
 
     func makeBody(configuration: Configuration) -> some View {
+        BuxActionPointerPressBody(configuration: configuration, isEnabled: isEnabled)
+    }
+}
+
+private struct BuxActionPointerPressBody: View {
+    let configuration: ButtonStyle.Configuration
+    let isEnabled: Bool
+
+    @State private var isHovered = false
+
+    var body: some View {
         configuration.label
-            .scaleEffect(
-                x: isEnabled && configuration.isPressed ? 0.965 : 1.0,
-                y: isEnabled && configuration.isPressed ? 1.015 : 1.0
-            )
+            .scaleEffect(x: displayScale.width, y: displayScale.height)
             .opacity(isEnabled ? (configuration.isPressed ? 0.94 : 1.0) : 0.55)
             .animation(.buxPressStretch, value: configuration.isPressed)
+            .animation(BuxPointerFeedback.hoverAnimation, value: isHovered)
+            .onContinuousHover { phase in
+                guard isEnabled, BuxPointerFeedback.isEnabled else { return }
+                switch phase {
+                case .active:
+                    isHovered = true
+                case .ended:
+                    isHovered = false
+                }
+            }
             .onChange(of: configuration.isPressed) { _, pressed in
                 if pressed && isEnabled {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred(intensity: 0.85)
                 }
             }
+    }
+
+    private var displayScale: CGSize {
+        if isEnabled && configuration.isPressed {
+            return CGSize(width: 0.965, height: 1.015)
+        }
+        if isHovered && isEnabled && BuxPointerFeedback.isEnabled {
+            let s = BuxPointerFeedback.hoverScale
+            return CGSize(width: s, height: s)
+        }
+        return CGSize(width: 1, height: 1)
     }
 }
 

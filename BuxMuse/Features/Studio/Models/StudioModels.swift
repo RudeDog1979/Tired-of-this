@@ -1070,6 +1070,11 @@ public enum StudioAgreementApprovalChannel: String, Codable, CaseIterable, Senda
     }
 }
 
+public enum AgreementImportedSourceKind: String, Codable, Sendable {
+    case pdf
+    case image
+}
+
 public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     public var id: UUID
     public var title: String
@@ -1102,6 +1107,13 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     public var clientClearAt: Date?
     /// Relative path under Application Support (`agreements/…`).
     public var signedDocumentPath: String?
+    /// Customer's original agreement PDF or image (`{id}-source.*`).
+    public var importedSourcePath: String?
+    /// `pdf` or `image` — see `AgreementImportedSourceKind`.
+    public var importedSourceKind: String?
+    public var importedSourceFilename: String?
+    /// In-app signed export from imported source (`{id}-signed-export.pdf`).
+    public var importedSignedExportPath: String?
     public var agreementSentAt: Date?
     public var proofRecordedAt: Date?
     /// Enabled pre-made T&C clause ids (`StudioAgreementTermsLibrary`).
@@ -1139,6 +1151,10 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         clientClearNote: String = "",
         clientClearAt: Date? = nil,
         signedDocumentPath: String? = nil,
+        importedSourcePath: String? = nil,
+        importedSourceKind: String? = nil,
+        importedSourceFilename: String? = nil,
+        importedSignedExportPath: String? = nil,
         agreementSentAt: Date? = nil,
         proofRecordedAt: Date? = nil,
         enabledTermsClauseIds: [String] = [],
@@ -1172,11 +1188,30 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         self.clientClearNote = clientClearNote
         self.clientClearAt = clientClearAt
         self.signedDocumentPath = signedDocumentPath
+        self.importedSourcePath = importedSourcePath
+        self.importedSourceKind = importedSourceKind
+        self.importedSourceFilename = importedSourceFilename
+        self.importedSignedExportPath = importedSignedExportPath
         self.agreementSentAt = agreementSentAt
         self.proofRecordedAt = proofRecordedAt
         self.enabledTermsClauseIds = enabledTermsClauseIds
         self.termsClauseOverrides = termsClauseOverrides
         self.termsCustomText = termsCustomText
+    }
+
+    public var hasImportedSource: Bool {
+        guard let importedSourcePath else { return false }
+        return !importedSourcePath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    public var importedSourceKindValue: AgreementImportedSourceKind? {
+        guard let importedSourceKind else { return nil }
+        return AgreementImportedSourceKind(rawValue: importedSourceKind)
+    }
+
+    public var hasImportedSignedExport: Bool {
+        guard let importedSignedExportPath else { return false }
+        return !importedSignedExportPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     public var isFullySigned: Bool {
@@ -1283,6 +1318,10 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
         clientClearNote = try c.decodeIfPresent(String.self, forKey: .clientClearNote) ?? ""
         clientClearAt = try c.decodeIfPresent(Date.self, forKey: .clientClearAt)
         signedDocumentPath = try c.decodeIfPresent(String.self, forKey: .signedDocumentPath)
+        importedSourcePath = try c.decodeIfPresent(String.self, forKey: .importedSourcePath)
+        importedSourceKind = try c.decodeIfPresent(String.self, forKey: .importedSourceKind)
+        importedSourceFilename = try c.decodeIfPresent(String.self, forKey: .importedSourceFilename)
+        importedSignedExportPath = try c.decodeIfPresent(String.self, forKey: .importedSignedExportPath)
         agreementSentAt = try c.decodeIfPresent(Date.self, forKey: .agreementSentAt)
         proofRecordedAt = try c.decodeIfPresent(Date.self, forKey: .proofRecordedAt)
         enabledTermsClauseIds = try c.decodeIfPresent([String].self, forKey: .enabledTermsClauseIds) ?? []

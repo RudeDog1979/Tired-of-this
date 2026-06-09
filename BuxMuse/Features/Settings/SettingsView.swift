@@ -75,7 +75,7 @@ struct SettingsView: View {
                                         showsProBadge: false
                                     )
                                 }
-                                .buttonStyle(BuxMicroShrinkStyle())
+                                .buxSettingsRowInteraction()
                             }
                             .settingsThemedCardChrome(cornerRadius: 20)
                         }
@@ -106,6 +106,15 @@ struct SettingsView: View {
                 guard requested else { return }
                 settingsPath.append(SettingsDestinationType.profile)
                 _ = navigationCoordinator.consumeProfileSettingsRequest()
+            }
+            .onChange(of: navigationCoordinator.openAppearanceSettingsRequest) { _, requested in
+                guard requested else { return }
+                routeToAppearanceSettings()
+            }
+            .onAppear {
+                if navigationCoordinator.openAppearanceSettingsRequest {
+                    routeToAppearanceSettings()
+                }
             }
             .navigationDestination(for: SettingsDestinationType.self) { destination in
                 SettingsDrillInBackdrop {
@@ -170,6 +179,13 @@ struct SettingsView: View {
         }
     }
 
+    private func routeToAppearanceSettings() {
+        settingsPath = NavigationPath()
+        settingsPath.append(SettingsDestinationType.appearance)
+        _ = navigationCoordinator.consumeAppearanceSettingsRequest()
+        _ = navigationCoordinator.takePendingSettingsDestination()
+    }
+
     @ViewBuilder
     private func settingsRowButton(for row: SettingsRowDisplay) -> some View {
         let showsUpsell = row.tier == .proOnly && !StudioFeatureGate.isPro
@@ -186,9 +202,11 @@ struct SettingsView: View {
                     showsProBadge: row.showsProBadge
                 )
             }
-            .buttonStyle(BuxMicroShrinkStyle())
+            .buxSettingsRowInteraction()
         } else {
-            NavigationLink(value: row.destination) {
+            Button {
+                settingsPath.append(row.destination)
+            } label: {
                 SettingsRow(
                     icon: row.iconName,
                     label: row.title,
@@ -197,7 +215,7 @@ struct SettingsView: View {
                     showsProBadge: row.showsProBadge && (row.tier == .freemium || StudioFeatureGate.isPro)
                 )
             }
-            .buttonStyle(BuxMicroShrinkStyle())
+            .buxSettingsRowInteraction()
         }
     }
 }
@@ -258,9 +276,11 @@ struct SettingsRow: View {
     let color: Color
     var trailingText: String? = nil
     var showsProBadge: Bool = false
+    var showsChevron: Bool = true
+    var compact: Bool = false
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: compact ? 12 : 14) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(color)
@@ -272,14 +292,15 @@ struct SettingsRow: View {
             }
 
             BuxCatalogText.text(label)
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: compact ? 14 : 15, weight: .medium))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                 .lineLimit(2)
+                .minimumScaleFactor(0.85)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
                 .layoutPriority(1)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: compact ? 4 : 8)
 
             if showsProBadge {
                 ProFeatureBadge(compact: true)
@@ -288,20 +309,24 @@ struct SettingsRow: View {
 
             if let trailing = trailingText {
                 BuxCatalogText.text(trailing)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: compact ? 12 : 13, weight: .semibold))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                    .lineLimit(2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                     .multilineTextAlignment(.trailing)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.trailing, 4)
+                    .layoutPriority(0)
+                    .padding(.trailing, compact ? 2 : 4)
             }
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(themeManager.chevronMuted(for: colorScheme))
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(themeManager.chevronMuted(for: colorScheme))
+            }
         }
-        .padding(.horizontal, BuxLayout.section)
-        .padding(.vertical, 14)
+        .padding(.horizontal, compact ? 10 : BuxLayout.section)
+        .padding(.vertical, compact ? 10 : 14)
         .contentShape(Rectangle())
     }
 }

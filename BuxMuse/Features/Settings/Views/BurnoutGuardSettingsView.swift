@@ -150,7 +150,7 @@ struct BurnoutGuardSettingsView: View {
                             }
                             .buxFormFieldPadding()
                         }
-                        .buttonStyle(.plain)
+                        .buxSettingsRowInteraction()
                     }
                 }
                 }

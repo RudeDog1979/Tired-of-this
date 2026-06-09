@@ -151,7 +151,7 @@ struct BudgetSettingsView: View {
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             }
-                            .buttonStyle(.plain)
+                            .buxSettingsRowInteraction()
 
                             Button(role: .destructive) {
                                 deleteProfile(id: profile.id)
@@ -159,7 +159,7 @@ struct BudgetSettingsView: View {
                                 Image(systemName: "trash")
                                     .font(.system(size: 14, weight: .bold))
                             }
-                            .buttonStyle(.plain)
+                            .buxSettingsRowInteraction()
                         }
                         .buxFormFieldPadding()
                     }
@@ -333,7 +333,7 @@ struct BudgetProfileEditorView: View {
                                     } label: {
                                         Image(systemName: "minus.circle.fill")
                                     }
-                                    .buttonStyle(.plain)
+                                    .buxSettingsRowInteraction()
                                 }
                                 .buxFormFieldPadding()
                             }
@@ -379,7 +379,7 @@ struct BudgetProfileEditorView: View {
                             }
                             .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                         }
-                        .buttonStyle(.plain)
+                        .buxSettingsRowInteraction()
                         .buxFormFieldPadding()
                     }
 

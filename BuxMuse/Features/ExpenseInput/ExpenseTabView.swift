@@ -14,6 +14,10 @@ struct ExpenseTabView: View {
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var brain: BuxMuseBrain
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var padNavigationBrain: BuxPadNavigationBrain
+    @EnvironmentObject private var padSceneBrainRegistry: BuxPadSceneBrainRegistry
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.buxPadExpenseUsesSplitLayout) private var usesPadSplitLayout
 
     @StateObject private var listModel = ExpensesViewModel()
     @State private var activeSheet: ExpenseSheetMode?
@@ -27,6 +31,7 @@ struct ExpenseTabView: View {
     @State private var showAdvancedFilters = false
     @State private var showCategoryManager = false
     @State private var showMerchantManager = false
+    @State private var padDeleteConfirmRecord: ExpenseRecord?
 
     private var allRecords: [ExpenseRecord] {
         brain.expenseRecords
@@ -82,9 +87,7 @@ struct ExpenseTabView: View {
                     }
                 }
             }
-            .buxCatalogNavigationTitle("Expenses")
-            .navigationBarTitleDisplayMode(.large)
-            .buxRootNavigationChrome()
+            .buxPadExpenseSplitNavigationChrome()
             .toolbar { expenseToolbar }
             .modifier(ExpenseSearchModifier(
                 searchText: $listModel.filters.searchText,
@@ -103,6 +106,7 @@ struct ExpenseTabView: View {
             ExpenseCarouselSession.shared.playInitialIfNeeded(dataToken: carouselDataToken)
             Task { @MainActor in
                 refreshExpenseListDisplay()
+                selectInitialPadExpenseIfNeeded()
             }
         }
         .onChange(of: carouselDataToken) { old, new in
@@ -141,21 +145,31 @@ struct ExpenseTabView: View {
         .onChange(of: SettingsStore.shared.sideHustleMatrixEnabled) { _, _ in
             refreshExpenseListDisplay()
         }
+        .onChange(of: navigationCoordinator.padKeyboardNewExpenseToken) { _, _ in
+            guard BuxPadIdiom.isPad else { return }
+            activeSheet = .add
+        }
+        .onChange(of: navigationCoordinator.padKeyboardFocusSearchToken) { _, _ in
+            guard BuxPadIdiom.isPad else { return }
+            navigationCoordinator.isExpenseSearchPresented = true
+        }
+        .onChange(of: padNavigationBrain.keyboardCommandToken) { _, _ in
+            guard BuxPadIdiom.isPad, usesPadSplitLayout else { return }
+            switch padNavigationBrain.lastKeyboardCommand {
+            case .selectPreviousRow:
+                padNavigationBrain.selectAdjacentExpense(in: filteredRecords, direction: -1)
+            case .selectNextRow:
+                padNavigationBrain.selectAdjacentExpense(in: filteredRecords, direction: 1)
+            default:
+                break
+            }
+        }
         .sheet(item: $activeSheet) { mode in
             AddExpenseSheet(brain: brain, settingsManager: appSettingsManager, mode: mode)
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(brain)
                 .environment(\.expensesEnhancedTint, true)
-        }
-        .sheet(item: $categorySheetTransaction) { tx in
-            ExpenseCategorySheet(transaction: tx) { category, categoryId in
-                changeCategory(tx, to: category, categoryId: categoryId)
-            }
-            .environmentObject(themeManager)
-            .environmentObject(brain)
-            .environment(\.expensesEnhancedTint, true)
-            .buxThemedSheetContent()
         }
         .sheet(isPresented: $showAdvancedFilters) {
             ExpenseFilterSheet(
@@ -186,22 +200,20 @@ struct ExpenseTabView: View {
                 .presentationCornerRadius(28)
                 .buxThemedSheetContent()
         }
-        .sheet(item: $noteRecord) { record in
-            ExpenseNoteSheet(
-                merchantName: record.name,
-                notes: $noteDraft,
-                onSave: {
-                    try brain.updateExpenseNotes(id: record.id, notes: noteDraft.isEmpty ? nil : noteDraft)
-                }
-            )
-            .environmentObject(themeManager)
-            .environment(\.expensesEnhancedTint, true)
-            .buxThemedSheetContent()
-            .onAppear {
-                noteDraft = record.notes ?? ""
+        .buxPadExpensePickerPresentation(
+            categoryTransaction: $categorySheetTransaction,
+            noteRecord: $noteRecord,
+            noteDraft: $noteDraft,
+            onCategoryChange: changeCategory,
+            onNoteSave: {
+                guard let record = noteRecord else { return }
+                try? brain.updateExpenseNotes(id: record.id, notes: noteDraft.isEmpty ? nil : noteDraft)
             }
-        }
-        .fullScreenCover(item: $selectedRecord) { record in
+        )
+        .fullScreenCover(item: Binding(
+            get: { usesPadSplitLayout ? nil : selectedRecord },
+            set: { selectedRecord = $0 }
+        )) { record in
             ExpenseDetailView(record: record, brain: brain, settingsManager: appSettingsManager) {
                 listModel.reloadCatalog(brain: brain)
                 refreshExpenseListDisplay()
@@ -211,6 +223,11 @@ struct ExpenseTabView: View {
             .environment(\.expensesEnhancedTint, true)
             .buxThemedSheetContent()
         }
+        .buxPadExpenseDeleteConfirmation(
+            pendingRecord: $padDeleteConfirmRecord,
+            locale: appSettingsManager.interfaceLocale,
+            onConfirm: deleteExpense
+        )
     }
 
     @ToolbarContentBuilder
@@ -379,9 +396,10 @@ struct ExpenseTabView: View {
                 }
             }
             .padding(.top, BuxTokens.tight)
+            .buxPadExpenseCardRail()
         }
         .scrollDismissesKeyboard(.interactively)
-        .buxRootTabScrollChrome()
+        .modifier(ExpensePadSplitScrollChromeModifier())
         .buxStaggeredReveal(index: 0, isVisible: listAppeared)
     }
 
@@ -447,10 +465,20 @@ struct ExpenseTabView: View {
                 }
             }
             .padding(.top, BuxTokens.tight)
+            .buxPadExpenseCardRail()
             .environment(\.textCase, nil)
         }
         .scrollDismissesKeyboard(.interactively)
-        .buxRootTabScrollChrome()
+        .modifier(ExpensePadSplitScrollChromeModifier())
+        .buxPadListArrowNavigation(
+            enabled: BuxPadIdiom.isPad && usesPadSplitLayout,
+            onPrevious: {
+                padNavigationBrain.selectAdjacentExpense(in: filteredRecords, direction: -1)
+            },
+            onNext: {
+                padNavigationBrain.selectAdjacentExpense(in: filteredRecords, direction: 1)
+            }
+        )
         .animation(.buxSnap, value: isListFocusMode)
     }
 
@@ -487,7 +515,7 @@ struct ExpenseTabView: View {
             expandedId: $expandedExpenseId,
             onOpenDetail: {
                 withAnimation(.buxSnap) {
-                    selectedRecord = record
+                    openExpenseDetail(record)
                 }
             }
         ) {
@@ -498,7 +526,29 @@ struct ExpenseTabView: View {
         .environmentObject(themeManager)
         .environmentObject(brain)
         .padding(expenseListRowInsets)
+        .buxPadExpenseRowInteractions(recordId: record.id, enabled: BuxPadIdiom.isPad && usesPadSplitLayout)
+        .background {
+            if usesPadSplitLayout, padNavigationBrain.selectedExpenseId == record.id {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(themeManager.contrastAccentColor(for: colorScheme).opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(
+                                themeManager.contrastAccentColor(for: colorScheme).opacity(0.35),
+                                lineWidth: 1.5
+                            )
+                    )
+            }
+        }
         .contextMenu {
+            if usesPadSplitLayout, padNavigationBrain.selectedExpenseId != record.id {
+                Button {
+                    padNavigationBrain.selectExpense(record.id)
+                } label: {
+                    Label(BuxCatalogLabel.string("Select", locale: appSettingsManager.interfaceLocale), systemImage: "checkmark.circle")
+                }
+            }
+
             Button {
                 noteDraft = record.notes ?? ""
                 noteRecord = record
@@ -527,11 +577,43 @@ struct ExpenseTabView: View {
             }
 
             Button(role: .destructive) {
-                deleteExpense(record)
+                padDeleteConfirmRecord = record
             } label: {
                 Label(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
             }
+
+            if usesPadSplitLayout, !padSceneBrainRegistry.isAuxiliary(padNavigationBrain) {
+                Divider()
+                Button {
+                    padNavigationBrain.selectExpense(record.id)
+                    BuxPadWindowLauncher.openExpenseWindow(
+                        from: padNavigationBrain,
+                        registry: padSceneBrainRegistry,
+                        openWindow: openWindow
+                    )
+                } label: {
+                    Label(
+                        BuxCatalogLabel.string("Open in New Window", locale: appSettingsManager.interfaceLocale),
+                        systemImage: "macwindow.on.rectangle"
+                    )
+                }
+            }
         }
+    }
+
+    private func openExpenseDetail(_ record: ExpenseRecord) {
+        if usesPadSplitLayout {
+            padNavigationBrain.selectExpense(record.id)
+        } else {
+            selectedRecord = record
+        }
+    }
+
+    private func selectInitialPadExpenseIfNeeded() {
+        guard usesPadSplitLayout else { return }
+        guard padNavigationBrain.selectedExpenseId == nil else { return }
+        guard let first = filteredRecords.first else { return }
+        padNavigationBrain.selectExpense(first.id)
     }
 
     private func applyPendingExpenseFilterIfNeeded() {

@@ -8,8 +8,9 @@
 import ActivityKit
 import Foundation
 
-struct StudioTimerAttributes: ActivityAttributes {
-    struct ContentState: Codable, Hashable {
+/// ActivityKit reads attributes from concurrent contexts — must not inherit default `@MainActor` isolation.
+nonisolated struct StudioTimerAttributes: ActivityAttributes, Sendable {
+    struct ContentState: Codable, Hashable, Sendable {
         var accumulated: TimeInterval
         var segmentStart: Date?
         var isRunning: Bool

@@ -93,6 +93,20 @@ struct AppearanceSettingsView: View {
                 )
             }
 
+            if BuxPadIdiom.isPad {
+                BuxFormSection(title: "Expense quick actions") {
+                    BuxSettingsMenuPickerRow(
+                        titleKey: "iPad FAB shortcut",
+                        selection: $store.ipadFabShortcut
+                    ) {
+                        ForEach(DashboardFabPadShortcut.availableShortcuts(studioEnabled: store.studioEnabled)) { shortcut in
+                            BuxCatalogDynamicText(key: shortcut.titleKey)
+                                .tag(shortcut)
+                        }
+                    }
+                }
+            }
+
             BuxFormSection(title: "Dashboard greeting") {
                 BuxSettingsToggleRow(
                     titleKey: "Show greeting header on dashboard",
@@ -181,6 +195,6 @@ private struct AccentSwatchButton: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
         }
-        .buttonStyle(.plain)
+        .buxSettingsRowInteraction()
     }
 }

@@ -8,6 +8,7 @@ import SwiftUI
 struct SimpleStudioPersonDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
@@ -38,7 +39,13 @@ struct SimpleStudioPersonDetailView: View {
 
     var body: some View {
         ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+            if usesPadSplitLayout {
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
+            } else {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
+            }
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: BuxTokens.block) {
@@ -115,6 +122,7 @@ struct SimpleStudioPersonDetailView: View {
                     .padding(.bottom, BuxTokens.sheetBottomClearance)
                 }
                 .padding(.top, BuxTokens.section)
+                .environment(\.studioEnhancedTint, true)
             }
         }
         .buxCatalogNavigationTitle("Person")

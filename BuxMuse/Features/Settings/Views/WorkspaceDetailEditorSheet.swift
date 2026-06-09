@@ -104,7 +104,7 @@ struct WorkspaceDetailEditorSheet: View {
                                     }
                                 }
                             }
-                            .buttonStyle(.plain)
+                            .buxSettingsRowInteraction()
                         }
                     }
                 }
@@ -135,7 +135,7 @@ struct WorkspaceDetailEditorSheet: View {
                     }
                     .font(.system(size: 14, weight: .semibold))
                 }
-                .buttonStyle(.plain)
+                .buxSettingsRowInteraction()
                 .padding(.vertical, 4)
 
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -285,7 +285,7 @@ struct WorkspaceDetailEditorSheet: View {
                         } label: {
                             Image(systemName: "minus.circle.fill")
                         }
-                        .buttonStyle(.plain)
+                        .buxSettingsRowInteraction()
                     }
                     if index < rules.wrappedValue.count - 1 {
                         BuxFormRowDivider()
@@ -305,7 +305,7 @@ struct WorkspaceDetailEditorSheet: View {
                         .font(.system(size: 22))
                         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
-                .buttonStyle(.plain)
+                .buxSettingsRowInteraction()
                 .disabled(newText.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }

@@ -28,6 +28,7 @@ struct AddExpenseSheet: View {
     @State private var paymentSourceQuery = ""
     @State private var showScanner = false
     @State private var isScanning = false
+    @State private var showPadDeleteConfirmation = false
 
     @ObservedObject private var settingsStore = SettingsStore.shared
 
@@ -359,6 +360,11 @@ struct AddExpenseSheet: View {
             }
             .animation(.easeInOut, value: isScanning)
             .tint(isIncomeMode ? incomeAccent : themeManager.contrastAccentColor(for: colorScheme))
+            .buxPadExpenseDeleteConfirmation(
+                isPresented: $showPadDeleteConfirmation,
+                locale: locale,
+                onConfirm: deleteWithUndo
+            )
         }
     }
 
@@ -470,7 +476,7 @@ struct AddExpenseSheet: View {
                 role: .destructive,
                 expands: true
             ) {
-                deleteWithUndo()
+                showPadDeleteConfirmation = true
             }
         }
         .transaction { $0.animation = nil }

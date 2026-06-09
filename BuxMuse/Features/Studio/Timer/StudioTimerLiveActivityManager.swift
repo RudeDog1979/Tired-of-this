@@ -3,7 +3,7 @@
 //  BuxMuse
 //
 
-import ActivityKit
+@preconcurrency import ActivityKit
 import Foundation
 
 @MainActor
@@ -69,8 +69,9 @@ enum StudioTimerLiveActivityManager {
         let staleDate = staleDate(for: session, now: now)
 
         if let activity = currentActivity {
+            let content = ActivityContent(state: state, staleDate: staleDate)
             Task {
-                await activity.update(ActivityContent(state: state, staleDate: staleDate))
+                await StudioTimerActivityKitGateway.update(activity, content: content)
             }
             return
         }
@@ -118,18 +119,18 @@ enum StudioTimerLiveActivityManager {
         guard let activity = currentActivity else { return }
         currentActivity = nil
         let final = activity.content.state
+        let content = ActivityContent(state: final, staleDate: nil)
         Task {
-            await activity.end(
-                ActivityContent(state: final, staleDate: nil),
+            await StudioTimerActivityKitGateway.end(
+                activity,
+                content: content,
                 dismissalPolicy: .immediate
             )
         }
     }
 
     static func endAllAsync() async {
-        for activity in Activity<StudioTimerAttributes>.activities {
-            await activity.end(nil, dismissalPolicy: .immediate)
-        }
+        await StudioTimerActivityKitGateway.endAll()
         currentActivity = nil
     }
 }

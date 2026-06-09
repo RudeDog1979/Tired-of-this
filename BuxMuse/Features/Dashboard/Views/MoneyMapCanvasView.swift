@@ -84,9 +84,6 @@ struct MoneyMapCanvasView: View {
     @State private var blendFrom: CGFloat = 0
     @State private var blendTo: CGFloat = 0
     @State private var blendStartedAt: Date?
-    @State private var parallax = MoneyMapParallaxDriver()
-    @State private var liveTilt: CGSize = .zero
-
     private var isLandscape: Bool {
         canvasSize.width > canvasSize.height
     }
@@ -182,8 +179,6 @@ struct MoneyMapCanvasView: View {
             blendTo = 0
             blendFrom = 0
             blendStartedAt = nil
-            parallax.stop()
-            liveTilt = .zero
         }
         .onChange(of: wantsLiveMotion) { old, wants in
             if wants {
@@ -217,13 +212,13 @@ struct MoneyMapCanvasView: View {
                         let elapsed = wantsLiveMotion
                             ? now.timeIntervalSince(motionAnchor)
                             : frozenElapsed
-                        mapStage(elapsed: elapsed, blend: blend, tilt: liveTilt)
+                        mapStage(elapsed: elapsed, blend: blend)
                             .onChange(of: now) { _, date in
                                 finalizeBlendIfNeeded(at: date)
                             }
                     }
                 } else {
-                    mapStage(elapsed: 0, blend: 1, tilt: .zero)
+                    mapStage(elapsed: 0, blend: 1)
                 }
             }
             .padding(cardPadding)
@@ -249,28 +244,21 @@ struct MoneyMapCanvasView: View {
             .opacity(mode == .full ? 0.45 : 0.35)
     }
 
-    private func parallaxShift(tilt: CGSize, blend: CGFloat, depth: CGFloat) -> CGSize {
-        guard mode == .full else { return .zero }
-        return MoneyMapMotionMath.parallaxShift(tilt: tilt, blend: blend, depth: depth)
-    }
-
     @ViewBuilder
-    private func mapStage(elapsed: TimeInterval, blend: CGFloat, tilt: CGSize) -> some View {
-        let liveBlend = mode == .full ? blend : 0
+    private func mapStage(elapsed: TimeInterval, blend: CGFloat) -> some View {
         ZStack {
             MoneyMapTopoWavesView(
                 accent: themeManager.contrastAccentColor(for: colorScheme),
                 isDark: colorScheme == .dark
             )
-            .offset(MoneyMapMotionMath.backgroundParallaxShift(tilt: tilt, blend: liveBlend))
 
-            sunHaloCanvas(elapsed: elapsed, blend: blend, tilt: tilt)
+            sunHaloCanvas(elapsed: elapsed, blend: blend)
 
-            connectionCanvas(elapsed: elapsed, blend: blend, tilt: tilt)
+            connectionCanvas(elapsed: elapsed, blend: blend)
 
-            centerHub(elapsed: elapsed, blend: blend, tilt: tilt)
+            centerHub(elapsed: elapsed, blend: blend)
 
-            nodeLayer(elapsed: elapsed, blend: blend, tilt: tilt)
+            nodeLayer(elapsed: elapsed, blend: blend)
         }
     }
 
@@ -279,13 +267,8 @@ struct MoneyMapCanvasView: View {
     private func syncMotionLifecycle(from old: Bool?, to wants: Bool) {
         if wants {
             motionAnchor = Date().addingTimeInterval(-frozenElapsed)
-            parallax.start { liveTilt = $0 }
-        } else {
-            if old == true {
-                frozenElapsed = Date().timeIntervalSince(motionAnchor)
-            }
-            parallax.stop()
-            liveTilt = .zero
+        } else if old == true {
+            frozenElapsed = Date().timeIntervalSince(motionAnchor)
         }
     }
 
@@ -355,15 +338,13 @@ struct MoneyMapCanvasView: View {
     // MARK: - Map layers
 
     @ViewBuilder
-    private func sunHaloCanvas(elapsed: TimeInterval, blend: CGFloat, tilt: CGSize) -> some View {
+    private func sunHaloCanvas(elapsed: TimeInterval, blend: CGFloat) -> some View {
         // Full map uses hub shadow only — large radial halos wash over weave lines.
         if mode == .mini {
             GeometryReader { geo in
                 let accent = themeManager.current.accentColor
                 let isDark = colorScheme == .dark
                 let haloDiameter = mode.hubSize * 1.62
-                let hubShift = parallaxShift(tilt: tilt, blend: blend, depth: MoneyMapMotionMath.ParallaxDepth.sun)
-
                 Circle()
                     .fill(
                         RadialGradient(
@@ -379,26 +360,21 @@ struct MoneyMapCanvasView: View {
                         )
                     )
                     .frame(width: haloDiameter, height: haloDiameter)
-                    .position(x: geo.size.width / 2 + hubShift.width, y: geo.size.height / 2 + hubShift.height)
+                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
             }
             .allowsHitTesting(false)
         }
     }
 
-    private func connectionCanvas(elapsed: TimeInterval, blend: CGFloat, tilt: CGSize) -> some View {
+    private func connectionCanvas(elapsed: TimeInterval, blend: CGFloat) -> some View {
         Canvas { context, size in
-            let hubShift = parallaxShift(tilt: tilt, blend: blend, depth: MoneyMapMotionMath.ParallaxDepth.hub)
-            let center = CGPoint(
-                x: size.width / 2 + hubShift.width,
-                y: size.height / 2 + hubShift.height
-            )
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
             let trimEnd = connectionTrimProgress
 
             for node in graph.nodes {
                 let drift = MoneyMapMotionMath.driftOffset(for: node, elapsed: elapsed, blend: blend)
                 let base = renderedPoint(for: node, in: size, drift: drift)
-                let nodeShift = parallaxShift(tilt: tilt, blend: blend, depth: MoneyMapMotionMath.ParallaxDepth.node(ring: node.ring))
-                let nodeCenter = CGPoint(x: base.x + nodeShift.width, y: base.y + nodeShift.height)
+                let nodeCenter = base
                 let nodeDiameter = (36 + node.weight * 22) * mode.nodeScale
                 let endpoints = connectionEndpoints(
                     hubCenter: center,
@@ -429,12 +405,11 @@ struct MoneyMapCanvasView: View {
         .allowsHitTesting(false)
     }
 
-    private func centerHub(elapsed: TimeInterval, blend: CGFloat, tilt: CGSize) -> some View {
+    private func centerHub(elapsed: TimeInterval, blend: CGFloat) -> some View {
         GeometryReader { geo in
             let size = geo.size
             let accent = themeManager.current.accentColor
             let pulse = MoneyMapMotionMath.hubPulseScale(elapsed: elapsed, blend: blend)
-            let hubShift = parallaxShift(tilt: tilt, blend: blend, depth: MoneyMapMotionMath.ParallaxDepth.hub)
 
             ZStack {
                 VStack(spacing: 4) {
@@ -467,30 +442,26 @@ struct MoneyMapCanvasView: View {
                 radius: mode == .full ? 10 : 0,
                 y: mode == .full ? 4 : 0
             )
-            .position(
-                x: size.width / 2 + hubShift.width,
-                y: size.height / 2 + hubShift.height
-            )
+            .position(x: size.width / 2, y: size.height / 2)
         }
         .allowsHitTesting(false)
     }
 
-    private func nodeLayer(elapsed: TimeInterval, blend: CGFloat, tilt: CGSize) -> some View {
+    private func nodeLayer(elapsed: TimeInterval, blend: CGFloat) -> some View {
         GeometryReader { geo in
             ForEach(graph.nodes) { node in
-                nodeView(node: node, size: geo.size, elapsed: elapsed, blend: blend, tilt: tilt)
+                nodeView(node: node, size: geo.size, elapsed: elapsed, blend: blend)
             }
         }
     }
 
     @ViewBuilder
-    private func nodeView(node: MoneyMapNode, size: CGSize, elapsed: TimeInterval, blend: CGFloat, tilt: CGSize) -> some View {
+    private func nodeView(node: MoneyMapNode, size: CGSize, elapsed: TimeInterval, blend: CGFloat) -> some View {
         let drift = MoneyMapMotionMath.driftOffset(for: node, elapsed: elapsed, blend: blend)
         let point = renderedPoint(for: node, in: size, drift: drift)
         let isHighlighted = highlightedNodeID == node.id || draggingNodeID == node.id
         let diameter = (36 + node.weight * 22) * mode.nodeScale
         let isDragging = draggingNodeID == node.id
-        let nodeShift = parallaxShift(tilt: tilt, blend: blend, depth: MoneyMapMotionMath.ParallaxDepth.node(ring: node.ring))
         let nodeScale = nodeDisplayScale(isDragging: isDragging, isHighlighted: isHighlighted, node: node)
 
         VStack(spacing: 2) {
@@ -526,7 +497,7 @@ struct MoneyMapCanvasView: View {
             radius: mode == .full ? 5 : 0,
             y: mode == .full ? 2 : 0
         )
-        .position(x: point.x + nodeShift.width, y: point.y + nodeShift.height)
+        .position(x: point.x, y: point.y)
         .animation(.spring(response: 0.45, dampingFraction: 0.72), value: isHighlighted)
         .animation(mode == .mini ? .spring(response: 0.58, dampingFraction: 0.84) : nil, value: layoutStore.layoutToken)
         .onTapGesture {
@@ -553,8 +524,6 @@ struct MoneyMapCanvasView: View {
                         highlightedNodeID = node.id
                         frozenElapsed = Date().timeIntervalSince(motionAnchor)
                         snapBlend(to: 0)
-                        parallax.stop()
-                        liveTilt = .zero
                         #if canImport(UIKit)
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         #endif

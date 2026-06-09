@@ -19,6 +19,7 @@ struct SimpleStudioHubView: View {
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var studioTimer = StudioTimerController.shared
 
@@ -57,14 +58,25 @@ struct SimpleStudioHubView: View {
     private var locale: Locale { appSettingsManager.interfaceLocale }
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
+        Group {
+            if usesPadSplitLayout {
+                simpleHubLayer
+            } else {
+                NavigationStack {
+                    simpleHubLayer
+                }
+            }
+        }
+    }
+
+    private var simpleHubLayer: some View {
+        ZStack(alignment: .bottomTrailing) {
                 BuxLandingTintBackground()
                     .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
-                        if #unavailable(iOS 26) {
+                        if showsHeroWordmarkInScroll {
                             SimpleStudioHeader()
                                 .buxScreenEntrance(index: 0, isVisible: hubAppeared)
                         }
@@ -165,41 +177,17 @@ struct SimpleStudioHubView: View {
                         Spacer().frame(height: 100)
                     }
                     .padding(.top, BuxTokens.tight)
+                    .buxPadDashboardCardRail()
+                    .environment(\.studioEnhancedTint, true)
                 }
-                .modifier(SimpleStudioRootTabScrollChromeModifier())
+                .modifier(SimpleStudioHubScrollChromeModifier(usesPadSplitLayout: usesPadSplitLayout))
 
                 fabLayer
             }
-            .buxStudioRootTabChrome(brand: .simple)
-            .buxInterfaceLocale()
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 16) {
-                        Button {
-                            showSearch = true
-                        } label: {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                        }
-                        .accessibilityLabel(BuxCatalogLabel.string("Search", locale: locale))
-
-                        Menu {
-                            Button(BuxCatalogLabel.string("People", locale: locale)) { showPeople = true }
-                            Button(BuxCatalogLabel.string("Upgrade to Pro", locale: locale)) {
-                                _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
-                                    simpleStore: simpleStudioStore,
-                                    studioStore: studioStore,
-                                    settings: settingsStore,
-                                    currencyCode: appSettingsManager.selectedCurrency.id
-                                )
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
-                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                        }
-                    }
-                }
+            .buxStudioHubPadNavigationChrome(usesPadSplitLayout: usesPadSplitLayout, brand: .simple) {
+                simpleHubTrailingToolbar
             }
+            .buxInterfaceLocale()
             .navigationDestination(isPresented: $showSearch) {
                 SimpleStudioSearchView(store: simpleStudioStore, isProSearch: false)
                     .environmentObject(themeManager)
@@ -254,6 +242,7 @@ struct SimpleStudioHubView: View {
                     .environmentObject(simpleStudioStore)
                     .environmentObject(studioStore)
                     .buxStudioSheetContent()
+                    .buxPadSimpleStudioQuickSheet()
             }
             .alert(markPaidAlertTitle, isPresented: $showMarkPaidConfirmation) {
                 Button(markPaidConfirmLabel) {
@@ -296,29 +285,34 @@ struct SimpleStudioHubView: View {
                 SimpleStudioLogMoneySheet(store: simpleStudioStore, initialKind: logMoneyKind)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .buxPadSimpleStudioQuickSheet()
             }
             .sheet(isPresented: $showScan) {
                 SimpleStudioScanView(store: simpleStudioStore)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .buxPadSimpleStudioQuickSheet()
             }
             .sheet(isPresented: $showInvoice) {
                 SimpleStudioSimpleInvoiceSheet(store: simpleStudioStore)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
+                    .buxPadSimpleStudioQuickSheet()
             }
             .sheet(item: $invoicePrefill) { prefill in
                 SimpleStudioSimpleInvoiceSheet(store: simpleStudioStore, prefill: prefill)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
+                    .buxPadSimpleStudioQuickSheet()
             }
             .sheet(isPresented: $showBusinessCard) {
                 SimpleStudioBusinessCardSheet(store: simpleStudioStore)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
+                    .buxPadSimpleStudioQuickSheet()
             }
             .sheet(isPresented: $showQuoteJob) {
                 SimpleStudioJobQuoteSheet(store: simpleStudioStore, existingJob: editingJob)
@@ -326,11 +320,44 @@ struct SimpleStudioHubView: View {
                     .environmentObject(appSettingsManager)
                     .environmentObject(studioStore)
                     .onDisappear { editingJob = nil }
+                    .buxPadSimpleStudioQuickSheet()
             }
             .navigationDestination(isPresented: $showPeople) {
                 SimpleStudioPeopleView(store: simpleStudioStore)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+            }
+    }
+
+    private var showsHeroWordmarkInScroll: Bool {
+        if usesPadSplitLayout { return false }
+        if #available(iOS 26, *) { return false }
+        return true
+    }
+
+    private var simpleHubTrailingToolbar: some View {
+        HStack(spacing: 16) {
+            Button {
+                showSearch = true
+            } label: {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+            }
+            .accessibilityLabel(BuxCatalogLabel.string("Search", locale: locale))
+
+            Menu {
+                Button(BuxCatalogLabel.string("People", locale: locale)) { showPeople = true }
+                Button(BuxCatalogLabel.string("Upgrade to Pro", locale: locale)) {
+                    _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
+                        simpleStore: simpleStudioStore,
+                        studioStore: studioStore,
+                        settings: settingsStore,
+                        currencyCode: appSettingsManager.selectedCurrency.id
+                    )
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
         }
     }
@@ -684,6 +711,18 @@ struct SimpleStudioHubView: View {
             ),
             openURL: openURL
         )
+    }
+}
+
+private struct SimpleStudioHubScrollChromeModifier: ViewModifier {
+    let usesPadSplitLayout: Bool
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content.modifier(StudioPadSplitScrollChromeModifier())
+        } else {
+            content.modifier(SimpleStudioRootTabScrollChromeModifier())
+        }
     }
 }
 

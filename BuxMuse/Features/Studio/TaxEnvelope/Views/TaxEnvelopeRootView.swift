@@ -23,6 +23,7 @@ enum TaxEnvelopeTab: String, CaseIterable, Identifiable {
 
 struct TaxEnvelopeRootView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
@@ -41,7 +42,13 @@ struct TaxEnvelopeRootView: View {
 
     var body: some View {
         ZStack {
-            themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+            if usesPadSplitLayout {
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
+            } else {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
+            }
 
             VStack(alignment: .leading, spacing: BuxTokens.block) {
                 header

@@ -69,10 +69,8 @@ private struct BuxCatalogNavigationTitleModifier: ViewModifier {
 }
 
 private struct BuxInterfaceLocaleModifier: ViewModifier {
-    @EnvironmentObject private var appSettingsManager: AppSettingsManager
-
     func body(content: Content) -> some View {
-        content.environment(\.locale, appSettingsManager.interfaceLocale)
+        content.environment(\.locale, BuxInterfaceLocale.currentInterfaceLocale)
     }
 }
 

@@ -169,11 +169,13 @@ struct MoneyMapFullView: View {
 
                 Spacer(minLength: BuxTokens.section)
             }
-            .padding(.horizontal, BuxTokens.marginRegular)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .buxPadDashboardCardRail()
             .padding(.top, BuxTokens.tight)
             .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
         }
         .buxDetailScrollChrome()
+        .buxScrollContentMargins()
         .onScrollGeometryChange(for: MoneyMapScrollActivity.self) { geometry in
             let y = max(0, geometry.contentOffset.y)
             return MoneyMapScrollActivity(offsetBucket: Int((y / 8).rounded()))

@@ -7,6 +7,7 @@ import SwiftUI
 
 struct SimpleStudioMyMoneyView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
@@ -186,8 +187,13 @@ struct SimpleStudioMyMoneyView: View {
             }
             .padding(.horizontal, BuxTokens.marginRegular)
             .padding(.vertical, BuxTokens.section)
+            .environment(\.studioEnhancedTint, true)
         }
-        .background(themeManager.screenBackground(for: colorScheme))
+        .background {
+            if !usesPadSplitLayout {
+                themeManager.screenBackground(for: colorScheme)
+            }
+        }
         .buxCatalogNavigationTitle("My money")
         .buxInterfaceLocale()
         .navigationBarTitleDisplayMode(.large)

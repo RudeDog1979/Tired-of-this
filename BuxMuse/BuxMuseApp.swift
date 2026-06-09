@@ -12,26 +12,7 @@ struct BuxMuseApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .environmentObject(container)
-                .environmentObject(SettingsStore.shared)
-                .environmentObject(container.brain)
-                .environmentObject(container.persistence)
-                .environmentObject(container.themeManager)
-                .environment(\.themeManager, container.themeManager)
-                .environmentObject(container.appSettingsManager)
-                .environmentObject(container.navigationCoordinator)
-                .environmentObject(container.financialBridge)
-                .environmentObject(container.goalsEngine)
-                .environmentObject(container.goalsViewModel)
-                .environmentObject(container.goalsSheetCoordinator)
-                .environmentObject(container.insightsEngine)
-                .environmentObject(container.insightsViewModel)
-                .environmentObject(container.studioStore)
-                .environmentObject(container.studioBrain)
-                .environmentObject(container.simpleStudioStore)
-                .environmentObject(container.simpleStudioBrain)
-                .environmentObject(container.taxEnvelopeBrain)
-                .environmentObject(container.appDataManager)
+                .buxAppContainerEnvironment(container, padBrain: container.padNavigationBrain)
                 .task {
                     _ = await ExpenseRenewalReminderScheduler.requestAuthorizationIfNeeded()
                     container.scheduleEngagementRefresh()
@@ -43,5 +24,40 @@ struct BuxMuseApp: App {
                     container.navigationCoordinator.openStudioLogTime()
                 }
         }
+        .commands {
+            BuxPadKeyboardCommands(padBrain: container.padNavigationBrain)
+        }
+
+        WindowGroup(id: BuxPadWindowID.expense, for: UUID.self) { $sessionId in
+            if let sessionId {
+                BuxPadExpenseWindowRoot(sessionId: sessionId, container: container)
+                    .buxAppContainerEnvironment(
+                        container,
+                        padBrain: container.padSceneBrainRegistry.brain(for: sessionId)
+                    )
+            }
+        }
+        .defaultSize(width: 1100, height: 800)
+        .handlesExternalEvents(matching: Set(arrayLiteral: BuxPadWindowID.expense))
+
+        WindowGroup(id: BuxPadWindowID.studio, for: BuxPadStudioWindowPayload.self) { $payload in
+            if let payload {
+                BuxPadStudioWindowRoot(payload: payload, container: container)
+                    .buxAppContainerEnvironment(
+                        container,
+                        padBrain: container.padSceneBrainRegistry.brain(for: payload.sessionId)
+                    )
+            }
+        }
+        .defaultSize(width: 1200, height: 860)
+        .handlesExternalEvents(matching: Set(arrayLiteral: BuxPadWindowID.studio))
+
+        WindowGroup(id: BuxPadWindowID.presentation, for: BuxPadPresentationPayload.self) { $payload in
+            if let payload {
+                BuxPadPresentationWindowRoot(payload: payload, container: container)
+            }
+        }
+        .defaultSize(width: 1400, height: 900)
+        .handlesExternalEvents(matching: Set(arrayLiteral: BuxPadWindowID.presentation))
     }
 }

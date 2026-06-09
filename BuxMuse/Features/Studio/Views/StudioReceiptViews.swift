@@ -223,6 +223,7 @@ struct StudioReceiptScannerView: View {
     @State private var category = ""
     @State private var isDeductible = true
     @State private var deductiblePercentage: Double = 100
+    @State private var showPadReceiptMarkup = false
 
     private var locale: Locale { appSettingsManager.interfaceLocale }
 
@@ -326,6 +327,11 @@ struct StudioReceiptScannerView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
                                         .frame(maxWidth: .infinity, alignment: .center)
                                         .buxFormFieldPadding()
+
+                                    buxPadScannerMarkupButton {
+                                        showPadReceiptMarkup = true
+                                    }
+                                    .padding(.bottom, 8)
                                 }
                             }
 
@@ -435,6 +441,10 @@ struct StudioReceiptScannerView: View {
                     }
                 }
             }
+            .buxPadReceiptScannerPencilChrome(
+                scannedImage: $scannedImage,
+                isPresented: $showPadReceiptMarkup
+            )
         }
     }
     
@@ -667,6 +677,7 @@ struct StudioReceiptDetailView: View {
                 .environmentObject(store)
                 .buxStudioSheetContent()
         }
+        .buxPadReceiptDetailPencilChrome(receipt: receipt)
     }
     
     private func infoRow(label: String, value: String, isAmount: Bool = false) -> some View {

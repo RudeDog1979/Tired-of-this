@@ -10,6 +10,8 @@ import SwiftUI
 
 struct SubscriptionHubView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.buxLayoutMode) private var layoutMode
+    @Environment(\.buxPadInspectorColumn) private var isPadInspectorColumn
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var brain: BuxMuseBrain
@@ -36,8 +38,14 @@ struct SubscriptionHubView: View {
         ZStack {
             NavigationStack {
                 ZStack {
-                    themeManager.screenBackground(for: colorScheme)
-                        .ignoresSafeArea()
+                    Group {
+                        if isPadInspectorColumn {
+                            Color.clear
+                        } else {
+                            themeManager.screenBackground(for: colorScheme)
+                        }
+                    }
+                    .ignoresSafeArea()
 
                     ScrollView(showsIndicators: false) {
                         LazyVStack(spacing: BuxLayout.section) {
@@ -68,7 +76,10 @@ struct SubscriptionHubView: View {
                         }
                         .padding(.vertical, BuxLayout.section)
                         .padding(.bottom, BuxOverlayMetrics.scrollBottomInset)
-                        .buxScreenContentMargins()
+                        .modifier(SubscriptionHubContentMarginsModifier(
+                            isPadInspectorColumn: isPadInspectorColumn,
+                            layoutMode: layoutMode
+                        ))
                     }
                     .buxDetailScrollChrome()
                 }

@@ -18,6 +18,7 @@ struct StudioHubView: View {
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
     @EnvironmentObject private var financialBridge: FinancialEngineBridge
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var studioTimer = StudioTimerController.shared
 
@@ -77,8 +78,14 @@ struct StudioHubView: View {
     }
 
     private var proStudioHub: some View {
-        NavigationStack {
-            studioHubLayer
+        Group {
+            if usesPadSplitLayout {
+                studioHubLayer
+            } else {
+                NavigationStack {
+                    studioHubLayer
+                }
+            }
         }
         .background {
             TaxTranslationSessionBridgeView()
@@ -93,7 +100,7 @@ struct StudioHubView: View {
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
-                        if #unavailable(iOS 26) {
+                        if showsHeroWordmarkInScroll {
                             StudioTierWordmark(style: .hero)
                                 .buxScreenEntrance(index: 0, isVisible: hubAppeared)
                         }
@@ -175,40 +182,13 @@ struct StudioHubView: View {
                         Spacer().frame(height: BuxTokens.tight)
                     }
                     .padding(.top, BuxTokens.tight)
+                    .buxPadDashboardCardRail()
                     .environment(\.studioEnhancedTint, true)
                 }
-                .buxRootTabScrollChrome()
+                .modifier(StudioPadSplitScrollChromeModifier())
             }
-            .buxStudioRootTabChrome(brand: .pro)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 16) {
-                        StudioTierWordmark(style: .badge)
-
-                        Button {
-                            showProSearch = true
-                        } label: {
-                            Image(systemName: "sparkle.magnifyingglass")
-                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                        }
-                        .accessibilityLabel(
-                            BuxCatalogLabel.string("Pro Search", locale: appSettingsManager.interfaceLocale)
-                        )
-
-                        BuxProfileToolbarMenu {
-                            Button {
-                                navigateToProfile = true
-                            } label: {
-                                BuxCatalogText.text("Business Profile")
-                            }
-                            Button {
-                                openTaxHub(.settings)
-                            } label: {
-                                BuxCatalogText.text("Tax Profile")
-                            }
-                        }
-                    }
-                }
+            .buxStudioHubPadNavigationChrome(usesPadSplitLayout: usesPadSplitLayout) {
+                studioHubTrailingToolbar
             }
             .navigationDestination(isPresented: $showProSearch) {
                 ProStudioSearchView()
@@ -464,6 +444,41 @@ struct StudioHubView: View {
 
     private var studioRowDivider: some View {
         Divider().padding(.leading, 44)
+    }
+
+    private var showsHeroWordmarkInScroll: Bool {
+        if usesPadSplitLayout { return false }
+        if #available(iOS 26, *) { return false }
+        return true
+    }
+
+    private var studioHubTrailingToolbar: some View {
+        HStack(spacing: 12) {
+            Button {
+                showProSearch = true
+            } label: {
+                Image(systemName: "sparkle.magnifyingglass")
+                    .font(.body.weight(.semibold))
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                BuxCatalogLabel.string("Pro Search", locale: appSettingsManager.interfaceLocale)
+            )
+
+            BuxProfileToolbarMenu {
+                Button {
+                    navigateToProfile = true
+                } label: {
+                    BuxCatalogText.text("Business Profile")
+                }
+                Button {
+                    openTaxHub(.settings)
+                } label: {
+                    BuxCatalogText.text("Tax Profile")
+                }
+            }
+        }
     }
 
     private func navRow(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {

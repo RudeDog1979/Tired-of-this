@@ -93,14 +93,14 @@ struct SecuritySettingsView: View {
                             Text(BuxCatalogLabel.string("Disable PIN", locale: appSettingsManager.interfaceLocale))
                         }
                         .font(.system(size: 14, weight: .bold))
-                        .buttonStyle(.plain)
+                        .buxSettingsRowInteraction()
                     } else {
                         Button(action: { showPasscodeSetup = true }) {
                             BuxCatalogDynamicText(key: "Enable PIN")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                         }
-                        .buttonStyle(.plain)
+                        .buxSettingsRowInteraction()
                     }
                 }
                 .buxFormFieldPadding()

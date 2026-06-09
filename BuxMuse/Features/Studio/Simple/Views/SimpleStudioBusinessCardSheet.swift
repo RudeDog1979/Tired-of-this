@@ -8,6 +8,7 @@ import SwiftUI
 struct SimpleStudioBusinessCardSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
@@ -52,13 +53,27 @@ struct SimpleStudioBusinessCardSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+        Group {
+            if usesPadSplitLayout {
+                businessCardLayer
+            } else {
+                NavigationStack {
+                    businessCardLayer
+                }
+            }
+        }
+    }
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: BuxTokens.block) {
-                        BuxThemedCardForm {
+    private var businessCardLayer: some View {
+        ZStack {
+            if !usesPadSplitLayout {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
+            }
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: BuxTokens.block) {
+                    BuxThemedCardForm {
                             BuxFormSection(title: "Photo (optional)") {
                                 HStack(spacing: BuxTokens.section) {
                                     Button {
@@ -167,54 +182,56 @@ struct SimpleStudioBusinessCardSheet: View {
                         .padding(.bottom, BuxTokens.sheetBottomClearance)
                     }
                     .padding(.top, BuxTokens.section)
+                    .environment(\.studioEnhancedTint, true)
                 }
             }
-            .buxCatalogNavigationTitle("Business card")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+        .buxCatalogNavigationTitle("Business card")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !usesPadSplitLayout {
                 ToolbarItem(placement: .cancellationAction) {
                     BuxToolbarCancelButton { dismiss() }
                 }
             }
-            .buxRootNavigationChrome()
-            .buxInterfaceLocale()
-            .buxMeshSheetPresentation()
-            .onAppear(perform: loadSavedCard)
-            .onChange(of: showNativePicker) { _, show in
-                guard show else { return }
-                GlobalImagePickerCoordinator.shared.present { image in
-                    if let image {
-                        photoLoadFailed = false
-                        pickedImage = image
-                        showCropSheet = true
-                    } else {
-                        photoLoadFailed = true
-                    }
-                    showNativePicker = false
+        }
+        .buxRootNavigationChrome()
+        .buxInterfaceLocale()
+        .buxMeshSheetPresentation()
+        .onAppear(perform: loadSavedCard)
+        .onChange(of: showNativePicker) { _, show in
+            guard show else { return }
+            GlobalImagePickerCoordinator.shared.present { image in
+                if let image {
+                    photoLoadFailed = false
+                    pickedImage = image
+                    showCropSheet = true
+                } else {
+                    photoLoadFailed = true
                 }
+                showNativePicker = false
             }
-            .sheet(isPresented: $showCropSheet) {
-                if let pickedImage {
-                    ImageCropView(
-                        inputImage: pickedImage,
-                        cropShape: .roundedRectangle(cornerRadius: 12),
-                        title: BuxCatalogLabel.string("Crop photo", locale: appSettingsManager.interfaceLocale),
-                        hint: BuxCatalogLabel.string("Drag to pan, slide to scale your card photo.", locale: appSettingsManager.interfaceLocale)
-                    ) { cropped in
-                        cardPhoto = cropped
-                        photoPath = SimpleStudioScanImageStore.saveBusinessCardPhoto(cropped)
-                    }
-                    .environmentObject(themeManager)
-                    .buxThemedSheetContent()
+        }
+        .sheet(isPresented: $showCropSheet) {
+            if let pickedImage {
+                ImageCropView(
+                    inputImage: pickedImage,
+                    cropShape: .roundedRectangle(cornerRadius: 12),
+                    title: BuxCatalogLabel.string("Crop photo", locale: appSettingsManager.interfaceLocale),
+                    hint: BuxCatalogLabel.string("Drag to pan, slide to scale your card photo.", locale: appSettingsManager.interfaceLocale)
+                ) { cropped in
+                    cardPhoto = cropped
+                    photoPath = SimpleStudioScanImageStore.saveBusinessCardPhoto(cropped)
                 }
+                .environmentObject(themeManager)
+                .buxThemedSheetContent()
             }
-            .sheet(item: $proUpsellFeature) { feature in
-                StudioProUpsellSheet(feature: feature)
-                    .environmentObject(themeManager)
-                    .environmentObject(appSettingsManager)
-                    .environmentObject(studioStore)
-                    .environmentObject(store)
-            }
+        }
+        .sheet(item: $proUpsellFeature) { feature in
+            StudioProUpsellSheet(feature: feature)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(studioStore)
+                .environmentObject(store)
         }
     }
 

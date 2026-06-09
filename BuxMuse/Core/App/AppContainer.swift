@@ -23,6 +23,8 @@ final class AppContainer: ObservableObject {
     public let themeManager: ThemeManager
     public let appSettingsManager: AppSettingsManager
     public let navigationCoordinator: NavigationCoordinator
+    public let padNavigationBrain: BuxPadNavigationBrain
+    public let padSceneBrainRegistry: BuxPadSceneBrainRegistry
     public let brain: BuxMuseBrain
     public let financialBridge: FinancialEngineBridge
     public let goalsEngine: GoalsEngine
@@ -44,6 +46,8 @@ final class AppContainer: ObservableObject {
         themeManager = ThemeManager()
         appSettingsManager = AppSettingsManager()
         navigationCoordinator = NavigationCoordinator()
+        padNavigationBrain = BuxPadNavigationBrain()
+        padSceneBrainRegistry = BuxPadSceneBrainRegistry(primaryBrain: padNavigationBrain)
 
         let settingsStore = SettingsStore.shared
         settingsStore.applyBrandThemesAppearance(to: themeManager)

@@ -611,6 +611,7 @@ struct StudioInvoiceDetailView: View {
                 .environmentObject(appSettingsManager)
                 .environmentObject(store)
         }
+        .buxPadInvoiceSignatureChrome(invoiceId: invoice.id)
     }
 
     private func exportPDF() {
@@ -643,7 +644,10 @@ struct StudioInvoiceDetailView: View {
         }
 
         let cleanNum = invoice.invoiceNumber.replacingOccurrences(of: "/", with: "-")
-        SimpleStudioShareHelper.presentPDF(data: data, fileName: "Invoice_\(cleanNum)")
+        SimpleStudioShareHelper.presentPDF(
+            data: BuxPadInvoicePDFExport.finalizePDF(data, invoiceId: invoice.id),
+            fileName: "Invoice_\(cleanNum)"
+        )
     }
     
     private func updateStatus(_ st: InvoiceStatus) {

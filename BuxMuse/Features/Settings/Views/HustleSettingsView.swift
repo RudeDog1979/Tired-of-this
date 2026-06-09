@@ -127,7 +127,7 @@ struct HustleSettingsView: View {
                                             }
                                         }
                                     }
-                                    .buttonStyle(.plain)
+                                    .buxSettingsRowInteraction()
                                 }
                             }
                         }
@@ -148,7 +148,7 @@ struct HustleSettingsView: View {
                             )
                         }
                         .disabled(newHustleName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        .buttonStyle(.plain)
+                        .buxSettingsRowInteraction()
                         .padding(.top, 4)
                     }
                     .buxFormFieldPadding()
@@ -226,7 +226,7 @@ struct HustleSettingsView: View {
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                 }
-                .buttonStyle(.plain)
+                .buxSettingsRowInteraction()
                 .accessibilityLabel(BuxCatalogLabel.string("Edit workspace", locale: appSettingsManager.interfaceLocale))
 
                 if hustleManager.selectedHustleId != hustle.id {
@@ -243,7 +243,7 @@ struct HustleSettingsView: View {
                             .background(themeManager.current.accentColor.opacity(0.1))
                             .clipShape(Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buxSettingsRowInteraction()
                 } else {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
@@ -261,7 +261,7 @@ struct HustleSettingsView: View {
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.red)
                     }
-                    .buttonStyle(.plain)
+                    .buxSettingsRowInteraction()
                 }
             }
         }
@@ -341,7 +341,7 @@ struct HustleSettingsView: View {
                 )
                 .cornerRadius(12)
             }
-            .buttonStyle(.plain)
+            .buxSettingsRowInteraction()
             .padding(.top, 4)
         }
         .padding(BuxLayout.section)

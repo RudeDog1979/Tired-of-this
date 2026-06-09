@@ -10,8 +10,10 @@ import SwiftUI
 struct ExpenseDetailView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.buxPadExpenseDetailEmbedded) private var isPadEmbedded
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var padNavigationBrain: BuxPadNavigationBrain
 
     @StateObject private var viewModel: ExpenseDetailViewModel
     @State private var showCategorySheet = false
@@ -20,6 +22,7 @@ struct ExpenseDetailView: View {
     @State private var presentedEmotionId: String?
     @State private var emotionTintOpacity: Double = 0
     @State private var emotionWatermarkOpacity: Double = 0
+    @State private var showPadDeleteConfirmation = false
 
     let brain: BuxMuseBrain
     let onUpdated: () -> Void
@@ -46,40 +49,11 @@ struct ExpenseDetailView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
-
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
-                        overviewCard
-                        intelligenceSections
-                        notesSection
-                        actionsSection
-                    }
-                    .padding(.bottom, 48)
-                    .buxScreenContentMargins()
-                }
-                .buxDetailScrollChrome()
-            }
-            .navigationTitle(
-                ExpenseDisplayL10n.label(viewModel.record.name, locale: appSettingsManager.interfaceLocale)
-            )
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    BuxToolbarBackButton { dismiss() }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale)) { showEditSheet = true }
-                        .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
-                }
-            }
-            .buxDetailNavigationChrome()
-            .environment(\.expensesEnhancedTint, true)
-            .buxInterfaceLocale()
-            .onChange(of: appSettingsManager.selectedCountry.id) { _, _ in
-                viewModel.reloadIntelligence()
+        Group {
+            if isPadEmbedded {
+                padEmbeddedDetailBody
+            } else {
+                phoneDetailBody
             }
         }
         .sheet(isPresented: $showCategorySheet) {
@@ -108,6 +82,11 @@ struct ExpenseDetailView: View {
         .onChange(of: viewModel.record.emotion) { _, _ in
             syncEmotionPresentation(animated: true)
         }
+        .buxPadExpenseDeleteConfirmation(
+            isPresented: $showPadDeleteConfirmation,
+            locale: appSettingsManager.interfaceLocale,
+            onConfirm: performDeleteExpense
+        )
     }
 
     private func syncEmotionPresentation(animated: Bool) {
@@ -150,6 +129,19 @@ struct ExpenseDetailView: View {
     private func normalizedEmotionId(_ raw: String?) -> String? {
         let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return trimmed.isEmpty ? nil : trimmed
+    }
+
+    /// Phone full-screen detail uses 20pt rails; iPad split sidebar matches Studio (~8pt).
+    private var detailHorizontalInset: CGFloat {
+        isPadEmbedded ? 8 : BuxLayout.marginHorizontal
+    }
+
+    private var overviewCardInnerPadding: CGFloat {
+        isPadEmbedded ? 16 : 28
+    }
+
+    private var detailCardInnerPadding: CGFloat {
+        isPadEmbedded ? 14 : 20
     }
 
     private var overviewCard: some View {
@@ -227,7 +219,7 @@ struct ExpenseDetailView: View {
                 }
                 .buttonStyle(BuxMicroShrinkStyle())
             }
-            .padding(28)
+            .padding(overviewCardInnerPadding)
         }
         .compositingGroup()
         .clipShape(shape)
@@ -254,7 +246,7 @@ struct ExpenseDetailView: View {
         }
         .animation(BuxMotion.emotionFadeOut, value: emotionTintOpacity)
         .shadow(color: chrome.shadowColor, radius: chrome.shadowRadius, x: 0, y: chrome.shadowY)
-        .padding(.horizontal, BuxLayout.marginHorizontal)
+        .padding(.horizontal, detailHorizontalInset)
     }
 
     @ViewBuilder
@@ -286,7 +278,7 @@ struct ExpenseDetailView: View {
                     )
                 }
             }
-            .padding(.horizontal, BuxLayout.marginHorizontal)
+            .padding(.horizontal, detailHorizontalInset)
         }
 
         if !standard.isEmpty {
@@ -316,11 +308,11 @@ struct ExpenseDetailView: View {
                         }
                     }
                 }
-                .padding(20)
+                .padding(detailCardInnerPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .expensesThemedCardChrome(cornerRadius: 20)
             }
-            .padding(.horizontal, BuxLayout.marginHorizontal)
+            .padding(.horizontal, detailHorizontalInset)
         }
     }
 
@@ -343,11 +335,11 @@ struct ExpenseDetailView: View {
                 .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 .buttonStyle(BuxMicroShrinkStyle())
             }
-            .padding(20)
+            .padding(detailCardInnerPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .expensesThemedCardChrome(cornerRadius: 20)
         }
-        .padding(.horizontal, BuxLayout.marginHorizontal)
+        .padding(.horizontal, detailHorizontalInset)
     }
 
     private var actionsSection: some View {
@@ -367,12 +359,10 @@ struct ExpenseDetailView: View {
                 role: .destructive,
                 expands: true
             ) {
-                try? viewModel.delete()
-                onUpdated()
-                dismiss()
+                showPadDeleteConfirmation = true
             }
         }
-        .padding(.horizontal, BuxLayout.marginHorizontal)
+        .padding(.horizontal, detailHorizontalInset)
     }
 
     private func primaryAction(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
@@ -451,5 +441,75 @@ struct ExpenseDetailView: View {
 
     private func localizedInsightTitle(_ key: String) -> String {
         BuxCatalogLabel.string(key, locale: appSettingsManager.interfaceLocale)
+    }
+
+    private func closeDetail() {
+        if isPadEmbedded {
+            padNavigationBrain.clearExpenseSelection()
+        } else {
+            dismiss()
+        }
+    }
+
+    private func performDeleteExpense() {
+        try? viewModel.delete()
+        onUpdated()
+        closeDetail()
+    }
+
+    private var detailCardStack: some View {
+        VStack(spacing: 24) {
+            overviewCard
+            intelligenceSections
+            notesSection
+            actionsSection
+        }
+        .padding(.bottom, 48)
+    }
+
+    private var detailScrollContent: some View {
+        ScrollView(showsIndicators: false) {
+            detailCardStack
+                .buxScreenContentMargins()
+        }
+        .buxDetailScrollChrome()
+    }
+
+    /// iPad split left column — parent sidebar List scrolls; tight rails like Studio sidebar rows.
+    private var padEmbeddedDetailBody: some View {
+        detailCardStack
+            .environment(\.expensesEnhancedTint, true)
+            .buxInterfaceLocale()
+            .onChange(of: appSettingsManager.selectedCountry.id) { _, _ in
+                viewModel.reloadIntelligence()
+            }
+    }
+
+    private var phoneDetailBody: some View {
+        NavigationStack {
+            ZStack {
+                themeManager.screenBackground(for: colorScheme).ignoresSafeArea()
+                detailScrollContent
+            }
+            .navigationTitle(
+                ExpenseDisplayL10n.label(viewModel.record.name, locale: appSettingsManager.interfaceLocale)
+            )
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    BuxToolbarBackButton { closeDetail() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale)) { showEditSheet = true }
+                        .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
+                }
+            }
+            .buxDetailNavigationChrome()
+            .environment(\.expensesEnhancedTint, true)
+            .buxInterfaceLocale()
+            .onChange(of: appSettingsManager.selectedCountry.id) { _, _ in
+                viewModel.reloadIntelligence()
+            }
+        }
     }
 }

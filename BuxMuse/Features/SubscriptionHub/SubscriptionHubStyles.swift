@@ -60,3 +60,18 @@ extension View {
         buxDetailCard(cornerRadius: cornerRadius)
     }
 }
+
+// MARK: - iPad inspector column insets (avoids double padding vs `buxPadRootChrome`)
+
+struct SubscriptionHubContentMarginsModifier: ViewModifier {
+    let isPadInspectorColumn: Bool
+    let layoutMode: BuxLayoutMode
+
+    func body(content: Content) -> some View {
+        if isPadInspectorColumn {
+            content.padding(.horizontal, BuxPadLayout.detailInset(layoutMode: layoutMode))
+        } else {
+            content.buxScreenContentMargins()
+        }
+    }
+}

@@ -261,7 +261,7 @@ struct OnboardingWizardView: View {
                                 .foregroundColor(themeManager.chevronMuted(for: colorScheme))
                         }
                     }
-                    .buttonStyle(.plain)
+                    .buxSettingsRowInteraction()
                     
                     Divider().opacity(0.08)
 
@@ -279,7 +279,7 @@ struct OnboardingWizardView: View {
                                 .foregroundColor(themeManager.chevronMuted(for: colorScheme))
                         }
                     }
-                    .buttonStyle(.plain)
+                    .buxSettingsRowInteraction()
 
                     Divider().opacity(0.08)
 

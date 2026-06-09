@@ -32,13 +32,19 @@ enum StudioProToolHeaderLayout {
 /// M3 canvas behind Studio pushed screens.
 struct StudioThemedListBackdrop<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @EnvironmentObject private var themeManager: ThemeManager
     @ViewBuilder var content: () -> Content
 
     var body: some View {
         ZStack {
-            themeManager.screenBackground(for: colorScheme)
-                .ignoresSafeArea()
+            if usesPadSplitLayout {
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
+            } else {
+                themeManager.screenBackground(for: colorScheme)
+                    .ignoresSafeArea()
+            }
 
             content()
         }

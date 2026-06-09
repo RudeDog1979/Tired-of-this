@@ -125,13 +125,14 @@ enum StudioAgreementPDFRenderer {
                 if let png, let image = UIImage(data: png) {
                     let inset: CGFloat = 6
                     let inner = boxRect.insetBy(dx: inset, dy: inset)
-                    let scale = min(inner.width / image.size.width, inner.height / image.size.height)
-                    let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+                    let drawImage = image.studioAgreementUprightImage()
+                    let scale = min(inner.width / drawImage.size.width, inner.height / drawImage.size.height)
+                    let size = CGSize(width: drawImage.size.width * scale, height: drawImage.size.height * scale)
                     let origin = CGPoint(
                         x: inner.midX - size.width / 2,
                         y: inner.midY - size.height / 2
                     )
-                    image.draw(in: CGRect(origin: origin, size: size))
+                    drawImage.draw(in: CGRect(origin: origin, size: size))
                 } else {
                     let placeholder = L("Not signed")
                     let attrs: [NSAttributedString.Key: Any] = [
@@ -193,6 +194,19 @@ enum StudioAgreementPDFRenderer {
             return url
         } catch {
             return nil
+        }
+    }
+}
+
+extension UIImage {
+    /// Bakes EXIF orientation so agreement PDF export draws signatures upright.
+    func studioAgreementUprightImage() -> UIImage {
+        guard imageOrientation != .up else { return self }
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = scale
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { _ in
+            draw(in: CGRect(origin: .zero, size: size))
         }
     }
 }

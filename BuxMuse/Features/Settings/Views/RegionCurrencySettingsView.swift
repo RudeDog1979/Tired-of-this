@@ -42,7 +42,7 @@ struct RegionCurrencySettingsView: View {
                             .buxChevronMuted()
                     }
                 }
-                .buttonStyle(.plain)
+                .buxSettingsRowInteraction()
                 .buxFormFieldPadding()
                 Text(
                     CountryDisplayL10n.displayName(
@@ -77,7 +77,7 @@ struct RegionCurrencySettingsView: View {
                             .buxChevronMuted()
                     }
                 }
-                .buttonStyle(.plain)
+                .buxSettingsRowInteraction()
                 .buxFormFieldPadding()
                 BuxFormRowDivider()
                 HStack {
@@ -298,7 +298,7 @@ struct CountryPickerView: View {
                             .padding(.vertical, 12)
                             .settingsThemedCardChrome(cornerRadius: 14)
                         }
-                        .buttonStyle(.plain)
+                        .buxSettingsRowInteraction()
                     }
                 }
                 .padding(.horizontal, BuxLayout.marginHorizontal)

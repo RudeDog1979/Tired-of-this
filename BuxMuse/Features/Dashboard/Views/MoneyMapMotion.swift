@@ -15,7 +15,7 @@ import CoreMotion
 enum MoneyMapMotionMath {
     /// Slow orbital drift — small, smooth movement.
     static let driftPeriod: TimeInterval = 18.0
-    static let driftAmplitude: CGFloat = 5.0
+    static let driftAmplitude: CGFloat = 3.5
 
     /// Normalized 0…1 autoreverse curve from elapsed time.
     static func driftUnitPhase(elapsed: TimeInterval) -> Double {
