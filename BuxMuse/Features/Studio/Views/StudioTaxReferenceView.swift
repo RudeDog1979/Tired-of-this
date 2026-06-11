@@ -17,7 +17,6 @@ struct StudioTaxReferenceView: View {
     @EnvironmentObject private var appDataManager: AppDataManager
 
     @State private var showCountryPicker = false
-    @State private var pickerSearchQuery = ""
     @State private var taxIncomeType: TaxIncomeType = .selfEmployed
     @State private var selectedPresetCode = ""
     @State private var selectedRegionCode = ""
@@ -160,7 +159,7 @@ struct StudioTaxReferenceView: View {
             presetToReview = staged
             stagingPreset = nil
         }) {
-            TaxCountryPickerSheet(searchQuery: $pickerSearchQuery) { preset in
+            TaxCountryPickerSheet { preset in
                 stagingPreset = preset
             }
             .environmentObject(themeManager)
@@ -385,7 +384,6 @@ struct StudioTaxReferenceView: View {
                 .environmentObject(appSettingsManager)
 
             Button {
-                pickerSearchQuery = ""
                 showCountryPicker = true
             } label: {
                 HStack {

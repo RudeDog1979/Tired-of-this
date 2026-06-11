@@ -56,6 +56,7 @@ struct BuxPadExpenseDetailPane: View {
                 brain: brain,
                 settingsManager: appSettingsManager
             ) { }
+            .id(record.id)
             .environmentObject(themeManager)
             .environmentObject(appSettingsManager)
             .environmentObject(padNavigationBrain)

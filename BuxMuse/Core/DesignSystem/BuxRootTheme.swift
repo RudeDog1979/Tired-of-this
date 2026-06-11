@@ -170,6 +170,7 @@ struct BuxRootBrandThemeModifier: ViewModifier {
             .environment(\.buxMaterialScheme, material)
             .environment(\.buxBrandSurfaces, branded)
             .animation(BuxMotion.themeCrossfade, value: themeManager.current.id)
+            .animation(.easeInOut(duration: 0.4), value: colorScheme)
     }
 }
 
@@ -423,3 +424,41 @@ extension View {
         scrollContentBackground(.hidden)
     }
 }
+
+// MARK: - Preferred Color Scheme setting observer
+
+struct BuxPreferredColorSchemeModifier: ViewModifier {
+    @ObservedObject private var settings = SettingsStore.shared
+
+    func body(content: Content) -> some View {
+        content
+            .preferredColorScheme(settings.themeMode.colorScheme)
+            .animation(.easeInOut(duration: 0.4), value: settings.themeMode)
+            .onChange(of: settings.themeMode, initial: true) { oldValue, newValue in
+                #if canImport(UIKit)
+                let style: UIUserInterfaceStyle
+                switch newValue {
+                case .system: style = .unspecified
+                case .light: style = .light
+                case .dark: style = .dark
+                }
+                DispatchQueue.main.async {
+                    UIApplication.shared.connectedScenes
+                        .compactMap { $0 as? UIWindowScene }
+                        .flatMap { $0.windows }
+                        .forEach { window in
+                            window.overrideUserInterfaceStyle = style
+                        }
+                }
+                #endif
+            }
+    }
+}
+
+extension View {
+    /// Observes the user's display mode setting and dynamically applies the preferred color scheme.
+    func buxPreferredColorScheme() -> some View {
+        modifier(BuxPreferredColorSchemeModifier())
+    }
+}
+

@@ -26,7 +26,7 @@ struct BuxPadPresentationWindowRoot: View {
         .buxPadEnvironment()
         .buxPadReportsContainerMetrics()
         .buxPadPublishesSceneScale()
-        .preferredColorScheme(nil)
+        .buxPreferredColorScheme()
         .userActivity(BuxPadSceneActivity.presentationWindow) { activity in
             activity.title = presentationTitle
             activity.isEligibleForSearch = false

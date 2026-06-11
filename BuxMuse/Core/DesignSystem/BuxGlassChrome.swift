@@ -25,19 +25,41 @@ enum BuxGlassRimMetrics {
 extension View {
     /// Top-leading rim highlight + soft drop shadow for material glass shapes.
     func buxGlassRimShimmer<S: InsettableShape>(shape: S, colorScheme: ColorScheme, enabled: Bool) -> some View {
-        overlay {
-            if enabled {
-                shape.strokeBorder(
-                    Color.white.opacity(BuxGlassRimMetrics.rimStrokeOpacity(for: colorScheme)),
-                    lineWidth: 0.5
-                )
+        modifier(BuxGlassRimShimmerModifier(shape: shape, colorScheme: colorScheme, enabled: enabled))
+    }
+
+    /// Forces dynamic materials to appear dark when the environment colorScheme is dark,
+    /// by overlaying a semi-translucent dark color. This compensates for UIKit trait collection
+    /// propagation issues in nested iPad split/sidebar controllers.
+    @ViewBuilder
+    func buxMaterialColorSchemeAdaptive<S: Shape>(shape: S, colorScheme: ColorScheme) -> some View {
+        self
+    }
+}
+
+private struct BuxGlassRimShimmerModifier<S: InsettableShape>: ViewModifier {
+    @Environment(\.buxPadFlatDashboardChrome) private var padFlatChrome
+
+    let shape: S
+    let colorScheme: ColorScheme
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        let shadowOn = enabled && !padFlatChrome
+        content
+            .overlay {
+                if enabled {
+                    shape.strokeBorder(
+                        Color.white.opacity(BuxGlassRimMetrics.rimStrokeOpacity(for: colorScheme)),
+                        lineWidth: 0.5
+                    )
+                }
             }
-        }
-        .shadow(
-            color: enabled ? BuxGlassRimMetrics.shadowColor(for: colorScheme) : .clear,
-            radius: enabled ? BuxGlassRimMetrics.shadowRadius : 0,
-            y: enabled ? BuxGlassRimMetrics.shadowY : 0
-        )
+            .shadow(
+                color: shadowOn ? BuxGlassRimMetrics.shadowColor(for: colorScheme) : .clear,
+                radius: shadowOn ? BuxGlassRimMetrics.shadowRadius : 0,
+                y: shadowOn ? BuxGlassRimMetrics.shadowY : 0
+            )
     }
 }
 
@@ -70,6 +92,7 @@ struct BuxGlassCircleBackground: View {
                     shape
                         .fill(.ultraThinMaterial)
                         .frame(width: diameter, height: diameter)
+                        .buxMaterialColorSchemeAdaptive(shape: shape, colorScheme: colorScheme)
                 }
             } else {
                 shape
@@ -101,7 +124,10 @@ struct BuxGlassCapsuleBackground: View {
 
     var body: some View {
         let shape = Capsule(style: .continuous)
-        Group {
+        let accent = themeManager.current.accentColor
+        let isDark = colorScheme == .dark
+
+        return Group {
             if settings.solarContrastModeEnabled {
                 shape
                     .fill(Color.white)
@@ -115,6 +141,7 @@ struct BuxGlassCapsuleBackground: View {
                     }
                 } else {
                     shape.fill(.ultraThinMaterial)
+                        .buxMaterialColorSchemeAdaptive(shape: shape, colorScheme: colorScheme)
                 }
             } else {
                 shape.fill(themeManager.pillTrackFill(for: colorScheme))
@@ -125,6 +152,23 @@ struct BuxGlassCapsuleBackground: View {
             colorScheme: colorScheme,
             enabled: settings.useGlassmorphism && castsShadow && !settings.solarContrastModeEnabled
         )
+        .overlay {
+            if settings.useGlassmorphism && settings.showsLandingCardShine && !settings.solarContrastModeEnabled {
+                shape.strokeBorder(
+                    LinearGradient(
+                        colors: [
+                            accent.opacity(isDark ? 0.22 : 0.14),
+                            accent.opacity(isDark ? 0.09 : 0.06),
+                            accent.opacity(isDark ? 0.03 : 0.02),
+                            Color.clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.75
+                )
+            }
+        }
     }
 }
 
@@ -153,6 +197,7 @@ struct BuxGlassPillBackground: View {
                     }
                 } else {
                     shape.fill(.ultraThinMaterial)
+                        .buxMaterialColorSchemeAdaptive(shape: shape, colorScheme: colorScheme)
                 }
             } else {
                 shape.fill(themeManager.cardFill(for: colorScheme))

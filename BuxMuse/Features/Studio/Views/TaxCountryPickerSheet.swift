@@ -14,7 +14,7 @@ struct TaxCountryPickerSheet: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var taxManager = TaxManager.shared
 
-    @Binding var searchQuery: String
+    @State private var searchQuery = ""
     var onSelect: (TaxInfo) -> Void
 
     private var filteredCountries: [TaxInfo] {
@@ -138,7 +138,7 @@ struct TaxCountryPickerSheet: View {
                                 .studioThemedListRowChrome()
                             }
                         }
-                        .studioThemedListRows()
+                        .studioThemedListRows(isSheet: true)
                     }
                 }
             }

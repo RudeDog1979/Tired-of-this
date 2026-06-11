@@ -206,7 +206,7 @@ struct MoneyMapCanvasView: View {
 
             Group {
                 if mode == .full {
-                    TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !shouldTickClock)) { timeline in
+                    TimelineView(.animation(paused: !shouldTickClock)) { timeline in
                         let now = timeline.date
                         let blend = currentBlend(at: now)
                         let elapsed = wantsLiveMotion
@@ -411,30 +411,17 @@ struct MoneyMapCanvasView: View {
             let accent = themeManager.current.accentColor
             let pulse = MoneyMapMotionMath.hubPulseScale(elapsed: elapsed, blend: blend)
 
-            ZStack {
-                VStack(spacing: 4) {
-                    Text(graph.centerTitle.uppercased())
-                        .font(.system(size: mode == .mini ? 8 : 9, weight: .bold))
-                        .kerning(1)
-                        .foregroundStyle(hubTitleColor(accent: accent))
-                    Text(graph.centerValue)
-                        .font(.system(size: mode.hubValueFont, weight: .black, design: .rounded))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        .minimumScaleFactor(0.65)
-                        .lineLimit(1)
-                    Text(graph.centerSubtitle)
-                        .font(.system(size: 8, weight: .medium))
-                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.8)
-                }
-                .padding(mode == .mini ? 10 : 16)
-                .frame(width: mode.hubSize, height: mode.hubSize)
-                .background {
-                    hubOrbBackground(accent: accent)
-                }
-            }
+            MoneyMapHubElementView(
+                mode: mode,
+                colorScheme: colorScheme,
+                centerTitle: graph.centerTitle,
+                centerValue: graph.centerValue,
+                centerSubtitle: graph.centerSubtitle,
+                accentColor: accent,
+                titleColor: hubTitleColor(accent: accent),
+                labelPrimaryColor: themeManager.labelPrimary(for: colorScheme),
+                labelSecondaryColor: themeManager.labelSecondary(for: colorScheme)
+            )
             .scaleEffect(mapAppeared ? pulse : 0.6)
             .opacity(mapAppeared ? 1 : 0)
             .shadow(
@@ -460,56 +447,34 @@ struct MoneyMapCanvasView: View {
         let drift = MoneyMapMotionMath.driftOffset(for: node, elapsed: elapsed, blend: blend)
         let point = renderedPoint(for: node, in: size, drift: drift)
         let isHighlighted = highlightedNodeID == node.id || draggingNodeID == node.id
-        let diameter = (36 + node.weight * 22) * mode.nodeScale
         let isDragging = draggingNodeID == node.id
         let nodeScale = nodeDisplayScale(isDragging: isDragging, isHighlighted: isHighlighted, node: node)
 
-        VStack(spacing: 2) {
-            ZStack {
-                nodeOrbBackground(node: node, diameter: diameter, isHighlighted: isHighlighted)
-
-                Image(systemName: node.systemIcon)
-                    .font(.system(size: (10 + node.weight * 5) * mode.nodeScale, weight: .bold))
-                    .foregroundStyle(node.accentColor)
-
-                if node.isProTerritory {
-                    Image(systemName: "s.circle.fill")
-                        .font(.system(size: 9, weight: .black))
-                        .foregroundStyle(.purple)
-                        .offset(x: diameter * 0.34, y: -diameter * 0.34)
+        MoneyMapNodeElementView(
+            node: node,
+            mode: mode,
+            isHighlighted: isHighlighted,
+            isDragging: isDragging,
+            colorScheme: colorScheme,
+            labelLocale: appSettingsManager.interfaceLocale,
+            labelPrimaryColor: themeManager.labelPrimary(for: colorScheme),
+            orbShadowColor: MoneyMapOrbChrome.orbShadowColor(isDark: colorScheme == .dark),
+            nodeDisplayOpacity: nodeDisplayOpacity,
+            nodeScale: nodeScale,
+            onTap: {
+                guard draggingNodeID == nil else { return }
+                if mode == .mini {
+                    onExpandRequested?()
+                } else if allowsNodeSelection {
+                    highlightedNodeID = node.id
+                    onNodeSelected?(node)
                 }
             }
-            if mode == .full {
-                Text(node.localizedTitle(locale: appSettingsManager.interfaceLocale))
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                    .frame(maxWidth: 76)
-            }
-        }
-        .scaleEffect(nodeScale)
-        .opacity(nodeDisplayOpacity)
-        .shadow(
-            color: mode == .full && !isDragging
-                ? MoneyMapOrbChrome.orbShadowColor(isDark: colorScheme == .dark)
-                : .clear,
-            radius: mode == .full ? 5 : 0,
-            y: mode == .full ? 2 : 0
         )
         .position(x: point.x, y: point.y)
+        .gesture(nodeDragGesture(for: node))
         .animation(.spring(response: 0.45, dampingFraction: 0.72), value: isHighlighted)
         .animation(mode == .mini ? .spring(response: 0.58, dampingFraction: 0.84) : nil, value: layoutStore.layoutToken)
-        .onTapGesture {
-            guard draggingNodeID == nil else { return }
-            if mode == .mini {
-                onExpandRequested?()
-            } else if allowsNodeSelection {
-                highlightedNodeID = node.id
-                onNodeSelected?(node)
-            }
-        }
-        .gesture(nodeDragGesture(for: node))
     }
 
     private func nodeDragGesture(for node: MoneyMapNode) -> some Gesture {
@@ -751,45 +716,127 @@ struct MoneyMapCanvasView: View {
         return accent
     }
 
-    @ViewBuilder
-    private func hubOrbBackground(accent: Color) -> some View {
-        Group {
-            if mode == .full {
-                Circle()
-                    .fill(MoneyMapOrbChrome.hubTintFill(accent: accent, isDark: colorScheme == .dark))
-            } else {
-                Circle()
-                    .fill(.ultraThinMaterial)
-            }
-        }
-        .overlay(
-            Circle()
-                .strokeBorder(
-                    LinearGradient(
-                        colors: [accent, .purple.opacity(0.75)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 2
-                )
-        )
-    }
+}
 
-    @ViewBuilder
-    private func nodeOrbBackground(node: MoneyMapNode, diameter: CGFloat, isHighlighted: Bool) -> some View {
+// MARK: - Performance-optimized Caching View Elements
+
+struct MoneyMapNodeElementView: View {
+    let node: MoneyMapNode
+    let mode: MoneyMapDisplayMode
+    let isHighlighted: Bool
+    let isDragging: Bool
+    let colorScheme: ColorScheme
+    let labelLocale: Locale
+    let labelPrimaryColor: Color
+    let orbShadowColor: Color
+    let nodeDisplayOpacity: Double
+    let nodeScale: CGFloat
+    let onTap: () -> Void
+
+    var body: some View {
+        let diameter = (36 + node.weight * 22) * mode.nodeScale
         let stroke = node.accentColor.opacity(isHighlighted ? 0.95 : 0.55)
         let lineWidth: CGFloat = isHighlighted ? 2.5 : 1.5
-        Group {
+        
+        VStack(spacing: 2) {
+            ZStack {
+                Group {
+                    if mode == .full {
+                        Circle()
+                            .fill(MoneyMapOrbChrome.nodeTintFill(isDark: colorScheme == .dark))
+                    } else {
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                    }
+                }
+                .frame(width: diameter, height: diameter)
+                .overlay(Circle().strokeBorder(stroke, lineWidth: lineWidth))
+
+                Image(systemName: node.systemIcon)
+                    .font(.system(size: (10 + node.weight * 5) * mode.nodeScale, weight: .bold))
+                    .foregroundStyle(node.accentColor)
+
+                if node.isProTerritory {
+                    Image(systemName: "s.circle.fill")
+                        .font(.system(size: 9, weight: .black))
+                        .foregroundStyle(.purple)
+                        .offset(x: diameter * 0.34, y: -diameter * 0.34)
+                }
+            }
             if mode == .full {
-                Circle()
-                    .fill(MoneyMapOrbChrome.nodeTintFill(isDark: colorScheme == .dark))
-            } else {
-                Circle()
-                    .fill(.ultraThinMaterial)
+                Text(node.localizedTitle(locale: labelLocale))
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(labelPrimaryColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .frame(maxWidth: 76)
             }
         }
-        .frame(width: diameter, height: diameter)
-        .overlay(Circle().strokeBorder(stroke, lineWidth: lineWidth))
+        .scaleEffect(nodeScale)
+        .opacity(nodeDisplayOpacity)
+        .shadow(
+            color: mode == .full && !isDragging ? orbShadowColor : .clear,
+            radius: mode == .full ? 5 : 0,
+            y: mode == .full ? 2 : 0
+        )
+        .onTapGesture(perform: onTap)
+    }
+}
+
+struct MoneyMapHubElementView: View {
+    let mode: MoneyMapDisplayMode
+    let colorScheme: ColorScheme
+    let centerTitle: String
+    let centerValue: String
+    let centerSubtitle: String
+    let accentColor: Color
+    let titleColor: Color
+    let labelPrimaryColor: Color
+    let labelSecondaryColor: Color
+
+    var body: some View {
+        let shape = Circle()
+        VStack(spacing: 4) {
+            Text(centerTitle.uppercased())
+                .font(.system(size: mode == .mini ? 8 : 9, weight: .bold))
+                .kerning(1)
+                .foregroundStyle(titleColor)
+            Text(centerValue)
+                .font(.system(size: mode.hubValueFont, weight: .black, design: .rounded))
+                .foregroundColor(labelPrimaryColor)
+                .minimumScaleFactor(0.65)
+                .lineLimit(1)
+            Text(centerSubtitle)
+                .font(.system(size: 8, weight: .medium))
+                .foregroundStyle(labelSecondaryColor)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
+        }
+        .padding(mode == .mini ? 10 : 16)
+        .frame(width: mode.hubSize, height: mode.hubSize)
+        .background {
+            Group {
+                if mode == .full {
+                    shape
+                        .fill(MoneyMapOrbChrome.hubTintFill(accent: accentColor, isDark: colorScheme == .dark))
+                } else {
+                    shape
+                        .fill(.ultraThinMaterial)
+                }
+            }
+            .overlay(
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [accentColor, .purple.opacity(0.75)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
+                    )
+            )
+        }
     }
 }
 

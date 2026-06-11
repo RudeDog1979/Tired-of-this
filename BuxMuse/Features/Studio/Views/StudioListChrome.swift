@@ -54,13 +54,23 @@ struct StudioThemedListBackdrop<Content: View>: View {
 }
 
 extension View {
-    func studioThemedListRows() -> some View {
-        listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .scrollDismissesKeyboard(.interactively)
-            .buxListContentMargins()
-            .buxStableNavigationBarWithKeyboard()
-            .buxSoftScrollChrome()
+    func studioThemedListRows(isSheet: Bool = false) -> some View {
+        Group {
+            if isSheet {
+                listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .scrollDismissesKeyboard(.interactively)
+                    .buxListContentMargins()
+                    .buxSoftScrollChrome()
+            } else {
+                listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .scrollDismissesKeyboard(.interactively)
+                    .buxListContentMargins()
+                    .buxStableNavigationBarWithKeyboard()
+                    .buxSoftScrollChrome()
+            }
+        }
     }
 
     func studioThemedListRowChrome() -> some View {

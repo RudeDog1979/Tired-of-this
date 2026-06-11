@@ -12,6 +12,7 @@ struct BuxMuseApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .buxPreferredColorScheme()
                 .buxAppContainerEnvironment(container, padBrain: container.padNavigationBrain)
                 .task {
                     _ = await ExpenseRenewalReminderScheduler.requestAuthorizationIfNeeded()
@@ -31,6 +32,7 @@ struct BuxMuseApp: App {
         WindowGroup(id: BuxPadWindowID.expense, for: UUID.self) { $sessionId in
             if let sessionId {
                 BuxPadExpenseWindowRoot(sessionId: sessionId, container: container)
+                    .buxPreferredColorScheme()
                     .buxAppContainerEnvironment(
                         container,
                         padBrain: container.padSceneBrainRegistry.brain(for: sessionId)
@@ -43,6 +45,7 @@ struct BuxMuseApp: App {
         WindowGroup(id: BuxPadWindowID.studio, for: BuxPadStudioWindowPayload.self) { $payload in
             if let payload {
                 BuxPadStudioWindowRoot(payload: payload, container: container)
+                    .buxPreferredColorScheme()
                     .buxAppContainerEnvironment(
                         container,
                         padBrain: container.padSceneBrainRegistry.brain(for: payload.sessionId)
@@ -55,6 +58,7 @@ struct BuxMuseApp: App {
         WindowGroup(id: BuxPadWindowID.presentation, for: BuxPadPresentationPayload.self) { $payload in
             if let payload {
                 BuxPadPresentationWindowRoot(payload: payload, container: container)
+                    .buxPreferredColorScheme()
             }
         }
         .defaultSize(width: 1400, height: 900)

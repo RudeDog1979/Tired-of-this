@@ -27,7 +27,7 @@ enum MoneyMapMotionMath {
     static func driftOffset(for node: MoneyMapNode, elapsed: TimeInterval, blend: CGFloat) -> CGSize {
         guard blend > 0.001 else { return .zero }
         let phase = driftUnitPhase(elapsed: elapsed)
-        let amp = driftAmplitude * blend
+        let amp = 0.5 * blend
         let x = cos(phase * .pi * 2 + node.angle) * amp
         let y = sin(phase * .pi * 2 + node.angle * 1.3) * amp
         return CGSize(width: x, height: y)
@@ -35,13 +35,13 @@ enum MoneyMapMotionMath {
 
     static func hubPulseScale(elapsed: TimeInterval, blend: CGFloat) -> CGFloat {
         let phase = driftUnitPhase(elapsed: elapsed)
-        return 1 + 0.018 * sin(phase * .pi * 2) * blend
+        return 1 + 0.003 * sin(phase * .pi * 2) * blend
     }
 
     static func hubCoronaOpacity(elapsed: TimeInterval, blend: CGFloat) -> Double {
         let phase = driftUnitPhase(elapsed: elapsed)
         let base = 0.22 + 0.20 * blend
-        return base + 0.14 * sin(phase * .pi * 2 + 0.6) * Double(blend)
+        return base + 0.03 * sin(phase * .pi * 2 + 0.6) * Double(blend)
     }
 
     /// Layer depth — background slowest, planets float furthest (original Money Map feel).

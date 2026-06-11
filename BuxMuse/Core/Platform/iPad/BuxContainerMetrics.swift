@@ -26,6 +26,7 @@ private struct BuxContainerMetricsModifier: ViewModifier {
                             applyContainerSize(newSize)
                         }
                 }
+                .ignoresSafeArea(.keyboard)
             }
             .environment(\.buxContainerWidth, containerSize.width)
             .environment(\.buxContainerHeight, containerSize.height)

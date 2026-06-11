@@ -9,13 +9,13 @@ import UIKit
 
 private final class BuxPadProMotionAnchorView: UIView {
     private var displayLink: CADisplayLink?
+    private var lastLayoutTime: CFTimeInterval = 0
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         isUserInteractionEnabled = false
         backgroundColor = .clear
         isHidden = true
-        guard BuxPadIdiom.isPad else { return }
         let link = CADisplayLink(target: self, selector: #selector(tick))
         if #available(iOS 15.0, *) {
             let maxFPS = UIScreen.main.maximumFramesPerSecond
@@ -27,7 +27,15 @@ private final class BuxPadProMotionAnchorView: UIView {
             )
         }
         link.add(to: .main, forMode: .common)
+        link.isPaused = true // Start paused to save CPU/battery when idle
         displayLink = link
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // Unpause the display link during layout changes (e.g. split resizing)
+        displayLink?.isPaused = false
+        lastLayoutTime = CACurrentMediaTime()
     }
 
     @available(*, unavailable)
@@ -39,7 +47,12 @@ private final class BuxPadProMotionAnchorView: UIView {
         displayLink?.invalidate()
     }
 
-    @objc private func tick() {}
+    @objc private func tick() {
+        // Auto-pause if no layout updates occur for 0.5s to restore 0% idle CPU
+        if CACurrentMediaTime() - lastLayoutTime > 0.5 {
+            displayLink?.isPaused = true
+        }
+    }
 }
 
 private struct BuxPadProMotionPreferenceView: UIViewRepresentable {
@@ -54,10 +67,8 @@ extension View {
     /// Attach on pad root — requests ProMotion frame rate where hardware supports it.
     func buxPadPrefersProMotion() -> some View {
         background {
-            if BuxPadIdiom.isPad {
-                BuxPadProMotionPreferenceView()
-                    .allowsHitTesting(false)
-            }
+            BuxPadProMotionPreferenceView()
+                .allowsHitTesting(false)
         }
     }
 }
