@@ -11,6 +11,7 @@ struct MerchantBreakdownChart: View {
     var maxItems: Int? = nil
     var progress: Double = 1
     var useGPUReveal: Bool = true
+    var rasterizesChart: Bool = true
 
     private var displayItems: [(String, Double)] {
         guard let maxItems, breakdown.count > maxItems else { return breakdown }
@@ -24,11 +25,11 @@ struct MerchantBreakdownChart: View {
     var body: some View {
         Group {
             if useGPUReveal {
-                MerchantBreakdownChartLayer(items: displayItems)
+                MerchantBreakdownChartLayer(items: displayItems, rasterizesChart: rasterizesChart)
                     .equatable()
                     .buxGPUChartReveal(progress: progress)
             } else {
-                MerchantBreakdownChartLayer(items: displayItems)
+                MerchantBreakdownChartLayer(items: displayItems, rasterizesChart: rasterizesChart)
                     .equatable()
             }
         }
@@ -37,6 +38,7 @@ struct MerchantBreakdownChart: View {
 
 private struct MerchantBreakdownChartLayer: View, Equatable {
     let items: [(String, Double)]
+    var rasterizesChart: Bool = true
 
     private var merchantNames: [String] {
         items.map(\.0)
@@ -70,6 +72,6 @@ private struct MerchantBreakdownChartLayer: View, Equatable {
             }
         }
         .chartForegroundStyleScale(domain: merchantNames, range: merchantGradients)
-        .drawingGroup(opaque: false, colorMode: .linear)
+        .modifier(ExpenseChartRasterizationModifier(enabled: rasterizesChart))
     }
 }

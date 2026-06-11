@@ -11,15 +11,24 @@ struct CategoryBreakdownChart: View {
     var customCategories: [ExpenseCategoryRecord] = []
     var progress: Double = 1
     var useGPUReveal: Bool = true
+    var rasterizesChart: Bool = true
 
     var body: some View {
         Group {
             if useGPUReveal {
-                CategoryBreakdownChartLayer(breakdown: breakdown, customCategories: customCategories)
+                CategoryBreakdownChartLayer(
+                    breakdown: breakdown,
+                    customCategories: customCategories,
+                    rasterizesChart: rasterizesChart
+                )
                     .equatable()
                     .buxGPUChartReveal(progress: progress)
             } else {
-                CategoryBreakdownChartLayer(breakdown: breakdown, customCategories: customCategories)
+                CategoryBreakdownChartLayer(
+                    breakdown: breakdown,
+                    customCategories: customCategories,
+                    rasterizesChart: rasterizesChart
+                )
                     .equatable()
             }
         }
@@ -29,6 +38,7 @@ struct CategoryBreakdownChart: View {
 private struct CategoryBreakdownChartLayer: View, Equatable {
     let breakdown: [(String, Double)]
     let customCategories: [ExpenseCategoryRecord]
+    var rasterizesChart: Bool = true
 
     private var categoryNames: [String] {
         breakdown.map(\.0)
@@ -63,6 +73,30 @@ private struct CategoryBreakdownChartLayer: View, Equatable {
         .chartLegend(.hidden)
         .chartXAxis(.hidden)
         .chartForegroundStyleScale(domain: categoryNames, range: categoryGradients)
-        .drawingGroup(opaque: false, colorMode: .linear)
+        .modifier(ExpenseChartRasterizationModifier(enabled: rasterizesChart))
+    }
+}
+
+struct ExpenseChartRasterizationModifier: ViewModifier {
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.drawingGroup(opaque: false, colorMode: .linear)
+        } else {
+            content
+        }
+    }
+}
+
+struct ExpenseChartCompositingModifier: ViewModifier {
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.compositingGroup()
+        } else {
+            content
+        }
     }
 }

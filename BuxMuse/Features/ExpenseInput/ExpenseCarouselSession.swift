@@ -15,6 +15,9 @@ final class ExpenseCarouselSession: ObservableObject {
     /// Only published when a full replay is requested — not on every animation frame.
     @Published private(set) var playRequest = UUID()
 
+    /// Active hero carousel page — drives the compact island subtitle on iPhone.
+    @Published private(set) var activePageIndex: Int = 0
+
     /// Persisted across tab switches; intentionally not @Published.
     var playedPages: Set<Int> = []
     var pageProgress: [Int: Double] = [:]
@@ -43,6 +46,11 @@ final class ExpenseCarouselSession: ObservableObject {
     func syncPlaybackState(playedPages: Set<Int>, pageProgress: [Int: Double]) {
         self.playedPages = playedPages
         self.pageProgress = pageProgress
+    }
+
+    func syncActivePage(_ index: Int) {
+        guard activePageIndex != index else { return }
+        activePageIndex = index
     }
 
     private func resetAnimationState() {

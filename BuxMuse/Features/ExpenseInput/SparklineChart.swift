@@ -12,15 +12,26 @@ struct SparklineChart: View {
     var showAreaFill: Bool = false
     var progress: Double = 1
     var useGPUReveal: Bool = true
+    var rasterizesChart: Bool = true
 
     var body: some View {
         Group {
             if useGPUReveal {
-                SparklineChartLayer(points: points, color: color, showAreaFill: showAreaFill)
+                SparklineChartLayer(
+                    points: points,
+                    color: color,
+                    showAreaFill: showAreaFill,
+                    rasterizesChart: rasterizesChart
+                )
                     .equatable()
                     .buxGPUChartReveal(progress: progress)
             } else {
-                SparklineChartLayer(points: points, color: color, showAreaFill: showAreaFill)
+                SparklineChartLayer(
+                    points: points,
+                    color: color,
+                    showAreaFill: showAreaFill,
+                    rasterizesChart: rasterizesChart
+                )
                     .equatable()
             }
         }
@@ -31,6 +42,7 @@ private struct SparklineChartLayer: View, Equatable {
     let points: [Double]
     let color: Color
     let showAreaFill: Bool
+    var rasterizesChart: Bool = true
 
     private var yDomain: ClosedRange<Double> {
         BuxChartMotion.paddedYDomain(for: points)
@@ -73,6 +85,6 @@ private struct SparklineChartLayer: View, Equatable {
         .chartPlotStyle { plotArea in
             plotArea.padding(.vertical, 4).padding(.horizontal, 2)
         }
-        .drawingGroup(opaque: false, colorMode: .linear)
+        .modifier(ExpenseChartRasterizationModifier(enabled: rasterizesChart))
     }
 }

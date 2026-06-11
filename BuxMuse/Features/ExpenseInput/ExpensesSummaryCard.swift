@@ -10,6 +10,8 @@ struct ExpensesSummaryCard: View {
     var customCategories: [ExpenseCategoryRecord] = []
     var chartProgress: Double = 1
     var chromeTier: BuxCardChromeTier = .hero
+    var rasterizesCharts: Bool = true
+    var isVisible: Bool = true
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
@@ -19,6 +21,7 @@ struct ExpensesSummaryCard: View {
             BuxCatalogText.text("Monthly summary")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                .heroCardReveal(isVisible: isVisible, delay: 0)
 
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -28,7 +31,8 @@ struct ExpensesSummaryCard: View {
                     CategoryBreakdownChart(
                         breakdown: display.categoryBreakdown,
                         customCategories: customCategories,
-                        progress: chartProgress
+                        progress: chartProgress,
+                        rasterizesChart: rasterizesCharts
                     )
                         .frame(height: 72)
                 }
@@ -40,7 +44,8 @@ struct ExpensesSummaryCard: View {
                     MerchantBreakdownChart(
                         breakdown: display.merchantBreakdown,
                         maxItems: 3,
-                        progress: chartProgress
+                        progress: chartProgress,
+                        rasterizesChart: rasterizesCharts
                     )
                     .frame(height: MerchantBreakdownChart.compactHeight(itemCount: min(3, display.merchantBreakdown.count)))
                     if display.merchantBreakdown.count > 3 {
@@ -56,6 +61,7 @@ struct ExpensesSummaryCard: View {
                     }
                 }
             }
+            .heroCardReveal(isVisible: isVisible, delay: 0.06)
 
             VStack(alignment: .leading, spacing: 6) {
                 BuxCatalogText.text("Trend")
@@ -64,7 +70,8 @@ struct ExpensesSummaryCard: View {
                 MonthlyTrendChart(
                     points: display.trendPoints,
                     prediction: display.prediction,
-                    progress: chartProgress
+                    progress: chartProgress,
+                    rasterizesChart: rasterizesCharts
                 )
                 .padding(.vertical, 2)
                 .background {
@@ -82,6 +89,7 @@ struct ExpensesSummaryCard: View {
                         .allowsHitTesting(false)
                 }
             }
+            .heroCardReveal(isVisible: isVisible, delay: 0.14)
         }
         .expenseCardChrome(tier: chromeTier)
         .frame(

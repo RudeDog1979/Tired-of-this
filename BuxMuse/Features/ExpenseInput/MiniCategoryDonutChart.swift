@@ -10,6 +10,7 @@ struct MiniCategoryDonutChart: View {
     var customCategories: [ExpenseCategoryRecord] = []
     var progress: Double = 1
     var useGPUReveal: Bool = true
+    var rasterizesChart: Bool = true
 
     private var segments: [(name: String, amount: Double)] {
         Array(breakdown.prefix(4))
@@ -19,16 +20,23 @@ struct MiniCategoryDonutChart: View {
         max(segments.reduce(0) { $0 + $1.amount }, 0.01)
     }
 
+    private var chartLayer: some View {
+        DonutChartLayer(
+            breakdown: breakdown,
+            customCategories: customCategories,
+            rasterizesChart: rasterizesChart
+        )
+        .equatable()
+    }
+
     var body: some View {
         ZStack {
             if useGPUReveal {
-                DonutChartLayer(breakdown: breakdown, customCategories: customCategories)
-                    .equatable()
-                    .compositingGroup()
+                chartLayer
+                    .modifier(ExpenseChartCompositingModifier(enabled: rasterizesChart))
                     .buxGPUChartReveal(progress: progress, axis: .radial)
             } else {
-                DonutChartLayer(breakdown: breakdown, customCategories: customCategories)
-                    .equatable()
+                chartLayer
             }
 
             Circle()
@@ -59,6 +67,7 @@ struct MiniCategoryDonutChart: View {
 private struct DonutChartLayer: View, Equatable {
     let breakdown: [(String, Double)]
     let customCategories: [ExpenseCategoryRecord]
+    var rasterizesChart: Bool = true
 
     private static let innerRadiusRatio: CGFloat = 0.62
     private static let angularInsetDegrees: Double = 1.5
@@ -115,7 +124,7 @@ private struct DonutChartLayer: View, Equatable {
             }
         }
         .transaction { $0.animation = nil }
-        .drawingGroup(opaque: false, colorMode: .linear)
+        .modifier(ExpenseChartRasterizationModifier(enabled: rasterizesChart))
     }
 }
 

@@ -20,6 +20,7 @@ struct ExpenseTabView: View {
     @Environment(\.buxPadExpenseUsesSplitLayout) private var usesPadSplitLayout
 
     @StateObject private var listModel = ExpensesViewModel()
+    @ObservedObject private var expenseCarouselSession = ExpenseCarouselSession.shared
     @State private var activeSheet: ExpenseSheetMode?
     @State private var categorySheetTransaction: Transaction?
     @State private var listAppeared = false
@@ -32,6 +33,7 @@ struct ExpenseTabView: View {
     @State private var showCategoryManager = false
     @State private var showMerchantManager = false
     @State private var padDeleteConfirmRecord: ExpenseRecord?
+    @State private var recordsById: [UUID: ExpenseRecord] = [:]
 
     private var allRecords: [ExpenseRecord] {
         brain.expenseRecords
@@ -414,7 +416,16 @@ struct ExpenseTabView: View {
         }
     }
 
+    @ViewBuilder
     private var unifiedExpenseList: some View {
+        if BuxPadIdiom.isPad {
+            padUnifiedExpenseList
+        } else {
+            iphoneUnifiedExpenseList
+        }
+    }
+
+    private var padUnifiedExpenseList: some View {
         let display = brain.expenseInteractionSnapshot
         let showHero = !display.sections.isEmpty || display.header.totalSpent != 0
 
@@ -424,7 +435,8 @@ struct ExpenseTabView: View {
                     ExpensesHeroCarouselHost(
                         header: display.header,
                         summary: display.summary,
-                        formatAmount: { appSettingsManager.format($0) }
+                        formatAmount: { appSettingsManager.format($0) },
+                        playRequest: expenseCarouselSession.playRequest
                     )
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
@@ -433,36 +445,34 @@ struct ExpenseTabView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
-                HustleSelectorBar()
-                    .padding(.bottom, 4)
-
-                if filteredRecords.isEmpty, listModel.filters.isActive {
-                    expenseNoMatchesState
-                }
-
-                ForEach(display.sections) { section in
-                    VStack(alignment: .leading, spacing: 0) {
-                        HStack {
-                            Text(section.title)
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                                .textCase(nil)
-
-                            Spacer()
-
-                            if let insight = section.microInsight {
-                                InlineInsightView(text: insight)
-                            }
+                ExpenseListBodyView(
+                    display: display,
+                    filteredRecords: filteredRecords,
+                    filtersActive: listModel.filters.isActive,
+                    recordsById: recordsById,
+                    selectedExpenseId: padNavigationBrain.selectedExpenseId,
+                    padNavigationBrain: padNavigationBrain,
+                    expandedExpenseId: $expandedExpenseId,
+                    activeSheet: $activeSheet,
+                    categorySheetTransaction: $categorySheetTransaction,
+                    noteRecord: $noteRecord,
+                    noteDraft: $noteDraft,
+                    padDeleteConfirmRecord: $padDeleteConfirmRecord,
+                    onClearFilters: {
+                        withAnimation(.buxSnap) {
+                            listModel.filters = ExpenseFilterState()
+                            listModel.searchScope = .all
+                            navigationCoordinator.dismissExpenseSearch()
                         }
-                        .padding(.vertical, 8)
-
-                        ForEach(section.expenses) { expense in
-                            if let record = filteredRecords.first(where: { $0.id == expense.id }) {
-                                expenseRowContent(expense: expense, record: record)
-                            }
-                        }
+                    },
+                    onOpenDetail: { record in
+                        openExpenseDetail(record)
+                    },
+                    onDuplicate: { record in
+                        duplicateExpense(record)
                     }
-                }
+                )
+                .equatable()
             }
             .padding(.top, BuxTokens.tight)
             .buxPadExpenseCardRail()
@@ -471,7 +481,7 @@ struct ExpenseTabView: View {
         .scrollDismissesKeyboard(.interactively)
         .modifier(ExpensePadSplitScrollChromeModifier())
         .buxPadListArrowNavigation(
-            enabled: BuxPadIdiom.isPad && usesPadSplitLayout,
+            enabled: usesPadSplitLayout,
             onPrevious: {
                 padNavigationBrain.selectAdjacentExpense(in: filteredRecords, direction: -1)
             },
@@ -482,123 +492,48 @@ struct ExpenseTabView: View {
         .animation(.buxSnap, value: isListFocusMode)
     }
 
-    private var expenseNoMatchesState: some View {
-        ContentUnavailableView {
-            Label(BuxCatalogLabel.string("No matches", locale: appSettingsManager.interfaceLocale), systemImage: "line.3.horizontal.decrease.circle")
-        } description: {
-            BuxCatalogText.text("Try a different merchant, note, or filter.")
-        } actions: {
-            if listModel.filters.isActive {
-                BuxButton(
-                    title: "Clear filters",
-                    systemImage: "xmark.circle",
-                    role: .secondary,
-                    size: .regular
-                ) {
-                    withAnimation(.buxSnap) {
-                        listModel.filters = ExpenseFilterState()
-                        listModel.searchScope = .all
-                        navigationCoordinator.dismissExpenseSearch()
-                    }
+    private var iphoneUnifiedExpenseList: some View {
+        let display = brain.expenseInteractionSnapshot
+        let showHero = !display.sections.isEmpty || display.header.totalSpent != 0
+        let showHeroChrome = showHero && !isListFocusMode
+        let pageCount = expenseHeroPageCount(header: display.header, summary: display.summary)
+
+        return IPhoneUnifiedExpenseListContainer(
+            display: display,
+            showHeroChrome: showHeroChrome,
+            pageCount: pageCount,
+            heroRowInsets: expenseHeroRowInsets,
+            isListFocusMode: isListFocusMode,
+            filteredRecords: filteredRecords,
+            filtersActive: listModel.filters.isActive,
+            recordsById: recordsById,
+            expandedExpenseId: $expandedExpenseId,
+            activeSheet: $activeSheet,
+            categorySheetTransaction: $categorySheetTransaction,
+            noteRecord: $noteRecord,
+            noteDraft: $noteDraft,
+            padDeleteConfirmRecord: $padDeleteConfirmRecord,
+            onClearFilters: {
+                withAnimation(.buxSnap) {
+                    listModel.filters = ExpenseFilterState()
+                    listModel.searchScope = .all
+                    navigationCoordinator.dismissExpenseSearch()
                 }
+            },
+            onOpenDetail: { record in
+                openExpenseDetail(record)
+            },
+            onDuplicate: { record in
+                duplicateExpense(record)
             }
-        }
-        .padding(.top, 24)
-        .padding(.bottom, 8)
+        )
     }
 
-    @ViewBuilder
-    private func expenseRowContent(expense: ExpenseRowDisplay, record: ExpenseRecord) -> some View {
-        ExpandableExpenseCard(
-            expense: expense,
-            record: record,
-            expandedId: $expandedExpenseId,
-            onOpenDetail: {
-                withAnimation(.buxSnap) {
-                    openExpenseDetail(record)
-                }
-            }
-        ) {
-            withAnimation(.buxSnap) {
-                activeSheet = .edit(record.toTransaction())
-            }
-        }
-        .environmentObject(themeManager)
-        .environmentObject(brain)
-        .padding(expenseListRowInsets)
-        .buxPadExpenseRowInteractions(recordId: record.id, enabled: BuxPadIdiom.isPad && usesPadSplitLayout)
-        .background {
-            if usesPadSplitLayout, padNavigationBrain.selectedExpenseId == record.id {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(themeManager.contrastAccentColor(for: colorScheme).opacity(0.08))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(
-                                themeManager.contrastAccentColor(for: colorScheme).opacity(0.35),
-                                lineWidth: 1.5
-                            )
-                    )
-            }
-        }
-        .contextMenu {
-            if usesPadSplitLayout, padNavigationBrain.selectedExpenseId != record.id {
-                Button {
-                    padNavigationBrain.selectExpense(record.id)
-                } label: {
-                    Label(BuxCatalogLabel.string("Select", locale: appSettingsManager.interfaceLocale), systemImage: "checkmark.circle")
-                }
-            }
-
-            Button {
-                noteDraft = record.notes ?? ""
-                noteRecord = record
-            } label: {
-                Label(BuxCatalogLabel.string("Note", locale: appSettingsManager.interfaceLocale), systemImage: "note.text")
-            }
-
-            Button {
-                withAnimation(.buxSnap) {
-                    activeSheet = .edit(record.toTransaction())
-                }
-            } label: {
-                Label(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale), systemImage: "pencil")
-            }
-
-            Button {
-                categorySheetTransaction = record.toTransaction()
-            } label: {
-                Label(BuxCatalogLabel.string("Category", locale: appSettingsManager.interfaceLocale), systemImage: "tag")
-            }
-
-            Button {
-                duplicateExpense(record)
-            } label: {
-                Label(BuxCatalogLabel.string("Duplicate", locale: appSettingsManager.interfaceLocale), systemImage: "plus.square.on.square")
-            }
-
-            Button(role: .destructive) {
-                padDeleteConfirmRecord = record
-            } label: {
-                Label(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
-            }
-
-            if usesPadSplitLayout, !padSceneBrainRegistry.isAuxiliary(padNavigationBrain) {
-                Divider()
-                Button {
-                    padNavigationBrain.selectExpense(record.id)
-                    BuxPadWindowLauncher.openExpenseWindow(
-                        from: padNavigationBrain,
-                        registry: padSceneBrainRegistry,
-                        openWindow: openWindow
-                    )
-                } label: {
-                    Label(
-                        BuxCatalogLabel.string("Open in New Window", locale: appSettingsManager.interfaceLocale),
-                        systemImage: "macwindow.on.rectangle"
-                    )
-                }
-            }
-        }
+    private func expenseHeroPageCount(header: ExpensesHeaderDisplay, summary: ExpensesSummaryDisplay) -> Int {
+        var count = 0
+        if header.totalSpent != 0 || !header.sparklinePoints.isEmpty { count += 1 }
+        if !summary.categoryBreakdown.isEmpty || !summary.merchantBreakdown.isEmpty { count += 1 }
+        return max(count, 1)
     }
 
     private func openExpenseDetail(_ record: ExpenseRecord) {
@@ -622,8 +557,10 @@ struct ExpenseTabView: View {
     }
 
     private func refreshExpenseListDisplay() {
+        let filtered = filteredRecords
+        recordsById = Dictionary(uniqueKeysWithValues: filtered.map { ($0.id, $0) })
         brain.updateExpenseInteractionSnapshot(
-            records: filteredRecords,
+            records: filtered,
             currency: appSettingsManager.selectedCurrency
         )
     }
@@ -656,26 +593,6 @@ struct ExpenseTabView: View {
         } catch {
             print("Category change failed: \(error)")
         }
-    }
-}
-
-/// Isolates carousel `playRequest` updates so the expense list does not re-render every animation frame.
-private struct ExpensesHeroCarouselHost: View {
-    @ObservedObject private var session = ExpenseCarouselSession.shared
-
-    let header: ExpensesHeaderDisplay
-    let summary: ExpensesSummaryDisplay
-    let formatAmount: (Decimal) -> String
-
-    var body: some View {
-        ExpensesTopCarousel(
-            header: header,
-            summary: summary,
-            formatAmount: formatAmount,
-            playRequest: session.playRequest,
-            session: session
-        )
-        .id(session.playRequest)
     }
 }
 
@@ -720,5 +637,342 @@ private struct ExpenseSearchToolbarBehaviorModifier: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+// MARK: - iPhone pinned overlay (isolated scroll offsets)
+
+struct IPhoneUnifiedExpenseListContainer: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+
+    let display: ExpenseInteractionDisplay
+    let showHeroChrome: Bool
+    let pageCount: Int
+    let heroRowInsets: EdgeInsets
+    let isListFocusMode: Bool
+    let filteredRecords: [ExpenseRecord]
+    let filtersActive: Bool
+    let recordsById: [UUID: ExpenseRecord]
+
+    @Binding var expandedExpenseId: UUID?
+    @Binding var activeSheet: ExpenseSheetMode?
+    @Binding var categorySheetTransaction: Transaction?
+    @Binding var noteRecord: ExpenseRecord?
+    @Binding var noteDraft: String
+    @Binding var padDeleteConfirmRecord: ExpenseRecord?
+
+    let onClearFilters: () -> Void
+    let onOpenDetail: (ExpenseRecord) -> Void
+    let onDuplicate: (ExpenseRecord) -> Void
+
+    @State private var expenseScrollOffset: CGFloat = 0
+    @State private var expenseHeroCollapseTrackingPaused = false
+
+    var body: some View {
+        ScrollViewReader { scrollProxy in
+            ZStack(alignment: .top) {
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(spacing: 0) {
+                        Color.clear
+                            .frame(height: showHeroChrome ? ExpenseHeroIslandLayout.heroReservedHeight : 0)
+                            .id("expense_scroll_top")
+                            .expenseHeroTrackScrollCollapse(
+                                scrollOffset: $expenseScrollOffset,
+                                isPaused: expenseHeroCollapseTrackingPaused
+                            )
+
+                        ExpenseListBodyView(
+                            display: display,
+                            filteredRecords: filteredRecords,
+                            filtersActive: filtersActive,
+                            recordsById: recordsById,
+                            selectedExpenseId: nil,
+                            padNavigationBrain: nil,
+                            expandedExpenseId: $expandedExpenseId,
+                            activeSheet: $activeSheet,
+                            categorySheetTransaction: $categorySheetTransaction,
+                            noteRecord: $noteRecord,
+                            noteDraft: $noteDraft,
+                            padDeleteConfirmRecord: $padDeleteConfirmRecord,
+                            onClearFilters: onClearFilters,
+                            onOpenDetail: onOpenDetail,
+                            onDuplicate: onDuplicate
+                        )
+                        .equatable()
+                        .padding(.top, ExpenseHeroIslandLayout.listBelowHeroSpacing)
+                    }
+                    .padding(.top, BuxTokens.tight)
+                    .buxPadExpenseCardRail()
+                    .environment(\.textCase, nil)
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .modifier(ExpensePadSplitScrollChromeModifier())
+                .buxScrollCollapseCoordinateSpace()
+                .animation(.buxSnap, value: isListFocusMode)
+                .onChange(of: isListFocusMode) { _, _ in
+                    expenseScrollOffset = 0
+                    expenseHeroCollapseTrackingPaused = false
+                }
+
+                if showHeroChrome {
+                    ExpenseHeroIslandOverlay(
+                        scrollOffset: expenseScrollOffset,
+                        header: display.header,
+                        summary: display.summary,
+                        pageCount: pageCount,
+                        heroRowInsets: heroRowInsets,
+                        onExpand: {
+                            expenseScrollOffset = 0
+                            expenseHeroCollapseTrackingPaused = true
+                            withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) {
+                                scrollProxy.scrollTo("expense_scroll_top", anchor: .top)
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                                expenseHeroCollapseTrackingPaused = false
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Optimized Equatable List Body
+
+struct ExpenseListBodyView: View, Equatable {
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var padSceneBrainRegistry: BuxPadSceneBrainRegistry
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.buxPadExpenseUsesSplitLayout) private var usesPadSplitLayout
+
+    let display: ExpenseInteractionDisplay
+    let filteredRecords: [ExpenseRecord]
+    let filtersActive: Bool
+    let recordsById: [UUID: ExpenseRecord]
+    let selectedExpenseId: UUID?
+    let padNavigationBrain: BuxPadNavigationBrain?
+
+    @Binding var expandedExpenseId: UUID?
+    @Binding var activeSheet: ExpenseSheetMode?
+    @Binding var categorySheetTransaction: Transaction?
+    @Binding var noteRecord: ExpenseRecord?
+    @Binding var noteDraft: String
+    @Binding var padDeleteConfirmRecord: ExpenseRecord?
+
+    let onClearFilters: () -> Void
+    let onOpenDetail: (ExpenseRecord) -> Void
+    let onDuplicate: (ExpenseRecord) -> Void
+
+    static func == (lhs: ExpenseListBodyView, rhs: ExpenseListBodyView) -> Bool {
+        lhs.selectedExpenseId == rhs.selectedExpenseId &&
+        lhs.display.sections.map { $0.id } == rhs.display.sections.map { $0.id } &&
+        lhs.display.sections.flatMap { $0.expenses }.map { $0.id } == rhs.display.sections.flatMap { $0.expenses }.map { $0.id } &&
+        lhs.filteredRecords.map { $0.id } == rhs.filteredRecords.map { $0.id } &&
+        lhs.filtersActive == rhs.filtersActive &&
+        lhs.recordsById == rhs.recordsById &&
+        lhs.expandedExpenseId == rhs.expandedExpenseId &&
+        lhs.activeSheet == rhs.activeSheet &&
+        lhs.categorySheetTransaction?.id == rhs.categorySheetTransaction?.id &&
+        lhs.noteRecord?.id == rhs.noteRecord?.id &&
+        lhs.noteDraft == rhs.noteDraft &&
+        lhs.padDeleteConfirmRecord?.id == rhs.padDeleteConfirmRecord?.id
+    }
+
+    private var expenseListRowInsets: EdgeInsets {
+        EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0)
+    }
+
+    var body: some View {
+        HustleSelectorBar()
+            .padding(.bottom, 4)
+
+        if filteredRecords.isEmpty, filtersActive {
+            expenseNoMatchesState
+        }
+
+        ForEach(display.sections) { section in
+            HStack {
+                Text(section.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
+                    .textCase(nil)
+
+                Spacer()
+
+                if let insight = section.microInsight {
+                    InlineInsightView(text: insight)
+                }
+            }
+            .padding(.vertical, 8)
+
+            ForEach(section.expenses) { expense in
+                if let record = recordsById[expense.id] {
+                    expenseRowContent(expense: expense, record: record)
+                }
+            }
+        }
+    }
+
+    private var expenseNoMatchesState: some View {
+        ContentUnavailableView {
+            Label(BuxCatalogLabel.string("No matches", locale: appSettingsManager.interfaceLocale), systemImage: "line.3.horizontal.decrease.circle")
+        } description: {
+            BuxCatalogText.text("Try a different merchant, note, or filter.")
+        } actions: {
+            if filtersActive {
+                BuxButton(
+                    title: "Clear filters",
+                    systemImage: "xmark.circle",
+                    role: .secondary,
+                    size: .regular
+                ) {
+                    onClearFilters()
+                }
+            }
+        }
+        .padding(.top, 24)
+        .padding(.bottom, 8)
+    }
+
+    @ViewBuilder
+    private func expenseRowContent(expense: ExpenseRowDisplay, record: ExpenseRecord) -> some View {
+        ExpandableExpenseCard(
+            expense: expense,
+            record: record,
+            expandedId: $expandedExpenseId,
+            onOpenDetail: {
+                withAnimation(.buxSnap) {
+                    onOpenDetail(record)
+                }
+            }
+        ) {
+            withAnimation(.buxSnap) {
+                activeSheet = .edit(record.toTransaction())
+            }
+        }
+        .environmentObject(themeManager)
+        .environmentObject(brain)
+        .padding(expenseListRowInsets)
+        .buxPadExpenseRowInteractions(recordId: record.id, enabled: BuxPadIdiom.isPad && usesPadSplitLayout)
+        .background {
+            if usesPadSplitLayout, selectedExpenseId == record.id {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(themeManager.contrastAccentColor(for: colorScheme).opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(
+                                themeManager.contrastAccentColor(for: colorScheme).opacity(0.35),
+                                lineWidth: 1.5
+                            )
+                    )
+            }
+        }
+        .contextMenu {
+            if usesPadSplitLayout, let padNavigationBrain, selectedExpenseId != record.id {
+                Button {
+                    padNavigationBrain.selectExpense(record.id)
+                } label: {
+                    Label(BuxCatalogLabel.string("Select", locale: appSettingsManager.interfaceLocale), systemImage: "checkmark.circle")
+                }
+            }
+
+            Button {
+                noteDraft = record.notes ?? ""
+                noteRecord = record
+            } label: {
+                Label(BuxCatalogLabel.string("Note", locale: appSettingsManager.interfaceLocale), systemImage: "note.text")
+            }
+
+            Button {
+                withAnimation(.buxSnap) {
+                    activeSheet = .edit(record.toTransaction())
+                }
+            } label: {
+                Label(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale), systemImage: "pencil")
+            }
+
+            Button {
+                categorySheetTransaction = record.toTransaction()
+            } label: {
+                Label(BuxCatalogLabel.string("Category", locale: appSettingsManager.interfaceLocale), systemImage: "tag")
+            }
+
+            Button {
+                onDuplicate(record)
+            } label: {
+                Label(BuxCatalogLabel.string("Duplicate", locale: appSettingsManager.interfaceLocale), systemImage: "plus.square.on.square")
+            }
+
+            Button(role: .destructive) {
+                padDeleteConfirmRecord = record
+            } label: {
+                Label(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
+            }
+
+            if usesPadSplitLayout, let padNavigationBrain, !padSceneBrainRegistry.isAuxiliary(padNavigationBrain) {
+                Divider()
+                Button {
+                    padNavigationBrain.selectExpense(record.id)
+                    BuxPadWindowLauncher.openExpenseWindow(
+                        from: padNavigationBrain,
+                        registry: padSceneBrainRegistry,
+                        openWindow: openWindow
+                    )
+                } label: {
+                    Label(
+                        BuxCatalogLabel.string("Open in New Window", locale: appSettingsManager.interfaceLocale),
+                        systemImage: "macwindow.on.rectangle"
+                    )
+                }
+            }
+        }
+    }
+}
+
+// MARK: - iPhone hero collapse tracking (immediate response, expand lock)
+
+private struct ExpenseHeroScrollCollapseTracker: ViewModifier {
+    @Binding var scrollOffset: CGFloat
+    var isPaused: Bool
+    let coordinateSpace: String
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                GeometryReader { geo in
+                    Color.clear.preference(
+                        key: ScrollOffsetPreferenceKey.self,
+                        value: geo.frame(in: .named(coordinateSpace)).minY
+                    )
+                }
+            }
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                guard !isPaused else { return }
+                let clamped = value < 0 ? max(-BuxScrollCollapse.maxTrackedOffset, value) : 0
+                guard abs(clamped - scrollOffset) > 0.5 else { return }
+                scrollOffset = clamped
+            }
+    }
+}
+
+private extension View {
+    func expenseHeroTrackScrollCollapse(
+        scrollOffset: Binding<CGFloat>,
+        isPaused: Bool,
+        coordinateSpace: String = BuxScrollCollapse.coordinateSpaceName
+    ) -> some View {
+        modifier(ExpenseHeroScrollCollapseTracker(
+            scrollOffset: scrollOffset,
+            isPaused: isPaused,
+            coordinateSpace: coordinateSpace
+        ))
     }
 }

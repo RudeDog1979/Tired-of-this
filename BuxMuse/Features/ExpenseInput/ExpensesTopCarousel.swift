@@ -7,11 +7,24 @@
 
 import SwiftUI
 
+private struct ExpenseHeroMatchesListCardsKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// iPhone island layout — hero chrome matches `ExpandableExpenseCard` (16pt radius, list material).
+    var expenseHeroMatchesListCards: Bool {
+        get { self[ExpenseHeroMatchesListCardsKey.self] }
+        set { self[ExpenseHeroMatchesListCardsKey.self] = newValue }
+    }
+}
+
 struct ExpensesTopCarousel: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @Environment(\.expenseHeroMatchesListCards) private var matchesListCards
 
     let header: ExpensesHeaderDisplay
     let summary: ExpensesSummaryDisplay
@@ -24,6 +37,7 @@ struct ExpensesTopCarousel: View {
     @State private var pageIndex: Int? = 0
     @State private var activeDetailSheet: HeroSheetType?
     @State private var cachedCustomCategories: [ExpenseCategoryRecord] = []
+    @State private var cardReveal = false
 
     init(
         header: ExpensesHeaderDisplay,
@@ -71,6 +85,13 @@ struct ExpensesTopCarousel: View {
         pages.isEmpty ? 0 : BuxLayout.expenseHeroSummaryHeight
     }
 
+    private var heroChromeTier: BuxCardChromeTier {
+        if matchesListCards || pages.count > 1 {
+            return .list
+        }
+        return .hero
+    }
+
     var body: some View {
         VStack(spacing: 10) {
             ZStack(alignment: .top) {
@@ -92,7 +113,8 @@ struct ExpensesTopCarousel: View {
                                         display: summary,
                                         customCategories: customCategories,
                                         chartProgress: pageProgressValue(index),
-                                        chromeTier: pages.count > 1 ? .list : .hero
+                                        chromeTier: heroChromeTier,
+                                        isVisible: cardReveal
                                     )
                                         .environmentObject(themeManager)
                                         .environmentObject(appSettingsManager)
@@ -153,12 +175,19 @@ struct ExpensesTopCarousel: View {
             if !playedPages.contains(activePageIndex) {
                 animatePage(activePageIndex)
             }
+            session.syncActivePage(activePageIndex)
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.84)) {
+                cardReveal = true
+            }
         }
         .onDisappear {
-            session.syncPlaybackState(playedPages: playedPages, pageProgress: pageProgress)
+            if session.playRequest == playRequest {
+                session.syncPlaybackState(playedPages: playedPages, pageProgress: pageProgress)
+            }
         }
         .onChange(of: activePageIndex) { old, index in
             guard old != index else { return }
+            session.syncActivePage(index)
             animatePage(index)
         }
         .sheet(item: $activeDetailSheet) { sheetType in
@@ -235,6 +264,7 @@ struct ExpensesTopCarousel: View {
                         .frame(width: 72, height: 72)
                 }
             }
+            .heroCardReveal(isVisible: cardReveal, delay: 0)
 
             if !summary.categoryBreakdown.isEmpty || !summary.merchantBreakdown.isEmpty {
                 HStack(spacing: 16) {
@@ -279,6 +309,7 @@ struct ExpensesTopCarousel: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
+                .heroCardReveal(isVisible: cardReveal, delay: 0.06)
             }
 
             if !header.sparklinePoints.isEmpty {
@@ -314,13 +345,15 @@ struct ExpensesTopCarousel: View {
                         monthChangeBadge
                     }
                 }
+                .heroCardReveal(isVisible: cardReveal, delay: 0.12)
             }
 
             if let insight = header.microInsight {
                 InlineInsightView(text: insight)
+                    .heroCardReveal(isVisible: cardReveal, delay: 0.18)
             }
         }
-        .expenseHeroCardChrome(themeManager: themeManager, colorScheme: colorScheme)
+        .expenseCardChrome(tier: heroChromeTier)
         .frame(maxWidth: .infinity, minHeight: slotHeight, alignment: .topLeading)
     }
 
@@ -376,13 +409,17 @@ struct ExpensesTopCarousel: View {
 struct ExpenseCardChromeModifier: ViewModifier {
     let tier: BuxCardChromeTier
     @Environment(\.expensesEnhancedTint) private var expensesEnhancedTint
+    @Environment(\.expenseHeroMatchesListCards) private var matchesListCards
     @ObservedObject private var settings = SettingsStore.shared
 
     func body(content: Content) -> some View {
-        let cornerRadius = BuxLayout.expenseHeroCardCornerRadius
+        let cornerRadius = matchesListCards
+            ? BuxLayout.cornerCard
+            : BuxLayout.expenseHeroCardCornerRadius
+        let cardPadding: CGFloat = 20
         let useMesh = expensesEnhancedTint && settings.brandThemesEnabled
         let padded = content
-            .padding(20)
+            .padding(cardPadding)
             .frame(maxWidth: .infinity, alignment: .topLeading)
 
         switch tier {
@@ -408,5 +445,62 @@ extension View {
 
     func expenseCardChrome(tier: BuxCardChromeTier) -> some View {
         modifier(ExpenseCardChromeModifier(tier: tier))
+    }
+}
+
+/// Isolates carousel `playRequest` updates so the expense list does not re-render every animation frame.
+struct ExpensesHeroCarouselHost: View, Equatable {
+    @ObservedObject private var session = ExpenseCarouselSession.shared
+
+    let header: ExpensesHeaderDisplay
+    let summary: ExpensesSummaryDisplay
+    let formatAmount: (Decimal) -> String
+    let playRequest: UUID
+
+    static func == (lhs: ExpensesHeroCarouselHost, rhs: ExpensesHeroCarouselHost) -> Bool {
+        lhs.playRequest == rhs.playRequest &&
+        lhs.header.totalSpent == rhs.header.totalSpent &&
+        lhs.header.changeVsLastMonth == rhs.header.changeVsLastMonth &&
+        lhs.header.monthlyTransactionCount == rhs.header.monthlyTransactionCount &&
+        lhs.header.biggestCategory == rhs.header.biggestCategory &&
+        lhs.header.biggestMerchant == rhs.header.biggestMerchant &&
+        lhs.header.sparklinePoints == rhs.header.sparklinePoints &&
+        lhs.header.microInsight == rhs.header.microInsight &&
+        lhs.summary.totalSpent == rhs.summary.totalSpent &&
+        lhs.summary.categoryBreakdown.map { $0.0 } == rhs.summary.categoryBreakdown.map { $0.0 } &&
+        lhs.summary.categoryBreakdown.map { $0.1 } == rhs.summary.categoryBreakdown.map { $0.1 } &&
+        lhs.summary.merchantBreakdown.map { $0.0 } == rhs.summary.merchantBreakdown.map { $0.0 } &&
+        lhs.summary.merchantBreakdown.map { $0.1 } == rhs.summary.merchantBreakdown.map { $0.1 } &&
+        lhs.summary.trendPoints == rhs.summary.trendPoints &&
+        lhs.summary.prediction == rhs.summary.prediction
+    }
+
+    var body: some View {
+        ExpensesTopCarousel(
+            header: header,
+            summary: summary,
+            formatAmount: formatAmount,
+            playRequest: playRequest,
+            session: session
+        )
+        .id(playRequest)
+    }
+}
+
+private struct HeroCardRevealModifier: ViewModifier {
+    let isVisible: Bool
+    let delay: Double
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(isVisible ? 1 : 0)
+            .offset(y: isVisible ? 0 : 10)
+            .animation(.spring(response: 0.5, dampingFraction: 0.84).delay(delay), value: isVisible)
+    }
+}
+
+extension View {
+    func heroCardReveal(isVisible: Bool, delay: Double) -> some View {
+        modifier(HeroCardRevealModifier(isVisible: isVisible, delay: delay))
     }
 }

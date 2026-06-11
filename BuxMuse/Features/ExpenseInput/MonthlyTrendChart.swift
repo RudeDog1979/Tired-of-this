@@ -11,6 +11,7 @@ struct MonthlyTrendChart: View {
     let prediction: String?
     var progress: Double = 1
     var useGPUReveal: Bool = true
+    var rasterizesChart: Bool = true
 
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
@@ -36,11 +37,21 @@ struct MonthlyTrendChart: View {
 
             Group {
                 if useGPUReveal {
-                    MonthlyTrendChartLayer(points: points, colorScheme: colorScheme, chartHeight: chartHeight)
+                    MonthlyTrendChartLayer(
+                        points: points,
+                        colorScheme: colorScheme,
+                        chartHeight: chartHeight,
+                        rasterizesChart: rasterizesChart
+                    )
                         .equatable()
                         .buxGPUChartReveal(progress: progress)
                 } else {
-                    MonthlyTrendChartLayer(points: points, colorScheme: colorScheme, chartHeight: chartHeight)
+                    MonthlyTrendChartLayer(
+                        points: points,
+                        colorScheme: colorScheme,
+                        chartHeight: chartHeight,
+                        rasterizesChart: rasterizesChart
+                    )
                         .equatable()
                 }
             }
@@ -52,6 +63,7 @@ private struct MonthlyTrendChartLayer: View, Equatable {
     let points: [Double]
     let colorScheme: ColorScheme
     let chartHeight: CGFloat
+    var rasterizesChart: Bool = true
 
     private var yDomain: ClosedRange<Double> {
         BuxChartMotion.paddedYDomain(for: points)
@@ -87,6 +99,6 @@ private struct MonthlyTrendChartLayer: View, Equatable {
         .chartPlotStyle { plotArea in
             plotArea.padding(.vertical, 6).padding(.horizontal, 3)
         }
-        .drawingGroup(opaque: false, colorMode: .linear)
+        .modifier(ExpenseChartRasterizationModifier(enabled: rasterizesChart))
     }
 }
