@@ -15,6 +15,8 @@ struct AgreementImportedSignatureCaptureSheet: View {
     let onCapture: (Data) -> Void
 
     @State private var drawing = PKDrawing()
+    @State private var inkColor = Color(red: 0, green: 0, blue: 0)
+    @State private var inkUIColor = AgreementSignatureInk.black
 
     private var locale: Locale { appSettingsManager.interfaceLocale }
 
@@ -30,6 +32,10 @@ struct AgreementImportedSignatureCaptureSheet: View {
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
 
+                if !BuxPadIdiom.isPad {
+                    AgreementSignatureInkColorPicker(inkColor: $inkColor, inkUIColor: $inkUIColor)
+                }
+
                 ZStack(alignment: .bottomTrailing) {
                     Group {
                         if BuxPadIdiom.isPad {
@@ -39,7 +45,13 @@ struct AgreementImportedSignatureCaptureSheet: View {
                                 showsToolPicker: true
                             )
                         } else {
-                            StudioSignaturePadView(drawing: $drawing)
+                            BuxPadPencilCanvasView(
+                                drawing: $drawing,
+                                drawingPolicy: .anyInput,
+                                showsToolPicker: false,
+                                inkColor: inkUIColor,
+                                inkWidth: 2.5
+                            )
                         }
                     }
                     .frame(height: canvasHeight)
@@ -81,7 +93,10 @@ struct AgreementImportedSignatureCaptureSheet: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        guard let png = AgreementImportedSignatureRasterizer.transparentPNG(from: drawing) else { return }
+                        let png = BuxPadIdiom.isPad
+                            ? AgreementImportedSignatureRasterizer.transparentPNG(from: drawing)
+                            : AgreementImportedSignatureRasterizer.transparentPNG(from: drawing, literalInk: inkUIColor)
+                        guard let png else { return }
                         onCapture(png)
                         BuxSaveFeedback.success()
                         dismiss()

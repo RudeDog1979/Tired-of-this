@@ -39,21 +39,14 @@ struct SubscriptionRenewalTimelineView: View {
                         ForEach(renewals) { sub in
                             Button(action: { onSelect(sub.merchantName) }) {
                                 renewalCard(for: sub)
-                                    .containerRelativeFrame(.horizontal) { width, _ in
-                                        width - 40
-                                    }
+                                    .frame(width: SubscriptionHubStyle.timelineCardWidth)
                             }
                             .buttonStyle(BuxMicroShrinkStyle())
                         }
                     }
                     .scrollTargetLayout()
                 }
-                .scrollClipDisabled()
-                .scrollTargetBehavior(.viewAligned)
-                .safeAreaPadding(.horizontal, 20)
-                .safeAreaPadding(.vertical, 8)
-                .padding(.horizontal, -BuxLayout.marginHorizontal)
-                .buxSoftHorizontalScrollChrome()
+                .buxViewAlignedHorizontalCarousel()
             }
         }
     }
@@ -79,7 +72,7 @@ struct SubscriptionRenewalTimelineView: View {
                 AsyncMerchantLogoView(merchantName: sub.merchantName, size: 36)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(sub.merchantName)
+                    Text(sub.displayName)
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .multilineTextAlignment(.leading)

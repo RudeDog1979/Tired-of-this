@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 // MARK: - Enums
 
@@ -15,6 +16,14 @@ public enum ThemeMode: String, Codable, CaseIterable, Identifiable {
     case dark = "Dark"
     
     public var id: String { rawValue }
+
+    public var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
 }
 
 public enum PreferredNameStyle: String, Codable, CaseIterable, Identifiable {

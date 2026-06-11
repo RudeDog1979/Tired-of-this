@@ -6,6 +6,7 @@
 import Combine
 import PencilKit
 import SwiftUI
+import UIKit
 
 final class AgreementImportedSignatureDrawingUndo: ObservableObject {
     @Published private(set) var canUndo = false
@@ -13,7 +14,6 @@ final class AgreementImportedSignatureDrawingUndo: ObservableObject {
 
     func bind(_ canvas: PKCanvasView) {
         canvasView = canvas
-        refresh()
     }
 
     func undo() {
@@ -40,6 +40,8 @@ struct AgreementImportedInlineSignaturePad: View {
     var onSave: (Data) -> Void
 
     @StateObject private var drawingUndo = AgreementImportedSignatureDrawingUndo()
+    @State private var inkColor = Color(red: 0, green: 0, blue: 0)
+    @State private var inkUIColor = AgreementSignatureInk.black
 
     private var locale: Locale { appSettingsManager.interfaceLocale }
 
@@ -55,6 +57,11 @@ struct AgreementImportedInlineSignaturePad: View {
         VStack(spacing: 0) {
             headerRow
             actionRow
+            if !BuxPadIdiom.isPad {
+                AgreementSignatureInkColorPicker(inkColor: $inkColor, inkUIColor: $inkUIColor)
+                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .padding(.bottom, 8)
+            }
             canvasBlock
                 .padding(.horizontal, BuxTokens.marginRegular)
                 .padding(.bottom, 12)
@@ -110,7 +117,10 @@ struct AgreementImportedInlineSignaturePad: View {
                 size: .regular,
                 isEnabled: !drawing.bounds.isEmpty,
                 action: {
-                    guard let png = AgreementImportedSignatureRasterizer.transparentPNG(from: drawing) else { return }
+                    let png = BuxPadIdiom.isPad
+                        ? AgreementImportedSignatureRasterizer.transparentPNG(from: drawing)
+                        : AgreementImportedSignatureRasterizer.transparentPNG(from: drawing, literalInk: inkUIColor)
+                    guard let png else { return }
                     onSave(png)
                 }
             )
@@ -122,7 +132,11 @@ struct AgreementImportedInlineSignaturePad: View {
 
     private var canvasBlock: some View {
         ZStack(alignment: .bottomTrailing) {
-            AgreementImportedClearSignatureCanvas(drawing: $drawing, drawingUndo: drawingUndo)
+            AgreementImportedClearSignatureCanvas(
+                drawing: $drawing,
+                drawingUndo: drawingUndo,
+                inkColor: BuxPadIdiom.isPad ? AgreementSignatureInk.black : inkUIColor
+            )
                 .frame(height: canvasHeight)
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -144,17 +158,23 @@ struct AgreementImportedInlineSignaturePad: View {
 
 private struct AgreementImportedClearSignatureCanvas: UIViewRepresentable {
     @Binding var drawing: PKDrawing
-    @ObservedObject var drawingUndo: AgreementImportedSignatureDrawingUndo
+    let drawingUndo: AgreementImportedSignatureDrawingUndo
+    var inkColor: UIColor = AgreementSignatureInk.black
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(drawing: $drawing, drawingUndo: drawingUndo)
+        Coordinator(drawing: $drawing, drawingUndo: drawingUndo, inkColor: inkColor)
     }
 
     func makeUIView(context: Context) -> PKCanvasView {
         let canvas = PKCanvasView()
         canvas.drawing = drawing
         canvas.drawingPolicy = .anyInput
-        canvas.tool = PKInkingTool(.monoline, color: .black, width: 0.25)
+        if BuxPadIdiom.isPad {
+            canvas.tool = PKInkingTool(.pen, color: inkColor, width: 2.5)
+        } else {
+            AgreementSignatureInk.preparePhoneSignatureCanvas(canvas)
+            AgreementSignatureInk.applyPenInk(inkColor, width: 2.5, to: canvas)
+        }
         canvas.backgroundColor = .clear
         canvas.isOpaque = false
         canvas.delegate = context.coordinator
@@ -172,8 +192,12 @@ private struct AgreementImportedClearSignatureCanvas: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: PKCanvasView, context: Context) {
-        context.coordinator.syncFromViewIfNeeded(uiView, binding: $drawing)
-        drawingUndo.bind(uiView)
+        if uiView.drawing != drawing {
+            uiView.drawing = drawing
+        }
+        if !BuxPadIdiom.isPad {
+            context.coordinator.applyInkColor(inkColor, to: uiView)
+        }
     }
 
     static func dismantleUIView(_ uiView: PKCanvasView, coordinator: Coordinator) {
@@ -182,31 +206,38 @@ private struct AgreementImportedClearSignatureCanvas: UIViewRepresentable {
     }
 
     final class Coordinator: NSObject, PKCanvasViewDelegate {
-        private var drawingBinding: Binding<PKDrawing>
+        @Binding var drawing: PKDrawing
         private let drawingUndo: AgreementImportedSignatureDrawingUndo
         var toolPicker: PKToolPicker?
-        private var isSyncingFromSwiftUI = false
+        private var appliedInkColor: UIColor
 
-        init(drawing: Binding<PKDrawing>, drawingUndo: AgreementImportedSignatureDrawingUndo) {
-            drawingBinding = drawing
+        private let pinsLiteralInk: Bool
+
+        init(
+            drawing: Binding<PKDrawing>,
+            drawingUndo: AgreementImportedSignatureDrawingUndo,
+            inkColor: UIColor
+        ) {
+            _drawing = drawing
             self.drawingUndo = drawingUndo
+            pinsLiteralInk = !BuxPadIdiom.isPad
+            appliedInkColor = inkColor
         }
 
-        func syncFromViewIfNeeded(_ canvasView: PKCanvasView, binding: Binding<PKDrawing>) {
-            drawingBinding = binding
-            guard canvasView.drawing != binding.wrappedValue else { return }
-            isSyncingFromSwiftUI = true
-            canvasView.drawing = binding.wrappedValue
-            isSyncingFromSwiftUI = false
-            drawingUndo.refresh()
+        func applyInkColor(_ inkColor: UIColor, to canvasView: PKCanvasView) {
+            guard appliedInkColor.cgColor != inkColor.cgColor else { return }
+            appliedInkColor = inkColor
+            AgreementSignatureInk.applyPenInk(inkColor, width: 2.5, to: canvasView)
         }
 
         func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-            guard !isSyncingFromSwiftUI else { return }
+            if pinsLiteralInk {
+                AgreementSignatureInk.applyPenInk(appliedInkColor, width: 2.5, to: canvasView)
+            }
             let updated = canvasView.drawing
-            DispatchQueue.main.async { [drawingBinding, drawingUndo] in
-                if drawingBinding.wrappedValue != updated {
-                    drawingBinding.wrappedValue = updated
+            DispatchQueue.main.async { [self] in
+                if drawing != updated {
+                    drawing = updated
                 }
                 drawingUndo.refresh()
             }

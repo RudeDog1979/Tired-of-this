@@ -11,18 +11,28 @@ struct BuxPadPencilCanvasView: UIViewRepresentable {
     @Binding var drawing: PKDrawing
     var drawingPolicy: PKCanvasViewDrawingPolicy = .anyInput
     var showsToolPicker: Bool = true
-    var inkColor: UIColor = .black
+    var inkColor: UIColor = AgreementSignatureInk.black
     var inkWidth: CGFloat = 3
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(drawing: $drawing)
+        Coordinator(
+            drawing: $drawing,
+            inkColor: inkColor,
+            inkWidth: inkWidth,
+            pinsLiteralInk: !showsToolPicker
+        )
     }
 
     func makeUIView(context: Context) -> PKCanvasView {
         let canvas = PKCanvasView()
         canvas.drawing = drawing
         canvas.drawingPolicy = drawingPolicy
-        canvas.tool = PKInkingTool(.pen, color: inkColor, width: inkWidth)
+        if !showsToolPicker {
+            AgreementSignatureInk.preparePhoneSignatureCanvas(canvas)
+            AgreementSignatureInk.applyPenInk(inkColor, width: inkWidth, to: canvas)
+        } else {
+            canvas.tool = PKInkingTool(.pen, color: inkColor, width: inkWidth)
+        }
         canvas.backgroundColor = .clear
         canvas.isOpaque = false
         canvas.delegate = context.coordinator
@@ -43,6 +53,9 @@ struct BuxPadPencilCanvasView: UIViewRepresentable {
             uiView.drawing = drawing
         }
         uiView.drawingPolicy = drawingPolicy
+        if !showsToolPicker {
+            context.coordinator.applyInkColor(inkColor, inkWidth: inkWidth, to: uiView)
+        }
     }
 
     static func dismantleUIView(_ uiView: PKCanvasView, coordinator: Coordinator) {
@@ -53,13 +66,39 @@ struct BuxPadPencilCanvasView: UIViewRepresentable {
     final class Coordinator: NSObject, PKCanvasViewDelegate {
         @Binding var drawing: PKDrawing
         var toolPicker: PKToolPicker?
+        private let pinsLiteralInk: Bool
+        private var appliedInkColor: UIColor
+        private var appliedInkWidth: CGFloat
 
-        init(drawing: Binding<PKDrawing>) {
+        init(
+            drawing: Binding<PKDrawing>,
+            inkColor: UIColor,
+            inkWidth: CGFloat,
+            pinsLiteralInk: Bool
+        ) {
             _drawing = drawing
+            self.pinsLiteralInk = pinsLiteralInk
+            appliedInkColor = inkColor
+            appliedInkWidth = inkWidth
+        }
+
+        func applyInkColor(_ inkColor: UIColor, inkWidth: CGFloat, to canvasView: PKCanvasView) {
+            guard appliedInkColor.cgColor != inkColor.cgColor || appliedInkWidth != inkWidth else { return }
+            appliedInkColor = inkColor
+            appliedInkWidth = inkWidth
+            AgreementSignatureInk.applyPenInk(inkColor, width: inkWidth, to: canvasView)
         }
 
         func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-            drawing = canvasView.drawing
+            if pinsLiteralInk {
+                AgreementSignatureInk.applyPenInk(appliedInkColor, width: appliedInkWidth, to: canvasView)
+            }
+            let updated = canvasView.drawing
+            DispatchQueue.main.async { [self] in
+                if drawing != updated {
+                    drawing = updated
+                }
+            }
         }
     }
 }

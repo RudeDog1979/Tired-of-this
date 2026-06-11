@@ -35,6 +35,8 @@ struct DashboardView: View {
     @State private var fabAnchor: CGPoint?
     @State private var categorySlideDirection: Int = 1
     @State private var categoryMotionToken = UUID()
+    /// Suppresses stacked launch/tab-return parallax until the user changes the category pill.
+    @State private var suppressCategoryCardEntrance = true
     @State private var activeSheet: DashboardActiveSheet?
     @State private var showQuickNewInvoice = false
     @State private var showTipPopup = false
@@ -162,10 +164,6 @@ struct DashboardView: View {
                                                     )
                                                     .rotationEffect(.degrees(-90))
                                                     .frame(width: 58, height: 58)
-                                                    .shadow(
-                                                        color: (warnBudget ? Color.red : themeManager.current.accentColor).opacity(0.3),
-                                                        radius: 3, x: 0, y: 1
-                                                    )
                                                 
                                                 VStack(spacing: 0) {
                                                     Text(
@@ -312,292 +310,12 @@ struct DashboardView: View {
                         .environmentObject(themeManager)
                         .frame(maxWidth: .infinity, alignment: .center)
 
-                        // Category content — horizontal slide + bounce (original behavior)
-                        ZStack(alignment: .topLeading) {
-                            if navigationCoordinator.activeCategoryPill == "Expenses" {
-                                let expenseHeader = brain.expenseInteractionSnapshot.header
-                                let monthlyTotal = Decimal(expenseHeader.totalSpent)
-                                let changeVsLast = expenseHeader.changeVsLastMonth
-                                let txnCount = expenseHeader.monthlyTransactionCount
-                                let changeFormatted = appSettingsManager.format(Decimal(abs(changeVsLast)))
-                                let changeTrend = changeVsLast >= 0 ? "+\(changeFormatted)" : "-\(changeFormatted)"
-                                let changeColor: Color = changeVsLast >= 0 ? .orange : .green
-
-                                HStack(alignment: .top, spacing: BuxTokens.tight) {
-                                    Button(action: {
-                                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                                            navigationCoordinator.openExpensesTab()
-                                        }
-                                    }) {
-                                        SubscriptionSummaryCardView(
-                                            title: BuxLocalizedString.string("This Month", locale: appSettingsManager.interfaceLocale),
-                                            cost: appSettingsManager.format(monthlyTotal),
-                                            subtext: expenseHeader.biggestCategory.map {
-                                                BuxLocalizedString.format(
-                                                    "Top: %@",
-                                                    locale: appSettingsManager.interfaceLocale,
-                                                    $0
-                                                )
-                                            } ?? BuxLocalizedString.string("All categories", locale: appSettingsManager.interfaceLocale),
-                                            trendText: changeTrend,
-                                            trendColor: changeColor,
-                                            icon: "creditcard.fill",
-                                            iconColor: themeManager.contrastAccentColor(for: colorScheme),
-                                            includesDashboardChrome: false
-                                        )
-                                        .dashboardMaterialPillCardLabel()
-                                    }
-                                    .buttonStyle(BuxDashboardCardButtonStyle())
-                                    .buxDashboardCategoryCard(
-                                        index: 0,
-                                        direction: categorySlideDirection,
-                                        motionToken: categoryMotionToken
-                                    )
-                                    .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
-                                    .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                    .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05), value: navigationCoordinator.isScreenLoaded)
-
-                                    Button(action: {
-                                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                                            navigationCoordinator.openExpensesTab()
-                                        }
-                                    }) {
-                                        SubscriptionSummaryCardView(
-                                            title: BuxLocalizedString.string("Transactions", locale: appSettingsManager.interfaceLocale),
-                                            cost: BuxLocalizedString.format(
-                                                "%lld This Month",
-                                                locale: appSettingsManager.interfaceLocale,
-                                                txnCount
-                                            ),
-                                            subtext: expenseHeader.biggestMerchant.map {
-                                                BuxLocalizedString.format(
-                                                    "Top: %@",
-                                                    locale: appSettingsManager.interfaceLocale,
-                                                    $0
-                                                )
-                                            } ?? BuxLocalizedString.string("All merchants", locale: appSettingsManager.interfaceLocale),
-                                            trendText: expenseHeader.microInsight
-                                                ?? BuxLocalizedString.string("On track", locale: appSettingsManager.interfaceLocale),
-                                            trendColor: themeManager.contrastAccentColor(for: colorScheme),
-                                            icon: "list.bullet.rectangle.fill",
-                                            iconColor: themeManager.contrastAccentColor(for: colorScheme),
-                                            includesDashboardChrome: false
-                                        )
-                                        .dashboardMaterialPillCardLabel()
-                                    }
-                                    .buttonStyle(BuxDashboardCardButtonStyle())
-                                    .buxDashboardCategoryCard(
-                                        index: 1,
-                                        direction: categorySlideDirection,
-                                        motionToken: categoryMotionToken
-                                    )
-                                    .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
-                                    .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                    .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.12), value: navigationCoordinator.isScreenLoaded)
-                                }
-                                .transition(.buxCategorySlide(direction: categorySlideDirection))
-                            } else if navigationCoordinator.activeCategoryPill == "Subscriptions" {
-                                let activeSubs = financialBridge.activeSubscriptions()
-                                HStack(alignment: .top, spacing: BuxTokens.tight) {
-                                    if activeSubs.isEmpty {
-                                        HStack {
-                                            Image(systemName: "sparkles")
-                                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                                                BuxCatalogText.text("No active subscriptions. Tapping quick action opens Subscription Hub.")
-                                                .font(.system(size: 11, weight: .bold))
-                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                                .multilineTextAlignment(.center)
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 32)
-                                        .dashboardMaterialCardChrome(.outlined)
-                                        .buxDashboardCategoryCard(
-                                            index: 0,
-                                            direction: categorySlideDirection,
-                                            motionToken: categoryMotionToken
-                                        )
-                                    } else {
-                                        ForEach(Array(activeSubs.prefix(2).enumerated()), id: \.offset) { index, sub in
-                                            Button(action: {
-                                                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                                                    navigationCoordinator.openSubscriptionHub()
-                                                }
-                                            }) {
-                                                SubscriptionCardView(
-                                                    title: sub.merchantName,
-                                                    cost: appSettingsManager.format(abs(sub.cost.value)),
-                                                    billingDate: sub.billingCycle.localizedDisplayName(
-                                                        locale: appSettingsManager.interfaceLocale
-                                                    ),
-                                                    accentColor: index == 0 ? themeManager.current.accentColor : Color.purple,
-                                                    includesDashboardChrome: false
-                                                )
-                                                .dashboardMaterialPillCardLabel()
-                                            }
-                                            .buttonStyle(BuxDashboardCardButtonStyle())
-                                            .buxDashboardCategoryCard(
-                                                index: index,
-                                                direction: categorySlideDirection,
-                                                motionToken: categoryMotionToken
-                                            )
-                                        }
-                                    }
-                                }
-                                .transition(.buxCategorySlide(direction: categorySlideDirection))
-                            } else if navigationCoordinator.activeCategoryPill == "Goals" {
-                                VStack(alignment: .leading, spacing: 16) {
-                                    HStack {
-                                        BuxCatalogText.text("Active savings goals")
-                                            .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
-                                        
-                                        Spacer()
-                                        
-                                        Button(action: {
-                                            goalsSheetCoordinator.presentAddGoal()
-                                        }) {
-                                            HStack(spacing: 4) {
-                                                Image(systemName: "plus.circle.fill")
-                                                    .font(.system(size: 14, weight: .bold))
-                                                BuxCatalogText.text("Add Goal")
-                                                    .font(.system(size: 12, weight: .bold))
-                                            }
-                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                                        }
-                                        .buttonStyle(BuxMicroShrinkStyle())
-                                    }
-                                    .padding(.horizontal, 4)
-                                    
-                                    if goalsViewModel.goals.isEmpty {
-                                        HStack {
-                                            Spacer()
-                                            VStack(spacing: 8) {
-                                                Image(systemName: "target")
-                                                    .font(.system(size: 24))
-                                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                                                BuxCatalogText.text("No active savings goals yet.")
-                                                    .font(.system(size: 13, weight: .medium))
-                                                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                            }
-                                            Spacer()
-                                        }
-                                        .padding(.vertical, 32)
-                                        .dashboardMaterialCardChrome(.outlined)
-                                        .buxDashboardCategoryCard(
-                                            index: 0,
-                                            direction: categorySlideDirection,
-                                            motionToken: categoryMotionToken
-                                        )
-                                    } else {
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: BuxTokens.tight) {
-                                                ForEach(Array(goalsViewModel.goals.enumerated()), id: \.element.id) { index, goal in
-                                                    let progress = min(1.0, max(0.0, Double(NSDecimalNumber(decimal: goal.currentAmount).doubleValue / max(1.0, NSDecimalNumber(decimal: goal.targetAmount).doubleValue))))
-                                                    let accentColor = index == 0 ? Color(red: 46/255, green: 204/255, blue: 113/255) : themeManager.current.accentColor
-                                                    
-                                                    Button(action: {
-                                                        goalsViewModel.selectGoal(goal)
-                                                        if let detail = goalsViewModel.selectedGoalDetail {
-                                                            goalsSheetCoordinator.presentGoalDetail(detail)
-                                                        }
-                                                    }) {
-                                                        GoalCardView(
-                                                            title: goal.name,
-                                                            saved: appSettingsManager.format(goal.currentAmount),
-                                                            target: appSettingsManager.format(goal.targetAmount),
-                                                            progress: progress,
-                                                            accentColor: accentColor,
-                                                            includesDashboardChrome: false
-                                                        )
-                                                        .dashboardMaterialPillCardLabel()
-                                                    }
-                                                    .buttonStyle(BuxDashboardCardButtonStyle())
-                                                    .buxDashboardCategoryCard(
-                                                        index: index,
-                                                        direction: categorySlideDirection,
-                                                        motionToken: categoryMotionToken
-                                                    )
-                                                    .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 50)
-                                                    .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                                                    .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.05 + Double(index) * 0.07), value: navigationCoordinator.isScreenLoaded)
-                                                }
-                                            }
-                                            .padding(.horizontal, 2)
-                                        }
-
-                                        Button(action: {
-                                            if let firstGoal = goalsViewModel.goals.first {
-                                                goalsViewModel.selectGoal(firstGoal)
-                                                if let detail = goalsViewModel.selectedGoalDetail {
-                                                    goalsSheetCoordinator.presentGoalDetail(detail)
-                                                }
-                                            }
-                                        }) {
-                                            HStack {
-                                                Image(systemName: "chart.bar.fill")
-                                                    .font(.system(size: 16))
-                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                                                
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    BuxCatalogText.text("See your progress")
-                                                        .font(.system(size: 13, weight: .bold))
-                                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                                    BuxCatalogText.text("Get structural forecast and potential acceleration timeline AI insights.")
-                                                        .font(.system(size: 11, weight: .medium))
-                                                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
-                                                }
-                                                .multilineTextAlignment(.leading)
-                                                
-                                                Spacer()
-                                                
-                                                BuxChevron()
-                                            }
-                                            .padding(16)
-                                            .dashboardMaterialPillAuxCardLabel()
-                                        }
-                                        .buttonStyle(BuxDashboardCardButtonStyle())
-                                        .buxDashboardCategoryCard(
-                                            index: 1,
-                                            direction: categorySlideDirection,
-                                            motionToken: categoryMotionToken
-                                        )
-                                    }
-                                }
-                                .transition(.buxCategorySlide(direction: categorySlideDirection))
-                            } else if navigationCoordinator.activeCategoryPill == "Insights" {
-                                DashboardInsightsPanel(
-                                    categorySlideDirection: categorySlideDirection,
-                                    categoryMotionToken: categoryMotionToken,
-                                    isScreenLoaded: navigationCoordinator.isScreenLoaded,
-                                    onOpenStudioSettings: openStudioSettings
-                                )
-                                .environmentObject(themeManager)
-                                .environmentObject(insightsViewModel)
-                            } else if navigationCoordinator.activeCategoryPill == "Money Map" {
-                                MoneyMapDashboardPanel(
-                                    categorySlideDirection: categorySlideDirection,
-                                    categoryMotionToken: categoryMotionToken,
-                                    onOpenStudioSettings: openStudioSettings
-                                )
-                                .environmentObject(themeManager)
-                                .environmentObject(appSettingsManager)
-                                .environmentObject(brain)
-                                .environmentObject(financialBridge)
-                                .environmentObject(insightsViewModel)
-                                .environmentObject(studioStore)
-                                .environmentObject(navigationCoordinator)
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .id(navigationCoordinator.activeCategoryPill)
-                        .animation(.buxCategorySpring, value: navigationCoordinator.activeCategoryPill)
-                        .onChange(of: navigationCoordinator.activeCategoryPill) { oldValue, newValue in
-                            let oldIndex = categoryIndex(for: oldValue)
-                            let newIndex = categoryIndex(for: newValue)
-                            categorySlideDirection = newIndex >= oldIndex ? 1 : -1
-                            withAnimation(.buxCategorySpring) {
-                                categoryMotionToken = UUID()
-                            }
-                        }
+                        DashboardCategoryPillSection(
+                            categorySlideDirection: $categorySlideDirection,
+                            categoryMotionToken: $categoryMotionToken,
+                            suppressCategoryCardEntrance: $suppressCategoryCardEntrance,
+                            onOpenStudioSettings: openStudioSettings
+                        )
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     // Buxmation Focus overlays: blurs and dims elements above stack on expansion
@@ -611,10 +329,8 @@ struct DashboardView: View {
                         onSeeMore: { navigationCoordinator.openExpensesTab() }
                     )
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .offset(y: navigationCoordinator.isScreenLoaded ? 0 : 30)
-                    .opacity(navigationCoordinator.isScreenLoaded ? 1.0 : 0.0)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.24), value: navigationCoordinator.isScreenLoaded)
                     .animation(nil, value: navigationCoordinator.activeCategoryPill)
+                    .animation(nil, value: dashSnapshot.recentTransactions)
 
                     Spacer().frame(height: BuxTokens.tight)
                 }
@@ -665,7 +381,7 @@ struct DashboardView: View {
             }
         }
         .coordinateSpace(name: "dashboardOverlay")
-        .onPreferenceChange(DashboardFabAnchorPreferenceKey.self) { fabAnchor = $0 }
+        .onPreferenceChange(DashboardFabAnchorPreferenceKey.self) { updateFabAnchor($0) }
         .onChange(of: isFabMenuExpanded) { _, expanded in
             if expanded {
                 showFabMenuOverlay = true
@@ -717,6 +433,16 @@ struct DashboardView: View {
         }
     }
 
+    private func updateFabAnchor(_ center: CGPoint?) {
+        guard let center, showFabMenuOverlay else { return }
+        if let current = fabAnchor,
+           abs(current.x - center.x) < 1.5,
+           abs(current.y - center.y) < 1.5 {
+            return
+        }
+        fabAnchor = center
+    }
+
     private func closeFabAnd(_ action: @escaping () -> Void) {
         isFabMenuExpanded = false
         let padDelay: TimeInterval = settingsStore.ipadFabShortcut == .themes ? 0.2 : 0.32
@@ -753,6 +479,334 @@ struct DashboardView: View {
     private func openStudioSettings() {
         navigationCoordinator.openStudioSettings()
     }
+}
+
+// MARK: - Category pill content (isolated for Swift type-checker)
+
+private struct DashboardCategoryPillSection: View {
+    @Binding var categorySlideDirection: Int
+    @Binding var categoryMotionToken: UUID
+    @Binding var suppressCategoryCardEntrance: Bool
+    let onOpenStudioSettings: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var financialBridge: FinancialEngineBridge
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var goalsViewModel: GoalsViewModel
+    @EnvironmentObject private var goalsSheetCoordinator: GoalsSheetCoordinator
+    @EnvironmentObject private var insightsViewModel: InsightsViewModel
+    @EnvironmentObject private var studioStore: StudioStore
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            if navigationCoordinator.activeCategoryPill == "Expenses" {
+                                let expenseHeader = brain.expenseInteractionSnapshot.header
+                                let monthlyTotal = Decimal(expenseHeader.totalSpent)
+                                let changeVsLast = expenseHeader.changeVsLastMonth
+                                let txnCount = expenseHeader.monthlyTransactionCount
+                                let changeFormatted = appSettingsManager.format(Decimal(abs(changeVsLast)))
+                                let changeTrend = changeVsLast >= 0 ? "+\(changeFormatted)" : "-\(changeFormatted)"
+                                let changeColor: Color = changeVsLast >= 0 ? .orange : .green
+
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 16) {
+                                        Button(action: {
+                                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                                navigationCoordinator.openExpensesTab()
+                                            }
+                                        }) {
+                                            SubscriptionSummaryCardView(
+                                                title: BuxLocalizedString.string("This Month", locale: appSettingsManager.interfaceLocale),
+                                                cost: appSettingsManager.format(monthlyTotal),
+                                                subtext: expenseHeader.biggestCategory.map {
+                                                    BuxLocalizedString.format(
+                                                        "Top: %@",
+                                                        locale: appSettingsManager.interfaceLocale,
+                                                        $0
+                                                    )
+                                                } ?? BuxLocalizedString.string("All categories", locale: appSettingsManager.interfaceLocale),
+                                                trendText: changeTrend,
+                                                trendColor: changeColor,
+                                                icon: "creditcard.fill",
+                                                iconColor: themeManager.contrastAccentColor(for: colorScheme),
+                                                includesDashboardChrome: false
+                                            )
+                                            .dashboardMaterialPillCardLabel()
+                                            .frame(width: SubscriptionHubStyle.timelineCardWidth)
+                                        }
+                                        .buttonStyle(BuxDashboardCardButtonStyle())
+                                        .buxDashboardCategoryCard(
+                                            index: 0,
+                                            direction: categorySlideDirection,
+                                            motionToken: categoryMotionToken,
+                                            animateEntrance: !suppressCategoryCardEntrance
+                                        )
+
+                                        Button(action: {
+                                            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                                navigationCoordinator.openExpensesTab()
+                                            }
+                                        }) {
+                                            SubscriptionSummaryCardView(
+                                                title: BuxLocalizedString.string("Transactions", locale: appSettingsManager.interfaceLocale),
+                                                cost: BuxLocalizedString.format(
+                                                    "%lld This Month",
+                                                    locale: appSettingsManager.interfaceLocale,
+                                                    txnCount
+                                                ),
+                                                subtext: expenseHeader.biggestMerchant.map {
+                                                    BuxLocalizedString.format(
+                                                        "Top: %@",
+                                                        locale: appSettingsManager.interfaceLocale,
+                                                        $0
+                                                    )
+                                                } ?? BuxLocalizedString.string("All merchants", locale: appSettingsManager.interfaceLocale),
+                                                trendText: expenseHeader.microInsight
+                                                    ?? BuxLocalizedString.string("On track", locale: appSettingsManager.interfaceLocale),
+                                                trendColor: themeManager.contrastAccentColor(for: colorScheme),
+                                                icon: "list.bullet.rectangle.fill",
+                                                iconColor: themeManager.contrastAccentColor(for: colorScheme),
+                                                includesDashboardChrome: false
+                                            )
+                                            .dashboardMaterialPillCardLabel()
+                                            .frame(width: SubscriptionHubStyle.timelineCardWidth)
+                                        }
+                                        .buttonStyle(BuxDashboardCardButtonStyle())
+                                        .buxDashboardCategoryCard(
+                                            index: 1,
+                                            direction: categorySlideDirection,
+                                            motionToken: categoryMotionToken,
+                                            animateEntrance: !suppressCategoryCardEntrance
+                                        )
+                                    }
+                                    .scrollTargetLayout()
+                                }
+                                .buxViewAlignedHorizontalCarousel()
+                                .transition(.buxCategorySlide(direction: categorySlideDirection))
+                            } else if navigationCoordinator.activeCategoryPill == "Subscriptions" {
+                                let activeSubs = financialBridge.activeSubscriptions()
+                                HStack(alignment: .top, spacing: BuxTokens.tight) {
+                                    if activeSubs.isEmpty {
+                                        HStack {
+                                            Image(systemName: "sparkles")
+                                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                                BuxCatalogText.text("No active subscriptions. Tapping quick action opens Subscription Hub.")
+                                                .font(.system(size: 11, weight: .bold))
+                                                .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                                .multilineTextAlignment(.center)
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 32)
+                                        .dashboardMaterialCardChrome(.outlined)
+                                        .buxDashboardCategoryCard(
+                                            index: 0,
+                                            direction: categorySlideDirection,
+                                            motionToken: categoryMotionToken,
+                                            animateEntrance: !suppressCategoryCardEntrance
+                                        )
+                                    } else {
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 16) {
+                                                ForEach(Array(activeSubs.enumerated()), id: \.element.id) { index, sub in
+                                                    Button(action: {
+                                                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                                            navigationCoordinator.openSubscriptionHub()
+                                                        }
+                                                    }) {
+                                                        SubscriptionCardView(
+                                                            title: sub.displayName,
+                                                            cost: appSettingsManager.format(abs(sub.cost.value)),
+                                                            billingDate: sub.billingCycle.localizedDisplayName(
+                                                                locale: appSettingsManager.interfaceLocale
+                                                            ),
+                                                            accentColor: index == 0 ? themeManager.current.accentColor : Color.purple,
+                                                            includesDashboardChrome: false
+                                                        )
+                                                        .dashboardMaterialPillCardLabel()
+                                                        .frame(width: SubscriptionHubStyle.timelineCardWidth)
+                                                    }
+                                                    .buttonStyle(BuxDashboardCardButtonStyle())
+                                                    .buxDashboardCategoryCard(
+                                                        index: index,
+                                                        direction: categorySlideDirection,
+                                                        motionToken: categoryMotionToken,
+                                                        animateEntrance: !suppressCategoryCardEntrance
+                                                    )
+                                                }
+                                            }
+                                            .scrollTargetLayout()
+                                        }
+                                        .buxViewAlignedHorizontalCarousel()
+                                    }
+                                }
+                                .transition(.buxCategorySlide(direction: categorySlideDirection))
+                            } else if navigationCoordinator.activeCategoryPill == "Goals" {
+                                VStack(alignment: .leading, spacing: 16) {
+                                    HStack {
+                                        BuxCatalogText.text("Active savings goals")
+                                            .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: {
+                                            goalsSheetCoordinator.presentAddGoal()
+                                        }) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "plus.circle.fill")
+                                                    .font(.system(size: 14, weight: .bold))
+                                                BuxCatalogText.text("Add Goal")
+                                                    .font(.system(size: 12, weight: .bold))
+                                            }
+                                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                        }
+                                        .buttonStyle(BuxMicroShrinkStyle())
+                                    }
+                                    .padding(.horizontal, 4)
+                                    
+                                    if goalsViewModel.goals.isEmpty {
+                                        HStack {
+                                            Spacer()
+                                            VStack(spacing: 8) {
+                                                Image(systemName: "target")
+                                                    .font(.system(size: 24))
+                                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                                BuxCatalogText.text("No active savings goals yet.")
+                                                    .font(.system(size: 13, weight: .medium))
+                                                    .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                            }
+                                            Spacer()
+                                        }
+                                        .padding(.vertical, 32)
+                                        .dashboardMaterialCardChrome(.outlined)
+                                        .buxDashboardCategoryCard(
+                                            index: 0,
+                                            direction: categorySlideDirection,
+                                            motionToken: categoryMotionToken,
+                                            animateEntrance: !suppressCategoryCardEntrance
+                                        )
+                                    } else {
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: BuxTokens.tight) {
+                                                ForEach(Array(goalsViewModel.goals.enumerated()), id: \.element.id) { index, goal in
+                                                    let progress = min(1.0, max(0.0, Double(NSDecimalNumber(decimal: goal.currentAmount).doubleValue / max(1.0, NSDecimalNumber(decimal: goal.targetAmount).doubleValue))))
+                                                    let accentColor = index == 0 ? Color(red: 46/255, green: 204/255, blue: 113/255) : themeManager.current.accentColor
+                                                    
+                                                    Button(action: {
+                                                        goalsViewModel.selectGoal(goal)
+                                                        if let detail = goalsViewModel.selectedGoalDetail {
+                                                            goalsSheetCoordinator.presentGoalDetail(detail)
+                                                        }
+                                                    }) {
+                                                        GoalCardView(
+                                                            title: goal.name,
+                                                            saved: appSettingsManager.format(goal.currentAmount),
+                                                            target: appSettingsManager.format(goal.targetAmount),
+                                                            progress: progress,
+                                                            accentColor: accentColor,
+                                                            includesDashboardChrome: false
+                                                        )
+                                                        .dashboardMaterialPillCardLabel()
+                                                    }
+                                                    .buttonStyle(BuxDashboardCardButtonStyle())
+                                                    .buxDashboardCategoryCard(
+                                                        index: index,
+                                                        direction: categorySlideDirection,
+                                                        motionToken: categoryMotionToken,
+                                                        animateEntrance: !suppressCategoryCardEntrance
+                                                    )
+                                                }
+                                            }
+                                            .buxPadScrollTargetLayout()
+                                            .padding(.horizontal, 2)
+                                        }
+                                        .buxPadViewAlignedHorizontalCarousel()
+
+                                        Button(action: {
+                                            if let firstGoal = goalsViewModel.goals.first {
+                                                goalsViewModel.selectGoal(firstGoal)
+                                                if let detail = goalsViewModel.selectedGoalDetail {
+                                                    goalsSheetCoordinator.presentGoalDetail(detail)
+                                                }
+                                            }
+                                        }) {
+                                            HStack {
+                                                Image(systemName: "chart.bar.fill")
+                                                    .font(.system(size: 16))
+                                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                                
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    BuxCatalogText.text("See your progress")
+                                                        .font(.system(size: 13, weight: .bold))
+                                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                                    BuxCatalogText.text("Get structural forecast and potential acceleration timeline AI insights.")
+                                                        .font(.system(size: 11, weight: .medium))
+                                                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                                }
+                                                .multilineTextAlignment(.leading)
+                                                
+                                                Spacer()
+                                                
+                                                BuxChevron()
+                                            }
+                                            .padding(16)
+                                            .dashboardMaterialPillAuxCardLabel()
+                                        }
+                                        .buttonStyle(BuxDashboardCardButtonStyle())
+                                        .buxDashboardCategoryCard(
+                                            index: 1,
+                                            direction: categorySlideDirection,
+                                            motionToken: categoryMotionToken,
+                                            animateEntrance: !suppressCategoryCardEntrance
+                                        )
+                                    }
+                                }
+                                .transition(.buxCategorySlide(direction: categorySlideDirection))
+                            } else if navigationCoordinator.activeCategoryPill == "Insights" {
+                                DashboardInsightsPanel(
+                                    categorySlideDirection: categorySlideDirection,
+                                    categoryMotionToken: categoryMotionToken,
+                                    isScreenLoaded: !suppressCategoryCardEntrance,
+                                    onOpenStudioSettings: onOpenStudioSettings
+                                )
+                                .environmentObject(themeManager)
+                                .environmentObject(insightsViewModel)
+                            } else if navigationCoordinator.activeCategoryPill == "Money Map" {
+                                MoneyMapDashboardPanel(
+                                    categorySlideDirection: categorySlideDirection,
+                                    categoryMotionToken: categoryMotionToken,
+                                    onOpenStudioSettings: onOpenStudioSettings
+                                )
+                                .environmentObject(themeManager)
+                                .environmentObject(appSettingsManager)
+                                .environmentObject(brain)
+                                .environmentObject(financialBridge)
+                                .environmentObject(insightsViewModel)
+                                .environmentObject(studioStore)
+                                .environmentObject(navigationCoordinator)
+                            }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .id(navigationCoordinator.activeCategoryPill)
+        .animation(.buxCategorySpring, value: navigationCoordinator.activeCategoryPill)
+        .onChange(of: navigationCoordinator.selectedTab) { _, tab in
+            if tab != .home {
+                suppressCategoryCardEntrance = true
+            }
+        }
+        .onChange(of: navigationCoordinator.activeCategoryPill) { oldValue, newValue in
+            guard oldValue != newValue else { return }
+            let oldIndex = categoryIndex(for: oldValue)
+            let newIndex = categoryIndex(for: newValue)
+            categorySlideDirection = newIndex >= oldIndex ? 1 : -1
+            suppressCategoryCardEntrance = false
+            withAnimation(.buxCategorySpring) {
+                categoryMotionToken = UUID()
+            }
+        }
+    }
 
     private func categoryIndex(for name: String) -> Int {
         switch name {
@@ -765,7 +819,6 @@ struct DashboardView: View {
         }
     }
 }
-
 
 // MARK: - Hero card (isolated scroll collapse — avoids commit hitches on Money Map / pills)
 
@@ -875,8 +928,7 @@ private struct DashboardHeroSection: View {
                         diameter: heroActionDiameter,
                         title: "Income",
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                        titleColor: themeManager.labelSecondary(for: colorScheme),
-                        usesReleaseBounce: true
+                        titleColor: themeManager.labelSecondary(for: colorScheme)
                     ) { isPressed in
                         Image(systemName: "arrow.down.circle.fill")
                             .font(.system(size: heroActionIconSize + 2))
@@ -901,7 +953,10 @@ private struct DashboardHeroSection: View {
                             .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                             .buxHeroActionIcon(.plus(isExpanded: isFabMenuExpanded), isPressed: isPressed)
                     }
-                    .dashboardFabAnchor(circleDiameter: heroActionDiameter)
+                    .dashboardFabAnchor(
+                        circleDiameter: heroActionDiameter,
+                        enabled: isFabMenuExpanded
+                    )
                     .buxScreenEntrance(index: 1, isVisible: navigationCoordinator.isScreenLoaded)
 
                     BuxHeroQuickActionButton(
@@ -915,8 +970,7 @@ private struct DashboardHeroSection: View {
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
                         titleColor: themeManager.labelSecondary(for: colorScheme),
                         circleShadowColor: brain.tipNeedsAttention && tipGlowPhase ? Color.yellow.opacity(0.55) : .clear,
-                        circleShadowRadius: 12,
-                        usesReleaseBounce: true
+                        circleShadowRadius: 12
                     ) { isPressed in
                         Image(systemName: "lightbulb.fill")
                             .font(.system(size: heroActionIconSize))
@@ -943,8 +997,7 @@ private struct DashboardHeroSection: View {
                         diameter: heroActionDiameter,
                         title: "Subscriptions",
                         titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                        titleColor: themeManager.labelSecondary(for: colorScheme),
-                        usesReleaseBounce: true
+                        titleColor: themeManager.labelSecondary(for: colorScheme)
                     ) { isPressed in
                         Image(systemName: "arrow.triangle.2.circlepath")
                             .font(.system(size: heroActionIconSize, weight: .semibold))

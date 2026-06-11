@@ -228,7 +228,9 @@ enum AgreementImportedPDFExporter {
         case .client:
             data = draft.clientSignaturePNG
         }
-        return data.flatMap { UIImage(data: $0)?.studioAgreementUprightImage() }
+        return data
+            .flatMap { AgreementImportedSignatureRasterizer.image(from: $0) }
+            .map { $0.studioAgreementUprightImage() }
     }
 
     /// Retained for callers that still composite page bitmaps (preview paths).

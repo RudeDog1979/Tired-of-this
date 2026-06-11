@@ -160,8 +160,10 @@ struct TipPopupView: View {
                 }
             } else if settings.useGlassmorphism {
                 shape.fill(.ultraThinMaterial)
+                    .buxMaterialColorSchemeAdaptive(shape: shape, colorScheme: colorScheme)
             } else {
                 shape.fill(.regularMaterial)
+                    .buxMaterialColorSchemeAdaptive(shape: shape, colorScheme: colorScheme)
             }
         }
         .overlay {

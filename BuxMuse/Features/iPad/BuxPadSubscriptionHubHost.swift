@@ -19,11 +19,13 @@ struct BuxPadSubscriptionHubHost: View {
             isPresented: $isPresented,
             engine: engine,
             settingsManager: settingsManager,
-            hubSnapshot: hubSnapshot
+            hubSnapshot: hubSnapshot,
+            onCancelSubscription: { name in
+                try? brain.cancelSubscription(merchantName: name)
+            }
         )
         .environmentObject(settingsManager)
         .environmentObject(themeManager)
-        .environmentObject(brain)
         .environment(\.buxPadInspectorColumn, true)
     }
 }

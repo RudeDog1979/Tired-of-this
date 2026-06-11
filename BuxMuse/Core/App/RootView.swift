@@ -159,8 +159,6 @@ struct RootView: View {
             .id(appSettingsManager.selectedCountry.id)
             .buxPadRootChrome(isPad: BuxPadIdiom.isPad)
             .buxPadCommandBridge(isPad: BuxPadIdiom.isPad)
-            .buxPadKeyboardContextSync(isPad: BuxPadIdiom.isPad)
-            .buxPadEscapeKeyHandler(isPad: BuxPadIdiom.isPad)
             .buxPadExternalDisplayBridge(isPad: BuxPadIdiom.isPad)
             .buxPadAdaptiveSheet(
                 isPresented: $navigationCoordinator.showSubscriptionHub,
@@ -173,8 +171,6 @@ struct RootView: View {
                     hubSnapshot: brain.subscriptionHubSnapshot
                 )
                 .environmentObject(themeManager)
-                .environmentObject(appSettingsManager)
-                .environmentObject(brain)
                 .buxThemedSheetContent()
             }
             .buxPadAdaptiveSheet(
@@ -324,7 +320,10 @@ struct RootView: View {
                 isPresented: $navigationCoordinator.showSubscriptionHub,
                 engine: financialBridge.engine,
                 settingsManager: appSettingsManager,
-                hubSnapshot: brain.subscriptionHubSnapshot
+                hubSnapshot: brain.subscriptionHubSnapshot,
+                onCancelSubscription: { name in
+                    try? brain.cancelSubscription(merchantName: name)
+                }
             )
             .transition(.asymmetric(
                 insertion: .move(edge: .trailing),
@@ -431,8 +430,6 @@ struct RootView: View {
                     hubSnapshot: brain.subscriptionHubSnapshot
                 )
                 .environmentObject(themeManager)
-                .environmentObject(appSettingsManager)
-                .environmentObject(brain)
             }
         }
 
@@ -519,19 +516,12 @@ struct RootView: View {
         @ViewBuilder content: @escaping () -> Content
     ) -> some View {
         let surface = BuxPadOverlayRouter.surface(for: trigger, layoutMode: buxLayoutMode)
-        let wrappedContent = {
-            content()
-                .environmentObject(themeManager)
-                .environmentObject(appSettingsManager)
-                .environmentObject(brain)
-                .environmentObject(goalsViewModel)
-        }
         switch surface {
         case .splitColumn:
-            BuxPadInspectorPanel(content: wrappedContent, onDismiss: onDismiss)
+            BuxPadInspectorPanel(content: content, onDismiss: onDismiss)
             .zIndex(10)
         case .rootOverlay:
-            wrappedContent()
+            content()
                 .transition(.asymmetric(
                     insertion: .move(edge: .trailing),
                     removal: .move(edge: .trailing)

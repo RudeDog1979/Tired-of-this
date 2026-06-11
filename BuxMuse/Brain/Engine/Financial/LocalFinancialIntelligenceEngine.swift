@@ -69,24 +69,42 @@ public final class LocalFinancialIntelligenceEngine: FinancialIntelligenceEngine
             var details: [String: SubscriptionDetail] = [:]
             
             for merchant in uniqueMerchants {
-                let subCategoryTransactions = txs.filter { MerchantLogoEngine.normalizeMerchantName($0.merchantName) == MerchantLogoEngine.normalizeMerchantName(merchant) }
-                let hasSubscriptionCat = subCategoryTransactions.contains(where: { $0.category == .subscriptions })
-                let activeCategory = hasSubscriptionCat ? TransactionCategory.subscriptions : (subCategoryTransactions.first?.category ?? .subscriptions)
-                
+                let norm = MerchantLogoEngine.normalizeMerchantName(merchant)
+                let merchantTxs = txs.filter { MerchantLogoEngine.normalizeMerchantName($0.merchantName) == norm }
+                let hasSubscriptionCat = merchantTxs.contains(where: { $0.category == .subscriptions })
+                let activeCategory = hasSubscriptionCat ? TransactionCategory.subscriptions : (merchantTxs.first?.category ?? .subscriptions)
+                let declaredTxs = merchantTxs.filter { $0.isSubscriptionLike || $0.isTrial }
+                let instanceCount = BillingCycleAIEngine.subscriptionInstanceCount(
+                    merchantExpenses: merchantTxs,
+                    userDeclaredCount: declaredTxs.count
+                )
+
                 if let subInfo = BillingCycleAIEngine.analyzeSubscription(
                     merchantName: merchant,
                     transactions: txs,
                     category: activeCategory,
                     locale: locale
                 ) {
-                    subs.append(subInfo)
-                    
-                    let detail = BillingCycleAIEngine.subscriptionDetail(
+                    for index in 0..<instanceCount {
+                        subs.append(subInfo.parallelInstance(at: index))
+                    }
+                    details[norm] = BillingCycleAIEngine.subscriptionDetail(
                         info: subInfo,
                         allTransactions: txs,
                         locale: locale
                     )
-                    details[MerchantLogoEngine.normalizeMerchantName(merchant)] = detail
+                } else {
+                    for (index, transaction) in declaredTxs.enumerated() {
+                        guard let subInfo = BillingCycleAIEngine.subscriptionFromUserDeclaration(transaction) else { continue }
+                        subs.append(subInfo.parallelInstance(at: index))
+                        if index == 0 {
+                            details[norm] = BillingCycleAIEngine.subscriptionDetail(
+                                info: subInfo,
+                                allTransactions: txs,
+                                locale: locale
+                            )
+                        }
+                    }
                 }
             }
 

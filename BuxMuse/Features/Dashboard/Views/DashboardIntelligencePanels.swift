@@ -30,10 +30,9 @@ struct DashboardFeatureInsightStrips: View {
                         featureStripCard(strip)
                     }
                 }
-                .padding(.horizontal, BuxTokens.marginRegular)
+                .scrollTargetLayout()
             }
-            .padding(.horizontal, -BuxTokens.marginRegular)
-            .modifier(BuxPadHorizontalFeatureStripChromeModifier())
+            .buxViewAlignedHorizontalCarousel()
         }
     }
 
@@ -520,14 +519,3 @@ struct WorkspaceSynergyROIPanel: View {
     }
 }
 
-// MARK: - iPad carousel chrome (iPhone keeps soft horizontal fade)
-
-private struct BuxPadHorizontalFeatureStripChromeModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        if BuxPadIdiom.isPad {
-            content.buxViewAlignedHorizontalCarousel()
-        } else {
-            content.buxSoftHorizontalScrollChrome()
-        }
-    }
-}

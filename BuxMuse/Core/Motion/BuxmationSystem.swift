@@ -110,9 +110,12 @@ struct BuxCategoryCardEnterModifier: ViewModifier {
     let cardIndex: Int
     let direction: Int
     let motionToken: UUID
+    /// When false, skips the horizontal parallax (cold launch / returning to Home tab).
+    var animateEntrance: Bool = true
 
     @State private var offsetX: CGFloat = 0
     @State private var scale: CGFloat = 1
+    @State private var lastAnimatedMotionToken: UUID?
 
     /// Outer block travels farther; each card travels slightly less (parallax).
     private var travel: CGFloat {
@@ -123,8 +126,15 @@ struct BuxCategoryCardEnterModifier: ViewModifier {
         content
             .scaleEffect(scale, anchor: .leading)
             .offset(x: offsetX)
-            .onAppear { runEnter() }
-            .onChange(of: motionToken) { _, _ in runEnter() }
+            .onAppear { playEntranceIfNeeded() }
+            .onChange(of: motionToken) { _, _ in playEntranceIfNeeded() }
+    }
+
+    private func playEntranceIfNeeded() {
+        guard animateEntrance else { return }
+        guard lastAnimatedMotionToken != motionToken else { return }
+        lastAnimatedMotionToken = motionToken
+        runEnter()
     }
 
     private func runEnter() {
@@ -139,8 +149,20 @@ struct BuxCategoryCardEnterModifier: ViewModifier {
 
 extension View {
     /// Staggered slide + parallax for dashboard summary cards when the pill category changes.
-    func buxDashboardCategoryCard(index: Int, direction: Int, motionToken: UUID) -> some View {
-        modifier(BuxCategoryCardEnterModifier(cardIndex: index, direction: direction, motionToken: motionToken))
+    func buxDashboardCategoryCard(
+        index: Int,
+        direction: Int,
+        motionToken: UUID,
+        animateEntrance: Bool = true
+    ) -> some View {
+        modifier(
+            BuxCategoryCardEnterModifier(
+                cardIndex: index,
+                direction: direction,
+                motionToken: motionToken,
+                animateEntrance: animateEntrance
+            )
+        )
     }
 }
 
@@ -405,6 +427,7 @@ extension View {
 ///
 /// Uses zero-duration long-press for immediate visual feedback per SwiftUI interactive-button patterns.
 struct BuxHeroQuickActionButton<Icon: View>: View {
+    @Environment(\.buxPadFlatDashboardChrome) private var padFlatChrome
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let action: () -> Void
@@ -414,34 +437,20 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
     let titleColor: Color
     var circleShadowColor: Color = .clear
     var circleShadowRadius: CGFloat = 0
-    var usesReleaseBounce: Bool = false
     @ViewBuilder var icon: (_ isPressed: Bool) -> Icon
 
     @State private var isPressed = false
-    @State private var isHovered = false
     @State private var dragExceeded = false
-    @State private var releaseBounce: CGFloat = 1
-
-    private var pressAnimation: Animation {
-        usesReleaseBounce
-            ? .spring(response: 0.26, dampingFraction: 0.52)
-            : BuxMotion.heroPress
-    }
-
-    private var hoverScale: CGFloat {
-        isHovered && BuxPointerFeedback.isEnabled ? BuxPointerFeedback.hoverScale : 1
-    }
-
-    private var combinedScale: CGFloat {
-        (isPressed ? (usesReleaseBounce ? 0.9 : 0.93) : 1.0) * releaseBounce * hoverScale
-    }
 
     var body: some View {
         VStack(spacing: 8) {
             BuxHeroActionCircle(diameter: diameter) {
                 icon(isPressed)
             }
-            .shadow(color: circleShadowColor, radius: circleShadowRadius)
+            .shadow(
+                color: padFlatChrome ? .clear : circleShadowColor,
+                radius: padFlatChrome ? 0 : circleShadowRadius
+            )
 
             BuxCatalogDynamicText(key: title)
                 .font(titleFont)
@@ -452,31 +461,28 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
-        .scaleEffect(combinedScale)
-        .animation(pressAnimation, value: isPressed)
-        .animation(pressAnimation, value: releaseBounce)
-        .animation(BuxPointerFeedback.hoverAnimation, value: isHovered)
-        .onContinuousHover { phase in
-            guard BuxPointerFeedback.isEnabled else { return }
-            switch phase {
-            case .active:
-                isHovered = true
-            case .ended:
-                isHovered = false
-            }
-        }
+        .scaleEffect(isPressed ? 0.93 : 1.0)
+        .animation(BuxMotion.heroPress, value: isPressed)
         .simultaneousGesture(
-            DragGesture(minimumDistance: 12)
-                .onChanged { _ in dragExceeded = true }
+            DragGesture(minimumDistance: 20)
+                .onChanged { value in
+                    let distance = hypot(value.translation.width, value.translation.height)
+                    if distance >= 20 {
+                        dragExceeded = true
+                    }
+                }
+                .onEnded { _ in
+                    dragExceeded = false
+                }
         )
         .onLongPressGesture(
             minimumDuration: 0,
-            maximumDistance: 24,
+            maximumDistance: 48,
             pressing: { pressing in
                 if pressing {
                     dragExceeded = false
                 }
-                withAnimation(pressAnimation) {
+                withAnimation(BuxMotion.heroPress) {
                     isPressed = pressing
                 }
                 if pressing {
@@ -485,34 +491,13 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
             },
             perform: {
                 guard !dragExceeded else { return }
-                if usesReleaseBounce {
-                    playReleaseBounce(completion: action)
-                } else {
-                    action()
-                }
+                action()
             }
         )
         .accessibilityLabel(
             BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale)
         )
         .accessibilityAddTraits(.isButton)
-    }
-
-    private func playReleaseBounce(completion: @escaping () -> Void) {
-        guard !BuxMotion.reducedMotion else {
-            completion()
-            return
-        }
-        releaseBounce = 0.94
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.46)) {
-            releaseBounce = 1.07
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.13) {
-            completion()
-            withAnimation(.spring(response: 0.34, dampingFraction: 0.66)) {
-                releaseBounce = 1
-            }
-        }
     }
 }
 
@@ -547,9 +532,12 @@ struct BuxDashboardCardButtonStyle: ButtonStyle {
 }
 
 // MARK: - MorphingPillButtonStyle (kept for Pill compatibility)
+/// Category / segment chips — press only. No pointer hover (5 chips in a nested scroll = frame drops).
 struct MorphingPillButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        BuxPointerButtonStyleBody(configuration: configuration, pressedScale: 0.985)
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.985 : 1.0)
+            .animation(.buxSoftPress, value: configuration.isPressed)
     }
 }
 

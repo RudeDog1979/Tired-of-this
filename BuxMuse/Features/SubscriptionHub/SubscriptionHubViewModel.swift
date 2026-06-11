@@ -6,8 +6,8 @@
 //  ViewModel managing local subscription analytics, timelines, burn rates, and risks.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 public final class SubscriptionHubViewModel: ObservableObject {
     private let engine: FinancialIntelligenceEngine
@@ -39,8 +39,9 @@ public final class SubscriptionHubViewModel: ObservableObject {
     // Selected states
     @Published var selectedDetail: SubscriptionDetail? = nil
     
-    private var cancellables = Set<AnyCancellable>()
-    
+    private var lastRecomputeFingerprint: [String] = []
+    private var quarterlyIncreaseTask: Task<Void, Never>?
+
     public init(engine: FinancialIntelligenceEngine, settingsManager: AppSettingsManager) {
         self.engine = engine
         self.settingsManager = settingsManager
@@ -53,40 +54,37 @@ public final class SubscriptionHubViewModel: ObservableObject {
         weeklyBurnRate = MoneyAmount(value: 0, currencyCode: currency)
         monthlyBurnRate = MoneyAmount(value: 0, currencyCode: currency)
         yearlyBurnRate = MoneyAmount(value: 0, currencyCode: currency)
-
-        // If the engine is an ObservableObject, we can observe its changes
-        if let obsEngine = engine as? LocalFinancialIntelligenceEngine18 {
-            obsEngine.objectWillChange
-                .receive(on: RunLoop.main)
-                .sink { [weak self] _ in
-                    self?.refreshData()
-                }
-                .store(in: &cancellables)
-        }
-
-        NotificationCenter.default.publisher(for: .buxMuseFinancialDataDidChange)
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.refreshData()
-            }
-            .store(in: &cancellables)
-
-        refreshData()
     }
 
     public func applySnapshot(_ snapshot: SubscriptionHubSnapshot, settingsManager: AppSettingsManager) {
-        subscriptions = snapshot.subscriptions
+        let fingerprint = Self.fingerprint(for: snapshot.subscriptions)
         healthScore = snapshot.healthScore
-        recomputeDisplayFields(from: snapshot.subscriptions)
+        guard fingerprint != lastRecomputeFingerprint else { return }
+        lastRecomputeFingerprint = fingerprint
+        subscriptions = snapshot.subscriptions
+        recomputeDisplayFields(
+            from: snapshot.subscriptions,
+            preferredHealthScore: snapshot.healthScore
+        )
     }
 
     public func refreshData() {
         let allSubs = engine.activeSubscriptions()
+        let fingerprint = Self.fingerprint(for: allSubs)
+        guard fingerprint != lastRecomputeFingerprint else { return }
+        lastRecomputeFingerprint = fingerprint
         subscriptions = allSubs
         recomputeDisplayFields(from: allSubs)
     }
 
-    private func recomputeDisplayFields(from allSubs: [SubscriptionInfo]) {
+    private static func fingerprint(for subs: [SubscriptionInfo]) -> [String] {
+        subs.map { "\($0.id)|\($0.cost.value)|\($0.nextRenewalDate.timeIntervalSince1970)" }
+    }
+
+    private func recomputeDisplayFields(
+        from allSubs: [SubscriptionInfo],
+        preferredHealthScore: Int? = nil
+    ) {
         let currency = settingsManager.selectedCurrency.id
         
         // 1. Calculate cost breakdowns & burn rates
@@ -137,37 +135,19 @@ public final class SubscriptionHubViewModel: ObservableObject {
         self.totalWeeklyCost = MoneyAmount(value: totalWeekly, currencyCode: currency)
         self.totalIrregularCost = MoneyAmount(value: totalIrregular, currencyCode: currency)
         
-        // 2. Health score calculations: start at 100, deduct for risk items
-        var score = 100
+        // 2. Health + monthly delta — prefer brain snapshot score; avoid per-sub detail fetches on scroll.
         var priceHikeSum: Decimal = 0
-        
         for sub in allSubs {
-            for risk in sub.risks {
-                switch risk.type {
-                case .priceHike:
-                    score -= 8
-                    // Extract numerical difference if possible from transaction history
-                    if let detail = engine.subscriptionDetail(for: sub.merchantName) {
-                        if detail.priceHistoryGraph.count >= 2 {
-                            let diff = detail.priceHistoryGraph.last! - detail.priceHistoryGraph.first!
-                            if diff > 0 { priceHikeSum += diff }
-                        }
-                    }
-                case .doubleCharge:
-                    score -= 15
-                case .zombieSubscription:
-                    score -= 10
-                case .irregularCycle:
-                    score -= 3
-                case .currencyChange:
-                    score -= 5
-                default:
-                    score -= 4
-                }
+            for risk in sub.risks where risk.type == .priceHike {
+                priceHikeSum += Self.priceHikeDelta(from: risk.description)
             }
         }
-        
-        self.healthScore = max(10, min(100, score))
+
+        if let preferredHealthScore {
+            self.healthScore = preferredHealthScore
+        } else {
+            self.healthScore = Self.healthScore(for: allSubs)
+        }
         
         let locale = settingsManager.interfaceLocale
         if priceHikeSum > 0 {
@@ -208,18 +188,73 @@ public final class SubscriptionHubViewModel: ObservableObject {
             )
         }
         
-        // Historical increase from subscription spend (last 90 days vs prior 90 days)
-        self.burnRateQuarterlyIncrease = Self.computeQuarterlyBurnIncrease(
-            subscriptions: allSubs,
-            engine: engine
-        )
+        // Historical increase — expensive full-transaction scan; run off the main actor.
+        scheduleQuarterlyBurnIncrease(for: allSubs)
     }
 
-    private static func computeQuarterlyBurnIncrease(
-        subscriptions: [SubscriptionInfo],
-        engine: FinancialIntelligenceEngine
-    ) -> Double {
-        guard !subscriptions.isEmpty else { return 0 }
+    private func scheduleQuarterlyBurnIncrease(for allSubs: [SubscriptionInfo]) {
+        quarterlyIncreaseTask?.cancel()
+        let normalizedMerchants = Set(allSubs.map {
+            MerchantLogoEngine.normalizeMerchantName($0.merchantName)
+        })
+        let spendRows = engine.allTransactions().compactMap { tx -> SubscriptionSpendRow? in
+            guard tx.amount.value < 0 else { return nil }
+            let normalized = MerchantLogoEngine.normalizeMerchantName(tx.merchantName)
+            guard normalizedMerchants.contains(normalized) else { return nil }
+            return SubscriptionSpendRow(date: tx.date, spend: abs(tx.amount.value))
+        }
+
+        quarterlyIncreaseTask = Task { [weak self] in
+            let increase = await Task.detached(priority: .utility) {
+                Self.computeQuarterlyBurnIncrease(spendRows: spendRows)
+            }.value
+            guard !Task.isCancelled else { return }
+            self?.burnRateQuarterlyIncrease = increase
+        }
+    }
+
+    private struct SubscriptionSpendRow: Sendable {
+        let date: Date
+        let spend: Decimal
+    }
+
+    private static func healthScore(for subs: [SubscriptionInfo]) -> Int {
+        var score = 100
+        for sub in subs {
+            for risk in sub.risks {
+                switch risk.type {
+                case .priceHike: score -= 8
+                case .doubleCharge: score -= 15
+                case .zombieSubscription: score -= 10
+                case .irregularCycle: score -= 3
+                case .currencyChange: score -= 5
+                default: score -= 4
+                }
+            }
+        }
+        return max(10, min(100, score))
+    }
+
+    /// Parses "(from X to Y)" price-hike copy without hitting `subscriptionDetail`.
+    private static func priceHikeDelta(from description: String) -> Decimal {
+        let pattern = #"from\s+([0-9]+(?:\.[0-9]+)?)\s+to\s+([0-9]+(?:\.[0-9]+)?)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+              let match = regex.firstMatch(
+                in: description,
+                range: NSRange(description.startIndex..., in: description)
+              ),
+              match.numberOfRanges == 3,
+              let oldRange = Range(match.range(at: 1), in: description),
+              let newRange = Range(match.range(at: 2), in: description),
+              let oldValue = Decimal(string: String(description[oldRange])),
+              let newValue = Decimal(string: String(description[newRange])),
+              newValue > oldValue
+        else { return 0 }
+        return newValue - oldValue
+    }
+
+    private nonisolated static func computeQuarterlyBurnIncrease(spendRows: [SubscriptionSpendRow]) -> Double {
+        guard !spendRows.isEmpty else { return 0 }
 
         let now = Date()
         let calendar = Calendar.current
@@ -228,21 +263,12 @@ public final class SubscriptionHubViewModel: ObservableObject {
             return 0
         }
 
-        let normalizedMerchants = Set(subscriptions.map {
-            MerchantLogoEngine.normalizeMerchantName($0.merchantName)
-        })
-
-        let subscriptionTxs = engine.allTransactions().filter { tx in
-            tx.amount.value < 0 &&
-            normalizedMerchants.contains(MerchantLogoEngine.normalizeMerchantName(tx.merchantName))
-        }
-
-        let currentTotal = subscriptionTxs
+        let currentTotal = spendRows
             .filter { $0.date >= currentStart }
-            .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
-        let previousTotal = subscriptionTxs
+            .reduce(Decimal(0)) { $0 + $1.spend }
+        let previousTotal = spendRows
             .filter { $0.date >= previousStart && $0.date < currentStart }
-            .reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+            .reduce(Decimal(0)) { $0 + $1.spend }
 
         guard previousTotal > 0 else { return 0 }
 

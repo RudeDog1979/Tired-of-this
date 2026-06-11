@@ -146,6 +146,9 @@ public final class BuxMuseBrain: ObservableObject {
 
         reloadExpenseRecordsFromStore()
         categoryRecords = (try? fetchAllCategoryRecords()) ?? []
+        let settings = SettingsStore.shared
+        settings.migrateLegacyCustomBudgetModeIfNeeded()
+        settings.normalizeEnvelopeCategoryStorageIfNeeded()
         refreshSnapshotsImmediately()
         if !expenseRecords.isEmpty {
             updateExpenseInteractionSnapshot(records: expenseRecords, currency: appSettings.selectedCurrency)
@@ -560,8 +563,6 @@ public final class BuxMuseBrain: ObservableObject {
         let calendar = Self.budgetCalendar()
         let now = Date()
         let store = SettingsStore.shared
-        store.migrateLegacyCustomBudgetModeIfNeeded()
-        store.normalizeEnvelopeCategoryStorageIfNeeded()
         let budgetPeriod = BuxBudgetPeriodCalculator.currentPeriod(
             configuration: .fromSettings,
             now: now,
@@ -658,8 +659,12 @@ public final class BuxMuseBrain: ObservableObject {
             workspaceSynergy: workspaceSynergy
         )
 
-        dashboardSnapshot = dashSnapshot
-        subscriptionHubSnapshot = hubSnapshot
+        if dashboardSnapshot != dashSnapshot {
+            dashboardSnapshot = dashSnapshot
+        }
+        if subscriptionHubSnapshot != hubSnapshot {
+            subscriptionHubSnapshot = hubSnapshot
+        }
         persistIntelligenceCache(subs: subs, currency: currency)
     }
 

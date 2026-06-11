@@ -24,15 +24,17 @@ struct DashboardFabAnchorPreferenceKey: PreferenceKey {
 
 extension View {
     /// Reports the Expense (+) circle center for iPad HUD arc deployment.
-    func dashboardFabAnchor(circleDiameter: CGFloat) -> some View {
+    func dashboardFabAnchor(circleDiameter: CGFloat, enabled: Bool = true) -> some View {
         background {
-            GeometryReader { proxy in
-                let frame = proxy.frame(in: .named("dashboardOverlay"))
-                let center = CGPoint(
-                    x: frame.midX,
-                    y: frame.minY + 10 + circleDiameter * 0.5
-                )
-                Color.clear.preference(key: DashboardFabAnchorPreferenceKey.self, value: center)
+            if enabled {
+                GeometryReader { proxy in
+                    let frame = proxy.frame(in: .named("dashboardOverlay"))
+                    let center = CGPoint(
+                        x: frame.midX,
+                        y: frame.minY + 10 + circleDiameter * 0.5
+                    )
+                    Color.clear.preference(key: DashboardFabAnchorPreferenceKey.self, value: center)
+                }
             }
         }
     }

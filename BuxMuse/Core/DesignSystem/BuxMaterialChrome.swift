@@ -48,6 +48,7 @@ enum BuxMaterialChrome {
 
 struct BuxMaterialCardChromeModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadFlatDashboardChrome) private var padFlatChrome
     @EnvironmentObject private var themeManager: ThemeManager
     @ObservedObject private var settings = SettingsStore.shared
 
@@ -77,7 +78,7 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         let borderLineWidth: CGFloat = settings.solarContrastModeEnabled ? 2.0 : 0.5
-        let shadowColor: Color = (variant == .elevated && castsShadow && !settings.solarContrastModeEnabled)
+        let shadowColor: Color = (variant == .elevated && castsShadow && !settings.solarContrastModeEnabled && !padFlatChrome)
             ? BuxMaterialChrome.elevatedShadowColor(for: colorScheme)
             : .clear
 
@@ -85,7 +86,7 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
             .background {
                 shape.fill(fillColor)
             }
-            .modifier(BuxMaterialClipGroupModifier(useGroup: variant == .elevated))
+            .modifier(BuxMaterialClipGroupModifier(useGroup: variant == .elevated && !padFlatChrome))
             .clipShape(shape)
             .overlay {
                 if showsBorder {
@@ -94,9 +95,9 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
             }
             .shadow(
                 color: shadowColor,
-                radius: variant == .elevated && castsShadow && !settings.solarContrastModeEnabled ? BuxMaterialChrome.elevatedShadowRadius : 0,
+                radius: variant == .elevated && castsShadow && !settings.solarContrastModeEnabled && !padFlatChrome ? BuxMaterialChrome.elevatedShadowRadius : 0,
                 x: 0,
-                y: variant == .elevated && castsShadow && !settings.solarContrastModeEnabled ? BuxMaterialChrome.elevatedShadowY : 0
+                y: variant == .elevated && castsShadow && !settings.solarContrastModeEnabled && !padFlatChrome ? BuxMaterialChrome.elevatedShadowY : 0
             )
             .modifier(BuxLandingLightRimWhenEnabled(
                 cornerRadius: cornerRadius,

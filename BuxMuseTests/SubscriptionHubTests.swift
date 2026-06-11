@@ -117,6 +117,33 @@ final class SubscriptionHubTests: XCTestCase {
         XCTAssertEqual(viewModel.healthScore, 100)
     }
     
+    func testDuplicateSameMerchantChargesSurfaceParallelSubscriptions() {
+        let calendar = Calendar.current
+        let today = Date()
+
+        let tx1 = Transaction(
+            date: calendar.date(byAdding: .day, value: -2, to: today)!,
+            amount: MoneyAmount(value: -9.99, currencyCode: "USD"),
+            merchantName: "Example Plus",
+            category: .subscriptions
+        )
+        let tx2 = Transaction(
+            date: calendar.date(byAdding: .day, value: -1, to: today)!,
+            amount: MoneyAmount(value: -9.99, currencyCode: "USD"),
+            merchantName: "Example Plus",
+            category: .subscriptions
+        )
+
+        engine.addTransaction(tx1)
+        engine.addTransaction(tx2)
+
+        let subs = engine.activeSubscriptions()
+        XCTAssertEqual(subs.count, 2)
+        XCTAssertEqual(subs.filter { $0.merchantName == "Example Plus" }.count, 2)
+        XCTAssertTrue(subs.contains(where: { $0.risks.contains(where: { $0.type == .doubleCharge }) }))
+        XCTAssertEqual(Set(subs.map(\.id)).count, 2)
+    }
+
     func testRiskAnalyzerAndCancellationOpportunityEngine() {
         let calendar = Calendar.current
         let today = Date()

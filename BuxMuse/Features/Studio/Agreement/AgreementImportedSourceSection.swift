@@ -257,6 +257,9 @@ struct AgreementImportedSourceSection: View {
             return
         }
 
+        let oldPath = draft.importedSourcePath
+        let oldPageCount = AgreementDocumentStore.pageCount(path: oldPath)
+
         guard let saved = AgreementDocumentStore.saveImportedSource(at: url, agreementId: draft.id) else {
             importError = StudioAgreementL10n.line(
                 "Could not import this file. Use a PDF or photo.",
@@ -265,12 +268,15 @@ struct AgreementImportedSourceSection: View {
             return
         }
 
-        if let oldPath = draft.importedSourcePath {
+        let newPageCount = AgreementDocumentStore.pageCount(path: saved.path)
+        let cleanupPageCount = max(oldPageCount, newPageCount)
+        if cleanupPageCount > 0 {
+            AgreementImportedMarkupStore.deleteAllMarkups(for: draft.id, pageCount: cleanupPageCount)
+        }
+
+        // Same agreement id reuses `{id}-source.{ext}` — atomic save already overwrote in place.
+        if let oldPath, oldPath != saved.path {
             AgreementDocumentStore.delete(path: oldPath)
-            AgreementImportedMarkupStore.deleteAllMarkups(
-                for: draft.id,
-                pageCount: AgreementDocumentStore.pageCount(path: oldPath)
-            )
         }
         if let oldExport = draft.importedSignedExportPath {
             AgreementDocumentStore.delete(path: oldExport)
@@ -281,7 +287,12 @@ struct AgreementImportedSourceSection: View {
         draft.importedSourceFilename = url.lastPathComponent
         draft.importedSignedExportPath = nil
         signedExportShareURL = nil
+        draft.clientSignaturePNG = nil
+        draft.providerSignaturePNG = nil
+        draft.clientSignedAt = nil
+        draft.providerSignedAt = nil
         draft.updatedAt = Date()
+        draft.refreshAgreementStatus()
         onPersist()
     }
 

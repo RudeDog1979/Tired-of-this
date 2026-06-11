@@ -326,6 +326,28 @@ private struct BuxHorizontalScrollEdgeFadeModifier: ViewModifier {
     }
 }
 
+/// Trailing vignette overlay — soft edge fade without clipping scroll content.
+private struct BuxTrailingScrollEdgeVignetteModifier: ViewModifier {
+    let background: Color
+    let width: CGFloat
+
+    func body(content: Content) -> some View {
+        content.overlay(alignment: .trailing) {
+            LinearGradient(
+                stops: [
+                    .init(color: .clear, location: 0),
+                    .init(color: background.opacity(0.55), location: 0.45),
+                    .init(color: background, location: 1),
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(width: width)
+            .allowsHitTesting(false)
+        }
+    }
+}
+
 extension View {
     func buxScrollEdgeMask(edges: Edge.Set, size: CGFloat = 20) -> some View {
         modifier(BuxScrollEdgeMaskModifier(edges: edges, fadeSize: size))
@@ -333,6 +355,11 @@ extension View {
 
     func buxHorizontalScrollEdgeFade(background: Color, width: CGFloat = 20) -> some View {
         modifier(BuxHorizontalScrollEdgeFadeModifier(fadeWidth: width))
+    }
+
+    /// Soft trailing edge for horizontal carousels — overlay vignette, not a content mask.
+    func buxTrailingScrollEdgeVignette(background: Color, width: CGFloat = 12) -> some View {
+        modifier(BuxTrailingScrollEdgeVignetteModifier(background: background, width: width))
     }
 
     func buxThemedHorizontalScrollEdgeFade(

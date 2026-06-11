@@ -9,6 +9,8 @@
 import SwiftUI
 
 struct VisualHorizonView: View {
+    @Environment(\.buxPadFlatDashboardChrome) private var padFlatChrome
+
     let points: [Double]
     let accentColor: Color
     var horizontalPadding: CGFloat = 0
@@ -40,10 +42,12 @@ struct VisualHorizonView: View {
                             )
                         )
                     
-                    // Blurred neon glow under stroke
-                    HorizonCurveShape(points: cgPoints)
-                        .stroke(accentColor.opacity(0.4), lineWidth: 4.5)
-                        .blur(radius: 4)
+                    // Blurred neon glow under stroke (skipped on iPad Home — blur is scroll-GPU heavy).
+                    if !padFlatChrome {
+                        HorizonCurveShape(points: cgPoints)
+                            .stroke(accentColor.opacity(0.4), lineWidth: 4.5)
+                            .blur(radius: 4)
+                    }
                     
                     // Sharp primary stroke line
                     HorizonCurveShape(points: cgPoints)
@@ -79,7 +83,10 @@ struct VisualHorizonView: View {
                                 )
                             )
                             .frame(width: 10, height: 10)
-                            .shadow(color: accentColor, radius: 5)
+                            .shadow(
+                                color: padFlatChrome ? .clear : accentColor,
+                                radius: padFlatChrome ? 0 : 5
+                            )
                     }
                     .position(lastPoint)
                 }

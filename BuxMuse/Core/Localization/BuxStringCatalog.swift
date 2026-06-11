@@ -106,11 +106,10 @@ enum BuxStringCatalog {
                 }
                 if ch == "d" {
                     let prev = format.index(before: cursor)
-                    let prev2 = format.index(before: prev)
-                    if format[prev] == "l", format[prev2] == "l" {
-                        specs.append("%lld")
-                    } else if format[prev] == "l" {
-                        specs.append("%ld")
+                    if format[prev] == "l" {
+                        let isLongLong = prev > format.startIndex
+                            && format[format.index(before: prev)] == "l"
+                        specs.append(isLongLong ? "%lld" : "%ld")
                     } else {
                         specs.append("%d")
                     }

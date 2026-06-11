@@ -267,21 +267,52 @@ public struct SubscriptionRisk: Codable, Equatable, Identifiable {
 }
 
 public struct SubscriptionInfo: Identifiable, Codable, Equatable {
-    public var id: String { merchantName }
+    /// Parallel billing instances for the same merchant (e.g. two identical subscriptions).
+    public let instanceIndex: Int
     public let merchantName: String
     public let cost: MoneyAmount
     public let billingCycle: SubscriptionBillingCycle
     public let nextRenewalDate: Date
     public let category: TransactionCategory
     public let risks: [SubscriptionRisk]
-    
-    public init(merchantName: String, cost: MoneyAmount, billingCycle: SubscriptionBillingCycle, nextRenewalDate: Date, category: TransactionCategory, risks: [SubscriptionRisk] = []) {
+
+    public var id: String {
+        instanceIndex == 0 ? merchantName : "\(merchantName)#\(instanceIndex)"
+    }
+
+    public var displayName: String {
+        instanceIndex == 0 ? merchantName : "\(merchantName) (\(instanceIndex + 1))"
+    }
+
+    public init(
+        merchantName: String,
+        cost: MoneyAmount,
+        billingCycle: SubscriptionBillingCycle,
+        nextRenewalDate: Date,
+        category: TransactionCategory,
+        risks: [SubscriptionRisk] = [],
+        instanceIndex: Int = 0
+    ) {
         self.merchantName = merchantName
         self.cost = cost
         self.billingCycle = billingCycle
         self.nextRenewalDate = nextRenewalDate
         self.category = category
         self.risks = risks
+        self.instanceIndex = instanceIndex
+    }
+
+    public func parallelInstance(at index: Int) -> SubscriptionInfo {
+        guard index != instanceIndex else { return self }
+        return SubscriptionInfo(
+            merchantName: merchantName,
+            cost: cost,
+            billingCycle: billingCycle,
+            nextRenewalDate: nextRenewalDate,
+            category: category,
+            risks: risks,
+            instanceIndex: index
+        )
     }
 }
 

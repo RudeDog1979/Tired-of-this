@@ -40,3 +40,17 @@ extension View {
         modifier(BuxPadDashboardCardRailModifier())
     }
 }
+
+// MARK: - iPad Home scroll GPU budget
+
+private struct BuxPadFlatDashboardChromeKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// iPad Home tab only — flat strokes instead of drop shadows / glow stacks in scroll content.
+    var buxPadFlatDashboardChrome: Bool {
+        get { self[BuxPadFlatDashboardChromeKey.self] }
+        set { self[BuxPadFlatDashboardChromeKey.self] = newValue }
+    }
+}

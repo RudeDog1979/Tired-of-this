@@ -20,6 +20,8 @@ struct RecentTransactionsSectionView: View {
     let transactions: [DashboardRecentTransaction]
     let onSeeMore: () -> Void
 
+    @State private var displayedTransactions: [DashboardRecentTransaction] = []
+
     private var cardColor: Color {
         themeManager.cardFill(for: colorScheme)
     }
@@ -34,13 +36,13 @@ struct RecentTransactionsSectionView: View {
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-            if transactions.isEmpty {
+            if displayedTransactions.isEmpty {
                 BuxCatalogText.text("No transactions yet. Add an expense to see activity here.")
                     .font(.system(size: 13, weight: .medium))
                     .buxLabelSecondary()
             } else {
-                LazyVStack(spacing: BuxLayout.tight + 2) {
-                    ForEach(transactions) { tx in
+                VStack(spacing: BuxLayout.tight + 2) {
+                    ForEach(displayedTransactions) { tx in
                         recentRow(for: tx)
                     }
                 }
@@ -58,6 +60,15 @@ struct RecentTransactionsSectionView: View {
                 .padding(.vertical, 12)
             }
             .buttonStyle(BuxMicroShrinkStyle())
+        }
+        .onAppear {
+            if displayedTransactions != transactions {
+                displayedTransactions = transactions
+            }
+        }
+        .onChange(of: transactions) { _, newValue in
+            guard newValue != displayedTransactions else { return }
+            displayedTransactions = newValue
         }
     }
 

@@ -124,7 +124,7 @@ struct AgreementImportedDocumentSignSheet: View {
     }
 
     private var topChrome: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: BuxPadIdiom.isPad ? 12 : 8) {
             Button {
                 saveCurrentPage()
                 dismiss()
@@ -137,25 +137,25 @@ struct AgreementImportedDocumentSignSheet: View {
                     .clipShape(Circle())
             }
 
-            Text(
-                StudioAgreementL10n.format(
-                    "Page %d of %d",
-                    locale: locale,
-                    pageIndex + 1,
-                    pageCount
+            if BuxPadIdiom.isPad {
+                Text(
+                    StudioAgreementL10n.format(
+                        "Page %d of %d",
+                        locale: locale,
+                        pageIndex + 1,
+                        pageCount
+                    )
                 )
-            )
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(.white)
-            .lineLimit(1)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            }
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
 
             if canMarkUpCurrentPage {
                 topSignModeControls
             }
-
-            Spacer(minLength: 8)
 
             if canMarkUpCurrentPage {
                 Picker(StudioAgreementL10n.line("Signer", locale: locale), selection: $activeRole) {
@@ -166,26 +166,14 @@ struct AgreementImportedDocumentSignSheet: View {
                 }
                 .pickerStyle(.menu)
                 .tint(.white)
-                .frame(width: 88, alignment: .trailing)
+                .frame(width: BuxPadIdiom.isPad ? 88 : 72, alignment: .trailing)
                 .opacity(editorMode == .sign ? 1 : 0)
                 .disabled(editorMode != .sign)
                 .accessibilityHidden(editorMode != .sign)
             }
 
-            Button {
-                saveCurrentPage()
-                onPersist()
-                BuxSaveFeedback.success()
-                dismiss()
-            } label: {
-                BuxCatalogDynamicText(key: "Done")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(themeManager.contrastAccentColor(for: colorScheme))
-                    .clipShape(Capsule())
-            }
+            doneChromeButton
+                .layoutPriority(1)
         }
         .padding(.horizontal, BuxTokens.marginRegular)
         .padding(.top, 8)
@@ -197,6 +185,43 @@ struct AgreementImportedDocumentSignSheet: View {
                 endPoint: .bottom
             )
         )
+        .overlay(alignment: .bottomLeading) {
+            if !BuxPadIdiom.isPad {
+                Text(
+                    StudioAgreementL10n.format(
+                        "Page %d of %d",
+                        locale: locale,
+                        pageIndex + 1,
+                        pageCount
+                    )
+                )
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.82))
+                .lineLimit(1)
+                .padding(.horizontal, BuxTokens.marginRegular)
+                .padding(.bottom, 2)
+            }
+        }
+    }
+
+    private var doneChromeButton: some View {
+        Button {
+            saveCurrentPage()
+            onPersist()
+            BuxSaveFeedback.success()
+            dismiss()
+        } label: {
+            Text(StudioAgreementL10n.line("Done", locale: locale))
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(themeManager.contrastAccentColor(for: colorScheme))
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 
     private var documentCanvas: some View {
@@ -331,7 +356,7 @@ struct AgreementImportedDocumentSignSheet: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
-            .frame(width: 156)
+            .frame(width: BuxPadIdiom.isPad ? 156 : 128)
             .buxThemedSegmentedPicker()
             .colorScheme(.dark)
 
@@ -349,7 +374,7 @@ struct AgreementImportedDocumentSignSheet: View {
             .opacity(editorMode == .sign && !annotation.signaturePlacements.isEmpty ? 1 : 0.35)
             .accessibilityLabel(StudioAgreementL10n.line("Undo", locale: locale))
         }
-        .frame(width: 200, alignment: .center)
+        .frame(width: BuxPadIdiom.isPad ? 200 : 168, alignment: .center)
     }
 
     private var bottomChrome: some View {
@@ -418,18 +443,16 @@ struct AgreementImportedDocumentSignSheet: View {
         if let role = placement.signatureRole,
            let image = signatureImage(for: role) {
             ZStack {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
+                AgreementDocumentPlacedSignatureView(image: image)
                     .frame(width: rect.width, height: rect.height)
                     .rotationEffect(.degrees(placement.rotationDegrees))
                     .contentShape(Rectangle())
                     .position(x: rect.midX, y: rect.midY)
-                    .allowsHitTesting(!isSelected)
-                    .onTapGesture {
-                        guard canManipulate else { return }
-                        selectedPlacementID = placement.id
-                    }
+                .allowsHitTesting(!isSelected)
+                .onTapGesture {
+                    guard canManipulate else { return }
+                    selectedPlacementID = placement.id
+                }
 
                 if isSelected && canManipulate {
                     AgreementImportedSignatureSelectionChrome(

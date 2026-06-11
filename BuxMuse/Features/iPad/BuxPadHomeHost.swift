@@ -10,6 +10,7 @@ struct BuxPadHomeHost: View {
 
     var body: some View {
         DashboardView(transactionNamespace: transactionNamespace)
+            .environment(\.buxPadFlatDashboardChrome, true)
             .buxPadDashboardUIScreenMitigation()
             .buxPadPublishesSceneScale()
             .toolbar {

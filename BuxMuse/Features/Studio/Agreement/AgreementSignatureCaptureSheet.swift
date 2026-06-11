@@ -21,6 +21,8 @@ struct AgreementSignatureCaptureSheet: View {
     let onCapture: (Data) -> Void
 
     @State private var drawing = PKDrawing()
+    @State private var inkColor = Color(red: 0, green: 0, blue: 0)
+    @State private var inkUIColor = AgreementSignatureInk.black
 
     private var locale: Locale { appSettingsManager.interfaceLocale }
 
@@ -32,13 +34,22 @@ struct AgreementSignatureCaptureSheet: View {
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
 
-                StudioSignaturePadView(drawing: $drawing)
-                    .frame(height: 180)
-                    .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous)
-                            .strokeBorder(Color.primary.opacity(0.12), lineWidth: 1)
-                    )
+                AgreementSignatureInkColorPicker(inkColor: $inkColor, inkUIColor: $inkUIColor)
+
+                BuxPadPencilCanvasView(
+                    drawing: $drawing,
+                    drawingPolicy: .anyInput,
+                    showsToolPicker: false,
+                    inkColor: inkUIColor,
+                    inkWidth: 2.5
+                )
+                .frame(height: 180)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous)
+                        .strokeBorder(Color.primary.opacity(0.12), lineWidth: 1)
+                )
 
                 BuxCatalogDynamicText(key: "Sign inside the box. Use Clear to start over.")
                     .font(.system(size: 11, weight: .medium))

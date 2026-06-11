@@ -44,7 +44,6 @@ public final class InsightsViewModel: ObservableObject {
             }
             .store(in: &cancellables)
             
-        // Observe changes in transactions to trigger automatic updates
         if let obsEngine = financialEngine as? LocalFinancialIntelligenceEngine18 {
             obsEngine.objectWillChange
                 .receive(on: RunLoop.main)

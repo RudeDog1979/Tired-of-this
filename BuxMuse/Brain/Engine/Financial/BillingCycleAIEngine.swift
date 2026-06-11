@@ -195,6 +195,33 @@ public struct BillingCycleAIEngine {
         )
     }
 
+    /// Same-amount charges within five days — parallel subs or duplicate billing in one cycle.
+    public static func parallelChargeInstanceCount(expenses: [Transaction]) -> Int {
+        let charges = expenses.filter { $0.amount.value < 0 }.sorted { $0.date < $1.date }
+        guard charges.count >= 2 else { return max(1, charges.count) }
+
+        var maxCluster = 1
+        for i in 0..<charges.count {
+            var cluster = 1
+            for j in (i + 1)..<charges.count {
+                let dayDiff = charges[j].date.timeIntervalSince(charges[i].date) / 86_400
+                if dayDiff < 5,
+                   charges[j].amount.value == charges[i].amount.value {
+                    cluster += 1
+                }
+            }
+            maxCluster = max(maxCluster, cluster)
+        }
+        return max(1, maxCluster)
+    }
+
+    public static func subscriptionInstanceCount(
+        merchantExpenses: [Transaction],
+        userDeclaredCount: Int
+    ) -> Int {
+        max(parallelChargeInstanceCount(expenses: merchantExpenses), userDeclaredCount, 1)
+    }
+
     /// Single user-declared subscription (no recurring history required).
     public static func subscriptionFromUserDeclaration(_ transaction: Transaction) -> SubscriptionInfo? {
         guard transaction.isSubscriptionLike || transaction.isTrial else { return nil }
@@ -230,23 +257,29 @@ public struct BillingCycleAIEngine {
         )
     }
 
-    /// Adds user-declared subscriptions not already detected from recurring history.
+    /// Fills any user-declared instances the merchant pass did not already surface.
     public static func appendUserDeclaredSubscriptions(
         to subs: inout [SubscriptionInfo],
         details: inout [String: SubscriptionDetail],
         transactions: [Transaction],
         locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) {
-        var seen = Set(subs.map { MerchantLogoEngine.normalizeMerchantName($0.merchantName) })
+        let declared = transactions.filter { $0.isSubscriptionLike || $0.isTrial }
+        let declaredByMerchant = Dictionary(grouping: declared) { MerchantLogoEngine.normalizeMerchantName($0.merchantName) }
 
-        for transaction in transactions.sorted(by: { $0.date > $1.date }) {
-            let norm = MerchantLogoEngine.normalizeMerchantName(transaction.merchantName)
-            guard !seen.contains(norm) else { continue }
-            guard let subInfo = subscriptionFromUserDeclaration(transaction) else { continue }
+        for (norm, merchantDeclared) in declaredByMerchant {
+            let existingCount = subs.filter { MerchantLogoEngine.normalizeMerchantName($0.merchantName) == norm }.count
+            guard existingCount < merchantDeclared.count else { continue }
 
-            subs.append(subInfo)
-            details[norm] = subscriptionDetail(info: subInfo, allTransactions: transactions, locale: locale)
-            seen.insert(norm)
+            let sortedDeclared = merchantDeclared.sorted { $0.date > $1.date }
+            for offset in existingCount..<sortedDeclared.count {
+                let transaction = sortedDeclared[offset]
+                guard let subInfo = subscriptionFromUserDeclaration(transaction) else { continue }
+                subs.append(subInfo.parallelInstance(at: offset))
+                if details[norm] == nil, let first = subscriptionFromUserDeclaration(sortedDeclared.last!) {
+                    details[norm] = subscriptionDetail(info: first, allTransactions: transactions, locale: locale)
+                }
+            }
         }
     }
 

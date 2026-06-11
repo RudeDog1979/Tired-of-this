@@ -14,23 +14,25 @@ struct SubscriptionHubView: View {
     @Environment(\.buxPadInspectorColumn) private var isPadInspectorColumn
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
-    @EnvironmentObject var brain: BuxMuseBrain
 
     @Binding var isPresented: Bool
 
     @StateObject private var viewModel: SubscriptionHubViewModel
     @State private var showDetailSheet = false
 
-    private let hubSnapshot: SubscriptionHubSnapshot
+    let hubSnapshot: SubscriptionHubSnapshot
+    let onCancelSubscription: (String) -> Void
 
     init(
         isPresented: Binding<Bool>,
         engine: FinancialIntelligenceEngine,
         settingsManager: AppSettingsManager,
-        hubSnapshot: SubscriptionHubSnapshot
+        hubSnapshot: SubscriptionHubSnapshot,
+        onCancelSubscription: @escaping (String) -> Void
     ) {
         self._isPresented = isPresented
         self.hubSnapshot = hubSnapshot
+        self.onCancelSubscription = onCancelSubscription
         self._viewModel = StateObject(wrappedValue: SubscriptionHubViewModel(engine: engine, settingsManager: settingsManager))
     }
 
@@ -48,7 +50,7 @@ struct SubscriptionHubView: View {
                     .ignoresSafeArea()
 
                     ScrollView(showsIndicators: false) {
-                        LazyVStack(spacing: BuxLayout.section) {
+                        VStack(spacing: BuxLayout.section) {
                             overviewCard
 
                             SubscriptionRenewalTimelineView(renewals: viewModel.upcomingRenewals) { name in
@@ -114,7 +116,7 @@ struct SubscriptionHubView: View {
                     detail: detail,
                     onCancelTriggered: { name in
                         withAnimation {
-                            try? brain.cancelSubscription(merchantName: name)
+                            onCancelSubscription(name)
                             viewModel.refreshData()
                         }
                     },
@@ -132,7 +134,7 @@ struct SubscriptionHubView: View {
         .onAppear {
             viewModel.applySnapshot(hubSnapshot, settingsManager: appSettingsManager)
         }
-        .onChange(of: brain.subscriptionHubSnapshot) { _, newSnapshot in
+        .onChange(of: hubSnapshot) { _, newSnapshot in
             viewModel.applySnapshot(newSnapshot, settingsManager: appSettingsManager)
         }
         .buxThemedPresentation()
@@ -221,15 +223,15 @@ struct SubscriptionHubView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .subscriptionHubCard()
         }
-        .buttonStyle(BuxMicroShrinkStyle())
+        .buttonStyle(BuxDashboardCardButtonStyle())
+        .contentShape(Rectangle())
     }
 
     private func triggerDetail(for name: String) {
         viewModel.loadDetail(for: name)
-        if viewModel.selectedDetail != nil {
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
-                showDetailSheet = true
-            }
+        guard viewModel.selectedDetail != nil else { return }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
+            showDetailSheet = true
         }
     }
 }

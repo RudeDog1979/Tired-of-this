@@ -203,13 +203,14 @@ struct ExpenseIntelligenceEngine {
         locale: Locale
     ) -> SubscriptionDetection {
         let norm = MerchantLogoEngine.normalizeMerchantName(record.name)
-        if let match = subscriptions.first(where: { MerchantLogoEngine.normalizeMerchantName($0.merchantName) == norm }) {
+        let matchingSubs = subscriptions.filter { MerchantLogoEngine.normalizeMerchantName($0.merchantName) == norm }
+        if let match = matchingSubs.first {
             return SubscriptionDetection(
                 isLike: true,
                 message: BuxLocalizedString.format(
                     "Matches your %@ pattern",
                     locale: locale,
-                    match.merchantName
+                    match.displayName
                 ),
                 matchesSubscription: true
             )
@@ -228,7 +229,7 @@ struct ExpenseIntelligenceEngine {
                     locale: locale,
                     sub.billingCycle.localizedDisplayName(locale: locale)
                 ),
-                matchesSubscription: false
+                matchesSubscription: true
             )
         }
 
