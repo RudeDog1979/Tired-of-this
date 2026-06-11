@@ -115,6 +115,7 @@ struct ExpensesTopCarousel: View {
                 .scrollTargetBehavior(.viewAligned)
                 .scrollPosition(id: $pageIndex)
                 .safeAreaPadding(.vertical, 8)
+                .buxPadViewAlignedHorizontalCarousel()
             }
             .frame(minHeight: slotHeight + 16, alignment: .top)
             .padding(.bottom, BuxLayout.expenseHeroShadowBleed)

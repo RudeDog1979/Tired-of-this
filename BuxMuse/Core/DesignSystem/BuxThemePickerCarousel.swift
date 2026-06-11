@@ -185,6 +185,7 @@ struct BuxThemePickerCarousel: View {
         scroll
             .modifier(BuxHorizontalSnapScrollModifier())
             .modifier(BuxCarouselScrollClipModifier())
+            .buxPadViewAlignedHorizontalCarousel()
     }
 }
 
@@ -225,6 +226,7 @@ struct BuxAccentPickerCarousel: View {
 
             scroll
                 .modifier(BuxHorizontalSnapScrollModifier())
+                .buxPadViewAlignedHorizontalCarousel()
         }
     }
 }

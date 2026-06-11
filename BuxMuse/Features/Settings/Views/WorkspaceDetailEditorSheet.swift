@@ -156,6 +156,7 @@ struct WorkspaceDetailEditorSheet: View {
                 .scrollTargetLayout()
                 .modifier(BuxHorizontalSnapScrollModifier())
                 .modifier(BuxCarouselScrollClipModifier())
+                .buxPadViewAlignedHorizontalCarousel()
             }
             .buxFormFieldPadding()
         }

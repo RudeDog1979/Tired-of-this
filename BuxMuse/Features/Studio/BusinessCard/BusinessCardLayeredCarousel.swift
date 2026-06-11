@@ -48,34 +48,48 @@ struct BusinessCardLayeredCarousel<Item: Hashable, Label: View>: View {
         return idx
     }
 
+    @ViewBuilder
+    private var carouselScroll: some View {
+        let scroll = ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: spacing) {
+                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                    let isActive = item == activeID
+                    VStack(spacing: 8) {
+                        card(item, isActive)
+                            .frame(width: cardWidth)
+                            .scrollTransition(.interactive, axis: .horizontal) { content, phase in
+                                content
+                                    .scaleEffect(phase.isIdentity ? 1 : 0.94)
+                                    .opacity(phase.isIdentity ? 1 : 0.78)
+                            }
+                        label(item)
+                    }
+                    .zIndex(layerOrder(for: index))
+                    .id(item)
+                }
+            }
+            .scrollTargetLayout()
+            .padding(.vertical, 12)
+        }
+
+        if BuxPadIdiom.isPad {
+            scroll
+                .buxViewAlignedHorizontalCarousel()
+                .scrollPosition(id: $activeID)
+                .frame(height: height)
+        } else {
+            scroll
+                .scrollClipDisabled()
+                .contentMargins(.horizontal, contentMargins, for: .scrollContent)
+                .scrollTargetBehavior(.viewAligned)
+                .scrollPosition(id: $activeID)
+                .frame(height: height)
+        }
+    }
+
     var body: some View {
         VStack(spacing: 10) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: spacing) {
-                    ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                        let isActive = item == activeID
-                        VStack(spacing: 8) {
-                            card(item, isActive)
-                                .frame(width: cardWidth)
-                                .scrollTransition(.interactive, axis: .horizontal) { content, phase in
-                                    content
-                                        .scaleEffect(phase.isIdentity ? 1 : 0.94)
-                                        .opacity(phase.isIdentity ? 1 : 0.78)
-                                }
-                            label(item)
-                        }
-                        .zIndex(layerOrder(for: index))
-                        .id(item)
-                    }
-                }
-                .scrollTargetLayout()
-                .padding(.vertical, 12)
-            }
-            .scrollClipDisabled()
-            .contentMargins(.horizontal, contentMargins, for: .scrollContent)
-            .scrollTargetBehavior(.viewAligned)
-            .scrollPosition(id: $activeID)
-            .frame(height: height)
+            carouselScroll
 
             if showsPageIndicator, items.count > 1 {
                 HStack(spacing: 6) {

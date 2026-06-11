@@ -153,4 +153,45 @@ extension View {
             }
         }
     }
+
+    /// View-aligned horizontal carousel — matches Subscription Hub renewals / Apple Music snap.
+    func buxViewAlignedHorizontalCarousel() -> some View {
+        scrollClipDisabled()
+            .scrollTargetBehavior(.viewAligned)
+            .safeAreaPadding(.horizontal, BuxLayout.marginHorizontal)
+            .safeAreaPadding(.vertical, 8)
+            .padding(.horizontal, -BuxLayout.marginHorizontal)
+    }
+
+    /// iPad: `buxViewAlignedHorizontalCarousel()`. iPhone: no-op — callers keep existing chrome.
+    func buxPadViewAlignedHorizontalCarousel() -> some View {
+        modifier(BuxPadViewAlignedHorizontalCarouselModifier())
+    }
+
+    /// iPad: marks scroll children for view-aligned snap. iPhone: no-op.
+    func buxPadScrollTargetLayout() -> some View {
+        modifier(BuxPadScrollTargetLayoutModifier())
+    }
+}
+
+// MARK: - iPad-only carousel chrome (iPhone paths unchanged)
+
+private struct BuxPadViewAlignedHorizontalCarouselModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if BuxPadIdiom.isPad {
+            content.buxViewAlignedHorizontalCarousel()
+        } else {
+            content
+        }
+    }
+}
+
+private struct BuxPadScrollTargetLayoutModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if BuxPadIdiom.isPad {
+            content.scrollTargetLayout()
+        } else {
+            content
+        }
+    }
 }
