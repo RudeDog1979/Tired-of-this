@@ -37,11 +37,45 @@ public enum BudgetingMode: String, Codable, CaseIterable, Identifiable {
     case simple = "Simple"
     case envelope = "Envelope"
     case custom = "Custom"
-    
+
     public var id: String { rawValue }
 
     public func localizedDisplayName(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
-        BuxCatalogLabel.string(rawValue, locale: locale)
+        catalogLabel(locale: locale)
+    }
+
+    public func catalogLabel(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
+        switch self {
+        case .simple, .custom:
+            return BuxCatalogLabel.string("Standard", locale: locale)
+        case .envelope:
+            return BuxCatalogLabel.string(rawValue, locale: locale)
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let raw = try container.decode(String.self)
+        switch raw {
+        case "Simple", "Income-based":
+            self = .simple
+        case "Envelope":
+            self = .envelope
+        case "Custom":
+            self = .custom
+        default:
+            self = .simple
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .simple, .custom:
+            try container.encode("Simple")
+        case .envelope:
+            try container.encode("Envelope")
+        }
     }
 }
 
@@ -64,7 +98,12 @@ public enum IncomeFundingSource: String, Codable, CaseIterable, Identifiable {
     }
     
     public func catalogLabel(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
-        localizedDisplayName(locale: locale)
+        switch self {
+        case .salary:
+            return BuxCatalogLabel.string("Paycheck & salary", locale: locale)
+        case .other:
+            return BuxCatalogLabel.string("Freelance & other", locale: locale)
+        }
     }
 }
 

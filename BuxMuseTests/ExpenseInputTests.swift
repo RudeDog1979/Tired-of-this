@@ -205,4 +205,41 @@ final class ExpenseInputTests: XCTestCase {
         viewModel.categorySelectionDidChange()
         XCTAssertFalse(viewModel.isSubscription)
     }
+
+    func testSpendingTotalsExcludeIncomeAndRefunds() {
+        let expense = ExpenseRecord(
+            name: "Groceries",
+            amountValue: -42,
+            currencyCode: "USD",
+            date: Date(),
+            categoryRaw: TransactionCategory.groceries.rawValue,
+            merchantName: "Market"
+        )
+        let income = ExpenseRecord(
+            name: "Paycheck",
+            amountValue: 300,
+            currencyCode: "USD",
+            date: Date(),
+            categoryRaw: TransactionCategory.income.rawValue,
+            merchantName: "Employer"
+        )
+        let refund = ExpenseRecord(
+            name: "Refund",
+            amountValue: 10,
+            currencyCode: "USD",
+            date: Date(),
+            categoryRaw: TransactionCategory.shopping.rawValue,
+            merchantName: "Store"
+        )
+
+        XCTAssertTrue(expense.isSpendingOutflow)
+        XCTAssertEqual(expense.spendingAmountDouble, 42)
+        XCTAssertFalse(income.isSpendingOutflow)
+        XCTAssertEqual(income.spendingAmountDouble, 0)
+        XCTAssertFalse(refund.isSpendingOutflow)
+        XCTAssertEqual(refund.spendingAmountDouble, 0)
+
+        let total = [expense, income, refund].reduce(0.0) { $0 + $1.spendingAmountDouble }
+        XCTAssertEqual(total, 42)
+    }
 }

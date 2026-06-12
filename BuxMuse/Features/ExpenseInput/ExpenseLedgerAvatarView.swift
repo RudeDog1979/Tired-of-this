@@ -67,55 +67,43 @@ enum IncomeSourceQuickPick: String, CaseIterable, Identifiable {
     }
 }
 
-struct ExpenseLedgerAvatarView: View {
-    @EnvironmentObject private var brain: BuxMuseBrain
-
-    let record: ExpenseRecord
-    var size: CGFloat = 44
-
-    var body: some View {
-        Group {
-            if let storeName = linkedStoreDisplayName {
-                AsyncMerchantLogoView(merchantName: storeName, size: size)
-            } else {
-                categoryAvatar
-            }
-        }
-        .frame(width: size, height: size)
+/// When to show merchant logos vs income/refund/category SF Symbols.
+enum ExpenseLedgerAvatarPolicy {
+    /// Explicit store link only — never guess a brand from free-text income labels.
+    static func shouldUseMerchantLogo(for record: ExpenseRecord) -> Bool {
+        record.merchantId != nil
     }
 
-    private var linkedStoreDisplayName: String? {
-        guard let name = brain.merchantLogoName(for: record)?
-            .trimmingCharacters(in: .whitespacesAndNewlines),
-              !name.isEmpty else {
+    static func merchantLogoName(for record: ExpenseRecord, linkedMerchantName: String?) -> String? {
+        guard shouldUseMerchantLogo(for: record) else { return nil }
+        guard let linked = linkedMerchantName?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !linked.isEmpty else {
             return nil
         }
-        return name
+        return linked
     }
 
-    private var categoryAvatar: some View {
-        let style = resolvedCategoryStyle()
-        return ZStack {
-            Circle()
-                .fill(style.background)
-                .frame(width: size, height: size)
-            Image(systemName: style.symbol)
-                .font(.system(size: size * 0.4, weight: .bold))
-                .foregroundStyle(style.foreground)
+    static func resolvedStyle(
+        for record: ExpenseRecord,
+        categoryRecords: [ExpenseCategoryRecord],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> (symbol: String, foreground: Color, background: Color) {
+        if record.isRefund {
+            return quickPickStyle(.refund)
         }
-    }
 
-    private func resolvedCategoryStyle() -> (symbol: String, foreground: Color, background: Color) {
-        if isOtherIncomePresentation {
+        if record.transactionCategory == .income || record.amountValue > 0 {
+            if isOtherIncomePresentation(record, locale: locale) {
+                return ("arrow.down.circle.fill", .green, Color.green.opacity(0.18))
+            }
+            if let pick = IncomeSourceQuickPick.matchingStoredLabel(record.name, locale: locale) {
+                return quickPickStyle(pick)
+            }
             return ("arrow.down.circle.fill", .green, Color.green.opacity(0.18))
         }
 
-        if let pick = IncomeSourceQuickPick.matchingStoredLabel(record.name) {
-            return quickPickStyle(pick)
-        }
-
         if let categoryId = record.categoryId,
-           let custom = brain.categoryRecords.first(where: { $0.id == categoryId }) {
+           let custom = categoryRecords.first(where: { $0.id == categoryId }) {
             return (
                 custom.icon,
                 ExpenseCategoryStyle.foreground(for: custom.color),
@@ -135,19 +123,15 @@ struct ExpenseLedgerAvatarView: View {
         return ("square.grid.2x2.fill", .gray, Color.gray.opacity(0.14))
     }
 
-    private var isOtherIncomePresentation: Bool {
+    private static func isOtherIncomePresentation(_ record: ExpenseRecord, locale: Locale) -> Bool {
         guard record.transactionCategory == .income || record.amountValue > 0 else { return false }
-        if IncomeSourceQuickPick.matchingStoredLabel(record.name) == .other { return true }
-        if record.name.trimmingCharacters(in: .whitespacesAndNewlines).localizedCaseInsensitiveCompare("Other income") == .orderedSame
-            || record.name.trimmingCharacters(in: .whitespacesAndNewlines).localizedCaseInsensitiveCompare(
-                IncomeSourceQuickPick.other.catalogKey
-            ) == .orderedSame {
-            return true
-        }
-        return false
+        if IncomeSourceQuickPick.matchingStoredLabel(record.name, locale: locale) == .other { return true }
+        let trimmed = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.localizedCaseInsensitiveCompare("Other income") == .orderedSame
+            || trimmed.localizedCaseInsensitiveCompare(IncomeSourceQuickPick.other.catalogKey) == .orderedSame
     }
 
-    private func quickPickStyle(_ pick: IncomeSourceQuickPick) -> (String, Color, Color) {
+    private static func quickPickStyle(_ pick: IncomeSourceQuickPick) -> (String, Color, Color) {
         switch pick {
         case .salary, .paycheck:
             return ("briefcase.fill", .mint, Color.mint.opacity(0.2))
@@ -163,6 +147,46 @@ struct ExpenseLedgerAvatarView: View {
             return ("banknote.fill", .green, Color.green.opacity(0.18))
         case .other:
             return ("arrow.down.circle.fill", .green, Color.green.opacity(0.18))
+        }
+    }
+}
+
+struct ExpenseLedgerAvatarView: View {
+    @EnvironmentObject private var brain: BuxMuseBrain
+
+    let record: ExpenseRecord
+    var size: CGFloat = 44
+
+    var body: some View {
+        Group {
+            if let storeName = linkedStoreDisplayName {
+                AsyncMerchantLogoView(merchantName: storeName, size: size)
+            } else {
+                categoryAvatar
+            }
+        }
+        .frame(width: size, height: size)
+    }
+
+    private var linkedStoreDisplayName: String? {
+        ExpenseLedgerAvatarPolicy.merchantLogoName(
+            for: record,
+            linkedMerchantName: brain.merchantLogoName(for: record)
+        )
+    }
+
+    private var categoryAvatar: some View {
+        let style = ExpenseLedgerAvatarPolicy.resolvedStyle(
+            for: record,
+            categoryRecords: brain.categoryRecords
+        )
+        return ZStack {
+            Circle()
+                .fill(style.background)
+                .frame(width: size, height: size)
+            Image(systemName: style.symbol)
+                .font(.system(size: size * 0.4, weight: .bold))
+                .foregroundStyle(style.foreground)
         }
     }
 }

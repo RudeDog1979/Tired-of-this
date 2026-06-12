@@ -13,6 +13,7 @@ struct StudioHubView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var store: StudioStore
     @EnvironmentObject private var studioBrain: StudioBrain
+    @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var appDataManager: AppDataManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
@@ -110,6 +111,32 @@ struct StudioHubView: View {
 
                         StudioHeroCard(display: display.hero)
                             .buxScreenEntrance(index: 1, isVisible: hubAppeared)
+
+                        if StandardBudgetStudioBridgePrompt.shouldShow(settings: settingsStore) {
+                            StandardBudgetStudioBridgePromptCard(
+                                pendingAmount: StandardBudgetStudioBridgePrompt.pendingIncomeThisPeriod(
+                                    period: BuxBudgetPeriodCalculator.currentPeriod(
+                                        configuration: .fromSettings,
+                                        calendar: {
+                                            var calendar = Calendar.current
+                                            calendar.firstWeekday = settingsStore.weekStartDay.calendarWeekday
+                                            return calendar
+                                        }()
+                                    ),
+                                    entries: simpleStudioStore.entries,
+                                    invoices: store.invoices,
+                                    incomeRecords: (try? brain.fetchAllExpenseRecords()) ?? [],
+                                    fundingSource: settingsStore.incomeFundingSource,
+                                    studioMode: settingsStore.studioMode
+                                )
+                            ) {
+                                studioBrain.scheduleRefreshAll()
+                            }
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                            .padding(.horizontal, BuxTokens.marginRegular)
+                            .buxScreenEntrance(index: 1, isVisible: hubAppeared)
+                        }
 
                         if settingsStore.studioEnabled {
                             TaxSavingsHubHeroSection {

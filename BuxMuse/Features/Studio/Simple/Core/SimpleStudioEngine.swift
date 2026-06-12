@@ -13,6 +13,9 @@ enum SimpleStudioEngine {
         snapshot: SimpleStudioSnapshot,
         businessTitle: String,
         persona: StudioPersona,
+        period: DateInterval,
+        periodTitle: String,
+        periodRangeSubtitle: String? = nil,
         format: (Decimal) -> String,
         locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
         envelopeContext: TaxEnvelopeSourceContext? = nil
@@ -20,13 +23,11 @@ enum SimpleStudioEngine {
         let calendar = Calendar.current
         let now = Date()
         let todayEntries = snapshot.entries.filter { calendar.isDateInToday($0.createdAt) }
-        let monthEntries = snapshot.entries.filter {
-            calendar.isDate($0.createdAt, equalTo: now, toGranularity: .month)
-        }
+        let periodEntries = entries(in: period, from: snapshot.entries)
 
         let todayKept = todayEntries.reduce(Decimal(0)) { $0 + $1.netKept }
-        let monthMade = sumMade(entries: monthEntries)
-        let monthSpent = sumSpent(entries: monthEntries)
+        let monthMade = sumMade(entries: periodEntries)
+        let monthSpent = sumSpent(entries: periodEntries)
         let waiting = sumWaiting(snapshot: snapshot)
         let owe = sumIOwe(entries: snapshot.entries)
 
@@ -34,6 +35,8 @@ enum SimpleStudioEngine {
             businessTitle: businessTitle.isEmpty
                 ? SimpleStudioCopy.line("Your Work", locale: locale)
                 : businessTitle,
+            periodTitle: periodTitle,
+            periodRangeSubtitle: periodRangeSubtitle,
             todayKeptFormatted: format(todayKept),
             madeFormatted: format(monthMade),
             spentFormatted: format(monthSpent),
@@ -66,21 +69,20 @@ enum SimpleStudioEngine {
     static func buildMyMoneyDisplay(
         snapshot: SimpleStudioSnapshot,
         persona: StudioPersona,
+        period: DateInterval,
+        periodTitle: String,
         format: (Decimal) -> String,
         locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
         envelopeContext: TaxEnvelopeSourceContext? = nil
     ) -> SimpleMyMoneyDisplay {
-        let calendar = Calendar.current
-        let now = Date()
-        let monthEntries = snapshot.entries.filter {
-            calendar.isDate($0.createdAt, equalTo: now, toGranularity: .month)
-        }
-        let monthMade = sumMade(entries: monthEntries)
-        let monthSpent = sumSpent(entries: monthEntries)
+        let periodEntries = entries(in: period, from: snapshot.entries)
+        let monthMade = sumMade(entries: periodEntries)
+        let monthSpent = sumSpent(entries: periodEntries)
         let waiting = sumWaiting(snapshot: snapshot)
         let owe = sumIOwe(entries: snapshot.entries)
 
         return SimpleMyMoneyDisplay(
+            periodTitle: periodTitle,
             monthSlices: buildMonthChartSlices(
                 made: monthMade,
                 spent: monthSpent,
@@ -91,7 +93,7 @@ enum SimpleStudioEngine {
             ),
             waitingItems: buildWaitingItems(snapshot: snapshot, format: format, locale: locale),
             iOweItems: buildIOweItems(snapshot: snapshot, format: format, locale: locale),
-            jobPockets: buildJobPockets(entries: monthEntries, format: format, locale: locale),
+            jobPockets: buildJobPockets(entries: periodEntries, format: format, locale: locale),
             taxTile: buildTaxTile(
                 made: monthMade,
                 spent: monthSpent,
@@ -101,6 +103,10 @@ enum SimpleStudioEngine {
                 envelopeContext: envelopeContext
             )
         )
+    }
+
+    static func entries(in period: DateInterval, from entries: [SimpleStudioEntry]) -> [SimpleStudioEntry] {
+        entries.filter { $0.createdAt >= period.start && $0.createdAt < period.end }
     }
 
     static func sumMade(entries: [SimpleStudioEntry]) -> Decimal {

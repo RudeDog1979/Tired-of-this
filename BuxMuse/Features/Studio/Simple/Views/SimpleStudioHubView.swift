@@ -14,6 +14,7 @@ struct SimpleStudioHubView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var studioBrain: StudioBrain
+    @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var appDataManager: AppDataManager
     @EnvironmentObject private var simpleStudioBrain: SimpleStudioBrain
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
@@ -84,6 +85,31 @@ struct SimpleStudioHubView: View {
 
                         simpleQuickActions
                             .buxScreenEntrance(index: 1, isVisible: hubAppeared)
+
+                        if StandardBudgetStudioBridgePrompt.shouldShow(settings: settingsStore) {
+                            StandardBudgetStudioBridgePromptCard(
+                                pendingAmount: StandardBudgetStudioBridgePrompt.pendingIncomeThisPeriod(
+                                    period: {
+                                        var calendar = Calendar.current
+                                        calendar.firstWeekday = settingsStore.weekStartDay.calendarWeekday
+                                        return BuxBudgetPeriodCalculator.currentPeriod(
+                                            configuration: .fromSettings,
+                                            calendar: calendar
+                                        )
+                                    }(),
+                                    entries: simpleStudioStore.entries,
+                                    invoices: studioStore.invoices,
+                                    incomeRecords: (try? brain.fetchAllExpenseRecords()) ?? [],
+                                    fundingSource: settingsStore.incomeFundingSource,
+                                    studioMode: settingsStore.studioMode
+                                )
+                            ) {
+                                // AppContainer wiring refreshes Home budget after toggle save.
+                            }
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                            .buxScreenEntrance(index: 1, isVisible: hubAppeared)
+                        }
 
                         NavigationLink {
                             SimpleStudioMyMoneyView(

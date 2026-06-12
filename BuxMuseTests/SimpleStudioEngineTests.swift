@@ -21,10 +21,13 @@ final class SimpleStudioEngineTests: XCTestCase {
             )
         ]
         let snapshot = SimpleStudioSnapshot(entries: entries)
+        let period = DateInterval(start: Date().addingTimeInterval(-86_400 * 30), duration: 86_400 * 60)
         let display = SimpleStudioEngine.buildHubDisplay(
             snapshot: snapshot,
             businessTitle: "Test Biz",
             persona: .jobsAndRepairs,
+            period: period,
+            periodTitle: "This month",
             format: { "\($0)" }
         )
         XCTAssertFalse(display.isEmpty)
@@ -79,5 +82,30 @@ final class SimpleStudioEngineTests: XCTestCase {
         )
         XCTAssertEqual(items.count, 2)
         XCTAssertTrue(items.contains { $0.customerName == "Supplier" })
+    }
+
+    func testEntriesFilterUsesPayPeriodWindow() {
+        let period = DateInterval(start: Date(timeIntervalSince1970: 0), duration: 86_400 * 7)
+        let inside = SimpleStudioEntry(kind: .income, amount: 100, createdAt: period.start.addingTimeInterval(3600))
+        let outside = SimpleStudioEntry(kind: .income, amount: 999, createdAt: period.end.addingTimeInterval(3600))
+        let filtered = SimpleStudioEngine.entries(in: period, from: [inside, outside])
+        XCTAssertEqual(filtered.count, 1)
+        XCTAssertEqual(filtered.first?.amount, 100)
+    }
+
+    func testPeriodSectionTitleUsesMonthForCalendarCycle() {
+        let config = BuxBudgetPeriodCalculator.Configuration(cycle: .monthFirst)
+        XCTAssertEqual(
+            BuxBudgetPeriodCalculator.periodSectionTitle(configuration: config, locale: Locale(identifier: "en")),
+            "This month"
+        )
+    }
+
+    func testPeriodSectionTitleUsesPeriodForWeeklyCycle() {
+        let config = BuxBudgetPeriodCalculator.Configuration(cycle: .weekly)
+        XCTAssertEqual(
+            BuxBudgetPeriodCalculator.periodSectionTitle(configuration: config, locale: Locale(identifier: "en")),
+            "This period"
+        )
     }
 }

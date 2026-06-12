@@ -23,14 +23,21 @@ public final class StudioBrain: ObservableObject {
     @Published var taxSandboxParams: TaxSandboxParams = .default
 
     let store: StudioStore
+    private let simpleStore: SimpleStudioStore
     private let settings: SettingsStore
     let appSettings: AppSettingsManager
     private var cancellables = Set<AnyCancellable>()
     private var refreshAllWork: DispatchWorkItem?
     private static let refreshCoalesceInterval: TimeInterval = 0.08
 
-    init(store: StudioStore, settings: SettingsStore, appSettings: AppSettingsManager) {
+    init(
+        store: StudioStore,
+        simpleStore: SimpleStudioStore,
+        settings: SettingsStore,
+        appSettings: AppSettingsManager
+    ) {
         self.store = store
+        self.simpleStore = simpleStore
         self.settings = settings
         self.appSettings = appSettings
         wireRefreshTriggers()
@@ -132,6 +139,14 @@ public final class StudioBrain: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.scheduleRefreshAll() }
             .store(in: &cancellables)
+
+        Publishers.MergeMany(
+            simpleStore.$entries.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            simpleStore.$invoices.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in self?.scheduleRefreshAll() }
+        .store(in: &cancellables)
 
         HustleManager.shared.$selectedHustleId
             .receive(on: RunLoop.main)
@@ -415,6 +430,9 @@ public final class StudioBrain: ObservableObject {
 
     private func buildSelfEmployedDashboardDisplay() -> SelfEmployedDashboardDisplay {
         guard settings.studioEnabled else { return .empty }
+        if settings.studioMode == .simple {
+            return buildSimpleStudioDashboardDisplay()
+        }
         let mileageRate = SettingsStore.shared.mileageRatePerUnit
         let breakdown = WorldTaxEngine.incomeTaxBreakdown(
             profile: store.profile,
@@ -450,6 +468,51 @@ public final class StudioBrain: ObservableObject {
             effectiveRatePercent: Int(breakdown.effectiveRate * 100),
             runwayMonthsFormatted: forecast.runwayMonths > 0
                 ? BuxLocalizedString.format("%.1f mo", locale: appSettings.interfaceLocale, forecast.runwayMonths)
+                : "—",
+            hasData: hasData
+        )
+    }
+
+    private func buildSimpleStudioDashboardDisplay() -> SelfEmployedDashboardDisplay {
+        let snapshot = simpleStore.snapshot
+        let periodConfig = BuxBudgetPeriodCalculator.Configuration(
+            cycle: SettingsStore.shared.simpleBudgetCycle,
+            weekStartDay: SettingsStore.shared.weekStartDay,
+            anchorDate: SettingsStore.shared.simpleBudgetPeriodAnchor
+        )
+        let calendar = BuxBudgetPeriodCalculator.calendar(weekStartDay: SettingsStore.shared.weekStartDay)
+        let period = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: periodConfig,
+            calendar: calendar
+        )
+        let periodEntries = SimpleStudioEngine.entries(in: period, from: snapshot.entries)
+        let made = SimpleStudioEngine.sumMade(entries: periodEntries)
+        let spent = SimpleStudioEngine.sumSpent(entries: periodEntries)
+        let kept = made - spent
+        let hasData = !snapshot.entries.isEmpty
+
+        let runwayMonths: Double
+        if spent > 0 {
+            runwayMonths = min(
+                24,
+                max(0, Double(truncating: (max(0, kept) / spent) as NSDecimalNumber))
+            )
+        } else if kept > 0 {
+            runwayMonths = 24
+        } else {
+            runwayMonths = 0
+        }
+
+        return SelfEmployedDashboardDisplay(
+            incomeFormatted: appSettings.format(made),
+            expensesFormatted: appSettings.format(spent),
+            deductibleFormatted: "—",
+            netProfitFormatted: appSettings.format(kept),
+            estimatedTaxFormatted: "—",
+            quarterlyDueFormatted: "—",
+            effectiveRatePercent: 0,
+            runwayMonthsFormatted: runwayMonths > 0
+                ? BuxLocalizedString.format("%.1f mo", locale: appSettings.interfaceLocale, runwayMonths)
                 : "—",
             hasData: hasData
         )

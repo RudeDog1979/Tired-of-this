@@ -520,6 +520,8 @@ public struct SimpleTaxTileDisplay: Equatable, Sendable {
 
 public struct SimpleStudioHubDisplay: Equatable, Sendable {
     public var businessTitle: String
+    public var periodTitle: String
+    public var periodRangeSubtitle: String?
     public var todayKeptFormatted: String
     public var madeFormatted: String
     public var spentFormatted: String
@@ -535,6 +537,8 @@ public struct SimpleStudioHubDisplay: Equatable, Sendable {
 
     public static let empty = SimpleStudioHubDisplay(
         businessTitle: "Your Work",
+        periodTitle: "This month",
+        periodRangeSubtitle: nil,
         todayKeptFormatted: "—",
         madeFormatted: "—",
         spentFormatted: "—",
@@ -564,6 +568,7 @@ public struct SimpleJobPocketDisplay: Identifiable, Equatable, Sendable {
 }
 
 public struct SimpleMyMoneyDisplay: Equatable, Sendable {
+    public var periodTitle: String
     public var monthSlices: [SimpleChartSlice]
     public var waitingItems: [SimpleWaitingItem]
     public var iOweItems: [SimpleWaitingItem]
@@ -571,6 +576,7 @@ public struct SimpleMyMoneyDisplay: Equatable, Sendable {
     public var taxTile: SimpleTaxTileDisplay
 
     public static let empty = SimpleMyMoneyDisplay(
+        periodTitle: "This month",
         monthSlices: [],
         waitingItems: [],
         iOweItems: [],

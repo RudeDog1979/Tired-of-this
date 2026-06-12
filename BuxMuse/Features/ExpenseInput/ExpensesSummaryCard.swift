@@ -18,10 +18,26 @@ struct ExpensesSummaryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            BuxCatalogText.text("Monthly summary")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                .heroCardReveal(isVisible: isVisible, delay: 0)
+            VStack(alignment: .leading, spacing: 6) {
+                BuxCatalogText.text("Monthly summary")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+
+                BuxCatalogText.text("This month")
+                    .font(.caption.bold())
+                    .foregroundColor(.gray)
+
+                Text(
+                    AppSettingsManager.format(
+                        amount: Decimal(display.totalSpent),
+                        currency: appSettingsManager.selectedCurrency
+                    )
+                )
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                    .transaction { $0.animation = nil }
+            }
+            .heroCardReveal(isVisible: isVisible, delay: 0)
 
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {

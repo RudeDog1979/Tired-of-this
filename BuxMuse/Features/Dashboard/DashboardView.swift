@@ -24,6 +24,7 @@ struct DashboardView: View {
     @EnvironmentObject var studioStore: StudioStore
 
     @ObservedObject private var settingsStore = SettingsStore.shared
+    @ObservedObject private var simpleStudioStore = SimpleStudioStore.shared
 
     var transactionNamespace: Namespace.ID
 
@@ -44,10 +45,47 @@ struct DashboardView: View {
 
     private var dashSnapshot: DashboardSnapshot { brain.dashboardSnapshot }
 
+    private var currentBudgetPeriod: DateInterval {
+        var calendar = Calendar.current
+        calendar.firstWeekday = settingsStore.weekStartDay.calendarWeekday
+        return BuxBudgetPeriodCalculator.currentPeriod(configuration: .fromSettings, calendar: calendar)
+    }
+
+    private var showsStudioBudgetBridgePrompt: Bool {
+        StandardBudgetStudioBridgePrompt.shouldShow(settings: settingsStore)
+    }
+
+    private var studioBridgePendingAmount: Decimal {
+        StandardBudgetStudioBridgePrompt.pendingIncomeThisPeriod(
+            period: currentBudgetPeriod,
+            entries: simpleStudioStore.entries,
+            invoices: studioStore.invoices,
+            incomeRecords: (try? brain.fetchAllExpenseRecords()) ?? [],
+            fundingSource: settingsStore.incomeFundingSource,
+            studioMode: settingsStore.studioMode
+        )
+    }
+
     /// Keeps hero sizing proportional on narrow windows (Stage Manager, phones).
     private var heroLayoutScale: CGFloat {
         let layoutWidth = containerWidth > 0 ? containerWidth : UIScreen.main.bounds.width
         return min(1, layoutWidth / 430)
+    }
+
+    @ViewBuilder
+    private func studioBridgeBadge(key: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 9, weight: .bold))
+
+            Text(BuxLocalizedString.string(key, locale: appSettingsManager.interfaceLocale))
+                .font(.system(size: 9, weight: .bold))
+        }
+        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Color(.systemGray5).opacity(colorScheme == .dark ? 0.35 : 0.55))
+        .cornerRadius(6)
     }
 
     var body: some View {
@@ -89,13 +127,31 @@ struct DashboardView: View {
                         }
 
                         VStack(alignment: .leading, spacing: BuxTokens.tight) {
+                                if showsStudioBudgetBridgePrompt {
+                                    StandardBudgetStudioBridgePromptCard(
+                                        pendingAmount: studioBridgePendingAmount
+                                    ) {
+                                        brain.scheduleSnapshotRefresh()
+                                    }
+                                    .environmentObject(themeManager)
+                                    .environmentObject(appSettingsManager)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+
                                 if let budgetName = dashSnapshot.activeBudgetName {
                                     let limit = dashSnapshot.activeBudgetLimit
                                     let spent = dashSnapshot.activeBudgetSpent
                                     let remaining = limit - spent
-                                    let progress = limit > 0 ? min(1.0, max(0.0, Double(NSDecimalNumber(decimal: spent).doubleValue / NSDecimalNumber(decimal: limit).doubleValue))) : 0.0
+                                    let isStandardBudget = dashSnapshot.budgetingMode == .simple || dashSnapshot.budgetingMode == .custom
+                                    let earned = dashSnapshot.incomePoolThisPeriod
+                                    let progress: Double = {
+                                        if limit > 0 {
+                                            return min(1.0, max(0.0, Double(NSDecimalNumber(decimal: spent).doubleValue / NSDecimalNumber(decimal: limit).doubleValue)))
+                                        }
+                                        return spent > 0 ? 1.0 : 0.0
+                                    }()
                                     let warnThreshold = Double(max(1, min(100, dashSnapshot.approachingThresholdPercent))) / 100.0
-                                    let warnBudget = settingsStore.showBudgetWarnings && progress >= warnThreshold
+                                    let warnBudget = settingsStore.showBudgetWarnings && (limit > 0 ? progress >= warnThreshold : spent > 0)
                                     
                                     Button(action: {
                                         withAnimation {
@@ -123,22 +179,77 @@ struct DashboardView: View {
                                                 .padding(.vertical, 4)
                                                 .background(themeManager.current.accentColor.opacity(0.12))
                                                 .cornerRadius(6)
+
+                                                if isStandardBudget, dashSnapshot.standardSimpleStudioIncomeSupplement > 0 {
+                                                    studioBridgeBadge(key: "Includes Simple Studio")
+                                                }
+
+                                                if isStandardBudget, dashSnapshot.standardProStudioIncomeSupplement > 0 {
+                                                    studioBridgeBadge(key: "Includes Pro Studio")
+                                                }
                                                 
                                                 VStack(alignment: .leading, spacing: 4) {
                                                     Text(appSettingsManager.format(remaining))
                                                         .font(.system(size: 22, weight: .black, design: .rounded))
-                                                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                                                    
-                                                    Text(
-                                                        BuxLocalizedString.format(
-                                                            "%@ of %@",
-                                                            locale: appSettingsManager.interfaceLocale,
-                                                            BuxLocalizedString.string("Remaining budget", locale: appSettingsManager.interfaceLocale),
-                                                            appSettingsManager.format(limit)
+                                                        .foregroundColor(
+                                                            remaining < 0
+                                                                ? .red
+                                                                : themeManager.labelPrimary(for: colorScheme)
                                                         )
-                                                    )
-                                                    .font(.system(size: 11, weight: .bold))
-                                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+
+                                                    if isStandardBudget {
+                                                        if earned == 0, spent == 0 {
+                                                            Text(
+                                                                BuxLocalizedString.string(
+                                                                    "Log income to start this period",
+                                                                    locale: appSettingsManager.interfaceLocale
+                                                                )
+                                                            )
+                                                            .font(.system(size: 11, weight: .bold))
+                                                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                                        } else if limit > 0, limit < earned {
+                                                            Text(
+                                                                BuxLocalizedString.format(
+                                                                    "%@ earned · %@ discretionary cap",
+                                                                    locale: appSettingsManager.interfaceLocale,
+                                                                    appSettingsManager.format(earned),
+                                                                    appSettingsManager.format(limit)
+                                                                )
+                                                            )
+                                                            .font(.system(size: 11, weight: .bold))
+                                                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                                        } else if earned > 0 {
+                                                            Text(
+                                                                BuxLocalizedString.format(
+                                                                    "%@ earned this period",
+                                                                    locale: appSettingsManager.interfaceLocale,
+                                                                    appSettingsManager.format(earned)
+                                                                )
+                                                            )
+                                                            .font(.system(size: 11, weight: .bold))
+                                                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                                        } else {
+                                                            Text(
+                                                                BuxLocalizedString.string(
+                                                                    "Remaining discretionary",
+                                                                    locale: appSettingsManager.interfaceLocale
+                                                                )
+                                                            )
+                                                            .font(.system(size: 11, weight: .bold))
+                                                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                                        }
+                                                    } else {
+                                                        Text(
+                                                            BuxLocalizedString.format(
+                                                                "%@ of %@",
+                                                                locale: appSettingsManager.interfaceLocale,
+                                                                BuxLocalizedString.string("Remaining budget", locale: appSettingsManager.interfaceLocale),
+                                                                appSettingsManager.format(limit)
+                                                            )
+                                                        )
+                                                        .font(.system(size: 11, weight: .bold))
+                                                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                                                    }
                                                 }
                                             }
                                             
@@ -201,6 +312,32 @@ struct DashboardView: View {
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
                                     .frame(maxWidth: .infinity, alignment: .leading)
+
+                                    if isStandardBudget, dashSnapshot.essentialSpentThisPeriod > 0 {
+                                        Text(
+                                            BuxLocalizedString.format(
+                                                "Essentials (housing & utilities): %@ — not counted in discretionary progress",
+                                                locale: appSettingsManager.interfaceLocale,
+                                                appSettingsManager.format(dashSnapshot.essentialSpentThisPeriod)
+                                            )
+                                        )
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    }
+
+                                    if isStandardBudget, dashSnapshot.standardStudioIncomeExcludedByDedup > 0 {
+                                        Text(
+                                            BuxLocalizedString.format(
+                                                "Studio income adjusted by %@ — already logged in Add Income",
+                                                locale: appSettingsManager.interfaceLocale,
+                                                appSettingsManager.format(dashSnapshot.standardStudioIncomeExcludedByDedup)
+                                            )
+                                        )
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    }
 
                                     if dashSnapshot.budgetingMode == .envelope, !dashSnapshot.envelopeBudgets.isEmpty {
                                         VStack(alignment: .leading, spacing: 10) {
@@ -939,8 +1076,12 @@ private struct DashboardHeroSection: View {
 
                     BuxHeroQuickActionButton(
                         action: {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.62)) {
-                                isFabMenuExpanded.toggle()
+                            if settingsStore.studioEnabled {
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.62)) {
+                                    isFabMenuExpanded.toggle()
+                                }
+                            } else {
+                                activeSheet = .addExpense(.add)
                             }
                         },
                         diameter: heroActionDiameter,

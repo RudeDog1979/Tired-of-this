@@ -34,7 +34,7 @@ struct SimpleStudioMyMoneyView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: BuxTokens.block) {
-                BuxSectionHeader(title: "This month")
+                BuxSectionHeader(title: display.periodTitle)
 
                 BuxCard(elevation: .card, cornerRadius: BuxTokens.Radius.hero, padding: BuxTokens.section) {
                     VStack(spacing: BuxTokens.section) {

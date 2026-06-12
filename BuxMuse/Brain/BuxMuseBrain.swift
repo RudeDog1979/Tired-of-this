@@ -489,17 +489,24 @@ public final class BuxMuseBrain: ObservableObject {
         try persistence.fetchMerchantRecord(id: id)
     }
 
-    /// Store/brand string for `AsyncMerchantLogoView` (optional income store link, expenses with merchant).
+    /// Store/brand string for `AsyncMerchantLogoView` when the user explicitly linked a merchant.
     func merchantLogoName(for record: ExpenseRecord) -> String? {
-        guard let merchantId = record.merchantId else { return nil }
+        guard let merchantId = record.merchantId else {
+            if record.amountValue > 0 || record.transactionCategory == .income {
+                return nil
+            }
+            let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let label = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !store.isEmpty, store.caseInsensitiveCompare(label) != .orderedSame else { return nil }
+            return store
+        }
         if let merchant = try? persistence.fetchMerchantRecord(id: merchantId) {
             let linked = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !linked.isEmpty else { return nil }
             return linked
         }
         let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let label = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !store.isEmpty, store.caseInsensitiveCompare(label) != .orderedSame else { return nil }
+        guard !store.isEmpty else { return nil }
         return store
     }
 
@@ -574,15 +581,27 @@ public final class BuxMuseBrain: ObservableObject {
         let activeBudgetName: String?
         let activeBudgetLimit: Decimal
         let activeBudgetSpent: Decimal
+        var essentialSpentThisPeriod: Decimal = 0
         var envelopeBudgets: [EnvelopeBudgetDisplay] = []
         let locale = BuxInterfaceLocale.currentInterfaceLocale
-        let categoryRecords = (try? persistence.fetchAllCategoryRecords()) ?? []
-        let incomePool = BudgetEnvelopeEngine.incomePool(
-            records: (try? persistence.fetchAllExpenseRecords()) ?? [],
+        let categoryRecords = (try? fetchAllCategoryRecords()) ?? []
+        let loggedIncomePool = BudgetEnvelopeEngine.incomePool(
+            records: expenseRecords,
             fundingSource: store.incomeFundingSource,
             period: budgetPeriod,
             locale: locale
         )
+        let simpleStudioSupplement = resolvedStandardSimpleStudioIncomeSupplement(
+            period: budgetPeriod,
+            records: expenseRecords
+        )
+        let proStudioSupplement = resolvedStandardProStudioIncomeSupplement(
+            period: budgetPeriod,
+            records: expenseRecords
+        )
+        let studioIncomeSupplement = simpleStudioSupplement.counted + proStudioSupplement.counted
+        let studioIncomeExcludedByDedup = simpleStudioSupplement.excludedByDedup + proStudioSupplement.excludedByDedup
+        let incomePool = loggedIncomePool + studioIncomeSupplement
         let approachingThreshold = store.budgetApproachingThresholdPercent
 
         switch budgetingMode {
@@ -594,19 +613,32 @@ public final class BuxMuseBrain: ObservableObject {
                     workspaceBudget.workspaceName
                 )
                 activeBudgetLimit = workspaceBudget.limit
+                activeBudgetSpent = periodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
             } else {
                 activeBudgetName = BuxLocalizedString.format(
-                    "Simple budget · %@",
+                    "Standard budget · %@",
                     locale: locale,
                     store.simpleBudgetCycle.catalogLabel(locale: locale)
                 )
-                if store.autoAdjustBudgetsFromHistory {
-                    activeBudgetLimit = Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
-                } else {
-                    activeBudgetLimit = store.simpleBudgetLimit
-                }
+                let spendingCap: Decimal = {
+                    if store.autoAdjustBudgetsFromHistory {
+                        return Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
+                    }
+                    return store.simpleBudgetLimit
+                }()
+                let standardResult = BudgetPeriodEngine.computeStandardBudget(
+                    records: expenseRecords,
+                    fundingSource: store.incomeFundingSource,
+                    period: budgetPeriod,
+                    spendingCap: spendingCap,
+                    categoryRecords: categoryRecords,
+                    supplementalEarned: studioIncomeSupplement,
+                    locale: locale
+                )
+                activeBudgetLimit = standardResult.effectiveLimit
+                activeBudgetSpent = standardResult.discretionarySpent
+                essentialSpentThisPeriod = standardResult.essentialSpent
             }
-            activeBudgetSpent = periodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
 
         case .envelope:
             let activeProfile = store.customBudgetProfiles.first(where: { $0.isActive })
@@ -616,7 +648,7 @@ public final class BuxMuseBrain: ObservableObject {
             if let activeProfile {
                 envelopeBudgets = BudgetEnvelopeEngine.computeEnvelopes(
                     profile: activeProfile,
-                    records: (try? persistence.fetchAllExpenseRecords()) ?? [],
+                    records: expenseRecords,
                     categoryRecords: categoryRecords,
                     period: budgetPeriod,
                     locale: locale
@@ -633,7 +665,7 @@ public final class BuxMuseBrain: ObservableObject {
             healthScore: health,
             currencyCode: currency
         )
-        let allExpenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
+        let allExpenseRecords = expenseRecords
         let workspaceSynergy = store.sideHustleMatrixEnabled
             ? WorkspaceROIEngine.summarize(records: allExpenseRecords, hustles: HustleManager.shared.hustles)
             : .empty
@@ -650,6 +682,10 @@ public final class BuxMuseBrain: ObservableObject {
             activeBudgetSpent: activeBudgetSpent,
             budgetingMode: budgetingMode,
             incomePoolThisPeriod: incomePool,
+            standardSimpleStudioIncomeSupplement: simpleStudioSupplement.counted,
+            standardProStudioIncomeSupplement: proStudioSupplement.counted,
+            standardStudioIncomeExcludedByDedup: studioIncomeExcludedByDedup,
+            essentialSpentThisPeriod: essentialSpentThisPeriod,
             envelopeBudgets: envelopeBudgets,
             budgetPeriodStart: budgetPeriod.start,
             budgetPeriodEnd: budgetPeriod.end,
@@ -790,38 +826,40 @@ public final class BuxMuseBrain: ObservableObject {
         let now = Date()
         let startOfMonth = Calendar.current.dateInterval(of: .month, for: now)?.start ?? now
         let thisMonthRecords = allRecords.filter { $0.date >= startOfMonth }
+        let thisMonthSpending = thisMonthRecords.filter(\.isSpendingOutflow)
 
         let lastMonthStart = Calendar.current.date(byAdding: .month, value: -1, to: startOfMonth) ?? now
         let lastMonthRecords = allRecords.filter { $0.date >= lastMonthStart && $0.date < startOfMonth }
+        let lastMonthSpending = lastMonthRecords.filter(\.isSpendingOutflow)
 
-        let totalSpent = thisMonthRecords.reduce(0.0) { $0 + abs($1.amountDouble) }
-        let lastMonthSpent = lastMonthRecords.reduce(0.0) { $0 + abs($1.amountDouble) }
+        let totalSpent = thisMonthSpending.reduce(0.0) { $0 + $1.spendingAmountDouble }
+        let lastMonthSpent = lastMonthSpending.reduce(0.0) { $0 + $1.spendingAmountDouble }
         let change = totalSpent - lastMonthSpent
 
         let locale = BuxInterfaceLocale.currentInterfaceLocale
         let categoryRecords = (try? fetchAllCategoryRecords()) ?? []
         let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
-        let categories = Dictionary(grouping: thisMonthRecords, by: {
+        let categories = Dictionary(grouping: thisMonthSpending, by: {
             $0.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale)
         })
-        let biggestCategory = categories.max(by: { $0.value.reduce(0) { $0 + abs($1.amountDouble) } < $1.value.reduce(0) { $0 + abs($1.amountDouble) } })?.key
+        let biggestCategory = categories.max(by: { $0.value.reduce(0) { $0 + $1.spendingAmountDouble } < $1.value.reduce(0) { $0 + $1.spendingAmountDouble } })?.key
 
-        let merchants = Dictionary(grouping: thisMonthRecords, by: { $0.merchantName })
-        let biggestMerchant = merchants.max(by: { $0.value.reduce(0) { $0 + abs($1.amountDouble) } < $1.value.reduce(0) { $0 + abs($1.amountDouble) } })?.key
+        let merchants = Dictionary(grouping: thisMonthSpending, by: { $0.merchantName })
+        let biggestMerchant = merchants.max(by: { $0.value.reduce(0) { $0 + $1.spendingAmountDouble } < $1.value.reduce(0) { $0 + $1.spendingAmountDouble } })?.key
 
         var sparkline = [Double]()
         for i in 0..<7 {
             let day = Calendar.current.date(byAdding: .day, value: -6 + i, to: now) ?? now
             let dayStart = Calendar.current.startOfDay(for: day)
             let dayEnd = Calendar.current.date(byAdding: .day, value: 1, to: dayStart)!
-            let spent = thisMonthRecords.filter { $0.date >= dayStart && $0.date < dayEnd }.reduce(0) { $0 + abs($1.amountDouble) }
+            let spent = thisMonthSpending.filter { $0.date >= dayStart && $0.date < dayEnd }.reduce(0) { $0 + $1.spendingAmountDouble }
             sparkline.append(spent)
         }
 
         let header = ExpensesHeaderDisplay(
             totalSpent: totalSpent,
             changeVsLastMonth: change,
-            monthlyTransactionCount: thisMonthRecords.count,
+            monthlyTransactionCount: thisMonthSpending.count,
             biggestCategory: biggestCategory,
             biggestMerchant: biggestMerchant,
             sparklinePoints: sparkline,
@@ -869,8 +907,8 @@ public final class BuxMuseBrain: ObservableObject {
             ))
         }
 
-        let summaryCat = categories.map { ($0.key, $0.value.reduce(0) { $0 + abs($1.amountDouble) }) }.sorted(by: { $0.1 > $1.1 })
-        let summaryMer = merchants.map { ($0.key, $0.value.reduce(0) { $0 + abs($1.amountDouble) }) }.sorted(by: { $0.1 > $1.1 })
+        let summaryCat = categories.map { ($0.key, $0.value.reduce(0) { $0 + $1.spendingAmountDouble }) }.sorted(by: { $0.1 > $1.1 })
+        let summaryMer = merchants.map { ($0.key, $0.value.reduce(0) { $0 + $1.spendingAmountDouble }) }.sorted(by: { $0.1 > $1.1 })
         let projected = Decimal(totalSpent * 1.2)
 
         let summary = ExpensesSummaryDisplay(
@@ -920,6 +958,59 @@ public final class BuxMuseBrain: ObservableObject {
         var calendar = Calendar.current
         calendar.firstWeekday = SettingsStore.shared.weekStartDay.calendarWeekday
         return calendar
+    }
+
+    /// Trailing 3-month average spend, rounded up 10% — used when auto-adjust is enabled.
+    func resolvedStandardSpendingCap() -> Decimal {
+        let store = SettingsStore.shared
+        if store.autoAdjustBudgetsFromHistory {
+            let txs = financialBridge.engine.allTransactions()
+            return Self.trailingAverageMonthlySpend(from: txs, calendar: Self.budgetCalendar())
+        }
+        return store.simpleBudgetLimit
+    }
+
+    func resolvedStandardStudioIncomeSupplement(period: DateInterval, records: [ExpenseRecord]) -> Decimal {
+        resolvedStandardSimpleStudioIncomeSupplement(period: period, records: records).counted
+            + resolvedStandardProStudioIncomeSupplement(period: period, records: records).counted
+    }
+
+    func resolvedStandardSimpleStudioIncomeSupplement(
+        period: DateInterval,
+        records: [ExpenseRecord]
+    ) -> StandardBudgetStudioSupplement {
+        let store = SettingsStore.shared
+        guard store.budgetingMode == .simple || store.budgetingMode == .custom else {
+            return StandardBudgetStudioSupplement(counted: 0, excludedByDedup: 0)
+        }
+        return StandardBudgetStudioBridge.supplementalIncome(
+            period: period,
+            entries: SimpleStudioStore.shared.entries,
+            incomeRecords: records,
+            fundingSource: store.incomeFundingSource,
+            studioEnabled: store.studioEnabled,
+            studioMode: store.studioMode,
+            includeInBudget: store.includeSimpleStudioIncomeInBudget
+        )
+    }
+
+    func resolvedStandardProStudioIncomeSupplement(
+        period: DateInterval,
+        records: [ExpenseRecord]
+    ) -> StandardBudgetStudioSupplement {
+        let store = SettingsStore.shared
+        guard store.budgetingMode == .simple || store.budgetingMode == .custom else {
+            return StandardBudgetStudioSupplement(counted: 0, excludedByDedup: 0)
+        }
+        return StandardBudgetStudioBridge.proSupplementalIncome(
+            period: period,
+            invoices: StudioStore.shared.invoices,
+            incomeRecords: records,
+            fundingSource: store.incomeFundingSource,
+            studioEnabled: store.studioEnabled,
+            studioMode: store.studioMode,
+            includeInBudget: store.includeProStudioIncomeInBudget
+        )
     }
 
     /// Trailing 3-month average spend, rounded up 10% — used when auto-adjust is enabled.

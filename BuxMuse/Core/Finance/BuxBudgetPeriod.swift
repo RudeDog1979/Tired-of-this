@@ -131,4 +131,52 @@ public enum BuxBudgetPeriodCalculator {
         let anchorDay = calendar.component(.day, from: anchor)
         return monthAlignedStart(day: anchorDay, now: now, calendar: calendar)
     }
+
+    // MARK: - Display labels
+
+    public static func usesMonthStyleTitle(for cycle: SimpleBudgetCycle) -> Bool {
+        switch cycle {
+        case .monthFirst, .monthFifteenth, .monthThirtieth:
+            return true
+        case .weekly, .biweekly, .daily, .custom:
+            return false
+        }
+    }
+
+    public static func periodSectionTitle(
+        configuration: Configuration,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> String {
+        if usesMonthStyleTitle(for: configuration.cycle) {
+            return BuxLocalizedString.string("This month", locale: locale)
+        }
+        return BuxLocalizedString.string("This period", locale: locale)
+    }
+
+    public static func periodRangeSubtitle(
+        period: DateInterval,
+        configuration: Configuration,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
+        calendar: Calendar? = nil
+    ) -> String? {
+        guard !usesMonthStyleTitle(for: configuration.cycle) else { return nil }
+        return formattedPeriodRange(period: period, locale: locale, calendar: calendar)
+    }
+
+    public static func formattedPeriodRange(
+        period: DateInterval,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
+        calendar: Calendar? = nil
+    ) -> String {
+        let cal = calendar ?? Calendar.current
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.calendar = cal
+        formatter.setLocalizedDateFormatFromTemplate("MMM d")
+        let endInclusive = cal.date(byAdding: .day, value: -1, to: period.end) ?? period.end
+        if cal.isDate(period.start, inSameDayAs: endInclusive) {
+            return formatter.string(from: period.start)
+        }
+        return "\(formatter.string(from: period.start)) – \(formatter.string(from: endInclusive))"
+    }
 }

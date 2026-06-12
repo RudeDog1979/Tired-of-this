@@ -90,6 +90,10 @@ struct MonthlySummaryDetailSheet: View {
             BuxCatalogText.text("Monthly summary")
                 .buxSectionLabelStyle(color: .gray)
 
+            BuxCatalogText.text("This month")
+                .font(.caption.bold())
+                .foregroundColor(.gray)
+
             sheetAmountHero(formatAmount(Decimal(summary.totalSpent)))
 
             if let prediction = summary.prediction {

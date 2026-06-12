@@ -55,10 +55,33 @@ public final class SimpleStudioBrain: ObservableObject {
             mileageRatePerUnit: settings.mileageRatePerUnit,
             locale: locale
         )
+        let periodConfig = BuxBudgetPeriodCalculator.Configuration(
+            cycle: settings.simpleBudgetCycle,
+            weekStartDay: settings.weekStartDay,
+            anchorDate: settings.simpleBudgetPeriodAnchor
+        )
+        let calendar = BuxBudgetPeriodCalculator.calendar(weekStartDay: settings.weekStartDay)
+        let period = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: periodConfig,
+            calendar: calendar
+        )
+        let periodTitle = BuxBudgetPeriodCalculator.periodSectionTitle(
+            configuration: periodConfig,
+            locale: locale
+        )
+        let periodRangeSubtitle = BuxBudgetPeriodCalculator.periodRangeSubtitle(
+            period: period,
+            configuration: periodConfig,
+            locale: locale,
+            calendar: calendar
+        )
         hubDisplay = SimpleStudioEngine.buildHubDisplay(
             snapshot: store.snapshot,
             businessTitle: title,
             persona: settings.studioPersona,
+            period: period,
+            periodTitle: periodTitle,
+            periodRangeSubtitle: periodRangeSubtitle,
             format: format,
             locale: locale,
             envelopeContext: envelopeContext
@@ -66,6 +89,8 @@ public final class SimpleStudioBrain: ObservableObject {
         myMoneyDisplay = SimpleStudioEngine.buildMyMoneyDisplay(
             snapshot: store.snapshot,
             persona: settings.studioPersona,
+            period: period,
+            periodTitle: periodTitle,
             format: format,
             locale: locale,
             envelopeContext: envelopeContext
@@ -96,6 +121,21 @@ public final class SimpleStudioBrain: ObservableObject {
             .store(in: &cancellables)
 
         settings.$studioEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshAll() }
+            .store(in: &cancellables)
+
+        settings.$simpleBudgetCycle
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshAll() }
+            .store(in: &cancellables)
+
+        settings.$simpleBudgetPeriodAnchor
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshAll() }
+            .store(in: &cancellables)
+
+        settings.$weekStartDay
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.refreshAll() }
             .store(in: &cancellables)

@@ -83,7 +83,11 @@ public final class SettingsStore: ObservableObject {
     @Published public var simpleBudgetLimit: Decimal = 1000
     @Published public var simpleBudgetCycle: SimpleBudgetCycle = .monthFirst
     @Published public var simpleBudgetPeriodAnchor: Date = Date()
-    @Published public var incomeFundingSource: IncomeFundingSource = .salary
+    @Published public var incomeFundingSource: IncomeFundingSource = .other
+    /// When enabled, Simple Studio money-in entries count toward Standard budget earned income for the pay period.
+    @Published public var includeSimpleStudioIncomeInBudget: Bool = false
+    /// When enabled, paid Pro Studio invoices count toward Standard budget earned income for the pay period.
+    @Published public var includeProStudioIncomeInBudget: Bool = false
     @Published public var customBudgetLimit: Decimal = 50
     @Published public var customBudgetPeriod: DefaultBudgetPeriod = .weekly
     @Published public var budgetApproachingThresholdPercent: Int = 80
@@ -92,6 +96,13 @@ public final class SettingsStore: ObservableObject {
     @Published public var studioEnabled: Bool = false
     /// Home banner dismissed; separate from main settings payload.
     @Published public var studioDiscoveryOfferDismissed: Bool = false
+    /// Dismisses the Standard budget ↔ Simple Studio bridge prompt on Home / Studio.
+    @Published public var standardBudgetStudioBridgePromptDismissed: Bool = UserDefaults.standard.bool(forKey: "buxmuse.standardBudgetStudioBridgePromptDismissed") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(standardBudgetStudioBridgePromptDismissed, forKey: Self.standardBudgetStudioBridgePromptDismissedKey)
+        }
+    }
     @Published public var studioProfileId: UUID? = nil
     /// Simple (default) vs Pro Studio presentation.
     @Published public var studioMode: StudioMode = .simple
@@ -419,6 +430,8 @@ public final class SettingsStore: ObservableObject {
         let simpleBudgetCycle: SimpleBudgetCycle?
         let simpleBudgetPeriodAnchor: Date?
         let incomeFundingSource: IncomeFundingSource?
+        let includeSimpleStudioIncomeInBudget: Bool?
+        let includeProStudioIncomeInBudget: Bool?
         let customBudgetLimit: Decimal?
         let customBudgetPeriod: DefaultBudgetPeriod?
         let budgetApproachingThresholdPercent: Int?
@@ -473,6 +486,8 @@ public final class SettingsStore: ObservableObject {
             case weekStartDay, budgetingMode, defaultBudgetPeriod
             case showBudgetWarnings, autoAdjustBudgetsFromHistory, customBudgetProfiles
             case simpleBudgetLimit, simpleBudgetCycle, simpleBudgetPeriodAnchor, incomeFundingSource
+            case includeSimpleStudioIncomeInBudget
+            case includeProStudioIncomeInBudget
             case customBudgetLimit, customBudgetPeriod, budgetApproachingThresholdPercent
             case studioEnabled, freelanceEnabled
             case studioProfileId, freelanceProfileId
@@ -537,6 +552,8 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetCycle = try c.decodeIfPresent(SimpleBudgetCycle.self, forKey: .simpleBudgetCycle)
             simpleBudgetPeriodAnchor = try c.decodeIfPresent(Date.self, forKey: .simpleBudgetPeriodAnchor)
             incomeFundingSource = try c.decodeIfPresent(IncomeFundingSource.self, forKey: .incomeFundingSource)
+            includeSimpleStudioIncomeInBudget = try c.decodeIfPresent(Bool.self, forKey: .includeSimpleStudioIncomeInBudget)
+            includeProStudioIncomeInBudget = try c.decodeIfPresent(Bool.self, forKey: .includeProStudioIncomeInBudget)
             customBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .customBudgetLimit)
             customBudgetPeriod = try c.decodeIfPresent(DefaultBudgetPeriod.self, forKey: .customBudgetPeriod)
             budgetApproachingThresholdPercent = try c.decodeIfPresent(Int.self, forKey: .budgetApproachingThresholdPercent)
@@ -606,6 +623,8 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetCycle: SimpleBudgetCycle?,
             simpleBudgetPeriodAnchor: Date?,
             incomeFundingSource: IncomeFundingSource?,
+            includeSimpleStudioIncomeInBudget: Bool?,
+            includeProStudioIncomeInBudget: Bool?,
             customBudgetLimit: Decimal?,
             customBudgetPeriod: DefaultBudgetPeriod?,
             budgetApproachingThresholdPercent: Int?,
@@ -669,6 +688,8 @@ public final class SettingsStore: ObservableObject {
             self.simpleBudgetCycle = simpleBudgetCycle
             self.simpleBudgetPeriodAnchor = simpleBudgetPeriodAnchor
             self.incomeFundingSource = incomeFundingSource
+            self.includeSimpleStudioIncomeInBudget = includeSimpleStudioIncomeInBudget ?? false
+            self.includeProStudioIncomeInBudget = includeProStudioIncomeInBudget ?? false
             self.customBudgetLimit = customBudgetLimit
             self.customBudgetPeriod = customBudgetPeriod
             self.budgetApproachingThresholdPercent = budgetApproachingThresholdPercent
@@ -735,6 +756,8 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(simpleBudgetCycle, forKey: .simpleBudgetCycle)
             try c.encodeIfPresent(simpleBudgetPeriodAnchor, forKey: .simpleBudgetPeriodAnchor)
             try c.encodeIfPresent(incomeFundingSource, forKey: .incomeFundingSource)
+            try c.encodeIfPresent(includeSimpleStudioIncomeInBudget, forKey: .includeSimpleStudioIncomeInBudget)
+            try c.encodeIfPresent(includeProStudioIncomeInBudget, forKey: .includeProStudioIncomeInBudget)
             try c.encodeIfPresent(customBudgetLimit, forKey: .customBudgetLimit)
             try c.encodeIfPresent(customBudgetPeriod, forKey: .customBudgetPeriod)
             try c.encodeIfPresent(budgetApproachingThresholdPercent, forKey: .budgetApproachingThresholdPercent)
@@ -824,7 +847,9 @@ public final class SettingsStore: ObservableObject {
                 self.simpleBudgetLimit = payload.simpleBudgetLimit ?? 1000
                 self.simpleBudgetCycle = payload.simpleBudgetCycle ?? .monthFirst
                 self.simpleBudgetPeriodAnchor = payload.simpleBudgetPeriodAnchor ?? Date()
-                self.incomeFundingSource = payload.incomeFundingSource ?? .salary
+                self.incomeFundingSource = payload.incomeFundingSource ?? .other
+                self.includeSimpleStudioIncomeInBudget = payload.includeSimpleStudioIncomeInBudget ?? false
+                self.includeProStudioIncomeInBudget = payload.includeProStudioIncomeInBudget ?? false
                 self.customBudgetLimit = payload.customBudgetLimit ?? 50
                 self.customBudgetPeriod = payload.customBudgetPeriod ?? .weekly
                 self.budgetApproachingThresholdPercent = payload.budgetApproachingThresholdPercent ?? 80
@@ -926,7 +951,7 @@ public final class SettingsStore: ObservableObject {
         self.simpleBudgetLimit = 1000
         self.simpleBudgetCycle = .monthFirst
         self.simpleBudgetPeriodAnchor = Date()
-        self.incomeFundingSource = .salary
+        self.incomeFundingSource = .other
         self.customBudgetLimit = 50
         self.customBudgetPeriod = .weekly
         self.budgetApproachingThresholdPercent = 80
@@ -950,14 +975,20 @@ public final class SettingsStore: ObservableObject {
     }
 
     private static let studioDiscoveryDismissedKey = "studio_discovery_offer_dismissed"
+    private static let standardBudgetStudioBridgePromptDismissedKey = "buxmuse.standardBudgetStudioBridgePromptDismissed"
 
     public func dismissStudioDiscoveryOffer() {
         studioDiscoveryOfferDismissed = true
         UserDefaults.standard.set(true, forKey: Self.studioDiscoveryDismissedKey)
     }
 
+    public func dismissStandardBudgetStudioBridgePrompt() {
+        standardBudgetStudioBridgePromptDismissed = true
+    }
+
     private func loadStudioDiscoveryPreference() {
         studioDiscoveryOfferDismissed = UserDefaults.standard.bool(forKey: Self.studioDiscoveryDismissedKey)
+        standardBudgetStudioBridgePromptDismissed = UserDefaults.standard.bool(forKey: Self.standardBudgetStudioBridgePromptDismissedKey)
     }
 
     private func loadMileagePreferences() {
@@ -1064,6 +1095,8 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetCycle: simpleBudgetCycle,
             simpleBudgetPeriodAnchor: simpleBudgetPeriodAnchor,
             incomeFundingSource: incomeFundingSource,
+            includeSimpleStudioIncomeInBudget: includeSimpleStudioIncomeInBudget,
+            includeProStudioIncomeInBudget: includeProStudioIncomeInBudget,
             customBudgetLimit: customBudgetLimit,
             customBudgetPeriod: customBudgetPeriod,
             budgetApproachingThresholdPercent: budgetApproachingThresholdPercent,

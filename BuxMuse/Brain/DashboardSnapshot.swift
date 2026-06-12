@@ -29,6 +29,14 @@ public struct DashboardSnapshot: Equatable {
     public var activeBudgetSpent: Decimal
     public var budgetingMode: BudgetingMode
     public var incomePoolThisPeriod: Decimal
+    /// Simple Studio money-in included in Standard budget earned pool (toggle on).
+    public var standardSimpleStudioIncomeSupplement: Decimal
+    /// Paid Pro Studio invoices included in Standard budget earned pool (toggle on).
+    public var standardProStudioIncomeSupplement: Decimal
+    /// Studio supplement skipped because the same amount was logged in Add Income the same day.
+    public var standardStudioIncomeExcludedByDedup: Decimal
+    /// Housing + utilities in the current period (Standard budget mode).
+    public var essentialSpentThisPeriod: Decimal
     public var envelopeBudgets: [EnvelopeBudgetDisplay]
     public var budgetPeriodStart: Date?
     public var budgetPeriodEnd: Date?
@@ -47,6 +55,10 @@ public struct DashboardSnapshot: Equatable {
         activeBudgetSpent: 0,
         budgetingMode: .simple,
         incomePoolThisPeriod: 0,
+        standardSimpleStudioIncomeSupplement: 0,
+        standardProStudioIncomeSupplement: 0,
+        standardStudioIncomeExcludedByDedup: 0,
+        essentialSpentThisPeriod: 0,
         envelopeBudgets: [],
         budgetPeriodStart: nil,
         budgetPeriodEnd: nil,

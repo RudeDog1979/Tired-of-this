@@ -93,9 +93,14 @@ struct SimpleStudioThisMonthCard: View {
         BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.hero, padding: BuxTokens.section) {
             VStack(alignment: .leading, spacing: BuxTokens.section) {
                 VStack(alignment: .leading, spacing: 4) {
-                    BuxCatalogDynamicText(key: "This month")
+                    Text(display.periodTitle)
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                    if let range = display.periodRangeSubtitle {
+                        Text(range)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                    }
                     BuxCatalogDynamicText(key: "Tap to open My money")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))

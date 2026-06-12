@@ -283,42 +283,50 @@ struct OnboardingWizardView: View {
 
                     Divider().opacity(0.08)
 
-                    // Budget Input Row
-                    HStack {
-                        BuxCatalogText.text("Monthly Budget limit")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        Spacer()
-                        
-                        HStack(spacing: 4) {
-                            Text(appSettingsManager.selectedCurrency.symbol)
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            BuxCatalogText.text("Optional spending cap")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                            Spacer()
+
+                            HStack(spacing: 4) {
+                                Text(appSettingsManager.selectedCurrency.symbol)
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+
+                                TextField(
+                                    BuxCatalogLabel.string("Amount", locale: appSettingsManager.interfaceLocale),
+                                    value: Binding(
+                                        get: { store.simpleBudgetLimit == 0 ? nil : store.simpleBudgetLimit },
+                                        set: {
+                                            store.simpleBudgetLimit = $0 ?? 0
+                                            store.save()
+                                        }
+                                    ),
+                                    format: .number
+                                )
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                            
-                            TextField(BuxCatalogLabel.string("Limit", locale: appSettingsManager.interfaceLocale), value: Binding(
-                                // If the value is 0, return nil so the text field can be completely empty
-                                get: { store.simpleBudgetLimit == 0 ? nil : store.simpleBudgetLimit },
-                                // If the user clears the field (nil), safely save 0 to the store
-                                set: {
-                                    store.simpleBudgetLimit = $0 ?? 0
-                                    store.save()
-                                }
-                            ), format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                            .frame(width: 80)
-                            .toolbar {
-                                ToolbarItemGroup(placement: .keyboard) {
-                                    Spacer()
-                                    Button(BuxCatalogLabel.string("Done", locale: appSettingsManager.interfaceLocale)) {
-                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                .frame(width: 80)
+                                .toolbar {
+                                    ToolbarItemGroup(placement: .keyboard) {
+                                        Spacer()
+                                        Button(BuxCatalogLabel.string("Done", locale: appSettingsManager.interfaceLocale)) {
+                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                        }
+                                        .font(.system(size: 16, weight: .bold))
                                     }
-                                    .font(.system(size: 16, weight: .bold))
                                 }
                             }
                         }
+
+                        BuxCatalogText.text("Log each payment with Add Income on the home tab. Leave the cap at zero to use your full logged income.")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .padding(16)
@@ -332,7 +340,7 @@ struct OnboardingWizardView: View {
                         .font(.system(size: 16))
                         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                     
-                    BuxCatalogText.text("You can adjust budgeting start dates, income sources, and weekly tracking targets at any time in Settings.")
+                    BuxCatalogText.text("You can adjust your pay cycle, budget counts, optional spending cap, and budget warnings anytime in Settings.")
                         .font(.system(size: 12))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .lineSpacing(3)
@@ -617,8 +625,8 @@ struct OnboardingWizardView: View {
                     tutorialRow(
                         symbol: sym("gauge.with.needle.fill", or: "gauge"),
                         color: Color.orange,
-                        headline: "3. Payday Budget Meters",
-                        bodyText: "A prominent budget indicator displays on your home tab to keep you informed of your remaining limits before the next paycheck or calendar period starts."
+                        headline: "3. Standard Budget Meter",
+                        bodyText: "The home tab shows what you have left this pay period — built from income you log, minus discretionary spending. Housing and utilities are tracked separately."
                     )
                 }
                 .padding(20)

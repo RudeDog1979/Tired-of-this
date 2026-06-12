@@ -56,6 +56,7 @@ final class AppContainer: ObservableObject {
         StudioTimerController.shared.refreshLiveActivity()
         studioBrain = StudioBrain(
             store: studioStore,
+            simpleStore: simpleStudioStore,
             settings: settingsStore,
             appSettings: appSettingsManager
         )
@@ -326,6 +327,25 @@ final class AppContainer: ObservableObject {
                 self?.scheduleEngagementRefresh()
             }
             .store(in: &cancellables)
+
+        wireSimpleStudioBudgetRefreshTriggers()
+    }
+
+    private func wireSimpleStudioBudgetRefreshTriggers() {
+        Publishers.MergeMany(
+            simpleStudioStore.$entries.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            simpleStudioStore.$invoices.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            studioStore.$invoices.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            guard let self else { return }
+            self.simpleStudioBrain.refreshAll()
+            self.studioBrain.scheduleRefreshAll()
+            self.taxEnvelopeBrain.refreshAll()
+            self.brain.scheduleSnapshotRefresh()
+        }
+        .store(in: &cancellables)
     }
 
     private func wireSettingsExpenseRefreshTriggers(_ settings: SettingsStore) {
@@ -338,10 +358,15 @@ final class AppContainer: ObservableObject {
             settings.$simpleBudgetLimit.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$simpleBudgetCycle.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$simpleBudgetPeriodAnchor.dropFirst().map { _ in () }.eraseToAnyPublisher(),
-            settings.$incomeFundingSource.dropFirst().map { _ in () }.eraseToAnyPublisher()
+            settings.$incomeFundingSource.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$includeSimpleStudioIncomeInBudget.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$includeProStudioIncomeInBudget.dropFirst().map { _ in () }.eraseToAnyPublisher()
         )
         .receive(on: RunLoop.main)
         .sink { [weak self] _ in
+            self?.brain.scheduleSnapshotRefresh()
+            self?.simpleStudioBrain.refreshAll()
+            self?.studioBrain.scheduleRefreshAll()
             self?.scheduleDebouncedExpenseRefresh()
         }
         .store(in: &cancellables)

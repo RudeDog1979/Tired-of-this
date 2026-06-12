@@ -81,6 +81,16 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         amountValue > 0 && transactionCategory != .income
     }
 
+    /// Outflow expenses only — income and refunds are excluded from spend totals.
+    public var isSpendingOutflow: Bool {
+        amountValue < 0
+    }
+
+    public var spendingAmountDouble: Double {
+        guard isSpendingOutflow else { return 0 }
+        return abs(amountDouble)
+    }
+
     public init(
         id: UUID = UUID(),
         name: String,

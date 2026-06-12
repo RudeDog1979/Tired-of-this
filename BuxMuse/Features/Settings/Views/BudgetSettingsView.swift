@@ -31,13 +31,41 @@ struct BudgetSettingsView: View {
                 }
             }
 
+            if store.studioEnabled, store.budgetingMode == .simple, store.studioMode == .simple, !store.includeSimpleStudioIncomeInBudget {
+                BuxFormSection {
+                    VStack(alignment: .leading, spacing: 8) {
+                        BuxCatalogText.text("Simple Studio income")
+                            .font(.system(size: 15, weight: .bold))
+                        BuxCatalogDynamicText(key: "Counts money-in entries from Simple Studio toward this period's earned budget. Matching Add Income on the same day is counted once.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .buxFormFieldPadding()
+                }
+            }
+
+            if store.studioEnabled, store.budgetingMode == .simple, store.studioMode == .pro, !store.includeProStudioIncomeInBudget {
+                BuxFormSection {
+                    VStack(alignment: .leading, spacing: 8) {
+                        BuxCatalogText.text("Pro Studio income")
+                            .font(.system(size: 15, weight: .bold))
+                        BuxCatalogDynamicText(key: "Counts paid Pro Studio invoices toward this period's earned budget. Matching Add Income on the same day is counted once.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .buxFormFieldPadding()
+                }
+            }
+
             if store.budgetingMode == .simple || store.budgetingMode == .envelope {
                 BuxFormSection(title: "Income & payday profile") {
-                    BuxSettingsSegmentedEnumRow(titleKey: "Income Source", selection: $store.incomeFundingSource) {
+                    BuxSettingsSegmentedEnumRow(titleKey: "Budget counts", selection: $store.incomeFundingSource) {
                         ForEach(IncomeFundingSource.allCases) { source in
                             Text(source.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(source)
                         }
                     }
+
+                    BuxSettingsFootnote(key: "Only matching Add Income entries count toward your budget. Paycheck & salary: Salary and Paycheck labels. Freelance & other: gigs, Other income, and custom labels. Studio bridge dedup uses the same rule.")
 
                     BuxFormRowDivider()
                     BuxSettingsMenuPickerRow(titleKey: "Payday Schedule", selection: $store.simpleBudgetCycle) {
@@ -58,22 +86,73 @@ struct BudgetSettingsView: View {
                         .buxFormFieldPadding()
                     }
 
-                    BuxFormRowDivider()
-                    BuxSettingsLabeledValueRow {
-                        BuxCatalogDynamicText(key: "Spending limit this period")
-                            .font(.system(size: 15, weight: .semibold))
-                            .fixedSize(horizontal: false, vertical: true)
-                    } value: {
-                        TextField(BuxCatalogLabel.string("Amount", locale: appSettingsManager.interfaceLocale), value: $store.simpleBudgetLimit, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                            .font(.system(size: 16, weight: .bold))
-                            .frame(minWidth: 120, maxWidth: 160)
+                    if store.budgetingMode == .simple {
+                        BuxFormRowDivider()
+                        BuxSettingsLabeledValueRow {
+                            BuxCatalogDynamicText(key: "Optional spending cap")
+                                .font(.system(size: 15, weight: .semibold))
+                                .fixedSize(horizontal: false, vertical: true)
+                        } value: {
+                            TextField(BuxCatalogLabel.string("Amount", locale: appSettingsManager.interfaceLocale), value: $store.simpleBudgetLimit, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                .font(.system(size: 16, weight: .bold))
+                                .frame(minWidth: 120, maxWidth: 160)
+                        }
+
+                        BuxFormRowDivider()
+                        BuxSettingsFootnote(key: "Log each payment when it arrives. Your limit comes from recorded income this period. Housing and utilities are essentials and do not reduce discretionary progress. Leave the cap at zero to use your full logged income. Auto-adjust tunes the optional cap from your spend history.")
                     }
 
-                    BuxFormRowDivider()
-                    BuxSettingsFootnote(key: "Your simple budget tracks expenses starting on your pay cycle—allowing you to measure spending relative to when your income arrives, rather than just the calendar month.")
+                    if store.studioEnabled, store.budgetingMode == .simple, store.studioMode == .simple {
+                        BuxFormRowDivider()
+                        Toggle(isOn: $store.includeSimpleStudioIncomeInBudget) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                BuxCatalogDynamicText(key: "Include Simple Studio income")
+                                    .font(.system(size: 15, weight: .semibold))
+                                BuxCatalogDynamicText(key: "Counts money-in entries from Simple Studio toward this period's earned budget. Matching Add Income on the same day is counted once.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
+                        .buxFormFieldPadding()
+                    }
+
+                    if store.studioEnabled, store.budgetingMode == .simple, store.studioMode == .pro {
+                        BuxFormRowDivider()
+                        Toggle(isOn: $store.includeProStudioIncomeInBudget) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                BuxCatalogDynamicText(key: "Include Pro Studio income")
+                                    .font(.system(size: 15, weight: .semibold))
+                                BuxCatalogDynamicText(key: "Counts paid Pro Studio invoices toward this period's earned budget. Matching Add Income on the same day is counted once.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
+                        .buxFormFieldPadding()
+                    }
+
+                    if store.budgetingMode == .envelope {
+                        BuxFormRowDivider()
+                        BuxSettingsLabeledValueRow {
+                            BuxCatalogDynamicText(key: "Spending limit this period")
+                                .font(.system(size: 15, weight: .semibold))
+                                .fixedSize(horizontal: false, vertical: true)
+                        } value: {
+                            TextField(BuxCatalogLabel.string("Amount", locale: appSettingsManager.interfaceLocale), value: $store.simpleBudgetLimit, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                .font(.system(size: 16, weight: .bold))
+                                .frame(minWidth: 120, maxWidth: 160)
+                        }
+
+                        BuxFormRowDivider()
+                        BuxSettingsFootnote(key: "Your simple budget tracks expenses starting on your pay cycle—allowing you to measure spending relative to when your income arrives, rather than just the calendar month.")
+                    }
                 }
             }
 
@@ -98,13 +177,13 @@ struct BudgetSettingsView: View {
                         )
                     }
                     .buxFormFieldPadding()
+                    BuxFormRowDivider()
+                    BuxSettingsToggleRow(
+                        titleKey: "Auto-adjust from history",
+                        subtitleKey: "BuxMuse Brain will adjust your optional spending cap based on seasonal spend trends",
+                        isOn: $store.autoAdjustBudgetsFromHistory
+                    )
                 }
-                BuxFormRowDivider()
-                BuxSettingsToggleRow(
-                    titleKey: "Auto-adjust from history",
-                    subtitleKey: "BuxMuse Brain will adjust limits based on seasonal spend trends",
-                    isOn: $store.autoAdjustBudgetsFromHistory
-                )
             }
 
             BuxFormSection(title: "Custom envelope profiles") {
@@ -221,6 +300,8 @@ struct BudgetSettingsView: View {
         .onChange(of: store.simpleBudgetCycle) { _, _ in store.save() }
         .onChange(of: store.simpleBudgetPeriodAnchor) { _, _ in store.save() }
         .onChange(of: store.incomeFundingSource) { _, _ in store.save() }
+        .onChange(of: store.includeSimpleStudioIncomeInBudget) { _, _ in store.save() }
+        .onChange(of: store.includeProStudioIncomeInBudget) { _, _ in store.save() }
         .onChange(of: store.customBudgetLimit) { _, _ in store.save() }
         .onChange(of: store.customBudgetPeriod) { _, _ in store.save() }
     }

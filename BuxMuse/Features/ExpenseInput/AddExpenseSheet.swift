@@ -29,6 +29,7 @@ struct AddExpenseSheet: View {
     @State private var showScanner = false
     @State private var isScanning = false
     @State private var showPadDeleteConfirmation = false
+    @State private var showBudgetSaveConfirmation = false
 
     @ObservedObject private var settingsStore = SettingsStore.shared
 
@@ -289,9 +290,7 @@ struct AddExpenseSheet: View {
                         isEnabled: !viewModel.amountString.isEmpty
                             && !viewModel.merchantName.trimmingCharacters(in: .whitespaces).isEmpty
                     ) {
-                        if viewModel.saveTransaction() {
-                            dismiss()
-                        }
+                        requestSave()
                     }
                 }
             }
@@ -365,6 +364,39 @@ struct AddExpenseSheet: View {
                 locale: locale,
                 onConfirm: deleteWithUndo
             )
+            .confirmationDialog(
+                loc("Are you sure?"),
+                isPresented: $showBudgetSaveConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button(loc("Save anyway")) {
+                    completeSaveIfValid()
+                }
+                Button(loc("Cancel"), role: .cancel) {}
+            } message: {
+                if let warning = viewModel.envelopeWarning {
+                    Text(warning)
+                }
+            }
+        }
+    }
+
+    private func requestSave() {
+        guard !isIncomeMode else {
+            completeSaveIfValid()
+            return
+        }
+        viewModel.refreshEnvelopeWarning()
+        if viewModel.envelopeWarning != nil {
+            showBudgetSaveConfirmation = true
+        } else {
+            completeSaveIfValid()
+        }
+    }
+
+    private func completeSaveIfValid() {
+        if viewModel.saveTransaction() {
+            dismiss()
         }
     }
 

@@ -74,7 +74,8 @@ struct RecentTransactionsSectionView: View {
 
     private func recentRow(for tx: DashboardRecentTransaction) -> some View {
         HStack(spacing: 14) {
-            AsyncMerchantLogoView(merchantName: dashboardLogoName(for: tx), size: 40)
+            RecentTransactionLedgerAvatarView(transaction: tx, size: 40)
+                .environmentObject(brain)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(tx.localizedMerchantLabel(locale: appSettingsManager.interfaceLocale))
@@ -112,17 +113,49 @@ struct RecentTransactionsSectionView: View {
             cardStroke: cardStroke
         ))
     }
+}
 
-    private func dashboardLogoName(for tx: DashboardRecentTransaction) -> String {
-        if let record = (try? brain.fetchExpenseRecord(id: tx.id)),
-           let linked = brain.merchantLogoName(for: record) {
-            return linked
+// MARK: - Ledger avatar (income / refund / merchant)
+
+private struct RecentTransactionLedgerAvatarView: View {
+    @EnvironmentObject private var brain: BuxMuseBrain
+
+    let transaction: DashboardRecentTransaction
+    var size: CGFloat = 40
+
+    var body: some View {
+        if let record = try? brain.fetchExpenseRecord(id: transaction.id) {
+            ExpenseLedgerAvatarView(record: record, size: size)
+                .environmentObject(brain)
+        } else {
+            fallbackAvatar
         }
-        return tx.merchantName
+    }
+
+    @ViewBuilder
+    private var fallbackAvatar: some View {
+        if transaction.amount.value > 0, transaction.category != .income {
+            ledgerSymbolAvatar(symbol: "arrow.uturn.backward.circle.fill", foreground: .green)
+        } else if transaction.category == .income || transaction.amount.value > 0 {
+            ledgerSymbolAvatar(symbol: "arrow.down.circle.fill", foreground: .green)
+        } else {
+            AsyncMerchantLogoView(merchantName: transaction.merchantName, size: size)
+        }
+    }
+
+    private func ledgerSymbolAvatar(symbol: String, foreground: Color) -> some View {
+        ZStack {
+            Circle()
+                .fill(foreground.opacity(0.18))
+                .frame(width: size, height: size)
+            Image(systemName: symbol)
+                .font(.system(size: size * 0.4, weight: .bold))
+                .foregroundStyle(foreground)
+        }
     }
 }
 
-// MARK: - Row chrome
+// MARK: - Legacy stack types
 
 private struct RecentTransactionRowChromeModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme

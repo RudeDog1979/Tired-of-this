@@ -44,14 +44,14 @@ struct TotalSpendDetailSheet: View {
         }
     }
 
-    // Filter and calculate stats based on selected time range
+    // Filter and calculate stats based on selected time range (outflows only — income excluded)
     private var filteredRecords: [ExpenseRecord] {
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -selectedRange.dayCount, to: Date()) ?? Date()
-        return allRecords.filter { $0.date >= cutoffDate }
+        return allRecords.filter { $0.date >= cutoffDate && $0.isSpendingOutflow }
     }
 
     private var totalSpentInRange: Double {
-        filteredRecords.reduce(0.0) { $0 + abs($1.amountDouble) }
+        filteredRecords.reduce(0.0) { $0 + $1.spendingAmountDouble }
     }
 
     private var dailyAverageInRange: Double {
@@ -60,7 +60,7 @@ struct TotalSpendDetailSheet: View {
     }
 
     private var largestPurchases: [ExpenseRecord] {
-        Array(filteredRecords.sorted(by: { abs($0.amountDouble) > abs($1.amountDouble) }).prefix(3))
+        Array(filteredRecords.sorted(by: { $0.spendingAmountDouble > $1.spendingAmountDouble }).prefix(3))
     }
 
     // Dynamic trend points aggregated by day for the selected range
@@ -81,7 +81,7 @@ struct TotalSpendDetailSheet: View {
         for record in filteredRecords {
             let dayStart = calendar.startOfDay(for: record.date)
             if pointsMap[dayStart] != nil {
-                pointsMap[dayStart, default: 0.0] += abs(record.amountDouble)
+                pointsMap[dayStart, default: 0.0] += record.spendingAmountDouble
             }
         }
 
@@ -449,7 +449,7 @@ struct TotalSpendDetailSheet: View {
                             Spacer()
 
                             // Amount
-                            Text(formatAmount(Decimal(abs(record.amountDouble))))
+                            Text(formatAmount(Decimal(record.spendingAmountDouble)))
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         }

@@ -190,9 +190,7 @@ public final class AddExpenseViewModel: ObservableObject {
             return
         }
         let store = SettingsStore.shared
-        guard store.budgetingMode == .envelope,
-              store.showBudgetWarnings,
-              let profile = store.customBudgetProfiles.first(where: { $0.isActive }) else {
+        guard store.showBudgetWarnings else {
             envelopeWarning = nil
             return
         }
@@ -203,6 +201,69 @@ public final class AddExpenseViewModel: ObservableObject {
         }
 
         let categoryRecords = (try? brain.fetchAllCategoryRecords()) ?? []
+        let period = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: .fromSettings,
+            calendar: {
+                var cal = Calendar.current
+                cal.firstWeekday = store.weekStartDay.calendarWeekday
+                return cal
+            }()
+        )
+        let records = (try? brain.fetchAllExpenseRecords()) ?? []
+
+        switch store.budgetingMode {
+        case .envelope:
+            refreshEnvelopeCategoryWarning(
+                amount: amount,
+                categoryRecords: categoryRecords,
+                records: records,
+                period: period,
+                store: store
+            )
+        case .simple, .custom:
+            let preview = ExpenseRecord(
+                name: merchantName,
+                amountValue: -amount,
+                currencyCode: settingsManager.selectedCurrency.id,
+                categoryId: selectedCategoryId,
+                date: date,
+                categoryRaw: selectedCategory.rawValue,
+                merchantName: merchantName
+            )
+            let isEssential = BudgetPeriodEngine.isEssentialLivingExpense(
+                preview,
+                categoryRecords: categoryRecords
+            )
+            if let result = BudgetPeriodEngine.projectedStandardBudgetWarning(
+                records: records,
+                fundingSource: store.incomeFundingSource,
+                period: period,
+                spendingCap: brain.resolvedStandardSpendingCap(),
+                categoryRecords: categoryRecords,
+                additionalAmount: amount,
+                additionalIsEssential: isEssential,
+                supplementalEarned: brain.resolvedStandardStudioIncomeSupplement(period: period, records: records),
+                approachingThresholdPercent: store.budgetApproachingThresholdPercent,
+                locale: locale
+            ) {
+                envelopeWarning = BuxLocalizedString.string(result.messageKey, locale: locale)
+            } else {
+                envelopeWarning = nil
+            }
+        }
+    }
+
+    private func refreshEnvelopeCategoryWarning(
+        amount: Decimal,
+        categoryRecords: [ExpenseCategoryRecord],
+        records: [ExpenseRecord],
+        period: DateInterval,
+        store: SettingsStore
+    ) {
+        guard let profile = store.customBudgetProfiles.first(where: { $0.isActive }) else {
+            envelopeWarning = nil
+            return
+        }
         let preview = ExpenseRecord(
             name: merchantName,
             amountValue: -amount,
@@ -223,19 +284,10 @@ public final class AddExpenseViewModel: ObservableObject {
             envelopeWarning = nil
             return
         }
-
-        let period = BuxBudgetPeriodCalculator.currentPeriod(
-            configuration: .fromSettings,
-            calendar: {
-                var cal = Calendar.current
-                cal.firstWeekday = store.weekStartDay.calendarWeekday
-                return cal
-            }()
-        )
         if let result = BudgetEnvelopeEngine.projectedEnvelopeStatus(
             envelope: envelope,
             profile: profile,
-            records: (try? brain.fetchAllExpenseRecords()) ?? [],
+            records: records,
             categoryRecords: categoryRecords,
             period: period,
             additionalAmount: amount,
