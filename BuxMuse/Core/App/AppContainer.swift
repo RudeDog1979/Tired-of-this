@@ -505,7 +505,7 @@ final class LocalBackupCoordinator {
         let goals = (try? persistence.fetchAllGoalEntities()) ?? []
 
         var payload: [String: Any] = [
-            "buxmuse_app_version": "1.0.0",
+            "buxmuse_app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0",
             "export_timestamp": Date().timeIntervalSince1970,
             "expenses_count": expenses.count,
             "goals_count": goals.count

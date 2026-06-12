@@ -234,12 +234,13 @@ public final class SettingsBrain {
             destination: .data
         )
         
+        let marketingVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
         let aboutRow = SettingsRowDisplay(
             title: "About",
             subtitle: "BuxMuse version, credits",
             iconName: "info.circle.fill",
             hexColor: "#8E8E93", // Gray
-            trailingText: "v1.0.0",
+            trailingText: "v\(marketingVersion)",
             destination: .about
         )
         

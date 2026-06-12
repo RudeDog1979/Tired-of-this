@@ -92,7 +92,7 @@ public enum BuxMuseArchiveService {
         return BuxMuseArchivePayload(
             manifest: BuxMuseArchiveManifest(
                 formatVersion: 2,
-                appVersion: "1.0.0",
+                appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0",
                 createdAt: Date(),
                 transactionCount: transactions.count,
                 goalCount: goals.count,
