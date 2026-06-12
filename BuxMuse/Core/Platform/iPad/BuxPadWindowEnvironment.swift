@@ -39,6 +39,7 @@ extension View {
             .environmentObject(container.taxEnvelopeBrain)
             .environmentObject(container.appDataManager)
             .environmentObject(container.padSceneBrainRegistry)
+            .environmentObject(container.tutorialCoordinator)
             .buxInterfaceLocale()
     }
 

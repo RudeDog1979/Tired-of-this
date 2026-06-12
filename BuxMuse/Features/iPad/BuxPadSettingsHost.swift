@@ -14,6 +14,7 @@ struct BuxPadSettingsHost: View {
     @EnvironmentObject private var padNavigationBrain: BuxPadNavigationBrain
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ObservedObject private var store = SettingsStore.shared
 
     @State private var selectedDestination: SettingsDestinationType?
@@ -60,6 +61,17 @@ struct BuxPadSettingsHost: View {
                 guard requested else { return }
                 routeToPendingSettingsDestination()
             }
+            .onChange(of: tutorialCoordinator.pendingSettingsDestination) { _, destination in
+                guard destination != nil else { return }
+                routeTutorialSettingsNavigation()
+            }
+            .onChange(of: tutorialCoordinator.pendingSettingsPopToRoot) { _, shouldPop in
+                guard shouldPop else { return }
+                routeTutorialSettingsNavigation()
+            }
+            .onChange(of: tutorialCoordinator.currentStepIndex) { _, _ in
+                routeTutorialSettingsNavigation()
+            }
             .buxPadDebouncedBrainResize(columnVisibility: columnVisibility)
     }
 
@@ -85,6 +97,11 @@ struct BuxPadSettingsHost: View {
             .toolbarBackground(.hidden, for: .navigationBar)
             .ignoresSafeArea(edges: .top)
         }
+        .tutorialCoachMarkOverlay(
+            layer: .settingsDetail,
+            coordinator: tutorialCoordinator,
+            reservesTabBarSpace: false
+        )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .environment(\.settingsEnhancedTint, true)
     }
@@ -148,6 +165,7 @@ struct BuxPadSettingsHost: View {
             style: .plain(titleKey: "Settings", showCountrySubtitle: false)
         )
         .padding(.horizontal, BuxPadLayout.detailInsetCompact)
+        .tutorialAnchor(.settingsOverview, coordinator: tutorialCoordinator)
     }
 
     @ViewBuilder
@@ -189,6 +207,7 @@ struct BuxPadSettingsHost: View {
             ) {
                 BuxPadSidebarSelection.select(row.destination, into: $selectedDestination)
             }
+            .modifier(SettingsTutorialAnchorModifier(destination: row.destination, coordinator: tutorialCoordinator))
         }
     }
 
@@ -222,6 +241,20 @@ struct BuxPadSettingsHost: View {
                 selectedDestination = .appearance
                 padNavigationBrain.selectedSettingsPath = SettingsDestinationType.appearance.rawValue
                 _ = navigationCoordinator.consumeAppearanceSettingsRequest()
+            }
+        }
+    }
+
+    private func routeTutorialSettingsNavigation() {
+        if tutorialCoordinator.consumeSettingsPopToRoot() {
+            selectedDestination = nil
+            padNavigationBrain.selectedSettingsPath = nil
+        }
+        guard let destination = tutorialCoordinator.consumeSettingsDestinationRequest() else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            withAnimation(BuxMotion.appearanceSettingsEntry) {
+                selectedDestination = destination
+                padNavigationBrain.selectedSettingsPath = destination.rawValue
             }
         }
     }

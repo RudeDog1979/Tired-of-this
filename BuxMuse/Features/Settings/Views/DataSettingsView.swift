@@ -19,6 +19,7 @@ struct DataSettingsView: View {
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
 
     @ObservedObject private var store = SettingsStore.shared
 

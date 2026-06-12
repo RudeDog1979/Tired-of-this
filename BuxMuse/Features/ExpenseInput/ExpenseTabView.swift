@@ -16,6 +16,7 @@ struct ExpenseTabView: View {
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @EnvironmentObject private var padNavigationBrain: BuxPadNavigationBrain
     @EnvironmentObject private var padSceneBrainRegistry: BuxPadSceneBrainRegistry
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @Environment(\.openWindow) private var openWindow
     @Environment(\.buxPadExpenseUsesSplitLayout) private var usesPadSplitLayout
 
@@ -89,6 +90,7 @@ struct ExpenseTabView: View {
                     }
                 }
             }
+            .tutorialAnchor(.expensesTabHeader, coordinator: tutorialCoordinator)
             .buxPadExpenseSplitNavigationChrome()
             .toolbar { expenseToolbar }
             .modifier(ExpenseSearchModifier(
@@ -171,6 +173,7 @@ struct ExpenseTabView: View {
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
                 .environmentObject(brain)
+                .environmentObject(tutorialCoordinator)
                 .environment(\.expensesEnhancedTint, true)
         }
         .sheet(isPresented: $showAdvancedFilters) {

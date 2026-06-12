@@ -14,6 +14,7 @@ struct StudioSettingsView: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var appDataManager: AppDataManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ObservedObject private var store = SettingsStore.shared
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
@@ -55,6 +56,7 @@ struct StudioSettingsView: View {
                 .tint(themeManager.contrastAccentColor(for: colorScheme))
                 .buxFormFieldPadding()
             }
+            .tutorialAnchor(.settingsStudioDetail, coordinator: tutorialCoordinator)
 
             if store.studioEnabled {
                 BuxFormSection(title: "Studio mode") {

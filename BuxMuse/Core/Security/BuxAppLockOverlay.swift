@@ -33,6 +33,11 @@ struct BuxAppLockOverlay: View {
                     .font(.system(size: 48))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
+                Image("BuxMuseLogo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 200)
+
                 BuxCatalogDynamicText(key: "BuxMuse Vault Active")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))

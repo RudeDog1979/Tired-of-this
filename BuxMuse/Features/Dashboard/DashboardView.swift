@@ -22,6 +22,7 @@ struct DashboardView: View {
     @EnvironmentObject var insightsViewModel: InsightsViewModel
     @EnvironmentObject var studioBrain: StudioBrain
     @EnvironmentObject var studioStore: StudioStore
+    @EnvironmentObject var tutorialCoordinator: AppTutorialCoordinator
 
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var simpleStudioStore = SimpleStudioStore.shared
@@ -99,6 +100,7 @@ struct DashboardView: View {
             BuxLandingTintBackground()
                 .ignoresSafeArea()
             // Scroll view containing page elements
+            ScrollViewReader { scrollProxy in
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BuxTokens.block) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {
@@ -112,7 +114,8 @@ struct DashboardView: View {
                             activeSheet: $activeSheet,
                             isFabMenuExpanded: $isFabMenuExpanded,
                             showTipPopup: $showTipPopup,
-                            tipGlowPhase: $tipGlowPhase
+                            tipGlowPhase: $tipGlowPhase,
+                            tutorialCoordinator: tutorialCoordinator
                         )
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -312,6 +315,7 @@ struct DashboardView: View {
                                     }
                                     .buttonStyle(BuxDashboardCardButtonStyle())
                                     .frame(maxWidth: .infinity, alignment: .leading)
+                                    .tutorialAnchor(.homeBudgetRing, coordinator: tutorialCoordinator)
 
                                     if isStandardBudget, dashSnapshot.essentialSpentThisPeriod > 0 {
                                         Text(
@@ -479,7 +483,9 @@ struct DashboardView: View {
             .contentMargins(.top, BuxLayout.dashboardRootTabScrollTopInset, for: .scrollContent)
             .buxRootTabScrollChrome()
             .buxScrollCollapseCoordinateSpace()
+            .scrollDisabled(tutorialCoordinator.isActive)
             .onTapGesture {
+                guard !tutorialCoordinator.isActive else { return }
                 // Tapping scroll area collapses category and transaction bars
                 if isPillSectionExpanded {
                     withAnimation(.spring(response: 0.52, dampingFraction: 0.58)) {
@@ -492,6 +498,11 @@ struct DashboardView: View {
                 withAnimation(.spring(response: 0.52, dampingFraction: 0.58)) {
                     isPillSectionExpanded = false
                 }
+            }
+            .onChange(of: tutorialCoordinator.currentStep?.id) { _, stepID in
+                handleTutorialStepChange(stepID)
+            }
+            .tutorialScrollToActiveAnchor(coordinator: tutorialCoordinator, proxy: scrollProxy)
             }
             
             if showFabMenuOverlay {
@@ -518,6 +529,11 @@ struct DashboardView: View {
             }
         }
         .coordinateSpace(name: "dashboardOverlay")
+        .tutorialCoachMarkOverlay(
+            layer: .dashboard,
+            coordinator: tutorialCoordinator,
+            reservesTabBarSpace: !BuxPadIdiom.isPad
+        )
         .onPreferenceChange(DashboardFabAnchorPreferenceKey.self) { updateFabAnchor($0) }
         .onChange(of: isFabMenuExpanded) { _, expanded in
             if expanded {
@@ -533,6 +549,7 @@ struct DashboardView: View {
                     .environmentObject(brain)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
+                    .environmentObject(tutorialCoordinator)
                     .environment(\.expensesEnhancedTint, true)
             case .categoryList:
                 ExpenseCategoryListSheet()
@@ -615,6 +632,23 @@ struct DashboardView: View {
 
     private func openStudioSettings() {
         navigationCoordinator.openStudioSettings()
+    }
+
+    private func handleTutorialStepChange(_ stepID: String?) {
+        guard tutorialCoordinator.isActive else { return }
+        switch stepID {
+        case "home.incomeSheet":
+            activeSheet = .addExpense(.addIncome)
+        case "expense.sheetIntro":
+            activeSheet = .addExpense(.add)
+        case "settings.intro", "settings.budget", "settings.budgetDetail", "settings.studio",
+             "settings.appearance", "settings.backup", "home.expensesTab", "studio.tab",
+             "studio.simpleMoney", "home.finish":
+            activeSheet = nil
+            brain.scheduleSnapshotRefresh()
+        default:
+            break
+        }
     }
 }
 
@@ -975,9 +1009,30 @@ private struct DashboardHeroSection: View {
     @Binding var isFabMenuExpanded: Bool
     @Binding var showTipPopup: Bool
     @Binding var tipGlowPhase: Bool
+    let tutorialCoordinator: AppTutorialCoordinator
 
     /// Local only — scroll collapse must not invalidate Money Map / category pills.
     @State private var scrollOffset: CGFloat = 0
+
+    private func openIncomeEntry() {
+        if tutorialCoordinator.isActive, tutorialCoordinator.currentStep?.anchor == .homeIncomeButton {
+            tutorialCoordinator.handleAnchorTap(.homeIncomeButton)
+        } else {
+            activeSheet = .addExpense(.addIncome)
+        }
+    }
+
+    private func openExpenseEntry() {
+        if tutorialCoordinator.isActive, tutorialCoordinator.currentStep?.anchor == .homeExpenseButton {
+            tutorialCoordinator.handleAnchorTap(.homeExpenseButton)
+        } else if settingsStore.studioEnabled {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.62)) {
+                isFabMenuExpanded.toggle()
+            }
+        } else {
+            activeSheet = .addExpense(.add)
+        }
+    }
 
     private var heroCardPadding: CGFloat {
         heroLayoutScale < 0.92 ? BuxTokens.section : BuxTokens.block
@@ -1001,6 +1056,10 @@ private struct DashboardHeroSection: View {
 
     private var heroActionIconSize: CGFloat {
         max(18, 22 * heroLayoutScale)
+    }
+
+    private var heroQuickActionsVisible: Bool {
+        navigationCoordinator.isScreenLoaded || tutorialCoordinator.isActive
     }
 
     var body: some View {
@@ -1060,45 +1119,53 @@ private struct DashboardHeroSection: View {
                 .padding(.top, BuxTokens.section + BuxTokens.tight)
 
                 HStack(spacing: 0) {
-                    BuxHeroQuickActionButton(
-                        action: { activeSheet = .addExpense(.addIncome) },
-                        diameter: heroActionDiameter,
-                        title: "Income",
-                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                        titleColor: themeManager.labelSecondary(for: colorScheme)
-                    ) { isPressed in
-                        Image(systemName: "arrow.down.circle.fill")
-                            .font(.system(size: heroActionIconSize + 2))
-                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                            .buxHeroActionIcon(.income, isPressed: isPressed)
+                    ZStack(alignment: .top) {
+                        BuxHeroQuickActionButton(
+                            action: { openIncomeEntry() },
+                            diameter: heroActionDiameter,
+                            title: "Income",
+                            titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                            titleColor: themeManager.labelSecondary(for: colorScheme)
+                        ) { isPressed in
+                            Image(systemName: "arrow.down.circle.fill")
+                                .font(.system(size: heroActionIconSize + 2))
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                .buxHeroActionIcon(.income, isPressed: isPressed)
+                        }
+                        Color.clear
+                            .frame(width: heroActionDiameter + 4, height: heroActionDiameter + 4)
+                            .padding(.top, 10)
+                            .tutorialAnchor(.homeIncomeButton, coordinator: tutorialCoordinator)
+                            .allowsHitTesting(false)
                     }
-                    .buxScreenEntrance(index: 0, isVisible: navigationCoordinator.isScreenLoaded)
+                    .frame(maxWidth: .infinity, minHeight: heroActionDiameter + 36)
+                    .buxScreenEntrance(index: 0, isVisible: heroQuickActionsVisible)
 
-                    BuxHeroQuickActionButton(
-                        action: {
-                            if settingsStore.studioEnabled {
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.62)) {
-                                    isFabMenuExpanded.toggle()
-                                }
-                            } else {
-                                activeSheet = .addExpense(.add)
-                            }
-                        },
-                        diameter: heroActionDiameter,
-                        title: "Expense",
-                        titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
-                        titleColor: themeManager.labelSecondary(for: colorScheme)
-                    ) { isPressed in
-                        Image(systemName: "plus")
-                            .font(.system(size: heroActionIconSize, weight: .semibold))
-                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                            .buxHeroActionIcon(.plus(isExpanded: isFabMenuExpanded), isPressed: isPressed)
+                    ZStack(alignment: .top) {
+                        BuxHeroQuickActionButton(
+                            action: { openExpenseEntry() },
+                            diameter: heroActionDiameter,
+                            title: "Expense",
+                            titleFont: .system(size: max(11, 12 * heroLayoutScale), weight: .medium),
+                            titleColor: themeManager.labelSecondary(for: colorScheme)
+                        ) { isPressed in
+                            Image(systemName: "plus")
+                                .font(.system(size: heroActionIconSize, weight: .semibold))
+                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                                .buxHeroActionIcon(.plus(isExpanded: isFabMenuExpanded), isPressed: isPressed)
+                        }
+                        Color.clear
+                            .frame(width: heroActionDiameter + 4, height: heroActionDiameter + 4)
+                            .padding(.top, 10)
+                            .tutorialAnchor(.homeExpenseButton, coordinator: tutorialCoordinator)
+                            .allowsHitTesting(false)
                     }
+                    .frame(maxWidth: .infinity, minHeight: heroActionDiameter + 36)
                     .dashboardFabAnchor(
                         circleDiameter: heroActionDiameter,
                         enabled: isFabMenuExpanded
                     )
-                    .buxScreenEntrance(index: 1, isVisible: navigationCoordinator.isScreenLoaded)
+                    .buxScreenEntrance(index: 1, isVisible: heroQuickActionsVisible)
 
                     BuxHeroQuickActionButton(
                         action: {
@@ -1168,6 +1235,7 @@ private struct DashboardHeroSection: View {
             )
         }
         .buxTrackScrollCollapse(scrollOffset: $scrollOffset)
+        .tutorialAnchor(.homeFinish, coordinator: tutorialCoordinator)
     }
 
     private var heroNotificationBell: some View {

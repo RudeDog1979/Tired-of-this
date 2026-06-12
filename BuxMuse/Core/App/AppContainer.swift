@@ -38,6 +38,7 @@ final class AppContainer: ObservableObject {
     public let simpleStudioBrain: SimpleStudioBrain
     public let taxEnvelopeBrain: TaxEnvelopeBrain
     public let appDataManager: AppDataManager
+    public let tutorialCoordinator: AppTutorialCoordinator
 
     init() {
         persistence = PersistenceController.shared
@@ -77,6 +78,7 @@ final class AppContainer: ObservableObject {
             taxManager: TaxManager.shared,
             appSettings: appSettingsManager
         )
+        tutorialCoordinator = AppTutorialCoordinator(settingsStore: settingsStore)
 
         let financialEngine: FinancialIntelligenceEngine
         if #available(iOS 26, *) {

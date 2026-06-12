@@ -126,14 +126,15 @@ struct OnboardingWizardView: View {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
             } else {
-                BuxButton(
-                    title: "Start Using BuxMuse",
-                    systemImage: "sparkles",
-                    role: .primary,
-                    expands: true
-                ) {
-                    completeOnboarding()
+                Button(action: completeOnboarding) {
+                    HStack(spacing: 8) {
+                        StudioSignatureSIcon(size: 16)
+                        BuxCatalogText.text("Get Started")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    .frame(maxWidth: .infinity)
                 }
+                .buxPrimaryPillStyle(accent: themeManager.contrastAccentColor(for: colorScheme), controlSize: .large)
             }
         }
         .padding(.horizontal, BuxLayout.marginHorizontal)
@@ -143,6 +144,7 @@ struct OnboardingWizardView: View {
     private func completeOnboarding() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         store.hasCompletedOnboarding = true
+        store.appTourPendingAutoStart = true
         store.save()
         dismiss()
     }
@@ -244,6 +246,16 @@ struct OnboardingWizardView: View {
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
+
+                VStack(alignment: .leading, spacing: 14) {
+                    bulletRow(icon: "arrow.down.circle.fill", text: "Log income when you get paid")
+                    bulletRow(icon: "plus.circle.fill", text: "Add expenses as you spend")
+                    bulletRow(icon: "house.fill", text: "Rent and utilities don't shrink your fun-money ring")
+                }
+                .padding(20)
+                .background(.ultraThinMaterial)
+                .cornerRadius(22)
+                .padding(.horizontal, BuxLayout.marginHorizontal)
 
                 // Inline form elements
                 VStack(spacing: 16) {

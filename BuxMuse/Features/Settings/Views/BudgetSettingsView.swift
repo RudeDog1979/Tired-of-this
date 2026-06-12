@@ -12,6 +12,7 @@ struct BudgetSettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ObservedObject private var store = SettingsStore.shared
 
     @State private var editingProfile: CustomBudgetProfile? = nil
@@ -154,6 +155,7 @@ struct BudgetSettingsView: View {
                         BuxSettingsFootnote(key: "Your simple budget tracks expenses starting on your pay cycle—allowing you to measure spending relative to when your income arrives, rather than just the calendar month.")
                     }
                 }
+                .tutorialAnchor(.settingsBudgetPayPeriod, coordinator: tutorialCoordinator)
             }
 
             BuxFormSection(title: "Intelligence rules") {

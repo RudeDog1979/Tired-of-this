@@ -11,6 +11,7 @@ struct AppearanceSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ObservedObject private var store = SettingsStore.shared
 
     private var glassChromeSubtitle: String {
@@ -132,6 +133,7 @@ struct AppearanceSettingsView: View {
                 }
             }
         }
+        .tutorialAnchor(.settingsAppearanceDetail, coordinator: tutorialCoordinator)
         .buxCatalogNavigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

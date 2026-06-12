@@ -16,6 +16,7 @@ struct AddExpenseSheet: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var brain: BuxMuseBrain
+    @EnvironmentObject var tutorialCoordinator: AppTutorialCoordinator
 
     @StateObject private var viewModel: AddExpenseViewModel
     /// Holds mood id for overlay color (kept briefly while fading out).
@@ -96,6 +97,7 @@ struct AddExpenseSheet: View {
                         .allowsHitTesting(false)
                 }
 
+                ScrollViewReader { scrollProxy in
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: BuxLayout.section) {
                         if isIncomeMode {
@@ -133,6 +135,7 @@ struct AddExpenseSheet: View {
                                 .expensesThemedCardChrome(cornerRadius: 18)
                             }
                             .buttonStyle(BuxMicroShrinkStyle())
+                            .tutorialAnchor(.addExpenseScan, coordinator: tutorialCoordinator)
                         }
 
                         amountCard
@@ -217,6 +220,9 @@ struct AddExpenseSheet: View {
                 }
                 .buxDetailScrollChrome()
                 .scrollDismissesKeyboard(.interactively)
+                .scrollDisabled(tutorialCoordinator.isActive)
+                .tutorialScrollToActiveAnchor(coordinator: tutorialCoordinator, proxy: scrollProxy)
+                }
             }
             .buxCatalogNavigationTitle(sheetTitleKey)
             .navigationBarTitleDisplayMode(.inline)
@@ -378,6 +384,7 @@ struct AddExpenseSheet: View {
                     Text(warning)
                 }
             }
+            .tutorialCoachMarkOverlay(layer: .sheet, coordinator: tutorialCoordinator)
         }
     }
 
@@ -534,13 +541,24 @@ struct AddExpenseSheet: View {
 
     // MARK: - Form sections
 
+    @ViewBuilder
     private var amountCard: some View {
-        AmountField(
+        let field = AmountField(
             amountString: $viewModel.amountString,
             kind: isIncomeMode ? .income : .expense
         )
         .environmentObject(themeManager)
         .environmentObject(appSettingsManager)
+
+        if isIncomeMode {
+            field
+                .padding(BuxLayout.section)
+                .background(incomeFieldChrome)
+                .tutorialAnchor(.addIncomeAmount, coordinator: tutorialCoordinator)
+        } else {
+            field
+                .tutorialAnchor(.addExpenseSave, coordinator: tutorialCoordinator)
+        }
     }
 
     private var incomeAvatarPreview: some View {
@@ -737,6 +755,7 @@ struct AddExpenseSheet: View {
             }
             .padding(BuxLayout.section)
             .expensesThemedCardChrome(cornerRadius: 20)
+            .tutorialAnchor(.addExpenseMerchant, coordinator: tutorialCoordinator)
         }
     }
 
@@ -835,13 +854,19 @@ struct AddExpenseSheet: View {
     }
 
     private var categoryCard: some View {
-        ExpenseCategoryPickerView(
-            selectedCategoryId: $viewModel.selectedCategoryId,
-            selectedCategory: $viewModel.selectedCategory,
-            emphasizeOnAppear: mode == .addWithCategoryFocus,
-            includesIncome: false
-        )
-        .environmentObject(brain)
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            BuxCatalogText.text("Category")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            ExpenseCategoryPickerView(
+                selectedCategoryId: $viewModel.selectedCategoryId,
+                selectedCategory: $viewModel.selectedCategory,
+                emphasizeOnAppear: mode == .addWithCategoryFocus,
+                includesIncome: false
+            )
+            .environmentObject(brain)
+        }
+        .tutorialAnchor(.addExpenseCategory, coordinator: tutorialCoordinator)
     }
 
     private var subscriptionCard: some View {

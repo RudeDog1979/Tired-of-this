@@ -35,6 +35,7 @@ private enum ArchiveOperation {
 struct BackupRestoreSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @EnvironmentObject private var persistence: PersistenceController
     @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var financialBridge: FinancialEngineBridge
@@ -143,6 +144,7 @@ struct BackupRestoreSettingsView: View {
                     .buxFormFieldPadding()
                 }
             }
+            .tutorialAnchor(.settingsBackupDetail, coordinator: tutorialCoordinator)
 
             BuxFormSection(title: "Backup reminders") {
                 Toggle(isOn: Binding(

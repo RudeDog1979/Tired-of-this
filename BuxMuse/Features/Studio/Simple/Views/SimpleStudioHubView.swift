@@ -20,6 +20,7 @@ struct SimpleStudioHubView: View {
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var studioTimer = StudioTimerController.shared
@@ -81,6 +82,7 @@ struct SimpleStudioHubView: View {
                         if showsHeroWordmarkInScroll {
                             SimpleStudioHeader()
                                 .buxScreenEntrance(index: 0, isVisible: hubAppeared)
+                                .tutorialAnchor(.studioHubHeader, coordinator: tutorialCoordinator)
                         }
 
                         simpleQuickActions
@@ -466,6 +468,7 @@ struct SimpleStudioHubView: View {
         .accessibilityLabel(
             BuxCatalogLabel.string(isFabExpanded ? "Close menu" : "Add", locale: locale)
         )
+        .tutorialAnchor(.studioMoneyEntry, coordinator: tutorialCoordinator)
     }
 
     private func fabItem(titleKey: String, icon: String, index: Int, action: @escaping () -> Void) -> some View {

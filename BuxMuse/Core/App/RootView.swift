@@ -39,6 +39,11 @@ struct RootView: View {
                 coreTabView
             }
         }
+            .tutorialCoachMarkOverlay(
+                layer: .root,
+                coordinator: container.tutorialCoordinator,
+                reservesTabBarSpace: !BuxPadIdiom.isPad
+            )
             .background {
                 TaxTranslationSessionBridgeView()
             }
@@ -99,6 +104,10 @@ struct RootView: View {
                     .environmentObject(appSettingsManager)
                     .buxThemedSheetContent()
             }
+            .onChange(of: settingsStore.hasCompletedOnboarding) { _, completed in
+                guard completed else { return }
+                container.tutorialCoordinator.consumeAutoStartIfNeeded()
+            }
             .onChange(of: navigationCoordinator.showStudioUnlockAnimation) { _, isShowing in
                 if !isShowing {
                     navigationCoordinator.finishStudioUnlockPresentation()
@@ -120,10 +129,15 @@ struct RootView: View {
                 }
             }
             .onAppear {
+                container.tutorialCoordinator.attach(
+                    navigationCoordinator: navigationCoordinator,
+                    appSettingsManager: appSettingsManager
+                )
                 withAnimation(.easeOut(duration: 0.5)) {
                     navigationCoordinator.isScreenLoaded = true
                 }
                 evaluateAppLock(forceOnLaunch: true)
+                container.tutorialCoordinator.consumeAutoStartIfNeeded()
             }
             .onChange(of: scenePhase) { _, newPhase in
                 switch newPhase {
@@ -390,6 +404,10 @@ struct RootView: View {
                         Image(systemName: "lock.shield.fill")
                             .font(.system(size: 48))
                             .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                        Image("BuxMuseLogo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 200)
                         BuxCatalogText.text("BuxMuse Vault Active")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -489,6 +507,10 @@ struct RootView: View {
                         Image(systemName: "lock.shield.fill")
                             .font(.system(size: 48))
                             .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                        Image("BuxMuseLogo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 200)
                         BuxCatalogText.text("BuxMuse Vault Active")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(themeManager.labelPrimary(for: colorScheme))

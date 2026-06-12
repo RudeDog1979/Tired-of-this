@@ -30,16 +30,12 @@ struct AboutSettingsView: View {
                 VStack(spacing: BuxTokens.block) {
 
                     VStack(spacing: 12) {
-                        ZStack {
-                            Circle()
-                                .fill(themeManager.current.accentColor.opacity(0.12))
-                                .frame(width: 80, height: 80)
-
-                            Image(systemName: "banknote.fill")
-                                .font(.system(size: 38))
-                                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                        }
-                        .padding(.top, 24)
+                        Image("BuxMuseAppIcon")
+                            .resizable()
+                            .aspectRatio(1, contentMode: .fit)
+                            .frame(width: 80, height: 80)
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .padding(.top, 24)
 
                         VStack(spacing: 4) {
                             BuxCatalogDynamicText(key: "BuxMuse")

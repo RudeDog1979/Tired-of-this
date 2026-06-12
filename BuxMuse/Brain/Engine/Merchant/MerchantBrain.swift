@@ -109,7 +109,8 @@ final class MerchantBrain {
 
     func candidates(
         for query: String,
-        expenseRecords: [ExpenseRecord]
+        expenseRecords: [ExpenseRecord],
+        locale: Locale = .current
     ) -> [MerchantCandidate] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count >= 1 else { return [] }
@@ -134,7 +135,12 @@ final class MerchantBrain {
                 continue
             }
             let stats = statsForMerchant(id: merchant.id, displayNames: [merchant.name], records: expenseRecords)
-            let subtitle = listSubtitle(expenseCount: stats.count, category: stats.topCategory, lastDate: stats.lastDate)
+            let subtitle = listSubtitle(
+                expenseCount: stats.count,
+                category: stats.topCategory,
+                lastDate: stats.lastDate,
+                locale: locale
+            )
             let confidence: MerchantMatchConfidence = norm.hasPrefix(normalizedQuery)
                 || matchName.lowercased().hasPrefix(trimmed.lowercased())
                 ? .high : .medium
@@ -177,7 +183,12 @@ final class MerchantBrain {
             }
 
             let stats = statsForRecords(records)
-            let subtitle = listSubtitle(expenseCount: stats.count, category: stats.topCategory, lastDate: stats.lastDate)
+            let subtitle = listSubtitle(
+                expenseCount: stats.count,
+                category: stats.topCategory,
+                lastDate: stats.lastDate,
+                locale: locale
+            )
             appendCandidate(
                 MerchantCandidate(
                     id: key,
@@ -207,8 +218,13 @@ final class MerchantBrain {
             }
             let stats = statsForRecords(related)
             let subtitle = stats.count > 0
-                ? listSubtitle(expenseCount: stats.count, category: stats.topCategory, lastDate: stats.lastDate)
-                : "Past label in your data"
+                ? listSubtitle(
+                    expenseCount: stats.count,
+                    category: stats.topCategory,
+                    lastDate: stats.lastDate,
+                    locale: locale
+                )
+                : BuxLocalizedString.string("Past label in your data", locale: locale)
             appendCandidate(
                 MerchantCandidate(
                     id: "label:\(key)",
@@ -232,7 +248,11 @@ final class MerchantBrain {
                     id: "catalog:\(key)",
                     merchantId: nil,
                     displayName: entry.displayName,
-                    subtitle: "Known retailer · \(entry.domain)",
+                    subtitle: BuxLocalizedString.format(
+                        "Known retailer · %@",
+                        locale: locale,
+                        entry.domain
+                    ),
                     matchKind: .knownRetailer,
                     confidence: .high,
                     historyLabel: entry.displayName
@@ -250,7 +270,7 @@ final class MerchantBrain {
                     id: "alias:\(key)",
                     merchantId: nil,
                     displayName: aliasLabel,
-                    subtitle: "Common name — tap to use",
+                    subtitle: BuxLocalizedString.string("Common name — tap to use", locale: locale),
                     matchKind: .aliasVariant,
                     confidence: .medium,
                     historyLabel: aliasLabel
@@ -276,7 +296,7 @@ final class MerchantBrain {
                 id: "new:\(normalizedQuery)",
                 merchantId: nil,
                 displayName: trimmed,
-                subtitle: "Add as new merchant",
+                subtitle: BuxLocalizedString.string("Add as new merchant", locale: locale),
                 matchKind: .newMerchant,
                 confidence: .low
             ))
@@ -459,18 +479,28 @@ final class MerchantBrain {
         return RecordStats(count: records.count, topCategory: top?.rawValue, lastDate: last)
     }
 
-    private func listSubtitle(expenseCount: Int, category: String?, lastDate: Date?) -> String {
+    private func listSubtitle(expenseCount: Int, category: String?, lastDate: Date?, locale: Locale) -> String {
         var parts: [String] = []
         if expenseCount > 0 {
-            parts.append("\(expenseCount) expense\(expenseCount == 1 ? "" : "s")")
+            let countKey = expenseCount == 1 ? "%lld expense" : "%lld expenses"
+            parts.append(BuxLocalizedString.format(countKey, locale: locale, expenseCount))
         }
         if let category, !category.isEmpty { parts.append(category) }
         if let lastDate {
             let formatter = DateFormatter()
+            formatter.locale = locale
             formatter.dateStyle = .medium
-            parts.append("last \(formatter.string(from: lastDate))")
+            parts.append(
+                BuxLocalizedString.format(
+                    "last %@",
+                    locale: locale,
+                    formatter.string(from: lastDate)
+                )
+            )
         }
-        return parts.isEmpty ? "No expenses yet" : parts.joined(separator: " · ")
+        return parts.isEmpty
+            ? BuxLocalizedString.string("No expenses yet", locale: locale)
+            : parts.joined(separator: " · ")
     }
 
     private func historyLabelDuplicatesEntity(exactName: String, merchant: ExpenseMerchantRecord) -> Bool {

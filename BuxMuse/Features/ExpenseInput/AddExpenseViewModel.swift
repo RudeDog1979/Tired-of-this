@@ -350,7 +350,7 @@ public final class AddExpenseViewModel: ObservableObject {
         }
 
         let records = (try? brain.fetchAllExpenseRecords()) ?? []
-        incomeStoreCandidates = brain.merchantBrain.candidates(for: clean, expenseRecords: records)
+        incomeStoreCandidates = brain.merchantBrain.candidates(for: clean, expenseRecords: records, locale: locale)
 
         if resetSelection {
             selectedCandidateId = nil
@@ -391,7 +391,7 @@ public final class AddExpenseViewModel: ObservableObject {
             return
         }
 
-        let next = brain.merchantBrain.candidates(for: cleanName, expenseRecords: records)
+        let next = brain.merchantBrain.candidates(for: cleanName, expenseRecords: records, locale: locale)
         candidates = next
         let choosable = next.filter { $0.matchKind != .newMerchant }
         let nonAliasChoosable = choosable.filter { $0.matchKind != .aliasVariant }
@@ -528,7 +528,7 @@ public final class AddExpenseViewModel: ObservableObject {
             let storeQuery = optionalStoreName.trimmingCharacters(in: .whitespacesAndNewlines)
             if !storeQuery.isEmpty {
                 let pickCandidates = incomeStoreCandidates.isEmpty
-                    ? brain.merchantBrain.candidates(for: storeQuery, expenseRecords: (try? brain.fetchAllExpenseRecords()) ?? [])
+                    ? brain.merchantBrain.candidates(for: storeQuery, expenseRecords: (try? brain.fetchAllExpenseRecords()) ?? [], locale: locale)
                     : incomeStoreCandidates
                 let mustPick = brain.merchantBrain.isAmbiguous(
                     query: storeQuery,

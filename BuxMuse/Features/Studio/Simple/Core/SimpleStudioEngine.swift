@@ -21,7 +21,6 @@ enum SimpleStudioEngine {
         envelopeContext: TaxEnvelopeSourceContext? = nil
     ) -> SimpleStudioHubDisplay {
         let calendar = Calendar.current
-        let now = Date()
         let todayEntries = snapshot.entries.filter { calendar.isDateInToday($0.createdAt) }
         let periodEntries = entries(in: period, from: snapshot.entries)
 

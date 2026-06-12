@@ -103,6 +103,20 @@ public final class SettingsStore: ObservableObject {
             UserDefaults.standard.set(standardBudgetStudioBridgePromptDismissed, forKey: Self.standardBudgetStudioBridgePromptDismissedKey)
         }
     }
+    @Published public var appTourFinished: Bool = UserDefaults.standard.bool(forKey: "buxmuse.appTour.finished") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(appTourFinished, forKey: Self.appTourFinishedKey)
+        }
+    }
+    @Published public var appTourSkipped: Bool = UserDefaults.standard.bool(forKey: "buxmuse.appTour.skipped") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(appTourSkipped, forKey: Self.appTourSkippedKey)
+        }
+    }
+    /// Ephemeral — set when onboarding completes; consumed to auto-start the interactive tour.
+    @Published public var appTourPendingAutoStart: Bool = false
     @Published public var studioProfileId: UUID? = nil
     /// Simple (default) vs Pro Studio presentation.
     @Published public var studioMode: StudioMode = .simple
@@ -976,6 +990,8 @@ public final class SettingsStore: ObservableObject {
 
     private static let studioDiscoveryDismissedKey = "studio_discovery_offer_dismissed"
     private static let standardBudgetStudioBridgePromptDismissedKey = "buxmuse.standardBudgetStudioBridgePromptDismissed"
+    private static let appTourFinishedKey = "buxmuse.appTour.finished"
+    private static let appTourSkippedKey = "buxmuse.appTour.skipped"
 
     public func dismissStudioDiscoveryOffer() {
         studioDiscoveryOfferDismissed = true
@@ -986,9 +1002,17 @@ public final class SettingsStore: ObservableObject {
         standardBudgetStudioBridgePromptDismissed = true
     }
 
+    public func resetAppTourProgress() {
+        appTourFinished = false
+        appTourSkipped = false
+        appTourPendingAutoStart = false
+    }
+
     private func loadStudioDiscoveryPreference() {
         studioDiscoveryOfferDismissed = UserDefaults.standard.bool(forKey: Self.studioDiscoveryDismissedKey)
         standardBudgetStudioBridgePromptDismissed = UserDefaults.standard.bool(forKey: Self.standardBudgetStudioBridgePromptDismissedKey)
+        appTourFinished = UserDefaults.standard.bool(forKey: Self.appTourFinishedKey)
+        appTourSkipped = UserDefaults.standard.bool(forKey: Self.appTourSkippedKey)
     }
 
     private func loadMileagePreferences() {

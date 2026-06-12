@@ -356,3 +356,27 @@ struct SimpleStudioHeader: View {
         )
     }
 }
+
+/// Gradient Studio **S** mark for CTAs (onboarding Get Started, etc.).
+struct StudioSignatureSIcon: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+    @Environment(\.colorScheme) private var colorScheme
+
+    var size: CGFloat = 16
+
+    var body: some View {
+        Text("S")
+            .font(.system(size: size, weight: .black, design: .rounded))
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [
+                        themeManager.current.accentColor,
+                        themeManager.current.accentColor.opacity(0.55)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .accessibilityHidden(true)
+    }
+}

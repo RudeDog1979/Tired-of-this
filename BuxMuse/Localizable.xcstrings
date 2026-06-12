@@ -53955,19 +53955,19 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Popular"
+            "value": "Conocido"
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Popular"
+            "value": "Conocido"
           }
         },
         "es-ES": {
           "stringUnit": {
             "state": "translated",
-            "value": "Popular"
+            "value": "Conocido"
           }
         }
       }
@@ -87714,6 +87714,472 @@
             "value": "Registra un ingreso para empezar este periodo"
           }
         }
+      }
+    },
+    "Log income when you get paid": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra un ingreso cuando cobres"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra un ingreso cuando cobres"
+          }
+        },
+        "es-ES": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra un ingreso cuando cobres"
+          }
+        }
+      }
+    },
+    "Add expenses as you spend": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade gastos según vayas gastando"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade gastos según vayas gastando"
+          }
+        },
+        "es-ES": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade gastos según vayas gastando"
+          }
+        }
+      }
+    },
+    "Rent and utilities don't shrink your fun-money ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El alquiler y servicios no reducen tu círculo de gasto libre"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El alquiler y servicios no reducen tu círculo de gasto libre"
+          }
+        },
+        "es-ES": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El alquiler y servicios no reducen tu círculo de gasto libre"
+          }
+        }
+      }
+    },
+    "Log your first income": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra tu primer ingreso"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra tu primer ingreso"
+          }
+        },
+        "es-ES": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra tu primer ingreso"
+          }
+        }
+      }
+    },
+    "Start here": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza aquí"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza aquí"
+          }
+        },
+        "es-ES": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza aquí"
+          }
+        }
+      }
+    },
+    "Log what you earned this period. Your budget ring fills from income, not your wallet balance.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra lo que ganaste este periodo. El círculo de presupuesto se llena con ingresos, no con el saldo de la cartera."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra lo que ganaste este periodo. El círculo de presupuesto se llena con ingresos, no con el saldo de la cartera."
+          }
+        },
+        "es-ES": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra lo que ganaste este periodo. El círculo de presupuesto se llena con ingresos, no con el saldo de la cartera."
+          }
+        }
+      }
+    },
+    "Known retailer · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Comercio conocido · %@" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Comercio conocido · %@" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Comercio conocido · %@" } }
+      }
+    },
+    "Common name — tap to use": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Nombre habitual — pulsa para usar" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Nombre habitual — pulsa para usar" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Nombre habitual — pulsa para usar" } }
+      }
+    },
+    "Add as new merchant": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir como comercio nuevo" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Añadir como comercio nuevo" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Añadir como comercio nuevo" } }
+      }
+    },
+    "Past label in your data": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Etiqueta anterior en tus datos" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Etiqueta anterior en tus datos" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Etiqueta anterior en tus datos" } }
+      }
+    },
+    "%lld expense": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "%lld gasto" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "%lld gasto" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "%lld gasto" } }
+      }
+    },
+    "%lld expenses": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "%lld gastos" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "%lld gastos" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "%lld gastos" } }
+      }
+    },
+    "last %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "último %@" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "último %@" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "último %@" } }
+      }
+    },
+    "No expenses yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Sin gastos aún" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Sin gastos aún" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Sin gastos aún" } }
+      }
+    },
+    "Get Started": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Empezar" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Empezar" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Empezar" } }
+      }
+    },
+    "Step %lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Paso %1$lld de %2$lld" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Paso %1$lld de %2$lld" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Paso %1$lld de %2$lld" } }
+      }
+    },
+    "Skip tour": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Saltar tour" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Saltar tour" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Saltar tour" } }
+      }
+    },
+    "Finish tour": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Finalizar tour" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Finalizar tour" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Finalizar tour" } }
+      }
+    },
+    "Add expenses": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Añadir gastos" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Añadir gastos" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Añadir gastos" } }
+      }
+    },
+    "Log what you spend. Do this after income so the ring stays meaningful.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Registra lo que gastas. Hazlo después del ingreso para que el círculo tenga sentido." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Registra lo que gastas. Hazlo después del ingreso para que el círculo tenga sentido." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Registra lo que gastas. Hazlo después del ingreso para que el círculo tenga sentido." } }
+      }
+    },
+    "Tap here when you get paid. Each payment grows what you have left this period.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Pulsa aquí cuando cobres. Cada pago aumenta lo que te queda en este periodo." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Pulsa aquí cuando cobres. Cada pago aumenta lo que te queda en este periodo." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Pulsa aquí cuando cobres. Cada pago aumenta lo que te queda en este periodo." } }
+      }
+    },
+    "Take app tour again": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Repetir tour de la app" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Repetir tour de la app" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Repetir tour de la app" } }
+      }
+    },
+    "Your budget ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Tu círculo de presupuesto" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Tu círculo de presupuesto" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Tu círculo de presupuesto" } }
+      }
+    },
+    "Built from income you log, not your wallet balance. Log pay first, then spending.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Se basa en los ingresos que registras, no en el saldo de la cartera. Primero cobros, luego gastos." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Se basa en los ingresos que registras, no en el saldo de la cartera. Primero cobros, luego gastos." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Se basa en los ingresos que registras, no en el saldo de la cartera. Primero cobros, luego gastos." } }
+      }
+    },
+    "Income entry": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Entrada de ingreso" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Entrada de ingreso" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Entrada de ingreso" } }
+      }
+    },
+    "Enter what you earned. Try it now or tap Next — both are fine.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Introduce lo que ganaste. Pruébalo ahora o pulsa Siguiente — ambas valen." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Introduce lo que ganaste. Pruébalo ahora o pulsa Siguiente — ambas valen." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Introduce lo que ganaste. Pruébalo ahora o pulsa Siguiente — ambas valen." } }
+      }
+    },
+    "Pay period and cap": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Periodo de pago y tope" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Periodo de pago y tope" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Periodo de pago y tope" } }
+      }
+    },
+    "Match when you get paid. Cap at zero uses your full logged income.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ajusta cuándo cobras. Tope en cero = usar todo el ingreso registrado." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Ajusta cuándo cobras. Tope en cero = usar todo el ingreso registrado." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Ajusta cuándo cobras. Tope en cero = usar todo el ingreso registrado." } }
+      }
+    },
+    "Studio settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ajustes de Studio" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Ajustes de Studio" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Ajustes de Studio" } }
+      }
+    },
+    "Turn on Simple or Pro Studio, connect work income to Home, and manage invoices and tax tools.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activa Simple o Pro Studio, conecta ingresos de trabajo a Inicio y gestiona facturas e impuestos." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Activa Simple o Pro Studio, conecta ingresos de trabajo a Inicio y gestiona facturas e impuestos." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Activa Simple o Pro Studio, conecta ingresos de trabajo a Inicio y gestiona facturas e impuestos." } }
+      }
+    },
+    "Themes": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Temas" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Temas" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Temas" } }
+      }
+    },
+    "Accent color, glass look, and motion. Make BuxMuse yours.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Color de acento, aspecto cristal y animaciones. Haz BuxMuse tuyo." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Color de acento, aspecto cristal y animaciones. Haz BuxMuse tuyo." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Color de acento, aspecto cristal y animaciones. Haz BuxMuse tuyo." } }
+      }
+    },
+    "Encrypted on-device archives. Manage backup reminders here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Archivos cifrados en el dispositivo. Gestiona recordatorios de copia aquí." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Archivos cifrados en el dispositivo. Gestiona recordatorios de copia aquí." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Archivos cifrados en el dispositivo. Gestiona recordatorios de copia aquí." } }
+      }
+    },
+    "Studio tab": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Pestaña Studio" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Pestaña Studio" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Pestaña Studio" } }
+      }
+    },
+    "Separate ledger for client work. Home budget can include Studio income without double counting.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Libro aparte para trabajo con clientes. El presupuesto de Inicio puede incluir ingresos de Studio sin duplicar." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Libro aparte para trabajo con clientes. El presupuesto de Inicio puede incluir ingresos de Studio sin duplicar." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Libro aparte para trabajo con clientes. El presupuesto de Inicio puede incluir ingresos de Studio sin duplicar." } }
+      }
+    },
+    "Work income": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ingresos de trabajo" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Ingresos de trabajo" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Ingresos de trabajo" } }
+      }
+    },
+    "Log gigs and payments here. Optionally bridge to Home budget in Settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Registra trabajos y cobros aquí. Opcionalmente conéctalo al presupuesto de Inicio en Ajustes." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Registra trabajos y cobros aquí. Opcionalmente conéctalo al presupuesto de Inicio en Ajustes." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Registra trabajos y cobros aquí. Opcionalmente conéctalo al presupuesto de Inicio en Ajustes." } }
+      }
+    },
+    "Expenses tab": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Pestaña Gastos" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Pestaña Gastos" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Pestaña Gastos" } }
+      }
+    },
+    "Full history, search, filters, and merchant breakdown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Historial completo, búsqueda, filtros y desglose por comercio." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Historial completo, búsqueda, filtros y desglose por comercio." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Historial completo, búsqueda, filtros y desglose por comercio." } }
+      }
+    },
+    "You're set": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Listo" } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Listo" } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Listo" } }
+      }
+    },
+    "Log income each pay period, add expenses as you go, and tune Settings anytime.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Registra ingresos cada periodo, añade gastos sobre la marcha y ajusta Ajustes cuando quieras." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Registra ingresos cada periodo, añade gastos sobre la marcha y ajusta Ajustes cuando quieras." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Registra ingresos cada periodo, añade gastos sobre la marcha y ajusta Ajustes cuando quieras." } }
+      }
+    },
+    "Control budget rules, Studio, look and feel, profile, and backups here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Aquí controlas presupuesto, Studio, apariencia, perfil y copias de seguridad." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Aquí controlas presupuesto, Studio, apariencia, perfil y copias de seguridad." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Aquí controlas presupuesto, Studio, apariencia, perfil y copias de seguridad." } }
+      }
+    },
+    "Optional. On-device OCR fills merchant, date, and total.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Opcional. El OCR en el dispositivo rellena comercio, fecha e importe." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Opcional. El OCR en el dispositivo rellena comercio, fecha e importe." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Opcional. El OCR en el dispositivo rellena comercio, fecha e importe." } }
+      }
+    },
+    "Your expense appears on Home and in Expenses. Next is fine without saving.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El gasto aparece en Inicio y en Gastos. Puedes pulsar Siguiente sin guardar." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "El gasto aparece en Inicio y en Gastos. Puedes pulsar Siguiente sin guardar." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "El gasto aparece en Inicio y en Gastos. Puedes pulsar Siguiente sin guardar." } }
+      }
+    },
+    "Organizes spending. Housing and utilities are essentials — they do not shrink your fun-money ring.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Organiza el gasto. Vivienda y servicios son esenciales — no reducen tu círculo de gasto libre." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Organiza el gasto. Vivienda y servicios son esenciales — no reducen tu círculo de gasto libre." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Organiza el gasto. Vivienda y servicios son esenciales — no reducen tu círculo de gasto libre." } }
+      }
+    },
+    "Name the store. Pick a suggestion or add a new one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Nombre del comercio. Elige una sugerencia o añade uno nuevo." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Nombre del comercio. Elige una sugerencia o añade uno nuevo." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Nombre del comercio. Elige una sugerencia o añade uno nuevo." } }
+      }
+    },
+    "Pay cycle, optional spending cap, budget counts, and warnings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ciclo de pago, tope opcional, qué ingresos cuentan y avisos." } },
+        "es-419": { "stringUnit": { "state": "translated", "value": "Ciclo de pago, tope opcional, qué ingresos cuentan y avisos." } },
+        "es-ES": { "stringUnit": { "state": "translated", "value": "Ciclo de pago, tope opcional, qué ingresos cuentan y avisos." } }
       }
     },
     "Optional spending cap": {

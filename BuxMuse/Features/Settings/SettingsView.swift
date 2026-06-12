@@ -16,6 +16,7 @@ struct SettingsView: View {
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ObservedObject private var store = SettingsStore.shared
     @State private var settingsPath = NavigationPath()
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
@@ -26,6 +27,7 @@ struct SettingsView: View {
                 BuxLandingTintBackground()
                     .ignoresSafeArea()
 
+                ScrollViewReader { scrollProxy in
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: BuxTokens.block) {
                         // Generate layout dynamically from SettingsBrain display structs
@@ -41,7 +43,7 @@ struct SettingsView: View {
                             interfaceLocale: appSettingsManager.interfaceLocale
                         )
                         
-                        ForEach(display.sections) { section in
+                        ForEach(Array(display.sections.enumerated()), id: \.element.id) { sectionIndex, section in
                             VStack(alignment: .leading, spacing: 12) {
                                 BuxSectionHeader(title: section.title)
                                     .padding(.leading, 4)
@@ -57,6 +59,12 @@ struct SettingsView: View {
                                 }
                                 .settingsThemedCardChrome(cornerRadius: 20)
                             }
+                            .modifier(
+                                SettingsOverviewTutorialAnchorModifier(
+                                    isFirstSection: sectionIndex == 0,
+                                    coordinator: tutorialCoordinator
+                                )
+                            )
                         }
 
                         VStack(alignment: .leading, spacing: 12) {
@@ -76,6 +84,21 @@ struct SettingsView: View {
                                     )
                                 }
                                 .buxSettingsRowInteraction()
+
+                                Divider().opacity(0.08)
+
+                                Button {
+                                    tutorialCoordinator.restartTour()
+                                } label: {
+                                    SettingsRow(
+                                        icon: "point.topleft.down.curvedto.point.bottomright.up",
+                                        label: "Take app tour again",
+                                        color: themeManager.contrastAccentColor(for: colorScheme),
+                                        trailingText: nil,
+                                        showsProBadge: false
+                                    )
+                                }
+                                .buxSettingsRowInteraction()
                             }
                             .settingsThemedCardChrome(cornerRadius: 20)
                         }
@@ -87,6 +110,9 @@ struct SettingsView: View {
                 .id(appSettingsManager.interfaceLanguage.rawValue)
                 .buxRootTabScrollChrome()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .scrollDisabled(tutorialCoordinator.isActive)
+                .tutorialScrollToActiveAnchor(coordinator: tutorialCoordinator, proxy: scrollProxy)
+                }
             }
             .buxCatalogNavigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
@@ -115,6 +141,18 @@ struct SettingsView: View {
                 if navigationCoordinator.openAppearanceSettingsRequest {
                     routeToAppearanceSettings()
                 }
+                routeTutorialSettingsNavigation()
+            }
+            .onChange(of: tutorialCoordinator.currentStepIndex) { _, _ in
+                routeTutorialSettingsNavigation()
+            }
+            .onChange(of: tutorialCoordinator.pendingSettingsDestination) { _, destination in
+                guard destination != nil else { return }
+                routeTutorialSettingsNavigation()
+            }
+            .onChange(of: tutorialCoordinator.pendingSettingsPopToRoot) { _, shouldPop in
+                guard shouldPop else { return }
+                routeTutorialSettingsNavigation()
             }
             .navigationDestination(for: SettingsDestinationType.self) { destination in
                 SettingsDrillInBackdrop {
@@ -186,6 +224,17 @@ struct SettingsView: View {
         _ = navigationCoordinator.takePendingSettingsDestination()
     }
 
+    private func routeTutorialSettingsNavigation() {
+        if tutorialCoordinator.consumeSettingsPopToRoot() {
+            settingsPath = NavigationPath()
+        }
+        guard let destination = tutorialCoordinator.consumeSettingsDestinationRequest() else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            settingsPath = NavigationPath()
+            settingsPath.append(destination)
+        }
+    }
+
     @ViewBuilder
     private func settingsRowButton(for row: SettingsRowDisplay) -> some View {
         let showsUpsell = row.tier == .proOnly && !StudioFeatureGate.isPro
@@ -216,6 +265,33 @@ struct SettingsView: View {
                 )
             }
             .buxSettingsRowInteraction()
+            .modifier(SettingsTutorialAnchorModifier(destination: row.destination, coordinator: tutorialCoordinator))
+        }
+    }
+}
+
+struct SettingsTutorialAnchorModifier: ViewModifier {
+    let destination: SettingsDestinationType
+    @ObservedObject var coordinator: AppTutorialCoordinator
+
+    func body(content: Content) -> some View {
+        if let anchor = destination.tutorialAnchorID {
+            content.tutorialAnchor(anchor, coordinator: coordinator)
+        } else {
+            content
+        }
+    }
+}
+
+private struct SettingsOverviewTutorialAnchorModifier: ViewModifier {
+    let isFirstSection: Bool
+    @ObservedObject var coordinator: AppTutorialCoordinator
+
+    func body(content: Content) -> some View {
+        if isFirstSection {
+            content.tutorialAnchor(.settingsOverview, coordinator: coordinator)
+        } else {
+            content
         }
     }
 }
@@ -225,6 +301,7 @@ struct SettingsView: View {
 private struct SettingsDrillInBackdrop<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -233,6 +310,11 @@ private struct SettingsDrillInBackdrop<Content: View>: View {
                 .ignoresSafeArea()
             content()
         }
+        .tutorialCoachMarkOverlay(
+            layer: .settingsDetail,
+            coordinator: tutorialCoordinator,
+            reservesTabBarSpace: !BuxPadIdiom.isPad
+        )
         .buxPushedNavigationChrome()
         .environment(\.isSettingsContext, true)
     }
