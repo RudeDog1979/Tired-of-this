@@ -17,6 +17,7 @@ struct OnboardingWizardView: View {
     @State private var currentTab = 0
     @State private var showCountrySheet = false
     @State private var showCurrencySheet = false
+    @State private var showPasscodeSetup = false
     @State private var isAnimatingLogo = false
     @State private var logoDidAppear = false
     @State private var logoFloating = false
@@ -84,6 +85,15 @@ struct OnboardingWizardView: View {
                     .presentationDragIndicator(.visible)
                     .environment(\.settingsEnhancedTint, true)
                     .buxThemedSheetContent()
+            }
+            .sheet(isPresented: $showPasscodeSetup) {
+                PasscodeSetupSheet { pin in
+                    store.setPasscode(pin)
+                    store.save()
+                }
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .buxThemedSheetContent()
             }
         }
     }
@@ -250,6 +260,7 @@ struct OnboardingWizardView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     bulletRow(icon: "arrow.down.circle.fill", text: "Log income when you get paid")
                     bulletRow(icon: "plus.circle.fill", text: "Add expenses as you spend")
+                    bulletRow(icon: "creditcard.fill", text: "Optionally track loans, cards, and informal debt")
                     bulletRow(icon: "house.fill", text: "Rent and utilities don't shrink your fun-money ring")
                 }
                 .padding(20)
@@ -292,6 +303,25 @@ struct OnboardingWizardView: View {
                         }
                     }
                     .buxSettingsRowInteraction()
+
+                    Divider().opacity(0.08)
+
+                    Toggle(isOn: Binding(
+                        get: { store.consumerDebtEnabled },
+                        set: {
+                            store.consumerDebtEnabled = $0
+                            store.save()
+                        }
+                    )) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            BuxCatalogText.text("Track consumer debt")
+                                .font(.system(size: 15, weight: .semibold))
+                            BuxCatalogDynamicText(key: "Banks, family loans, and informal lenders.")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
 
                     Divider().opacity(0.08)
 
@@ -476,6 +506,10 @@ struct OnboardingWizardView: View {
             description: "Because BuxMuse is 100% offline with no servers, your ledger exists only on this device. We recommend setting up local notification alerts to remind you to back up your ledger."
         ) {
             VStack(spacing: 16) {
+                if !BuxPadIdiom.isPad {
+                    phoneSecurityOnboardingSection
+                }
+
                 // Reminders Toggle
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
@@ -639,6 +673,15 @@ struct OnboardingWizardView: View {
                         color: Color.orange,
                         headline: "3. Standard Budget Meter",
                         bodyText: "The home tab shows what you have left this pay period — built from income you log, minus discretionary spending. Housing and utilities are tracked separately."
+                    )
+
+                    Divider().opacity(0.08)
+
+                    tutorialRow(
+                        symbol: "creditcard.fill",
+                        color: Color.red,
+                        headline: "4. Consumer debt",
+                        bodyText: "Optional. Track bank loans, cards, family loans, and informal lenders with reminders and payoff insights."
                     )
                 }
                 .padding(20)
@@ -864,5 +907,55 @@ struct OnboardingWizardView: View {
             return ios26Name
         }
         return fallback
+    }
+
+    @ViewBuilder
+    private var phoneSecurityOnboardingSection: some View {
+        VStack(spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    BuxCatalogText.text("Protect with Face ID")
+                        .font(.system(size: 16, weight: .bold))
+                    BuxCatalogDynamicText(key: "Optional on iPhone — lock BuxMuse when you leave the app.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Toggle("", isOn: Binding(
+                    get: { store.biometricLockEnabled },
+                    set: {
+                        store.biometricLockEnabled = $0
+                        store.requireBiometricOnLaunch = $0
+                        store.save()
+                    }
+                ))
+                .labelsHidden()
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
+            }
+            .padding(16)
+            .background(Color.black.opacity(colorScheme == .dark ? 0.15 : 0.02))
+            .cornerRadius(16)
+
+            Button {
+                showPasscodeSetup = true
+            } label: {
+                HStack {
+                    Image(systemName: store.hasAppPasscode ? "checkmark.circle.fill" : "lock.fill")
+                        .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
+                    BuxCatalogText.text(store.hasAppPasscode ? "Passcode set" : "Create a 4-digit passcode")
+                        .font(.system(size: 15, weight: .semibold))
+                    Spacer()
+                    if !store.hasAppPasscode {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(16)
+                .background(Color.black.opacity(colorScheme == .dark ? 0.15 : 0.02))
+                .cornerRadius(16)
+            }
+            .buttonStyle(.plain)
+        }
     }
 }

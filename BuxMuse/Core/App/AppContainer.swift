@@ -28,6 +28,7 @@ final class AppContainer: ObservableObject {
     public let brain: BuxMuseBrain
     public let financialBridge: FinancialEngineBridge
     public let goalsEngine: GoalsEngine
+    public let debtEngine: DebtEngine
     public let goalsViewModel: GoalsViewModel
     public let goalsSheetCoordinator: GoalsSheetCoordinator
     public let insightsEngine: InsightsEngine
@@ -89,6 +90,7 @@ final class AppContainer: ObservableObject {
 
         financialBridge = FinancialEngineBridge(engine: financialEngine)
         goalsEngine = GoalsEngine()
+        debtEngine = DebtEngine(persistence: persistence)
         insightsEngine = InsightsEngine()
         goalsViewModel = GoalsViewModel(goalsEngine: goalsEngine, financialEngine: financialBridge.engine)
         insightsViewModel = InsightsViewModel(
@@ -130,6 +132,82 @@ final class AppContainer: ObservableObject {
         }
 
         themeManager.updateThemeForActiveWorkspace()
+
+        HouseholdSyncEngine.shared.attach(brain: brain)
+        Task {
+            _ = await HouseholdSyncEngine.shared.checkAccountStatus()
+            await HouseholdSyncEngine.shared.pullRemoteChanges()
+        }
+
+        PersonalCloudSyncEngine.shared.attach(brain: brain, debtEngine: debtEngine, goalsEngine: goalsEngine)
+        wirePersonalCloudSyncTriggers()
+        wireRegionalPreferencesSync(settingsStore: settingsStore)
+    }
+
+    private func wirePersonalCloudSyncTriggers() {
+        NotificationCenter.default.publisher(for: .buxMuseSettingsDidPersist)
+            .receive(on: RunLoop.main)
+            .sink { _ in
+                PersonalCloudSyncEngine.shared.scheduleSettingsPush()
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .buxMuseStudioDidPersist)
+            .receive(on: RunLoop.main)
+            .sink { _ in
+                PersonalCloudSyncEngine.shared.scheduleStudioPush()
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .buxMuseSimpleStudioDidPersist)
+            .receive(on: RunLoop.main)
+            .sink { _ in
+                PersonalCloudSyncEngine.shared.scheduleSimpleStudioPush()
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .buxMuseHustlesDidPersist)
+            .receive(on: RunLoop.main)
+            .sink { _ in
+                PersonalCloudSyncEngine.shared.scheduleHustlesPush()
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .buxMusePersonalCloudSyncDidPull)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.appSettingsManager.applyRegionalPreferences(from: SettingsStore.shared)
+                self.brain.scheduleSnapshotRefresh()
+                self.studioBrain.refreshAll()
+                self.simpleStudioBrain.refreshAll()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func wireRegionalPreferencesSync(settingsStore: SettingsStore) {
+        settingsStore.pushRegionalPreferences(from: appSettingsManager)
+
+        Publishers.Merge3(
+            appSettingsManager.$selectedCurrency.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            appSettingsManager.$selectedCountry.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            appSettingsManager.$interfaceLanguage.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] in
+            guard let self else { return }
+            settingsStore.pushRegionalPreferences(from: self.appSettingsManager)
+            settingsStore.save()
+            PersonalCloudSyncEngine.shared.scheduleSettingsPush()
+        }
+        .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .buxMuseSettingsArchiveDidImport)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.appSettingsManager.applyRegionalPreferences(from: settingsStore)
+            }
+            .store(in: &cancellables)
     }
 
     private func wireWorkspaceNexusLifecycle() {

@@ -1,0 +1,54 @@
+{
+  "Review sync conflicts": {
+    "es-419": "Revisar conflictos de sincronización",
+    "es-ES": "Revisar conflictos de sincronización"
+  },
+  "Sync conflicts": {
+    "es-419": "Conflictos de sincronización",
+    "es-ES": "Conflictos de sincronización"
+  },
+  "Review conflicts": {
+    "es-419": "Revisar conflictos",
+    "es-ES": "Revisar conflictos"
+  },
+  "No sync conflicts. Your iPhone and iPad data matches.": {
+    "es-419": "No hay conflictos de sincronización. Los datos de tu iPhone e iPad coinciden.",
+    "es-ES": "No hay conflictos de sincronización. Los datos de tu iPhone e iPad coinciden."
+  },
+  "Keep this device": {
+    "es-419": "Conservar este dispositivo",
+    "es-ES": "Conservar este dispositivo"
+  },
+  "Keep iCloud": {
+    "es-419": "Conservar iCloud",
+    "es-ES": "Conservar iCloud"
+  },
+  "Settings conflict": {
+    "es-419": "Conflicto de ajustes",
+    "es-ES": "Conflicto de ajustes"
+  },
+  "Budget settings conflict": {
+    "es-419": "Conflicto de ajustes de presupuesto",
+    "es-ES": "Conflicto de ajustes de presupuesto"
+  },
+  "Appearance settings conflict": {
+    "es-419": "Conflicto de ajustes de apariencia",
+    "es-ES": "Conflicto de ajustes de apariencia"
+  },
+  "Studio settings conflict": {
+    "es-419": "Conflicto de ajustes de Studio",
+    "es-ES": "Conflicto de ajustes de Studio"
+  },
+  "Studio item conflict": {
+    "es-419": "Conflicto de elemento de Studio",
+    "es-ES": "Conflicto de elemento de Studio"
+  },
+  "Simple Studio item conflict": {
+    "es-419": "Conflicto de elemento de Simple Studio",
+    "es-ES": "Conflicto de elemento de Simple Studio"
+  },
+  "Workspace conflict": {
+    "es-419": "Conflicto de espacio de trabajo",
+    "es-ES": "Conflicto de espacio de trabajo"
+  }
+}

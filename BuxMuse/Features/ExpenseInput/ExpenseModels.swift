@@ -7,6 +7,94 @@
 
 import Foundation
 
+// MARK: - Category split
+
+struct ExpenseSplitLineRecord: Identifiable, Equatable, Hashable, Codable {
+    public let id: UUID
+    public var categoryId: UUID?
+    public var categoryRaw: String
+    public var amountValue: Decimal
+    public var sortOrder: Int
+
+    public var transactionCategory: TransactionCategory {
+        TransactionCategory(rawValue: categoryRaw) ?? .other
+    }
+
+    public init(
+        id: UUID = UUID(),
+        categoryId: UUID? = nil,
+        categoryRaw: String,
+        amountValue: Decimal,
+        sortOrder: Int = 0
+    ) {
+        self.id = id
+        self.categoryId = categoryId
+        self.categoryRaw = categoryRaw
+        self.amountValue = amountValue
+        self.sortOrder = sortOrder
+    }
+
+    public static func from(_ entity: ExpenseSplitLineEntity) -> ExpenseSplitLineRecord {
+        ExpenseSplitLineRecord(
+            id: entity.id,
+            categoryId: entity.categoryId,
+            categoryRaw: entity.categoryRaw,
+            amountValue: entity.amountValue,
+            sortOrder: entity.sortOrder
+        )
+    }
+}
+
+/// UI draft line for split editor — persisted as `ExpenseSplitLineRecord`.
+public struct ExpenseCategorySplitLine: Codable, Identifiable, Equatable, Hashable {
+    public let id: UUID
+    public var categoryId: UUID?
+    public var categoryRaw: String
+    public var amountString: String
+
+    public init(
+        id: UUID = UUID(),
+        categoryId: UUID? = nil,
+        categoryRaw: String = TransactionCategory.other.rawValue,
+        amountString: String = ""
+    ) {
+        self.id = id
+        self.categoryId = categoryId
+        self.categoryRaw = categoryRaw
+        self.amountString = amountString
+    }
+
+    public var amountDecimal: Decimal? {
+        let cleaned = amountString.replacingOccurrences(of: ",", with: ".")
+        guard let value = Decimal(string: cleaned), value > 0 else { return nil }
+        return value
+    }
+
+    public var transactionCategory: TransactionCategory {
+        TransactionCategory(rawValue: categoryRaw) ?? .other
+    }
+
+    func toSplitLineRecord(sortOrder: Int) -> ExpenseSplitLineRecord? {
+        guard let amount = amountDecimal else { return nil }
+        return ExpenseSplitLineRecord(
+            id: id,
+            categoryId: categoryId,
+            categoryRaw: categoryRaw,
+            amountValue: amount,
+            sortOrder: sortOrder
+        )
+    }
+
+    static func from(_ record: ExpenseSplitLineRecord) -> ExpenseCategorySplitLine {
+        ExpenseCategorySplitLine(
+            id: record.id,
+            categoryId: record.categoryId,
+            categoryRaw: record.categoryRaw,
+            amountString: NSDecimalNumber(decimal: record.amountValue).stringValue
+        )
+    }
+}
+
 // MARK: - Record
 
 struct ExpenseRecord: Identifiable, Equatable, Hashable {
@@ -52,6 +140,9 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
     public var bridgeSharePercent: Double?
     public var bridgePeerExpenseId: UUID?
     public var bridgeCounterpartyHustleId: UUID?
+    public var isCategorySplit: Bool
+    public var splitLines: [ExpenseSplitLineRecord]
+    public var householdScope: HouseholdScope
 
     public var synergyBridgeKind: SynergyBridgeKind? {
         bridgeKind.flatMap { SynergyBridgeKind(rawValue: $0) }
@@ -133,7 +224,10 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         bridgeRole: String? = nil,
         bridgeSharePercent: Double? = nil,
         bridgePeerExpenseId: UUID? = nil,
-        bridgeCounterpartyHustleId: UUID? = nil
+        bridgeCounterpartyHustleId: UUID? = nil,
+        isCategorySplit: Bool = false,
+        splitLines: [ExpenseSplitLineRecord] = [],
+        householdScope: HouseholdScope = .personal
     ) {
         self.id = id
         self.name = name
@@ -177,6 +271,9 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         self.bridgeSharePercent = bridgeSharePercent
         self.bridgePeerExpenseId = bridgePeerExpenseId
         self.bridgeCounterpartyHustleId = bridgeCounterpartyHustleId
+        self.isCategorySplit = isCategorySplit
+        self.splitLines = splitLines
+        self.householdScope = householdScope
     }
 
     public func toTransaction() -> Transaction {
@@ -251,7 +348,12 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
             bridgeRole: entity.bridgeRole,
             bridgeSharePercent: entity.bridgeSharePercent,
             bridgePeerExpenseId: entity.bridgePeerExpenseId,
-            bridgeCounterpartyHustleId: entity.bridgeCounterpartyHustleId
+            bridgeCounterpartyHustleId: entity.bridgeCounterpartyHustleId,
+            isCategorySplit: entity.isCategorySplit,
+            splitLines: entity.splitLines
+                .sorted { $0.sortOrder < $1.sortOrder }
+                .map { ExpenseSplitLineRecord.from($0) },
+            householdScope: HouseholdScope(rawValue: entity.householdScopeRaw) ?? .personal
         )
     }
 

@@ -91,6 +91,12 @@ public final class SettingsStore: ObservableObject {
     @Published public var customBudgetLimit: Decimal = 50
     @Published public var customBudgetPeriod: DefaultBudgetPeriod = .weekly
     @Published public var budgetApproachingThresholdPercent: Int = 80
+    @Published public var budgetQuickSetupCompleted: Bool = UserDefaults.standard.bool(forKey: "buxmuse.budgetQuickSetupCompleted") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(budgetQuickSetupCompleted, forKey: Self.budgetQuickSetupCompletedKey)
+        }
+    }
     
     // MARK: - Freelance Settings
     @Published public var studioEnabled: Bool = false
@@ -306,6 +312,26 @@ public final class SettingsStore: ObservableObject {
     @Published public var includeAnalyticsInExports: Bool = false
     @Published public var lastExportDate: Date? = nil
     
+    // MARK: - Household iCloud Settings
+    @Published public var householdCloudRecordName: String? = nil
+    @Published public var householdShareURL: String? = nil
+    @Published public var sharedEnvelopeProfileId: UUID? = nil
+    @Published public var householdDisplayName: String? = nil
+    @Published public var householdSharedZoneName: String? = nil
+    @Published public var householdSharedZoneOwner: String? = nil
+
+    // MARK: - Personal iCloud sync (same Apple ID across your devices)
+    @Published public var personalCloudSyncEnabled: Bool = false
+
+    // MARK: - Consumer debt tracking
+    @Published public var consumerDebtEnabled: Bool = false
+    @Published public var debtDiscoveryDeferred: Bool = false
+
+    /// Mirrored into iCloud personal sync so currency, country, and language match across devices.
+    @Published public var syncedCurrencyId: String? = nil
+    @Published public var syncedCountryId: String? = nil
+    @Published public var syncedInterfaceLanguageRaw: String? = nil
+
     // MARK: - Developer Options
     @Published public var enableDebugOverlay: Bool = false
     @Published public var showPerformanceMetrics: Bool = false
@@ -353,6 +379,7 @@ public final class SettingsStore: ObservableObject {
     private let saveQueue = DispatchQueue(label: "com.buxmuse.settings.save", qos: .utility)
     private var pendingSaveWork: DispatchWorkItem?
     private static let saveDebounceInterval: TimeInterval = 0.4
+    public private(set) var lastPersistedAt: Date?
     private var isLoaded = false
     
     private init() {
@@ -449,6 +476,7 @@ public final class SettingsStore: ObservableObject {
         let customBudgetLimit: Decimal?
         let customBudgetPeriod: DefaultBudgetPeriod?
         let budgetApproachingThresholdPercent: Int?
+        let budgetQuickSetupCompleted: Bool?
 
         let studioEnabled: Bool
         let studioProfileId: UUID?
@@ -492,6 +520,18 @@ public final class SettingsStore: ObservableObject {
         let greetingHeaderEnabled: Bool?
         let greetingShowIcon: Bool?
         let greetingFontStyle: GreetingFontStyle?
+        let householdCloudRecordName: String?
+        let householdShareURL: String?
+        let sharedEnvelopeProfileId: UUID?
+        let householdDisplayName: String?
+        let householdSharedZoneName: String?
+        let householdSharedZoneOwner: String?
+        let personalCloudSyncEnabled: Bool?
+        let consumerDebtEnabled: Bool?
+        let debtDiscoveryDeferred: Bool?
+        let syncedCurrencyId: String?
+        let syncedCountryId: String?
+        let syncedInterfaceLanguageRaw: String?
 
         enum CodingKeys: String, CodingKey {
             case firstName, lastName, userDisplayName, profileAvatarData, preferredNameStyle
@@ -502,7 +542,7 @@ public final class SettingsStore: ObservableObject {
             case simpleBudgetLimit, simpleBudgetCycle, simpleBudgetPeriodAnchor, incomeFundingSource
             case includeSimpleStudioIncomeInBudget
             case includeProStudioIncomeInBudget
-            case customBudgetLimit, customBudgetPeriod, budgetApproachingThresholdPercent
+            case customBudgetLimit, customBudgetPeriod, budgetApproachingThresholdPercent, budgetQuickSetupCompleted
             case studioEnabled, freelanceEnabled
             case studioProfileId, freelanceProfileId
             case studioMode, studioPersona, studioPersonaConfigured
@@ -518,6 +558,11 @@ public final class SettingsStore: ObservableObject {
             case includeAnalyticsInExports, lastExportDate
             case enableDebugOverlay, showPerformanceMetrics
             case greetingHeaderEnabled, greetingShowIcon, greetingFontStyle
+            case householdCloudRecordName, householdShareURL, sharedEnvelopeProfileId, householdDisplayName
+            case householdSharedZoneName, householdSharedZoneOwner
+            case personalCloudSyncEnabled
+            case consumerDebtEnabled, debtDiscoveryDeferred
+            case syncedCurrencyId, syncedCountryId, syncedInterfaceLanguageRaw
         }
 
         init(from decoder: Decoder) throws {
@@ -571,6 +616,7 @@ public final class SettingsStore: ObservableObject {
             customBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .customBudgetLimit)
             customBudgetPeriod = try c.decodeIfPresent(DefaultBudgetPeriod.self, forKey: .customBudgetPeriod)
             budgetApproachingThresholdPercent = try c.decodeIfPresent(Int.self, forKey: .budgetApproachingThresholdPercent)
+            budgetQuickSetupCompleted = try c.decodeIfPresent(Bool.self, forKey: .budgetQuickSetupCompleted)
             studioEnabled = try c.decodeIfPresent(Bool.self, forKey: .studioEnabled)
                 ?? c.decodeIfPresent(Bool.self, forKey: .freelanceEnabled) ?? false
             studioProfileId = try c.decodeIfPresent(UUID.self, forKey: .studioProfileId)
@@ -612,6 +658,18 @@ public final class SettingsStore: ObservableObject {
             greetingHeaderEnabled = try c.decodeIfPresent(Bool.self, forKey: .greetingHeaderEnabled)
             greetingShowIcon = try c.decodeIfPresent(Bool.self, forKey: .greetingShowIcon)
             greetingFontStyle = try c.decodeIfPresent(GreetingFontStyle.self, forKey: .greetingFontStyle)
+            householdCloudRecordName = try c.decodeIfPresent(String.self, forKey: .householdCloudRecordName)
+            householdShareURL = try c.decodeIfPresent(String.self, forKey: .householdShareURL)
+            sharedEnvelopeProfileId = try c.decodeIfPresent(UUID.self, forKey: .sharedEnvelopeProfileId)
+            householdDisplayName = try c.decodeIfPresent(String.self, forKey: .householdDisplayName)
+            householdSharedZoneName = try c.decodeIfPresent(String.self, forKey: .householdSharedZoneName)
+            householdSharedZoneOwner = try c.decodeIfPresent(String.self, forKey: .householdSharedZoneOwner)
+            personalCloudSyncEnabled = try c.decodeIfPresent(Bool.self, forKey: .personalCloudSyncEnabled)
+            consumerDebtEnabled = try c.decodeIfPresent(Bool.self, forKey: .consumerDebtEnabled)
+            debtDiscoveryDeferred = try c.decodeIfPresent(Bool.self, forKey: .debtDiscoveryDeferred)
+            syncedCurrencyId = try c.decodeIfPresent(String.self, forKey: .syncedCurrencyId)
+            syncedCountryId = try c.decodeIfPresent(String.self, forKey: .syncedCountryId)
+            syncedInterfaceLanguageRaw = try c.decodeIfPresent(String.self, forKey: .syncedInterfaceLanguageRaw)
         }
 
         init(
@@ -642,6 +700,7 @@ public final class SettingsStore: ObservableObject {
             customBudgetLimit: Decimal?,
             customBudgetPeriod: DefaultBudgetPeriod?,
             budgetApproachingThresholdPercent: Int?,
+            budgetQuickSetupCompleted: Bool? = nil,
             studioEnabled: Bool,
             studioProfileId: UUID?,
             studioMode: StudioMode?,
@@ -678,7 +737,19 @@ public final class SettingsStore: ObservableObject {
             hasCompletedOnboarding: Bool?,
             greetingHeaderEnabled: Bool?,
             greetingShowIcon: Bool?,
-            greetingFontStyle: GreetingFontStyle?
+            greetingFontStyle: GreetingFontStyle?,
+            householdCloudRecordName: String? = nil,
+            householdShareURL: String? = nil,
+            sharedEnvelopeProfileId: UUID? = nil,
+            householdDisplayName: String? = nil,
+            householdSharedZoneName: String? = nil,
+            householdSharedZoneOwner: String? = nil,
+            personalCloudSyncEnabled: Bool? = nil,
+            consumerDebtEnabled: Bool? = nil,
+            debtDiscoveryDeferred: Bool? = nil,
+            syncedCurrencyId: String? = nil,
+            syncedCountryId: String? = nil,
+            syncedInterfaceLanguageRaw: String? = nil
         ) {
             self.firstName = firstName
             self.lastName = lastName
@@ -707,6 +778,7 @@ public final class SettingsStore: ObservableObject {
             self.customBudgetLimit = customBudgetLimit
             self.customBudgetPeriod = customBudgetPeriod
             self.budgetApproachingThresholdPercent = budgetApproachingThresholdPercent
+            self.budgetQuickSetupCompleted = budgetQuickSetupCompleted
             self.studioEnabled = studioEnabled
             self.studioProfileId = studioProfileId
             self.studioMode = studioMode
@@ -744,6 +816,18 @@ public final class SettingsStore: ObservableObject {
             self.greetingHeaderEnabled = greetingHeaderEnabled ?? true
             self.greetingShowIcon = greetingShowIcon ?? true
             self.greetingFontStyle = greetingFontStyle ?? .playful
+            self.householdCloudRecordName = householdCloudRecordName
+            self.householdShareURL = householdShareURL
+            self.sharedEnvelopeProfileId = sharedEnvelopeProfileId
+            self.householdDisplayName = householdDisplayName
+            self.householdSharedZoneName = householdSharedZoneName
+            self.householdSharedZoneOwner = householdSharedZoneOwner
+            self.personalCloudSyncEnabled = personalCloudSyncEnabled ?? false
+            self.consumerDebtEnabled = consumerDebtEnabled ?? false
+            self.debtDiscoveryDeferred = debtDiscoveryDeferred ?? false
+            self.syncedCurrencyId = syncedCurrencyId
+            self.syncedCountryId = syncedCountryId
+            self.syncedInterfaceLanguageRaw = syncedInterfaceLanguageRaw
         }
 
         func encode(to encoder: Encoder) throws {
@@ -775,6 +859,7 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(customBudgetLimit, forKey: .customBudgetLimit)
             try c.encodeIfPresent(customBudgetPeriod, forKey: .customBudgetPeriod)
             try c.encodeIfPresent(budgetApproachingThresholdPercent, forKey: .budgetApproachingThresholdPercent)
+            try c.encodeIfPresent(budgetQuickSetupCompleted, forKey: .budgetQuickSetupCompleted)
             try c.encode(studioEnabled, forKey: .studioEnabled)
             try c.encodeIfPresent(studioProfileId, forKey: .studioProfileId)
             try c.encodeIfPresent(studioMode, forKey: .studioMode)
@@ -812,6 +897,18 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(greetingHeaderEnabled, forKey: .greetingHeaderEnabled)
             try c.encodeIfPresent(greetingShowIcon, forKey: .greetingShowIcon)
             try c.encodeIfPresent(greetingFontStyle, forKey: .greetingFontStyle)
+            try c.encodeIfPresent(householdCloudRecordName, forKey: .householdCloudRecordName)
+            try c.encodeIfPresent(householdShareURL, forKey: .householdShareURL)
+            try c.encodeIfPresent(sharedEnvelopeProfileId, forKey: .sharedEnvelopeProfileId)
+            try c.encodeIfPresent(householdDisplayName, forKey: .householdDisplayName)
+            try c.encodeIfPresent(householdSharedZoneName, forKey: .householdSharedZoneName)
+            try c.encodeIfPresent(householdSharedZoneOwner, forKey: .householdSharedZoneOwner)
+            try c.encodeIfPresent(personalCloudSyncEnabled, forKey: .personalCloudSyncEnabled)
+            try c.encodeIfPresent(consumerDebtEnabled, forKey: .consumerDebtEnabled)
+            try c.encodeIfPresent(debtDiscoveryDeferred, forKey: .debtDiscoveryDeferred)
+            try c.encodeIfPresent(syncedCurrencyId, forKey: .syncedCurrencyId)
+            try c.encodeIfPresent(syncedCountryId, forKey: .syncedCountryId)
+            try c.encodeIfPresent(syncedInterfaceLanguageRaw, forKey: .syncedInterfaceLanguageRaw)
         }
     }
     
@@ -867,6 +964,9 @@ public final class SettingsStore: ObservableObject {
                 self.customBudgetLimit = payload.customBudgetLimit ?? 50
                 self.customBudgetPeriod = payload.customBudgetPeriod ?? .weekly
                 self.budgetApproachingThresholdPercent = payload.budgetApproachingThresholdPercent ?? 80
+                if let completed = payload.budgetQuickSetupCompleted {
+                    self.budgetQuickSetupCompleted = completed
+                }
                 migrateLegacyCustomBudgetModeIfNeeded()
                 normalizeEnvelopeCategoryStorageIfNeeded()
 
@@ -912,11 +1012,28 @@ public final class SettingsStore: ObservableObject {
                 self.greetingHeaderEnabled = payload.greetingHeaderEnabled ?? true
                 self.greetingShowIcon = payload.greetingShowIcon ?? true
                 self.greetingFontStyle = payload.greetingFontStyle ?? .playful
+                self.householdCloudRecordName = payload.householdCloudRecordName
+                self.householdShareURL = payload.householdShareURL
+                self.sharedEnvelopeProfileId = payload.sharedEnvelopeProfileId
+                self.householdDisplayName = payload.householdDisplayName
+                self.householdSharedZoneName = payload.householdSharedZoneName
+                self.householdSharedZoneOwner = payload.householdSharedZoneOwner
+                self.personalCloudSyncEnabled = payload.personalCloudSyncEnabled ?? false
+                self.consumerDebtEnabled = payload.consumerDebtEnabled ?? false
+                self.debtDiscoveryDeferred = payload.debtDiscoveryDeferred ?? false
+                self.syncedCurrencyId = payload.syncedCurrencyId
+                self.syncedCountryId = payload.syncedCountryId
+                self.syncedInterfaceLanguageRaw = payload.syncedInterfaceLanguageRaw
 
                 loadInvoicePaymentPreferences()
                 loadMileagePreferences()
                 loadStudioDiscoveryPreference()
                 loadAgreementPreferences()
+
+                if let attrs = try? fm.attributesOfItem(atPath: path),
+                   let modified = attrs[.modificationDate] as? Date {
+                    lastPersistedAt = modified
+                }
                 
                 self.isLoaded = true
                 print("SettingsStore: successfully loaded settings.")
@@ -992,6 +1109,7 @@ public final class SettingsStore: ObservableObject {
     private static let standardBudgetStudioBridgePromptDismissedKey = "buxmuse.standardBudgetStudioBridgePromptDismissed"
     private static let appTourFinishedKey = "buxmuse.appTour.finished"
     private static let appTourSkippedKey = "buxmuse.appTour.skipped"
+    private static let budgetQuickSetupCompletedKey = "buxmuse.budgetQuickSetupCompleted"
 
     public func dismissStudioDiscoveryOffer() {
         studioDiscoveryOfferDismissed = true
@@ -1077,23 +1195,23 @@ public final class SettingsStore: ObservableObject {
     }
 
     /// Coalesces rapid edits (sliders, typing) into one disk write — same payload as before.
-    public func save() {
+    public func save(notifyCloudSync: Bool = true) {
         pendingSaveWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
-            self?.performSave()
+            self?.performSave(notifyCloudSync: notifyCloudSync)
         }
         pendingSaveWork = work
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.saveDebounceInterval, execute: work)
     }
 
     /// Flushes any pending debounced save and writes immediately (export, import, reset).
-    public func saveImmediately() {
+    public func saveImmediately(notifyCloudSync: Bool = true) {
         pendingSaveWork?.cancel()
         pendingSaveWork = nil
-        performSave()
+        performSave(notifyCloudSync: notifyCloudSync)
     }
 
-    private func performSave() {
+    private func performSave(notifyCloudSync: Bool = true) {
         persistInvoicePaymentPreferences()
         persistMileagePreferences()
         let payload = StorePayload(
@@ -1124,6 +1242,7 @@ public final class SettingsStore: ObservableObject {
             customBudgetLimit: customBudgetLimit,
             customBudgetPeriod: customBudgetPeriod,
             budgetApproachingThresholdPercent: budgetApproachingThresholdPercent,
+            budgetQuickSetupCompleted: budgetQuickSetupCompleted,
             studioEnabled: studioEnabled,
             studioProfileId: studioProfileId,
             studioMode: studioMode,
@@ -1160,12 +1279,29 @@ public final class SettingsStore: ObservableObject {
             hasCompletedOnboarding: hasCompletedOnboarding,
             greetingHeaderEnabled: greetingHeaderEnabled,
             greetingShowIcon: greetingShowIcon,
-            greetingFontStyle: greetingFontStyle
+            greetingFontStyle: greetingFontStyle,
+            householdCloudRecordName: householdCloudRecordName,
+            householdShareURL: householdShareURL,
+            sharedEnvelopeProfileId: sharedEnvelopeProfileId,
+            householdDisplayName: householdDisplayName,
+            householdSharedZoneName: householdSharedZoneName,
+            householdSharedZoneOwner: householdSharedZoneOwner,
+            personalCloudSyncEnabled: personalCloudSyncEnabled,
+            consumerDebtEnabled: consumerDebtEnabled,
+            debtDiscoveryDeferred: debtDiscoveryDeferred,
+            syncedCurrencyId: syncedCurrencyId,
+            syncedCountryId: syncedCountryId,
+            syncedInterfaceLanguageRaw: syncedInterfaceLanguageRaw
         )
         
         do {
             let data = try JSONEncoder().encode(payload)
             try data.write(to: storeURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+            lastPersistedAt = Date()
+            if notifyCloudSync {
+                PersonalSettingsDomainSync.refreshDomainRevisions(from: self)
+                NotificationCenter.default.post(name: .buxMuseSettingsDidPersist, object: nil)
+            }
         } catch {
             print("SettingsStore: failed to save JSON payload: \(error)")
         }
@@ -1181,14 +1317,45 @@ public final class SettingsStore: ObservableObject {
     }
 
     public func exportArchiveSettingsData() -> Data? {
-        saveImmediately()
+        saveImmediately(notifyCloudSync: false)
         return try? Data(contentsOf: storeURL)
+    }
+
+    /// Whether an exported settings blob reflects real user configuration (not factory defaults).
+    public static func archiveContainsUserData(_ data: Data) -> Bool {
+        struct Probe: Decodable {
+            var hasCompletedOnboarding: Bool?
+            var budgetQuickSetupCompleted: Bool?
+            var simpleBudgetLimit: Decimal?
+            var firstName: String?
+            var personalCloudSyncEnabled: Bool?
+        }
+        if let probe = try? JSONDecoder().decode(Probe.self, from: data) {
+            if probe.hasCompletedOnboarding == true { return true }
+            if probe.personalCloudSyncEnabled == true { return true }
+            if probe.budgetQuickSetupCompleted == true { return true }
+            if probe.firstName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false { return true }
+        }
+        return data.count > 900
     }
 
     public func importArchiveSettingsData(_ data: Data) throws {
         try data.write(to: storeURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
         isLoaded = false
         loadStore()
+        NotificationCenter.default.post(name: .buxMuseSettingsArchiveDidImport, object: nil)
+    }
+
+    /// Forces a disk reload — used when converting legacy iCloud settings blobs into domain records.
+    public func reloadFromDiskForSyncMigration() {
+        isLoaded = false
+        loadStore()
+    }
+
+    func pushRegionalPreferences(from appSettings: AppSettingsManager) {
+        syncedCurrencyId = appSettings.selectedCurrency.id
+        syncedCountryId = appSettings.selectedCountry.id
+        syncedInterfaceLanguageRaw = appSettings.interfaceLanguage.rawValue
     }
 
     // MARK: - Brand themes

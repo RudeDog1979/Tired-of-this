@@ -60,6 +60,12 @@ final class ExpenseEntity {
     var bridgeSharePercent: Double?
     var bridgePeerExpenseId: UUID?
     var bridgeCounterpartyHustleId: UUID?
+    /// When true, budget math uses `splitLines` instead of the parent category.
+    var isCategorySplit: Bool
+    /// Personal vs shared household scope for iCloud sync.
+    var householdScopeRaw: String
+    @Relationship(deleteRule: .cascade, inverse: \ExpenseSplitLineEntity.expense)
+    var splitLines: [ExpenseSplitLineEntity]
 
     init(
         id: UUID = UUID(),
@@ -103,7 +109,10 @@ final class ExpenseEntity {
         bridgeRole: String? = nil,
         bridgeSharePercent: Double? = nil,
         bridgePeerExpenseId: UUID? = nil,
-        bridgeCounterpartyHustleId: UUID? = nil
+        bridgeCounterpartyHustleId: UUID? = nil,
+        isCategorySplit: Bool = false,
+        householdScopeRaw: String = HouseholdScope.personal.rawValue,
+        splitLines: [ExpenseSplitLineEntity] = []
     ) {
         self.id = id
         self.name = name
@@ -147,6 +156,120 @@ final class ExpenseEntity {
         self.bridgeSharePercent = bridgeSharePercent
         self.bridgePeerExpenseId = bridgePeerExpenseId
         self.bridgeCounterpartyHustleId = bridgeCounterpartyHustleId
+        self.isCategorySplit = isCategorySplit
+        self.householdScopeRaw = householdScopeRaw
+        self.splitLines = splitLines
+    }
+}
+
+@Model
+final class ExpenseSplitLineEntity {
+    @Attribute(.unique) var id: UUID
+    var categoryId: UUID?
+    var categoryRaw: String
+    var amountValue: Decimal
+    var sortOrder: Int
+    var expense: ExpenseEntity?
+
+    init(
+        id: UUID = UUID(),
+        categoryId: UUID? = nil,
+        categoryRaw: String,
+        amountValue: Decimal,
+        sortOrder: Int,
+        expense: ExpenseEntity? = nil
+    ) {
+        self.id = id
+        self.categoryId = categoryId
+        self.categoryRaw = categoryRaw
+        self.amountValue = amountValue
+        self.sortOrder = sortOrder
+        self.expense = expense
+    }
+}
+
+// MARK: - Debts
+
+@Model
+final class DebtEntity {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var typeRaw: String
+    var currentBalance: Decimal
+    var originalBalance: Decimal?
+    var aprPercent: Decimal?
+    var minimumPayment: Decimal?
+    var dueDayOfMonth: Int?
+    var lender: String?
+    var lenderSourceRaw: String?
+    var remindersEnabled: Bool
+    var notes: String?
+    var isArchived: Bool
+    var createdAt: Date
+    var updatedAt: Date
+    @Relationship(deleteRule: .cascade, inverse: \DebtPaymentEntity.debt)
+    var payments: [DebtPaymentEntity]
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        typeRaw: String,
+        currentBalance: Decimal,
+        originalBalance: Decimal? = nil,
+        aprPercent: Decimal? = nil,
+        minimumPayment: Decimal? = nil,
+        dueDayOfMonth: Int? = nil,
+        lender: String? = nil,
+        lenderSourceRaw: String? = DebtLenderSource.bank.rawValue,
+        remindersEnabled: Bool = true,
+        notes: String? = nil,
+        isArchived: Bool = false,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date(),
+        payments: [DebtPaymentEntity] = []
+    ) {
+        self.id = id
+        self.name = name
+        self.typeRaw = typeRaw
+        self.currentBalance = currentBalance
+        self.originalBalance = originalBalance
+        self.aprPercent = aprPercent
+        self.minimumPayment = minimumPayment
+        self.dueDayOfMonth = dueDayOfMonth
+        self.lender = lender
+        self.lenderSourceRaw = lenderSourceRaw
+        self.remindersEnabled = remindersEnabled
+        self.notes = notes
+        self.isArchived = isArchived
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.payments = payments
+    }
+}
+
+@Model
+final class DebtPaymentEntity {
+    @Attribute(.unique) var id: UUID
+    var amount: Decimal
+    var date: Date
+    var linkedExpenseId: UUID?
+    var notes: String?
+    var debt: DebtEntity?
+
+    init(
+        id: UUID = UUID(),
+        amount: Decimal,
+        date: Date = Date(),
+        linkedExpenseId: UUID? = nil,
+        notes: String? = nil,
+        debt: DebtEntity? = nil
+    ) {
+        self.id = id
+        self.amount = amount
+        self.date = date
+        self.linkedExpenseId = linkedExpenseId
+        self.notes = notes
+        self.debt = debt
     }
 }
 
@@ -205,7 +328,7 @@ final class ContributionEntity {
     }
 }
 
-// MARK: - Insights (metadata only)
+// MARK: - Goals
 
 @Model
 final class InsightEntity {
@@ -488,6 +611,67 @@ extension GoalEntity {
         )
         entity.contributions = goal.contributions.map {
             ContributionEntity(id: $0.id, amount: $0.amount, date: $0.date, notes: $0.notes, goal: entity)
+        }
+        return entity
+    }
+}
+
+extension DebtEntity {
+    func toDebt() -> Debt {
+        Debt(
+            id: id,
+            name: name,
+            type: DebtType(rawValue: typeRaw) ?? .other,
+            currentBalance: currentBalance,
+            originalBalance: originalBalance,
+            aprPercent: aprPercent,
+            minimumPayment: minimumPayment,
+            dueDayOfMonth: dueDayOfMonth,
+            lender: lender,
+            lenderSource: DebtLenderSource(rawValue: lenderSourceRaw ?? "") ?? .other,
+            remindersEnabled: remindersEnabled,
+            notes: notes,
+            isArchived: isArchived,
+            createdAt: createdAt,
+            payments: payments.map {
+                DebtPayment(
+                    id: $0.id,
+                    amount: $0.amount,
+                    date: $0.date,
+                    notes: $0.notes,
+                    linkedExpenseId: $0.linkedExpenseId
+                )
+            }
+        )
+    }
+
+    static func from(_ debt: Debt) -> DebtEntity {
+        let entity = DebtEntity(
+            id: debt.id,
+            name: debt.name,
+            typeRaw: debt.type.rawValue,
+            currentBalance: debt.currentBalance,
+            originalBalance: debt.originalBalance,
+            aprPercent: debt.aprPercent,
+            minimumPayment: debt.minimumPayment,
+            dueDayOfMonth: debt.dueDayOfMonth,
+            lender: debt.lender,
+            lenderSourceRaw: debt.lenderSource.rawValue,
+            remindersEnabled: debt.remindersEnabled,
+            notes: debt.notes,
+            isArchived: debt.isArchived,
+            createdAt: debt.createdAt,
+            updatedAt: Date()
+        )
+        entity.payments = debt.payments.map {
+            DebtPaymentEntity(
+                id: $0.id,
+                amount: $0.amount,
+                date: $0.date,
+                linkedExpenseId: $0.linkedExpenseId,
+                notes: $0.notes,
+                debt: entity
+            )
         }
         return entity
     }

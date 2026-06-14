@@ -40,6 +40,7 @@ struct BackupRestoreSettingsView: View {
     @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var financialBridge: FinancialEngineBridge
     @EnvironmentObject private var goalsViewModel: GoalsViewModel
+    @EnvironmentObject private var debtEngine: DebtEngine
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
@@ -590,6 +591,7 @@ struct BackupRestoreSettingsView: View {
                     selectedHustleId: HustleManager.shared.selectedHustleId,
                     transactions: txs,
                     goals: goalsViewModel.goals,
+                    debts: debtEngine.debts,
                     studioSnapshot: includesStudio ? studioStore.currentSnapshot() : nil,
                     simpleSnapshot: includesStudio ? simpleStudioStore.snapshot : nil
                 )
@@ -685,6 +687,7 @@ struct BackupRestoreSettingsView: View {
                     },
                     paceSteps: true
                 )
+                debtEngine.load()
                 try await dwell(at: .finalize, progress: 1.0, context: context)
                 restorePassword = ""
                 showRestorePassword = false
@@ -723,6 +726,7 @@ private enum ArchiveProgressPacing {
         case .settings: baseSeconds = 0.85
         case .expenses: baseSeconds = 1.15
         case .goals: baseSeconds = 0.9
+        case .debts: baseSeconds = 0.85
         case .studio: baseSeconds = 1.05
         case .finalize: baseSeconds = 1.15
         }

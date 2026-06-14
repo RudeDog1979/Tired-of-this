@@ -269,6 +269,25 @@ public final class AppSettingsManager: ObservableObject {
         }
     }
 
+    /// Applies country, currency, and language pulled from SettingsStore / iCloud personal sync.
+    public func applyRegionalPreferences(from store: SettingsStore) {
+        if let countryId = store.syncedCountryId,
+           let country = CountryCatalog.country(for: countryId),
+           country.id != selectedCountry.id {
+            updateCountry(country, suggestCurrency: false)
+        }
+        if let currencyId = store.syncedCurrencyId,
+           let currency = Self.availableCurrencies.first(where: { $0.id == currencyId }),
+           currency.id != selectedCurrency.id {
+            applyCurrency(currency, persist: true)
+        }
+        if let languageRaw = store.syncedInterfaceLanguageRaw,
+           let language = AppInterfaceLanguage(rawValue: languageRaw),
+           language != interfaceLanguage {
+            updateInterfaceLanguage(language)
+        }
+    }
+
     /// UI string-catalog locale driven by **Settings → App language**, not device language or country alone.
     public var interfaceLocale: Locale {
         interfaceLanguage.locale
@@ -282,7 +301,45 @@ public final class AppSettingsManager: ObservableObject {
         fmt.locale = Locale(identifier: selectedCurrency.localeIdentifier)
         fmt.minimumFractionDigits = 2
         fmt.maximumFractionDigits = 2
+        fmt.usesGroupingSeparator = true
         return fmt
+    }
+
+    /// Decimal formatter for amount text fields — grouping separators, locale-aware.
+    public var decimalInputFormatter: NumberFormatter {
+        let fmt = NumberFormatter()
+        fmt.numberStyle = .decimal
+        fmt.locale = Locale(identifier: selectedCurrency.localeIdentifier)
+        fmt.minimumFractionDigits = 0
+        fmt.maximumFractionDigits = 2
+        fmt.usesGroupingSeparator = true
+        return fmt
+    }
+
+    /// Formats amounts for currency text fields with locale grouping (no symbol).
+    public func formatAmountInput(_ amount: Decimal) -> String {
+        decimalInputFormatter.string(from: amount as NSDecimalNumber)
+            ?? NSDecimalNumber(decimal: amount).stringValue
+    }
+
+    /// Parses locale-aware amount strings such as `10,000.50` or `10.000,50`.
+    public func parseAmountInput(_ text: String) -> Decimal? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        let fmt = decimalInputFormatter
+        if let number = fmt.number(from: trimmed) {
+            return number.decimalValue
+        }
+
+        let grouping = fmt.groupingSeparator ?? ","
+        let decimalSep = fmt.decimalSeparator ?? "."
+        var normalized = trimmed.replacingOccurrences(of: grouping, with: "")
+        if decimalSep != "." {
+            normalized = normalized.replacingOccurrences(of: decimalSep, with: ".")
+        }
+        normalized = normalized.replacingOccurrences(of: ",", with: ".")
+        return Decimal(string: normalized)
     }
     
     /// Formats a Decimal value using the active currency and regional settings

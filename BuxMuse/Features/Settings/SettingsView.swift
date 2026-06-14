@@ -17,10 +17,14 @@ struct SettingsView: View {
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
     @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
+    @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var debtEngine: DebtEngine
+    @EnvironmentObject private var financialBridge: FinancialEngineBridge
     @ObservedObject private var store = SettingsStore.shared
     @State private var settingsPath = NavigationPath()
     @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
     @State private var showOnboardingReplay = false
+    @State private var isAdvancedExpanded = false
     var body: some View {
         NavigationStack(path: $settingsPath) {
             ZStack {
@@ -44,27 +48,7 @@ struct SettingsView: View {
                         )
                         
                         ForEach(Array(display.sections.enumerated()), id: \.element.id) { sectionIndex, section in
-                            VStack(alignment: .leading, spacing: 12) {
-                                BuxSectionHeader(title: section.title)
-                                    .padding(.leading, 4)
-
-                                VStack(spacing: 0) {
-                                    ForEach(Array(section.rows.enumerated()), id: \.element.id) { index, row in
-                                        settingsRowButton(for: row)
-                                        
-                                        if index < section.rows.count - 1 {
-                                            Divider().opacity(0.08)
-                                        }
-                                    }
-                                }
-                                .settingsThemedCardChrome(cornerRadius: 20)
-                            }
-                            .modifier(
-                                SettingsOverviewTutorialAnchorModifier(
-                                    isFirstSection: sectionIndex == 0,
-                                    coordinator: tutorialCoordinator
-                                )
-                            )
+                            settingsSectionView(section: section, sectionIndex: sectionIndex)
                         }
 
                         VStack(alignment: .leading, spacing: 12) {
@@ -128,6 +112,11 @@ struct SettingsView: View {
                 settingsPath.append(SettingsDestinationType.paymentSources)
                 _ = navigationCoordinator.consumePaymentSettingsRequest()
             }
+            .onChange(of: navigationCoordinator.openDebtsSettingsRequest) { _, requested in
+                guard requested else { return }
+                settingsPath.append(SettingsDestinationType.debts)
+                _ = navigationCoordinator.consumeDebtsSettingsRequest()
+            }
             .onChange(of: navigationCoordinator.openProfileSettingsRequest) { _, requested in
                 guard requested else { return }
                 settingsPath.append(SettingsDestinationType.profile)
@@ -156,46 +145,7 @@ struct SettingsView: View {
             }
             .navigationDestination(for: SettingsDestinationType.self) { destination in
                 SettingsDrillInBackdrop {
-                    Group {
-                        switch destination {
-                        case .profile:
-                            ProfileSettingsView()
-                        case .appearance:
-                            AppearanceSettingsView()
-                        case .regionCurrency:
-                            RegionCurrencySettingsView()
-                        case .budgets:
-                            BudgetSettingsView()
-                        case .studio:
-                            StudioSettingsView()
-                        case .invoicePayment:
-                            InvoicePaymentSettingsView()
-                        case .mileage:
-                            MileageSettingsView()
-                        case .notifications:
-                            NotificationSettingsView()
-                        case .security:
-                            SecuritySettingsView()
-                        case .data:
-                            DataSettingsView()
-                        case .about:
-                            AboutSettingsView()
-                        case .hustles:
-                            HustleSettingsView()
-                        case .dualCashDrawer:
-                            DualCashDrawerSettingsView()
-                        case .barterLogger:
-                            BarterLoggerSettingsView()
-                        case .scopeCreepRadar:
-                            ScopeCreepRadarSettingsView()
-                        case .agreementScratchpad:
-                            AgreementScratchpadSettingsView()
-                        case .burnoutGuard:
-                            BurnoutGuardSettingsView()
-                        case .paymentSources:
-                            PaymentSourceSettingsView()
-                        }
-                    }
+                    settingsDrillInContent(for: destination)
                 }
                 .buxInterfaceLocale()
                 .environment(\.settingsEnhancedTint, true)
@@ -236,10 +186,137 @@ struct SettingsView: View {
     }
 
     @ViewBuilder
+    private func settingsDrillInContent(for destination: SettingsDestinationType) -> some View {
+        switch destination {
+        case .profile:
+            ProfileSettingsView()
+        case .appearance:
+            AppearanceSettingsView()
+        case .regionCurrency:
+            RegionCurrencySettingsView()
+        case .budgets:
+            BudgetSettingsView()
+        case .studio:
+            StudioSettingsView()
+        case .invoicePayment:
+            InvoicePaymentSettingsView()
+        case .mileage:
+            MileageSettingsView()
+        case .notifications:
+            NotificationSettingsView()
+        case .security:
+            SecuritySettingsView()
+        case .data:
+            DataSettingsView()
+        case .about:
+            AboutSettingsView()
+        case .hustles:
+            HustleSettingsView()
+        case .dualCashDrawer:
+            DualCashDrawerSettingsView()
+        case .barterLogger:
+            BarterLoggerSettingsView()
+        case .scopeCreepRadar:
+            ScopeCreepRadarSettingsView()
+        case .agreementScratchpad:
+            AgreementScratchpadSettingsView()
+        case .burnoutGuard:
+            BurnoutGuardSettingsView()
+        case .paymentSources:
+            PaymentSourceSettingsView()
+        case .categories:
+            ExpenseCategoryListSheet()
+                .environmentObject(brain)
+        case .merchants:
+            ExpenseMerchantListSheet()
+                .environmentObject(brain)
+        case .subscriptions:
+            SubscriptionsSettingsEmbedView()
+                .environmentObject(brain)
+                .environmentObject(financialBridge)
+        case .workTools:
+            WorkToolsSettingsView()
+        case .debts:
+            DebtsSettingsView()
+                .environmentObject(debtEngine)
+        case .household:
+            HouseholdSettingsView()
+                .environmentObject(brain)
+        case .personalCloudSync:
+            PersonalCloudSyncSettingsView()
+                .environmentObject(brain)
+                .environmentObject(debtEngine)
+        }
+    }
+
+    @ViewBuilder
+    private func settingsSectionView(section: SettingsSectionDisplay, sectionIndex: Int) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if section.isAdvancedSection {
+                Button {
+                    withAnimation(.buxSnap) { isAdvancedExpanded.toggle() }
+                } label: {
+                    HStack {
+                        BuxSectionHeader(title: section.title)
+                        Spacer()
+                        Image(systemName: isAdvancedExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                    }
+                    .padding(.leading, 4)
+                }
+                .buttonStyle(.plain)
+            } else {
+                BuxSectionHeader(title: section.title)
+                    .padding(.leading, 4)
+            }
+
+            if !section.isAdvancedSection || isAdvancedExpanded {
+                VStack(spacing: 0) {
+                    ForEach(Array(section.rows.enumerated()), id: \.element.id) { index, row in
+                        settingsRowButton(for: row)
+
+                        if index < section.rows.count - 1 {
+                            Divider().opacity(0.08)
+                        }
+                    }
+                }
+                .settingsThemedCardChrome(cornerRadius: 20)
+            }
+
+            if let footerKey = section.footerKey {
+                BuxCatalogDynamicText(key: footerKey)
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+                    .padding(.horizontal, 8)
+            }
+        }
+        .modifier(
+            SettingsOverviewTutorialAnchorModifier(
+                isFirstSection: sectionIndex == 0,
+                coordinator: tutorialCoordinator
+            )
+        )
+    }
+
+    @ViewBuilder
     private func settingsRowButton(for row: SettingsRowDisplay) -> some View {
         let showsUpsell = row.tier == .proOnly && !StudioFeatureGate.isPro
 
-        if showsUpsell, let feature = StudioFeatureGate.upsellFeature(for: row.destination) {
+        if row.opensSubscriptionHub {
+            Button {
+                navigationCoordinator.openSubscriptionHub()
+            } label: {
+                SettingsRow(
+                    icon: row.iconName,
+                    label: row.title,
+                    color: Color(hex: row.hexColor),
+                    trailingText: row.trailingText,
+                    showsProBadge: row.showsProBadge
+                )
+            }
+            .buxSettingsRowInteraction()
+        } else if showsUpsell, let feature = StudioFeatureGate.upsellFeature(for: row.destination) {
             Button {
                 proUpsellFeature = feature
             } label: {

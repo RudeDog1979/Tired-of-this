@@ -21,6 +21,8 @@ struct ExpenseCategoryPickerView: View {
     var includesIncome: Bool = false
     /// Income sheet: only Income (+ custom tags), not expense categories.
     var incomeOnly: Bool = false
+    /// When false, the section header is omitted (parent already shows "Category").
+    var showsSectionLabel: Bool = true
 
     @State private var categories: [ExpenseCategoryRecord] = []
     @State private var showCreateCategory = false
@@ -37,8 +39,10 @@ struct ExpenseCategoryPickerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            BuxCatalogText.text("Category")
-                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+            if showsSectionLabel {
+                BuxCatalogText.text("Category")
+                    .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+            }
 
             ScrollView(.horizontal, showsIndicators: false) {
                 categoryChipRow

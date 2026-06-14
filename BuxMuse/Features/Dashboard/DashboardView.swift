@@ -23,6 +23,7 @@ struct DashboardView: View {
     @EnvironmentObject var studioBrain: StudioBrain
     @EnvironmentObject var studioStore: StudioStore
     @EnvironmentObject var tutorialCoordinator: AppTutorialCoordinator
+    @EnvironmentObject var debtEngine: DebtEngine
 
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var simpleStudioStore = SimpleStudioStore.shared
@@ -42,6 +43,7 @@ struct DashboardView: View {
     @State private var activeSheet: DashboardActiveSheet?
     @State private var showQuickNewInvoice = false
     @State private var showTipPopup = false
+    @State private var showBudgetSetup = false
     @State private var tipGlowPhase = false
 
     private var dashSnapshot: DashboardSnapshot { brain.dashboardSnapshot }
@@ -130,6 +132,26 @@ struct DashboardView: View {
                         }
 
                         VStack(alignment: .leading, spacing: BuxTokens.tight) {
+                                if !settingsStore.budgetQuickSetupCompleted {
+                                    Button {
+                                        showBudgetSetup = true
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            BuxCatalogText.text("Set a monthly budget")
+                                                .font(.system(size: 17, weight: .bold))
+                                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                            BuxCatalogText.text("See what you have left to spend this month.")
+                                                .font(.system(size: 13, weight: .medium))
+                                                .buxLabelSecondary()
+                                                .fixedSize(horizontal: false, vertical: true)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(BuxTokens.section)
+                                        .dashboardMaterialCardChrome(.outlined)
+                                    }
+                                    .buttonStyle(BuxDashboardCardButtonStyle())
+                                }
+
                                 if showsStudioBudgetBridgePrompt {
                                     StandardBudgetStudioBridgePromptCard(
                                         pendingAmount: studioBridgePendingAmount
@@ -139,6 +161,14 @@ struct DashboardView: View {
                                     .environmentObject(themeManager)
                                     .environmentObject(appSettingsManager)
                                     .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+
+                                if settingsStore.consumerDebtEnabled, !debtEngine.activeDebts.isEmpty {
+                                    DashboardDebtSummaryCard()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                } else if !settingsStore.debtDiscoveryDeferred {
+                                    DashboardDebtDiscoveryCard()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                 }
 
                                 if let budgetName = dashSnapshot.activeBudgetName {
@@ -570,6 +600,14 @@ struct DashboardView: View {
                     .environmentObject(navigationCoordinator)
                     .buxThemedSheetContent()
             }
+        }
+        .sheet(isPresented: $showBudgetSetup) {
+            SimpleBudgetSetupSheet()
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .onDisappear {
+                    brain.scheduleSnapshotRefresh()
+                }
         }
         .onChange(of: navigationCoordinator.openTipPopupRequest) { _, request in
             guard request else { return }

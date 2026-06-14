@@ -52,6 +52,21 @@ struct AboutSettingsView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 12) {
+                        BuxSectionHeader(title: "How BuxMuse works")
+                            .padding(.horizontal, 20)
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            BuxCatalogDynamicText(key: "BuxMuse works on your device. You enter your own transactions — we never connect to your bank. Export or back up anytime.")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(20)
+                        .settingsThemedCardChrome(cornerRadius: 20)
+                        .padding(.horizontal, 20)
+                    }
+
+                    VStack(alignment: .leading, spacing: 12) {
                         BuxSectionHeader(title: "Privacy")
                             .padding(.horizontal, 20)
 

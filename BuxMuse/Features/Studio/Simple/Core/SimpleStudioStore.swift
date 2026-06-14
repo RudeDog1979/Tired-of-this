@@ -20,6 +20,7 @@ public final class SimpleStudioStore: ObservableObject {
 
     private let saveQueue = DispatchQueue(label: "com.buxmuse.simplestudio.save", qos: .utility)
     private var isLoaded = false
+    public private(set) var lastPersistedAt: Date?
 
     private init() {
         loadStore()
@@ -76,6 +77,10 @@ public final class SimpleStudioStore: ObservableObject {
                 }
                 businessCard = card
             }
+            if let attrs = try? FileManager.default.attributesOfItem(atPath: storeURL.path),
+               let modified = attrs[.modificationDate] as? Date {
+                lastPersistedAt = modified
+            }
             isLoaded = true
         } catch {
             print("SimpleStudioStore: decode error \(error)")
@@ -83,12 +88,16 @@ public final class SimpleStudioStore: ObservableObject {
         }
     }
 
-    public func save() {
+    public func save(notifyCloudSync: Bool = true) {
         let payload = snapshot
         let url = storeURL
         do {
             let data = try JSONEncoder().encode(payload)
             try data.write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+            lastPersistedAt = Date()
+            if notifyCloudSync {
+                NotificationCenter.default.post(name: .buxMuseSimpleStudioDidPersist, object: nil)
+            }
         } catch {
             print("SimpleStudioStore: save error \(error)")
         }

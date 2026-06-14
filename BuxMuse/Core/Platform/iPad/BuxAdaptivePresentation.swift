@@ -18,6 +18,7 @@ enum BuxPadPresentationTrigger: Equatable {
     case expenseDetail
     case addExpense
     case subscriptionHub
+    case debtHub
     case goalDetail
     case insightDetail
     case studioTool
@@ -36,7 +37,7 @@ enum BuxAdaptivePresentation {
         guard isPad else {
             switch trigger {
             case .expenseDetail: return .fullScreenCover
-            case .subscriptionHub, .goalDetail, .insightDetail: return .rootOverlay
+            case .subscriptionHub, .goalDetail, .insightDetail, .debtHub: return .rootOverlay
             case .categoryPicker, .notePicker: return .sheetMedium
             case .share: return .sheetLarge
             default: return .sheetLarge
@@ -45,7 +46,7 @@ enum BuxAdaptivePresentation {
 
         switch trigger {
         case .expenseDetail, .studioTool: return .splitColumn
-        case .subscriptionHub, .goalDetail, .insightDetail: return .splitColumn
+        case .subscriptionHub, .goalDetail, .insightDetail, .debtHub: return .splitColumn
         case .share: return .popover
         case .onboarding: return .fullScreenCover
         case .addExpense:

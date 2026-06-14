@@ -116,6 +116,12 @@ final class NavigationCoordinator: ObservableObject {
     /// Set when Money Map deep-links to Payment Sources in Settings.
     @Published var openPaymentSettingsRequest = false
 
+    /// Set when dashboard debt card routes to the Debt Center hub.
+    @Published var showDebtHub: Bool = false
+
+    /// Set when dashboard debt card routes to Debts settings.
+    @Published var openDebtsSettingsRequest = false
+
     /// Set when Home hero avatar opens Profile settings.
     @Published var openProfileSettingsRequest = false
 
@@ -137,6 +143,25 @@ final class NavigationCoordinator: ObservableObject {
         }
     }
 
+    func openDebtHub() {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            showDebtHub = true
+        }
+    }
+
+    func closeDebtHub() {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            showDebtHub = false
+        }
+    }
+
+    func openDebtsSettings() {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            selectedTab = .settings
+            openDebtsSettingsRequest = true
+        }
+    }
+
     func consumeStudioSettingsRequest() -> Bool {
         guard openStudioSettingsRequest else { return false }
         openStudioSettingsRequest = false
@@ -146,6 +171,12 @@ final class NavigationCoordinator: ObservableObject {
     func consumePaymentSettingsRequest() -> Bool {
         guard openPaymentSettingsRequest else { return false }
         openPaymentSettingsRequest = false
+        return true
+    }
+
+    func consumeDebtsSettingsRequest() -> Bool {
+        guard openDebtsSettingsRequest else { return false }
+        openDebtsSettingsRequest = false
         return true
     }
 

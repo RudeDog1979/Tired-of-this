@@ -62,12 +62,11 @@ enum BudgetPeriodEngine {
         }
         var essential: Decimal = 0
         var discretionary: Decimal = 0
-        for record in periodExpenses {
-            let amount = abs(record.amountValue)
-            if isEssentialLivingExpense(record, categoryRecords: categoryRecords) {
-                essential += amount
+        for line in ExpenseBudgetAttribution.lines(for: periodExpenses) {
+            if isEssentialLivingAttribution(line, categoryRecords: categoryRecords) {
+                essential += line.amount
             } else {
-                discretionary += amount
+                discretionary += line.amount
             }
         }
 
@@ -95,17 +94,26 @@ enum BudgetPeriodEngine {
         _ record: ExpenseRecord,
         categoryRecords: [ExpenseCategoryRecord]
     ) -> Bool {
-        if essentialLivingCategories.contains(record.transactionCategory) {
+        ExpenseBudgetAttribution.lines(for: record).contains {
+            isEssentialLivingAttribution($0, categoryRecords: categoryRecords)
+        }
+    }
+
+    static func isEssentialLivingAttribution(
+        _ line: ExpenseBudgetAttributionLine,
+        categoryRecords: [ExpenseCategoryRecord]
+    ) -> Bool {
+        if essentialLivingCategories.contains(line.transactionCategory) {
             return true
         }
-        if let categoryId = record.categoryId,
+        if let categoryId = line.categoryId,
            let custom = categoryRecords.first(where: { $0.id == categoryId }),
            let raw = custom.systemCategoryRaw,
            let system = TransactionCategory(rawValue: raw),
            essentialLivingCategories.contains(system) {
             return true
         }
-        if let system = TransactionCategory(rawValue: record.categoryRaw),
+        if let system = TransactionCategory(rawValue: line.categoryRaw),
            essentialLivingCategories.contains(system) {
             return true
         }

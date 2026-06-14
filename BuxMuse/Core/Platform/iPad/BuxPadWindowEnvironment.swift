@@ -28,6 +28,7 @@ extension View {
             .environmentObject(padBrain)
             .environmentObject(container.financialBridge)
             .environmentObject(container.goalsEngine)
+            .environmentObject(container.debtEngine)
             .environmentObject(container.goalsViewModel)
             .environmentObject(container.goalsSheetCoordinator)
             .environmentObject(container.insightsEngine)

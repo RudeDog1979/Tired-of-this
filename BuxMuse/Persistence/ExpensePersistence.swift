@@ -182,6 +182,7 @@ extension PersistenceController {
 
         if let existing = try fetchExpenseEntity(id: id) {
             apply(record: saved, to: existing, updatedAt: now)
+            replaceSplitLines(for: existing, from: saved)
         } else {
             let entity = ExpenseEntity(
                 id: saved.id,
@@ -225,9 +226,12 @@ extension PersistenceController {
                 bridgeRole: saved.bridgeRole,
                 bridgeSharePercent: saved.bridgeSharePercent,
                 bridgePeerExpenseId: saved.bridgePeerExpenseId,
-                bridgeCounterpartyHustleId: saved.bridgeCounterpartyHustleId
+                bridgeCounterpartyHustleId: saved.bridgeCounterpartyHustleId,
+                isCategorySplit: saved.isCategorySplit,
+                householdScopeRaw: saved.householdScope.rawValue
             )
             context.insert(entity)
+            replaceSplitLines(for: entity, from: saved)
         }
         try context.save()
         return try fetchExpenseRecord(id: saved.id) ?? saved
@@ -273,7 +277,25 @@ extension PersistenceController {
         entity.bridgeSharePercent = record.bridgeSharePercent
         entity.bridgePeerExpenseId = record.bridgePeerExpenseId
         entity.bridgeCounterpartyHustleId = record.bridgeCounterpartyHustleId
+        entity.isCategorySplit = record.isCategorySplit
+        entity.householdScopeRaw = record.householdScope.rawValue
         entity.updatedAt = updatedAt
+    }
+
+    private func replaceSplitLines(for entity: ExpenseEntity, from record: ExpenseRecord) {
+        for line in entity.splitLines {
+            context.delete(line)
+        }
+        entity.splitLines = record.splitLines.enumerated().map { index, line in
+            ExpenseSplitLineEntity(
+                id: line.id,
+                categoryId: line.categoryId,
+                categoryRaw: line.categoryRaw,
+                amountValue: line.amountValue,
+                sortOrder: line.sortOrder == 0 ? index : line.sortOrder,
+                expense: entity
+            )
+        }
     }
 
     func deleteExpenseRecord(id: UUID) throws {

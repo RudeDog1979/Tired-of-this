@@ -1,0 +1,286 @@
+{
+  "Log your first debt": {
+    "es-419": "Registra tu primera deuda",
+    "es-ES": "Registra tu primera deuda"
+  },
+  "Track what you owe": {
+    "es-419": "Controla lo que debes",
+    "es-ES": "Controla lo que debes"
+  },
+  "Banks, family loans, and informal lenders — all in one place.": {
+    "es-419": "Bancos, préstamos familiares y prestamistas informales — todo en un solo lugar.",
+    "es-ES": "Bancos, préstamos familiares y prestamistas informales — todo en un solo lugar."
+  },
+  "Turn on consumer debt tracking to see balances, reminders, and payoff insights.": {
+    "es-419": "Activa el seguimiento de deuda personal para ver saldos, recordatorios e ideas de pago.",
+    "es-ES": "Activa el seguimiento de deuda personal para ver saldos, recordatorios e ideas de pago."
+  },
+  "Log debt": {
+    "es-419": "Registrar deuda",
+    "es-ES": "Registrar deuda"
+  },
+  "Turn on & log debt": {
+    "es-419": "Activar y registrar deuda",
+    "es-ES": "Activar y registrar deuda"
+  },
+  "Debt Center": {
+    "es-419": "Centro de deudas",
+    "es-ES": "Centro de deudas"
+  },
+  "Track consumer debt": {
+    "es-419": "Seguir deuda personal",
+    "es-ES": "Seguir deuda personal"
+  },
+  "Track bank loans, credit cards, family loans, and informal lenders.": {
+    "es-419": "Registra préstamos bancarios, tarjetas, préstamos familiares y prestamistas informales.",
+    "es-ES": "Registra préstamos bancarios, tarjetas, préstamos familiares y prestamistas informales."
+  },
+  "Track credit cards, loans, and other balances in one place.": {
+    "es-419": "Registra tarjetas, préstamos y otros saldos en un solo lugar.",
+    "es-ES": "Registra tarjetas, préstamos y otros saldos en un solo lugar."
+  },
+  "Active debts": {
+    "es-419": "Deudas activas",
+    "es-ES": "Deudas activas"
+  },
+  "Upcoming reminders": {
+    "es-419": "Próximos recordatorios",
+    "es-ES": "Próximos recordatorios"
+  },
+  "Balance breakdown": {
+    "es-419": "Desglose del saldo",
+    "es-ES": "Desglose del saldo"
+  },
+  "Your debts": {
+    "es-419": "Tus deudas",
+    "es-ES": "Tus deudas"
+  },
+  "On-device insights": {
+    "es-419": "Información en el dispositivo",
+    "es-ES": "Información en el dispositivo"
+  },
+  "On-device intelligence": {
+    "es-419": "Inteligencia en el dispositivo",
+    "es-ES": "Inteligencia en el dispositivo"
+  },
+  "Show archived debts": {
+    "es-419": "Mostrar deudas archivadas",
+    "es-ES": "Mostrar deudas archivadas"
+  },
+  "Add debt": {
+    "es-419": "Agregar deuda",
+    "es-ES": "Agregar deuda"
+  },
+  "Payment log": {
+    "es-419": "Historial de pagos",
+    "es-ES": "Historial de pagos"
+  },
+  "Payment history": {
+    "es-419": "Historial de pagos",
+    "es-ES": "Historial de pagos"
+  },
+  "Due date reminders": {
+    "es-419": "Recordatorios de vencimiento",
+    "es-ES": "Recordatorios de vencimiento"
+  },
+  "Local notification 3 days before your due date.": {
+    "es-419": "Notificación local 3 días antes de tu fecha de pago.",
+    "es-ES": "Notificación local 3 días antes de tu fecha de pago."
+  },
+  "Reminders": {
+    "es-419": "Recordatorios",
+    "es-ES": "Recordatorios"
+  },
+  "Current balance": {
+    "es-419": "Saldo actual",
+    "es-ES": "Saldo actual"
+  },
+  "Original balance": {
+    "es-419": "Saldo original",
+    "es-ES": "Saldo original"
+  },
+  "APR %": {
+    "es-419": "TAE %",
+    "es-ES": "TAE %"
+  },
+  "Minimum payment": {
+    "es-419": "Pago mínimo",
+    "es-ES": "Pago mínimo"
+  },
+  "Monthly due date": {
+    "es-419": "Fecha de pago mensual",
+    "es-ES": "Fecha de pago mensual"
+  },
+  "Payment due today — reminder is on.": {
+    "es-419": "Pago vence hoy — el recordatorio está activo.",
+    "es-ES": "Pago vence hoy — el recordatorio está activo."
+  },
+  "Terms": {
+    "es-419": "Condiciones",
+    "es-ES": "Condiciones"
+  },
+  "Account": {
+    "es-419": "Cuenta",
+    "es-ES": "Cuenta"
+  },
+  "Credit card": {
+    "es-419": "Tarjeta de crédito",
+    "es-ES": "Tarjeta de crédito"
+  },
+  "Personal loan": {
+    "es-419": "Préstamo personal",
+    "es-ES": "Préstamo personal"
+  },
+  "Student loan": {
+    "es-419": "Préstamo estudiantil",
+    "es-ES": "Préstamo estudiantil"
+  },
+  "Mortgage": {
+    "es-419": "Hipoteca",
+    "es-ES": "Hipoteca"
+  },
+  "Other debt": {
+    "es-419": "Otra deuda",
+    "es-ES": "Otra deuda"
+  },
+  "Bank": {
+    "es-419": "Banco",
+    "es-ES": "Banco"
+  },
+  "Credit union": {
+    "es-419": "Cooperativa de crédito",
+    "es-ES": "Cooperativa de crédito"
+  },
+  "Friend or family": {
+    "es-419": "Amigo o familiar",
+    "es-ES": "Amigo o familiar"
+  },
+  "Private individual": {
+    "es-419": "Particular",
+    "es-ES": "Particular"
+  },
+  "Informal lender": {
+    "es-419": "Prestamista informal",
+    "es-ES": "Prestamista informal"
+  },
+  "Other source": {
+    "es-419": "Otra fuente",
+    "es-ES": "Otra fuente"
+  },
+  "Focus payment": {
+    "es-419": "Priorizar pago",
+    "es-ES": "Priorizar pago"
+  },
+  "%@ carries the largest balance — extra payments there reduce total interest fastest.": {
+    "es-419": "%@ tiene el saldo más alto — pagos extra ahí reducen intereses más rápido.",
+    "es-ES": "%@ tiene el saldo más alto — pagos extra ahí reducen intereses más rápido."
+  },
+  "Due soon": {
+    "es-419": "Vence pronto",
+    "es-ES": "Vence pronto"
+  },
+  "%@ payment is due today.": {
+    "es-419": "El pago de %@ vence hoy.",
+    "es-ES": "El pago de %@ vence hoy."
+  },
+  "%@ payment is due in %lld days.": {
+    "es-419": "El pago de %@ vence en %lld días.",
+    "es-ES": "El pago de %@ vence en %lld días."
+  },
+  "No payment yet": {
+    "es-419": "Sin pago aún",
+    "es-ES": "Sin pago aún"
+  },
+  "You haven't logged a payment for %@ this month.": {
+    "es-419": "No has registrado un pago para %@ este mes.",
+    "es-ES": "No has registrado un pago para %@ este mes."
+  },
+  "Debt snapshot": {
+    "es-419": "Resumen de deudas",
+    "es-ES": "Resumen de deudas"
+  },
+  "You're tracking %lld active balances on this device.": {
+    "es-419": "Estás siguiendo %lld saldos activos en este dispositivo.",
+    "es-ES": "Estás siguiendo %lld saldos activos en este dispositivo."
+  },
+  "Great progress": {
+    "es-419": "Gran avance",
+    "es-ES": "Gran avance"
+  },
+  "You've paid down %lld%% of the original balance.": {
+    "es-419": "Has pagado el %lld%% del saldo original.",
+    "es-ES": "Has pagado el %lld%% del saldo original."
+  },
+  "High interest": {
+    "es-419": "Interés alto",
+    "es-ES": "Interés alto"
+  },
+  "At %@%% APR, paying more than the minimum saves real money over time.": {
+    "es-419": "Con %@%% TAE, pagar más que el mínimo ahorra dinero real con el tiempo.",
+    "es-ES": "Con %@%% TAE, pagar más que el mínimo ahorra dinero real con el tiempo."
+  },
+  "Payoff path": {
+    "es-419": "Camino de pago",
+    "es-ES": "Camino de pago"
+  },
+  "At your minimum payment, this could be paid off around %@.": {
+    "es-419": "Con tu pago mínimo, esto podría liquidarse alrededor de %@.",
+    "es-ES": "Con tu pago mínimo, esto podría liquidarse alrededor de %@."
+  },
+  "Informal loan": {
+    "es-419": "Préstamo informal",
+    "es-ES": "Préstamo informal"
+  },
+  "Log every payment so you always know what's left — even without a bank statement.": {
+    "es-419": "Registra cada pago para saber siempre cuánto queda — incluso sin extracto bancario.",
+    "es-ES": "Registra cada pago para saber siempre cuánto queda — incluso sin extracto bancario."
+  },
+  "Almost there": {
+    "es-419": "Casi listo",
+    "es-ES": "Casi listo"
+  },
+  "You're close to clearing this balance. One more push could finish it.": {
+    "es-419": "Estás cerca de liquidar este saldo. Un último empujón podría terminarlo.",
+    "es-ES": "Estás cerca de liquidar este saldo. Un último empujón podría terminarlo."
+  },
+  "Debt payment due soon": {
+    "es-419": "Pago de deuda vence pronto",
+    "es-ES": "Pago de deuda vence pronto"
+  },
+  "Logo appears only for known banks in our catalog. Everyone else gets a category icon.": {
+    "es-419": "El logo solo aparece para bancos conocidos en nuestro catálogo. Los demás usan un icono de categoría.",
+    "es-ES": "El logo solo aparece para bancos conocidos en nuestro catálogo. Los demás usan un icono de categoría."
+  },
+  "e.g. Mom, Uncle Carlos": {
+    "es-419": "p. ej. Mamá, Tío Carlos",
+    "es-ES": "p. ej. Mamá, Tío Carlos"
+  },
+  "e.g. Local lender": {
+    "es-419": "p. ej. Prestamista local",
+    "es-ES": "p. ej. Prestamista local"
+  },
+  "e.g. John Smith": {
+    "es-419": "p. ej. Juan Pérez",
+    "es-ES": "p. ej. Juan Pérez"
+  },
+  "e.g. Chase, mBank": {
+    "es-419": "p. ej. Chase, mBank",
+    "es-ES": "p. ej. Chase, mBank"
+  },
+  "Track debt": {
+    "es-419": "Seguir deudas",
+    "es-ES": "Seguir deudas"
+  },
+  "Optional. Turn on consumer debt tracking to log loans, cards, and informal lenders.": {
+    "es-419": "Opcional. Activa el seguimiento de deuda personal para registrar préstamos, tarjetas y prestamistas informales.",
+    "es-ES": "Opcional. Activa el seguimiento de deuda personal para registrar préstamos, tarjetas y prestamistas informales."
+  },
+  "Optionally track loans, cards, and informal debt": {
+    "es-419": "Opcionalmente registra préstamos, tarjetas y deuda informal",
+    "es-ES": "Opcionalmente registra préstamos, tarjetas y deuda informal"
+  },
+  "4. Consumer debt": {
+    "es-419": "4. Deuda personal",
+    "es-ES": "4. Deuda personal"
+  }
+}

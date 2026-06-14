@@ -17,7 +17,52 @@ public struct BuxMuseArchiveManifest: Codable, Equatable {
     public var createdAt: Date
     public var transactionCount: Int
     public var goalCount: Int
+    public var debtCount: Int
     public var includesStudio: Bool
+
+    public init(
+        formatVersion: Int,
+        appVersion: String,
+        createdAt: Date,
+        transactionCount: Int,
+        goalCount: Int,
+        debtCount: Int = 0,
+        includesStudio: Bool
+    ) {
+        self.formatVersion = formatVersion
+        self.appVersion = appVersion
+        self.createdAt = createdAt
+        self.transactionCount = transactionCount
+        self.goalCount = goalCount
+        self.debtCount = debtCount
+        self.includesStudio = includesStudio
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case formatVersion, appVersion, createdAt, transactionCount, goalCount, debtCount, includesStudio
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        formatVersion = try c.decode(Int.self, forKey: .formatVersion)
+        appVersion = try c.decode(String.self, forKey: .appVersion)
+        createdAt = try c.decode(Date.self, forKey: .createdAt)
+        transactionCount = try c.decode(Int.self, forKey: .transactionCount)
+        goalCount = try c.decode(Int.self, forKey: .goalCount)
+        debtCount = try c.decodeIfPresent(Int.self, forKey: .debtCount) ?? 0
+        includesStudio = try c.decode(Bool.self, forKey: .includesStudio)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(formatVersion, forKey: .formatVersion)
+        try c.encode(appVersion, forKey: .appVersion)
+        try c.encode(createdAt, forKey: .createdAt)
+        try c.encode(transactionCount, forKey: .transactionCount)
+        try c.encode(goalCount, forKey: .goalCount)
+        try c.encode(debtCount, forKey: .debtCount)
+        try c.encode(includesStudio, forKey: .includesStudio)
+    }
 }
 
 public struct BuxMuseArchivePayload: Codable {
@@ -28,8 +73,66 @@ public struct BuxMuseArchivePayload: Codable {
     public var selectedHustleId: UUID?
     public var transactions: [Transaction]
     public var goals: [Goal]
+    public var debts: [Debt]
     public var studioSnapshot: StudioSnapshot?
     public var simpleStudioSnapshot: SimpleStudioSnapshot?
+
+    public init(
+        manifest: BuxMuseArchiveManifest,
+        settingsData: Data,
+        featureFlags: [String: Bool],
+        hustles: [Hustle],
+        selectedHustleId: UUID?,
+        transactions: [Transaction],
+        goals: [Goal],
+        debts: [Debt] = [],
+        studioSnapshot: StudioSnapshot?,
+        simpleStudioSnapshot: SimpleStudioSnapshot?
+    ) {
+        self.manifest = manifest
+        self.settingsData = settingsData
+        self.featureFlags = featureFlags
+        self.hustles = hustles
+        self.selectedHustleId = selectedHustleId
+        self.transactions = transactions
+        self.goals = goals
+        self.debts = debts
+        self.studioSnapshot = studioSnapshot
+        self.simpleStudioSnapshot = simpleStudioSnapshot
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case manifest, settingsData, featureFlags, hustles, selectedHustleId
+        case transactions, goals, debts, studioSnapshot, simpleStudioSnapshot
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        manifest = try c.decode(BuxMuseArchiveManifest.self, forKey: .manifest)
+        settingsData = try c.decode(Data.self, forKey: .settingsData)
+        featureFlags = try c.decode([String: Bool].self, forKey: .featureFlags)
+        hustles = try c.decode([Hustle].self, forKey: .hustles)
+        selectedHustleId = try c.decodeIfPresent(UUID.self, forKey: .selectedHustleId)
+        transactions = try c.decode([Transaction].self, forKey: .transactions)
+        goals = try c.decode([Goal].self, forKey: .goals)
+        debts = try c.decodeIfPresent([Debt].self, forKey: .debts) ?? []
+        studioSnapshot = try c.decodeIfPresent(StudioSnapshot.self, forKey: .studioSnapshot)
+        simpleStudioSnapshot = try c.decodeIfPresent(SimpleStudioSnapshot.self, forKey: .simpleStudioSnapshot)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(manifest, forKey: .manifest)
+        try c.encode(settingsData, forKey: .settingsData)
+        try c.encode(featureFlags, forKey: .featureFlags)
+        try c.encode(hustles, forKey: .hustles)
+        try c.encodeIfPresent(selectedHustleId, forKey: .selectedHustleId)
+        try c.encode(transactions, forKey: .transactions)
+        try c.encode(goals, forKey: .goals)
+        try c.encode(debts, forKey: .debts)
+        try c.encodeIfPresent(studioSnapshot, forKey: .studioSnapshot)
+        try c.encodeIfPresent(simpleStudioSnapshot, forKey: .simpleStudioSnapshot)
+    }
 }
 
 public enum BuxMuseArchiveError: LocalizedError {
@@ -57,6 +160,7 @@ public enum BuxMuseArchiveStep: String, CaseIterable, Identifiable {
     case settings = "Restoring settings"
     case expenses = "Restoring expenses"
     case goals = "Restoring goals"
+    case debts = "Restoring debts"
     case studio = "Restoring Studio"
     case finalize = "Finalizing"
 
@@ -82,6 +186,7 @@ public enum BuxMuseArchiveService {
         selectedHustleId: UUID?,
         transactions: [Transaction],
         goals: [Goal],
+        debts: [Debt] = [],
         studioSnapshot: StudioSnapshot?,
         simpleSnapshot: SimpleStudioSnapshot?
     ) throws -> BuxMuseArchivePayload {
@@ -96,6 +201,7 @@ public enum BuxMuseArchiveService {
                 createdAt: Date(),
                 transactionCount: transactions.count,
                 goalCount: goals.count,
+                debtCount: debts.count,
                 includesStudio: studioSnapshot != nil
             ),
             settingsData: settingsData,
@@ -104,6 +210,7 @@ public enum BuxMuseArchiveService {
             selectedHustleId: selectedHustleId,
             transactions: transactions,
             goals: goals,
+            debts: debts,
             studioSnapshot: studioSnapshot,
             simpleStudioSnapshot: simpleSnapshot
         )
@@ -204,8 +311,11 @@ public enum BuxMuseArchiveService {
             _ = try brain.saveExpense(tx)
         }
 
-        try await beat(.goals, 0.62)
+        try await beat(.goals, 0.58)
         try persistence.replaceAllGoals(payload.goals)
+
+        try await beat(.debts, 0.68)
+        try persistence.replaceAllDebts(payload.debts)
 
         try await beat(.studio, 0.82)
         if let studio = payload.studioSnapshot {

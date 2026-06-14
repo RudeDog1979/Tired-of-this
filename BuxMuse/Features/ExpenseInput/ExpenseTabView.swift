@@ -35,6 +35,7 @@ struct ExpenseTabView: View {
     @State private var showMerchantManager = false
     @State private var padDeleteConfirmRecord: ExpenseRecord?
     @State private var recordsById: [UUID: ExpenseRecord] = [:]
+    @State private var isExpenseSearchPresented = false
 
     private var allRecords: [ExpenseRecord] {
         brain.expenseRecords
@@ -71,9 +72,18 @@ struct ExpenseTabView: View {
         )
     }
 
-    /// Search or filters active — hero collapses so results stay in focus.
+    /// Filters active — iPad inline hero hides while refining results.
+    private var isFilterFocusMode: Bool {
+        listModel.filters.isActive
+    }
+
+    /// Search field open — drives toolbar search and iPhone hero overlay.
+    private var isSearchFocusMode: Bool {
+        isExpenseSearchPresented
+    }
+
     private var isListFocusMode: Bool {
-        navigationCoordinator.isExpenseSearchPresented || listModel.filters.isActive
+        isSearchFocusMode || isFilterFocusMode
     }
 
     var body: some View {
@@ -96,7 +106,7 @@ struct ExpenseTabView: View {
             .modifier(ExpenseSearchModifier(
                 searchText: $listModel.filters.searchText,
                 searchScope: $listModel.searchScope,
-                isSearchPresented: $navigationCoordinator.isExpenseSearchPresented
+                isSearchPresented: $isExpenseSearchPresented
             ))
         }
         .tint(themeManager.contrastAccentColor(for: colorScheme))
@@ -118,11 +128,19 @@ struct ExpenseTabView: View {
             ExpenseCarouselSession.shared.bumpForDataChange(dataToken: new)
         }
         .onDisappear {
-            navigationCoordinator.dismissExpenseSearch()
+            closeExpenseSearch()
         }
-        .onChange(of: navigationCoordinator.isExpenseSearchPresented) { _, presented in
+        .onChange(of: isExpenseSearchPresented) { _, presented in
+            navigationCoordinator.isExpenseSearchPresented = presented
             if !presented {
                 refreshExpenseListDisplay()
+            }
+        }
+        .onChange(of: navigationCoordinator.isExpenseSearchPresented) { _, presented in
+            if !presented, isExpenseSearchPresented {
+                closeExpenseSearch()
+            } else if presented, !isExpenseSearchPresented {
+                isExpenseSearchPresented = true
             }
         }
         .onChange(of: expenseDataToken) { _, _ in
@@ -155,7 +173,7 @@ struct ExpenseTabView: View {
         }
         .onChange(of: navigationCoordinator.padKeyboardFocusSearchToken) { _, _ in
             guard BuxPadIdiom.isPad else { return }
-            navigationCoordinator.isExpenseSearchPresented = true
+            isExpenseSearchPresented = true
         }
         .onChange(of: padNavigationBrain.keyboardCommandToken) { _, _ in
             guard BuxPadIdiom.isPad, usesPadSplitLayout else { return }
@@ -237,26 +255,15 @@ struct ExpenseTabView: View {
 
     @ToolbarContentBuilder
     private var expenseToolbar: some ToolbarContent {
-        if !allRecords.isEmpty {
-            ToolbarItemGroup(placement: .topBarTrailing) {
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            expenseManageMenu
+            if !allRecords.isEmpty {
                 expenseFilterMenu
-
-                BuxNavIconButton(
-                    systemName: "tag",
-                    accessibilityLabel: "Manage categories",
-                    action: { showCategoryManager = true }
-                )
-
-                BuxNavIconButton(
-                    systemName: "building.2",
-                    accessibilityLabel: "Manage merchants",
-                    action: { showMerchantManager = true }
-                )
             }
+        }
 
-            if #available(iOS 26.0, *) {
-                ToolbarSpacer(.fixed, placement: .topBarTrailing)
-            }
+        if #available(iOS 26.0, *), !allRecords.isEmpty {
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
         }
 
         ToolbarItem(placement: .topBarTrailing) {
@@ -270,6 +277,31 @@ struct ExpenseTabView: View {
                 }
             )
         }
+    }
+
+    private var expenseManageMenu: some View {
+        Menu {
+            Button {
+                showCategoryManager = true
+            } label: {
+                Label(BuxCatalogLabel.string("Manage categories", locale: appSettingsManager.interfaceLocale), systemImage: "tag")
+            }
+            Button {
+                showMerchantManager = true
+            } label: {
+                Label(BuxCatalogLabel.string("Manage merchants", locale: appSettingsManager.interfaceLocale), systemImage: "building.2")
+            }
+            if !allRecords.isEmpty {
+                Button {
+                    showAdvancedFilters = true
+                } label: {
+                    Label(BuxCatalogLabel.string("Advanced filters…", locale: appSettingsManager.interfaceLocale), systemImage: "line.3.horizontal.decrease.circle")
+                }
+            }
+        } label: {
+            BuxToolbarIcon(systemName: "ellipsis.circle")
+        }
+        .accessibilityLabel(BuxCatalogLabel.string("Expense options", locale: appSettingsManager.interfaceLocale))
     }
 
     private var expenseFilterMenu: some View {
@@ -392,9 +424,9 @@ struct ExpenseTabView: View {
                     }
                 } else {
                     ContentUnavailableView {
-                        Label(BuxCatalogLabel.string("No expenses logged yet", locale: appSettingsManager.interfaceLocale), systemImage: "creditcard")
+                        Label(BuxCatalogLabel.string("Log your first expense", locale: appSettingsManager.interfaceLocale), systemImage: "creditcard")
                     } description: {
-                        BuxCatalogText.text("Your financial details are kept strictly offline and secure inside the BuxMuse Brain.")
+                        BuxCatalogText.text("No bank connection needed. Everything stays on your phone.")
                     } actions: {
                         addExpenseButton
                     }
@@ -465,7 +497,7 @@ struct ExpenseTabView: View {
                         withAnimation(.buxSnap) {
                             listModel.filters = ExpenseFilterState()
                             listModel.searchScope = .all
-                            navigationCoordinator.dismissExpenseSearch()
+                            closeExpenseSearch()
                         }
                     },
                     onOpenDetail: { record in
@@ -498,15 +530,15 @@ struct ExpenseTabView: View {
     private var iphoneUnifiedExpenseList: some View {
         let display = brain.expenseInteractionSnapshot
         let showHero = !display.sections.isEmpty || display.header.totalSpent != 0
-        let showHeroChrome = showHero && !isListFocusMode
+        let showHeroChrome = showHero && !isSearchFocusMode
         let pageCount = expenseHeroPageCount(header: display.header, summary: display.summary)
 
         return IPhoneUnifiedExpenseListContainer(
             display: display,
             showHeroChrome: showHeroChrome,
+            isSearchPresented: isSearchFocusMode,
             pageCount: pageCount,
             heroRowInsets: expenseHeroRowInsets,
-            isListFocusMode: isListFocusMode,
             filteredRecords: filteredRecords,
             filtersActive: listModel.filters.isActive,
             recordsById: recordsById,
@@ -520,7 +552,7 @@ struct ExpenseTabView: View {
                 withAnimation(.buxSnap) {
                     listModel.filters = ExpenseFilterState()
                     listModel.searchScope = .all
-                    navigationCoordinator.dismissExpenseSearch()
+                    closeExpenseSearch()
                 }
             },
             onOpenDetail: { record in
@@ -557,6 +589,13 @@ struct ExpenseTabView: View {
     private func applyPendingExpenseFilterIfNeeded() {
         guard let pending = navigationCoordinator.consumePendingExpenseFilter() else { return }
         listModel.filters = pending
+    }
+
+    private func closeExpenseSearch(clearText: Bool = false) {
+        if clearText {
+            listModel.filters.searchText = ""
+        }
+        isExpenseSearchPresented = false
     }
 
     private func refreshExpenseListDisplay() {
@@ -629,17 +668,6 @@ private struct ExpenseSearchModifier: ViewModifier {
                     }
                 }
             ))
-            .modifier(ExpenseSearchToolbarBehaviorModifier())
-    }
-}
-
-private struct ExpenseSearchToolbarBehaviorModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content.searchToolbarBehavior(.minimize)
-        } else {
-            content
-        }
     }
 }
 
@@ -649,13 +677,12 @@ struct IPhoneUnifiedExpenseListContainer: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var brain: BuxMuseBrain
-    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
 
     let display: ExpenseInteractionDisplay
     let showHeroChrome: Bool
+    let isSearchPresented: Bool
     let pageCount: Int
     let heroRowInsets: EdgeInsets
-    let isListFocusMode: Bool
     let filteredRecords: [ExpenseRecord]
     let filtersActive: Bool
     let recordsById: [UUID: ExpenseRecord]
@@ -684,7 +711,7 @@ struct IPhoneUnifiedExpenseListContainer: View {
                             .id("expense_scroll_top")
                             .expenseHeroTrackScrollCollapse(
                                 scrollOffset: $expenseScrollOffset,
-                                isPaused: expenseHeroCollapseTrackingPaused
+                                isPaused: expenseHeroCollapseTrackingPaused || isSearchPresented
                             )
 
                         ExpenseListBodyView(
@@ -714,10 +741,18 @@ struct IPhoneUnifiedExpenseListContainer: View {
                 .scrollDismissesKeyboard(.interactively)
                 .modifier(ExpensePadSplitScrollChromeModifier())
                 .buxScrollCollapseCoordinateSpace()
-                .animation(.buxSnap, value: isListFocusMode)
-                .onChange(of: isListFocusMode) { _, _ in
-                    expenseScrollOffset = 0
-                    expenseHeroCollapseTrackingPaused = false
+                .animation(.buxSnap, value: showHeroChrome)
+                .onChange(of: isSearchPresented) { _, presented in
+                    if presented {
+                        expenseScrollOffset = 0
+                        expenseHeroCollapseTrackingPaused = true
+                    } else {
+                        expenseScrollOffset = 0
+                        expenseHeroCollapseTrackingPaused = false
+                        withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) {
+                            scrollProxy.scrollTo("expense_scroll_top", anchor: .top)
+                        }
+                    }
                 }
 
                 if showHeroChrome {
@@ -864,6 +899,18 @@ struct ExpenseListBodyView: View, Equatable {
         .environmentObject(themeManager)
         .environmentObject(brain)
         .padding(expenseListRowInsets)
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if record.isSpendingOutflow, record.bridgeKind == nil {
+                Button {
+                    withAnimation(.buxSnap) {
+                        activeSheet = .editWithCategorySplit(record.toTransaction())
+                    }
+                } label: {
+                    Label(BuxCatalogLabel.string("Split categories", locale: appSettingsManager.interfaceLocale), systemImage: "square.split.2x1")
+                }
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
+            }
+        }
         .buxPadExpenseRowInteractions(recordId: record.id, enabled: BuxPadIdiom.isPad && usesPadSplitLayout)
         .background {
             if usesPadSplitLayout, selectedExpenseId == record.id {
@@ -906,6 +953,16 @@ struct ExpenseListBodyView: View, Equatable {
                 categorySheetTransaction = record.toTransaction()
             } label: {
                 Label(BuxCatalogLabel.string("Category", locale: appSettingsManager.interfaceLocale), systemImage: "tag")
+            }
+
+            if record.isSpendingOutflow, record.bridgeKind == nil {
+                Button {
+                    withAnimation(.buxSnap) {
+                        activeSheet = .editWithCategorySplit(record.toTransaction())
+                    }
+                } label: {
+                    Label(BuxCatalogLabel.string("Split categories", locale: appSettingsManager.interfaceLocale), systemImage: "square.split.2x1")
+                }
             }
 
             Button {

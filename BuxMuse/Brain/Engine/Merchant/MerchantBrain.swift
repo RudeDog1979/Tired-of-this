@@ -83,6 +83,12 @@ struct MerchantListDisplayInfo: Equatable, Sendable {
     var disambiguatorLabel: String?
 }
 
+struct MerchantCategorySuggestion: Equatable, Sendable {
+    let category: TransactionCategory
+    let sampleCount: Int
+    let totalCount: Int
+}
+
 @MainActor
 final class MerchantBrain {
     private let persistence: PersistenceController
@@ -372,6 +378,47 @@ final class MerchantBrain {
         )
     }
 
+    func suggestedCategory(
+        for label: String,
+        merchantId: UUID?,
+        expenseRecords: [ExpenseRecord],
+        excludeRecordId: UUID? = nil
+    ) -> MerchantCategorySuggestion? {
+        let trimmed = label.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        let merchants = (try? persistence.fetchAllMerchantRecords()) ?? []
+        let isSubscriptionMerchant = merchantIsSubscriptionFlagged(
+            merchantId: merchantId,
+            label: trimmed,
+            merchants: merchants
+        )
+        let related = matchingExpenseRecords(
+            for: trimmed,
+            merchantId: merchantId,
+            in: expenseRecords,
+            excludeRecordId: excludeRecordId
+        )
+        let eligible = related.filter { record in
+            let category = record.transactionCategory
+            if category == .income { return false }
+            if category == .subscriptions, !isSubscriptionMerchant { return false }
+            return true
+        }
+        guard eligible.count >= 2 else { return nil }
+
+        let grouped = Dictionary(grouping: eligible, by: \.transactionCategory)
+        guard let top = grouped.max(by: { $0.value.count < $1.value.count }) else { return nil }
+        let share = Double(top.value.count) / Double(eligible.count)
+        guard share >= 0.6 else { return nil }
+
+        return MerchantCategorySuggestion(
+            category: top.key,
+            sampleCount: top.value.count,
+            totalCount: eligible.count
+        )
+    }
+
     func needsDisambiguatorLabel(
         for displayName: String,
         disambiguator: String?
@@ -387,7 +434,7 @@ final class MerchantBrain {
 
     private struct RecordStats {
         var count: Int
-        var topCategory: String?
+        var topCategory: TransactionCategory?
         var lastDate: Date?
     }
 
@@ -471,21 +518,60 @@ final class MerchantBrain {
         return statsForRecords(fallback)
     }
 
+    private func matchingExpenseRecords(
+        for label: String,
+        merchantId: UUID?,
+        in expenseRecords: [ExpenseRecord],
+        excludeRecordId: UUID?
+    ) -> [ExpenseRecord] {
+        let normalizedLabel = normalized(label)
+        return expenseRecords.filter { record in
+            if let excludeRecordId, record.id == excludeRecordId { return false }
+            if let merchantId, record.merchantId == merchantId { return true }
+            let merchantName = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let title = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            if normalized(merchantName) == normalizedLabel { return true }
+            if normalized(title) == normalizedLabel { return true }
+            return false
+        }
+    }
+
+    private func merchantIsSubscriptionFlagged(
+        merchantId: UUID?,
+        label: String,
+        merchants: [ExpenseMerchantRecord]
+    ) -> Bool {
+        if let merchantId, let merchant = merchants.first(where: { $0.id == merchantId }) {
+            return merchant.isSubscriptionMerchant
+        }
+        let normalizedLabel = normalized(label)
+        return merchants.contains {
+            $0.isSubscriptionMerchant && $0.normalizedName == normalizedLabel
+        }
+    }
+
     private func statsForRecords(_ records: [ExpenseRecord]) -> RecordStats {
         guard !records.isEmpty else { return RecordStats(count: 0, topCategory: nil, lastDate: nil) }
         let categories = records.map(\.transactionCategory)
         let top = Dictionary(grouping: categories, by: { $0 }).max(by: { $0.value.count < $1.value.count })?.key
         let last = records.map(\.date).max()
-        return RecordStats(count: records.count, topCategory: top?.rawValue, lastDate: last)
+        return RecordStats(count: records.count, topCategory: top, lastDate: last)
     }
 
-    private func listSubtitle(expenseCount: Int, category: String?, lastDate: Date?, locale: Locale) -> String {
+    private func listSubtitle(
+        expenseCount: Int,
+        category: TransactionCategory?,
+        lastDate: Date?,
+        locale: Locale
+    ) -> String {
         var parts: [String] = []
         if expenseCount > 0 {
             let countKey = expenseCount == 1 ? "%lld expense" : "%lld expenses"
             parts.append(BuxLocalizedString.format(countKey, locale: locale, expenseCount))
         }
-        if let category, !category.isEmpty { parts.append(category) }
+        if let category {
+            parts.append(category.localizedDisplayName(locale: locale))
+        }
         if let lastDate {
             let formatter = DateFormatter()
             formatter.locale = locale

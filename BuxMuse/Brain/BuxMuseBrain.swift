@@ -241,10 +241,12 @@ public final class BuxMuseBrain: ObservableObject {
 
     public func deleteExpense(id: UUID) throws {
         let padUndoSnapshot = BuxPadExpenseUndoBridge.snapshotBeforeDelete(id: id, brain: self)
+        let currencyCode = (try? fetchExpenseRecord(id: id))?.currencyCode ?? SettingsStore.shared.primaryLocalCurrency
         ExpenseRenewalReminderScheduler.cancel(for: id)
         try persistence.deleteExpenseRecord(id: id)
         refreshExpenses()
         BuxPadExpenseUndoBridge.offerUndoAfterDelete(padUndoSnapshot, brain: self)
+        PersonalCloudSyncEngine.shared.pushDeletedExpense(id: id, currencyCode: currencyCode)
     }
 
     // MARK: - Expense records (full SwiftData model)
@@ -292,7 +294,10 @@ public final class BuxMuseBrain: ObservableObject {
             if SettingsStore.shared.isSubscriptionCancelled(normalizedMerchant: normalizedMerchant) {
                 working.isSubscriptionLike = false
                 working.isTrial = false
-            } else {
+            } else if merchantIsSubscriptionFlagged(
+                normalizedMerchant: normalizedMerchant,
+                merchantId: working.merchantId
+            ) {
                 working.isSubscriptionLike = analysis.isSubscriptionLike
             }
         }
@@ -313,7 +318,18 @@ public final class BuxMuseBrain: ObservableObject {
         Task { @MainActor in
             await ExpenseRenewalReminderScheduler.schedule(for: saved)
         }
+        PersonalCloudSyncEngine.shared.pushExpenseIfNeeded(saved)
         return saved
+    }
+
+    private func merchantIsSubscriptionFlagged(normalizedMerchant: String, merchantId: UUID?) -> Bool {
+        let merchants = (try? persistence.fetchAllMerchantRecords()) ?? []
+        if let merchantId, let merchant = merchants.first(where: { $0.id == merchantId }) {
+            return merchant.isSubscriptionMerchant
+        }
+        return merchants.contains {
+            $0.isSubscriptionMerchant && $0.normalizedName == normalizedMerchant
+        }
     }
 
     @discardableResult
@@ -727,6 +743,7 @@ public final class BuxMuseBrain: ObservableObject {
         scheduleSave { [weak self] in
             guard let self else { return }
             try self.persistence.replaceAllGoals(self.goalsEngine.goals)
+            PersonalCloudSyncEngine.shared.pushGoalsIfNeeded(self.goalsEngine.goals)
         }
     }
 

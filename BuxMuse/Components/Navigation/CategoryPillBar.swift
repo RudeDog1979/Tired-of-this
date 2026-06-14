@@ -15,9 +15,20 @@ private enum DashboardCategory: String, CaseIterable, Identifiable {
     case moneyMap = "Money Map"
 
     var id: String { rawValue }
+
+    func catalogLabel(locale: Locale) -> String {
+        switch self {
+        case .expenses: return BuxCatalogLabel.string("Spending", locale: locale)
+        case .subscriptions: return BuxCatalogLabel.string("Subscriptions", locale: locale)
+        case .goals: return BuxCatalogLabel.string("Goals", locale: locale)
+        case .insights: return BuxCatalogLabel.string("Summary", locale: locale)
+        case .moneyMap: return BuxCatalogLabel.string("Money map", locale: locale)
+        }
+    }
 }
 
 struct CategoryPillBar: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @Binding var activeCategory: String
     @Binding var isExpanded: Bool
     /// Kept for call-site compatibility; Studio bar always uses brand / dashboard wash when enabled.
@@ -42,7 +53,7 @@ struct CategoryPillBar: View {
         StudioGlassHorizontalSectionMenu(
             selection: categorySelection,
             tabs: DashboardCategory.allCases,
-            label: \.rawValue
+            label: { $0.catalogLabel(locale: appSettingsManager.interfaceLocale) }
         )
     }
 }

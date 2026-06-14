@@ -10,6 +10,7 @@ enum BuxPadEscapeLayer: Equatable {
     case insightDetail
     case goalDetail
     case subscriptionHub
+    case debtHub
     case expenseSearch
     case expenseSelection
     case externalPresentation
@@ -26,6 +27,7 @@ enum BuxPadEscapeStack {
         if navigation.selectedCryptoCard != nil { return .cryptoCard }
         if insights.showInsightDetail { return .insightDetail }
         if goals.showGoalDetail { return .goalDetail }
+        if navigation.showDebtHub { return .debtHub }
         if navigation.showSubscriptionHub { return .subscriptionHub }
         if navigation.isExpenseSearchPresented { return .expenseSearch }
         if padBrain.selectedExpenseId != nil { return .expenseSelection }
@@ -55,6 +57,8 @@ enum BuxPadEscapeStack {
             insights.dismissInsightDetail()
         case .goalDetail:
             goals.dismissGoalDetail()
+        case .debtHub:
+            navigation.closeDebtHub()
         case .subscriptionHub:
             navigation.closeSubscriptionHub()
         case .expenseSearch:

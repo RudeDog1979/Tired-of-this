@@ -78,6 +78,13 @@ enum TutorialCoreSteps {
                 onEnter: .selectTab(.home)
             ),
             TutorialStepDefinition(
+                id: "home.debt",
+                titleKey: "Track debt",
+                bodyKey: "Optional. Turn on consumer debt tracking to log loans, cards, and informal lenders.",
+                anchor: .homeDebtDiscovery,
+                onEnter: .selectTab(.home)
+            ),
+            TutorialStepDefinition(
                 id: "expense.sheetIntro",
                 titleKey: "Merchant",
                 bodyKey: "Name the store. Pick a suggestion or add a new one.",

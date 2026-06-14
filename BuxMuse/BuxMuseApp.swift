@@ -4,9 +4,11 @@
 //
 
 import SwiftUI
+import CloudKit
 
 @main
 struct BuxMuseApp: App {
+    @UIApplicationDelegateAdaptor(PersonalCloudSyncAppDelegate.self) private var appDelegate
     @StateObject private var container = AppContainer()
 
     var body: some Scene {
@@ -21,8 +23,17 @@ struct BuxMuseApp: App {
                     container.scheduleTaxCatalogRefresh()
                 }
                 .onOpenURL { url in
-                    guard StudioTimerDeepLink.matches(url) else { return }
-                    container.navigationCoordinator.openStudioLogTime()
+                    if StudioTimerDeepLink.matches(url) {
+                        container.navigationCoordinator.openStudioLogTime()
+                        return
+                    }
+                    Task {
+                        let metadata = try? await CKContainer(identifier: HouseholdSyncEngine.containerIdentifier)
+                            .shareMetadata(for: url)
+                        if let metadata {
+                            try? await HouseholdSyncEngine.shared.acceptShare(metadata: metadata)
+                        }
+                    }
                 }
         }
         .commands {

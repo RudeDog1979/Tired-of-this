@@ -24,6 +24,8 @@ struct AddExpenseSheet: View {
     @State private var moodBackdropOpacity: Double = 0
     @State private var moodCrossfadeTask: Task<Void, Never>?
     @State private var actionNoticeDismissTask: Task<Void, Never>?
+    @State private var showBillingOptions = false
+    @State private var showMoreOptions = false
     @State private var showOptionalPaymentSection = false
     @State private var showOptionalIncomeStore = false
     @State private var paymentSourceQuery = ""
@@ -38,10 +40,7 @@ struct AddExpenseSheet: View {
 
     init(brain: BuxMuseBrain, settingsManager: AppSettingsManager, mode: ExpenseSheetMode) {
         self.mode = mode
-        let editing: Transaction? = {
-            if case .edit(let tx) = mode { return tx }
-            return nil
-        }()
+        let editing: Transaction? = mode.editingTransaction
         let preset: TransactionCategory? = {
             switch mode {
             case .addIncome: return .income
@@ -54,7 +53,8 @@ struct AddExpenseSheet: View {
             settingsManager: settingsManager,
             editing: editing,
             presetCategory: preset,
-            autoScan: autoScan
+            autoScan: autoScan,
+            focusCategorySplit: mode.opensWithCategorySplit
         ))
     }
 
@@ -147,6 +147,13 @@ struct AddExpenseSheet: View {
                         } else {
                             merchantCard
                             categoryCard
+                            if viewModel.showsCategorySplitEditor {
+                                categorySplitCard
+                            }
+                        }
+
+                        if viewModel.isHouseholdActive, !isIncomeMode {
+                            householdScopeCard
                         }
 
                         if settingsStore.sideHustleMatrixEnabled {
@@ -173,27 +180,13 @@ struct AddExpenseSheet: View {
                         }
 
                         if !isIncomeMode {
-                            subscriptionCard
-                        }
-
-                        if !isIncomeMode, !viewModel.isEditing {
-                            recurringCard
+                            billingOptionsSection
                         }
 
                         dateCard
-                        notesCard
 
                         if !isIncomeMode {
-                            emotionalCard
-                        }
-
-                        if !isIncomeMode, let hint = viewModel.smartHint {
-                            Text(hint)
-                                .font(.system(size: 13, weight: .medium))
-                                .buxLabelSecondary()
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(BuxLayout.section)
-                                .expensesThemedCardChrome(cornerRadius: 20)
+                            moreOptionsSection
                         }
 
                         if !isIncomeMode, let warning = viewModel.envelopeWarning {
@@ -244,6 +237,14 @@ struct AddExpenseSheet: View {
                     }
                 }
             }
+            .onAppear {
+                if viewModel.isSubscription || viewModel.isRecurring {
+                    showBillingOptions = true
+                }
+                if !viewModel.notes.isEmpty || !viewModel.emotionTag.isEmpty {
+                    showMoreOptions = true
+                }
+            }
             .onChange(of: viewModel.emotionTag) { _, newTag in
                 guard !isIncomeMode else { return }
                 syncMoodBackdrop(to: newTag, animated: true)
@@ -251,6 +252,9 @@ struct AddExpenseSheet: View {
             .onChange(of: viewModel.selectedCategory) { _, _ in
                 guard !isIncomeMode else { return }
                 viewModel.categorySelectionDidChange()
+                if viewModel.isSubscriptionsCategorySelected || viewModel.isSubscription || viewModel.isRecurring {
+                    showBillingOptions = true
+                }
             }
             .onChange(of: viewModel.date) { _, _ in
                 guard !isIncomeMode else { return }
@@ -833,7 +837,7 @@ struct AddExpenseSheet: View {
 
     private var recurringCard: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight) {
-            BuxCatalogText.text("Recurring")
+            BuxCatalogText.text("Fixed payment")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             Toggle(isOn: $viewModel.isRecurring) {
@@ -841,7 +845,7 @@ struct AddExpenseSheet: View {
                     BuxCatalogText.text("Repeats regularly")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    BuxCatalogText.text("Rent, utilities, subscriptions you pay outside the subscription toggle.")
+                    BuxCatalogText.text("Use for rent, utilities, or other bills that repeat on a schedule.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
@@ -862,11 +866,118 @@ struct AddExpenseSheet: View {
                 selectedCategoryId: $viewModel.selectedCategoryId,
                 selectedCategory: $viewModel.selectedCategory,
                 emphasizeOnAppear: mode == .addWithCategoryFocus,
-                includesIncome: false
+                includesIncome: false,
+                showsSectionLabel: false
             )
             .environmentObject(brain)
+
+            if let notice = viewModel.categorySuggestionNotice {
+                Text(notice)
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+            }
         }
         .tutorialAnchor(.addExpenseCategory, coordinator: tutorialCoordinator)
+    }
+
+    private var categorySplitCard: some View {
+        ExpenseCategorySplitEditor(
+            isEnabled: $viewModel.isCategorySplitEnabled,
+            lines: $viewModel.categorySplitDraftLines,
+            totalAmountString: viewModel.amountString,
+            validationMessage: viewModel.categorySplitValidationMessage
+        )
+        .environmentObject(brain)
+        .onChange(of: viewModel.categorySplitDraftLines) { _, _ in
+            _ = viewModel.validateCategorySplitDraft()
+        }
+        .onChange(of: viewModel.amountString) { _, _ in
+            _ = viewModel.validateCategorySplitDraft()
+        }
+    }
+
+    private var householdScopeCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            BuxCatalogText.text("Household")
+                .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
+
+            Picker(loc("Household"), selection: $viewModel.householdScope) {
+                ForEach(HouseholdScope.allCases) { scope in
+                    Text(BuxCatalogLabel.string(scope.catalogKey, locale: locale)).tag(scope)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(BuxLayout.section)
+            .expensesThemedCardChrome(cornerRadius: 20)
+        }
+    }
+
+    private var billingOptionsSection: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Button {
+                withAnimation(.buxSnap) { showBillingOptions.toggle() }
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        BuxCatalogText.text("Fixed payments & subscriptions")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        BuxCatalogText.text("Rent, utilities, Netflix, and other repeating bills")
+                            .font(.system(size: 11, weight: .medium))
+                            .buxLabelSecondary()
+                    }
+                    Spacer()
+                    Image(systemName: showBillingOptions ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                }
+                .padding(BuxLayout.section)
+                .expensesThemedCardChrome(cornerRadius: 20)
+            }
+            .buttonStyle(.plain)
+
+            if showBillingOptions || viewModel.isSubscription || viewModel.isRecurring {
+                subscriptionCard
+                if !viewModel.isEditing {
+                    recurringCard
+                }
+            }
+        }
+    }
+
+    private var moreOptionsSection: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Button {
+                withAnimation(.buxSnap) { showMoreOptions.toggle() }
+            } label: {
+                HStack {
+                    BuxCatalogText.text("More options")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                    Spacer()
+                    Image(systemName: showMoreOptions ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                }
+                .padding(BuxLayout.section)
+                .expensesThemedCardChrome(cornerRadius: 20)
+            }
+            .buttonStyle(.plain)
+
+            if showMoreOptions {
+                notesCard
+                emotionalCard
+
+                if let hint = viewModel.smartHint {
+                    Text(hint)
+                        .font(.system(size: 13, weight: .medium))
+                        .buxLabelSecondary()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(BuxLayout.section)
+                        .expensesThemedCardChrome(cornerRadius: 20)
+                }
+            }
+        }
     }
 
     private var subscriptionCard: some View {

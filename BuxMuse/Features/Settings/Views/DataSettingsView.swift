@@ -33,6 +33,14 @@ struct DataSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
+            BuxFormSection {
+                BuxCatalogDynamicText(key: "BuxMuse works on your device. You enter your own transactions — we never connect to your bank. Export or back up anytime.")
+                    .font(.system(size: 13, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .buxFormFieldPadding()
+            }
+
             BackupRestoreSettingsView()
 
             BuxFormSection(title: "Photo access settings") {

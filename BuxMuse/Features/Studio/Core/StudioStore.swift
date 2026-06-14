@@ -29,6 +29,7 @@ public final class StudioStore: ObservableObject {
     private var isLoaded = false
     /// True when `studio_hub.json` (or legacy path) was loaded — false for factory empty defaults.
     public private(set) var didLoadPersistedSnapshot = false
+    public private(set) var lastPersistedAt: Date?
 
     private init() {
         loadStore()
@@ -86,6 +87,10 @@ public final class StudioStore: ObservableObject {
                 let snapshot = try JSONDecoder().decode(StudioSnapshot.self, from: data)
                 apply(snapshot)
                 didLoadPersistedSnapshot = true
+                if let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+                   let modified = attrs[.modificationDate] as? Date {
+                    lastPersistedAt = modified
+                }
                 isLoaded = true
                 if url != storeURL {
                     save()
@@ -101,7 +106,7 @@ public final class StudioStore: ObservableObject {
         isLoaded = true
     }
 
-    public func save() {
+    public func save(notifyCloudSync: Bool = true) {
         let snapshot = currentSnapshot()
         do {
             let data = try JSONEncoder().encode(snapshot)
@@ -109,6 +114,11 @@ public final class StudioStore: ObservableObject {
             saveQueue.async {
                 do {
                     try data.write(to: url, options: .atomic)
+                    DispatchQueue.main.async { [weak self] in
+                        self?.lastPersistedAt = Date()
+                        guard notifyCloudSync else { return }
+                        NotificationCenter.default.post(name: .buxMuseStudioDidPersist, object: nil)
+                    }
                 } catch {
                     print("StudioStore: failed to write JSON payload: \(error)")
                 }

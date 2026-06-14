@@ -54,6 +54,7 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published public var saveError: String?
     @Published public var actionNotice: String?
     @Published public var smartHint: String?
+    @Published public var categorySuggestionNotice: String?
     @Published public var envelopeWarning: String?
     @Published public var shouldAutoTriggerScanner = false
 
@@ -69,6 +70,10 @@ public final class AddExpenseViewModel: ObservableObject {
     @Published public var bridgeSecondaryHustleId: UUID?
     @Published public var bridgeSplitSharePercent: Double = 50
     @Published public var paymentMethod: String? = nil
+    @Published public var isCategorySplitEnabled = false
+    @Published public var categorySplitDraftLines: [ExpenseCategorySplitLine] = []
+    @Published public var categorySplitValidationMessage: String?
+    @Published var householdScope: HouseholdScope = .personal
     // MARK: - Barter Logger Fields
     @Published public var isBarterExchange: Bool = false
     @Published public var barterGoodsGiven: String = ""
@@ -79,6 +84,18 @@ public final class AddExpenseViewModel: ObservableObject {
     private var categoryIdBeforeSubscription: UUID?
 
     public var isEditing: Bool { editingId != nil }
+
+    public var isHouseholdActive: Bool {
+        SettingsStore.shared.householdCloudRecordName != nil
+    }
+
+    public var showsWorkspaceBridgeSplit: Bool {
+        SettingsStore.shared.sideHustleMatrixEnabled && bridgeEntryMode == .split
+    }
+
+    public var showsCategorySplitEditor: Bool {
+        !isIncomeEntry && !showsWorkspaceBridgeSplit
+    }
 
     public var workspaceAutoRoutePreviewName: String? {
         guard SettingsStore.shared.sideHustleMatrixEnabled,
@@ -108,7 +125,14 @@ public final class AddExpenseViewModel: ObservableObject {
         )
     }
 
-    public init(brain: BuxMuseBrain, settingsManager: AppSettingsManager, editing: Transaction? = nil, presetCategory: TransactionCategory? = nil, autoScan: Bool = false) {
+    public init(
+        brain: BuxMuseBrain,
+        settingsManager: AppSettingsManager,
+        editing: Transaction? = nil,
+        presetCategory: TransactionCategory? = nil,
+        autoScan: Bool = false,
+        focusCategorySplit: Bool = false
+    ) {
         self.brain = brain
         self.settingsManager = settingsManager
         self.editingId = editing?.id
@@ -140,6 +164,11 @@ public final class AddExpenseViewModel: ObservableObject {
                 renewalReminderDays = record.renewalReminderDays ?? 3
                 emotionTag = record.emotion ?? ""
                 paymentMethod = record.paymentMethod
+                if record.isCategorySplit, !record.splitLines.isEmpty {
+                    isCategorySplitEnabled = true
+                    categorySplitDraftLines = record.splitLines.map { ExpenseCategorySplitLine.from($0) }
+                }
+                householdScope = record.householdScope
             }
         } else if let preset = presetCategory {
             selectedCategory = preset
@@ -170,10 +199,27 @@ public final class AddExpenseViewModel: ObservableObject {
                 syncSubscriptionStartFromExpenseDate()
             }
         }
+
+        if focusCategorySplit, !isIncomeEntry {
+            isCategorySplitEnabled = true
+            if categorySplitDraftLines.count < 2 {
+                let groceriesId = try? brain.categoryId(for: .groceries)
+                let otherId = try? brain.categoryId(for: .other)
+                categorySplitDraftLines = [
+                    ExpenseCategorySplitLine(
+                        categoryId: selectedCategoryId ?? groceriesId,
+                        categoryRaw: selectedCategory.rawValue
+                    ),
+                    ExpenseCategorySplitLine(categoryId: otherId, categoryRaw: TransactionCategory.other.rawValue)
+                ]
+            }
+        }
     }
 
     public func categorySelectionDidChange() {
         guard !isIncomeEntry else { return }
+        categorySuggestionNotice = nil
+        if isCategorySplitEnabled { return }
         if selectedCategory == .subscriptions {
             isSubscription = true
             syncSubscriptionStartFromExpenseDate()
@@ -385,6 +431,7 @@ public final class AddExpenseViewModel: ObservableObject {
         if cleanName.isEmpty {
             candidates = []
             mergeHintCandidate = nil
+            categorySuggestionNotice = nil
             if resetSelection {
                 selectedCandidateId = nil
             }
@@ -575,6 +622,10 @@ public final class AddExpenseViewModel: ObservableObject {
             return false
         }
 
+        if isCategorySplitEnabled {
+            guard validateCategorySplitDraft() else { return false }
+        }
+
         let cleanedAmountStr = amountString.replacingOccurrences(of: ",", with: ".")
         guard let doubleVal = Double(cleanedAmountStr) else {
             saveError = loc("Enter a valid amount.")
@@ -670,6 +721,27 @@ public final class AddExpenseViewModel: ObservableObject {
             record.recurrenceConfidence = 0.9
         }
 
+        if isCategorySplitEnabled {
+            let drafts = normalizedCategorySplitLines()
+            record.isCategorySplit = true
+            record.splitLines = drafts.enumerated().compactMap { index, line in
+                line.toSplitLineRecord(sortOrder: index)
+            }
+            if let primary = record.splitLines.first {
+                record.categoryId = primary.categoryId
+                record.categoryRaw = primary.categoryRaw
+                selectedCategory = primary.transactionCategory
+                selectedCategoryId = primary.categoryId
+            }
+        } else {
+            record.isCategorySplit = false
+            record.splitLines = []
+        }
+
+        if isHouseholdActive {
+            record.householdScope = householdScope
+        }
+
         let selection: MerchantSelection? = {
             if isIncomeEntry {
                 guard selectedMerchantId != nil || pendingMerchantSelection != nil else { return nil }
@@ -685,6 +757,9 @@ public final class AddExpenseViewModel: ObservableObject {
                 try saveBridgeTransaction(record: record, selection: selection, cleanName: cleanName, amount: decimalValue)
             } else {
                 _ = try brain.saveExpenseRecord(record, merchantSelection: selection)
+            }
+            if record.householdScope == .shared {
+                Task { await HouseholdSyncEngine.shared.pushSharedExpenseIfNeeded(record) }
             }
             return true
         } catch is BridgeSaveError {
@@ -753,6 +828,46 @@ public final class AddExpenseViewModel: ObservableObject {
         case missingWorkspaces
     }
 
+    public func validateCategorySplitDraft() -> Bool {
+        categorySplitValidationMessage = nil
+        guard isCategorySplitEnabled else { return true }
+        guard categorySplitDraftLines.count >= 2, categorySplitDraftLines.count <= 5 else {
+            categorySplitValidationMessage = loc("Use 2 to 5 category lines.")
+            saveError = categorySplitValidationMessage
+            return false
+        }
+        let amounts = categorySplitDraftLines.compactMap(\.amountDecimal)
+        guard amounts.count == categorySplitDraftLines.count else {
+            categorySplitValidationMessage = loc("Enter a valid amount for each line.")
+            saveError = categorySplitValidationMessage
+            return false
+        }
+        let cleanedAmountStr = amountString.replacingOccurrences(of: ",", with: ".")
+        guard let total = Decimal(string: cleanedAmountStr), total > 0 else {
+            categorySplitValidationMessage = loc("Enter a valid amount.")
+            saveError = categorySplitValidationMessage
+            return false
+        }
+        let allocated = amounts.reduce(0, +)
+        let delta = abs(NSDecimalNumber(decimal: total - allocated).doubleValue)
+        guard delta < 0.01 else {
+            categorySplitValidationMessage = loc("Split amounts must equal the expense total.")
+            saveError = categorySplitValidationMessage
+            return false
+        }
+        return true
+    }
+
+    private func normalizedCategorySplitLines() -> [ExpenseCategorySplitLine] {
+        categorySplitDraftLines.map { line in
+            var normalized = line
+            if normalized.categoryId == nil {
+                normalized.categoryId = try? brain.categoryId(for: normalized.transactionCategory)
+            }
+            return normalized
+        }
+    }
+
     // MARK: - Private
 
     private func normalizedPaymentMethod() -> String? {
@@ -806,6 +921,14 @@ public final class AddExpenseViewModel: ObservableObject {
         } else if isSubscription {
             syncSubscriptionStartFromExpenseDate()
         }
+        if record.isCategorySplit, !record.splitLines.isEmpty {
+            isCategorySplitEnabled = true
+            categorySplitDraftLines = record.splitLines.map { ExpenseCategorySplitLine.from($0) }
+        } else {
+            isCategorySplitEnabled = false
+            categorySplitDraftLines = []
+        }
+        householdScope = record.householdScope
     }
 
     /// `name` stays the user label; `merchantName` holds the linked store brand for logos when applicable.
@@ -896,21 +1019,33 @@ public final class AddExpenseViewModel: ObservableObject {
     private func applySmartDefaults(for candidate: MerchantCandidate) {
         guard editingId == nil else { return }
         let label = candidate.historyLabel ?? candidate.displayName
+        let records = (try? brain.fetchAllExpenseRecords()) ?? []
+
+        if let suggestion = brain.merchantBrain.suggestedCategory(
+            for: label,
+            merchantId: candidate.merchantId,
+            expenseRecords: records
+        ) {
+            selectedCategory = suggestion.category
+            selectedCategoryId = try? brain.categoryId(for: suggestion.category)
+            categorySuggestionNotice = loc("Suggested from past visits")
+        } else {
+            categorySuggestionNotice = nil
+        }
+
         let pastTx = brain.financialEngine.allTransactions()
         let matches = pastTx.filter {
             MerchantLogoEngine.normalizeMerchantName($0.merchantName)
                 == MerchantLogoEngine.normalizeMerchantName(label)
         }
-        guard let firstMatch = matches.first else { return }
+        guard !matches.isEmpty else { return }
 
-        selectedCategory = firstMatch.category
-        selectedCategoryId = try? brain.categoryId(for: firstMatch.category)
         let amounts = Set(matches.map { $0.amount.value })
         if amounts.count == 1, let recurringAmount = amounts.first, amountString.isEmpty {
             let absAmount = abs(recurringAmount)
             amountString = String(format: "%.2f", NSDecimalNumber(decimal: absAmount).doubleValue)
         }
-        if let note = firstMatch.notes, !note.isEmpty, notes.isEmpty {
+        if let note = matches.compactMap(\.notes).first(where: { !$0.isEmpty }), notes.isEmpty {
             notes = note
         }
     }

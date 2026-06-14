@@ -8,6 +8,7 @@ import SwiftUI
 struct BuxPadSettingsHost: View {
     @Environment(\.buxLayoutMode) private var layoutMode
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var container: AppContainer
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
@@ -51,6 +52,12 @@ struct BuxPadSettingsHost: View {
                 padNavigationBrain.selectedSettingsPath = SettingsDestinationType.paymentSources.rawValue
                 _ = navigationCoordinator.consumePaymentSettingsRequest()
             }
+            .onChange(of: navigationCoordinator.openDebtsSettingsRequest) { _, requested in
+                guard requested else { return }
+                selectedDestination = .debts
+                padNavigationBrain.selectedSettingsPath = SettingsDestinationType.debts.rawValue
+                _ = navigationCoordinator.consumeDebtsSettingsRequest()
+            }
             .onChange(of: navigationCoordinator.openProfileSettingsRequest) { _, requested in
                 guard requested else { return }
                 selectedDestination = .profile
@@ -82,9 +89,11 @@ struct BuxPadSettingsHost: View {
 
             NavigationSplitView(columnVisibility: $columnVisibility) {
                 settingsSidebar
+                    .buxPadSplitColumnEnvironment(container, padBrain: padNavigationBrain)
                     .buxPadSplitSidebarColumnWidth(layoutMode: layoutMode)
             } detail: {
                 settingsDetailColumn
+                    .buxPadSplitColumnEnvironment(container, padBrain: padNavigationBrain)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .opacity
@@ -181,7 +190,17 @@ struct BuxPadSettingsHost: View {
             compact: true
         )
 
-        if showsUpsell, let feature = StudioFeatureGate.upsellFeature(for: row.destination) {
+        if row.opensSubscriptionHub {
+            Button {
+                navigationCoordinator.openSubscriptionHub()
+            } label: {
+                rowLabel
+            }
+            .buxSettingsRowInteraction()
+            .listRowBackground(padSidebarRowBackground(isSelected: isSelected))
+            .listRowInsets(padSidebarRowInsets)
+            .listRowSeparator(.hidden)
+        } else if showsUpsell, let feature = StudioFeatureGate.upsellFeature(for: row.destination) {
             Button {
                 proUpsellFeature = feature
             } label: {

@@ -20,8 +20,8 @@ struct BudgetSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
-            BuxFormSection(title: "Budget method") {
-                BuxSettingsSegmentedEnumRow(titleKey: "Budgeting Mode", selection: $store.budgetingMode) {
+            BuxFormSection(title: "Budget setup") {
+                BuxSettingsSegmentedEnumRow(titleKey: "How you budget", selection: $store.budgetingMode) {
                     ForEach(BudgetingMode.allCases.filter { $0 != .custom }) { mode in
                         Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                     }
@@ -60,7 +60,7 @@ struct BudgetSettingsView: View {
 
             if store.budgetingMode == .simple || store.budgetingMode == .envelope {
                 BuxFormSection(title: "Income & payday profile") {
-                    BuxSettingsSegmentedEnumRow(titleKey: "Budget counts", selection: $store.incomeFundingSource) {
+                    BuxSettingsSegmentedEnumRow(titleKey: "What counts as income", selection: $store.incomeFundingSource) {
                         ForEach(IncomeFundingSource.allCases) { source in
                             Text(source.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(source)
                         }
@@ -69,7 +69,7 @@ struct BudgetSettingsView: View {
                     BuxSettingsFootnote(key: "Only matching Add Income entries count toward your budget. Paycheck & salary: Salary and Paycheck labels. Freelance & other: gigs, Other income, and custom labels. Studio bridge dedup uses the same rule.")
 
                     BuxFormRowDivider()
-                    BuxSettingsMenuPickerRow(titleKey: "Payday Schedule", selection: $store.simpleBudgetCycle) {
+                    BuxSettingsMenuPickerRow(titleKey: "When your budget resets", selection: $store.simpleBudgetCycle) {
                         ForEach(SimpleBudgetCycle.allCases) { cycle in
                             Text(cycle.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(cycle)
                         }
@@ -298,7 +298,10 @@ struct BudgetSettingsView: View {
         }
         .onChange(of: store.showBudgetWarnings) { _, _ in store.save() }
         .onChange(of: store.autoAdjustBudgetsFromHistory) { _, _ in store.save() }
-        .onChange(of: store.simpleBudgetLimit) { _, _ in store.save() }
+        .onChange(of: store.simpleBudgetLimit) { _, _ in
+            store.budgetQuickSetupCompleted = true
+            store.save()
+        }
         .onChange(of: store.simpleBudgetCycle) { _, _ in store.save() }
         .onChange(of: store.simpleBudgetPeriodAnchor) { _, _ in store.save() }
         .onChange(of: store.incomeFundingSource) { _, _ in store.save() }

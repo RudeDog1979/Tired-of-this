@@ -114,6 +114,7 @@ struct RootView: View {
                 }
             }
             .animation(.spring(response: 0.45, dampingFraction: 0.85, blendDuration: 0), value: navigationCoordinator.showSubscriptionHub)
+            .animation(.spring(response: 0.45, dampingFraction: 0.85, blendDuration: 0), value: navigationCoordinator.showDebtHub)
             .buxRootBrandTheme()
             .buxInterfaceLocale()
             .sheet(item: $goalsSheetCoordinator.activeSheet) { sheet in
@@ -149,6 +150,9 @@ struct RootView: View {
                     StudioTimerDisplayMonitor.shared.handleSceneBecameInactive()
                 case .active:
                     StudioTimerDisplayMonitor.shared.handleSceneBecameActive()
+                    if settingsStore.personalCloudSyncEnabled {
+                        Task { await PersonalCloudSyncEngine.shared.syncNow() }
+                    }
                     if didEnterBackground {
                         evaluateAppLock(forceOnLaunch: false)
                         container.scheduleEngagementRefresh()
@@ -346,6 +350,18 @@ struct RootView: View {
             .zIndex(10)
         }
 
+        if navigationCoordinator.showDebtHub {
+            DebtHubView(isPresented: $navigationCoordinator.showDebtHub)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(container.debtEngine)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing),
+                    removal: .move(edge: .trailing)
+                ))
+                .zIndex(10)
+        }
+
         if goalsSheetCoordinator.showGoalDetail, let detail = goalsSheetCoordinator.selectedGoalDetail {
             GoalDetailView(
                 detail: detail,
@@ -448,6 +464,19 @@ struct RootView: View {
                     hubSnapshot: brain.subscriptionHubSnapshot
                 )
                 .environmentObject(themeManager)
+            }
+        }
+
+        if navigationCoordinator.showDebtHub {
+            padHubOverlay(
+                trigger: .debtHub,
+                isPresented: navigationCoordinator.showDebtHub,
+                onDismiss: { navigationCoordinator.closeDebtHub() }
+            ) {
+                DebtHubView(isPresented: $navigationCoordinator.showDebtHub)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .environmentObject(container.debtEngine)
             }
         }
 

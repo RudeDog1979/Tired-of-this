@@ -78,7 +78,7 @@ public final class HustleManager: ObservableObject {
         }
     }
     
-    public func saveHustles() {
+    public func saveHustles(notifyCloudSync: Bool = true) {
         if let encoded = try? JSONEncoder().encode(hustles) {
             UserDefaults.standard.set(encoded, forKey: storeKey)
         }
@@ -86,6 +86,9 @@ public final class HustleManager: ObservableObject {
             UserDefaults.standard.set(selectedId.uuidString, forKey: activeHustleKey)
         } else {
             UserDefaults.standard.removeObject(forKey: activeHustleKey)
+        }
+        if notifyCloudSync {
+            NotificationCenter.default.post(name: .buxMuseHustlesDidPersist, object: nil)
         }
     }
     
@@ -130,10 +133,10 @@ public final class HustleManager: ObservableObject {
         saveHustles()
     }
 
-    public func replaceAll(_ newHustles: [Hustle], selectedId: UUID? = nil) {
+    public func replaceAll(_ newHustles: [Hustle], selectedId: UUID? = nil, notifyCloudSync: Bool = true) {
         hustles = newHustles
         selectedHustleId = selectedId
-        saveHustles()
+        saveHustles(notifyCloudSync: notifyCloudSync)
     }
 
     /// Evaluates auto-routing rules for unassigned expenses. First active workspace match wins.

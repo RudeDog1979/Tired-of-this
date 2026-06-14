@@ -55,6 +55,32 @@ final class ExpenseInputTests: XCTestCase {
     }
 
     func testPredictiveDefaultsFromBrain() throws {
+        let merchant = "RodolfoTestCafe"
+        for _ in 0..<2 {
+            let tx = Transaction(
+                date: Date(),
+                amount: MoneyAmount(value: -6.50, currencyCode: "USD"),
+                merchantName: merchant,
+                category: .restaurants
+            )
+            try brain.saveExpense(tx)
+        }
+
+        viewModel.merchantName = ""
+        viewModel.amountString = ""
+        viewModel.selectedCategory = .other
+        viewModel.merchantName = merchant
+        viewModel.refreshMerchantSuggestions(resetSelection: false)
+        if let candidate = viewModel.candidates.first(where: { $0.matchKind == .historyGroup }) {
+            viewModel.selectCandidate(candidate)
+        }
+
+        XCTAssertEqual(viewModel.selectedCategory, .restaurants)
+        XCTAssertEqual(viewModel.amountString, "6.50")
+        XCTAssertEqual(viewModel.categorySuggestionNotice, BuxCatalogLabel.string("Suggested from past visits", locale: settingsManager.interfaceLocale))
+    }
+
+    func testSingleSubscriptionHistoryDoesNotAutoPickSubscriptionsCategory() throws {
         let tx = Transaction(
             date: Date(),
             amount: MoneyAmount(value: -15.99, currencyCode: "USD"),
@@ -64,12 +90,39 @@ final class ExpenseInputTests: XCTestCase {
         try brain.saveExpense(tx)
 
         viewModel.merchantName = ""
-        viewModel.amountString = ""
         viewModel.selectedCategory = .other
         viewModel.merchantName = "Netflix"
 
-        XCTAssertEqual(viewModel.selectedCategory, .subscriptions)
-        XCTAssertEqual(viewModel.amountString, "15.99")
+        XCTAssertEqual(viewModel.selectedCategory, .other)
+        XCTAssertNil(viewModel.categorySuggestionNotice)
+    }
+
+    func testSaveWithoutSubscriptionToggleDoesNotAutoMarkSubscription() throws {
+        let cal = Calendar.current
+        let dates = [
+            cal.date(from: DateComponents(year: 2026, month: 1, day: 15))!,
+            cal.date(from: DateComponents(year: 2026, month: 2, day: 15))!
+        ]
+        for date in dates {
+            let tx = Transaction(
+                date: date,
+                amount: MoneyAmount(value: -9.99, currencyCode: "USD"),
+                merchantName: "Spotify",
+                category: .entertainment
+            )
+            try brain.saveExpense(tx)
+        }
+
+        viewModel.merchantName = "Spotify"
+        viewModel.amountString = "9.99"
+        viewModel.selectedCategory = .entertainment
+        viewModel.isSubscription = false
+        viewModel.date = cal.date(from: DateComponents(year: 2026, month: 3, day: 15))!
+        XCTAssertTrue(viewModel.saveTransaction())
+
+        let record = try XCTUnwrap(try brain.fetchAllExpenseRecords().last)
+        XCTAssertFalse(record.isSubscriptionLike)
+        XCTAssertEqual(record.transactionCategory, .entertainment)
     }
 
     func testMerchantNameNormalizationOnSave() {

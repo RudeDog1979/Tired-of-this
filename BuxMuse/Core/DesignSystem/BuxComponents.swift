@@ -418,20 +418,14 @@ struct BuxDrawerSearchModifier: ViewModifier {
     @Binding var isPresented: Bool
 
     func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content
-                .searchable(text: $searchText, isPresented: $isPresented, prompt: prompt)
-                .tint(semantic.accent)
-        } else {
-            content
-                .searchable(
-                    text: $searchText,
-                    isPresented: $isPresented,
-                    placement: .navigationBarDrawer(displayMode: .automatic),
-                    prompt: prompt
-                )
-                .tint(semantic.accent)
-        }
+        content
+            .searchable(
+                text: $searchText,
+                isPresented: $isPresented,
+                placement: .navigationBarDrawer(displayMode: .automatic),
+                prompt: prompt
+            )
+            .tint(semantic.accent)
     }
 }
 

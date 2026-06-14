@@ -106,18 +106,32 @@ enum BudgetEnvelopeEngine {
         categoryRecords: [ExpenseCategoryRecord],
         locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> Bool {
-        guard record.amountValue < 0 else { return false }
+        ExpenseBudgetAttribution.lines(for: record).contains {
+            attributionLineMatchesEnvelope(
+                $0,
+                envelope: envelope,
+                categoryRecords: categoryRecords,
+                locale: locale
+            )
+        }
+    }
 
-        if let envelopeCategoryId = envelope.categoryId, record.categoryId == envelopeCategoryId {
+    static func attributionLineMatchesEnvelope(
+        _ line: ExpenseBudgetAttributionLine,
+        envelope: CustomBudgetCategory,
+        categoryRecords: [ExpenseCategoryRecord],
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> Bool {
+        if let envelopeCategoryId = envelope.categoryId, line.categoryId == envelopeCategoryId {
             return true
         }
 
         if let systemRaw = envelope.systemCategoryRaw,
-           record.transactionCategory.rawValue == systemRaw {
+           line.transactionCategory.rawValue == systemRaw {
             return true
         }
 
-        if let recordCategoryId = record.categoryId,
+        if let recordCategoryId = line.categoryId,
            let custom = categoryRecords.first(where: { $0.id == recordCategoryId }) {
             if let envelopeCategoryId = envelope.categoryId, custom.id == envelopeCategoryId {
                 return true
@@ -132,7 +146,7 @@ enum BudgetEnvelopeEngine {
             }
         }
 
-        if record.transactionCategory.displayName.localizedCaseInsensitiveCompare(envelope.name) == .orderedSame {
+        if line.transactionCategory.displayName.localizedCaseInsensitiveCompare(envelope.name) == .orderedSame {
             return true
         }
         if let raw = envelope.systemCategoryRaw,
@@ -151,10 +165,17 @@ enum BudgetEnvelopeEngine {
         period: DateInterval,
         locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> Decimal {
-        records
+        ExpenseBudgetAttribution.lines(for: records)
             .filter { $0.date >= period.start && $0.date < period.end }
-            .filter { recordMatchesEnvelope($0, envelope: envelope, categoryRecords: categoryRecords, locale: locale) }
-            .reduce(Decimal(0)) { $0 + abs($1.amountValue) }
+            .filter {
+                attributionLineMatchesEnvelope(
+                    $0,
+                    envelope: envelope,
+                    categoryRecords: categoryRecords,
+                    locale: locale
+                )
+            }
+            .reduce(Decimal(0)) { $0 + $1.amount }
     }
 
     // MARK: - Rollover

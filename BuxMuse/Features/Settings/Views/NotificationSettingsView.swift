@@ -31,19 +31,27 @@ struct NotificationSettingsView: View {
                 }
 
                 if store.notificationsEnabled {
-                    BuxFormSection(title: "Alerts & radar") {
+                    BuxFormSection(title: "Priority alerts") {
+                        Toggle(isOn: $store.billRemindersEnabled) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                BuxCatalogText.text("Bill reminders")
+                                    .font(.system(size: 15, weight: .bold))
+                                BuxCatalogText.text("Notify me before subscriptions and fixed payments are due")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .buxLabelSecondary()
+                            }
+                        }
+                            .tint(themeManager.contrastAccentColor(for: colorScheme))
+                            .buxFormFieldPadding()
+                        BuxFormRowDivider()
                         Toggle(isOn: $store.budgetAlertsEnabled) {
                             Text(BuxCatalogLabel.string("Budget threshold warnings", locale: appSettingsManager.interfaceLocale))
                         }
                             .tint(themeManager.contrastAccentColor(for: colorScheme))
                             .buxFormFieldPadding()
-                        BuxFormRowDivider()
-                        Toggle(isOn: $store.billRemindersEnabled) {
-                            Text(BuxCatalogLabel.string("Upcoming bill reminders", locale: appSettingsManager.interfaceLocale))
-                        }
-                            .tint(themeManager.contrastAccentColor(for: colorScheme))
-                            .buxFormFieldPadding()
-                        BuxFormRowDivider()
+                    }
+
+                    BuxFormSection(title: "More alerts") {
                         Toggle(isOn: $store.studioInvoiceRemindersEnabled) {
                             Text(BuxCatalogLabel.string("Invoice status updates", locale: appSettingsManager.interfaceLocale))
                         }

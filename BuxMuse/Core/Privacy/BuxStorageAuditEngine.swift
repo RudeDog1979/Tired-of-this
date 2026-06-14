@@ -31,7 +31,7 @@ public struct BuxStorageBreakdown: Equatable, Sendable {
 
 public enum BuxStorageAuditEngine {
 
-    private static let swiftDataStoreBaseName = "BuxMuse_v3"
+    private static let swiftDataStoreBaseName = "BuxMuse_v5"
     private static let merchantLogoFolder = "BuxMuseMerchantLogosV5"
     private static let settingsFileName = "settings_store_v1.json"
     private static let silentBackupFolder = "BuxMuseBackups"

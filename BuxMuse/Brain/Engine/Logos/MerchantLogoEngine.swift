@@ -106,6 +106,20 @@ public struct MerchantLogoEngine {
         return FetchPlan(cacheKey: cacheKey, urls: urls)
     }
 
+    /// Only resolves logos for an explicit known domain — no heuristic `.com` guessing.
+    public static func fetchPlanForKnownDomain(_ domain: String) -> FetchPlan? {
+        let cleanHost = domain
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "https://", with: "")
+            .replacingOccurrences(of: "http://", with: "")
+            .replacingOccurrences(of: "www.", with: "")
+        guard !cleanHost.isEmpty else { return nil }
+        let urls = remoteLogoURLs(forHost: cleanHost).compactMap(URL.init(string:))
+        guard !urls.isEmpty else { return nil }
+        return FetchPlan(cacheKey: cleanHost, urls: urls)
+    }
+
     /// Google first, DuckDuckGo fallback only.
     static func remoteLogoURLs(forHost host: String) -> [String] {
         let cleanHost = host

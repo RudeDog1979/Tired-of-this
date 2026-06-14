@@ -9,6 +9,7 @@ enum TutorialAnchorID: String, Hashable, CaseIterable {
     case homeBudgetRing
     case homeIncomeButton
     case homeExpenseButton
+    case homeDebtDiscovery
     case addIncomeAmount
     case addExpenseMerchant
     case addExpenseCategory

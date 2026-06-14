@@ -71,4 +71,10 @@ public final class FinancialEngineBridge: ObservableObject {
 
 extension Notification.Name {
     static let buxMuseFinancialDataDidChange = Notification.Name("BuxMuseFinancialDataDidChange")
+    static let buxMuseSettingsArchiveDidImport = Notification.Name("BuxMuseSettingsArchiveDidImport")
+    static let buxMuseSettingsDidPersist = Notification.Name("BuxMuseSettingsDidPersist")
+    static let buxMuseStudioDidPersist = Notification.Name("BuxMuseStudioDidPersist")
+    static let buxMuseSimpleStudioDidPersist = Notification.Name("BuxMuseSimpleStudioDidPersist")
+    static let buxMuseHustlesDidPersist = Notification.Name("BuxMuseHustlesDidPersist")
+    static let buxMusePersonalCloudSyncDidPull = Notification.Name("BuxMusePersonalCloudSyncDidPull")
 }
