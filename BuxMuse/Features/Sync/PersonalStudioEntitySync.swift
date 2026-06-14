@@ -11,7 +11,7 @@ enum PersonalStudioEntitySync {
     @MainActor
     static func exportAll(from store: StudioStore) -> [PersonalSyncEntityRecord] {
         let snapshot = store.currentSnapshot()
-        let revision = store.lastPersistedAt ?? Date()
+        let revision = store.didLoadPersistedSnapshot ? (store.lastPersistedAt ?? Date()) : .distantPast
         let deviceId = PersonalSyncDeviceIdentity.currentDeviceId
         var records: [PersonalSyncEntityRecord] = []
 
@@ -109,8 +109,60 @@ enum PersonalStudioEntitySync {
         if record.entityKind == PersonalStudioEntityKind.agreementFile.cloudKind {
             return PersonalAgreementMediaSync.entityHasUserData(record)
         }
-        if record.entityKind == PersonalStudioEntityKind.profileBundle.cloudKind { return record.payloadJSON.count > 80 }
+        if record.entityKind == PersonalStudioEntityKind.profileBundle.cloudKind {
+            return profileBundleHasUserData(record.payloadJSON)
+        }
+        if record.entityKind == PersonalStudioEntityKind.taxEnvelope.cloudKind {
+            return taxEnvelopeHasUserData(record.payloadJSON)
+        }
+        if record.entityKind == PersonalStudioEntityKind.businessCardLibrary.cloudKind {
+            return businessCardLibraryHasUserData(record.payloadJSON)
+        }
         return record.payloadJSON.count > 24
+    }
+
+    private static func profileBundleHasUserData(_ json: String) -> Bool {
+        guard let data = json.data(using: .utf8),
+              let bundle = try? JSONDecoder().decode(StudioProfileBundleEntity.self, from: data) else {
+            return false
+        }
+        let profile = bundle.profile
+        if !profile.displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
+        if !profile.businessName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
+        if profile.logoData != nil { return true }
+        if profile.defaultHourlyRate != nil { return true }
+        if let address = profile.businessAddress?.trimmingCharacters(in: .whitespacesAndNewlines), !address.isEmpty {
+            return true
+        }
+        if let party = profile.partyDetails, partyHasUserData(party) { return true }
+        return false
+    }
+
+    private static func taxEnvelopeHasUserData(_ json: String) -> Bool {
+        guard let data = json.data(using: .utf8),
+              let envelope = try? JSONDecoder().decode(TaxEnvelopeState.self, from: data) else {
+            return false
+        }
+        if envelope.isEnabled || envelope.onboardingCompleted { return true }
+        if envelope.recommendedSaveRateOverride != nil { return true }
+        return !envelope.deposits.isEmpty || !envelope.paymentMarks.isEmpty
+    }
+
+    private static func businessCardLibraryHasUserData(_ json: String) -> Bool {
+        guard let data = json.data(using: .utf8),
+              let library = try? JSONDecoder().decode(ProBusinessCardLibrary.self, from: data) else {
+            return false
+        }
+        return !library.savedDesigns.isEmpty
+    }
+
+    private static func partyHasUserData(_ party: InvoicePartyDetails) -> Bool {
+        if !party.organizationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
+        if !party.givenNames.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
+        if !party.familyNames.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
+        if !party.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
+        if !party.addressLine1.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
+        return false
     }
 
     static func recordName(for record: PersonalSyncEntityRecord) -> String {
@@ -252,8 +304,8 @@ enum PersonalEntityMergeEngine {
                 byKey[key] = remoteRecord
                 continue
             }
-            let localHas = localRecord.payloadJSON.count > 12 && !localRecord.isDeleted
-            let remoteHas = remoteRecord.payloadJSON.count > 12 && !remoteRecord.isDeleted
+            let localHas = entityHasUserData(localRecord)
+            let remoteHas = entityHasUserData(remoteRecord)
             if localHas && !remoteHas { continue }
             if !localHas && remoteHas {
                 byKey[key] = remoteRecord
@@ -268,20 +320,60 @@ enum PersonalEntityMergeEngine {
             } else if remoteRecord.updatedAt < localRecord.updatedAt {
                 continue
             } else if remoteRecord.contentHash != localRecord.contentHash {
-                conflicts.append(
-                    PersonalSyncConflict(
-                        kind: kind,
-                        entityKey: key,
-                        titleKey: defaultTitleKey,
-                        localUpdatedAt: localRecord.updatedAt,
-                        remoteUpdatedAt: remoteRecord.updatedAt,
-                        localSummary: localRecord.entityId,
-                        remoteSummary: remoteRecord.entityId
+                if localHas && remoteHas && recordsConflictAcrossDevices(local: localRecord, remote: remoteRecord) {
+                    conflicts.append(
+                        PersonalSyncConflict(
+                            kind: kind,
+                            entityKey: key,
+                            titleKey: defaultTitleKey,
+                            localUpdatedAt: localRecord.updatedAt,
+                            remoteUpdatedAt: remoteRecord.updatedAt,
+                            localSummary: localRecord.entityId,
+                            remoteSummary: remoteRecord.entityId
+                        )
                     )
-                )
+                } else {
+                    byKey[key] = preferredRecordWhenHashesDiffer(
+                        local: localRecord,
+                        remote: remoteRecord,
+                        localHas: localHas,
+                        remoteHas: remoteHas
+                    )
+                }
             }
         }
         return (Array(byKey.values), conflicts)
+    }
+
+    private static func recordsConflictAcrossDevices(
+        local: PersonalSyncEntityRecord,
+        remote: PersonalSyncEntityRecord
+    ) -> Bool {
+        guard !local.deviceId.isEmpty, !remote.deviceId.isEmpty else { return false }
+        return local.deviceId != remote.deviceId
+    }
+
+    private static func preferredRecordWhenHashesDiffer(
+        local: PersonalSyncEntityRecord,
+        remote: PersonalSyncEntityRecord,
+        localHas: Bool,
+        remoteHas: Bool
+    ) -> PersonalSyncEntityRecord {
+        if remoteHas && !localHas { return remote }
+        if localHas && !remoteHas { return local }
+        if remote.updatedAt >= local.updatedAt { return remote }
+        return local
+    }
+
+    private static func entityHasUserData(_ record: PersonalSyncEntityRecord) -> Bool {
+        if record.isDeleted { return false }
+        if record.entityKind.hasPrefix("studio.") {
+            return PersonalStudioEntitySync.entityHasUserData(record)
+        }
+        if record.entityKind == PersonalHustleEntityKind.hustle.cloudKind {
+            return record.payloadJSON.count > 24
+        }
+        return record.payloadJSON.count > 24
     }
 
     static func shouldApplyRemote(

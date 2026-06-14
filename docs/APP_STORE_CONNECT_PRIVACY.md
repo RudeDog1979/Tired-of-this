@@ -77,13 +77,14 @@ Camera is used for receipt scan; treat under **Photos or Videos** or **Other Use
 | Local notifications | None | Usually not “collected” |
 | Live Activities | None | N/A |
 | iCloud Drive share of `.buxmuse` | None | User-initiated export, not app collection |
+| **Personal iCloud sync (CloudKit)** | iCloud + CloudKit on App ID | User’s **private** iCloud container; BuxMuse does not operate a server that receives sync payloads |
 | Face ID lock | None | On-device Keychain |
 
 ---
 
 ## Review notes (optional field for Apple)
 
-> BuxMuse is offline-first with no user account. Financial data and receipt images are stored on device. Optional HealthKit sleep read (Pro) improves Creative Energy locally; BuxMuse does not upload health or expense data to its servers. Encrypted `.buxmuse` backups are exported by the user via the system share sheet.
+> BuxMuse is offline-first with no user account. Financial data and receipt images are stored on device. Optional **Personal iCloud sync** (Settings) stores encrypted sync records in the user’s private iCloud container via Apple CloudKit — not on BuxMuse servers. Optional HealthKit sleep read (Pro) improves Creative Energy locally. Encrypted `.buxmuse` backups are exported by the user via the system share sheet.
 
 ---
 
@@ -93,4 +94,7 @@ Camera is used for receipt scan; treat under **Photos or Videos** or **Other Use
 2. Add expense, receipt scan (camera / library).  
 3. Settings → Backup → create `.buxmuse` → Share to Files.  
 4. Pro → Creative Energy → enable Health sleep sync.  
-5. Studio timer → Lock Screen Live Activity.
+5. Studio timer → Lock Screen Live Activity.  
+6. **1.0.9** — Settings → iCloud sync → enable on two devices; verify budget/expenses/Studio restore.  
+7. **1.0.9** — Delete all local data (with sync off: no iCloud prompt; with sync on: keep/delete cloud paths).  
+8. **1.0.9** — Complete onboarding → app tour; tab bar must not cover coach marks.

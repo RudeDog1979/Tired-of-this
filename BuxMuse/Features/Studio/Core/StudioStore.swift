@@ -553,7 +553,25 @@ public final class StudioStore: ObservableObject {
     }
 
     public func resetAllData() {
+        purgeAllPersistedData()
+    }
+
+    /// Factory reset: empty memory and delete hub JSON — never writes a fresh hub file.
+    public func purgeAllPersistedData() {
         applyEmptyDefaults()
-        save()
+        isLoaded = false
+        didLoadPersistedSnapshot = false
+        lastPersistedAt = nil
+
+        let fm = FileManager.default
+        for url in allLoadCandidateURLs {
+            try? fm.removeItem(at: url)
+        }
+        for url in [storeURL, legacyStoreURL] {
+            if fm.fileExists(atPath: url.path) {
+                try? fm.removeItem(at: url)
+            }
+        }
+        isLoaded = true
     }
 }

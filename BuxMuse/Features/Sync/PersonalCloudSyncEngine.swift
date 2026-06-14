@@ -19,6 +19,22 @@ private enum PersonalCloudSyncMetadata {
     private static let hustlesRevisionKey = "buxmuse.personalCloud.hustlesRevision"
     private static let zoneChangeTokenKey = "buxmuse.personalCloud.zoneChangeToken"
     private static let enableDisclaimerAcceptedKey = "buxmuse.personalCloud.enableDisclaimerAccepted"
+    static let pendingCloudRestoreKey = "buxmuse.personalCloud.pendingCloudRestore"
+
+    static var pendingCloudRestore: Bool {
+        get { defaults.bool(forKey: pendingCloudRestoreKey) }
+        set {
+            if newValue {
+                defaults.set(true, forKey: pendingCloudRestoreKey)
+            } else {
+                defaults.removeObject(forKey: pendingCloudRestoreKey)
+            }
+        }
+    }
+
+    static func clearPendingCloudRestore() {
+        pendingCloudRestore = false
+    }
 
     static var enableDisclaimerAccepted: Bool {
         get { defaults.bool(forKey: enableDisclaimerAcceptedKey) }
@@ -99,6 +115,18 @@ private enum PersonalCloudSyncMetadata {
             }
         }
     }
+
+    /// Clears on-device sync bookkeeping only — never deletes CloudKit records.
+    /// When `preserveCloudSnapshot` is true (factory reset), skip empty initial upload on re-enable.
+    static func resetLocalState(preserveCloudSnapshot: Bool = true) {
+        lastSyncedAt = nil
+        initialUploadCompleted = preserveCloudSnapshot
+        settingsRevision = nil
+        studioRevision = nil
+        simpleStudioRevision = nil
+        hustlesRevision = nil
+        zoneChangeToken = nil
+    }
 }
 
 @MainActor
@@ -152,6 +180,70 @@ final class PersonalCloudSyncEngine: ObservableObject {
         syncStatus = isEnabled ? .idle : .disabled
     }
 
+    /// Factory reset: wipe local sync state and disable pull/push. iCloud data is untouched.
+    func prepareForFactoryReset() {
+        cancelPendingPushWork()
+        stopForegroundPullTimer()
+        isPullInFlight = false
+        isApplyingRemote = false
+
+        PersonalCloudSyncMetadata.resetLocalState(preserveCloudSnapshot: true)
+        PersonalSettingsDomainSync.resetLocalSyncMetadata()
+        PersonalSyncConflictStore.shared.clearAll()
+        pendingConflictCount = 0
+
+        settingsStore.personalCloudSyncEnabled = false
+        refreshEnabledState()
+    }
+
+    /// Set after local nuclear wipe when iCloud backup was kept — forces silent cloud restore on next sync enable.
+    static var isPendingCloudRestoreAfterWipe: Bool {
+        PersonalCloudSyncMetadata.pendingCloudRestore
+    }
+
+    static func markPendingCloudRestoreAfterLocalWipe() {
+        PersonalCloudSyncMetadata.pendingCloudRestore = true
+    }
+
+    static func clearPendingCloudRestore() {
+        PersonalCloudSyncMetadata.pendingCloudRestore = false
+    }
+
+    /// Permanently deletes the personal sync zone and all CloudKit records in it.
+    func deleteAllCloudData() async throws {
+        cancelPendingPushWork()
+        stopForegroundPullTimer()
+        isPullInFlight = false
+        isApplyingRemote = false
+
+        guard await ensureAccountAvailable() else {
+            throw PersonalCloudSyncDeletionError.iCloudUnavailable
+        }
+
+        _ = try? await privateDatabase.deleteSubscription(withID: Self.zoneSubscriptionID)
+
+        do {
+            _ = try await privateDatabase.modifyRecordZones(saving: [], deleting: [personalZoneID])
+        } catch let error as CKError where error.code == .zoneNotFound {
+            // Zone already removed — treat as success.
+        }
+
+        PersonalCloudSyncMetadata.resetLocalState(preserveCloudSnapshot: false)
+        PersonalSettingsDomainSync.resetLocalSyncMetadata()
+        UserDefaults.standard.removeObject(forKey: "buxmuse.personalSync.dualReconcileVersion")
+        PersonalSyncConflictStore.shared.clearAll()
+        pendingConflictCount = 0
+        settingsStore.personalCloudSyncEnabled = false
+        refreshEnabledState()
+    }
+
+    private func cancelPendingPushWork() {
+        settingsPushWork?.cancel()
+        studioPushWork?.cancel()
+        simpleStudioPushWork?.cancel()
+        hustlesPushWork?.cancel()
+    }
+
     func setEnabled(_ enabled: Bool) async {
         settingsStore.personalCloudSyncEnabled = enabled
         settingsStore.save(notifyCloudSync: false)
@@ -177,9 +269,16 @@ final class PersonalCloudSyncEngine: ObservableObject {
         } else {
             await reconcileInitialUploadIfNeeded()
         }
-        await reconcileMasterDataIfNeeded()
+        if shouldPushLocalMasterData(brain: brain) {
+            await reconcileMasterDataIfNeeded()
+        }
         await ensureZoneSubscription()
         startForegroundPullTimer()
+    }
+
+    private func shouldPushLocalMasterData(brain: BuxMuseBrain?) -> Bool {
+        guard let brain else { return false }
+        return PersonalSyncReconciler.localHasMeaningfulUserData(brain: brain, settingsStore: settingsStore)
     }
 
     func syncNow() async {
@@ -195,7 +294,9 @@ final class PersonalCloudSyncEngine: ObservableObject {
         isApplyingRemote = true
         defer { isApplyingRemote = false }
         await pullRemoteChangesIfIdle()
-        await reconcileMasterDataIfNeeded()
+        if shouldPushLocalMasterData(brain: brain) {
+            await reconcileMasterDataIfNeeded()
+        }
     }
 
     @discardableResult
@@ -553,6 +654,7 @@ final class PersonalCloudSyncEngine: ObservableObject {
     }
 
     private func pushEntityFirstMasterDataIfNeeded() async {
+        guard shouldPushLocalMasterData(brain: brain) else { return }
         await pushSettingsDomainsIfNeeded()
         await pushStudioEntitiesIfNeeded()
         await pushSimpleStudioEntitiesIfNeeded()
@@ -1220,8 +1322,9 @@ final class PersonalCloudSyncEngine: ObservableObject {
     }
 
     private func localSettingsHasUserData() -> Bool {
-        if settingsStore.hasCompletedOnboarding { return true }
-        if let brain, ((try? brain.fetchAllExpenseRecords()) ?? []).isEmpty == false { return true }
+        if let brain {
+            return PersonalSyncReconciler.localHasMeaningfulUserData(brain: brain, settingsStore: settingsStore)
+        }
         if let data = settingsStore.exportArchiveSettingsData() {
             return SettingsStore.archiveContainsUserData(data)
         }
@@ -1245,5 +1348,16 @@ final class PersonalCloudSyncEngine: ObservableObject {
 
     private func simpleStudioSnapshotHasUserData(_ snapshot: SimpleStudioSnapshot) -> Bool {
         !snapshot.entries.isEmpty || !snapshot.invoices.isEmpty || !snapshot.customers.isEmpty || snapshot.businessCard != nil
+    }
+}
+
+enum PersonalCloudSyncDeletionError: LocalizedError {
+    case iCloudUnavailable
+
+    var errorDescription: String? {
+        switch self {
+        case .iCloudUnavailable:
+            return "Sign in to iCloud on this device and try again."
+        }
     }
 }

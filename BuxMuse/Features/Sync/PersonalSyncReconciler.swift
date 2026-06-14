@@ -18,6 +18,33 @@ enum PersonalSyncReconciler {
         remoteHustleEntities: [PersonalSyncEntityRecord],
         manifest: PersonalSyncManifestPayload?
     ) -> [PersonalSyncConflict] {
+        let expenseCount = (try? brain.fetchAllExpenseRecords())?.count ?? 0
+        let pendingRestore = PersonalCloudSyncEngine.isPendingCloudRestoreAfterWipe
+        let localMeaningful = localHasMeaningfulUserData(brain: brain, settingsStore: settingsStore)
+        let cloudHas = cloudHasUserData(
+            settingsDomains: remoteSettingsDomains,
+            studioEntities: remoteStudioEntities,
+            simpleEntities: remoteSimpleStudioEntities,
+            hustleEntities: remoteHustleEntities,
+            expenseCount: expenseCount
+        )
+
+        // Fresh device / post-wipe restore: apply iCloud silently — no merge conflicts.
+        if cloudHas && (pendingRestore || !localMeaningful) {
+            PersonalSettingsDomainSync.applyCloudRestore(
+                settingsStore: settingsStore,
+                remoteSettingsDomains: remoteSettingsDomains,
+                remoteStudioEntities: remoteStudioEntities,
+                remoteSimpleStudioEntities: remoteSimpleStudioEntities,
+                remoteHustleEntities: remoteHustleEntities
+            )
+            PersonalCloudSyncEngine.clearPendingCloudRestore()
+            if shouldRunDualDevicePass(brain: brain, manifest: manifest) {
+                markDualDeviceReconcileComplete()
+            }
+            return []
+        }
+
         var conflicts: [PersonalSyncConflict] = []
 
         let localSettings = PersonalSettingsDomainSync.exportAllDomains(from: settingsStore)
@@ -44,20 +71,34 @@ enum PersonalSyncReconciler {
             markDualDeviceReconcileComplete()
         }
 
-        PersonalSyncConflictStore.shared.append(contentsOf: conflicts)
-        _ = brain
+        if localMeaningful && cloudHas {
+            PersonalSyncConflictStore.shared.replaceAll(conflicts)
+        } else {
+            PersonalSyncConflictStore.shared.clearAll()
+            conflicts = []
+        }
         return conflicts
+    }
+
+    /// True when this device has real user financial/studio data — not onboarding/setup shells alone.
+    @MainActor
+    static func localHasMeaningfulUserData(brain: BuxMuseBrain, settingsStore: SettingsStore) -> Bool {
+        let expenses = (try? brain.fetchAllExpenseRecords()) ?? []
+        if !expenses.isEmpty { return true }
+        if PersonalSettingsDomainSync.localBudgetIsConfigured(in: settingsStore) { return true }
+        if !PersonalStudioEntitySync.exportAll(from: StudioStore.shared).filter({ PersonalStudioEntitySync.entityHasUserData($0) }).isEmpty {
+            return true
+        }
+        if !PersonalSimpleStudioEntitySync.exportAll(from: SimpleStudioStore.shared).filter({ !$0.isDeleted && $0.payloadJSON.count > 24 }).isEmpty {
+            return true
+        }
+        if !HustleManager.shared.hustles.isEmpty { return true }
+        return false
     }
 
     @MainActor
     static func localHasUserData(brain: BuxMuseBrain) -> Bool {
-        let expenses = (try? brain.fetchAllExpenseRecords()) ?? []
-        if !expenses.isEmpty { return true }
-        if SettingsStore.shared.hasCompletedOnboarding { return true }
-        if !PersonalStudioEntitySync.exportAll(from: StudioStore.shared).filter({ PersonalStudioEntitySync.entityHasUserData($0) }).isEmpty { return true }
-        if !PersonalSimpleStudioEntitySync.exportAll(from: SimpleStudioStore.shared).isEmpty { return true }
-        if !HustleManager.shared.hustles.isEmpty { return true }
-        return false
+        localHasMeaningfulUserData(brain: brain, settingsStore: SettingsStore.shared)
     }
 
     static func cloudHasUserData(
@@ -69,8 +110,9 @@ enum PersonalSyncReconciler {
     ) -> Bool {
         if expenseCount > 0 { return true }
         if settingsDomains.contains(where: { PersonalSettingsDomainSync.domainHasUserData($0) }) { return true }
+        if settingsDomains.contains(where: { PersonalSettingsDomainSync.budgetDomainIsConfigured($0) }) { return true }
         if studioEntities.contains(where: { PersonalStudioEntitySync.entityHasUserData($0) }) { return true }
-        if !simpleEntities.isEmpty { return true }
+        if !simpleEntities.filter({ !$0.isDeleted && $0.payloadJSON.count > 24 }).isEmpty { return true }
         if !hustleEntities.filter({ $0.entityKind == PersonalHustleEntityKind.hustle.cloudKind }).isEmpty { return true }
         return false
     }

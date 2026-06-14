@@ -54,6 +54,15 @@ final class PersonalSyncConflictStore: ObservableObject {
         persist()
     }
 
+    func clearAll() {
+        conflicts = []
+        try? FileManager.default.removeItem(at: storeURL)
+    }
+
+    func purgePersistedFile() {
+        clearAll()
+    }
+
     private func load() {
         guard FileManager.default.fileExists(atPath: storeURL.path),
               let data = try? Data(contentsOf: storeURL),

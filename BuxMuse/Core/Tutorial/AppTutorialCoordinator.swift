@@ -71,8 +71,15 @@ final class AppTutorialCoordinator: ObservableObject {
     func consumeAutoStartIfNeeded() {
         guard settingsStore.appTourPendingAutoStart else { return }
         guard settingsStore.hasCompletedOnboarding, !isActive else { return }
+        if settingsStore.appTourSkipped {
+            settingsStore.appTourPendingAutoStart = false
+            return
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) { [weak self] in
-            self?.startCoreTour(restart: false)
+            guard let self else { return }
+            guard self.settingsStore.appTourPendingAutoStart else { return }
+            // Ignore stale finished flag from UserDefaults / older builds — onboarding just completed.
+            self.startCoreTour(restart: true)
         }
     }
 
@@ -177,5 +184,10 @@ final class AppTutorialCoordinator: ObservableObject {
         pendingSettingsDestination = nil
         pendingSettingsPopToRoot = false
         layoutEpoch += 1
+    }
+
+    func tearDownForFactoryReset() {
+        settingsStore.resetAppTourProgress()
+        tearDown()
     }
 }

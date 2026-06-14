@@ -1,0 +1,102 @@
+{
+  "This action is irreversible on this device. It will wipe expenses, goals, Tax savings, merchants, logo cache, Studio and Simple Studio records, receipts, scans, backups, and reset all settings. On the next step you choose whether to keep or delete your iCloud backup.": {
+    "es-419": "Esta acción es irreversible en este dispositivo. Borrará gastos, metas, ahorros fiscales, comercios, caché de logos, registros de Studio y Simple Studio, recibos, escaneos, copias y restablecerá todos los ajustes. En el siguiente paso eliges si conservar o eliminar tu copia de iCloud.",
+    "es-ES": "Esta acción es irreversible en este dispositivo. Borrará gastos, metas, ahorros fiscales, comercios, caché de logos, registros de Studio y Simple Studio, recibos, escaneos, copias y restablecerá todos los ajustes. En el siguiente paso eliges si conservar o eliminar tu copia de iCloud."
+  },
+  "Continue to iCloud choice": {
+    "es-419": "Continuar a la opción de iCloud",
+    "es-ES": "Continuar a la opción de iCloud"
+  },
+  "On the next step you choose whether to keep or delete your iCloud backup.": {
+    "es-419": "En el siguiente paso eliges si conservar o eliminar tu copia de iCloud.",
+    "es-ES": "En el siguiente paso eliges si conservar o eliminar tu copia de iCloud."
+  },
+  "What should happen to your iCloud data?": {
+    "es-419": "¿Qué debe ocurrir con tus datos de iCloud?",
+    "es-ES": "¿Qué debe ocurrir con tus datos de iCloud?"
+  },
+  "You can erase this device only and keep a backup in iCloud for your other devices, or permanently delete your BuxMuse iCloud backup on every device signed into this Apple ID.": {
+    "es-419": "Puedes borrar solo este dispositivo y conservar una copia en iCloud para tus otros dispositivos, o eliminar permanentemente la copia de BuxMuse en iCloud en todos los dispositivos con este Apple ID.",
+    "es-ES": "Puedes borrar solo este dispositivo y conservar una copia en iCloud para tus otros dispositivos, o eliminar permanentemente la copia de BuxMuse en iCloud en todos los dispositivos con este Apple ID."
+  },
+  "Keep data in iCloud": {
+    "es-419": "Conservar datos en iCloud",
+    "es-ES": "Conservar datos en iCloud"
+  },
+  "Also delete iCloud data": {
+    "es-419": "Eliminar también datos de iCloud",
+    "es-ES": "Eliminar también datos de iCloud"
+  },
+  "Back up before deleting iCloud": {
+    "es-419": "Haz una copia antes de eliminar iCloud",
+    "es-ES": "Haz una copia antes de eliminar iCloud"
+  },
+  "Deleting iCloud data is permanent on all your devices. Save a local JSON backup first if you might need this data later.": {
+    "es-419": "Eliminar datos de iCloud es permanente en todos tus dispositivos. Guarda primero una copia JSON local si podrías necesitar estos datos más tarde.",
+    "es-ES": "Eliminar datos de iCloud es permanente en todos tus dispositivos. Guarda primero una copia JSON local si podrías necesitar estos datos más tarde."
+  },
+  "Export JSON backup": {
+    "es-419": "Exportar copia JSON",
+    "es-ES": "Exportar copia JSON"
+  },
+  "Continue without backup": {
+    "es-419": "Continuar sin copia",
+    "es-ES": "Continuar sin copia"
+  },
+  "Delete iCloud data?": {
+    "es-419": "¿Eliminar datos de iCloud?",
+    "es-ES": "¿Eliminar datos de iCloud?"
+  },
+  "Yes, continue": {
+    "es-419": "Sí, continuar",
+    "es-ES": "Sí, continuar"
+  },
+  "Are you sure? This will permanently remove your BuxMuse backup from iCloud on every device. You cannot recover it from Apple later.": {
+    "es-419": "¿Estás seguro? Esto eliminará permanentemente tu copia de BuxMuse de iCloud en todos los dispositivos. No podrás recuperarla de Apple más tarde.",
+    "es-ES": "¿Estás seguro? Esto eliminará permanentemente tu copia de BuxMuse de iCloud en todos los dispositivos. No podrás recuperarla de Apple más tarde."
+  },
+  "Final warning: delete iCloud backup?": {
+    "es-419": "Advertencia final: ¿eliminar copia de iCloud?",
+    "es-ES": "Advertencia final: ¿eliminar copia de iCloud?"
+  },
+  "Delete iCloud and reset device": {
+    "es-419": "Eliminar iCloud y restablecer dispositivo",
+    "es-ES": "Eliminar iCloud y restablecer dispositivo"
+  },
+  "Last chance. BuxMuse will erase your iCloud backup and all local data on this device. Other devices will no longer restore from iCloud. Are you absolutely sure?": {
+    "es-419": "Última oportunidad. BuxMuse borrará tu copia de iCloud y todos los datos locales de este dispositivo. Otros dispositivos ya no podrán restaurar desde iCloud. ¿Estás completamente seguro?",
+    "es-ES": "Última oportunidad. BuxMuse borrará tu copia de iCloud y todos los datos locales de este dispositivo. Otros dispositivos ya no podrán restaurar desde iCloud. ¿Estás completamente seguro?"
+  },
+  "Last chance: BuxMuse will permanently delete every piece of local data on this device. Your iCloud backup will be kept. Are you absolutely sure?": {
+    "es-419": "Última oportunidad: BuxMuse eliminará permanentemente todos los datos locales de este dispositivo. Tu copia de iCloud se conservará. ¿Estás completamente seguro?",
+    "es-ES": "Última oportunidad: BuxMuse eliminará permanentemente todos los datos locales de este dispositivo. Tu copia de iCloud se conservará. ¿Estás completamente seguro?"
+  },
+  "Save this JSON file somewhere safe — Files, iCloud Drive, or email — before deleting your iCloud backup.": {
+    "es-419": "Guarda este archivo JSON en un lugar seguro — Archivos, iCloud Drive o correo — antes de eliminar tu copia de iCloud.",
+    "es-ES": "Guarda este archivo JSON en un lugar seguro — Archivos, iCloud Drive o correo — antes de eliminar tu copia de iCloud."
+  },
+  "Save JSON backup archive": {
+    "es-419": "Guardar copia JSON",
+    "es-ES": "Guardar copia JSON"
+  },
+  "Continue to iCloud deletion": {
+    "es-419": "Continuar a eliminación de iCloud",
+    "es-ES": "Continuar a eliminación de iCloud"
+  },
+  "Save local backup": {
+    "es-419": "Guardar copia local",
+    "es-ES": "Guardar copia local"
+  },
+  "Your BuxMuse database, settings, and iCloud backup have been erased. This device is restored to fresh seeds.": {
+    "es-419": "Tu base de datos, ajustes y copia de iCloud de BuxMuse se han borrado. Este dispositivo se ha restablecido a valores iniciales.",
+    "es-ES": "Tu base de datos, ajustes y copia de iCloud de BuxMuse se han borrado. Este dispositivo se ha restablecido a valores iniciales."
+  },
+  "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, Tax savings, merchants, Studio data, caches, and backups are removed. Your iCloud backup was kept.": {
+    "es-419": "Tu base de datos y ajustes de BuxMuse se han restablecido a valores iniciales. Se eliminaron gastos, ahorros fiscales, comercios, datos de Studio, cachés y copias. Tu copia de iCloud se conservó.",
+    "es-ES": "Tu base de datos y ajustes de BuxMuse se han restablecido a valores iniciales. Se eliminaron gastos, ahorros fiscales, comercios, datos de Studio, cachés y copias. Tu copia de iCloud se conservó."
+  },
+  "iCloud deletion failed": {
+    "es-419": "Error al eliminar iCloud",
+    "es-ES": "Error al eliminar iCloud"
+  }
+}

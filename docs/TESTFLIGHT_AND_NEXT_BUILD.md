@@ -1,6 +1,70 @@
 # BuxMuse — TestFlight handoff & next agent
 
-Last updated: 2026-06-05 (invoice archive Phase A + polish)
+Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Connect ready (local commit; upload via Xcode)
+
+---
+
+## Release 1.0.9 (build 10) — shipped in this build
+
+### Personal iCloud sync (entity-first)
+
+- **Settings → iCloud sync** — optional private CloudKit sync across the user’s Apple devices (`iCloud.com.buxmuse.app`).
+- **Entity-first records** — settings domains, Pro Studio entities, Simple Studio entities, hustles, expenses/debts/goals; legacy master blobs migrated off write path.
+- **Dual-device reconciler** — silent cloud restore on fresh device / post-wipe; merge conflicts only when both sides have real user data **and different device IDs**.
+- **Sync Conflict Center** — UI to resolve rare cross-device conflicts (Spanish strings in catalog).
+- **Agreement documents** — large agreement files sync via CloudKit assets.
+- **Production CloudKit schema** — record types must be deployed in CloudKit Dashboard (Production) before App Store users enable sync.
+
+### Consumer debt
+
+- Debt tracking hub, dashboard cards, reminders, settings toggle (`consumerDebtEnabled`).
+
+### Factory reset & iCloud delete (Data settings)
+
+- **Nuclear local wipe** — deletes all Application Support + Documents app data, BuxMuse caches/temp, all `buxmuse.*` UserDefaults; recreates empty SQLite; clears profile avatar, photos, scans, studio JSON, sync conflict file.
+- **iCloud choice only when sync is ON** — if Personal iCloud sync is disabled, reset skips the iCloud step and goes straight to local final confirmation.
+- **Keep vs delete iCloud** — multi-step flow when sync enabled: keep cloud backup (device wipe + `pendingCloudRestore` on re-enable) or delete zone + double confirmation + optional JSON export first.
+- **Runtime reload** — post-wipe notification reloads brain, debt, goals, studio; cancels debt reminder notifications.
+
+### App tour
+
+- **Tab bar** hidden during tour; coach marks render in a **fullscreen root overlay** above the tab bar (no longer blocked by navigation chrome).
+
+### Localization
+
+- **Phase 33** — reset / iCloud wipe copy (`docs/localization/phase33-reset-icloud-translations.json` → `Localizable.xcstrings`).
+
+### Versioning (Xcode)
+
+| Target | Marketing | Build |
+|--------|-----------|-------|
+| BuxMuse | **1.0.9** | **10** |
+| Widget | **1.0.9** | **10** |
+
+---
+
+## App Store Connect — 1.0.9 checklist (human)
+
+1. **CloudKit Dashboard (Production)** — deploy personal sync record types + indexes used by `PersonalCloudSyncEngine` (same as Development schema).
+2. **Developer portal** — App ID `com.buxmuse.app`: HealthKit + **iCloud** (CloudKit container `iCloud.com.buxmuse.app`); widget App ID unchanged.
+3. **Xcode** — Archive **1.0.9 (10)** → Distribute → App Store Connect.
+4. **App Store Connect** — new version **1.0.9**; paste **What’s New** (below); complete App Privacy (see `docs/APP_STORE_CONNECT_PRIVACY.md` — includes optional iCloud sync note).
+5. **Privacy policy URL** — host `docs/legal/PRIVACY_POLICY.md`; mention optional iCloud sync stores data in the user’s private iCloud, not on BuxMuse servers.
+6. **Review notes** — offline-first, no account; optional iCloud sync uses user’s private CloudKit container; HealthKit optional on-device only.
+7. **Device QA before submit**
+   - Fresh install → onboarding → app tour (tab bar must not cover coach marks).
+   - Enable iCloud sync on device A → add budget/expense → device B pull.
+   - Factory reset **without** iCloud enabled → no iCloud dialog; avatar/photos gone; storage ~minimal.
+   - Factory reset **with** iCloud enabled → keep cloud → re-enable sync → data restores without spurious conflicts.
+
+### Suggested “What’s New” (1.0.9)
+
+- Optional **iCloud sync** to keep expenses, budgets, Studio, and settings in sync across your Apple devices.
+- **Consumer debt** tracking with reminders.
+- Safer **Delete all data** — complete local wipe; choose to keep or delete your iCloud backup when sync is on.
+- App tour improvements and Spanish translations.
+
+---
 
 ## Platform strategy
 

@@ -31,6 +31,14 @@ enum TutorialCoachMarkLayer {
         }
     }
 
+    /// Root-level phone overlay layer (dashboard + tab steps). Sheet/detail layers render locally.
+    static func phoneOverlayLayer(for coordinator: AppTutorialCoordinator) -> TutorialCoachMarkLayer? {
+        guard coordinator.isActive, let anchor = coordinator.currentStep?.anchor else { return nil }
+        if anchor.hostsInSheet || anchor.hostsInSettingsDetail { return nil }
+        if isDashboardAnchor(anchor) { return .dashboard }
+        return .root
+    }
+
     func shouldShow(for coordinator: AppTutorialCoordinator) -> Bool {
         guard coordinator.isActive, let anchor = coordinator.currentStep?.anchor else {
             return false
@@ -103,6 +111,24 @@ extension View {
                 globalFrames: globalFrames,
                 reservesTabBarSpace: reservesTabBarSpace
             )
+        }
+    }
+
+    /// Full-screen phone tutorial above the tab bar (dashboard + tab-level steps).
+    func buxPhoneTutorialOverlay(
+        coordinator: AppTutorialCoordinator,
+        isPad: Bool
+    ) -> some View {
+        overlayPreferenceValue(TutorialAnchorGlobalFrameKey.self) { globalFrames in
+            if !isPad, let layer = TutorialCoachMarkLayer.phoneOverlayLayer(for: coordinator) {
+                TutorialCoachMarkOverlayLayer(
+                    layer: layer,
+                    coordinator: coordinator,
+                    globalFrames: globalFrames,
+                    reservesTabBarSpace: false
+                )
+                .zIndex(25_000)
+            }
         }
     }
 }

@@ -559,11 +559,6 @@ struct DashboardView: View {
             }
         }
         .coordinateSpace(name: "dashboardOverlay")
-        .tutorialCoachMarkOverlay(
-            layer: .dashboard,
-            coordinator: tutorialCoordinator,
-            reservesTabBarSpace: !BuxPadIdiom.isPad
-        )
         .onPreferenceChange(DashboardFabAnchorPreferenceKey.self) { updateFabAnchor($0) }
         .onChange(of: isFabMenuExpanded) { _, expanded in
             if expanded {

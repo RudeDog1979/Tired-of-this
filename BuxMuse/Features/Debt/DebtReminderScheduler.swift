@@ -54,6 +54,16 @@ enum DebtReminderScheduler {
         }
     }
 
+    static func cancelAllDebtReminders() async {
+        if isTesting { return }
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        let ids = pending
+            .map(\.identifier)
+            .filter { $0.hasPrefix("buxmuse.debt.due.") }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+    }
+
     static func schedule(for debt: Debt) async {
         if isTesting { return }
         cancel(for: debt.id)

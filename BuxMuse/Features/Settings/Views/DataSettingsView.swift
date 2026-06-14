@@ -24,9 +24,19 @@ struct DataSettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
 
     @State private var showResetDialog = false
-    @State private var showFinalPurgeDialog = false
+    @State private var showICloudChoiceDialog = false
+    @State private var showBackupBeforeCloudDeleteDialog = false
+    @State private var showCloudDeleteFirstWarning = false
+    @State private var showCloudDeleteFinalWarning = false
+    @State private var showLocalFinalPurgeDialog = false
+    @State private var showExportBeforeCloudDeleteSheet = false
     @State private var showSuccessAlert = false
+    @State private var showCloudDeleteFailedAlert = false
     @State private var showLogoCacheClearedAlert = false
+    @State private var purgeDeletedCloudData = false
+    @State private var resetKeepsCloudBackup = false
+    @State private var cloudDeleteErrorMessage = ""
+    @State private var isPerformingPurge = false
     @State private var exportURL: URL? = nil
     @State private var storageBreakdown = BuxStorageBreakdown.empty
     @State private var photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
@@ -291,7 +301,18 @@ struct DataSettingsView: View {
         .alert(BuxCatalogLabel.string("Database Reset Complete", locale: appSettingsManager.interfaceLocale), isPresented: $showSuccessAlert) {
             Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
-            BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, Tax savings, merchants, Studio data, caches, and backups are removed.")
+            if purgeDeletedCloudData {
+                BuxCatalogDynamicText(key: "Your BuxMuse database, settings, and iCloud backup have been erased. This device is restored to fresh seeds.")
+            } else if resetKeepsCloudBackup {
+                BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, Tax savings, merchants, Studio data, caches, and backups are removed. Your iCloud backup was kept.")
+            } else {
+                BuxCatalogDynamicText(key: "Your BuxMuse database and settings have been restored to fresh seeds. Expenses, Tax savings, merchants, Studio data, caches, and backups are removed from this device.")
+            }
+        }
+        .alert(BuxCatalogLabel.string("iCloud deletion failed", locale: appSettingsManager.interfaceLocale), isPresented: $showCloudDeleteFailedAlert) {
+            Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+        } message: {
+            Text(cloudDeleteErrorMessage)
         }
         .alert(BuxCatalogLabel.string("Logo cache cleared", locale: appSettingsManager.interfaceLocale), isPresented: $showLogoCacheClearedAlert) {
             Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
@@ -299,20 +320,82 @@ struct DataSettingsView: View {
             BuxCatalogDynamicText(key: "Merchant favicons will download again the next time you view them.")
         }
         .confirmationDialog(BuxCatalogLabel.string("WARNING: Delete All Data?", locale: appSettingsManager.interfaceLocale), isPresented: $showResetDialog, titleVisibility: .visible) {
-            Button(BuxCatalogLabel.string("Continue to final warning", locale: appSettingsManager.interfaceLocale), role: .destructive) {
-                showFinalPurgeDialog = true
+            if store.personalCloudSyncEnabled {
+                Button(BuxCatalogLabel.string("Continue to iCloud choice", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                    showICloudChoiceDialog = true
+                }
+            } else {
+                Button(BuxCatalogLabel.string("Continue", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                    resetKeepsCloudBackup = false
+                    purgeDeletedCloudData = false
+                    showLocalFinalPurgeDialog = true
+                }
             }
             Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
-            BuxCatalogDynamicText(key: "This action is completely offline and irreversible. It will wipe expenses, goals, Tax savings, merchants, logo cache, Studio and Simple Studio records, receipts, scans, backups, and reset all settings.")
+            if store.personalCloudSyncEnabled {
+                BuxCatalogDynamicText(key: "This action is irreversible on this device. It will wipe expenses, goals, Tax savings, merchants, logo cache, Studio and Simple Studio records, receipts, scans, backups, and reset all settings. On the next step you choose whether to keep or delete your iCloud backup.")
+            } else {
+                BuxCatalogDynamicText(key: "This action is irreversible on this device. It will wipe expenses, goals, Tax savings, merchants, logo cache, Studio and Simple Studio records, receipts, scans, backups, and reset all settings.")
+            }
         }
-        .alert(BuxCatalogLabel.string("Final warning: erase everything?", locale: appSettingsManager.interfaceLocale), isPresented: $showFinalPurgeDialog) {
-            Button(BuxCatalogLabel.string("Erase everything permanently", locale: appSettingsManager.interfaceLocale), role: .destructive) {
-                performFullPurge()
+        .confirmationDialog(BuxCatalogLabel.string("What should happen to your iCloud data?", locale: appSettingsManager.interfaceLocale), isPresented: $showICloudChoiceDialog, titleVisibility: .visible) {
+            Button(BuxCatalogLabel.string("Keep data in iCloud", locale: appSettingsManager.interfaceLocale)) {
+                resetKeepsCloudBackup = true
+                purgeDeletedCloudData = false
+                showLocalFinalPurgeDialog = true
+            }
+            Button(BuxCatalogLabel.string("Also delete iCloud data", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                resetKeepsCloudBackup = false
+                purgeDeletedCloudData = true
+                showBackupBeforeCloudDeleteDialog = true
             }
             Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
         } message: {
-            BuxCatalogDynamicText(key: "Last chance: BuxMuse will permanently delete every piece of local data on this device. Nothing will remain. Are you absolutely sure?")
+            BuxCatalogDynamicText(key: "You can erase this device only and keep a backup in iCloud for your other devices, or permanently delete your BuxMuse iCloud backup on every device signed into this Apple ID.")
+        }
+        .confirmationDialog(BuxCatalogLabel.string("Back up before deleting iCloud", locale: appSettingsManager.interfaceLocale), isPresented: $showBackupBeforeCloudDeleteDialog, titleVisibility: .visible) {
+            Button(BuxCatalogLabel.string("Export JSON backup", locale: appSettingsManager.interfaceLocale)) {
+                generateJSONDump()
+                showExportBeforeCloudDeleteSheet = true
+            }
+            Button(BuxCatalogLabel.string("Continue without backup", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                showCloudDeleteFirstWarning = true
+            }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+        } message: {
+            BuxCatalogDynamicText(key: "Deleting iCloud data is permanent on all your devices. Save a local JSON backup first if you might need this data later.")
+        }
+        .alert(BuxCatalogLabel.string("Delete iCloud data?", locale: appSettingsManager.interfaceLocale), isPresented: $showCloudDeleteFirstWarning) {
+            Button(BuxCatalogLabel.string("Yes, continue", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                showCloudDeleteFinalWarning = true
+            }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+        } message: {
+            BuxCatalogDynamicText(key: "Are you sure? This will permanently remove your BuxMuse backup from iCloud on every device. You cannot recover it from Apple later.")
+        }
+        .alert(BuxCatalogLabel.string("Final warning: delete iCloud backup?", locale: appSettingsManager.interfaceLocale), isPresented: $showCloudDeleteFinalWarning) {
+            Button(BuxCatalogLabel.string("Delete iCloud and reset device", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                performFullPurge(deleteCloudData: true)
+            }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+        } message: {
+            BuxCatalogDynamicText(key: "Last chance. BuxMuse will erase your iCloud backup and all local data on this device. Other devices will no longer restore from iCloud. Are you absolutely sure?")
+        }
+        .alert(BuxCatalogLabel.string("Final warning: erase everything?", locale: appSettingsManager.interfaceLocale), isPresented: $showLocalFinalPurgeDialog) {
+            Button(BuxCatalogLabel.string("Erase everything permanently", locale: appSettingsManager.interfaceLocale), role: .destructive) {
+                performFullPurge(deleteCloudData: false)
+            }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+        } message: {
+            if resetKeepsCloudBackup {
+                BuxCatalogDynamicText(key: "Last chance: BuxMuse will permanently delete every piece of local data on this device. Your iCloud backup will be kept. Are you absolutely sure?")
+            } else {
+                BuxCatalogDynamicText(key: "Last chance: BuxMuse will permanently delete every piece of local data on this device. Are you absolutely sure?")
+            }
+        }
+        .sheet(isPresented: $showExportBeforeCloudDeleteSheet) {
+            exportBeforeCloudDeleteSheet
         }
         .onChange(of: store.allowLocalBackups) { _, _ in store.save() }
         .onChange(of: store.autoBackupFrequency) { _, _ in store.save() }
@@ -430,35 +513,115 @@ struct DataSettingsView: View {
 
     // MARK: - Destruction Logic
 
-    private func performFullPurge() {
+    private var exportBeforeCloudDeleteSheet: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 16) {
+                BuxCatalogDynamicText(key: "Save this JSON file somewhere safe — Files, iCloud Drive, or email — before deleting your iCloud backup.")
+                    .font(.system(size: 14, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let url = exportURL {
+                    ShareLink(item: url) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up.fill")
+                            BuxCatalogDynamicText(key: "Save JSON backup archive")
+                        }
+                        .font(.system(size: 15, weight: .bold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
+                }
+
+                Button(role: .destructive) {
+                    showExportBeforeCloudDeleteSheet = false
+                    showCloudDeleteFirstWarning = true
+                } label: {
+                    BuxCatalogDynamicText(key: "Continue to iCloud deletion")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                Spacer()
+            }
+            .padding()
+            .buxCatalogNavigationTitle("Save local backup")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) {
+                        showExportBeforeCloudDeleteSheet = false
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func performFullPurge(deleteCloudData: Bool) {
+        guard !isPerformingPurge else { return }
+        isPerformingPurge = true
+        purgeDeletedCloudData = deleteCloudData
+
+        Task {
+            if deleteCloudData {
+                do {
+                    try await PersonalCloudSyncEngine.shared.deleteAllCloudData()
+                } catch {
+                    await MainActor.run {
+                        cloudDeleteErrorMessage = error.localizedDescription
+                        showCloudDeleteFailedAlert = true
+                        isPerformingPurge = false
+                    }
+                    return
+                }
+            } else {
+                PersonalCloudSyncEngine.shared.prepareForFactoryReset()
+            }
+
+            await MainActor.run {
+                finishLocalPurge(restoreFromCloudOnNextSync: resetKeepsCloudBackup)
+                isPerformingPurge = false
+            }
+        }
+    }
+
+    private func finishLocalPurge(restoreFromCloudOnNextSync: Bool) {
+        BuxStorageAuditEngine.performNuclearLocalWipe()
+
+        do {
+            try persistence.recreateLocalStoreForFactoryReset()
+        } catch {
+            print("Database purge failed: \(error)")
+        }
+
         store.resetAllData()
-        LightweightLogoCache.shared.clearCacheSynchronously()
-        BuxStorageAuditEngine.purgeAllUserGeneratedMedia()
-        SimpleStudioScanImageStore.purgeAllStoredImages()
-        TaxTranslationCache.clearAll()
+        studioStore.purgeAllPersistedData()
+        simpleStudioStore.resetAllData()
         HustleManager.shared.resetAllData()
         MoneyMapLayoutStore.shared.resetAll()
         BuxNotificationInboxEngine.purgePersistedState()
         StudioTimerController.shared.reset()
-        UserDefaults.standard.removeObject(forKey: "buxmuse.cancelledSubscriptionMerchants")
-        UserDefaults.standard.removeObject(forKey: "buxmuse.moneymap.didPlayFirstFullOpen")
-        UserDefaults.standard.removeObject(forKey: "buxmuse.news.cache.v2")
-        UserDefaults.standard.removeObject(forKey: "buxmuse.news.lastFetchTipDay")
-        UserDefaults.standard.removeObject(forKey: "buxmuse.news.seenTipId")
-        UserDefaults.standard.removeObject(forKey: "buxmuse.tips.history")
+        PersonalSyncConflictStore.shared.clearAll()
+        tutorialCoordinator.tearDownForFactoryReset()
+        LightweightLogoCache.shared.clearCacheSynchronously()
+        SimpleStudioScanImageStore.purgeAllStoredImages()
+        TaxTranslationCache.clearAll()
         exportURL = nil
 
-        do {
-            try persistence.purgeAllUserFinancialData()
-            try persistence.seedExpenseCatalogIfNeeded()
-            studioStore.resetAllData()
-            simpleStudioStore.resetAllData()
-            brain.refreshExpenses()
-            taxEnvelopeBrain.refreshAll()
-            refreshStorageBreakdown()
-            self.showSuccessAlert = true
-        } catch {
-            print("Database purge failed: \(error)")
+        appSettingsManager.applyRegionalPreferences(from: store)
+        themeManager.restoreGlobalAppearance()
+        brain.refreshExpenses()
+        taxEnvelopeBrain.refreshAll()
+        refreshStorageBreakdown()
+
+        if restoreFromCloudOnNextSync {
+            PersonalCloudSyncEngine.markPendingCloudRestoreAfterLocalWipe()
         }
+
+        NotificationCenter.default.post(name: .buxMuseDidPerformFactoryReset, object: nil)
+        showSuccessAlert = true
     }
 }

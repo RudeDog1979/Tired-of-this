@@ -76,7 +76,8 @@ enum TaxTranslationCache {
     }
 
     static func clearAll() {
-        persist(TaxTranslationCachePayload(entries: [:]))
+        let url = cacheURL
+        try? FileManager.default.removeItem(at: url)
     }
 
     // MARK: - Private

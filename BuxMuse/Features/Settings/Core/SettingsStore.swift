@@ -1051,6 +1051,11 @@ public final class SettingsStore: ObservableObject {
     private func seedDefaults() {
         self.firstName = nil
         self.lastName = nil
+        self.profileAvatarData = nil
+        self.preferredNameStyle = .fullName
+        self.cancelledSubscriptionMerchants = []
+        self.studioDiscoveryOfferDismissed = false
+        self.standardBudgetStudioBridgePromptDismissed = false
         self.themeMode = .system
         self.solarContrastModeEnabled = false
         self.brandThemesEnabled = false
@@ -1088,14 +1093,25 @@ public final class SettingsStore: ObservableObject {
         self.budgetApproachingThresholdPercent = 80
         self.customBackupIntervalDays = 3
         self.hasCompletedOnboarding = false
+        self.personalCloudSyncEnabled = false
+        self.consumerDebtEnabled = false
+        self.debtDiscoveryDeferred = false
+        self.budgetQuickSetupCompleted = false
+        self.householdCloudRecordName = nil
+        self.householdShareURL = nil
+        self.sharedEnvelopeProfileId = nil
+        self.householdDisplayName = nil
+        self.householdSharedZoneName = nil
+        self.householdSharedZoneOwner = nil
         self.greetingHeaderEnabled = true
         self.greetingShowIcon = true
         self.greetingFontStyle = .playful
+        resetAppTourProgress()
         loadInvoicePaymentPreferences()
         loadMileagePreferences()
         loadStudioDiscoveryPreference()
         loadAgreementPreferences()
-        save()
+        save(notifyCloudSync: false)
     }
 
     private func loadAgreementPreferences() {
@@ -1124,6 +1140,8 @@ public final class SettingsStore: ObservableObject {
         appTourFinished = false
         appTourSkipped = false
         appTourPendingAutoStart = false
+        UserDefaults.standard.removeObject(forKey: Self.appTourFinishedKey)
+        UserDefaults.standard.removeObject(forKey: Self.appTourSkippedKey)
     }
 
     private func loadStudioDiscoveryPreference() {
@@ -1310,9 +1328,11 @@ public final class SettingsStore: ObservableObject {
     // MARK: - Actions
     
     public func resetAllData() {
-        // Clear passcode
         clearPasscode()
-        // Re-seed defaults
+        if FileManager.default.fileExists(atPath: storeURL.path) {
+            try? FileManager.default.removeItem(at: storeURL)
+        }
+        isLoaded = false
         seedDefaults()
     }
 

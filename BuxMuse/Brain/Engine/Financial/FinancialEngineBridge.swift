@@ -77,4 +77,5 @@ extension Notification.Name {
     static let buxMuseSimpleStudioDidPersist = Notification.Name("BuxMuseSimpleStudioDidPersist")
     static let buxMuseHustlesDidPersist = Notification.Name("BuxMuseHustlesDidPersist")
     static let buxMusePersonalCloudSyncDidPull = Notification.Name("BuxMusePersonalCloudSyncDidPull")
+    static let buxMuseDidPerformFactoryReset = Notification.Name("BuxMuseDidPerformFactoryReset")
 }

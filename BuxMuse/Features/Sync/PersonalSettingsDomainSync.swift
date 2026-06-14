@@ -160,6 +160,12 @@ enum PersonalSettingsDomainSync {
         UserDefaults.standard.set(revisions, forKey: revisionDefaultsKey)
     }
 
+    /// Clears local domain revision/hash caches after factory reset (CloudKit unchanged).
+    static func resetLocalSyncMetadata() {
+        UserDefaults.standard.removeObject(forKey: revisionDefaultsKey)
+        UserDefaults.standard.removeObject(forKey: "buxmuse.personalSync.settingsDomainHashes")
+    }
+
     static func exportAllDomains(from store: SettingsStore) -> [PersonalSettingsDomainRecord] {
         let deviceId = PersonalSyncDeviceIdentity.currentDeviceId
         let revisions = domainRevisions()
@@ -169,7 +175,8 @@ enum PersonalSettingsDomainSync {
         return PersonalSettingsDomainID.allCases.compactMap { domain in
             guard let data = try? encodeDomain(domain, from: store, encoder: encoder) else { return nil }
             let hash = PersonalSyncContentHash.hash(data: data)
-            let updatedAt = revisions[domain.rawValue] ?? store.lastPersistedAt ?? Date()
+            // Use per-domain revision only — never stamp every domain with lastPersistedAt (breaks iCloud restore).
+            let updatedAt = revisions[domain.rawValue] ?? .distantPast
             return PersonalSettingsDomainRecord(
                 domain: domain,
                 data: data,
@@ -232,20 +239,59 @@ enum PersonalSettingsDomainSync {
             } else if remoteDomain.updatedAt < localDomain.updatedAt {
                 continue
             } else if remoteDomain.contentHash != localDomain.contentHash {
-                conflicts.append(
-                    PersonalSyncConflict(
-                        kind: .settingsDomain,
-                        entityKey: remoteDomain.domainId,
-                        titleKey: conflictTitleKey(for: remoteDomain.domainId),
-                        localUpdatedAt: localDomain.updatedAt,
-                        remoteUpdatedAt: remoteDomain.updatedAt,
-                        localSummary: localDomain.domainId,
-                        remoteSummary: remoteDomain.domainId
+                if localHas && remoteHas && recordsConflictAcrossDevices(local: localDomain, remote: remoteDomain) {
+                    conflicts.append(
+                        PersonalSyncConflict(
+                            kind: .settingsDomain,
+                            entityKey: remoteDomain.domainId,
+                            titleKey: conflictTitleKey(for: remoteDomain.domainId),
+                            localUpdatedAt: localDomain.updatedAt,
+                            remoteUpdatedAt: remoteDomain.updatedAt,
+                            localSummary: localDomain.domainId,
+                            remoteSummary: remoteDomain.domainId
+                        )
                     )
-                )
+                } else {
+                    byID[remoteDomain.domainId] = preferredDomainWhenHashesDiffer(
+                        local: localDomain,
+                        remote: remoteDomain,
+                        localHas: localHas,
+                        remoteHas: remoteHas
+                    )
+                }
             }
         }
         return (Array(byID.values), conflicts)
+    }
+
+    /// Applies cloud domains/entities wholesale — used when this device has no meaningful local data yet.
+    @MainActor
+    static func applyCloudRestore(
+        settingsStore: SettingsStore,
+        remoteSettingsDomains: [PersonalSettingsDomainRecord],
+        remoteStudioEntities: [PersonalSyncEntityRecord],
+        remoteSimpleStudioEntities: [PersonalSyncEntityRecord],
+        remoteHustleEntities: [PersonalSyncEntityRecord]
+    ) {
+        if !remoteSettingsDomains.isEmpty {
+            applyDomains(remoteSettingsDomains, to: settingsStore)
+        }
+        if !remoteStudioEntities.isEmpty {
+            PersonalStudioEntitySync.apply(remoteStudioEntities, to: StudioStore.shared)
+        }
+        if !remoteSimpleStudioEntities.isEmpty {
+            PersonalSimpleStudioEntitySync.apply(remoteSimpleStudioEntities, to: SimpleStudioStore.shared)
+        }
+        if !remoteHustleEntities.isEmpty {
+            PersonalHustleEntitySync.apply(remoteHustleEntities, to: HustleManager.shared)
+        }
+        PersonalSyncConflictStore.shared.clearAll()
+    }
+
+    static func localBudgetIsConfigured(in store: SettingsStore) -> Bool {
+        if store.budgetQuickSetupCompleted { return true }
+        if store.budgetingMode == .custom, !store.customBudgetProfiles.isEmpty { return true }
+        return false
     }
 
     @MainActor
@@ -267,28 +313,30 @@ enum PersonalSettingsDomainSync {
         switch PersonalSettingsDomainID(rawValue: record.domainId) {
         case .profile:
             if let payload = try? JSONDecoder().decode(SettingsProfileDomain.self, from: record.data) {
-                return payload.hasCompletedOnboarding
-                    || payload.firstName?.isEmpty == false
+                return payload.firstName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
                     || payload.profileAvatarData != nil
             }
+            return false
         case .budget:
             return budgetDomainIsConfigured(record)
         case .studioFlags:
             if let payload = try? JSONDecoder().decode(SettingsStudioFlagsDomain.self, from: record.data) {
                 return payload.studioEnabled
             }
+            return false
         case .debt:
             if let payload = try? JSONDecoder().decode(SettingsDebtDomain.self, from: record.data) {
                 return payload.consumerDebtEnabled
             }
+            return false
         case .dataBackup:
             if let payload = try? JSONDecoder().decode(SettingsDataBackupDomain.self, from: record.data) {
                 return payload.personalCloudSyncEnabled
             }
+            return false
         default:
-            break
+            return false
         }
-        return record.data.count > 48
     }
 
     static func domainsFromLegacyMasterBlob(_ settingsData: Data, updatedAt: Date, deviceId: String) -> [PersonalSettingsDomainRecord] {
@@ -476,8 +524,8 @@ enum PersonalSettingsDomainSync {
                 dualCashDrawerEnabled: store.dualCashDrawerEnabled,
                 cashLocalBalanceValue: store.cashLocalBalanceValue,
                 cashSecondaryBalanceValue: store.cashSecondaryBalanceValue,
-                appTourFinished: store.appTourFinished,
-                appTourSkipped: store.appTourSkipped
+                appTourFinished: false,
+                appTourSkipped: false
             ))
         case .greeting:
             return try encoder.encode(SettingsGreetingDomain(
@@ -612,8 +660,7 @@ enum PersonalSettingsDomainSync {
             store.dualCashDrawerEnabled = payload.dualCashDrawerEnabled
             store.cashLocalBalanceValue = payload.cashLocalBalanceValue
             store.cashSecondaryBalanceValue = payload.cashSecondaryBalanceValue
-            store.appTourFinished = payload.appTourFinished
-            store.appTourSkipped = payload.appTourSkipped
+            // Tour progress is per-device UX state — never overwrite from iCloud.
         case .greeting:
             guard let payload = try? decoder.decode(SettingsGreetingDomain.self, from: record.data) else { return }
             store.greetingHeaderEnabled = payload.greetingHeaderEnabled
@@ -623,6 +670,26 @@ enum PersonalSettingsDomainSync {
             guard let payload = try? decoder.decode(SettingsSubscriptionsDomain.self, from: record.data) else { return }
             store.cancelledSubscriptionMerchants = payload.cancelledSubscriptionMerchants
         }
+    }
+
+    private static func recordsConflictAcrossDevices(
+        local: PersonalSettingsDomainRecord,
+        remote: PersonalSettingsDomainRecord
+    ) -> Bool {
+        guard !local.deviceId.isEmpty, !remote.deviceId.isEmpty else { return false }
+        return local.deviceId != remote.deviceId
+    }
+
+    private static func preferredDomainWhenHashesDiffer(
+        local: PersonalSettingsDomainRecord,
+        remote: PersonalSettingsDomainRecord,
+        localHas: Bool,
+        remoteHas: Bool
+    ) -> PersonalSettingsDomainRecord {
+        if remoteHas && !localHas { return remote }
+        if localHas && !remoteHas { return local }
+        if remote.updatedAt >= local.updatedAt { return remote }
+        return local
     }
 }
 

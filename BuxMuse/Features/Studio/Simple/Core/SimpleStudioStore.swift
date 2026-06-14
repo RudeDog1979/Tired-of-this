@@ -349,6 +349,8 @@ public final class SimpleStudioStore: ObservableObject {
         invoices = []
         hourlyRateHint = nil
         businessCard = nil
+        lastPersistedAt = nil
+        isLoaded = true
         if FileManager.default.fileExists(atPath: storeURL.path) {
             try? FileManager.default.removeItem(at: storeURL)
         }

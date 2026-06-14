@@ -39,11 +39,6 @@ struct RootView: View {
                 coreTabView
             }
         }
-            .tutorialCoachMarkOverlay(
-                layer: .root,
-                coordinator: container.tutorialCoordinator,
-                reservesTabBarSpace: !BuxPadIdiom.isPad
-            )
             .background {
                 TaxTranslationSessionBridgeView()
             }
@@ -246,6 +241,10 @@ struct RootView: View {
                     .buxThemedSheetContent()
                 }
             }
+            .buxPhoneTutorialOverlay(
+                coordinator: container.tutorialCoordinator,
+                isPad: BuxPadIdiom.isPad
+            )
     }
 
     private var coreTabView: some View {
@@ -314,6 +313,10 @@ struct RootView: View {
             }
         }
         .buxNativeTabBarMinimizeOnScroll()
+        .toolbar(
+            container.tutorialCoordinator.isActive && !BuxPadIdiom.isPad ? .hidden : .visible,
+            for: .tabBar
+        )
     }
 
     @ViewBuilder

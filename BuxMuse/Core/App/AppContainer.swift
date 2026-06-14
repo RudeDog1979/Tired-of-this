@@ -178,9 +178,35 @@ final class AppContainer: ObservableObject {
             .sink { [weak self] _ in
                 guard let self else { return }
                 self.appSettingsManager.applyRegionalPreferences(from: SettingsStore.shared)
+                self.themeManager.restoreGlobalAppearance()
                 self.brain.scheduleSnapshotRefresh()
                 self.studioBrain.refreshAll()
                 self.simpleStudioBrain.refreshAll()
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .buxMuseDidPerformFactoryReset)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.debtEngine.load()
+                if let goals = try? self.persistence.fetchAllGoals() {
+                    self.goalsEngine.replaceAllGoals(goals)
+                } else {
+                    self.goalsEngine.replaceAllGoals([])
+                }
+                self.navigationCoordinator.selectedTab = .home
+                self.navigationCoordinator.closeSubscriptionHub()
+                self.navigationCoordinator.closeDebtHub()
+                self.brain.hydrateFromPersistence(
+                    appSettings: self.appSettingsManager,
+                    themeManager: self.themeManager,
+                    navigation: self.navigationCoordinator
+                )
+                self.studioBrain.refreshAll()
+                self.simpleStudioBrain.refreshAll()
+                self.taxEnvelopeBrain.refreshAll()
+                Task { await DebtReminderScheduler.cancelAllDebtReminders() }
             }
             .store(in: &cancellables)
     }

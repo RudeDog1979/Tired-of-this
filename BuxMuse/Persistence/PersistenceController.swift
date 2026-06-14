@@ -13,7 +13,7 @@ import Combine
 public final class PersistenceController: ObservableObject {
     public static let shared = PersistenceController()
 
-    public let container: ModelContainer
+    public private(set) var container: ModelContainer
     /// App-wide main-queue context (`container.mainContext`). Never use from background queues.
     public private(set) var context: ModelContext
     /// Set when we had to fall back to in-memory or recovery store — UI can surface a one-time notice.
@@ -371,6 +371,36 @@ public final class PersistenceController: ObservableObject {
             context.delete(category)
         }
         try context.save()
+    }
+
+    /// Factory reset: delete the SQLite store and open a fresh file so tracked size drops.
+    func recreateLocalStoreForFactoryReset() throws {
+        let schema = Self.makeSchema()
+        let storeName = Self.storeName
+        let supportURL = Self.applicationSupportURL()
+
+        // Release the on-disk store before deleting its files.
+        let memoryConfig = Self.localConfiguration(
+            "\(storeName)_purge_\(UUID().uuidString)",
+            schema: schema,
+            isStoredInMemoryOnly: true
+        )
+        let memoryContainer = try ModelContainer(for: schema, configurations: [memoryConfig])
+        container = memoryContainer
+        context = memoryContainer.mainContext
+        context.autosaveEnabled = false
+
+        Self.removeAllStoreArtifacts(forBaseName: storeName, in: supportURL)
+        Self.removeAllStoreArtifacts(forBaseName: "\(storeName)_recovery", in: supportURL)
+
+        let storeURL = Self.makeStoreURL(for: storeName, in: supportURL)
+        let diskConfig = Self.localConfiguration(storeName, schema: schema, url: storeURL)
+        let diskContainer = try ModelContainer(for: schema, configurations: [diskConfig])
+        container = diskContainer
+        context = diskContainer.mainContext
+        context.autosaveEnabled = false
+        didRunSeedAndMigration = false
+        try seedExpenseCatalogIfNeeded()
     }
 }
 
