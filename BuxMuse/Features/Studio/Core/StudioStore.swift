@@ -114,8 +114,8 @@ public final class StudioStore: ObservableObject {
             saveQueue.async {
                 do {
                     try data.write(to: url, options: .atomic)
-                    DispatchQueue.main.async { [weak self] in
-                        self?.lastPersistedAt = Date()
+                    DispatchQueue.main.async {
+                        self.lastPersistedAt = Date()
                         guard notifyCloudSync else { return }
                         NotificationCenter.default.post(name: .buxMuseStudioDidPersist, object: nil)
                     }

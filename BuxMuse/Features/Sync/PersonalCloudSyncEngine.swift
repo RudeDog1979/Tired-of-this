@@ -648,13 +648,28 @@ final class PersonalCloudSyncEngine: ObservableObject {
                 record[PersonalCloudField.deviceId] = entity.deviceId as CKRecordValue
                 record[PersonalCloudField.contentHash] = entity.contentHash as CKRecordValue
                 record[PersonalCloudField.isDeleted] = (entity.isDeleted ? 1 : 0) as CKRecordValue
-                if entity.usesExternalAsset, let asset = makeSyncAsset(from: entity.payloadJSON) {
+                if entity.usesExternalAsset,
+                   let attachmentData = entity.attachmentData,
+                   let asset = makeSyncAsset(from: attachmentData) {
+                    record[PersonalCloudField.payloadAsset] = asset
+                } else if entity.usesExternalAsset, let asset = makeSyncAsset(from: entity.payloadJSON) {
                     record[PersonalCloudField.payloadAsset] = asset
                 }
             }
             PersonalCloudSyncMetadata.lastSyncedAt = Date()
         } catch {
             syncStatus = .error(userFacingSyncError(error, feature: "iCloud"))
+        }
+    }
+
+    private func makeSyncAsset(from data: Data) -> CKAsset? {
+        guard !data.isEmpty else { return nil }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("bux-sync-\(UUID().uuidString).bin")
+        do {
+            try data.write(to: url, options: .atomic)
+            return CKAsset(fileURL: url)
+        } catch {
+            return nil
         }
     }
 
@@ -712,8 +727,13 @@ final class PersonalCloudSyncEngine: ObservableObject {
 
     private func decodeEntityRecord(_ record: CKRecord) -> PersonalSyncEntityRecord? {
         var jsonString = record[PersonalCloudField.payloadJSON] as? String ?? ""
-        if jsonString.isEmpty, let asset = record[PersonalCloudField.payloadAsset] as? CKAsset, let url = asset.fileURL {
-            jsonString = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        var attachmentData: Data?
+        if let asset = record[PersonalCloudField.payloadAsset] as? CKAsset, let url = asset.fileURL {
+            if jsonString.isEmpty, let assetText = try? String(contentsOf: url, encoding: .utf8) {
+                jsonString = assetText
+            } else if let assetData = try? Data(contentsOf: url) {
+                attachmentData = assetData
+            }
         }
         guard let entityKind = record[PersonalCloudField.entityKind] as? String,
               let entityId = record[PersonalCloudField.entityId] as? String,
@@ -726,7 +746,8 @@ final class PersonalCloudSyncEngine: ObservableObject {
             deviceId: (record[PersonalCloudField.deviceId] as? String) ?? "",
             contentHash: (record[PersonalCloudField.contentHash] as? String) ?? PersonalSyncContentHash.hash(json: jsonString),
             isDeleted: (record[PersonalCloudField.isDeleted] as? Int) == 1,
-            usesExternalAsset: record[PersonalCloudField.payloadAsset] != nil
+            usesExternalAsset: record[PersonalCloudField.payloadAsset] != nil,
+            attachmentData: attachmentData
         )
     }
 

@@ -57,6 +57,11 @@ enum PersonalStudioEntitySync {
         }
         for draft in snapshot.agreementDrafts {
             records.append(makeRecord(kind: .agreement, entityId: draft.id.uuidString, encodable: draft, revision: revision, deviceId: deviceId))
+            records.append(contentsOf: PersonalAgreementMediaSync.exportFileRecords(
+                for: draft,
+                revision: revision,
+                deviceId: deviceId
+            ))
         }
         for entry in snapshot.mileageEntries {
             records.append(makeRecord(kind: .mileage, entityId: entry.id.uuidString, encodable: entry, revision: revision, deviceId: deviceId))
@@ -79,8 +84,10 @@ enum PersonalStudioEntitySync {
     @MainActor
     static func apply(_ records: [PersonalSyncEntityRecord], to store: StudioStore) {
         var snapshot = store.currentSnapshot()
+        let fileRecords = records.filter { $0.entityKind == PersonalStudioEntityKind.agreementFile.cloudKind }
+        let entityRecords = records.filter { $0.entityKind.hasPrefix("studio.") && $0.entityKind != PersonalStudioEntityKind.agreementFile.cloudKind }
 
-        for record in records where record.entityKind.hasPrefix("studio.") {
+        for record in entityRecords {
             guard !record.isDeleted else {
                 removeEntity(record, from: &snapshot)
                 continue
@@ -89,17 +96,28 @@ enum PersonalStudioEntitySync {
         }
 
         store.apply(snapshot)
+
+        for record in fileRecords {
+            _ = PersonalAgreementMediaSync.applyFileRecord(record)
+        }
+
         store.save(notifyCloudSync: false)
     }
 
     static func entityHasUserData(_ record: PersonalSyncEntityRecord) -> Bool {
         guard !record.isDeleted else { return false }
+        if record.entityKind == PersonalStudioEntityKind.agreementFile.cloudKind {
+            return PersonalAgreementMediaSync.entityHasUserData(record)
+        }
         if record.entityKind == PersonalStudioEntityKind.profileBundle.cloudKind { return record.payloadJSON.count > 80 }
         return record.payloadJSON.count > 24
     }
 
     static func recordName(for record: PersonalSyncEntityRecord) -> String {
-        "personal-studio-\(record.entityKind)-\(record.entityId)"
+        if record.entityKind == PersonalStudioEntityKind.agreementFile.cloudKind {
+            return PersonalAgreementMediaSync.recordName(for: record)
+        }
+        return "personal-studio-\(record.entityKind)-\(record.entityId)"
     }
 
     // MARK: - Private
@@ -156,12 +174,28 @@ enum PersonalStudioEntitySync {
             upsert(id: record.entityId, in: &snapshot.receipts, decode: StudioReceipt.self, from: data, decoder: decoder)
         case .agreement:
             upsert(id: record.entityId, in: &snapshot.agreementDrafts, decode: AgreementDraft.self, from: data, decoder: decoder)
+        case .agreementFile:
+            break
         case .mileage:
             upsert(id: record.entityId, in: &snapshot.mileageEntries, decode: MileageEntry.self, from: data, decoder: decoder)
         }
     }
 
     private static func removeEntity(_ record: PersonalSyncEntityRecord, from snapshot: inout StudioSnapshot) {
+        if record.entityKind == PersonalStudioEntityKind.agreementFile.cloudKind {
+            _ = PersonalAgreementMediaSync.applyFileRecord(
+                PersonalSyncEntityRecord(
+                    entityKind: record.entityKind,
+                    entityId: record.entityId,
+                    payloadJSON: record.payloadJSON,
+                    updatedAt: record.updatedAt,
+                    deviceId: record.deviceId,
+                    contentHash: record.contentHash,
+                    isDeleted: true
+                )
+            )
+            return
+        }
         guard let kind = PersonalStudioEntityKind(cloudKind: record.entityKind),
               let uuid = UUID(uuidString: record.entityId) else { return }
         switch kind {
@@ -169,7 +203,9 @@ enum PersonalStudioEntitySync {
         case .invoice: snapshot.invoices.removeAll { $0.id == uuid }
         case .project: snapshot.projects.removeAll { $0.id == uuid }
         case .receipt: snapshot.receipts.removeAll { $0.id == uuid }
-        case .agreement: snapshot.agreementDrafts.removeAll { $0.id == uuid }
+        case .agreement:
+            snapshot.agreementDrafts.removeAll { $0.id == uuid }
+            AgreementDocumentStore.deleteAllSyncedFiles(for: uuid)
         case .mileage: snapshot.mileageEntries.removeAll { $0.id == uuid }
         default: break
         }
@@ -266,9 +302,17 @@ enum PersonalEntityMergeEngine {
         remote: PersonalSyncEntityRecord?
     ) -> Bool {
         guard !local.isDeleted else { return true }
-        guard local.payloadJSON.count > 12 else { return false }
+        if local.entityKind == PersonalStudioEntityKind.agreementFile.cloudKind {
+            guard local.attachmentData != nil || PersonalAgreementMediaSync.entityHasUserData(local) else { return false }
+        } else {
+            guard local.payloadJSON.count > 12 else { return false }
+        }
         guard let remote else { return true }
-        let remoteHas = remote.payloadJSON.count > 12 && !remote.isDeleted
+        let remoteHas = remote.isDeleted ? false : (
+            remote.entityKind == PersonalStudioEntityKind.agreementFile.cloudKind
+                ? (remote.attachmentData != nil || PersonalAgreementMediaSync.entityHasUserData(remote))
+                : (remote.payloadJSON.count > 12)
+        )
         if !remoteHas { return true }
         return local.updatedAt > remote.updatedAt
     }

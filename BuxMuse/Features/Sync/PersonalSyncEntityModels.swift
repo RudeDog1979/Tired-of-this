@@ -27,8 +27,21 @@ nonisolated struct PersonalSyncEntityRecord: Codable, Equatable, Identifiable, S
     var isDeleted: Bool
     /// When non-nil, large binary lives in CKAsset field `payloadAsset`.
     var usesExternalAsset: Bool
+    /// In-memory binary attachment for push/pull; not persisted in conflict JSON.
+    var attachmentData: Data?
 
     var id: String { "\(entityKind):\(entityId)" }
+
+    enum CodingKeys: String, CodingKey {
+        case entityKind
+        case entityId
+        case payloadJSON
+        case updatedAt
+        case deviceId
+        case contentHash
+        case isDeleted
+        case usesExternalAsset
+    }
 
     init(
         entityKind: String,
@@ -38,7 +51,8 @@ nonisolated struct PersonalSyncEntityRecord: Codable, Equatable, Identifiable, S
         deviceId: String,
         contentHash: String,
         isDeleted: Bool = false,
-        usesExternalAsset: Bool = false
+        usesExternalAsset: Bool = false,
+        attachmentData: Data? = nil
     ) {
         self.entityKind = entityKind
         self.entityId = entityId
@@ -48,6 +62,18 @@ nonisolated struct PersonalSyncEntityRecord: Codable, Equatable, Identifiable, S
         self.contentHash = contentHash
         self.isDeleted = isDeleted
         self.usesExternalAsset = usesExternalAsset
+        self.attachmentData = attachmentData
+    }
+
+    static func == (lhs: PersonalSyncEntityRecord, rhs: PersonalSyncEntityRecord) -> Bool {
+        lhs.entityKind == rhs.entityKind
+            && lhs.entityId == rhs.entityId
+            && lhs.payloadJSON == rhs.payloadJSON
+            && lhs.updatedAt == rhs.updatedAt
+            && lhs.deviceId == rhs.deviceId
+            && lhs.contentHash == rhs.contentHash
+            && lhs.isDeleted == rhs.isDeleted
+            && lhs.usesExternalAsset == rhs.usesExternalAsset
     }
 }
 
@@ -96,6 +122,7 @@ enum PersonalStudioEntityKind: String, Codable, CaseIterable {
     case project
     case receipt
     case agreement
+    case agreementFile
     case mileage
     case taxEnvelope
     case businessCardLibrary

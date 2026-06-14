@@ -191,6 +191,42 @@ enum AgreementDocumentStore {
         try? FileManager.default.removeItem(at: url)
     }
 
+    /// Writes synced bytes to the canonical agreements folder using a normalized relative path.
+    @discardableResult
+    static func writeSyncedFile(data: Data, relativePath: String) -> Bool {
+        guard let normalized = normalizedStoredPath(relativePath),
+              let url = resolveURL(for: normalized) else { return false }
+        do {
+            try FileManager.default.createDirectory(
+                at: agreementsDirectory,
+                withIntermediateDirectories: true
+            )
+            try data.write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+            return true
+        } catch {
+            print("AgreementDocumentStore: synced file write error \(error)")
+            return false
+        }
+    }
+
+    static func deleteAllSyncedFiles(for agreementId: UUID) {
+        let prefix = agreementId.uuidString
+        guard let files = try? FileManager.default.contentsOfDirectory(at: agreementsDirectory, includingPropertiesForKeys: nil) else {
+            return
+        }
+        for file in files where file.lastPathComponent.hasPrefix(prefix) {
+            try? FileManager.default.removeItem(at: file)
+        }
+        AgreementImportedMarkupStore.deleteAllMarkups(
+            for: agreementId,
+            pageCount: AgreementImportedDocumentLimits.maxSignablePages
+        )
+        AgreementImportedPageAnnotationStore.deleteAll(
+            for: agreementId,
+            pageCount: AgreementImportedDocumentLimits.maxSignablePages
+        )
+    }
+
     static var importContentTypes: [UTType] {
         [.pdf, .png, .jpeg, .heic, .image]
     }
