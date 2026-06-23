@@ -10,6 +10,7 @@ import Foundation
 
 public enum SettingsDestinationType: String, Codable, CaseIterable {
     case profile
+    case subscription
     case appearance
     case regionCurrency
     case budgets
@@ -34,6 +35,7 @@ public enum SettingsDestinationType: String, Codable, CaseIterable {
     case debts
     case household
     case personalCloudSync
+    case appleWallet
 }
 
 public enum SettingsRowTier: Equatable {
@@ -146,6 +148,14 @@ public final class SettingsBrain {
                     destination: .profile
                 ),
                 SettingsRowDisplay(
+                    title: "Subscription",
+                    subtitle: subscriptionSettingsSubtitle(locale: interfaceLocale),
+                    iconName: "sparkles",
+                    hexColor: "#FFD60A",
+                    trailingText: subscriptionSettingsTrailing(locale: interfaceLocale),
+                    destination: .subscription
+                ),
+                SettingsRowDisplay(
                     title: "Look & feel",
                     subtitle: "Theme, colors, motion",
                     iconName: "paintpalette.fill",
@@ -182,6 +192,16 @@ public final class SettingsBrain {
                     hexColor: "#30D158",
                     trailingText: budgetModeName,
                     destination: .budgets
+                ),
+                SettingsRowDisplay(
+                    title: "Apple Wallet Sync",
+                    subtitle: store.appleWalletSyncEnabled
+                        ? "Automatically sync and match transactions"
+                        : "Off — tap to connect Apple Wallet",
+                    iconName: "wallet.pass.fill",
+                    hexColor: "#007AFF",
+                    trailingText: Self.localizedOnOff(store.appleWalletSyncEnabled, locale: interfaceLocale),
+                    destination: .appleWallet
                 ),
                 SettingsRowDisplay(
                     title: "Debts",
@@ -278,37 +298,36 @@ public final class SettingsBrain {
 
         var sections: [SettingsSectionDisplay] = [youSection, moneySection, alertsSection, privacySection]
 
-        if store.studioEnabled {
-            let studioStatus = Self.localizedOnOff(store.studioEnabled, locale: interfaceLocale)
-            let workSection = SettingsSectionDisplay(
-                title: "Work",
-                rows: [
-                    SettingsRowDisplay(
-                        title: "Studio",
-                        subtitle: "Business profile, invoices, tax",
-                        iconName: "laptopcomputer",
-                        hexColor: "#FF9F0A",
-                        trailingText: studioStatus,
-                        destination: .studio
-                    ),
-                    SettingsRowDisplay(
-                        title: "Projects",
-                        subtitle: workspaceSubtitle(store: store, locale: interfaceLocale),
-                        iconName: "briefcase.fill",
-                        hexColor: "#64D2FF",
-                        destination: .hustles
-                    ),
-                    SettingsRowDisplay(
-                        title: "Work tools",
-                        subtitle: workToolsSubtitle(store: store, locale: interfaceLocale),
-                        iconName: "wrench.and.screwdriver.fill",
-                        hexColor: "#AC8E68",
-                        destination: .workTools
-                    )
-                ]
+        let purchaseManager = StudioPurchaseManager.shared
+        var workRows: [SettingsRowDisplay] = [
+            SettingsRowDisplay(
+                title: "Studio",
+                subtitle: studioSettingsSubtitle(store: store, locale: interfaceLocale),
+                iconName: "laptopcomputer",
+                hexColor: "#FF9F0A",
+                trailingText: studioSettingsTrailing(store: store, locale: interfaceLocale),
+                destination: .studio
             )
-            sections.append(workSection)
+        ]
+        if store.studioEnabled && purchaseManager.hasSimpleStudio {
+            workRows.append(contentsOf: [
+                SettingsRowDisplay(
+                    title: "Projects",
+                    subtitle: workspaceSubtitle(store: store, locale: interfaceLocale),
+                    iconName: "briefcase.fill",
+                    hexColor: "#64D2FF",
+                    destination: .hustles
+                ),
+                SettingsRowDisplay(
+                    title: "Work tools",
+                    subtitle: workToolsSubtitle(store: store, locale: interfaceLocale),
+                    iconName: "wrench.and.screwdriver.fill",
+                    hexColor: "#AC8E68",
+                    destination: .workTools
+                )
+            ])
         }
+        sections.append(SettingsSectionDisplay(title: "Work", rows: workRows))
 
         let advancedSection = SettingsSectionDisplay(
             title: "Advanced",
@@ -353,6 +372,60 @@ public final class SettingsBrain {
         sections.append(advancedSection)
 
         return SettingsOverviewDisplay(sections: sections)
+    }
+
+    private static func subscriptionSettingsSubtitle(locale: Locale) -> String {
+        let purchaseManager = StudioPurchaseManager.shared
+        if purchaseManager.baseSubscriptionActive {
+            return BuxLocalizedString.string("BuxMuse is active", locale: locale)
+        }
+        if purchaseManager.isTrialActive {
+            return BuxLocalizedString.format(
+                "Trial · %lld days left",
+                locale: locale,
+                Int64(purchaseManager.trialDaysRemaining)
+            )
+        }
+        return BuxLocalizedString.string("£1.99/mo or £14.99/yr after trial", locale: locale)
+    }
+
+    private static func subscriptionSettingsTrailing(locale: Locale) -> String {
+        let purchaseManager = StudioPurchaseManager.shared
+        if purchaseManager.baseSubscriptionActive {
+            return BuxLocalizedString.string("Active", locale: locale)
+        }
+        if purchaseManager.isTrialActive {
+            return BuxLocalizedString.format("%lldd", locale: locale, Int64(purchaseManager.trialDaysRemaining))
+        }
+        return BuxLocalizedString.string("Subscribe", locale: locale)
+    }
+
+    private static func studioSettingsSubtitle(store: SettingsStore, locale: Locale) -> String {
+        let purchaseManager = StudioPurchaseManager.shared
+        if !purchaseManager.hasActiveSubscription {
+            return BuxLocalizedString.string("Requires BuxMuse subscription", locale: locale)
+        }
+        if purchaseManager.hasProStudio {
+            return BuxLocalizedString.string("Pro — business profile, invoices, tax", locale: locale)
+        }
+        if purchaseManager.hasSimpleStudio {
+            return BuxLocalizedString.string("Simple — invoices and work ledger", locale: locale)
+        }
+        return BuxLocalizedString.string("Add-on — invoices and work tools", locale: locale)
+    }
+
+    private static func studioSettingsTrailing(store: SettingsStore, locale: Locale) -> String {
+        let purchaseManager = StudioPurchaseManager.shared
+        if !purchaseManager.hasSimpleStudio {
+            return BuxLocalizedString.string("Get", locale: locale)
+        }
+        if purchaseManager.hasProStudio {
+            return BuxLocalizedString.string("Pro", locale: locale)
+        }
+        if store.studioEnabled {
+            return BuxLocalizedString.string("Simple", locale: locale)
+        }
+        return BuxLocalizedString.string("Off", locale: locale)
     }
 
     private static func workspaceSubtitle(store: SettingsStore, locale: Locale) -> String {

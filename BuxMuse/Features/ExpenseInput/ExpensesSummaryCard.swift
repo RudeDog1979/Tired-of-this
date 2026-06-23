@@ -27,12 +27,10 @@ struct ExpensesSummaryCard: View {
                     .font(.caption.bold())
                     .foregroundColor(.gray)
 
-                Text(
-                    AppSettingsManager.format(
-                        amount: Decimal(display.totalSpent),
-                        currency: appSettingsManager.selectedCurrency
-                    )
-                )
+                Text(ExpenseDisplayL10n.signedOutflow(
+                    amount: display.totalSpent,
+                    currency: appSettingsManager.selectedCurrency
+                ))
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                     .transaction { $0.animation = nil }

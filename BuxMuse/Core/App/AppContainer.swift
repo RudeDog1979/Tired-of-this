@@ -26,6 +26,7 @@ final class AppContainer: ObservableObject {
     public let padNavigationBrain: BuxPadNavigationBrain
     public let padSceneBrainRegistry: BuxPadSceneBrainRegistry
     public let brain: BuxMuseBrain
+    public let expenseTabStore: ExpenseTabStore
     public let financialBridge: FinancialEngineBridge
     public let goalsEngine: GoalsEngine
     public let debtEngine: DebtEngine
@@ -108,6 +109,7 @@ final class AppContainer: ObservableObject {
             goalsEngine: goalsEngine,
             insightsEngine: insightsEngine
         )
+        expenseTabStore = ExpenseTabStore(brain: brain, appSettings: appSettingsManager)
 
         brain.hydrateFromPersistence(
             appSettings: appSettingsManager,
@@ -140,8 +142,12 @@ final class AppContainer: ObservableObject {
         }
 
         PersonalCloudSyncEngine.shared.attach(brain: brain, debtEngine: debtEngine, goalsEngine: goalsEngine)
+        StudioPurchaseManager.shared.start()
         wirePersonalCloudSyncTriggers()
         wireRegionalPreferencesSync(settingsStore: settingsStore)
+        wireWalletAutoSyncTriggers(settingsStore)
+        BuxFinanceKitManager.shared.beginAutomaticSyncIfConfigured()
+        BuxFinanceKitManager.shared.scheduleDeferredSessionSyncIfNeeded()
     }
 
     private func wirePersonalCloudSyncTriggers() {
@@ -437,6 +443,25 @@ final class AppContainer: ObservableObject {
         wireSimpleStudioBudgetRefreshTriggers()
     }
 
+    private func wireWalletAutoSyncTriggers(_ settings: SettingsStore) {
+        Publishers.Merge3(
+            settings.$appleWalletSyncEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$appleWalletAutoSyncEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$appleWalletInitialSyncCompleted.dropFirst().map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { _ in
+            if SettingsStore.shared.appleWalletSyncEnabled,
+               SettingsStore.shared.appleWalletAutoSyncEnabled {
+                BuxFinanceKitManager.shared.beginAutomaticSyncIfConfigured()
+                BuxFinanceKitManager.shared.scheduleDeferredSessionSyncIfNeeded()
+            } else {
+                BuxFinanceKitManager.shared.stopAutomaticSyncScheduler()
+            }
+        }
+        .store(in: &cancellables)
+    }
+
     private func wireSimpleStudioBudgetRefreshTriggers() {
         Publishers.MergeMany(
             simpleStudioStore.$entries.dropFirst().map { _ in () }.eraseToAnyPublisher(),
@@ -465,6 +490,7 @@ final class AppContainer: ObservableObject {
             settings.$simpleBudgetCycle.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$simpleBudgetPeriodAnchor.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$incomeFundingSource.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$salaryPayProfile.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$includeSimpleStudioIncomeInBudget.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$includeProStudioIncomeInBudget.dropFirst().map { _ in () }.eraseToAnyPublisher()
         )
@@ -473,7 +499,6 @@ final class AppContainer: ObservableObject {
             self?.brain.scheduleSnapshotRefresh()
             self?.simpleStudioBrain.refreshAll()
             self?.studioBrain.scheduleRefreshAll()
-            self?.scheduleDebouncedExpenseRefresh()
         }
         .store(in: &cancellables)
 
@@ -490,7 +515,7 @@ final class AppContainer: ObservableObject {
         )
         .receive(on: RunLoop.main)
         .sink { [weak self] _ in
-            self?.scheduleDebouncedExpenseRefresh()
+            self?.brain.scheduleSnapshotRefresh()
         }
         .store(in: &cancellables)
     }

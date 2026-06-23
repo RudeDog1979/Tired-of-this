@@ -182,4 +182,64 @@ public final class DebtEngine: ObservableObject {
         debts[debtIndex].payments[paymentIndex].linkedExpenseId = expenseId
         notifyChanged()
     }
+
+    public func linkedDebt(for expenseId: UUID) -> Debt? {
+        debts.first { debt in
+            debt.payments.contains { $0.linkedExpenseId == expenseId }
+        }
+    }
+
+    func recordPaymentFromExpense(
+        debtId: UUID,
+        record: ExpenseRecord,
+        notes: String? = nil
+    ) throws {
+        guard record.isSpendingOutflow else {
+            throw DebtEngineError.notSpendingOutflow
+        }
+        if let existing = linkedDebt(for: record.id) {
+            throw DebtEngineError.alreadyLinked(debtName: existing.name)
+        }
+        guard activeDebts.contains(where: { $0.id == debtId }) else {
+            throw DebtEngineError.debtNotFound
+        }
+
+        let amount = Decimal(abs(record.amountDouble))
+        let paymentDate = Calendar.current.startOfDay(for: record.date)
+        recordPayment(
+            debtId: debtId,
+            amount: amount,
+            date: paymentDate,
+            notes: notes,
+            linkedExpenseId: record.id
+        )
+    }
+}
+
+enum DebtEngineError: LocalizedError {
+    case notSpendingOutflow
+    case alreadyLinked(debtName: String)
+    case debtNotFound
+
+    var errorDescription: String? {
+        localizedMessage(locale: BuxInterfaceLocale.currentInterfaceLocale)
+    }
+
+    func localizedMessage(locale: Locale) -> String {
+        switch self {
+        case .notSpendingOutflow:
+            return BuxCatalogLabel.string(
+                "Only spending outflows can be logged as debt payments.",
+                locale: locale
+            )
+        case .alreadyLinked(let debtName):
+            return BuxLocalizedString.format(
+                "This transaction is already linked to %@.",
+                locale: locale,
+                debtName
+            )
+        case .debtNotFound:
+            return BuxCatalogLabel.string("That debt could not be found.", locale: locale)
+        }
+    }
 }

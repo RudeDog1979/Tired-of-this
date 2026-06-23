@@ -80,10 +80,11 @@ public final class SettingsStore: ObservableObject {
     @Published public var showBudgetWarnings: Bool = true
     @Published public var autoAdjustBudgetsFromHistory: Bool = false
     @Published public var customBudgetProfiles: [CustomBudgetProfile] = []
-    @Published public var simpleBudgetLimit: Decimal = 1000
+    @Published public var simpleBudgetLimit: Decimal = 0
     @Published public var simpleBudgetCycle: SimpleBudgetCycle = .monthFirst
     @Published public var simpleBudgetPeriodAnchor: Date = Date()
-    @Published public var incomeFundingSource: IncomeFundingSource = .other
+    @Published public var incomeFundingSource: IncomeFundingSource = .salary
+    @Published public var salaryPayProfile: SalaryPayProfile = .empty
     /// When enabled, Simple Studio money-in entries count toward Standard budget earned income for the pay period.
     @Published public var includeSimpleStudioIncomeInBudget: Bool = false
     /// When enabled, paid Pro Studio invoices count toward Standard budget earned income for the pay period.
@@ -128,7 +129,75 @@ public final class SettingsStore: ObservableObject {
     @Published public var studioMode: StudioMode = .simple
     @Published public var studioPersona: StudioPersona = .other
     @Published public var studioPersonaConfigured: Bool = false
-    
+    /// Pre-IAP installs that already unlocked Studio keep access after StoreKit ships.
+    @Published public var studioLegacySimpleEntitled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.studio.legacySimple") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(studioLegacySimpleEntitled, forKey: "buxmuse.studio.legacySimple")
+        }
+    }
+    @Published public var studioLegacyProEntitled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.studio.legacyPro") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(studioLegacyProEntitled, forKey: "buxmuse.studio.legacyPro")
+        }
+    }
+    @Published public var studioIAPLegacyReconciled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.studio.iapLegacyReconciled") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(studioIAPLegacyReconciled, forKey: "buxmuse.studio.iapLegacyReconciled")
+        }
+    }
+
+    /// Premium access for installs that predated subscriptions (TestFlight grandfather).
+    @Published public var premiumLegacyEntitled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.premium.legacyEntitled") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(premiumLegacyEntitled, forKey: "buxmuse.premium.legacyEntitled")
+        }
+    }
+
+    /// First launch timestamp for the 7-day Premium trial.
+    @Published public var premiumTrialStartDate: Date? = {
+        guard let interval = UserDefaults.standard.object(forKey: "buxmuse.premium.trialStart") as? TimeInterval else {
+            return nil
+        }
+        return Date(timeIntervalSince1970: interval)
+    }() {
+        didSet {
+            guard isLoaded else { return }
+            if let premiumTrialStartDate {
+                UserDefaults.standard.set(premiumTrialStartDate.timeIntervalSince1970, forKey: "buxmuse.premium.trialStart")
+            } else {
+                UserDefaults.standard.removeObject(forKey: "buxmuse.premium.trialStart")
+            }
+        }
+    }
+
+    static let premiumTrialLengthDays = 7
+
+    var isPremiumTrialActive: Bool {
+        guard let start = premiumTrialStartDate else { return false }
+        guard !premiumLegacyEntitled else { return false }
+        let elapsed = Date().timeIntervalSince(start)
+        return elapsed < Double(Self.premiumTrialLengthDays) * 86_400
+    }
+
+    var premiumTrialDaysRemaining: Int {
+        guard let start = premiumTrialStartDate else { return 0 }
+        let end = start.addingTimeInterval(Double(Self.premiumTrialLengthDays) * 86_400)
+        let remaining = end.timeIntervalSince(Date())
+        guard remaining > 0 else { return 0 }
+        return Int(ceil(remaining / 86_400))
+    }
+
+    func ensurePremiumTrialStarted() {
+        guard premiumTrialStartDate == nil, !premiumLegacyEntitled else { return }
+        premiumTrialStartDate = Date()
+        save(notifyCloudSync: false)
+        objectWillChange.send()
+    }
+
     // MARK: - Notifications Settings
     @Published public var notificationsEnabled: Bool = true
     @Published public var budgetAlertsEnabled: Bool = true
@@ -258,6 +327,42 @@ public final class SettingsStore: ObservableObject {
         didSet {
             guard isLoaded else { return }
             UserDefaults.standard.set(paymentSourceTrackingEnabled, forKey: "buxmuse.paymentsource.enabled")
+        }
+    }
+
+    // MARK: - Apple Wallet / FinanceKit Settings
+    @Published public var appleWalletSyncEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.applewallet.enabled") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(appleWalletSyncEnabled, forKey: "buxmuse.applewallet.enabled")
+        }
+    }
+
+    @Published public var appleWalletAutoSyncEnabled: Bool = UserDefaults.standard.bool(forKey: "buxmuse.applewallet.autosync") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(appleWalletAutoSyncEnabled, forKey: "buxmuse.applewallet.autosync")
+        }
+    }
+
+    @Published public var appleWalletInitialSyncCompleted: Bool = UserDefaults.standard.bool(forKey: "buxmuse.applewallet.initialsync.done") {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(appleWalletInitialSyncCompleted, forKey: "buxmuse.applewallet.initialsync.done")
+        }
+    }
+
+    @Published public var appleWalletLastSyncDate: Date? = {
+        let raw = UserDefaults.standard.double(forKey: "buxmuse.applewallet.lastsync")
+        return raw > 0 ? Date(timeIntervalSince1970: raw) : nil
+    }() {
+        didSet {
+            guard isLoaded else { return }
+            if let appleWalletLastSyncDate {
+                UserDefaults.standard.set(appleWalletLastSyncDate.timeIntervalSince1970, forKey: "buxmuse.applewallet.lastsync")
+            } else {
+                UserDefaults.standard.removeObject(forKey: "buxmuse.applewallet.lastsync")
+            }
         }
     }
 
@@ -471,6 +576,7 @@ public final class SettingsStore: ObservableObject {
         let simpleBudgetCycle: SimpleBudgetCycle?
         let simpleBudgetPeriodAnchor: Date?
         let incomeFundingSource: IncomeFundingSource?
+        let salaryPayProfile: SalaryPayProfile?
         let includeSimpleStudioIncomeInBudget: Bool?
         let includeProStudioIncomeInBudget: Bool?
         let customBudgetLimit: Decimal?
@@ -539,7 +645,7 @@ public final class SettingsStore: ObservableObject {
             case solarContrastModeEnabled
             case weekStartDay, budgetingMode, defaultBudgetPeriod
             case showBudgetWarnings, autoAdjustBudgetsFromHistory, customBudgetProfiles
-            case simpleBudgetLimit, simpleBudgetCycle, simpleBudgetPeriodAnchor, incomeFundingSource
+            case simpleBudgetLimit, simpleBudgetCycle, simpleBudgetPeriodAnchor, incomeFundingSource, salaryPayProfile
             case includeSimpleStudioIncomeInBudget
             case includeProStudioIncomeInBudget
             case customBudgetLimit, customBudgetPeriod, budgetApproachingThresholdPercent, budgetQuickSetupCompleted
@@ -611,6 +717,7 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetCycle = try c.decodeIfPresent(SimpleBudgetCycle.self, forKey: .simpleBudgetCycle)
             simpleBudgetPeriodAnchor = try c.decodeIfPresent(Date.self, forKey: .simpleBudgetPeriodAnchor)
             incomeFundingSource = try c.decodeIfPresent(IncomeFundingSource.self, forKey: .incomeFundingSource)
+            salaryPayProfile = try c.decodeIfPresent(SalaryPayProfile.self, forKey: .salaryPayProfile)
             includeSimpleStudioIncomeInBudget = try c.decodeIfPresent(Bool.self, forKey: .includeSimpleStudioIncomeInBudget)
             includeProStudioIncomeInBudget = try c.decodeIfPresent(Bool.self, forKey: .includeProStudioIncomeInBudget)
             customBudgetLimit = try c.decodeIfPresent(Decimal.self, forKey: .customBudgetLimit)
@@ -695,6 +802,7 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetCycle: SimpleBudgetCycle?,
             simpleBudgetPeriodAnchor: Date?,
             incomeFundingSource: IncomeFundingSource?,
+            salaryPayProfile: SalaryPayProfile? = nil,
             includeSimpleStudioIncomeInBudget: Bool?,
             includeProStudioIncomeInBudget: Bool?,
             customBudgetLimit: Decimal?,
@@ -773,6 +881,7 @@ public final class SettingsStore: ObservableObject {
             self.simpleBudgetCycle = simpleBudgetCycle
             self.simpleBudgetPeriodAnchor = simpleBudgetPeriodAnchor
             self.incomeFundingSource = incomeFundingSource
+            self.salaryPayProfile = salaryPayProfile
             self.includeSimpleStudioIncomeInBudget = includeSimpleStudioIncomeInBudget ?? false
             self.includeProStudioIncomeInBudget = includeProStudioIncomeInBudget ?? false
             self.customBudgetLimit = customBudgetLimit
@@ -854,6 +963,7 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(simpleBudgetCycle, forKey: .simpleBudgetCycle)
             try c.encodeIfPresent(simpleBudgetPeriodAnchor, forKey: .simpleBudgetPeriodAnchor)
             try c.encodeIfPresent(incomeFundingSource, forKey: .incomeFundingSource)
+            try c.encodeIfPresent(salaryPayProfile, forKey: .salaryPayProfile)
             try c.encodeIfPresent(includeSimpleStudioIncomeInBudget, forKey: .includeSimpleStudioIncomeInBudget)
             try c.encodeIfPresent(includeProStudioIncomeInBudget, forKey: .includeProStudioIncomeInBudget)
             try c.encodeIfPresent(customBudgetLimit, forKey: .customBudgetLimit)
@@ -955,10 +1065,11 @@ public final class SettingsStore: ObservableObject {
                 self.showBudgetWarnings = payload.showBudgetWarnings
                 self.autoAdjustBudgetsFromHistory = payload.autoAdjustBudgetsFromHistory
                 self.customBudgetProfiles = payload.customBudgetProfiles.filter { $0.name != "Standard Essentials" }
-                self.simpleBudgetLimit = payload.simpleBudgetLimit ?? 1000
+                self.simpleBudgetLimit = payload.simpleBudgetLimit ?? 0
                 self.simpleBudgetCycle = payload.simpleBudgetCycle ?? .monthFirst
                 self.simpleBudgetPeriodAnchor = payload.simpleBudgetPeriodAnchor ?? Date()
-                self.incomeFundingSource = payload.incomeFundingSource ?? .other
+                self.incomeFundingSource = payload.incomeFundingSource ?? .salary
+                self.salaryPayProfile = payload.salaryPayProfile ?? .empty
                 self.includeSimpleStudioIncomeInBudget = payload.includeSimpleStudioIncomeInBudget ?? false
                 self.includeProStudioIncomeInBudget = payload.includeProStudioIncomeInBudget ?? false
                 self.customBudgetLimit = payload.customBudgetLimit ?? 50
@@ -1036,6 +1147,7 @@ public final class SettingsStore: ObservableObject {
                 }
                 
                 self.isLoaded = true
+                ensurePremiumTrialStarted()
                 print("SettingsStore: successfully loaded settings.")
                 return
             } catch {
@@ -1046,6 +1158,7 @@ public final class SettingsStore: ObservableObject {
         // Defaults seed
         seedDefaults()
         self.isLoaded = true
+        ensurePremiumTrialStarted()
     }
     
     private func seedDefaults() {
@@ -1068,6 +1181,11 @@ public final class SettingsStore: ObservableObject {
         self.budgetingMode = .simple
         self.defaultBudgetPeriod = .monthly
         self.studioEnabled = false
+        self.studioLegacySimpleEntitled = false
+        self.studioLegacyProEntitled = false
+        self.studioIAPLegacyReconciled = false
+        self.premiumLegacyEntitled = false
+        self.premiumTrialStartDate = nil
         self.notificationsEnabled = true
         self.burnoutGuardEnabled = true
         self.healthKitSyncEnabled = false
@@ -1078,16 +1196,21 @@ public final class SettingsStore: ObservableObject {
         self.sideHustleMatrixEnabled = false
         self.showUnassignedExpensesInWorkspace = true
         self.paymentSourceTrackingEnabled = true
+        self.appleWalletSyncEnabled = false
+        self.appleWalletAutoSyncEnabled = false
+        self.appleWalletInitialSyncCompleted = false
+        self.appleWalletLastSyncDate = nil
         self.dualCashDrawerEnabled = false
         self.primaryLocalCurrency = "USD"
         self.secondaryTradingCurrency = "DOP"
         self.cashLocalBalanceValue = 0.0
         self.cashSecondaryBalanceValue = 0.0
         self.customBudgetProfiles = []
-        self.simpleBudgetLimit = 1000
+        self.simpleBudgetLimit = 0
         self.simpleBudgetCycle = .monthFirst
         self.simpleBudgetPeriodAnchor = Date()
-        self.incomeFundingSource = .other
+        self.incomeFundingSource = .salary
+        self.salaryPayProfile = .empty
         self.customBudgetLimit = 50
         self.customBudgetPeriod = .weekly
         self.budgetApproachingThresholdPercent = 80
@@ -1255,6 +1378,7 @@ public final class SettingsStore: ObservableObject {
             simpleBudgetCycle: simpleBudgetCycle,
             simpleBudgetPeriodAnchor: simpleBudgetPeriodAnchor,
             incomeFundingSource: incomeFundingSource,
+            salaryPayProfile: salaryPayProfile,
             includeSimpleStudioIncomeInBudget: includeSimpleStudioIncomeInBudget,
             includeProStudioIncomeInBudget: includeProStudioIncomeInBudget,
             customBudgetLimit: customBudgetLimit,

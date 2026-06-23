@@ -159,8 +159,12 @@ struct ExpenseLedgerAvatarView: View {
 
     var body: some View {
         Group {
-            if let storeName = linkedStoreDisplayName {
-                AsyncMerchantLogoView(merchantName: storeName, size: size)
+            if let logoContext = linkedLogoContext {
+                AsyncMerchantLogoView(
+                    merchantName: logoContext.name,
+                    knownDomain: logoContext.knownDomain,
+                    size: size
+                )
             } else {
                 categoryAvatar
             }
@@ -168,11 +172,13 @@ struct ExpenseLedgerAvatarView: View {
         .frame(width: size, height: size)
     }
 
-    private var linkedStoreDisplayName: String? {
-        ExpenseLedgerAvatarPolicy.merchantLogoName(
+    private var linkedLogoContext: (name: String, knownDomain: String?)? {
+        guard let context = brain.merchantLogoContext(for: record) else { return nil }
+        guard let name = ExpenseLedgerAvatarPolicy.merchantLogoName(
             for: record,
-            linkedMerchantName: brain.merchantLogoName(for: record)
-        )
+            linkedMerchantName: context.name
+        ) else { return nil }
+        return (name, context.knownDomain)
     }
 
     private var categoryAvatar: some View {

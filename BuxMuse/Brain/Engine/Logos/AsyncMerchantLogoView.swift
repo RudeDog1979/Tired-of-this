@@ -10,14 +10,17 @@ import SwiftUI
 
 public struct AsyncMerchantLogoView: View {
     public let merchantName: String
+    /// When set (linked merchants), skips fuzzy catalog matching during plan resolution.
+    public var knownDomain: String?
     public var size: CGFloat = 44
 
     @State private var image: UIImage?
     @State private var loadedOpacity: Double = 0
     @State private var loadToken = UUID()
 
-    public init(merchantName: String, size: CGFloat = 44) {
+    public init(merchantName: String, knownDomain: String? = nil, size: CGFloat = 44) {
         self.merchantName = merchantName
+        self.knownDomain = knownDomain
         self.size = size
     }
 
@@ -34,6 +37,11 @@ public struct AsyncMerchantLogoView: View {
 
     private var trimmedMerchantName: String {
         merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var loadIdentity: String {
+        let domain = knownDomain?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return "\(trimmedMerchantName)|\(domain)"
     }
 
     @ViewBuilder
@@ -67,9 +75,10 @@ public struct AsyncMerchantLogoView: View {
                 .transition(.opacity)
             }
         }
-        .task(id: trimmedMerchantName) {
+        .task(id: loadIdentity) {
             guard !SettingsStore.shared.dataGuardModeEnabled else { return }
-            loadLogo()
+            await Task.yield()
+            await loadLogo()
         }
     }
 
@@ -116,46 +125,73 @@ public struct AsyncMerchantLogoView: View {
         return Color(hue: hue, saturation: 0.55, brightness: 0.62)
     }
 
-    private func loadLogo() {
+    private func loadLogo() async {
         let token = UUID()
-        loadToken = token
-        image = nil
-        loadedOpacity = 0
+        let name = trimmedMerchantName
+        let domain = knownDomain?.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard let plan = MerchantLogoEngine.fetchPlan(for: trimmedMerchantName) else { return }
+        await MainActor.run {
+            loadToken = token
+        }
 
-        if let cached = LightweightLogoCache.shared.getImage(forKey: plan.cacheKey) {
-            image = cached
-            loadedOpacity = 1
+        let plan = await Task.detached(priority: .utility) {
+            MerchantLogoEngine.fetchPlan(for: name, knownDomain: domain)
+        }.value
+
+        guard let plan else {
+            await MainActor.run {
+                guard loadToken == token else { return }
+                image = nil
+                loadedOpacity = 0
+            }
             return
         }
 
-        Task {
-            let shouldFetch = await MainActor.run { ConnectivityBrain.shared.shouldFetchMerchantIcons }
-            guard shouldFetch else { return }
-            guard let fetched = await MerchantLogoEngine.fetchRemoteLogo(plan: plan) else { return }
+        let cached = await MainActor.run {
+            LightweightLogoCache.shared.getImage(forKey: plan.cacheKey)
+        }
+
+        if let cached {
             await MainActor.run {
                 guard loadToken == token else { return }
-                image = fetched
+                image = cached
                 loadedOpacity = 1
             }
+            return
+        }
+
+        await MainActor.run {
+            guard loadToken == token else { return }
+            image = nil
+            loadedOpacity = 0
+        }
+
+        let shouldFetch = await MainActor.run { ConnectivityBrain.shared.shouldFetchMerchantIcons }
+        guard shouldFetch else { return }
+
+        guard let fetched = await MerchantLogoEngine.fetchRemoteLogo(plan: plan) else { return }
+
+        await MainActor.run {
+            guard loadToken == token else { return }
+            image = fetched
+            loadedOpacity = 1
         }
     }
 
     private var fallbackSymbol: String {
-        let normalized = MerchantLogoEngine.normalizeMerchantName(trimmedMerchantName)
-        if normalized.contains("biedronka") || normalized.contains("lidl") || normalized.contains("aldi")
-            || normalized.contains("tesco") || normalized.contains("asda") || normalized.contains("sainsbury")
-            || normalized.contains("carrefour") || normalized.contains("kaufland") || normalized.contains("zabka") {
+        let lower = trimmedMerchantName.lowercased()
+        if lower.contains("biedronka") || lower.contains("lidl") || lower.contains("aldi")
+            || lower.contains("tesco") || lower.contains("asda") || lower.contains("sainsbury")
+            || lower.contains("carrefour") || lower.contains("kaufland") || lower.contains("zabka") {
             return "cart.fill"
         }
-        if normalized.contains("spotify") || normalized.contains("music") || normalized.contains("netflix") {
+        if lower.contains("spotify") || lower.contains("music") || lower.contains("netflix") {
             return "arrow.triangle.2.circlepath"
-        } else if normalized.contains("uber") || normalized.contains("taxi") || normalized.contains("car") {
+        } else if lower.contains("uber") || lower.contains("taxi") || lower.contains("car") {
             return "car.fill"
-        } else if normalized.contains("market") || normalized.contains("grocer") || normalized.contains("store") {
+        } else if lower.contains("market") || lower.contains("grocer") || lower.contains("store") {
             return "cart.fill"
-        } else if normalized.contains("starbucks") || normalized.contains("coffee") || normalized.contains("restaurant") || normalized.contains("food") {
+        } else if lower.contains("starbucks") || lower.contains("coffee") || lower.contains("restaurant") || lower.contains("food") {
             return "fork.knife"
         }
         return "building.2.crop.circle"

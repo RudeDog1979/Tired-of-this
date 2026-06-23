@@ -88,6 +88,9 @@
             ReferencedContainer = "container:BuxMuse.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../BuxMuse/Configuration/BuxMuse.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

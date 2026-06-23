@@ -143,6 +143,21 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
     public var isCategorySplit: Bool
     public var splitLines: [ExpenseSplitLineRecord]
     public var householdScope: HouseholdScope
+    public var financeKitTransactionId: String?
+    /// FinanceKit account that owns this Wallet row — used to match one bank account, not Apple Cash + checking combined.
+    public var walletAccountId: String?
+    /// Apple Wallet / FinanceKit authorization still pending bank posting.
+    public var walletIsPending: Bool
+    /// User manually picked the category for this wallet row — auto re-classify must not override.
+    public var walletCategoryUserConfirmed: Bool
+    /// Last auto-classifier confidence (`high` / `medium` / `low`) for wallet imports.
+    public var walletCategoryConfidence: String?
+    /// Explicit income subtype — e.g. linked paycheck (`salary`).
+    public var incomeRole: String?
+
+    public var isSalaryTagged: Bool {
+        incomeRole == "salary"
+    }
 
     public var synergyBridgeKind: SynergyBridgeKind? {
         bridgeKind.flatMap { SynergyBridgeKind(rawValue: $0) }
@@ -179,6 +194,16 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
 
     public var spendingAmountDouble: Double {
         guard isSpendingOutflow else { return 0 }
+        return abs(amountDouble)
+    }
+
+    /// Paycheck, deposits, and other booked income — excluded from spend totals.
+    public var isIncomeInflow: Bool {
+        amountValue > 0 && transactionCategory == .income
+    }
+
+    public var incomeAmountDouble: Double {
+        guard isIncomeInflow else { return 0 }
         return abs(amountDouble)
     }
 
@@ -227,7 +252,11 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         bridgeCounterpartyHustleId: UUID? = nil,
         isCategorySplit: Bool = false,
         splitLines: [ExpenseSplitLineRecord] = [],
-        householdScope: HouseholdScope = .personal
+        householdScope: HouseholdScope = .personal,
+        walletIsPending: Bool = false,
+        walletCategoryUserConfirmed: Bool = false,
+        walletCategoryConfidence: String? = nil,
+        incomeRole: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -274,6 +303,10 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         self.isCategorySplit = isCategorySplit
         self.splitLines = splitLines
         self.householdScope = householdScope
+        self.walletIsPending = walletIsPending
+        self.walletCategoryUserConfirmed = walletCategoryUserConfirmed
+        self.walletCategoryConfidence = walletCategoryConfidence
+        self.incomeRole = incomeRole
     }
 
     public func toTransaction() -> Transaction {
@@ -306,7 +339,7 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
     }
 
     public static func from(_ entity: ExpenseEntity) -> ExpenseRecord {
-        ExpenseRecord(
+        var record = ExpenseRecord(
             id: entity.id,
             name: entity.name.isEmpty ? entity.merchantName : entity.name,
             amountValue: entity.amountValue,
@@ -355,6 +388,8 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
                 .map { ExpenseSplitLineRecord.from($0) },
             householdScope: HouseholdScope(rawValue: entity.householdScopeRaw) ?? .personal
         )
+        record.financeKitTransactionId = entity.financeKitTransactionId
+        return record
     }
 
     public static func from(_ transaction: Transaction, categoryId: UUID?, merchantId: UUID?) -> ExpenseRecord {
@@ -651,24 +686,52 @@ enum ExpenseCategoryCatalog {
 
 public struct ExpenseInteractionDisplay {
     public var header: ExpensesHeaderDisplay
+    public var pendingExpenses: [ExpenseRowDisplay]
     public var sections: [ExpenseSectionDisplay]
     public var summary: ExpensesSummaryDisplay
-    
+    public var archiveMonths: [ExpenseArchiveMonthIndex]
+
     public static let empty = ExpenseInteractionDisplay(
-        header: ExpensesHeaderDisplay(totalSpent: 0, changeVsLastMonth: 0, monthlyTransactionCount: 0, biggestCategory: nil, biggestMerchant: nil, sparklinePoints: [], microInsight: nil),
+        header: ExpensesHeaderDisplay(
+            totalSpent: 0,
+            totalIncome: 0,
+            ledgerBalance: 0,
+            changeVsLastMonth: 0,
+            monthlyTransactionCount: 0,
+            biggestCategory: nil,
+            biggestMerchant: nil,
+            sparklinePoints: [],
+            microInsight: nil,
+            periodRangeSubtitle: nil,
+            periodElapsedDays: 1
+        ),
+        pendingExpenses: [],
         sections: [],
-        summary: ExpensesSummaryDisplay(totalSpent: 0, categoryBreakdown: [], merchantBreakdown: [], trendPoints: [], prediction: nil)
+        summary: ExpensesSummaryDisplay(
+            totalSpent: 0,
+            changeVsLastMonth: 0,
+            categoryBreakdown: [],
+            merchantBreakdown: [],
+            trendPoints: [],
+            prediction: nil
+        ),
+        archiveMonths: []
     )
 }
 
 public struct ExpensesHeaderDisplay {
     public var totalSpent: Double
+    public var totalIncome: Double
+    /// Signed ledger balance for the active currency — income (+) and expenses (−), including pending Wallet rows.
+    public var ledgerBalance: Double
     public var changeVsLastMonth: Double
     public var monthlyTransactionCount: Int
     public var biggestCategory: String?
     public var biggestMerchant: String?
     public var sparklinePoints: [Double]
     public var microInsight: String?
+    public var periodRangeSubtitle: String?
+    public var periodElapsedDays: Int
 }
 
 public struct ExpenseSectionDisplay: Identifiable {
@@ -695,10 +758,15 @@ public struct ExpenseRowDisplay: Identifiable {
     public var isUnassignedWorkspace: Bool
     public var workspaceLabel: String?
     public var bridgeBadge: String?
+    public var isWalletPending: Bool = false
+    public var isSalaryTagged: Bool = false
+    public var isIncomeInflow: Bool = false
+    public var linkedDebtName: String?
 }
 
 public struct ExpensesSummaryDisplay {
     public var totalSpent: Double
+    public var changeVsLastMonth: Double
     public var categoryBreakdown: [(String, Double)]
     public var merchantBreakdown: [(String, Double)]
     public var trendPoints: [Double]

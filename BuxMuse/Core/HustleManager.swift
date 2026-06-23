@@ -102,7 +102,7 @@ public final class HustleManager: ObservableObject {
     }
     
     public func canAddHustle() -> Bool {
-        let isPro = SettingsStore.shared.studioMode == .pro
+        let isPro = StudioFeatureGate.isPro
         if isPro {
             return true
         } else {

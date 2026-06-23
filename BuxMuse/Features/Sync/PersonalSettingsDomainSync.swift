@@ -48,6 +48,7 @@ struct SettingsBudgetDomain: Codable, Equatable {
     var simpleBudgetCycle: SimpleBudgetCycle
     var simpleBudgetPeriodAnchor: Date
     var incomeFundingSource: IncomeFundingSource
+    var salaryPayProfile: SalaryPayProfile?
     var includeSimpleStudioIncomeInBudget: Bool
     var includeProStudioIncomeInBudget: Bool
     var customBudgetLimit: Decimal
@@ -442,6 +443,7 @@ enum PersonalSettingsDomainSync {
                 simpleBudgetCycle: store.simpleBudgetCycle,
                 simpleBudgetPeriodAnchor: store.simpleBudgetPeriodAnchor,
                 incomeFundingSource: store.incomeFundingSource,
+                salaryPayProfile: store.salaryPayProfile,
                 includeSimpleStudioIncomeInBudget: store.includeSimpleStudioIncomeInBudget,
                 includeProStudioIncomeInBudget: store.includeProStudioIncomeInBudget,
                 customBudgetLimit: store.customBudgetLimit,
@@ -585,6 +587,7 @@ enum PersonalSettingsDomainSync {
             store.simpleBudgetCycle = payload.simpleBudgetCycle
             store.simpleBudgetPeriodAnchor = payload.simpleBudgetPeriodAnchor
             store.incomeFundingSource = payload.incomeFundingSource
+            store.salaryPayProfile = payload.salaryPayProfile ?? .empty
             store.includeSimpleStudioIncomeInBudget = payload.includeSimpleStudioIncomeInBudget
             store.includeProStudioIncomeInBudget = payload.includeProStudioIncomeInBudget
             store.customBudgetLimit = payload.customBudgetLimit

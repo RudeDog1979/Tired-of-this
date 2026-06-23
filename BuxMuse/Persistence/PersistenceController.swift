@@ -16,6 +16,8 @@ public final class PersistenceController: ObservableObject {
     public private(set) var container: ModelContainer
     /// App-wide main-queue context (`container.mainContext`). Never use from background queues.
     public private(set) var context: ModelContext
+    /// GRDB expense ledger — hot path reads/writes for expenses + split lines.
+    private(set) var expenseDatabase: ExpenseDatabase
     /// Set when we had to fall back to in-memory or recovery store — UI can surface a one-time notice.
     @Published public private(set) var lastBootstrapIssue: String?
 
@@ -40,9 +42,37 @@ public final class PersistenceController: ObservableObject {
         context.autosaveEnabled = false
         lastBootstrapIssue = bootstrap.issueMessage
 
+        do {
+            expenseDatabase = try ExpenseDatabase()
+        } catch {
+            lastBootstrapIssue = "Expense database failed to open: \(error.localizedDescription)"
+            fatalError("Expense GRDB bootstrap failed: \(error)")
+        }
+
         if bootstrap.shouldAttemptMigration {
             PersistenceStoreMigration.migrateIfNeeded(into: self)
         }
+
+        do {
+            try bootstrapExpenseGRDBIfNeeded()
+        } catch {
+            lastBootstrapIssue = "Expense GRDB migration failed: \(error.localizedDescription)"
+            fatalError("Expense GRDB migration failed: \(error)")
+        }
+    }
+
+    private func bootstrapExpenseGRDBIfNeeded() throws {
+        _ = try expenseDatabase.migrateFromSwiftDataIfNeeded { [self] in
+            try fetchAllExpenseRecordsFromSwiftData()
+        }
+    }
+
+    /// One-time SwiftData source for GRDB migration — not used on the hot path after cutover.
+    private func fetchAllExpenseRecordsFromSwiftData() throws -> [ExpenseRecord] {
+        let descriptor = FetchDescriptor<ExpenseEntity>(
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        return try context.fetch(descriptor).map { ExpenseRecord.from($0) }
     }
 
     private struct BootstrapResult {
@@ -317,12 +347,27 @@ public final class PersistenceController: ObservableObject {
 
     func replaceSubscriptionCache(_ subscriptions: [SubscriptionInfo]) throws {
         let existing = try context.fetch(FetchDescriptor<SubscriptionEntity>())
-        existing.forEach { context.delete($0) }
+        var byKey = Dictionary(uniqueKeysWithValues: existing.map { ($0.merchantKey, $0) })
         let encoder = JSONEncoder()
+        let incomingKeys = Set(
+            subscriptions.map { MerchantLogoEngine.normalizeMerchantName($0.merchantName) }
+        )
+
         for sub in subscriptions {
             let key = MerchantLogoEngine.normalizeMerchantName(sub.merchantName)
             guard let data = try? encoder.encode(sub) else { continue }
-            context.insert(SubscriptionEntity(merchantKey: key, payloadJSON: data))
+            if let entity = byKey[key] {
+                entity.payloadJSON = data
+                entity.updatedAt = Date()
+            } else {
+                let entity = SubscriptionEntity(merchantKey: key, payloadJSON: data)
+                context.insert(entity)
+                byKey[key] = entity
+            }
+        }
+
+        for entity in existing where !incomingKeys.contains(entity.merchantKey) {
+            context.delete(entity)
         }
         try context.save()
     }
@@ -347,11 +392,16 @@ public final class PersistenceController: ObservableObject {
         try context.fetch(FetchDescriptor<ExpenseEntity>())
     }
 
+    func expenseRecordCount() throws -> Int {
+        try expenseDatabase.expenseCount()
+    }
+
     func fetchAllGoalEntities() throws -> [GoalEntity] {
         try context.fetch(FetchDescriptor<GoalEntity>())
     }
 
     func purgeExpensesAndGoals() throws {
+        try expenseDatabase.purgeAllExpenses()
         let expenses = try fetchAllExpenseEntities()
         expenses.forEach { context.delete($0) }
         let goals = try fetchAllGoalEntities()
@@ -401,6 +451,25 @@ public final class PersistenceController: ObservableObject {
         context.autosaveEnabled = false
         didRunSeedAndMigration = false
         try seedExpenseCatalogIfNeeded()
+        ExpenseDatabase.removeDatabaseFiles()
+        expenseDatabase = try ExpenseDatabase()
+    }
+}
+
+// MARK: - GRDB scoped reads
+
+extension PersistenceController {
+    func fetchExpenseLedgerScope(currentMonthStart: Date, lastMonthStart: Date) throws -> ExpenseLedgerScopePack {
+        try expenseDatabase.fetchLedgerScope(
+            currentMonthStart: currentMonthStart,
+            lastMonthStart: lastMonthStart,
+            hustleId: HustleWorkspaceFilter.selectedHustleId,
+            includeUnassigned: HustleWorkspaceFilter.showUnassignedWhenFiltered
+        )
+    }
+
+    func fetchExpenseMonthRecords(monthStart: Date, monthEnd: Date) throws -> [ExpenseRecord] {
+        try expenseDatabase.fetchMonthRecords(monthStart: monthStart, monthEnd: monthEnd)
     }
 }
 

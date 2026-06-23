@@ -107,6 +107,40 @@ public enum IncomeFundingSource: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// User-linked paycheck fingerprint for repeat Wallet / manual salary recognition.
+public struct SalaryPayProfile: Codable, Equatable, Sendable {
+    public var isConfigured: Bool
+    public var payCycle: SimpleBudgetCycle
+    public var payAnchorDate: Date
+    public var anchorExpenseId: UUID?
+    public var anchorFinanceKitId: String?
+    public var matchMerchantKey: String
+    public var expectedAmount: Decimal
+    public var amountTolerancePercent: Double
+
+    public init(
+        isConfigured: Bool = false,
+        payCycle: SimpleBudgetCycle = .monthFirst,
+        payAnchorDate: Date = Date(),
+        anchorExpenseId: UUID? = nil,
+        anchorFinanceKitId: String? = nil,
+        matchMerchantKey: String = "",
+        expectedAmount: Decimal = 0,
+        amountTolerancePercent: Double = 0.05
+    ) {
+        self.isConfigured = isConfigured
+        self.payCycle = payCycle
+        self.payAnchorDate = payAnchorDate
+        self.anchorExpenseId = anchorExpenseId
+        self.anchorFinanceKitId = anchorFinanceKitId
+        self.matchMerchantKey = matchMerchantKey
+        self.expectedAmount = expectedAmount
+        self.amountTolerancePercent = amountTolerancePercent
+    }
+
+    public static var empty: SalaryPayProfile { SalaryPayProfile() }
+}
+
 /// Simple-budget spend window (independent of calendar month when using mid-month / pay cycles).
 public enum SimpleBudgetCycle: String, Codable, CaseIterable, Identifiable {
     case monthFirst = "Month starts on the 1st"

@@ -17,6 +17,7 @@ struct VisualHorizonView: View {
     var cornerRadius: CGFloat = 28
     
     @State private var animates = false
+    @State private var didReveal = false
     
     var body: some View {
         GeometryReader { geo in
@@ -97,10 +98,19 @@ struct VisualHorizonView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             )
             .onAppear {
-                withAnimation(.spring(response: 3.8, dampingFraction: 0.96)) {
-                    animates = true
-                }
+                tryRevealHorizon()
             }
+            .onChange(of: points) { _, _ in
+                tryRevealHorizon()
+            }
+        }
+    }
+
+    private func tryRevealHorizon() {
+        guard !didReveal, !points.isEmpty else { return }
+        didReveal = true
+        withAnimation(.spring(response: 3.8, dampingFraction: 0.96)) {
+            animates = true
         }
     }
     

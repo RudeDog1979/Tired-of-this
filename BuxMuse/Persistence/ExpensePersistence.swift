@@ -43,6 +43,10 @@ extension PersistenceController {
         }
         guard !deletedIDs.isEmpty else { return }
 
+        for merchantId in deletedIDs {
+            try expenseDatabase.clearMerchantId(merchantId)
+        }
+
         let expenses = try context.fetch(FetchDescriptor<ExpenseEntity>())
         var changed = false
         for expense in expenses where expense.merchantId.map({ deletedIDs.contains($0) }) == true {
@@ -50,7 +54,7 @@ extension PersistenceController {
             expense.updatedAt = Date()
             changed = true
         }
-        if changed || !deletedIDs.isEmpty {
+        if changed {
             try context.save()
         }
     }
@@ -146,12 +150,55 @@ extension PersistenceController {
 
     func fetchAllExpenseRecords() throws -> [ExpenseRecord] {
         try seedExpenseCatalogIfNeeded()
-        let descriptor = FetchDescriptor<ExpenseEntity>(sortBy: [SortDescriptor(\.date, order: .reverse)])
-        return try context.fetch(descriptor).map { ExpenseRecord.from($0) }
+        return try expenseDatabase.fetchAllRecords()
+    }
+
+    func hasFinanceKitImportedExpenses() throws -> Bool {
+        try fetchAllExpenseRecords().contains { record in
+            guard let financeKitTransactionId = record.financeKitTransactionId else { return false }
+            return !financeKitTransactionId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+    }
+
+    func fetchExpenseRecords(
+        from start: Date,
+        to end: Date,
+        hustleId: UUID?,
+        includeUnassigned: Bool
+    ) throws -> [ExpenseRecord] {
+        try seedExpenseCatalogIfNeeded()
+        return try expenseDatabase.fetchRecords(
+            from: start,
+            to: end,
+            hustleId: hustleId,
+            includeUnassigned: includeUnassigned
+        )
+    }
+
+    func fetchExpenseRecordsForIntelligence(around record: ExpenseRecord) throws -> [ExpenseRecord] {
+        try seedExpenseCatalogIfNeeded()
+        return try expenseDatabase.fetchRecordsForIntelligence(around: record)
+    }
+
+    func fetchExpenseRecordsMatchingMerchant(merchantName: String) throws -> [ExpenseRecord] {
+        try seedExpenseCatalogIfNeeded()
+        return try expenseDatabase.fetchRecordsMatchingMerchant(merchantName: merchantName)
     }
 
     func fetchExpenseRecord(id: UUID) throws -> ExpenseRecord? {
-        try fetchExpenseEntity(id: id).map { ExpenseRecord.from($0) }
+        try expenseDatabase.fetchRecord(id: id)
+    }
+
+    func fetchExpenseRecordByFinanceKitId(_ financeKitId: String) throws -> ExpenseRecord? {
+        try expenseDatabase.fetchRecord(financeKitTransactionId: financeKitId)
+    }
+
+    func fetchPendingWalletExpenseRecords() throws -> [ExpenseRecord] {
+        try expenseDatabase.fetchPendingWalletRecords()
+    }
+
+    func fetchWalletImportedExpenseRecords() throws -> [ExpenseRecord] {
+        try expenseDatabase.fetchWalletImportedRecords()
     }
 
     func upsertExpenseRecord(_ record: ExpenseRecord, merchantSelection: MerchantSelection? = nil) throws -> ExpenseRecord {
@@ -160,7 +207,6 @@ extension PersistenceController {
         if let merchant = try resolveMerchantIfNeeded(for: record, selection: merchantSelection) {
             saved.merchantId = merchant.id
             if saved.transactionCategory == .income {
-                // Keep the user label in `name`; persist brand string for logos (matches dashboard lookup).
                 let brand = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
                 saved.merchantName = brand.isEmpty ? saved.name : brand
             } else if saved.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -177,151 +223,64 @@ extension PersistenceController {
             saved.categoryId = try categoryId(for: saved.transactionCategory)
         }
 
-        let id = saved.id
-        let now = Date()
-
-        if let existing = try fetchExpenseEntity(id: id) {
-            apply(record: saved, to: existing, updatedAt: now)
-            replaceSplitLines(for: existing, from: saved)
-        } else {
-            let entity = ExpenseEntity(
-                id: saved.id,
-                name: saved.name,
-                amountValue: saved.amountValue,
-                currencyCode: saved.currencyCode,
-                categoryId: saved.categoryId,
-                merchantId: saved.merchantId,
-                date: saved.date,
-                notes: saved.notes,
-                isRecurring: saved.isRecurring,
-                recurrenceType: saved.recurrenceType,
-                recurrenceConfidence: saved.recurrenceConfidence,
-                nextExpectedDate: saved.nextExpectedDate,
-                isSubscriptionLike: saved.isSubscriptionLike,
-                isTrial: saved.isTrial,
-                subscriptionStartDate: saved.subscriptionStartDate,
-                trialEndDate: saved.trialEndDate,
-                renewalReminderDays: saved.renewalReminderDays,
-                heatZoneBucket: saved.heatZoneBucket,
-                emotion: saved.emotion,
-                contextTag: saved.contextTag,
-                hustleId: saved.hustleId,
-                habitSignatureId: saved.habitSignatureId,
-                subscriptionConfidence: saved.subscriptionConfidence,
-                microCommitmentType: saved.microCommitmentType,
-                microCommitmentValue: saved.microCommitmentValue,
-                futureImpact1Y: saved.futureImpact1Y,
-                futureImpact5Y: saved.futureImpact5Y,
-                createdAt: saved.createdAt,
-                updatedAt: now,
-                categoryRaw: saved.categoryRaw,
-                merchantName: saved.merchantName,
-                paymentMethod: saved.paymentMethod,
-                isBarterExchange: saved.isBarterExchange,
-                barterGoodsGiven: saved.barterGoodsGiven,
-                barterGoodsReceived: saved.barterGoodsReceived,
-                barterEstimatedValue: saved.barterEstimatedValue,
-                bridgeGroupId: saved.bridgeGroupId,
-                bridgeKind: saved.bridgeKind,
-                bridgeRole: saved.bridgeRole,
-                bridgeSharePercent: saved.bridgeSharePercent,
-                bridgePeerExpenseId: saved.bridgePeerExpenseId,
-                bridgeCounterpartyHustleId: saved.bridgeCounterpartyHustleId,
-                isCategorySplit: saved.isCategorySplit,
-                householdScopeRaw: saved.householdScope.rawValue
-            )
-            context.insert(entity)
-            replaceSplitLines(for: entity, from: saved)
-        }
-        try context.save()
-        return try fetchExpenseRecord(id: saved.id) ?? saved
-    }
-
-    private func apply(record: ExpenseRecord, to entity: ExpenseEntity, updatedAt: Date) {
-        entity.name = record.name
-        entity.merchantName = record.merchantName
-        entity.amountValue = record.amountValue
-        entity.currencyCode = record.currencyCode
-        entity.categoryId = record.categoryId
-        entity.merchantId = record.merchantId
-        entity.date = record.date
-        entity.notes = record.notes
-        entity.isRecurring = record.isRecurring
-        entity.recurrenceType = record.recurrenceType
-        entity.recurrenceConfidence = record.recurrenceConfidence
-        entity.nextExpectedDate = record.nextExpectedDate
-        entity.isSubscriptionLike = record.isSubscriptionLike
-        entity.isTrial = record.isTrial
-        entity.subscriptionStartDate = record.subscriptionStartDate
-        entity.trialEndDate = record.trialEndDate
-        entity.renewalReminderDays = record.renewalReminderDays
-        entity.heatZoneBucket = record.heatZoneBucket
-        entity.emotion = record.emotion
-        entity.contextTag = record.contextTag
-        entity.hustleId = record.hustleId
-        entity.habitSignatureId = record.habitSignatureId
-        entity.subscriptionConfidence = record.subscriptionConfidence
-        entity.microCommitmentType = record.microCommitmentType
-        entity.microCommitmentValue = record.microCommitmentValue
-        entity.futureImpact1Y = record.futureImpact1Y
-        entity.futureImpact5Y = record.futureImpact5Y
-        entity.categoryRaw = record.categoryRaw
-        entity.paymentMethod = record.paymentMethod
-        entity.isBarterExchange = record.isBarterExchange
-        entity.barterGoodsGiven = record.barterGoodsGiven
-        entity.barterGoodsReceived = record.barterGoodsReceived
-        entity.barterEstimatedValue = record.barterEstimatedValue
-        entity.bridgeGroupId = record.bridgeGroupId
-        entity.bridgeKind = record.bridgeKind
-        entity.bridgeRole = record.bridgeRole
-        entity.bridgeSharePercent = record.bridgeSharePercent
-        entity.bridgePeerExpenseId = record.bridgePeerExpenseId
-        entity.bridgeCounterpartyHustleId = record.bridgeCounterpartyHustleId
-        entity.isCategorySplit = record.isCategorySplit
-        entity.householdScopeRaw = record.householdScope.rawValue
-        entity.updatedAt = updatedAt
-    }
-
-    private func replaceSplitLines(for entity: ExpenseEntity, from record: ExpenseRecord) {
-        for line in entity.splitLines {
-            context.delete(line)
-        }
-        entity.splitLines = record.splitLines.enumerated().map { index, line in
-            ExpenseSplitLineEntity(
-                id: line.id,
-                categoryId: line.categoryId,
-                categoryRaw: line.categoryRaw,
-                amountValue: line.amountValue,
-                sortOrder: line.sortOrder == 0 ? index : line.sortOrder,
-                expense: entity
-            )
-        }
+        return try expenseDatabase.upsertRecord(saved)
     }
 
     func deleteExpenseRecord(id: UUID) throws {
-        if let existing = try fetchExpenseEntity(id: id) {
-            context.delete(existing)
-            try context.save()
-        }
+        try expenseDatabase.deleteRecord(id: id)
     }
 
     func updateExpenseCategory(id: UUID, category: TransactionCategory, categoryId explicitCategoryId: UUID? = nil) throws {
-        guard let existing = try fetchExpenseEntity(id: id) else { return }
-        existing.categoryRaw = category.rawValue
+        let resolvedCategoryId: UUID?
         if let explicitCategoryId {
-            existing.categoryId = explicitCategoryId
+            resolvedCategoryId = explicitCategoryId
         } else {
-            existing.categoryId = try categoryId(for: category)
+            resolvedCategoryId = try categoryId(for: category)
         }
-        existing.updatedAt = Date()
-        try context.save()
+        try expenseDatabase.updateCategory(id: id, categoryRaw: category.rawValue, categoryId: resolvedCategoryId)
+    }
+
+    func markWalletCategoryUserConfirmed(expenseId: UUID) throws {
+        try expenseDatabase.markWalletCategoryUserConfirmed(id: expenseId)
     }
 
     func updateExpenseNotes(id: UUID, notes: String?) throws {
-        guard let existing = try fetchExpenseEntity(id: id) else { return }
-        existing.notes = notes
-        existing.updatedAt = Date()
-        try context.save()
+        try expenseDatabase.updateNotes(id: id, notes: notes)
+    }
+
+    // MARK: - Wallet merchant category memory (manual corrections only)
+
+    func rememberManualWalletMerchantCategory(
+        merchantName: String,
+        walletRawLabel: String?,
+        category: TransactionCategory
+    ) throws {
+        let keys = WalletMerchantCategoryMemory.normalizedKeys(
+            merchantName: merchantName,
+            walletRawLabel: walletRawLabel
+        )
+        guard !keys.isEmpty else { return }
+        for key in keys {
+            try expenseDatabase.upsertWalletMerchantCategoryMemory(
+                normalizedKey: key,
+                categoryRaw: category.rawValue
+            )
+        }
+    }
+
+    func walletMerchantCategoryMemory(
+        merchantName: String,
+        walletRawLabel: String?
+    ) throws -> TransactionCategory? {
+        for key in WalletMerchantCategoryMemory.normalizedKeys(
+            merchantName: merchantName,
+            walletRawLabel: walletRawLabel
+        ) {
+            if let category = try expenseDatabase.fetchWalletMerchantCategoryMemory(normalizedKey: key) {
+                return category
+            }
+        }
+        return nil
     }
 
     // MARK: - Categories CRUD
@@ -355,11 +314,7 @@ extension PersistenceController {
     }
 
     func mergeCategories(sourceId: UUID, into targetId: UUID) throws {
-        let expenses = try context.fetch(FetchDescriptor<ExpenseEntity>())
-        for expense in expenses where expense.categoryId == sourceId {
-            expense.categoryId = targetId
-            expense.updatedAt = Date()
-        }
+        try expenseDatabase.reassignCategory(from: sourceId, to: targetId)
         if let source = try fetchCategoryEntity(id: sourceId), source.isCustom {
             context.delete(source)
         }
@@ -424,6 +379,250 @@ extension PersistenceController {
 
     func upsertMerchant(forName name: String) throws -> ExpenseMerchantRecord {
         try resolveMerchant(selection: MerchantSelection(displayName: name, createNew: false))
+    }
+
+    func buildWalletMerchantContexts() throws -> [WalletMerchantContext] {
+        let merchants = try fetchAllMerchantRecords()
+        let expenses = try fetchAllExpenseRecords()
+        return merchants.map { merchant in
+            let labels = expenses
+                .filter { $0.merchantId == merchant.id }
+                .flatMap { [$0.name, $0.merchantName] }
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+            let unique = Array(Set(labels))
+            let domain = merchant.logoURL.flatMap { MerchantLogoEngine.domain(fromStoredLogoURL: $0) }
+            return WalletMerchantContext(
+                id: merchant.id,
+                displayName: merchant.name,
+                normalizedName: merchant.normalizedName,
+                domain: domain,
+                statementLabels: unique
+            )
+        }
+    }
+
+    @discardableResult
+    func resolveWalletImportedMerchant(
+        resolution: WalletStatementResolution,
+        rawStatementLabel: String
+    ) throws -> ExpenseMerchantRecord? {
+        let canonical = resolution.canonicalName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !canonical.isEmpty else { return nil }
+
+        if let merchantId = resolution.matchedMerchantId,
+           let existing = try fetchMerchantRecord(id: merchantId) {
+            return try touchWalletMerchant(
+                existing,
+                canonicalName: canonical,
+                domain: resolution.domain,
+                rawStatementLabel: rawStatementLabel
+            )
+        }
+
+        let normalized = MerchantLogoEngine.normalizeMerchantName(canonical)
+        if let existing = try fetchMerchant(normalized: normalized, disambiguator: "") {
+            return try touchWalletMerchant(
+                existing,
+                canonicalName: canonical,
+                domain: resolution.domain,
+                rawStatementLabel: rawStatementLabel
+            )
+        }
+
+        return try createWalletMerchant(
+            name: canonical,
+            normalized: normalized,
+            domain: resolution.domain
+        )
+    }
+
+    @discardableResult
+    func reconcileWalletImports() throws -> Int {
+        var contexts = try buildWalletMerchantContexts()
+        let expenses = try fetchWalletImportedExpenseRecords()
+        var updated = 0
+
+        for record in expenses {
+            let raw = WalletStatementIntelligence.walletRawLabel(for: record)
+            guard !raw.isEmpty else { continue }
+
+            let resolution = WalletStatementIntelligence.resolve(rawLabel: raw, contexts: contexts)
+            let displayName = resolution.canonicalName.isEmpty ? raw : resolution.canonicalName
+            let userMemory = try walletMerchantCategoryMemory(
+                merchantName: displayName,
+                walletRawLabel: raw
+            )
+            let decision = WalletCategoryIntelligence.classify(
+                WalletCategoryIntelligence.input(
+                    rawLabel: raw,
+                    displayName: displayName,
+                    amountValue: record.amountValue,
+                    userMemoryCategory: userMemory
+                )
+            )
+            let classification = WalletTransactionClassification(
+                rawLabel: raw,
+                displayName: displayName,
+                resolution: resolution,
+                decision: decision,
+                userMemoryCategory: userMemory
+            )
+
+            var changed = record
+            var didChange = false
+
+            let importNotes = WalletStatementIntelligence.walletImportNotes(rawLabel: raw)
+            if changed.notes != importNotes {
+                changed.notes = importNotes
+                didChange = true
+            }
+            if changed.name != displayName {
+                changed.name = displayName
+                didChange = true
+            }
+            if changed.merchantName != displayName {
+                changed.merchantName = displayName
+                didChange = true
+            }
+
+            if !record.walletCategoryUserConfirmed,
+               WalletTransactionClassifier.shouldRefreshCategory(
+                   existing: WalletCategoryRefreshSnapshot(record: record),
+                   classification: classification
+               ) {
+                let category = classification.category
+                if changed.transactionCategory != category {
+                    changed.categoryRaw = category.rawValue
+                    changed.categoryId = try categoryId(for: category)
+                    didChange = true
+                }
+                let confidence = decision.confidence.persistedRaw
+                if changed.walletCategoryConfidence != confidence {
+                    changed.walletCategoryConfidence = confidence
+                    didChange = true
+                }
+                let subscriptionLike = walletSubscriptionLike(
+                    name: displayName,
+                    category: category
+                )
+                if changed.isSubscriptionLike != subscriptionLike {
+                    changed.isSubscriptionLike = subscriptionLike
+                    didChange = true
+                }
+                if changed.isRecurring != subscriptionLike {
+                    changed.isRecurring = subscriptionLike
+                    didChange = true
+                }
+            }
+
+            if let merchant = try resolveWalletImportedMerchant(
+                resolution: resolution,
+                rawStatementLabel: raw
+            ) {
+                if changed.merchantId != merchant.id {
+                    changed.merchantId = merchant.id
+                    didChange = true
+                }
+                contexts = mergeWalletMerchantContext(
+                    contexts,
+                    merchant: merchant,
+                    rawLabel: raw,
+                    canonicalName: displayName
+                )
+            }
+
+            if didChange {
+                _ = try upsertExpenseRecord(changed)
+                updated += 1
+            }
+        }
+
+        return updated
+    }
+
+    private func walletSubscriptionLike(name: String, category: TransactionCategory) -> Bool {
+        if category == .subscriptions { return true }
+        let lower = name.lowercased()
+        return BuxFinanceKitManager.knownSubscriptionKeywords.contains { lower.contains($0) }
+    }
+
+    private func mergeWalletMerchantContext(
+        _ contexts: [WalletMerchantContext],
+        merchant: ExpenseMerchantRecord,
+        rawLabel: String,
+        canonicalName: String
+    ) -> [WalletMerchantContext] {
+        var updated = contexts
+        let domain = merchant.logoURL.flatMap { MerchantLogoEngine.domain(fromStoredLogoURL: $0) }
+        if let index = updated.firstIndex(where: { $0.id == merchant.id }) {
+            var labels = Set(updated[index].statementLabels)
+            labels.insert(rawLabel)
+            labels.insert(canonicalName)
+            updated[index] = WalletMerchantContext(
+                id: merchant.id,
+                displayName: merchant.name,
+                normalizedName: merchant.normalizedName,
+                domain: domain,
+                statementLabels: Array(labels)
+            )
+        } else {
+            updated.append(
+                WalletMerchantContext(
+                    id: merchant.id,
+                    displayName: merchant.name,
+                    normalizedName: merchant.normalizedName,
+                    domain: domain,
+                    statementLabels: [rawLabel, canonicalName]
+                )
+            )
+        }
+        return updated
+    }
+
+    private func touchWalletMerchant(
+        _ merchant: ExpenseMerchantRecord,
+        canonicalName: String,
+        domain: String?,
+        rawStatementLabel: String
+    ) throws -> ExpenseMerchantRecord {
+        guard let entity = try fetchMerchantEntity(id: merchant.id) else { return merchant }
+        let trimmed = canonicalName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            entity.name = trimmed
+        }
+        entity.lastSeenAt = Date()
+        if entity.logoURL == nil, let domain, !domain.isEmpty {
+            entity.logoURL = MerchantLogoEngine.googleFaviconURL(for: domain)
+        }
+        try context.save()
+        return ExpenseMerchantRecord.from(entity)
+    }
+
+    private func createWalletMerchant(
+        name: String,
+        normalized: String,
+        domain: String?
+    ) throws -> ExpenseMerchantRecord {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !normalized.isEmpty else {
+            throw NSError(
+                domain: "ExpensePersistence",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Merchant name is required."]
+            )
+        }
+        let resolvedDomain = domain?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let entity = MerchantEntity(
+            normalizedName: normalized,
+            name: trimmed,
+            disambiguator: "",
+            logoURL: resolvedDomain.flatMap { $0.isEmpty ? nil : MerchantLogoEngine.googleFaviconURL(for: $0) },
+            cluster: MerchantIntelligence.normalize(trimmed)
+        )
+        context.insert(entity)
+        try context.save()
+        return ExpenseMerchantRecord.from(entity)
     }
 
     private func fetchMerchant(normalized: String, disambiguator: String) throws -> ExpenseMerchantRecord? {

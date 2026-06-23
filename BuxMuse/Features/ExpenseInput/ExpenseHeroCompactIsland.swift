@@ -52,6 +52,7 @@ struct ExpenseHeroCompactIsland: View, Equatable {
 
     static func == (lhs: ExpenseHeroCompactIsland, rhs: ExpenseHeroCompactIsland) -> Bool {
         lhs.header.totalSpent == rhs.header.totalSpent &&
+        lhs.header.totalIncome == rhs.header.totalIncome &&
         lhs.header.changeVsLastMonth == rhs.header.changeVsLastMonth &&
         lhs.summary.totalSpent == rhs.summary.totalSpent &&
         lhs.summary.categoryBreakdown.map { $0.0 } == rhs.summary.categoryBreakdown.map { $0.0 } &&
@@ -65,10 +66,23 @@ struct ExpenseHeroCompactIsland: View, Equatable {
 
     private var primaryAmount: String {
         if isMonthlyPage {
-            formatAmount(Decimal(summary.totalSpent))
-        } else {
-            formatAmount(Decimal(header.totalSpent))
+            return ExpenseDisplayL10n.signedOutflow(
+                amount: summary.totalSpent,
+                currency: appSettingsManager.selectedCurrency
+            )
         }
+        return ExpenseDisplayL10n.signedOutflow(
+            amount: header.totalSpent,
+            currency: appSettingsManager.selectedCurrency
+        )
+    }
+
+    private var incomeCaption: String? {
+        guard !isMonthlyPage, header.totalIncome > 0 else { return nil }
+        return ExpenseDisplayL10n.signedInflow(
+            amount: header.totalIncome,
+            currency: appSettingsManager.selectedCurrency
+        )
     }
 
     private var subtitle: String {
@@ -83,7 +97,7 @@ struct ExpenseHeroCompactIsland: View, Equatable {
             return BuxLocalizedString.string("On track", locale: appSettingsManager.interfaceLocale)
         }
         let formatted = formatAmount(Decimal(abs(change)))
-        return change > 0 ? "+\(formatted) vs last mo" : "-\(formatted) vs last mo"
+        return change > 0 ? "+\(formatted) vs last period" : "−\(formatted) vs last period"
     }
 
     private var trendColor: Color {
@@ -101,8 +115,10 @@ struct ExpenseHeroCompactIsland: View, Equatable {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(primaryAmount)
                         .font(.system(size: 17, weight: .bold, design: .rounded))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        .monospacedDigit()
                         .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .minimumScaleFactor(0.85)
 
                     Text(subtitle)

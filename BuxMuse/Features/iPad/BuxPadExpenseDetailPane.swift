@@ -11,6 +11,7 @@ struct BuxPadExpenseDetailPane: View {
     @EnvironmentObject private var brain: BuxMuseBrain
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
+    @EnvironmentObject private var expenseTabStore: ExpenseTabStore
 
     var body: some View {
         List {
@@ -55,7 +56,9 @@ struct BuxPadExpenseDetailPane: View {
                 record: record,
                 brain: brain,
                 settingsManager: appSettingsManager
-            ) { }
+            ) {
+                expenseTabStore.reloadFromLedger(currency: appSettingsManager.selectedCurrency)
+            }
             .id(record.id)
             .environmentObject(themeManager)
             .environmentObject(appSettingsManager)

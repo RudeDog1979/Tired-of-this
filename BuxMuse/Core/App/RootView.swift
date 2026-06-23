@@ -22,6 +22,7 @@ struct RootView: View {
     @Environment(\.buxLayoutMode) private var buxLayoutMode
     @Environment(\.scenePhase) private var scenePhase
     @ObservedObject private var settingsStore = SettingsStore.shared
+    @ObservedObject private var purchaseManager = StudioPurchaseManager.shared
     @Namespace private var transactionNamespace
 
     @State private var isAppLocked = false
@@ -29,7 +30,27 @@ struct RootView: View {
     @State private var hasUnlockedThisSession = false
     @State private var didEnterBackground = false
 
+    private var hasAppAccess: Bool {
+        purchaseManager.baseSubscriptionActive
+            || settingsStore.isPremiumTrialActive
+            || settingsStore.premiumLegacyEntitled
+    }
+
     var body: some View {
+        Group {
+            if hasAppAccess {
+                premiumGatedAppShell
+            } else {
+                BuxMuseSubscriptionView(isBlocking: true)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .buxRootBrandTheme()
+                    .buxInterfaceLocale()
+            }
+        }
+    }
+
+    private var premiumGatedAppShell: some View {
         Group {
             if BuxPadIdiom.isPad {
                 BuxPadShell {
@@ -148,6 +169,10 @@ struct RootView: View {
                     if settingsStore.personalCloudSyncEnabled {
                         Task { await PersonalCloudSyncEngine.shared.syncNow() }
                     }
+                    if settingsStore.appleWalletSyncEnabled && settingsStore.appleWalletAutoSyncEnabled {
+                        BuxFinanceKitManager.shared.resetSessionSyncFlag()
+                        BuxFinanceKitManager.shared.scheduleDeferredSessionSyncIfNeeded()
+                    }
                     if didEnterBackground {
                         evaluateAppLock(forceOnLaunch: false)
                         container.scheduleEngagementRefresh()
@@ -164,7 +189,8 @@ struct RootView: View {
                 }
             }
             .onChange(of: settingsStore.studioEnabled) { _, enabled in
-                if !enabled && navigationCoordinator.selectedTab == .studio {
+                if (!enabled || !StudioPurchaseManager.shared.hasSimpleStudio),
+                   navigationCoordinator.selectedTab == .studio {
                     navigationCoordinator.selectedTab = .home
                 }
             }
@@ -241,10 +267,7 @@ struct RootView: View {
                     .buxThemedSheetContent()
                 }
             }
-            .buxPhoneTutorialOverlay(
-                coordinator: container.tutorialCoordinator,
-                isPad: BuxPadIdiom.isPad
-            )
+            .buxRootTutorialOverlay(coordinator: container.tutorialCoordinator)
     }
 
     private var coreTabView: some View {
@@ -269,7 +292,7 @@ struct RootView: View {
                 BuxTabBarLabel(titleKey: "Expenses", systemImage: AppTab.expense.nativeTabSymbol)
             }
 
-            if settingsStore.studioEnabled {
+            if settingsStore.studioEnabled, StudioPurchaseManager.shared.hasSimpleStudio {
                 Tab(value: AppTab.studio) {
                     if BuxPadIdiom.isPad {
                         BuxPadStudioHost()
@@ -314,7 +337,7 @@ struct RootView: View {
         }
         .buxNativeTabBarMinimizeOnScroll()
         .toolbar(
-            container.tutorialCoordinator.isActive && !BuxPadIdiom.isPad ? .hidden : .visible,
+            container.tutorialCoordinator.isActive ? .hidden : .visible,
             for: .tabBar
         )
     }

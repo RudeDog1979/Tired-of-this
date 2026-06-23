@@ -15,33 +15,85 @@ import UIKit
 #endif
 
 public struct MerchantLogoEngine {
-    
+    private nonisolated static let nonAlphanumericWhitespace = CharacterSet.alphanumerics.union(.whitespaces).inverted
+    private nonisolated(unsafe) static let normalizationCache: NSCache<NSString, NSString> = {
+        let cache = NSCache<NSString, NSString>()
+        cache.countLimit = 512
+        return cache
+    }()
+
     // MARK: - Normalizer
-    public static func normalizeMerchantName(_ name: String) -> String {
+    public nonisolated static func normalizeMerchantName(_ name: String) -> String {
+        let key = name as NSString
+        if let cached = normalizationCache.object(forKey: key) {
+            return cached as String
+        }
+        let normalized = normalizeMerchantNameUncached(name)
+        normalizationCache.setObject(normalized as NSString, forKey: key)
+        return normalized
+    }
+
+    private nonisolated static func normalizeMerchantNameUncached(_ name: String) -> String {
         var clean = name.lowercased()
-        
+
         // Remove emojis
         clean = clean.filter { !$0.isEmoji }
-        
+
         // Remove common suffixes
         let suffixes = ["ltd", "inc", "s.a.", "sa", "llc", "corp", "co", "incorporated", "limited"]
         for suffix in suffixes {
             let escaped = NSRegularExpression.escapedPattern(for: suffix)
             clean = clean.replacingOccurrences(of: "\\b\(escaped)\\b", with: "", options: .regularExpression)
         }
-        
+
         // Remove punctuation & special chars
-        clean = clean.components(separatedBy: CharacterSet.alphanumerics.union(CharacterSet.whitespaces).inverted).joined()
-        
+        clean = clean.components(separatedBy: nonAlphanumericWhitespace).joined()
+
         // Trim edge and consecutive spaces
         clean = clean.trimmingCharacters(in: .whitespacesAndNewlines)
         clean = clean.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-        
+
         return clean
+    }
+
+    /// Domain host from a persisted Google favicon URL (`logoURL` on linked merchants).
+    public nonisolated static func domain(fromStoredLogoURL logoURL: String) -> String? {
+        let trimmed = logoURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let url = URL(string: trimmed),
+           let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           let domain = components.queryItems?.first(where: { $0.name == "domain" })?.value {
+            let clean = domain.trimmingCharacters(in: .whitespacesAndNewlines)
+            return clean.isEmpty ? nil : clean
+        }
+
+        // DuckDuckGo ip3 URLs: https://icons.duckduckgo.com/ip3/example.com.ico
+        if let range = trimmed.range(of: "/ip3/") {
+            let hostPart = String(trimmed[range.upperBound...])
+                .replacingOccurrences(of: ".ico", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return hostPart.isEmpty ? nil : hostPart
+        }
+
+        return nil
     }
     
     // MARK: - Domain Resolver
-    public static func resolveDomain(for merchantName: String) -> String? {
+    public nonisolated static func resolveDomain(for merchantName: String) -> String? {
+        let intelligence = WalletStatementIntelligence.resolve(
+            rawLabel: merchantName,
+            contexts: []
+        )
+        if let domain = intelligence.domain {
+            switch intelligence.confidence {
+            case .high, .medium:
+                return domain
+            case .low:
+                break
+            }
+        }
+
         if let catalogDomain = MerchantCatalog.domain(for: merchantName) {
             return catalogDomain
         }
@@ -82,7 +134,7 @@ public struct MerchantLogoEngine {
         return nil
     }
 
-    public static func googleFaviconURL(for domain: String, size: Int = 256) -> String {
+    public nonisolated static func googleFaviconURL(for domain: String, size: Int = 256) -> String {
         "https://www.google.com/s2/favicons?sz=\(size)&domain=\(domain)"
     }
 
@@ -94,7 +146,12 @@ public struct MerchantLogoEngine {
     }
 
     /// Domain-first cache key so "Biedronka" and typos share the same logo.
-    public static func fetchPlan(for merchantName: String) -> FetchPlan? {
+    public nonisolated static func fetchPlan(for merchantName: String, knownDomain: String? = nil) -> FetchPlan? {
+        if let knownDomain,
+           let plan = fetchPlanForKnownDomain(knownDomain) {
+            return plan
+        }
+
         let normalized = normalizeMerchantName(merchantName)
         guard !normalized.isEmpty else { return nil }
 
@@ -107,7 +164,7 @@ public struct MerchantLogoEngine {
     }
 
     /// Only resolves logos for an explicit known domain — no heuristic `.com` guessing.
-    public static func fetchPlanForKnownDomain(_ domain: String) -> FetchPlan? {
+    public nonisolated static func fetchPlanForKnownDomain(_ domain: String) -> FetchPlan? {
         let cleanHost = domain
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
@@ -121,7 +178,7 @@ public struct MerchantLogoEngine {
     }
 
     /// Google first, DuckDuckGo fallback only.
-    static func remoteLogoURLs(forHost host: String) -> [String] {
+    nonisolated static func remoteLogoURLs(forHost host: String) -> [String] {
         let cleanHost = host
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
@@ -420,7 +477,7 @@ extension String {
 }
 
 extension Character {
-    fileprivate var isEmoji: Bool {
+    fileprivate nonisolated var isEmoji: Bool {
         guard let scalar = unicodeScalars.first else { return false }
         return scalar.properties.isEmoji && (scalar.value >= 0x203C || scalar.properties.isEmojiPresentation)
     }

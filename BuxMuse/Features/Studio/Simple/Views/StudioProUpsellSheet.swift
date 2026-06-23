@@ -14,9 +14,14 @@ struct StudioProUpsellSheet: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @ObservedObject private var purchaseManager = StudioPurchaseManager.shared
     @ObservedObject private var settingsStore = SettingsStore.shared
 
     let feature: Feature
+
+    @State private var isPurchasing = false
+    @State private var errorMessage: String?
+    @State private var proBillingPeriod: BuxMuseBillingPeriod = .monthly
 
     enum Feature: String, Identifiable {
         case pdfInvoices
@@ -101,20 +106,23 @@ struct StudioProUpsellSheet: View {
                 .padding(.horizontal, BuxTokens.marginRegular)
 
                 VStack(spacing: BuxTokens.tight) {
+                    BuxBillingPeriodToggle(
+                        billingPeriod: $proBillingPeriod,
+                        caption: "Pro Studio billing"
+                    )
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .padding(.horizontal, BuxTokens.marginRegular)
+
                     BuxButton(
-                        title: "Upgrade to Pro Studio",
+                        title: proPurchaseTitle,
                         systemImage: "sparkles",
                         role: .primary,
                         expands: true
                     ) {
-                        _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
-                            simpleStore: simpleStudioStore,
-                            studioStore: studioStore,
-                            settings: settingsStore,
-                            currencyCode: appSettingsManager.selectedCurrency.id
-                        )
-                        dismiss()
+                        Task { await purchasePro() }
                     }
+                    .disabled(isPurchasing || purchaseManager.isPurchasing)
 
                     BuxButton(
                         title: "Not now",
@@ -138,6 +146,47 @@ struct StudioProUpsellSheet: View {
                 }
             }
             .buxStudioSheetContent()
+            .alert(
+                BuxCatalogLabel.string("Purchase failed", locale: appSettingsManager.interfaceLocale),
+                isPresented: Binding(
+                    get: { errorMessage != nil },
+                    set: { if !$0 { errorMessage = nil } }
+                )
+            ) {
+                Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+            } message: {
+                if let errorMessage {
+                    Text(errorMessage)
+                }
+            }
+        }
+    }
+
+    private var proPurchaseTitle: String {
+        if let price = purchaseManager.displayPrice(for: proBillingPeriod.studioProProductID) {
+            return BuxLocalizedString.format("Upgrade to Pro Studio — %@", locale: appSettingsManager.interfaceLocale, price)
+        }
+        return BuxCatalogLabel.string("Upgrade to Pro Studio", locale: appSettingsManager.interfaceLocale)
+    }
+
+    private func purchasePro() async {
+        isPurchasing = true
+        defer { isPurchasing = false }
+        do {
+            try await StudioPurchaseFlow.purchasePro(
+                simpleStore: simpleStudioStore,
+                studioStore: studioStore,
+                settings: settingsStore,
+                appSettingsManager: appSettingsManager,
+                navigationCoordinator: nil,
+                purchaseManager: purchaseManager,
+                period: proBillingPeriod
+            )
+            dismiss()
+        } catch StudioPurchaseError.userCancelled {
+            return
+        } catch {
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 

@@ -27,6 +27,16 @@ struct ExpandableExpenseCard: View {
         isExpanded ? 20 : 16
     }
 
+    private var amountColor: Color {
+        if record.walletIsPending {
+            return themeManager.labelSecondary(for: colorScheme)
+        }
+        if expense.isIncomeInflow {
+            return BuxChartColors.comparisonDown
+        }
+        return themeManager.labelPrimary(for: colorScheme)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 14) {
@@ -49,11 +59,9 @@ struct ExpandableExpenseCard: View {
                                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                                 .textCase(nil)
                                 .lineLimit(1)
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
-                            if expense.category != nil
-                                || expense.workspaceLabel != nil
-                                || expense.isUnassignedWorkspace
-                                || expense.bridgeBadge != nil {
+                            if showsMetadataRow {
                                 metadataRow
                             }
                         }
@@ -62,7 +70,11 @@ struct ExpandableExpenseCard: View {
 
                         Text(expense.amountFormatted)
                             .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .foregroundStyle(amountColor)
+                            .opacity(record.walletIsPending ? 0.72 : 1)
                     }
                     .contentShape(Rectangle())
                 }
@@ -143,8 +155,51 @@ struct ExpandableExpenseCard: View {
         .environment(\.textCase, nil)
     }
 
+    private var showsMetadataRow: Bool {
+        expense.category != nil
+            || expense.workspaceLabel != nil
+            || expense.isUnassignedWorkspace
+            || expense.bridgeBadge != nil
+            || record.walletIsPending
+            || expense.isSalaryTagged
+            || record.isSalaryTagged
+            || expense.linkedDebtName != nil
+    }
+
+    private func ledgerStatusBadge(_ title: String, foreground: Color, background: Color) -> some View {
+        Text(title)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(foreground)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(background)
+            .clipShape(Capsule())
+    }
+
     private var metadataRow: some View {
         HStack(spacing: 6) {
+            if record.walletIsPending {
+                ledgerStatusBadge(
+                    BuxLocalizedString.string("Pending", locale: appSettingsManager.interfaceLocale),
+                    foreground: .orange,
+                    background: Color.orange.opacity(0.14)
+                )
+            } else if expense.isSalaryTagged || record.isSalaryTagged {
+                ledgerStatusBadge(
+                    BuxLocalizedString.string("Paycheck", locale: appSettingsManager.interfaceLocale),
+                    foreground: .green,
+                    background: Color.green.opacity(0.14)
+                )
+            } else if let linkedDebtName = expense.linkedDebtName {
+                ledgerStatusBadge(
+                    linkedDebtName,
+                    foreground: themeManager.contrastAccentColor(for: colorScheme),
+                    background: themeManager.current.accentColor.opacity(0.14)
+                )
+            }
+
             if let category = expense.category {
                 Text(category)
                     .font(.footnote)

@@ -377,12 +377,7 @@ struct SimpleStudioHubView: View {
             Menu {
                 Button(BuxCatalogLabel.string("People", locale: locale)) { showPeople = true }
                 Button(BuxCatalogLabel.string("Upgrade to Pro", locale: locale)) {
-                    _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
-                        simpleStore: simpleStudioStore,
-                        studioStore: studioStore,
-                        settings: settingsStore,
-                        currencyCode: appSettingsManager.selectedCurrency.id
-                    )
+                    proUpsellFeature = .fullTax
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")

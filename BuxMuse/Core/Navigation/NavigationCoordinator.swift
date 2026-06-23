@@ -221,6 +221,7 @@ final class NavigationCoordinator: ObservableObject {
     @Published private(set) var studioUnlockAwaitingCommit = false
 
     func beginStudioUnlock() {
+        guard StudioPurchaseManager.shared.hasSimpleStudio else { return }
         guard !studioUnlockAwaitingCommit, !SettingsStore.shared.studioEnabled else { return }
         studioUnlockAwaitingCommit = true
         withAnimation(.easeInOut(duration: 0.45)) {

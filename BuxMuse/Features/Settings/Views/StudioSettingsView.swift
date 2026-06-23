@@ -18,6 +18,7 @@ struct StudioSettingsView: View {
     @ObservedObject private var store = SettingsStore.shared
     @EnvironmentObject private var studioStore: StudioStore
     @EnvironmentObject private var simpleStudioStore: SimpleStudioStore
+    @ObservedObject private var purchaseManager = StudioPurchaseManager.shared
 
     @State private var displayName = ""
     @State private var businessName = ""
@@ -25,6 +26,9 @@ struct StudioSettingsView: View {
     @State private var paymentTerms = 30
     @State private var hourlyRate = ""
     @State private var logoData: Data?
+    @State private var proUpsellFeature: StudioProUpsellSheet.Feature?
+    @State private var purchaseErrorMessage: String?
+    @State private var studioBillingPeriod: BuxMuseBillingPeriod = .monthly
 
     private var studioToggleOn: Bool {
         store.studioEnabled || navigationCoordinator.studioUnlockAwaitingCommit
@@ -32,9 +36,11 @@ struct StudioSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
-            if !store.studioEnabled {
+            if !purchaseManager.hasSimpleStudio {
+                studioPurchaseSection
+            } else if !store.studioEnabled {
                 BuxFormSection {
-                    BuxCatalogDynamicText(key: "Studio adds work tracking, simple invoices, and job pockets. Turn it on when you need it — Home and Expenses stay the same.")
+                    BuxCatalogDynamicText(key: "Studio is unlocked on this Apple ID. Turn on the Studio tab when you want work tools — Home and Expenses stay the same.")
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                         .fixedSize(horizontal: false, vertical: true)
@@ -42,25 +48,27 @@ struct StudioSettingsView: View {
                 }
             }
 
-            BuxFormSection(title: "Studio") {
-                Toggle(isOn: studioToggleBinding) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        BuxCatalogDynamicText(key: "Show Studio tab")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                        BuxCatalogDynamicText(key: "Simple work ledger or full Pro tools")
-                            .font(.system(size: 11))
-                            .buxLabelSecondary()
+            if purchaseManager.hasSimpleStudio {
+                BuxFormSection(title: "Studio") {
+                    Toggle(isOn: studioToggleBinding) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            BuxCatalogDynamicText(key: "Show Studio tab")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                            BuxCatalogDynamicText(key: "Simple work ledger or full Pro tools")
+                                .font(.system(size: 11))
+                                .buxLabelSecondary()
+                        }
                     }
+                    .tint(themeManager.contrastAccentColor(for: colorScheme))
+                    .buxFormFieldPadding()
                 }
-                .tint(themeManager.contrastAccentColor(for: colorScheme))
-                .buxFormFieldPadding()
+                .tutorialAnchor(.settingsStudioDetail, coordinator: tutorialCoordinator)
             }
-            .tutorialAnchor(.settingsStudioDetail, coordinator: tutorialCoordinator)
 
-            if store.studioEnabled {
+            if store.studioEnabled && purchaseManager.hasSimpleStudio {
                 BuxFormSection(title: "Studio mode") {
-                    Picker(selection: $store.studioMode) {
+                    Picker(selection: studioModeBinding) {
                         BuxCatalogDynamicText(key: "Simple Studio").tag(StudioMode.simple)
                         BuxCatalogDynamicText(key: "Pro Studio").tag(StudioMode.pro)
                     } label: {
@@ -68,18 +76,6 @@ struct StudioSettingsView: View {
                     }
                     .buxThemedSegmentedPicker()
                     .buxFormFieldPadding()
-                    .onChange(of: store.studioMode) { _, newMode in
-                        if newMode == .pro {
-                            _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
-                                simpleStore: simpleStudioStore,
-                                studioStore: studioStore,
-                                settings: store,
-                                currencyCode: appSettingsManager.selectedCurrency.id
-                            )
-                        } else {
-                            store.save()
-                        }
-                    }
 
                     HStack(spacing: 10) {
                         if store.studioMode == .pro {
@@ -271,6 +267,126 @@ struct StudioSettingsView: View {
         .onChange(of: businessType) { _, _ in saveStudioProfile() }
         .onChange(of: paymentTerms) { _, _ in saveStudioProfile() }
         .onChange(of: hourlyRate) { _, _ in saveStudioProfile() }
+        .sheet(item: $proUpsellFeature) { feature in
+            StudioProUpsellSheet(feature: feature)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(studioStore)
+                .environmentObject(simpleStudioStore)
+                .buxThemedSheetContent()
+        }
+        .alert(
+            BuxCatalogLabel.string("Purchase failed", locale: appSettingsManager.interfaceLocale),
+            isPresented: Binding(
+                get: { purchaseErrorMessage != nil },
+                set: { if !$0 { purchaseErrorMessage = nil } }
+            )
+        ) {
+            Button(BuxCatalogLabel.string("OK", locale: appSettingsManager.interfaceLocale), role: .cancel) {}
+        } message: {
+            if let purchaseErrorMessage {
+                Text(purchaseErrorMessage)
+            }
+        }
+    }
+
+    private var studioPurchaseSection: some View {
+        BuxFormSection(title: "Unlock Studio") {
+            if !purchaseManager.hasActiveSubscription {
+                StudioAddOnRequirementNotice()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .buxFormFieldPadding()
+
+                BuxCatalogDynamicText(key: "Subscribe to BuxMuse first — Studio alone won't unlock the app.")
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .buxFormFieldPadding()
+
+                NavigationLink {
+                    BuxMuseSubscriptionView(isBlocking: false)
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                } label: {
+                    HStack {
+                        BuxCatalogDynamicText(key: "View subscription plans")
+                            .font(.system(size: 15, weight: .semibold))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .buxLabelSecondary()
+                    }
+                }
+                .buxFormFieldPadding()
+            } else {
+                StudioPurchaseChooser(
+                    style: .settingsList,
+                    billingPeriod: $studioBillingPeriod,
+                    onPurchaseSimple: {
+                        try await StudioPurchaseFlow.purchaseSimple(
+                            navigationCoordinator: navigationCoordinator,
+                            purchaseManager: purchaseManager
+                        )
+                    },
+                    onPurchasePro: {
+                        try await StudioPurchaseFlow.purchasePro(
+                            simpleStore: simpleStudioStore,
+                            studioStore: studioStore,
+                            settings: store,
+                            appSettingsManager: appSettingsManager,
+                            navigationCoordinator: navigationCoordinator,
+                            purchaseManager: purchaseManager,
+                            period: studioBillingPeriod
+                        )
+                    },
+                    onError: { purchaseErrorMessage = $0 }
+                )
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+
+                BuxFormRowDivider()
+
+                Button {
+                    Task { await purchaseManager.restorePurchases() }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.clockwise")
+                        BuxCatalogDynamicText(key: "Restore purchases")
+                    }
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
+                }
+                .disabled(purchaseManager.isRestoring)
+                .buxFormFieldPadding()
+            }
+        }
+        .tutorialAnchor(.settingsStudioDetail, coordinator: tutorialCoordinator)
+    }
+
+    private var studioModeBinding: Binding<StudioMode> {
+        Binding(
+            get: { store.studioMode },
+            set: { newMode in
+                if newMode == .pro {
+                    guard purchaseManager.hasProStudio else {
+                        proUpsellFeature = .fullTax
+                        return
+                    }
+                    _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
+                        simpleStore: simpleStudioStore,
+                        studioStore: studioStore,
+                        settings: store,
+                        currencyCode: appSettingsManager.selectedCurrency.id
+                    )
+                } else {
+                    store.studioMode = .simple
+                    store.save()
+                }
+            }
+        )
     }
 
     private var studioToolsSection: some View {
@@ -398,6 +514,7 @@ struct StudioSettingsView: View {
             get: { studioToggleOn },
             set: { enabled in
                 if enabled {
+                    guard purchaseManager.hasSimpleStudio else { return }
                     guard !store.studioEnabled else { return }
                     navigationCoordinator.beginStudioUnlock()
                 } else {

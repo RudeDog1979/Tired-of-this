@@ -17,6 +17,11 @@ public struct BillingCycleAIEngine {
         category: TransactionCategory = .subscriptions,
         locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> SubscriptionInfo? {
+        // Only analyze categories that can contain subscriptions
+        guard category == .subscriptions || category == .utilities || category == .housing else {
+            return nil
+        }
+        
         // Filter transactions for this specific normalized merchant
         let normName = MerchantLogoEngine.normalizeMerchantName(merchantName)
         let filtered = transactions.filter {

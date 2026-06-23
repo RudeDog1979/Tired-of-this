@@ -31,8 +31,8 @@ enum TutorialCoachMarkLayer {
         }
     }
 
-    /// Root-level phone overlay layer (dashboard + tab steps). Sheet/detail layers render locally.
-    static func phoneOverlayLayer(for coordinator: AppTutorialCoordinator) -> TutorialCoachMarkLayer? {
+    /// Root-level overlay layer (dashboard + tab steps). Sheet/detail layers render locally.
+    static func rootOverlayLayer(for coordinator: AppTutorialCoordinator) -> TutorialCoachMarkLayer? {
         guard coordinator.isActive, let anchor = coordinator.currentStep?.anchor else { return nil }
         if anchor.hostsInSheet || anchor.hostsInSettingsDetail { return nil }
         if isDashboardAnchor(anchor) { return .dashboard }
@@ -114,22 +114,27 @@ extension View {
         }
     }
 
-    /// Full-screen phone tutorial above the tab bar (dashboard + tab-level steps).
-    func buxPhoneTutorialOverlay(
-        coordinator: AppTutorialCoordinator,
-        isPad: Bool
-    ) -> some View {
+    /// Full-screen root tutorial above tab chrome (dashboard + tab-level steps). iPhone and iPad.
+    func buxRootTutorialOverlay(coordinator: AppTutorialCoordinator) -> some View {
         overlayPreferenceValue(TutorialAnchorGlobalFrameKey.self) { globalFrames in
-            if !isPad, let layer = TutorialCoachMarkLayer.phoneOverlayLayer(for: coordinator) {
+            if let layer = TutorialCoachMarkLayer.rootOverlayLayer(for: coordinator) {
                 TutorialCoachMarkOverlayLayer(
                     layer: layer,
                     coordinator: coordinator,
                     globalFrames: globalFrames,
-                    reservesTabBarSpace: false
+                    reservesTabBarSpace: !BuxPadIdiom.isPad
                 )
                 .zIndex(25_000)
             }
         }
+    }
+
+    /// Backward-compatible alias — same behavior on iPhone and iPad.
+    func buxPhoneTutorialOverlay(
+        coordinator: AppTutorialCoordinator,
+        isPad: Bool
+    ) -> some View {
+        buxRootTutorialOverlay(coordinator: coordinator)
     }
 }
 

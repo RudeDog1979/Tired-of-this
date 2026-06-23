@@ -40,7 +40,7 @@ public struct MerchantIntelligence {
     }
     
     /// Computes the Levenshtein distance between two normalized strings
-    public static func levenshteinDistance(between s1: String, and s2: String) -> Int {
+    public nonisolated static func levenshteinDistance(between s1: String, and s2: String) -> Int {
         if s1.isEmpty { return s2.count }
         if s2.isEmpty { return s1.count }
         

@@ -18,7 +18,7 @@ public struct MoneyAmount: Codable, Equatable {
     }
 }
 
-public enum TransactionCategory: String, Codable, CaseIterable, Identifiable {
+public enum TransactionCategory: String, Codable, CaseIterable, Identifiable, Sendable {
     case groceries
     case restaurants
     case transport

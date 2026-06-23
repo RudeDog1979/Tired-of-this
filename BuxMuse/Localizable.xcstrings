@@ -4262,6 +4262,54 @@
         }
       }
     },
+    "1 Month" : {
+      "comment" : "Apple Wallet historical import range — one month.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 mes"
+          }
+        }
+      }
+    },
+    "1 Year" : {
+      "comment" : "Apple Wallet historical import range — one year.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 año"
+          }
+        }
+      }
+    },
     "1. Rapid Entry FAB (+)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4338,6 +4386,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "2. Escáner OCR Receipt Vision"
+          }
+        }
+      }
+    },
+    "3 Months" : {
+      "comment" : "Apple Wallet historical import range — three months.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 meses"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 meses"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 meses"
           }
         }
       }
@@ -4459,6 +4531,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "5 minutos"
+          }
+        }
+      }
+    },
+    "6 Months" : {
+      "comment" : "Apple Wallet historical import range — six months.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 meses"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 meses"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 meses"
           }
         }
       }
@@ -9262,6 +9358,30 @@
         }
       }
     },
+    "Allow Apple Wallet access before BuxMuse can import your transactions." : {
+      "comment" : "Wallet sync error when import runs without authorization.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite el acceso a Apple Wallet antes de que BuxMuse pueda importar tus transacciones."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite el acceso a Apple Wallet antes de que BuxMuse pueda importar tus transacciones."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite el acceso a Apple Wallet antes de que BuxMuse pueda importar tus transacciones."
+          }
+        }
+      }
+    },
     "Allow Local Backups" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9947,6 +10067,29 @@
         }
       }
     },
+    "App Store products could not be loaded. For Xcode testing, run from the BuxMuse scheme with the StoreKit configuration file. For TestFlight, upload a build and use a Sandbox Apple ID." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron cargar los productos de App Store. Para probar en Xcode, ejecuta desde el esquema BuxMuse con el archivo de configuración StoreKit. Para TestFlight, sube una compilación y usa un Apple ID de Sandbox."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron cargar los productos de App Store. Para probar en Xcode, ejecuta desde el esquema BuxMuse con el archivo de configuración StoreKit. Para TestFlight, sube una compilación y usa un Apple ID de Sandbox."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron cargar los productos de App Store. Para probar en Xcode, ejecuta desde el esquema BuxMuse con el archivo de configuración StoreKit. Para TestFlight, sube una compilación y usa un Apple ID de Sandbox."
+          }
+        }
+      }
+    },
     "Appearance" : {
       "comment" : "A label displayed above the Appearance theme picker view.",
       "extractionState" : "stale",
@@ -10041,6 +10184,29 @@
         }
       }
     },
+    "Apple could not complete this purchase. Sign in with a Sandbox Apple ID under Settings → Developer → Sandbox Apple ID (or App Store → Sandbox Account), then try again." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple no pudo completar esta compra. Inicia sesión con un Apple ID de Sandbox en Ajustes → Desarrollador → Apple ID de Sandbox (o App Store → Cuenta de Sandbox) e inténtalo de nuevo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple no pudo completar esta compra. Inicia sesión con un Apple ID de Sandbox en Ajustes → Desarrollador → Apple ID de Sandbox (o App Store → Cuenta de Sandbox) e inténtalo de nuevo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple no pudo completar esta compra. Inicia sesión con un Apple ID de Sandbox en Ajustes → Desarrollador → Apple ID de Sandbox (o App Store → Cuenta de Sandbox) e inténtalo de nuevo."
+          }
+        }
+      }
+    },
     "Apple Health & your privacy" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10106,6 +10272,122 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple TV+ (alternativas desde %@ 9,99/mes)"
+          }
+        }
+      }
+    },
+    "Apple Wallet" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Wallet"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Wallet"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Wallet"
+          }
+        }
+      }
+    },
+    "Apple Wallet financial data is not available on this device. Confirm FinanceKit is enabled for this app and try again." : {
+      "comment" : "Wallet sync error when FinanceKit data is unavailable.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos financieros de Apple Wallet no están disponibles en este dispositivo. Confirma que FinanceKit está activado para esta app e inténtalo de nuevo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos financieros de Apple Wallet no están disponibles en este dispositivo. Confirma que FinanceKit está activado para esta app e inténtalo de nuevo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos financieros de Apple Wallet no están disponibles en este dispositivo. Confirma que FinanceKit está activado para esta app e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "Apple Wallet Import" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar desde Apple Wallet"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar desde Apple Wallet"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar desde Apple Wallet"
+          }
+        }
+      }
+    },
+    "Apple Wallet Integration" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Integración con Apple Wallet"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Integración con Apple Wallet"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Integración con Apple Wallet"
+          }
+        }
+      }
+    },
+    "Apple Wallet Sync" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización con Apple Wallet"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización con Apple Wallet"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización con Apple Wallet"
           }
         }
       }
@@ -10201,6 +10483,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aplicar sugerencia"
+          }
+        }
+      }
+    },
+    "Apply to debt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplicar a la deuda"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplicar a la deuda"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplicar a la deuda"
           }
         }
       }
@@ -11209,6 +11514,52 @@
         }
       }
     },
+    "Automatically sync and match transactions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar y conciliar transacciones automáticamente"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar y conciliar transacciones automáticamente"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar y conciliar transacciones automáticamente"
+          }
+        }
+      }
+    },
+    "Automatically sync new transactions in the background when they occur." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincroniza automáticamente las transacciones nuevas en segundo plano cuando ocurren."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincroniza automáticamente las transacciones nuevas en segundo plano cuando ocurren."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincroniza automáticamente las transacciones nuevas en segundo plano cuando ocurren."
+          }
+        }
+      }
+    },
     "Autopilot" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -11555,6 +11906,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fondo"
+          }
+        }
+      }
+    },
+    "Background Auto-Sync" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización automática en segundo plano"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización automática en segundo plano"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronización automática en segundo plano"
           }
         }
       }
@@ -15538,6 +15912,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BuxMuse necesita acceso a fotografías para configurar fondos y retratos de tarjetas. Puede permitir el acceso total o limitado en Configuración."
+          }
+        }
+      }
+    },
+    "BuxMuse needs your permission to read Apple Wallet transactions. You can allow access in Settings → Privacy & Security → BuxMuse." : {
+      "comment" : "Wallet sync error when the user denied FinanceKit access.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita tu permiso para leer transacciones de Apple Wallet. Puedes permitir el acceso en Ajustes → Privacidad y seguridad → BuxMuse."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita tu permiso para leer transacciones de Apple Wallet. Puedes permitir el acceso en Configuración → Privacidad y seguridad → BuxMuse."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse necesita tu permiso para leer transacciones de Apple Wallet. Puedes permitir el acceso en Ajustes → Privacidad y seguridad → BuxMuse."
           }
         }
       }
@@ -20846,6 +21244,29 @@
         }
       }
     },
+    "Could not reach the App Store. Check your connection and try again." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo conectar con App Store. Comprueba tu conexión e inténtalo de nuevo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo conectar con App Store. Comprueba tu conexión e inténtalo de nuevo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo conectar con App Store. Comprueba tu conexión e inténtalo de nuevo."
+          }
+        }
+      }
+    },
     "Could not read that photo." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -26057,6 +26478,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bajar de plan"
+          }
+        }
+      }
+    },
+    "Download card and account transactions directly from Apple Wallet." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descarga transacciones de tarjetas y cuentas directamente desde Apple Wallet."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descarga transacciones de tarjetas y cuentas directamente desde Apple Wallet."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descarga transacciones de tarjetas y cuentas directamente desde Apple Wallet."
+          }
+        }
+      }
+    },
+    "Download Cash, Card, and Savings transactions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargar transacciones de efectivo, tarjetas y ahorros"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargar transacciones de efectivo, tarjetas y ahorros"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargar transacciones de efectivo, tarjetas y ahorros"
+          }
+        }
+      }
+    },
+    "Downloading transaction data..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargando datos de transacciones..."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargando datos de transacciones..."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargando datos de transacciones..."
           }
         }
       }
@@ -33871,6 +34361,98 @@
         }
       }
     },
+    "Full app · %@/month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · %@/mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · %@/mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · %@/mes"
+          }
+        }
+      }
+    },
+    "Full app · %@/year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · %@/año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · %@/año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · %@/año"
+          }
+        }
+      }
+    },
+    "Full app · £1.99/month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · £1.99/mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · £1.99/mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · £1.99/mes"
+          }
+        }
+      }
+    },
+    "Full app · £14.99/year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · £14.99/año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · £14.99/año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App completa · £14.99/año"
+          }
+        }
+      }
+    },
     "Full designer & custom branding" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -37019,6 +37601,29 @@
         }
       }
     },
+    "Historical Import Period" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Período de importación histórica"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Período de importación histórica"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Período de importación histórica"
+          }
+        }
+      }
+    },
     "Home" : {
       "localizations" : {
         "es" : {
@@ -38159,6 +38764,29 @@
         }
       }
     },
+    "Import Data" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar datos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar datos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar datos"
+          }
+        }
+      }
+    },
     "Import from Photo Library" : {
       "localizations" : {
         "es" : {
@@ -38177,6 +38805,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importar desde la biblioteca de fotos"
+          }
+        }
+      }
+    },
+    "Import Historical Transactions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar transacciones históricas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar transacciones históricas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar transacciones históricas"
+          }
+        }
+      }
+    },
+    "Import History" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historial de importación"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historial de importación"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historial de importación"
           }
         }
       }
@@ -38217,6 +38891,31 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importar PDF o foto"
+          }
+        }
+      }
+    },
+    "Import Period" : {
+      "comment" : "A label for the user to select the historical import period.",
+      "extractionState" : "stale",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Período de importación"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Período de importación"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Período de importación"
           }
         }
       }
@@ -38293,6 +38992,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Documento importado"
+          }
+        }
+      }
+    },
+    "Imported from Apple Wallet" : {
+      "comment" : "System note on wallet-imported expenses without a statement label.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importado desde Apple Wallet"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importado desde Apple Wallet"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importado desde Apple Wallet"
+          }
+        }
+      }
+    },
+    "Imported from Apple Wallet · %@" : {
+      "comment" : "System note on wallet-imported expenses. %@ is the raw bank statement label.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importado desde Apple Wallet · %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importado desde Apple Wallet · %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importado desde Apple Wallet · %@"
           }
         }
       }
@@ -38408,6 +39155,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En persona, listo para empezar, adjunta un PDF firmado o anota un servicio externo — guardado en tu dispositivo."
+          }
+        }
+      }
+    },
+    "In-app purchases are not allowed on this device. Check Screen Time restrictions." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las compras integradas no están permitidas en este dispositivo. Revisa las restricciones de Tiempo de uso."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las compras integradas no están permitidas en este dispositivo. Revisa las restricciones de Tiempo de uso."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las compras integradas no están permitidas en este dispositivo. Revisa las restricciones de Tiempo de uso."
           }
         }
       }
@@ -39953,6 +40723,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notas internas"
+          }
+        }
+      }
+    },
+    "Invalid purchase quantity." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cantidad de compra no válida."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cantidad de compra no válida."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cantidad de compra no válida."
           }
         }
       }
@@ -43022,6 +43815,29 @@
         }
       }
     },
+    "Link Debt Payment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vincular pago de deuda"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vincular pago de deuda"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vincular pago de deuda"
+          }
+        }
+      }
+    },
     "Link savings goals to positive daily habits." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -43981,6 +44797,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Registra cualquier intercambio o trueque"
+          }
+        }
+      }
+    },
+    "Log as debt payment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar como pago de deuda"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar como pago de deuda"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar como pago de deuda"
           }
         }
       }
@@ -46396,6 +47235,52 @@
         }
       }
     },
+    "Matches current balance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincide con el saldo actual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincide con el saldo actual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincide con el saldo actual"
+          }
+        }
+      }
+    },
+    "Matches minimum payment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincide con el pago mínimo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincide con el pago mínimo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincide con el pago mínimo"
+          }
+        }
+      }
+    },
     "Matches your %@ pattern" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -46892,6 +47777,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Palabras clave de comercio"
+          }
+        }
+      }
+    },
+    "Merchant matches lender" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El comercio coincide con el prestamista"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El comercio coincide con el prestamista"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El comercio coincide con el prestamista"
           }
         }
       }
@@ -48479,6 +49387,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Límite de gasto mensual"
+          }
+        }
+      }
+    },
+    "Monthly subscription · includes Simple" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción mensual · incluye Simple"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción mensual · incluye Simple"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción mensual · incluye Simple"
           }
         }
       }
@@ -50806,6 +51737,29 @@
         }
       }
     },
+    "No payment logged this month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin pagos registrados este mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin pagos registrados este mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin pagos registrados este mes"
+          }
+        }
+      }
+    },
     "No payment yet" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -51082,6 +52036,10 @@
           }
         }
       }
+    },
+    "No recent transaction trend data available." : {
+      "comment" : "A message displayed when there is no trend data available for the 7-day spending trend.",
+      "isCommentAutoGenerated" : true
     },
     "No saved cards yet" : {
       "comment" : "A description of the state when the user has no saved business cards.",
@@ -51767,6 +52725,9 @@
         }
       }
     },
+    "None yet" : {
+
+    },
     "Normal" : {
       "comment" : "A label describing a stress score that is neither high nor low.",
       "isCommentAutoGenerated" : true,
@@ -52364,6 +53325,29 @@
         }
       }
     },
+    "Off — tap to connect Apple Wallet" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivado — toca para conectar Apple Wallet"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivado — toca para conectar Apple Wallet"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivado — toca para conectar Apple Wallet"
+          }
+        }
+      }
+    },
     "Office Expenses" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -52767,6 +53751,29 @@
         }
       }
     },
+    "One-time unlock · requires BuxMuse" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra única · requiere BuxMuse"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra única · requiere BuxMuse"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra única · requiere BuxMuse"
+          }
+        }
+      }
+    },
     "Only Apple’s system permission dialog can grant access. BuxMuse cannot read Health data until you approve there." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -52832,6 +53839,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Solo cuentan las entradas de Agregar ingreso que coincidan. Nómina y salario: etiquetas Salario y Nómina. Freelance y otros: trabajos, Otros ingresos y etiquetas personalizadas. La deduplicación de Studio usa la misma regla."
+          }
+        }
+      }
+    },
+    "Only spending outflows can be logged as debt payments." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo los gastos de salida pueden registrarse como pagos de deuda."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo los gastos de salida pueden registrarse como pagos de deuda."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo los gastos de salida pueden registrarse como pagos de deuda."
           }
         }
       }
@@ -56074,6 +57104,29 @@
         }
       }
     },
+    "Payment note" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota del pago"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota del pago"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota del pago"
+          }
+        }
+      }
+    },
     "payment received" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -57362,6 +58415,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Elige cláusulas de plantilla editables o escribe las tuyas propias — incluidas en los PDF."
+          }
+        }
+      }
+    },
+    "Pick Simple for invoices and a work ledger, or Pro for tax tools and unlimited projects." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige Simple para facturas y un libro de trabajo, o Pro para herramientas fiscales y proyectos ilimitados."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige Simple para facturas y un libro de trabajo, o Pro para herramientas fiscales y proyectos ilimitados."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige Simple para facturas y un libro de trabajo, o Pro para herramientas fiscales y proyectos ilimitados."
           }
         }
       }
@@ -60143,6 +61219,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importar campos del proyecto “%@”."
+          }
+        }
+      }
+    },
+    "Purchase cancelled." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra cancelada."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra cancelada."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra cancelada."
+          }
+        }
+      }
+    },
+    "Purchase failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra fallida"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra fallida"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra fallida"
           }
         }
       }
@@ -73375,6 +74497,29 @@
         }
       }
     },
+    "Something went wrong with the purchase." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo salió mal con la compra."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo salió mal con la compra."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo salió mal con la compra."
+          }
+        }
+      }
+    },
     "Source workspace uses the picker above." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -76723,6 +77868,29 @@
         }
       }
     },
+    "Suggested match" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincidencia sugerida"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincidencia sugerida"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincidencia sugerida"
+          }
+        }
+      }
+    },
     "Suggested set-aside" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -77233,6 +78401,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Símbolo"
+          }
+        }
+      }
+    },
+    "Sync Apple Wallet" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar Apple Wallet"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar Apple Wallet"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar Apple Wallet"
+          }
+        }
+      }
+    },
+    "Sync Complete!" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Sincronización completa!"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Sincronización completa!"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Sincronización completa!"
           }
         }
       }
@@ -80589,6 +81803,29 @@
         }
       }
     },
+    "That debt could not be found." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró esa deuda."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró esa deuda."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró esa deuda."
+          }
+        }
+      }
+    },
     "The Brain detected a recent price increase for your %@ subscription. You are paying more than the baseline average from previous cycles." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -81431,6 +82668,29 @@
         }
       }
     },
+    "This logs a payment on the debt and keeps the expense in your ledger — linked on both sides." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto registra un pago en la deuda y mantiene el gasto en tu libro mayor — vinculado en ambos lados."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto registra un pago en la deuda y mantiene el gasto en tu libro mayor — vinculado en ambos lados."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto registra un pago en la deuda y mantiene el gasto en tu libro mayor — vinculado en ambos lados."
+          }
+        }
+      }
+    },
     "This looks like a subscription · %@ cycle" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -81609,6 +82869,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esto elimina permanentemente las tarjetas seleccionadas de Tus diseños."
+          }
+        }
+      }
+    },
+    "This product is not available from the App Store yet. Upload a build with in-app purchases enabled, then test with a Sandbox Apple ID." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este producto aún no está disponible en App Store. Sube una compilación con compras integradas habilitadas y prueba con un Apple ID de Sandbox."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este producto aún no está disponible en App Store. Sube una compilación con compras integradas habilitadas y prueba con un Apple ID de Sandbox."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este producto aún no está disponible en App Store. Sube una compilación con compras integradas habilitadas y prueba con un Apple ID de Sandbox."
           }
         }
       }
@@ -81793,6 +83076,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esta sesión añade aproximadamente %@."
+          }
+        }
+      }
+    },
+    "This transaction is already linked to %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta transacción ya está vinculada a %@."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta transacción ya está vinculada a %@."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta transacción ya está vinculada a %@."
           }
         }
       }
@@ -90772,6 +92078,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ahorro anual"
+          }
+        }
+      }
+    },
+    "Yearly subscription · includes Simple" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción anual · incluye Simple"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción anual · incluye Simple"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción anual · incluye Simple"
           }
         }
       }

@@ -67,6 +67,7 @@ enum BudgetEnvelopeEngine {
 
     static func isSalaryIncome(record: ExpenseRecord, locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> Bool {
         guard record.amountValue > 0 else { return false }
+        if SalaryPayrollMatcher.isSalaryTagged(record) { return true }
         if let pick = IncomeSourceQuickPick.matchingStoredLabel(record.name, locale: locale) {
             return pick == .salary || pick == .paycheck
         }

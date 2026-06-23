@@ -476,7 +476,7 @@ struct OnboardingWizardView: View {
                     Image(systemName: "gearshape.fill")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                    Text(BuxCatalogLabel.string("Activate Studio in Settings → Studio. Choose Simple or unlock Pro Studio.", locale: appSettingsManager.interfaceLocale))
+                    Text(BuxCatalogLabel.string("Activate Studio in Settings → Work → Studio. Simple and Pro are separate purchases.", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
@@ -506,9 +506,7 @@ struct OnboardingWizardView: View {
             description: "Because BuxMuse is 100% offline with no servers, your ledger exists only on this device. We recommend setting up local notification alerts to remind you to back up your ledger."
         ) {
             VStack(spacing: 16) {
-                if !BuxPadIdiom.isPad {
-                    phoneSecurityOnboardingSection
-                }
+                securityOnboardingSection
 
                 // Reminders Toggle
                 HStack {
@@ -910,13 +908,13 @@ struct OnboardingWizardView: View {
     }
 
     @ViewBuilder
-    private var phoneSecurityOnboardingSection: some View {
+    private var securityOnboardingSection: some View {
         VStack(spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    BuxCatalogText.text("Protect with Face ID")
+                    BuxCatalogDynamicText(key: "Face ID / Touch ID")
                         .font(.system(size: 16, weight: .bold))
-                    BuxCatalogDynamicText(key: "Optional on iPhone — lock BuxMuse when you leave the app.")
+                    BuxCatalogDynamicText(key: "Optional — lock BuxMuse when you leave the app.")
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                 }

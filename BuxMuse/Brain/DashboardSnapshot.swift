@@ -37,6 +37,8 @@ public struct DashboardSnapshot: Equatable {
     public var standardStudioIncomeExcludedByDedup: Decimal
     /// Housing + utilities in the current period (Standard budget mode).
     public var essentialSpentThisPeriod: Decimal
+    /// Discretionary budget headroom for the current pay period (Standard mode).
+    public var spendableRemainingThisPeriod: Decimal
     public var envelopeBudgets: [EnvelopeBudgetDisplay]
     public var budgetPeriodStart: Date?
     public var budgetPeriodEnd: Date?
@@ -59,6 +61,7 @@ public struct DashboardSnapshot: Equatable {
         standardProStudioIncomeSupplement: 0,
         standardStudioIncomeExcludedByDedup: 0,
         essentialSpentThisPeriod: 0,
+        spendableRemainingThisPeriod: 0,
         envelopeBudgets: [],
         budgetPeriodStart: nil,
         budgetPeriodEnd: nil,

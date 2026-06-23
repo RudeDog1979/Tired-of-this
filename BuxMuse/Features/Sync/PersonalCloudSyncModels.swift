@@ -25,6 +25,7 @@ struct PersonalExpensePayload: Codable, Equatable, Identifiable {
     var isCategorySplit: Bool
     var splitLines: [ExpenseSplitLineRecord]
     var householdScope: HouseholdScope
+    var incomeRole: String?
     var createdAt: Date
     var updatedAt: Date
     var isDeleted: Bool
@@ -47,6 +48,7 @@ struct PersonalExpensePayload: Codable, Equatable, Identifiable {
         isCategorySplit = record.isCategorySplit
         splitLines = record.splitLines
         householdScope = record.householdScope
+        incomeRole = record.incomeRole
         createdAt = record.createdAt
         updatedAt = record.updatedAt
         self.isDeleted = isDeleted
@@ -72,7 +74,8 @@ struct PersonalExpensePayload: Codable, Equatable, Identifiable {
             paymentMethod: paymentMethod,
             isCategorySplit: isCategorySplit,
             splitLines: splitLines,
-            householdScope: householdScope
+            householdScope: householdScope,
+            incomeRole: incomeRole
         )
     }
 }

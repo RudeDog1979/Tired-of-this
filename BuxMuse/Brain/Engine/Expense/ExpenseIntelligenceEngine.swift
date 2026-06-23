@@ -202,7 +202,16 @@ struct ExpenseIntelligenceEngine {
         subscriptions: [SubscriptionInfo],
         locale: Locale
     ) -> SubscriptionDetection {
+        let nonSubscriptionCategories: Set<TransactionCategory> = [
+            .groceries, .restaurants, .transport, .shopping, .travel, .education, .health, .personal, .other
+        ]
         let norm = MerchantLogoEngine.normalizeMerchantName(record.name)
+        let isKnownSubKeyword = BuxFinanceKitManager.knownSubscriptionKeywords.contains(where: { norm.contains($0) })
+        
+        if nonSubscriptionCategories.contains(record.transactionCategory) && !isKnownSubKeyword {
+            return SubscriptionDetection(isLike: false, message: nil, matchesSubscription: false)
+        }
+
         let matchingSubs = subscriptions.filter { MerchantLogoEngine.normalizeMerchantName($0.merchantName) == norm }
         if let match = matchingSubs.first {
             return SubscriptionDetection(

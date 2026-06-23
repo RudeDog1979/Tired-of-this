@@ -7,8 +7,8 @@
 
 import Foundation
 
-enum BuxCatalogLabel {
-    static func string(_ englishKey: String, locale: Locale) -> String {
+enum BuxCatalogLabel: Sendable {
+    nonisolated static func string(_ englishKey: String, locale: Locale) -> String {
         BuxStringCatalog.localized(englishKey, locale: locale)
     }
 }

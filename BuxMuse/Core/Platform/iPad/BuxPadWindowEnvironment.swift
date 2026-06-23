@@ -20,6 +20,7 @@ extension View {
         environmentObject(container)
             .environmentObject(SettingsStore.shared)
             .environmentObject(container.brain)
+            .environmentObject(container.expenseTabStore)
             .environmentObject(container.persistence)
             .environmentObject(container.themeManager)
             .environment(\.themeManager, container.themeManager)

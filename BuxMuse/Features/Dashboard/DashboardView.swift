@@ -63,7 +63,7 @@ struct DashboardView: View {
             period: currentBudgetPeriod,
             entries: simpleStudioStore.entries,
             invoices: studioStore.invoices,
-            incomeRecords: (try? brain.fetchAllExpenseRecords()) ?? [],
+            incomeRecords: (try? brain.fetchExpenseRecords(in: currentBudgetPeriod)) ?? [],
             fundingSource: settingsStore.incomeFundingSource,
             studioMode: settingsStore.studioMode
         )
@@ -111,7 +111,6 @@ struct DashboardView: View {
                         }
 
                         DashboardHeroSection(
-                            dashSnapshot: dashSnapshot,
                             heroLayoutScale: heroLayoutScale,
                             activeSheet: $activeSheet,
                             isFabMenuExpanded: $isFabMenuExpanded,
@@ -708,8 +707,9 @@ private struct DashboardCategoryPillSection: View {
         ZStack(alignment: .topLeading) {
             if navigationCoordinator.activeCategoryPill == "Expenses" {
                                 let expenseHeader = brain.expenseInteractionSnapshot.header
-                                let monthlyTotal = Decimal(expenseHeader.totalSpent)
-                                let changeVsLast = expenseHeader.changeVsLastMonth
+                                let expenseSummary = brain.expenseInteractionSnapshot.summary
+                                let monthlyTotal = Decimal(expenseSummary.totalSpent)
+                                let changeVsLast = expenseSummary.changeVsLastMonth
                                 let txnCount = expenseHeader.monthlyTransactionCount
                                 let changeFormatted = appSettingsManager.format(Decimal(abs(changeVsLast)))
                                 let changeTrend = changeVsLast >= 0 ? "+\(changeFormatted)" : "-\(changeFormatted)"
@@ -1032,10 +1032,10 @@ private struct DashboardHeroSection: View {
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @EnvironmentObject private var brain: BuxMuseBrain
+    @EnvironmentObject private var expenseTabStore: ExpenseTabStore
 
     @ObservedObject private var settingsStore = SettingsStore.shared
 
-    let dashSnapshot: DashboardSnapshot
     let heroLayoutScale: CGFloat
 
     @Binding var activeSheet: DashboardActiveSheet?
@@ -1095,6 +1095,23 @@ private struct DashboardHeroSection: View {
         navigationCoordinator.isScreenLoaded || tutorialCoordinator.isActive
     }
 
+    private var heroDisplayAmount: Decimal {
+        let header = expenseTabStore.display.header
+        return Decimal(header.totalIncome - header.totalSpent)
+    }
+
+    private var heroBalanceIsReady: Bool {
+        expenseTabStore.displayRevision > 0
+    }
+
+    private var heroAmountTitle: String {
+        BuxLocalizedString.format(
+            "%@ Wallet",
+            locale: appSettingsManager.interfaceLocale,
+            appSettingsManager.selectedCurrency.id
+        )
+    }
+
     var body: some View {
         BuxCard(elevation: .hero, cornerRadius: BuxTokens.Radius.sheet, padding: heroCardPadding) {
             VStack(alignment: .leading, spacing: 0) {
@@ -1121,13 +1138,7 @@ private struct DashboardHeroSection: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
-                        let balanceTitle = BuxLocalizedString.format(
-                            "%@ Wallet",
-                            locale: appSettingsManager.interfaceLocale,
-                            appSettingsManager.selectedCurrency.id
-                        )
-
-                        Text(balanceTitle)
+                        Text(heroAmountTitle)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
                             .opacity(BuxScrollCollapseMath.fadeOpacity(scrollOffset: scrollOffset))
@@ -1142,12 +1153,22 @@ private struct DashboardHeroSection: View {
                         .opacity(BuxScrollCollapseMath.fadeOpacity(scrollOffset: scrollOffset))
                     }
 
-                    let balanceToFormat = dashSnapshot.totalBalance
-
-                    Text(navigationCoordinator.isBalanceVisible ? appSettingsManager.format(balanceToFormat) : "\(appSettingsManager.selectedCurrency.symbol) ••••••••")
+                    Text(navigationCoordinator.isBalanceVisible ? appSettingsManager.format(heroDisplayAmount) : "\(appSettingsManager.selectedCurrency.symbol) ••••••••")
                         .font(.system(size: collapseValue(start: 38, end: 24), weight: .semibold, design: .rounded))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        .monospacedDigit()
+                        .foregroundColor(
+                            heroDisplayAmount < 0
+                                ? .red
+                                : themeManager.labelPrimary(for: colorScheme)
+                        )
                         .offset(y: collapseValue(start: 0, end: -10))
+                        .opacity(heroBalanceIsReady ? 1 : 0)
+                        .animation(.easeOut(duration: 0.22), value: heroBalanceIsReady)
+                        .transaction { transaction in
+                            if !heroBalanceIsReady {
+                                transaction.animation = nil
+                            }
+                        }
                 }
                 .padding(.top, BuxTokens.section + BuxTokens.tight)
 
@@ -1255,7 +1276,7 @@ private struct DashboardHeroSection: View {
                 Group {
                     if settingsStore.showVisualHorizonBackground {
                         VisualHorizonView(
-                            points: brain.expenseInteractionSnapshot.header.sparklinePoints,
+                            points: heroBalanceIsReady ? expenseTabStore.display.header.sparklinePoints : [],
                             accentColor: themeManager.current.accentColor,
                             horizontalPadding: 0,
                             cornerRadius: BuxTokens.Radius.sheet

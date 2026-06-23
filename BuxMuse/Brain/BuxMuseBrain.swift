@@ -13,7 +13,8 @@ public final class BuxMuseBrain: ObservableObject {
     @Published public private(set) var dashboardSnapshot: DashboardSnapshot = .empty
     @Published public private(set) var subscriptionHubSnapshot: SubscriptionHubSnapshot = .empty
     @Published public private(set) var expenseInteractionSnapshot: ExpenseInteractionDisplay = .empty
-    /// Expenses tab list source — always loaded on the main actor (never via background `@Query`).
+    @Published public private(set) var expenseDataRevision: Int = 0
+    /// Expenses tab list source — workspace-filtered cache for filters/search.
     @Published private(set) var expenseRecords: [ExpenseRecord] = []
     @Published private(set) var categoryRecords: [ExpenseCategoryRecord] = []
     @Published public private(set) var isHydrated: Bool = false
@@ -39,6 +40,9 @@ public final class BuxMuseBrain: ObservableObject {
     private var snapshotWorkItem: DispatchWorkItem?
     private var cancellables = Set<AnyCancellable>()
     private var isRefreshingExpenses = false
+    private var allExpenseRecordsCache: [ExpenseRecord] = []
+    private var expenseLedgerSignature: UInt64 = 0
+    private var snapshotRebuildGeneration = 0
 
     public var financialEngine: FinancialIntelligenceEngine { financialBridge.engine }
 
@@ -61,8 +65,15 @@ public final class BuxMuseBrain: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self else { return }
+                self.refreshExpenses()
                 self.scheduleSnapshotRefresh()
-                // Expenses persist immediately via saveExpense/update/delete — never debounced here.
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: .buxMuseWalletSyncDidComplete)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshExpensesAfterWalletSync()
             }
             .store(in: &cancellables)
 
@@ -84,7 +95,7 @@ public final class BuxMuseBrain: ObservableObject {
         SettingsStore.shared.$sideHustleMatrixEnabled
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.refreshExpenses()
+                self?.refreshForActiveWorkspaceChange()
                 self?.scheduleSnapshotRefresh()
             }
             .store(in: &cancellables)
@@ -92,7 +103,7 @@ public final class BuxMuseBrain: ObservableObject {
         SettingsStore.shared.$showUnassignedExpensesInWorkspace
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.refreshExpenses()
+                self?.refreshForActiveWorkspaceChange()
                 self?.scheduleSnapshotRefresh()
             }
             .store(in: &cancellables)
@@ -108,9 +119,6 @@ public final class BuxMuseBrain: ObservableObject {
         }
 
         do {
-            let transactions = try persistence.fetchAllExpenses()
-            loadTransactionsIntoEngine(transactions)
-
             let goals = try persistence.fetchAllGoals()
             goalsEngine.replaceAllGoals(goals)
 
@@ -144,16 +152,12 @@ public final class BuxMuseBrain: ObservableObject {
             loadTransactionsIntoEngine([])
         }
 
-        reloadExpenseRecordsFromStore()
         categoryRecords = (try? fetchAllCategoryRecords()) ?? []
         let settings = SettingsStore.shared
         settings.migrateLegacyCustomBudgetModeIfNeeded()
         settings.normalizeEnvelopeCategoryStorageIfNeeded()
-        refreshSnapshotsImmediately()
-        if !expenseRecords.isEmpty {
-            updateExpenseInteractionSnapshot(records: expenseRecords, currency: appSettings.selectedCurrency)
-        }
         isHydrated = true
+        scheduleSnapshotRefresh()
     }
 
     private func loadTransactionsIntoEngine(_ transactions: [Transaction]) {
@@ -185,43 +189,114 @@ public final class BuxMuseBrain: ObservableObject {
         )
     }
 
-    // MARK: - Expenses (immediate SwiftData — no debounce)
+    // MARK: - Expenses (GRDB ledger)
 
-    /// Reload in-memory engine + snapshots from SwiftData only. Does not write to disk.
+    /// Full ledger reload — bulk sync, import, category merge only. Never hydrate or tab navigation.
     public func refreshExpenses() {
+        guard !isRefreshingExpenses else { return }
         isRefreshingExpenses = true
         defer { isRefreshingExpenses = false }
-
         do {
-            let transactions = try persistence.fetchAllExpenses()
-            loadTransactionsIntoEngine(transactions)
-            reloadExpenseRecordsFromStore()
-            refreshSnapshotsImmediately()
-            financialBridge.objectWillChange.send()
-
-            Task { @MainActor in
-                expenseInteractionSnapshot = await generateExpenseInteractionDisplay()
-            }
+            let all = try persistence.expenseDatabase.fetchAllRecords()
+            applyFetchedExpenseRecords(all)
         } catch {
             print("refreshExpenses failed: \(error)")
         }
     }
 
-    /// Workspace pill changes only re-filter in-memory data — engine already scopes via `HustleWorkspaceFilter`.
-    public func refreshForActiveWorkspaceChange() {
-        reloadExpenseRecordsFromStore()
-        refreshSnapshotsImmediately()
-        financialBridge.objectWillChange.send()
-        let globalCurrency = AppSettingsManager.currencySetting(for: AppSettingsManager.preferredCurrencyCode)
-        updateExpenseInteractionSnapshot(
-            records: expenseRecords,
-            currency: WorkspaceCurrencyContext.activeDisplayCurrency(global: globalCurrency)
-        )
+    /// Wallet sync writes straight to GRDB — always re-hydrate ledger + bump revision for tab refresh.
+    public func refreshExpensesAfterWalletSync() {
+        guard !isRefreshingExpenses else { return }
+        isRefreshingExpenses = true
+        defer { isRefreshingExpenses = false }
+        do {
+            let all = try persistence.expenseDatabase.fetchAllRecords()
+            expenseLedgerSignature = Self.ledgerSignature(for: all)
+            allExpenseRecordsCache = all
+            expenseRecords = HustleWorkspaceFilter.filter(all) { $0.hustleId }
+            expenseDataRevision += 1
+            loadTransactionsIntoEngine(all.map { $0.toTransaction() })
+            scheduleSnapshotRefresh()
+            financialBridge.objectWillChange.send()
+        } catch {
+            print("refreshExpensesAfterWalletSync failed: \(error)")
+        }
     }
 
-    private func reloadExpenseRecordsFromStore() {
-        let all = (try? persistence.fetchAllExpenseRecords()) ?? []
+    private func applyFetchedExpenseRecords(_ all: [ExpenseRecord]) {
+        let signature = Self.ledgerSignature(for: all)
+        guard signature != expenseLedgerSignature else { return }
+
+        expenseLedgerSignature = signature
+        allExpenseRecordsCache = all
         expenseRecords = HustleWorkspaceFilter.filter(all) { $0.hustleId }
+        expenseDataRevision += 1
+        loadTransactionsIntoEngine(all.map { $0.toTransaction() })
+        scheduleSnapshotRefresh()
+        financialBridge.objectWillChange.send()
+    }
+
+    private func applyExpenseRecordUpsert(_ record: ExpenseRecord, isNew: Bool) {
+        if let index = allExpenseRecordsCache.firstIndex(where: { $0.id == record.id }) {
+            allExpenseRecordsCache[index] = record
+        } else {
+            allExpenseRecordsCache.append(record)
+            allExpenseRecordsCache.sort { $0.date > $1.date }
+        }
+        expenseLedgerSignature = Self.ledgerSignature(for: allExpenseRecordsCache)
+        expenseRecords = HustleWorkspaceFilter.filter(allExpenseRecordsCache) { $0.hustleId }
+        expenseDataRevision += 1
+        let transaction = record.toTransaction()
+        if isNew {
+            financialEngine.addTransaction(transaction)
+        } else {
+            financialEngine.updateTransaction(transaction)
+        }
+        financialBridge.objectWillChange.send()
+        scheduleSnapshotRefresh()
+    }
+
+    private func applyExpenseRecordDelete(id: UUID) {
+        allExpenseRecordsCache.removeAll { $0.id == id }
+        expenseLedgerSignature = Self.ledgerSignature(for: allExpenseRecordsCache)
+        expenseRecords = HustleWorkspaceFilter.filter(allExpenseRecordsCache) { $0.hustleId }
+        expenseDataRevision += 1
+        financialEngine.deleteTransaction(id: id)
+        financialBridge.objectWillChange.send()
+        scheduleSnapshotRefresh()
+    }
+
+    private static func ledgerSignature(for records: [ExpenseRecord]) -> UInt64 {
+        guard !records.isEmpty else { return 0 }
+        var signature = UInt64(records.count)
+        let pendingRecords = records.filter(\.walletIsPending)
+        signature ^= UInt64(pendingRecords.count) &* 7_919
+        for pending in pendingRecords.prefix(16) {
+            signature ^= UInt64(truncatingIfNeeded: pending.id.hashValue)
+            signature ^= UInt64(bitPattern: Int64(pending.updatedAt.timeIntervalSince1970.bitPattern))
+        }
+        let stride = max(1, records.count / 64)
+        for index in Swift.stride(from: 0, to: records.count, by: stride) {
+            let record = records[index]
+            signature ^= UInt64(bitPattern: Int64(record.updatedAt.timeIntervalSince1970.bitPattern))
+            signature = signature &* 1_009 &+ UInt64(truncatingIfNeeded: record.id.hashValue)
+            if record.walletIsPending {
+                signature ^= 1
+            }
+        }
+        if let newest = records.first, let oldest = records.last {
+            signature ^= UInt64(truncatingIfNeeded: newest.id.hashValue)
+            signature ^= UInt64(truncatingIfNeeded: oldest.id.hashValue)
+        }
+        return signature
+    }
+
+    /// Workspace pill changes only re-filter in-memory data.
+    public func refreshForActiveWorkspaceChange() {
+        expenseRecords = HustleWorkspaceFilter.filter(allExpenseRecordsCache) { $0.hustleId }
+        expenseDataRevision += 1
+        financialBridge.objectWillChange.send()
+        scheduleSnapshotRefresh()
     }
 
     @discardableResult
@@ -244,12 +319,21 @@ public final class BuxMuseBrain: ObservableObject {
         let currencyCode = (try? fetchExpenseRecord(id: id))?.currencyCode ?? SettingsStore.shared.primaryLocalCurrency
         ExpenseRenewalReminderScheduler.cancel(for: id)
         try persistence.deleteExpenseRecord(id: id)
-        refreshExpenses()
+        applyExpenseRecordDelete(id: id)
         BuxPadExpenseUndoBridge.offerUndoAfterDelete(padUndoSnapshot, brain: self)
         PersonalCloudSyncEngine.shared.pushDeletedExpense(id: id, currencyCode: currencyCode)
     }
 
     // MARK: - Expense records (full SwiftData model)
+
+    func fetchExpenseRecords(in period: DateInterval) throws -> [ExpenseRecord] {
+        try persistence.fetchExpenseRecords(
+            from: period.start,
+            to: period.end,
+            hustleId: HustleWorkspaceFilter.selectedHustleId,
+            includeUnassigned: HustleWorkspaceFilter.showUnassignedWhenFiltered
+        )
+    }
 
     func fetchAllExpenseRecords() throws -> [ExpenseRecord] {
         try persistence.fetchAllExpenseRecords()
@@ -260,11 +344,56 @@ public final class BuxMuseBrain: ObservableObject {
     }
 
     @discardableResult
+    func linkPaycheck(
+        from record: ExpenseRecord,
+        payCycle: SimpleBudgetCycle,
+        payAnchorDate: Date
+    ) throws -> ExpenseRecord {
+        guard record.amountValue > 0 else {
+            throw NSError(domain: "BuxMuseBrain", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "Only incoming transactions can be linked as paycheck."
+            ])
+        }
+
+        var updated = record
+        SalaryPayrollMatcher.applySalaryTag(to: &updated)
+        updated.categoryId = try persistence.categoryId(for: .income)
+        let saved = try saveExpenseRecord(updated)
+
+        let store = SettingsStore.shared
+        store.salaryPayProfile = SalaryPayrollMatcher.buildProfile(
+            from: saved,
+            payCycle: payCycle,
+            payAnchorDate: payAnchorDate
+        )
+        store.simpleBudgetCycle = payCycle
+        store.simpleBudgetPeriodAnchor = Calendar.current.startOfDay(for: payAnchorDate)
+        store.incomeFundingSource = .salary
+        store.save()
+
+        try retroactivelyApplySalaryProfile(store.salaryPayProfile)
+        return saved
+    }
+
+    private func retroactivelyApplySalaryProfile(_ profile: SalaryPayProfile) throws {
+        guard profile.isConfigured else { return }
+        let records = try fetchAllExpenseRecords()
+        for var record in records where record.amountValue > 0 && !record.isSalaryTagged {
+            guard SalaryPayrollMatcher.applyAutoTagIfMatched(
+                &record,
+                profile: profile,
+                weekStartDay: SettingsStore.shared.weekStartDay
+            ) else { continue }
+            _ = try saveExpenseRecord(record)
+        }
+    }
+
+    @discardableResult
     func saveExpenseRecord(_ record: ExpenseRecord, merchantSelection: MerchantSelection? = nil) throws -> ExpenseRecord {
         var working = record
         let userDeclaredSubscription = working.isSubscriptionLike || working.isTrial
         let userMarkedRecurring = working.isRecurring && (working.recurrenceConfidence ?? 0) >= 0.85
-        let all = (try? persistence.fetchAllExpenseRecords()) ?? []
+        let intelligencePeers = (try? persistence.fetchExpenseRecordsForIntelligence(around: working)) ?? []
         let normalizedMerchant = MerchantLogoEngine.normalizeMerchantName(working.merchantName)
         if !userDeclaredSubscription,
            SettingsStore.shared.isSubscriptionCancelled(normalizedMerchant: normalizedMerchant) {
@@ -280,7 +409,7 @@ public final class BuxMuseBrain: ObservableObject {
         let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
         let analysis = ExpenseIntelligenceEngine.analyze(
             record: working,
-            allRecords: all,
+            allRecords: intelligencePeers,
             activeSubscriptions: subs,
             categoriesById: categoriesById,
             locale: BuxInterfaceLocale.currentInterfaceLocale
@@ -314,7 +443,7 @@ public final class BuxMuseBrain: ObservableObject {
         WorkspaceAutoRouter.applyCreateOnlyRouting(to: &working, isNewRecord: isNewRecord)
 
         let saved = try persistence.upsertExpenseRecord(working, merchantSelection: merchantSelection)
-        refreshExpenses()
+        applyExpenseRecordUpsert(saved, isNew: isNewRecord)
         Task { @MainActor in
             await ExpenseRenewalReminderScheduler.schedule(for: saved)
         }
@@ -344,20 +473,44 @@ public final class BuxMuseBrain: ObservableObject {
 
     func updateExpenseNotes(id: UUID, notes: String?) throws {
         try persistence.updateExpenseNotes(id: id, notes: notes)
-        refreshExpenses()
+        if let updated = try persistence.fetchExpenseRecord(id: id) {
+            applyExpenseRecordUpsert(updated, isNew: false)
+        }
     }
 
     public func changeExpenseCategory(id: UUID, category: TransactionCategory, categoryId: UUID? = nil) throws {
+        let existing = try persistence.fetchExpenseRecord(id: id)
         try persistence.updateExpenseCategory(id: id, category: category, categoryId: categoryId)
-        refreshExpenses()
+        if let existing {
+            let merchantLabel = {
+                let merchant = existing.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !merchant.isEmpty { return merchant }
+                return existing.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            }()
+            let walletRawLabel = existing.notes.flatMap {
+                WalletStatementIntelligence.rawLabelFromStoredNote($0)
+            }
+            try persistence.rememberManualWalletMerchantCategory(
+                merchantName: merchantLabel,
+                walletRawLabel: walletRawLabel,
+                category: category
+            )
+            if existing.financeKitTransactionId != nil {
+                try persistence.markWalletCategoryUserConfirmed(expenseId: id)
+            }
+        }
+        if let updated = try persistence.fetchExpenseRecord(id: id) {
+            applyExpenseRecordUpsert(updated, isNew: false)
+        }
     }
 
     public func cancelSubscription(merchantName: String) throws {
         let normalized = MerchantLogoEngine.normalizeMerchantName(merchantName)
         SettingsStore.shared.registerCancelledSubscription(normalizedMerchant: normalized)
 
-        let records = (try? persistence.fetchAllExpenseRecords()) ?? []
-        for var record in records where MerchantLogoEngine.normalizeMerchantName(record.merchantName) == normalized {
+        let affected = try persistence.fetchExpenseRecordsMatchingMerchant(merchantName: merchantName)
+            .filter { MerchantLogoEngine.normalizeMerchantName($0.merchantName) == normalized }
+        for var record in affected {
             record.isSubscriptionLike = false
             record.isTrial = false
             record.nextExpectedDate = nil
@@ -365,9 +518,9 @@ public final class BuxMuseBrain: ObservableObject {
             record.trialEndDate = nil
             record.renewalReminderDays = nil
             ExpenseRenewalReminderScheduler.cancel(for: record.id)
-            _ = try persistence.upsertExpenseRecord(record)
+            let saved = try persistence.upsertExpenseRecord(record)
+            applyExpenseRecordUpsert(saved, isNew: false)
         }
-        refreshExpenses()
     }
 
     func convertExpenseToSubscription(id: UUID) throws {
@@ -454,13 +607,13 @@ public final class BuxMuseBrain: ObservableObject {
     func expenseIntelligenceDisplay(for id: UUID, locale: Locale? = nil) -> ExpenseIntelligenceDisplay {
         let resolvedLocale = locale ?? BuxInterfaceLocale.currentInterfaceLocale
         guard let record = try? persistence.fetchExpenseRecord(id: id) else { return .empty }
-        let all = (try? persistence.fetchAllExpenseRecords()) ?? []
+        let intelligencePeers = (try? persistence.fetchExpenseRecordsForIntelligence(around: record)) ?? []
         let subs = financialEngine.activeSubscriptions()
         let categoryRecords = (try? fetchAllCategoryRecords()) ?? []
         let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
         return ExpenseIntelligenceEngine.analyze(
             record: record,
-            allRecords: all,
+            allRecords: intelligencePeers,
             activeSubscriptions: subs,
             categoriesById: categoriesById,
             locale: resolvedLocale
@@ -505,8 +658,8 @@ public final class BuxMuseBrain: ObservableObject {
         try persistence.fetchMerchantRecord(id: id)
     }
 
-    /// Store/brand string for `AsyncMerchantLogoView` when the user explicitly linked a merchant.
-    func merchantLogoName(for record: ExpenseRecord) -> String? {
+    /// Store/brand string and optional persisted domain for `AsyncMerchantLogoView`.
+    func merchantLogoContext(for record: ExpenseRecord) -> (name: String, knownDomain: String?)? {
         guard let merchantId = record.merchantId else {
             if record.amountValue > 0 || record.transactionCategory == .income {
                 return nil
@@ -514,16 +667,22 @@ public final class BuxMuseBrain: ObservableObject {
             let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
             let label = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !store.isEmpty, store.caseInsensitiveCompare(label) != .orderedSame else { return nil }
-            return store
+            return (store, nil)
         }
         if let merchant = try? persistence.fetchMerchantRecord(id: merchantId) {
             let linked = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !linked.isEmpty else { return nil }
-            return linked
+            let domain = merchant.logoURL.flatMap { MerchantLogoEngine.domain(fromStoredLogoURL: $0) }
+            return (linked, domain)
         }
         let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !store.isEmpty else { return nil }
-        return store
+        return (store, nil)
+    }
+
+    /// Store/brand string for `AsyncMerchantLogoView` when the user explicitly linked a merchant.
+    func merchantLogoName(for record: ExpenseRecord) -> String? {
+        merchantLogoContext(for: record)?.name
     }
 
     func updateMerchant(_ record: ExpenseMerchantRecord) throws {
@@ -547,42 +706,20 @@ public final class BuxMuseBrain: ObservableObject {
     public func scheduleSnapshotRefresh() {
         snapshotWorkItem?.cancel()
         let work = DispatchWorkItem { @MainActor [weak self] in
-            self?.rebuildSnapshots()
+            self?.startSnapshotRebuild()
         }
         snapshotWorkItem = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: work)
     }
 
     private func refreshSnapshotsImmediately() {
-        rebuildSnapshots()
+        startSnapshotRebuild()
     }
 
-    private func rebuildSnapshots() {
-        let txs = financialBridge.engine.allTransactions().sorted { $0.date > $1.date }
-        let expenseRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
-        let recordsById = Self.recordsByID(expenseRecords)
-        let recent = Array(txs.prefix(5)).map { tx in
-            let record = recordsById[tx.id]
-            let emotion = record?.emotion
-            return DashboardRecentTransaction(
-                id: tx.id,
-                date: tx.date,
-                amount: tx.amount,
-                merchantName: tx.merchantName,
-                category: tx.category,
-                emotion: emotion,
-                emotionSymbol: emotion.flatMap { EmotionalTaggingEngine.tag(for: $0)?.symbol }
-            )
-        }
-        let subs = financialBridge.engine.activeSubscriptions()
-        let currency = txs.first?.amount.currencyCode
-            ?? subs.first?.cost.currencyCode
-            ?? AppSettingsManager.preferredCurrencyCode
-        let monthly = subs.reduce(Decimal(0)) { $0 + abs($1.cost.value) }
-        let health = Self.subscriptionHealthScore(for: subs)
-
-        let totalBalance = txs.reduce(Decimal(0)) { $0 + $1.amount.value }
-        
+    private func startSnapshotRebuild() {
+        snapshotRebuildGeneration += 1
+        let generation = snapshotRebuildGeneration
+        let persistence = persistence
         let calendar = Self.budgetCalendar()
         let now = Date()
         let store = SettingsStore.shared
@@ -591,34 +728,106 @@ public final class BuxMuseBrain: ObservableObject {
             now: now,
             calendar: calendar
         )
-        let periodTxs = txs.filter { $0.date >= budgetPeriod.start && $0.date < budgetPeriod.end }
-
+        let hustleId = HustleWorkspaceFilter.selectedHustleId
+        let includeUnassigned = HustleWorkspaceFilter.showUnassignedWhenFiltered
         let budgetingMode = store.budgetingMode
+        let currencyCode = AppSettingsManager.preferredCurrencyCode
+        let sql = persistence.expenseDatabase.sql
+
+        Task.detached(priority: .utility) {
+            let periodPayload = try? sql.fetchRecordsRaw(
+                from: budgetPeriod.start,
+                to: budgetPeriod.end,
+                hustleId: hustleId,
+                includeUnassigned: includeUnassigned
+            )
+            let recentPayload = try? sql.fetchRecentRecordsRaw(
+                limit: 5,
+                hustleId: hustleId,
+                includeUnassigned: includeUnassigned
+            )
+            let monthlyTotals = (try? sql.fetchMonthlyOutflowTotals(months: 3)) ?? []
+            let totalBalance = (try? sql.sumLedgerAmountValues(
+                currencyCode: currencyCode,
+                includePending: true,
+                walletOnly: false
+            )) ?? 0
+
+            await MainActor.run { [weak self] in
+                guard let self, generation == self.snapshotRebuildGeneration else { return }
+                self.finishSnapshotRebuild(
+                    periodPayload: periodPayload,
+                    recentPayload: recentPayload,
+                    monthlyTotals: monthlyTotals,
+                    totalBalance: totalBalance,
+                    budgetPeriod: budgetPeriod,
+                    calendar: calendar,
+                    store: store,
+                    budgetingMode: budgetingMode
+                )
+            }
+        }
+    }
+
+    private func finishSnapshotRebuild(
+        periodPayload: ExpenseRowPayload?,
+        recentPayload: ExpenseRowPayload?,
+        monthlyTotals: [MonthlyOutflowTotal],
+        totalBalance: Double,
+        budgetPeriod: DateInterval,
+        calendar: Calendar,
+        store: SettingsStore,
+        budgetingMode: BudgetingMode
+    ) {
+        let periodRecords = periodPayload.map { ExpenseGRDBRecordMapper.makeRecords(from: $0) } ?? []
+        let recentRecords = recentPayload.map { ExpenseGRDBRecordMapper.makeRecords(from: $0) } ?? []
+        let recent = recentRecords.map { record in
+            let emotion = record.emotion
+            return DashboardRecentTransaction(
+                id: record.id,
+                date: record.date,
+                amount: record.toTransaction().amount,
+                merchantName: record.merchantName,
+                category: record.transactionCategory,
+                emotion: emotion,
+                emotionSymbol: emotion.flatMap { EmotionalTaggingEngine.tag(for: $0)?.symbol }
+            )
+        }
+        let subs = financialBridge.engine.activeSubscriptions()
+        let currency = periodRecords.first?.currencyCode
+            ?? recentRecords.first?.currencyCode
+            ?? subs.first?.cost.currencyCode
+            ?? AppSettingsManager.preferredCurrencyCode
+        let monthly = subs.reduce(Decimal(0)) { $0 + abs($1.cost.value) }
+        let health = Self.subscriptionHealthScore(for: subs)
+
         let activeBudgetName: String?
         let activeBudgetLimit: Decimal
         let activeBudgetSpent: Decimal
         var essentialSpentThisPeriod: Decimal = 0
+        var spendableRemainingThisPeriod: Decimal = 0
         var envelopeBudgets: [EnvelopeBudgetDisplay] = []
         let locale = BuxInterfaceLocale.currentInterfaceLocale
         let categoryRecords = (try? fetchAllCategoryRecords()) ?? []
         let loggedIncomePool = BudgetEnvelopeEngine.incomePool(
-            records: expenseRecords,
+            records: periodRecords,
             fundingSource: store.incomeFundingSource,
             period: budgetPeriod,
             locale: locale
         )
         let simpleStudioSupplement = resolvedStandardSimpleStudioIncomeSupplement(
             period: budgetPeriod,
-            records: expenseRecords
+            records: periodRecords
         )
         let proStudioSupplement = resolvedStandardProStudioIncomeSupplement(
             period: budgetPeriod,
-            records: expenseRecords
+            records: periodRecords
         )
         let studioIncomeSupplement = simpleStudioSupplement.counted + proStudioSupplement.counted
         let studioIncomeExcludedByDedup = simpleStudioSupplement.excludedByDedup + proStudioSupplement.excludedByDedup
         let incomePool = loggedIncomePool + studioIncomeSupplement
         let approachingThreshold = store.budgetApproachingThresholdPercent
+        let periodTxs = periodRecords.map { $0.toTransaction() }
 
         switch budgetingMode {
         case .simple, .custom:
@@ -630,6 +839,7 @@ public final class BuxMuseBrain: ObservableObject {
                 )
                 activeBudgetLimit = workspaceBudget.limit
                 activeBudgetSpent = periodTxs.filter { $0.amount.value < 0 }.reduce(Decimal(0)) { $0 + abs($1.amount.value) }
+                spendableRemainingThisPeriod = workspaceBudget.limit - activeBudgetSpent
             } else {
                 activeBudgetName = BuxLocalizedString.format(
                     "Standard budget · %@",
@@ -638,12 +848,12 @@ public final class BuxMuseBrain: ObservableObject {
                 )
                 let spendingCap: Decimal = {
                     if store.autoAdjustBudgetsFromHistory {
-                        return Self.trailingAverageMonthlySpend(from: txs, calendar: calendar)
+                        return Self.trailingAverageMonthlySpend(from: monthlyTotals)
                     }
                     return store.simpleBudgetLimit
                 }()
                 let standardResult = BudgetPeriodEngine.computeStandardBudget(
-                    records: expenseRecords,
+                    records: periodRecords,
                     fundingSource: store.incomeFundingSource,
                     period: budgetPeriod,
                     spendingCap: spendingCap,
@@ -654,6 +864,7 @@ public final class BuxMuseBrain: ObservableObject {
                 activeBudgetLimit = standardResult.effectiveLimit
                 activeBudgetSpent = standardResult.discretionarySpent
                 essentialSpentThisPeriod = standardResult.essentialSpent
+                spendableRemainingThisPeriod = standardResult.remaining
             }
 
         case .envelope:
@@ -664,7 +875,7 @@ public final class BuxMuseBrain: ObservableObject {
             if let activeProfile {
                 envelopeBudgets = BudgetEnvelopeEngine.computeEnvelopes(
                     profile: activeProfile,
-                    records: expenseRecords,
+                    records: periodRecords,
                     categoryRecords: categoryRecords,
                     period: budgetPeriod,
                     locale: locale
@@ -681,9 +892,8 @@ public final class BuxMuseBrain: ObservableObject {
             healthScore: health,
             currencyCode: currency
         )
-        let allExpenseRecords = expenseRecords
         let workspaceSynergy = store.sideHustleMatrixEnabled
-            ? WorkspaceROIEngine.summarize(records: allExpenseRecords, hustles: HustleManager.shared.hustles)
+            ? WorkspaceROIEngine.summarize(records: periodRecords, hustles: HustleManager.shared.hustles)
             : .empty
 
         let dashSnapshot = DashboardSnapshot(
@@ -692,7 +902,7 @@ public final class BuxMuseBrain: ObservableObject {
             subscriptionCount: subs.count,
             subscriptionHealthScore: health,
             currencyCode: currency,
-            totalBalance: totalBalance,
+            totalBalance: Decimal(totalBalance),
             activeBudgetName: activeBudgetName,
             activeBudgetLimit: activeBudgetLimit,
             activeBudgetSpent: activeBudgetSpent,
@@ -702,6 +912,7 @@ public final class BuxMuseBrain: ObservableObject {
             standardProStudioIncomeSupplement: proStudioSupplement.counted,
             standardStudioIncomeExcludedByDedup: studioIncomeExcludedByDedup,
             essentialSpentThisPeriod: essentialSpentThisPeriod,
+            spendableRemainingThisPeriod: spendableRemainingThisPeriod,
             envelopeBudgets: envelopeBudgets,
             budgetPeriodStart: budgetPeriod.start,
             budgetPeriodEnd: budgetPeriod.end,
@@ -718,6 +929,14 @@ public final class BuxMuseBrain: ObservableObject {
             subscriptionHubSnapshot = hubSnapshot
         }
         persistIntelligenceCache(subs: subs, currency: currency)
+    }
+
+    private static func trailingAverageMonthlySpend(from monthlyTotals: [MonthlyOutflowTotal]) -> Decimal {
+        guard !monthlyTotals.isEmpty else { return SettingsStore.shared.simpleBudgetLimit }
+        let totals = monthlyTotals.map { Decimal($0.total) }
+        let average = totals.reduce(0, +) / Decimal(totals.count)
+        let adjusted = average * Decimal(string: "1.1")!
+        return max(SettingsStore.shared.simpleBudgetLimit, adjusted)
     }
 
     nonisolated private static func subscriptionHealthScore(for subs: [SubscriptionInfo]) -> Int {
@@ -827,92 +1046,342 @@ public final class BuxMuseBrain: ObservableObject {
         expenseInteractionSnapshot = buildExpenseInteractionDisplay(from: records, currency: currency)
     }
 
-    public func generateExpenseInteractionDisplay() async -> ExpenseInteractionDisplay {
-        let allRecords = (try? persistence.fetchAllExpenseRecords()) ?? []
-        let scoped = HustleWorkspaceFilter.filter(allRecords) { $0.hustleId }
-        let globalCurrency = AppSettingsManager.currencySetting(for: AppSettingsManager.preferredCurrencyCode)
-        return buildExpenseInteractionDisplay(
-            from: scoped,
-            currency: WorkspaceCurrencyContext.activeDisplayCurrency(global: globalCurrency)
+    func publishExpenseInteractionDisplay(_ display: ExpenseInteractionDisplay) {
+        expenseInteractionSnapshot = display
+    }
+
+    /// Scoped GRDB fetch for the Expenses tab — SQL off main, mapping on MainActor.
+    func fetchScopedExpenseTabContent(currency: CurrencySetting) async -> (display: ExpenseInteractionDisplay, listRecords: [ExpenseRecord])? {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start,
+              let lastMonthStart = calendar.date(byAdding: .month, value: -1, to: startOfMonth) else {
+            return nil
+        }
+
+        let store = SettingsStore.shared
+        let budgetConfig = BuxBudgetPeriodCalculator.Configuration(
+            cycle: store.simpleBudgetCycle,
+            weekStartDay: store.weekStartDay,
+            anchorDate: store.simpleBudgetPeriodAnchor
+        )
+        let budgetCalendar = BuxBudgetPeriodCalculator.calendar(weekStartDay: budgetConfig.weekStartDay)
+        let currentPeriod = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: budgetConfig,
+            now: now,
+            calendar: budgetCalendar
+        )
+        let previousAnchor = budgetCalendar.date(byAdding: .second, value: -1, to: currentPeriod.start) ?? currentPeriod.start
+        let previousPeriod = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: budgetConfig,
+            now: previousAnchor,
+            calendar: budgetCalendar
+        )
+
+        let hustleId = HustleWorkspaceFilter.selectedHustleId
+        let includeUnassigned = HustleWorkspaceFilter.showUnassignedWhenFiltered
+        let sql = persistence.expenseDatabase.sql
+        let periodStart = currentPeriod.start
+        let periodEnd = currentPeriod.end
+        let prevPeriodStart = previousPeriod.start
+        let prevPeriodEnd = previousPeriod.end
+
+        let raw: (scope: LedgerScopeRaw, payPeriod: ExpenseRowPayload, previousPayPeriod: ExpenseRowPayload, ledgerBalance: Double)
+        do {
+            raw = try await Task.detached(priority: .userInitiated) {
+                let scope = try sql.fetchLedgerScopeRaw(
+                    currentMonthStart: startOfMonth,
+                    lastMonthStart: lastMonthStart,
+                    hustleId: hustleId,
+                    includeUnassigned: includeUnassigned
+                )
+                let periodPayload = try sql.fetchRecordsRaw(
+                    from: periodStart,
+                    to: periodEnd,
+                    hustleId: hustleId,
+                    includeUnassigned: includeUnassigned
+                )
+                let previousPeriodPayload = try sql.fetchRecordsRaw(
+                    from: prevPeriodStart,
+                    to: prevPeriodEnd,
+                    hustleId: hustleId,
+                    includeUnassigned: includeUnassigned
+                )
+                let ledgerBalance = (try? sql.sumLedgerAmountValues(
+                    currencyCode: currency.id,
+                    includePending: true,
+                    walletOnly: false
+                )) ?? 0
+                return (scope, periodPayload, previousPeriodPayload, ledgerBalance)
+            }.value
+        } catch {
+            print("fetchScopedExpenseTabContent failed: \(error)")
+            return nil
+        }
+
+        let pack = ExpenseGRDBRecordMapper.makeLedgerScopePack(from: raw.scope)
+        let payPeriodRecords = ExpenseGRDBRecordMapper.makeRecords(from: raw.payPeriod)
+        let previousPayPeriodRecords = ExpenseGRDBRecordMapper.makeRecords(from: raw.previousPayPeriod)
+        let display = buildScopedExpenseDisplay(
+            currentMonthRecords: pack.currentMonth,
+            lastMonthRecords: pack.lastMonth,
+            pendingWalletRecords: pack.pendingWallet,
+            archiveMonths: pack.archiveMonths,
+            currency: currency,
+            budgetConfiguration: budgetConfig,
+            payPeriodRecords: payPeriodRecords,
+            previousPayPeriodRecords: previousPayPeriodRecords,
+            referenceDate: now,
+            ledgerBalance: raw.ledgerBalance
+        )
+        return (display, pack.currentMonth + pack.pendingWallet)
+    }
+
+    func fetchArchiveMonthRecords(monthStart: Date) async -> [ExpenseRecord] {
+        let calendar = Calendar.current
+        guard let monthEnd = calendar.date(byAdding: .month, value: 1, to: monthStart) else { return [] }
+        let sql = persistence.expenseDatabase.sql
+        do {
+            let payload = try await Task.detached(priority: .userInitiated) {
+                try sql.fetchRecordsRaw(
+                    from: monthStart,
+                    to: monthEnd,
+                    hustleId: nil,
+                    includeUnassigned: false
+                )
+            }.value
+            return ExpenseGRDBRecordMapper.makeRecords(from: payload)
+        } catch {
+            print("fetchArchiveMonthRecords failed: \(error)")
+            return []
+        }
+    }
+
+    func makeExpenseRowDisplays(from records: [ExpenseRecord]) -> [ExpenseRowDisplay] {
+        guard !records.isEmpty else { return [] }
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
+        let categoryRecords = self.categoryRecords
+        let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
+        let hustles = HustleManager.shared.hustles
+        return records.map { record in
+            let rowCurrency = AppSettingsManager.currencySetting(for: record.currencyCode)
+            let isIncome = record.isIncomeInflow
+            return ExpenseRowDisplay(
+                id: record.id,
+                name: ExpenseDisplayL10n.label(record.name, locale: locale),
+                amount: record.amountDouble,
+                amountFormatted: ExpenseDisplayL10n.signedAmount(for: record, currency: rowCurrency),
+                date: record.date,
+                category: record.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale),
+                merchant: record.merchantName,
+                heatZone: record.heatZoneBucket,
+                habitSignature: record.habitSignatureId,
+                emotion: record.emotion,
+                emotionSymbol: record.emotion.flatMap { EmotionalTaggingEngine.tag(for: $0)?.symbol },
+                context: record.contextTag,
+                hustleId: record.hustleId,
+                isUnassignedWorkspace: SettingsStore.shared.sideHustleMatrixEnabled && HustleWorkspaceFilter.isUnassigned(record.hustleId),
+                workspaceLabel: WorkspaceExpenseRowChrome.workspaceLabel(for: record.hustleId, hustles: hustles),
+                bridgeBadge: WorkspaceExpenseRowChrome.bridgeBadge(for: record, hustles: hustles),
+                isWalletPending: record.walletIsPending,
+                isSalaryTagged: record.isSalaryTagged,
+                isIncomeInflow: isIncome
+            )
+        }
+    }
+
+    func buildExpenseInteractionDisplay(from allRecords: [ExpenseRecord], currency: CurrencySetting) -> ExpenseInteractionDisplay {
+        let ledgerBalance = (try? persistence.expenseDatabase.sql.sumLedgerAmountValues(
+            currencyCode: currency.id,
+            includePending: true,
+            walletOnly: false
+        )) ?? 0
+        guard !allRecords.isEmpty else {
+            if ledgerBalance == 0 { return .empty }
+            return ExpenseInteractionDisplay(
+                header: ExpensesHeaderDisplay(
+                    totalSpent: 0,
+                    totalIncome: 0,
+                    ledgerBalance: ledgerBalance,
+                    changeVsLastMonth: 0,
+                    monthlyTransactionCount: 0,
+                    biggestCategory: nil,
+                    biggestMerchant: nil,
+                    sparklinePoints: [],
+                    microInsight: nil,
+                    periodRangeSubtitle: nil,
+                    periodElapsedDays: 1
+                ),
+                pendingExpenses: [],
+                sections: [],
+                summary: ExpensesSummaryDisplay(
+                    totalSpent: 0,
+                    changeVsLastMonth: 0,
+                    categoryBreakdown: [],
+                    merchantBreakdown: [],
+                    trendPoints: [],
+                    prediction: nil
+                ),
+                archiveMonths: []
+            )
+        }
+
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
+        let pendingWalletRecords = allRecords.filter(\.walletIsPending)
+        let bookedRecords = allRecords.filter { !$0.walletIsPending }
+        let currentMonthRecords = bookedRecords.filter { $0.date >= startOfMonth }
+        let lastMonthStart = calendar.date(byAdding: .month, value: -1, to: startOfMonth) ?? now
+        let lastMonthRecords = bookedRecords.filter { $0.date >= lastMonthStart && $0.date < startOfMonth }
+        let archiveMonths: [ExpenseArchiveMonthIndex] = []
+
+        return buildScopedExpenseDisplay(
+            currentMonthRecords: currentMonthRecords,
+            lastMonthRecords: lastMonthRecords,
+            pendingWalletRecords: pendingWalletRecords,
+            archiveMonths: archiveMonths,
+            currency: currency,
+            budgetConfiguration: BuxBudgetPeriodCalculator.Configuration.fromSettings,
+            referenceDate: now,
+            ledgerBalance: ledgerBalance
         )
     }
 
-    private func buildExpenseInteractionDisplay(from allRecords: [ExpenseRecord], currency: CurrencySetting) -> ExpenseInteractionDisplay {
-        guard !allRecords.isEmpty else { return .empty }
-
-        let now = Date()
-        let startOfMonth = Calendar.current.dateInterval(of: .month, for: now)?.start ?? now
-        let thisMonthRecords = allRecords.filter { $0.date >= startOfMonth }
-        let thisMonthSpending = thisMonthRecords.filter(\.isSpendingOutflow)
-
-        let lastMonthStart = Calendar.current.date(byAdding: .month, value: -1, to: startOfMonth) ?? now
-        let lastMonthRecords = allRecords.filter { $0.date >= lastMonthStart && $0.date < startOfMonth }
-        let lastMonthSpending = lastMonthRecords.filter(\.isSpendingOutflow)
-
-        let totalSpent = thisMonthSpending.reduce(0.0) { $0 + $1.spendingAmountDouble }
-        let lastMonthSpent = lastMonthSpending.reduce(0.0) { $0 + $1.spendingAmountDouble }
-        let change = totalSpent - lastMonthSpent
-
-        let locale = BuxInterfaceLocale.currentInterfaceLocale
-        let categoryRecords = (try? fetchAllCategoryRecords()) ?? []
-        let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
-        let categories = Dictionary(grouping: thisMonthSpending, by: {
-            $0.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale)
-        })
-        let biggestCategory = categories.max(by: { $0.value.reduce(0) { $0 + $1.spendingAmountDouble } < $1.value.reduce(0) { $0 + $1.spendingAmountDouble } })?.key
-
-        let merchants = Dictionary(grouping: thisMonthSpending, by: { $0.merchantName })
-        let biggestMerchant = merchants.max(by: { $0.value.reduce(0) { $0 + $1.spendingAmountDouble } < $1.value.reduce(0) { $0 + $1.spendingAmountDouble } })?.key
-
-        var sparkline = [Double]()
-        for i in 0..<7 {
-            let day = Calendar.current.date(byAdding: .day, value: -6 + i, to: now) ?? now
-            let dayStart = Calendar.current.startOfDay(for: day)
-            let dayEnd = Calendar.current.date(byAdding: .day, value: 1, to: dayStart)!
-            let spent = thisMonthSpending.filter { $0.date >= dayStart && $0.date < dayEnd }.reduce(0) { $0 + $1.spendingAmountDouble }
-            sparkline.append(spent)
+    func buildScopedExpenseDisplay(
+        currentMonthRecords: [ExpenseRecord],
+        lastMonthRecords: [ExpenseRecord],
+        pendingWalletRecords: [ExpenseRecord],
+        archiveMonths: [ExpenseArchiveMonthIndex],
+        currency: CurrencySetting,
+        budgetConfiguration: BuxBudgetPeriodCalculator.Configuration,
+        payPeriodRecords: [ExpenseRecord]? = nil,
+        previousPayPeriodRecords: [ExpenseRecord]? = nil,
+        referenceDate: Date = Date(),
+        ledgerBalance: Double = 0
+    ) -> ExpenseInteractionDisplay {
+        if currentMonthRecords.isEmpty,
+           lastMonthRecords.isEmpty,
+           archiveMonths.isEmpty,
+           pendingWalletRecords.isEmpty,
+           ledgerBalance == 0 {
+            return .empty
         }
 
-        let header = ExpensesHeaderDisplay(
-            totalSpent: totalSpent,
-            changeVsLastMonth: change,
-            monthlyTransactionCount: thisMonthSpending.count,
-            biggestCategory: biggestCategory,
-            biggestMerchant: biggestMerchant,
-            sparklinePoints: sparkline,
-            microInsight: change > 0
-                ? BuxLocalizedString.string("Spending is up this month", locale: locale)
-                : BuxLocalizedString.string("Great job keeping costs down", locale: locale)
+        let calendar = Calendar.current
+        let now = referenceDate
+        let budgetCalendar = BuxBudgetPeriodCalculator.calendar(weekStartDay: budgetConfiguration.weekStartDay)
+        let currentPeriod = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: budgetConfiguration,
+            now: now,
+            calendar: budgetCalendar
+        )
+        let previousAnchor = budgetCalendar.date(byAdding: .second, value: -1, to: currentPeriod.start) ?? currentPeriod.start
+        let previousPeriod = BuxBudgetPeriodCalculator.currentPeriod(
+            configuration: budgetConfiguration,
+            now: previousAnchor,
+            calendar: budgetCalendar
         )
 
-        let timelineGroups = ExpenseTimelineGrouper.group(allRecords)
-        var sections = [ExpenseSectionDisplay]()
+        let bookedCurrentMonth = currentMonthRecords.filter { !$0.walletIsPending }
 
-        let hustles = HustleManager.shared.hustles
-        for group in timelineGroups {
-            let displayRows = group.records.map { r in
-                ExpenseRowDisplay(
-                    id: r.id,
-                    name: ExpenseDisplayL10n.label(r.name, locale: locale),
-                    amount: r.amountDouble,
-                    amountFormatted: AppSettingsManager.format(
-                        amount: abs(r.amountDouble),
-                        currency: AppSettingsManager.currencySetting(for: r.currencyCode)
-                    ),
-                    date: r.date,
-                    category: r.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale),
-                    merchant: r.merchantName,
-                    heatZone: r.heatZoneBucket,
-                    habitSignature: r.habitSignatureId,
-                    emotion: r.emotion,
-                    emotionSymbol: r.emotion.flatMap { EmotionalTaggingEngine.tag(for: $0)?.symbol },
-                    context: r.contextTag,
-                    hustleId: r.hustleId,
-                    isUnassignedWorkspace: SettingsStore.shared.sideHustleMatrixEnabled && HustleWorkspaceFilter.isUnassigned(r.hustleId),
-                    workspaceLabel: WorkspaceExpenseRowChrome.workspaceLabel(for: r.hustleId, hustles: hustles),
-                    bridgeBadge: WorkspaceExpenseRowChrome.bridgeBadge(for: r, hustles: hustles)
-                )
+        let mergedBooked = bookedCurrentMonth + lastMonthRecords.filter { !$0.walletIsPending }
+
+        let resolvedPeriodRecords = payPeriodRecords ?? mergedBooked.filter {
+            $0.date >= currentPeriod.start && $0.date < currentPeriod.end
+        }
+        let resolvedPreviousPeriodRecords = previousPayPeriodRecords ?? mergedBooked.filter {
+            $0.date >= previousPeriod.start && $0.date < previousPeriod.end
+        }
+
+        // Calendar month — summary card
+        let thisMonthSpending = bookedCurrentMonth.filter(\.isSpendingOutflow)
+        let lastMonthSpending = lastMonthRecords.filter { !$0.walletIsPending }.filter(\.isSpendingOutflow)
+        let monthTotalSpent = thisMonthSpending.reduce(0.0) { $0 + $1.spendingAmountDouble }
+        let lastMonthSpent = lastMonthSpending.reduce(0.0) { $0 + $1.spendingAmountDouble }
+        let monthChange = monthTotalSpent - lastMonthSpent
+
+        // Pay period — header card
+        let periodBooked = resolvedPeriodRecords.filter { !$0.walletIsPending }
+        let periodSpending = periodBooked.filter(\.isSpendingOutflow)
+        let periodIncomeRecords = periodBooked.filter(\.isIncomeInflow)
+        let previousPeriodSpending = resolvedPreviousPeriodRecords
+            .filter { !$0.walletIsPending }
+            .filter(\.isSpendingOutflow)
+
+        let periodTotalSpent = periodSpending.reduce(0.0) { $0 + $1.spendingAmountDouble }
+        let periodTotalIncome = periodIncomeRecords.reduce(0.0) { $0 + $1.incomeAmountDouble }
+        let previousPeriodSpent = previousPeriodSpending.reduce(0.0) { $0 + $1.spendingAmountDouble }
+        let periodChange = periodTotalSpent - previousPeriodSpent
+
+        let periodElapsedDays = max(
+            1,
+            budgetCalendar.dateComponents([.day], from: currentPeriod.start, to: budgetCalendar.startOfDay(for: now)).day ?? 1
+        )
+
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
+        let categoryRecords = self.categoryRecords
+        let categoriesById = Dictionary(uniqueKeysWithValues: categoryRecords.map { ($0.id, $0) })
+
+        let periodCategories = Dictionary(grouping: periodSpending, by: {
+            $0.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale)
+        })
+        let biggestCategory = periodCategories.max(by: {
+            $0.value.reduce(0) { $0 + $1.spendingAmountDouble } < $1.value.reduce(0) { $0 + $1.spendingAmountDouble }
+        })?.key
+
+        let periodMerchants = Dictionary(grouping: periodSpending, by: { $0.merchantName })
+        let biggestMerchant = periodMerchants.max(by: {
+            $0.value.reduce(0) { $0 + $1.spendingAmountDouble } < $1.value.reduce(0) { $0 + $1.spendingAmountDouble }
+        })?.key
+
+        var periodSparkline = [Double]()
+        for i in 0..<7 {
+            let day = calendar.date(byAdding: .day, value: -6 + i, to: now) ?? now
+            let dayStart = calendar.startOfDay(for: day)
+            let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart)!
+            let spent = periodSpending.filter { $0.date >= dayStart && $0.date < dayEnd }.reduce(0.0) {
+                $0 + abs($1.amountDouble)
             }
+            periodSparkline.append(spent)
+        }
+
+        var monthSparkline = [Double]()
+        for i in 0..<7 {
+            let day = calendar.date(byAdding: .day, value: -6 + i, to: now) ?? now
+            let dayStart = calendar.startOfDay(for: day)
+            let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart)!
+            let spent = thisMonthSpending.filter { $0.date >= dayStart && $0.date < dayEnd }.reduce(0) { $0 + $1.spendingAmountDouble }
+            monthSparkline.append(spent)
+        }
+
+        let periodSubtitle = BuxBudgetPeriodCalculator.periodRangeSubtitle(
+            period: currentPeriod,
+            configuration: budgetConfiguration,
+            locale: locale,
+            calendar: budgetCalendar
+        )
+
+        let header = ExpensesHeaderDisplay(
+            totalSpent: periodTotalSpent,
+            totalIncome: periodTotalIncome,
+            ledgerBalance: ledgerBalance,
+            changeVsLastMonth: periodChange,
+            monthlyTransactionCount: periodSpending.count,
+            biggestCategory: biggestCategory,
+            biggestMerchant: biggestMerchant,
+            sparklinePoints: periodSparkline,
+            microInsight: periodChange > 0
+                ? BuxLocalizedString.string("Spending is up this period", locale: locale)
+                : BuxLocalizedString.string("Great job keeping costs down", locale: locale),
+            periodRangeSubtitle: periodSubtitle,
+            periodElapsedDays: periodElapsedDays
+        )
+
+        let timelineGroups = ExpenseTimelineGrouper.group(bookedCurrentMonth, calendar: calendar)
+        var sections = [ExpenseSectionDisplay]()
+        for group in timelineGroups {
+            let displayRows = makeExpenseRowDisplays(from: group.records)
             sections.append(ExpenseSectionDisplay(
                 title: group.section.catalogLabel(locale: locale),
                 microInsight: BuxLocalizedString.format(
@@ -924,15 +1393,27 @@ public final class BuxMuseBrain: ObservableObject {
             ))
         }
 
-        let summaryCat = categories.map { ($0.key, $0.value.reduce(0) { $0 + $1.spendingAmountDouble }) }.sorted(by: { $0.1 > $1.1 })
-        let summaryMer = merchants.map { ($0.key, $0.value.reduce(0) { $0 + $1.spendingAmountDouble }) }.sorted(by: { $0.1 > $1.1 })
-        let projected = Decimal(totalSpent * 1.2)
+        let pendingExpenses = makeExpenseRowDisplays(
+            from: pendingWalletRecords.sorted {
+                if $0.date != $1.date { return $0.date > $1.date }
+                return $0.updatedAt > $1.updatedAt
+            }
+        )
+
+        let summaryCat = Dictionary(grouping: thisMonthSpending, by: {
+            $0.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale)
+        }).map { ($0.key, $0.value.reduce(0) { $0 + $1.spendingAmountDouble }) }.sorted(by: { $0.1 > $1.1 })
+        let summaryMer = Dictionary(grouping: thisMonthSpending, by: { $0.merchantName })
+            .map { ($0.key, $0.value.reduce(0) { $0 + $1.spendingAmountDouble }) }
+            .sorted(by: { $0.1 > $1.1 })
+        let projected = Decimal(monthTotalSpent * 1.2)
 
         let summary = ExpensesSummaryDisplay(
-            totalSpent: totalSpent,
+            totalSpent: monthTotalSpent,
+            changeVsLastMonth: monthChange,
             categoryBreakdown: Array(summaryCat.prefix(5)),
             merchantBreakdown: Array(summaryMer.prefix(5)),
-            trendPoints: sparkline,
+            trendPoints: monthSparkline,
             prediction: BuxLocalizedString.format(
                 "Trending towards %@ this month",
                 locale: locale,
@@ -940,7 +1421,13 @@ public final class BuxMuseBrain: ObservableObject {
             )
         )
 
-        return ExpenseInteractionDisplay(header: header, sections: sections, summary: summary)
+        return ExpenseInteractionDisplay(
+            header: header,
+            pendingExpenses: pendingExpenses,
+            sections: sections,
+            summary: summary,
+            archiveMonths: archiveMonths
+        )
     }
 
     private static func transactionMatchesEnvelopeCategory(
@@ -981,8 +1468,8 @@ public final class BuxMuseBrain: ObservableObject {
     func resolvedStandardSpendingCap() -> Decimal {
         let store = SettingsStore.shared
         if store.autoAdjustBudgetsFromHistory {
-            let txs = financialBridge.engine.allTransactions()
-            return Self.trailingAverageMonthlySpend(from: txs, calendar: Self.budgetCalendar())
+            let totals = (try? persistence.expenseDatabase.sql.fetchMonthlyOutflowTotals(months: 3)) ?? []
+            return Self.trailingAverageMonthlySpend(from: totals)
         }
         return store.simpleBudgetLimit
     }

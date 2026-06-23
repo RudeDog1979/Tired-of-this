@@ -41,7 +41,7 @@ struct AboutSettingsView: View {
                             BuxCatalogDynamicText(key: "BuxMuse")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            BuxCatalogDynamicText(key: "Your premium offline co-pilot")
+                            BuxCatalogDynamicText(key: "Your personal finance co-pilot")
                                 .font(.system(size: 13, weight: .semibold))
                                 .buxLabelSecondary()
                         }

@@ -74,20 +74,20 @@ private struct BuxInterfaceLocaleModifier: ViewModifier {
     }
 }
 
-enum BuxLocalizedString {
-    static func string(_ key: String, locale: Locale) -> String {
+enum BuxLocalizedString: Sendable {
+    nonisolated static func string(_ key: String, locale: Locale) -> String {
         BuxStringCatalog.localized(key, locale: locale)
     }
 
-    static func string(_ key: String.LocalizationValue, locale: Locale) -> String {
+    nonisolated static func string(_ key: String.LocalizationValue, locale: Locale) -> String {
         string(String(localized: key), locale: locale)
     }
 
-    static func format(_ key: String, locale: Locale, _ arguments: CVarArg...) -> String {
+    nonisolated static func format(_ key: String, locale: Locale, _ arguments: CVarArg...) -> String {
         BuxStringCatalog.localizedFormat(key, locale: locale, arguments)
     }
 
-    static func format(_ key: String.LocalizationValue, locale: Locale, _ arguments: CVarArg...) -> String {
+    nonisolated static func format(_ key: String.LocalizationValue, locale: Locale, _ arguments: CVarArg...) -> String {
         format(String(localized: key), locale: locale, arguments)
     }
 }

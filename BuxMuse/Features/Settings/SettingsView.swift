@@ -190,6 +190,10 @@ struct SettingsView: View {
         switch destination {
         case .profile:
             ProfileSettingsView()
+        case .subscription:
+            BuxMuseSubscriptionView(isBlocking: false)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
         case .appearance:
             AppearanceSettingsView()
         case .regionCurrency:
@@ -222,6 +226,9 @@ struct SettingsView: View {
             AgreementScratchpadSettingsView()
         case .burnoutGuard:
             BurnoutGuardSettingsView()
+        case .appleWallet:
+            AppleWalletSettingsView()
+                .environmentObject(brain)
         case .paymentSources:
             PaymentSourceSettingsView()
         case .categories:

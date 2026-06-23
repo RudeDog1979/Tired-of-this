@@ -10,7 +10,9 @@ import SwiftUI
 // MARK: - Feature gate
 
 enum StudioFeatureGate {
-    static var isPro: Bool { SettingsStore.shared.studioMode == .pro }
+    static var isPro: Bool { StudioPurchaseManager.shared.hasProStudio }
+
+    static var hasSimpleStudio: Bool { StudioPurchaseManager.shared.hasSimpleStudio }
 
     static func requiresPro(for destination: SettingsDestinationType) -> Bool {
         switch destination {

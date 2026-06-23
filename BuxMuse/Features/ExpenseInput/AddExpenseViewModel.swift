@@ -709,6 +709,12 @@ public final class AddExpenseViewModel: ObservableObject {
             record.categoryId = try? brain.categoryId(for: record.transactionCategory)
         }
 
+        if treatsAsIncome,
+           let pick = IncomeSourceQuickPick.matchingStoredLabel(cleanName, locale: locale),
+           pick == .salary || pick == .paycheck {
+            record.incomeRole = SalaryPayrollMatcher.salaryRole
+        }
+
         if isSubscription {
             record.nextExpectedDate = isTrial
                 ? trialEndDate

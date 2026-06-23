@@ -14,10 +14,13 @@ struct ExpenseDetailView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var padNavigationBrain: BuxPadNavigationBrain
+    @EnvironmentObject private var debtEngine: DebtEngine
 
     @StateObject private var viewModel: ExpenseDetailViewModel
     @State private var showCategorySheet = false
     @State private var showEditSheet = false
+    @State private var showLinkPaycheckSheet = false
+    @State private var showLinkDebtPaymentSheet = false
     /// Keeps mood visuals on screen while fading out after clear/save.
     @State private var presentedEmotionId: String?
     @State private var emotionTintOpacity: Double = 0
@@ -87,6 +90,48 @@ struct ExpenseDetailView: View {
             locale: appSettingsManager.interfaceLocale,
             onConfirm: performDeleteExpense
         )
+        .sheet(isPresented: $showLinkPaycheckSheet) {
+            LinkPaycheckSheet(record: viewModel.record)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(brain)
+                .presentationDetents([.medium, .large])
+                .presentationCornerRadius(28)
+                .buxThemedSheetContent()
+                .onDisappear {
+                    viewModel.reloadRecord()
+                    onUpdated()
+                }
+        }
+        .sheet(isPresented: $showLinkDebtPaymentSheet) {
+            LinkDebtPaymentSheet(record: viewModel.record, debtEngine: debtEngine)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(debtEngine)
+                .environmentObject(brain)
+                .presentationDetents([.medium, .large])
+                .presentationCornerRadius(28)
+                .buxThemedSheetContent()
+                .onDisappear {
+                    viewModel.reloadRecord()
+                    onUpdated()
+                }
+        }
+    }
+
+    private var linkedDebt: Debt? {
+        debtEngine.linkedDebt(for: viewModel.record.id)
+    }
+
+    private var canLinkToDebt: Bool {
+        settings.consumerDebtEnabled
+            && viewModel.record.isSpendingOutflow
+            && linkedDebt == nil
+            && !debtEngine.activeDebts.isEmpty
+    }
+
+    private var canLinkPaycheck: Bool {
+        viewModel.record.amountValue > 0 && !viewModel.record.isSalaryTagged
     }
 
     private func syncEmotionPresentation(animated: Bool) {
@@ -322,18 +367,26 @@ struct ExpenseDetailView: View {
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             VStack(alignment: .leading, spacing: 12) {
-                TextField(BuxCatalogLabel.string("Add a note", locale: appSettingsManager.interfaceLocale), text: $viewModel.notesDraft, axis: .vertical)
-                    .lineLimit(3...6)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                if viewModel.record.financeKitTransactionId != nil,
+                   WalletStatementIntelligence.isWalletImportNote(viewModel.notesDraft) {
+                    Text(ExpenseDisplayL10n.note(viewModel.notesDraft, locale: appSettingsManager.interfaceLocale))
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    TextField(BuxCatalogLabel.string("Add a note", locale: appSettingsManager.interfaceLocale), text: $viewModel.notesDraft, axis: .vertical)
+                        .lineLimit(3...6)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
 
-                Button(BuxCatalogLabel.string("Save note", locale: appSettingsManager.interfaceLocale)) {
-                    try? viewModel.saveNotes()
-                    onUpdated()
+                    Button(BuxCatalogLabel.string("Save note", locale: appSettingsManager.interfaceLocale)) {
+                        try? viewModel.saveNotes()
+                        onUpdated()
+                    }
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                    .buttonStyle(BuxMicroShrinkStyle())
                 }
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                .buttonStyle(BuxMicroShrinkStyle())
             }
             .padding(detailCardInnerPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -344,6 +397,22 @@ struct ExpenseDetailView: View {
 
     private var actionsSection: some View {
         VStack(spacing: 12) {
+            if canLinkPaycheck {
+                primaryAction("Link as paycheck", icon: "briefcase.fill") {
+                    showLinkPaycheckSheet = true
+                }
+            }
+
+            if canLinkToDebt {
+                primaryAction("Log as debt payment", icon: "creditcard.and.123") {
+                    showLinkDebtPaymentSheet = true
+                }
+            }
+
+            primaryAction("Edit transaction", icon: "pencil") {
+                showEditSheet = true
+            }
+
             primaryAction("Convert to subscription", icon: "arrow.triangle.2.circlepath") {
                 try? viewModel.convertToSubscription()
                 onUpdated()
@@ -369,7 +438,7 @@ struct ExpenseDetailView: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Image(systemName: icon)
-                Text(title)
+                BuxCatalogText.text(title)
                     .font(.system(size: 15, weight: .bold))
                 Spacer()
                 Image(systemName: "chevron.right")

@@ -206,7 +206,7 @@ enum MoneyMapBuilder {
         }
 
         if !trendPoints.isEmpty {
-            let delta = header.changeVsLastMonth
+            let delta = summary.changeVsLastMonth
             place(
                 id: "flow",
                 kind: .flow,
@@ -224,7 +224,7 @@ enum MoneyMapBuilder {
                         locale: locale
                     ),
                     metricLines: [
-                        (MoneyMapL10n.string("This month", locale: locale), format(Decimal(header.totalSpent))),
+                        (MoneyMapL10n.string("This month", locale: locale), format(Decimal(summary.totalSpent))),
                         (MoneyMapL10n.string("Vs last month", locale: locale), delta >= 0 ? "+\(Int(delta))%" : "\(Int(delta))%"),
                         (MoneyMapL10n.string("Transactions", locale: locale), "\(header.monthlyTransactionCount)")
                     ],
@@ -637,7 +637,7 @@ enum MoneyMapBuilder {
 
         return MoneyMapGraph(
             centerTitle: MoneyMapL10n.string("Money Map", locale: locale),
-            centerValue: format(Decimal(header.totalSpent)),
+            centerValue: format(Decimal(summary.totalSpent)),
             centerSubtitle: MoneyMapL10n.format(
                 "%lld moves · %lld territories",
                 locale: locale,

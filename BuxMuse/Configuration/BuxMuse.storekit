@@ -1,0 +1,244 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "BuxMuseCommerce",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "BUX_STUDIO_SIMPLE",
+      "localizations" : [
+        {
+          "description" : "Simple Studio — work ledger, invoices, and up to 3 workspaces. Requires an active BuxMuse subscription.",
+          "displayName" : "Simple Studio",
+          "locale" : "en_GB"
+        }
+      ],
+      "productID" : "com.buxmuse.app.studio.simple",
+      "referenceName" : "Simple Studio",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "GBR",
+    "_storeKitErrors" : [
+      {
+        "enabled" : false,
+        "name" : "Load Products"
+      }
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionBundleGroups" : [
+
+  ],
+  "subscriptionGroups" : [
+    {
+      "id" : "BUX_PREMIUM_GROUP",
+      "localizations" : [
+        {
+          "description" : "Full BuxMuse access after your 7-day trial.",
+          "displayName" : "BuxMuse",
+          "locale" : "en_GB"
+        }
+      ],
+      "name" : "BuxMuse",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "1.99",
+              "displayPrice" : "1.99",
+              "internalID" : "BDD54495",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "BUX_PREMIUM_MONTHLY",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Full BuxMuse — budgets, expenses, goals, and insights.",
+              "displayName" : "BuxMuse Monthly",
+              "locale" : "en_GB"
+            }
+          ],
+          "productID" : "com.buxmuse.app.premium.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "BuxMuse Monthly",
+          "subscriptionGroupID" : "BUX_PREMIUM_GROUP",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "14.99",
+              "displayPrice" : "14.99",
+              "internalID" : "0D52D1FC",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "14.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "BUX_PREMIUM_YEARLY",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Full BuxMuse for a year — best value.",
+              "displayName" : "BuxMuse Yearly",
+              "locale" : "en_GB"
+            }
+          ],
+          "productID" : "com.buxmuse.app.premium.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "BuxMuse Yearly",
+          "subscriptionGroupID" : "BUX_PREMIUM_GROUP",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "BUX_STUDIO_PRO_GROUP",
+      "localizations" : [
+        {
+          "description" : "Pro Studio tools — includes Simple Studio.",
+          "displayName" : "Pro Studio",
+          "locale" : "en_GB"
+        }
+      ],
+      "name" : "Pro Studio",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "3.99",
+              "displayPrice" : "3.99",
+              "internalID" : "BBB5EE6D",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "3.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "BUX_STUDIO_PRO_MONTHLY",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Tax Studio, PDF designer, unlimited projects.",
+              "displayName" : "Pro Studio Monthly",
+              "locale" : "en_GB"
+            }
+          ],
+          "productID" : "com.buxmuse.app.studio.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Pro Studio Monthly",
+          "subscriptionGroupID" : "BUX_STUDIO_PRO_GROUP",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "29.99",
+              "displayPrice" : "29.99",
+              "internalID" : "56825982",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "29.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "BUX_STUDIO_PRO_YEARLY",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Pro Studio for a year — includes Simple.",
+              "displayName" : "Pro Studio Yearly",
+              "locale" : "en_GB"
+            }
+          ],
+          "productID" : "com.buxmuse.app.studio.pro.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Pro Studio Yearly",
+          "subscriptionGroupID" : "BUX_STUDIO_PRO_GROUP",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "subscriptionSuiteGroups" : [
+
+  ],
+  "version" : {
+    "major" : 6,
+    "minor" : 3
+  }
+}

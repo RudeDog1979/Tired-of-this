@@ -13,6 +13,7 @@ struct ExpenseTabView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
     @EnvironmentObject var brain: BuxMuseBrain
+    @EnvironmentObject private var expenseTabStore: ExpenseTabStore
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
     @EnvironmentObject private var padNavigationBrain: BuxPadNavigationBrain
     @EnvironmentObject private var padSceneBrainRegistry: BuxPadSceneBrainRegistry
@@ -34,28 +35,41 @@ struct ExpenseTabView: View {
     @State private var showCategoryManager = false
     @State private var showMerchantManager = false
     @State private var padDeleteConfirmRecord: ExpenseRecord?
-    @State private var recordsById: [UUID: ExpenseRecord] = [:]
     @State private var isExpenseSearchPresented = false
+    @State private var expenseArchivePath = NavigationPath()
 
-    private var allRecords: [ExpenseRecord] {
-        brain.expenseRecords
+    private var tabDisplay: ExpenseInteractionDisplay {
+        expenseTabStore.display
+    }
+
+    private var filtersAreActive: Bool {
+        listModel.filters.isActive
+            || !listModel.filters.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private var filteredRecords: [ExpenseRecord] {
-        listModel.filteredRecords(from: allRecords)
+        if filtersAreActive {
+            return listModel.filteredRecords(from: brain.expenseRecords)
+        }
+        return Array(expenseTabStore.recordsById.values)
     }
 
-    private var expenseDataToken: String {
-        brain.expenseRecords.map { "\($0.id.uuidString)-\($0.updatedAt.timeIntervalSince1970)" }.joined(separator: "|")
+    private var showsExpenseEmptyState: Bool {
+        !filtersAreActive
+            && tabDisplay.sections.isEmpty
+            && tabDisplay.archiveMonths.isEmpty
     }
 
-    /// Stable fingerprint for carousel replays — tied to records, not rebuilt chart snapshots.
+    private var recordsById: [UUID: ExpenseRecord] {
+        expenseTabStore.recordsById
+    }
+
     private var carouselDataToken: String {
         [
-            expenseDataToken,
+            "\(expenseTabStore.displayRevision)",
             HustleManager.shared.selectedHustleId?.uuidString ?? "all",
             appSettingsManager.selectedCurrency.id,
-            listModel.filters.isActive ? "filtered" : "all"
+            filtersAreActive ? "filtered" : "scoped"
         ].joined(separator: "|")
     }
 
@@ -87,13 +101,13 @@ struct ExpenseTabView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $expenseArchivePath) {
             ZStack {
                 BuxLandingTintBackground()
                     .ignoresSafeArea()
 
                 Group {
-                    if allRecords.isEmpty {
+                    if showsExpenseEmptyState {
                         emptyStateWithWorkspaceAccess
                     } else {
                         unifiedExpenseList
@@ -108,13 +122,41 @@ struct ExpenseTabView: View {
                 searchScope: $listModel.searchScope,
                 isSearchPresented: $isExpenseSearchPresented
             ))
+            .navigationDestination(for: ExpenseArchiveMonth.self) { archive in
+                ExpenseMonthArchiveView(
+                    monthStart: archive.monthStart,
+                    selectedExpenseId: usesPadSplitLayout ? padNavigationBrain.selectedExpenseId : nil,
+                    padNavigationBrain: usesPadSplitLayout ? padNavigationBrain : nil,
+                    expandedExpenseId: $expandedExpenseId,
+                    activeSheet: $activeSheet,
+                    categorySheetTransaction: $categorySheetTransaction,
+                    noteRecord: $noteRecord,
+                    noteDraft: $noteDraft,
+                    padDeleteConfirmRecord: $padDeleteConfirmRecord,
+                    onOpenDetail: { record in
+                        openExpenseDetail(record)
+                    },
+                    onDuplicate: { record in
+                        duplicateExpense(record)
+                    }
+                )
+                .environmentObject(themeManager)
+                .environmentObject(brain)
+                .environmentObject(appSettingsManager)
+                .environmentObject(navigationCoordinator)
+                .environmentObject(padSceneBrainRegistry)
+            }
         }
         .tint(themeManager.contrastAccentColor(for: colorScheme))
         .buxInterfaceLocale()
         .environment(\.expensesEnhancedTint, true)
         .buxReportsContainerWidth()
         .onAppear {
-            listModel.reloadCatalog(brain: brain)
+            Task { @MainActor in
+                if listModel.categories.isEmpty {
+                    listModel.reloadCatalog(brain: brain)
+                }
+            }
             applyPendingExpenseFilterIfNeeded()
             listAppeared = true
             ExpenseCarouselSession.shared.playInitialIfNeeded(dataToken: carouselDataToken)
@@ -143,8 +185,10 @@ struct ExpenseTabView: View {
                 isExpenseSearchPresented = true
             }
         }
-        .onChange(of: expenseDataToken) { _, _ in
-            listModel.reloadCatalog(brain: brain)
+        .onChange(of: brain.expenseDataRevision) { _, _ in
+            if listModel.categories.isEmpty {
+                listModel.reloadCatalog(brain: brain)
+            }
             refreshExpenseListDisplay()
         }
         .onChange(of: listModel.filters) { _, _ in
@@ -257,12 +301,12 @@ struct ExpenseTabView: View {
     private var expenseToolbar: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
             expenseManageMenu
-            if !allRecords.isEmpty {
+            if !showsExpenseEmptyState {
                 expenseFilterMenu
             }
         }
 
-        if #available(iOS 26.0, *), !allRecords.isEmpty {
+        if #available(iOS 26.0, *), !showsExpenseEmptyState {
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
         }
 
@@ -282,6 +326,23 @@ struct ExpenseTabView: View {
     private var expenseManageMenu: some View {
         Menu {
             Button {
+                withAnimation(.buxSnap) {
+                    activeSheet = .addIncome
+                }
+            } label: {
+                Label(BuxCatalogLabel.string("Log income", locale: appSettingsManager.interfaceLocale), systemImage: "arrow.down.circle.fill")
+            }
+
+            if SettingsStore.shared.appleWalletSyncEnabled {
+                Button {
+                    Task {
+                        await syncWalletFromExpenses()
+                    }
+                } label: {
+                    Label(BuxCatalogLabel.string("Sync Apple Wallet", locale: appSettingsManager.interfaceLocale), systemImage: "wallet.pass")
+                }
+            }
+            Button {
                 showCategoryManager = true
             } label: {
                 Label(BuxCatalogLabel.string("Manage categories", locale: appSettingsManager.interfaceLocale), systemImage: "tag")
@@ -291,7 +352,7 @@ struct ExpenseTabView: View {
             } label: {
                 Label(BuxCatalogLabel.string("Manage merchants", locale: appSettingsManager.interfaceLocale), systemImage: "building.2")
             }
-            if !allRecords.isEmpty {
+            if !showsExpenseEmptyState {
                 Button {
                     showAdvancedFilters = true
                 } label: {
@@ -461,7 +522,7 @@ struct ExpenseTabView: View {
     }
 
     private var padUnifiedExpenseList: some View {
-        let display = brain.expenseInteractionSnapshot
+        let display = tabDisplay
         let showHero = !display.sections.isEmpty || display.header.totalSpent != 0
 
         return ScrollView(showsIndicators: false) {
@@ -505,6 +566,9 @@ struct ExpenseTabView: View {
                     },
                     onDuplicate: { record in
                         duplicateExpense(record)
+                    },
+                    onSelectArchiveMonth: { month in
+                        expenseArchivePath.append(ExpenseArchiveMonth(monthStart: month))
                     }
                 )
                 .equatable()
@@ -528,7 +592,7 @@ struct ExpenseTabView: View {
     }
 
     private var iphoneUnifiedExpenseList: some View {
-        let display = brain.expenseInteractionSnapshot
+        let display = tabDisplay
         let showHero = !display.sections.isEmpty || display.header.totalSpent != 0
         let showHeroChrome = showHero && !isSearchFocusMode
         let pageCount = expenseHeroPageCount(header: display.header, summary: display.summary)
@@ -560,6 +624,9 @@ struct ExpenseTabView: View {
             },
             onDuplicate: { record in
                 duplicateExpense(record)
+            },
+            onSelectArchiveMonth: { month in
+                expenseArchivePath.append(ExpenseArchiveMonth(monthStart: month))
             }
         )
     }
@@ -599,12 +666,15 @@ struct ExpenseTabView: View {
     }
 
     private func refreshExpenseListDisplay() {
-        let filtered = filteredRecords
-        recordsById = Dictionary(uniqueKeysWithValues: filtered.map { ($0.id, $0) })
-        brain.updateExpenseInteractionSnapshot(
-            records: filtered,
+        expenseTabStore.reload(
+            recordsForList: filtersAreActive ? listModel.filteredRecords(from: brain.expenseRecords) : [],
+            filtersActive: filtersAreActive,
             currency: appSettingsManager.selectedCurrency
         )
+    }
+
+    private func syncWalletFromExpenses() async {
+        await BuxFinanceKitManager.shared.syncWalletNow()
     }
 
     private func duplicateExpense(_ record: ExpenseRecord) {
@@ -632,6 +702,7 @@ struct ExpenseTabView: View {
     private func changeCategory(_ tx: Transaction, to category: TransactionCategory, categoryId: UUID?) {
         do {
             try brain.changeExpenseCategory(id: tx.id, category: category, categoryId: categoryId)
+            refreshExpenseListDisplay()
         } catch {
             print("Category change failed: \(error)")
         }
@@ -697,6 +768,7 @@ struct IPhoneUnifiedExpenseListContainer: View {
     let onClearFilters: () -> Void
     let onOpenDetail: (ExpenseRecord) -> Void
     let onDuplicate: (ExpenseRecord) -> Void
+    let onSelectArchiveMonth: (Date) -> Void
 
     @State private var expenseScrollOffset: CGFloat = 0
     @State private var expenseHeroCollapseTrackingPaused = false
@@ -729,7 +801,8 @@ struct IPhoneUnifiedExpenseListContainer: View {
                             padDeleteConfirmRecord: $padDeleteConfirmRecord,
                             onClearFilters: onClearFilters,
                             onOpenDetail: onOpenDetail,
-                            onDuplicate: onDuplicate
+                            onDuplicate: onDuplicate,
+                            onSelectArchiveMonth: onSelectArchiveMonth
                         )
                         .equatable()
                         .padding(.top, ExpenseHeroIslandLayout.listBelowHeroSpacing)
@@ -808,12 +881,29 @@ struct ExpenseListBodyView: View, Equatable {
     let onClearFilters: () -> Void
     let onOpenDetail: (ExpenseRecord) -> Void
     let onDuplicate: (ExpenseRecord) -> Void
+    let onSelectArchiveMonth: (Date) -> Void
+
+    @State private var collapsedDays: Set<Date> = []
+
+    private let dayFormatter: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateStyle = .full
+        fmt.timeStyle = .none
+        return fmt
+    }()
+
+    private let monthFormatter: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "MMMM yyyy"
+        return fmt
+    }()
 
     static func == (lhs: ExpenseListBodyView, rhs: ExpenseListBodyView) -> Bool {
         lhs.selectedExpenseId == rhs.selectedExpenseId &&
-        lhs.display.sections.map { $0.id } == rhs.display.sections.map { $0.id } &&
+        lhs.display.pendingExpenses.map(\.id) == rhs.display.pendingExpenses.map(\.id) &&
         lhs.display.sections.flatMap { $0.expenses }.map { $0.id } == rhs.display.sections.flatMap { $0.expenses }.map { $0.id } &&
-        lhs.filteredRecords.map { $0.id } == rhs.filteredRecords.map { $0.id } &&
+        lhs.display.archiveMonths == rhs.display.archiveMonths &&
+        (!lhs.filtersActive || lhs.filteredRecords.map(\.id) == rhs.filteredRecords.map(\.id)) &&
         lhs.filtersActive == rhs.filtersActive &&
         lhs.recordsById == rhs.recordsById &&
         lhs.expandedExpenseId == rhs.expandedExpenseId &&
@@ -828,32 +918,107 @@ struct ExpenseListBodyView: View, Equatable {
         EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0)
     }
 
+    @ViewBuilder
     var body: some View {
-        HustleSelectorBar()
-            .padding(.bottom, 4)
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfCurrentMonth = calendar.dateInterval(of: .month, for: now)?.start ?? calendar.startOfDay(for: now)
 
-        if filteredRecords.isEmpty, filtersActive {
-            expenseNoMatchesState
+        let allDisplayRows = display.sections.flatMap { $0.expenses }
+        let groupedRows = Dictionary(grouping: allDisplayRows, by: { calendar.startOfDay(for: $0.date) })
+        let sortedDays = groupedRows.keys.sorted(by: >)
+        let recentDays = sortedDays.filter { $0 >= startOfCurrentMonth }
+
+        let dayHeaderTitle: (Date) -> String = { date in
+            if calendar.isDateInToday(date) {
+                return BuxLocalizedString.string("Today", locale: appSettingsManager.interfaceLocale)
+            } else if calendar.isDateInYesterday(date) {
+                return BuxLocalizedString.string("Yesterday", locale: appSettingsManager.interfaceLocale)
+            } else {
+                dayFormatter.locale = appSettingsManager.interfaceLocale
+                return dayFormatter.string(from: date)
+            }
         }
 
-        ForEach(display.sections) { section in
-            HStack {
-                Text(section.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(themeManager.sectionHeaderColor(for: colorScheme))
-                    .textCase(nil)
-
-                Spacer()
-
-                if let insight = section.microInsight {
-                    InlineInsightView(text: insight)
+        let dailySpendTotal: (Date, [ExpenseRowDisplay]) -> Double = { _, rows in
+            rows.reduce(0.0) { sum, row in
+                if let record = recordsById[row.id], record.isSpendingOutflow {
+                    return sum + record.spendingAmountDouble
                 }
+                return sum
             }
-            .padding(.vertical, 8)
+        }
 
-            ForEach(section.expenses) { expense in
-                if let record = recordsById[expense.id] {
-                    expenseRowContent(expense: expense, record: record)
+        Group {
+            HustleSelectorBar()
+                .padding(.bottom, 4)
+
+            if filteredRecords.isEmpty, filtersActive {
+                expenseNoMatchesState
+            }
+
+            if !display.pendingExpenses.isEmpty {
+                ExpensePendingWalletSectionView(
+                    rows: display.pendingExpenses,
+                    recordsById: recordsById,
+                    selectedExpenseId: selectedExpenseId,
+                    padNavigationBrain: padNavigationBrain,
+                    expandedExpenseId: $expandedExpenseId,
+                    activeSheet: $activeSheet,
+                    categorySheetTransaction: $categorySheetTransaction,
+                    noteRecord: $noteRecord,
+                    noteDraft: $noteDraft,
+                    padDeleteConfirmRecord: $padDeleteConfirmRecord,
+                    rowInsets: expenseListRowInsets,
+                    onOpenDetail: onOpenDetail,
+                    onDuplicate: onDuplicate
+                )
+            }
+
+            ForEach(recentDays, id: \.self) { day in
+                ExpenseDaySectionView(
+                    day: day,
+                    rows: groupedRows[day] ?? [],
+                    dayTitle: dayHeaderTitle(day),
+                    totalSpent: dailySpendTotal(day, groupedRows[day] ?? []),
+                    collapsedDays: $collapsedDays,
+                    recordsById: recordsById,
+                    selectedExpenseId: selectedExpenseId,
+                    padNavigationBrain: padNavigationBrain,
+                    expandedExpenseId: $expandedExpenseId,
+                    activeSheet: $activeSheet,
+                    categorySheetTransaction: $categorySheetTransaction,
+                    noteRecord: $noteRecord,
+                    noteDraft: $noteDraft,
+                    padDeleteConfirmRecord: $padDeleteConfirmRecord,
+                    rowInsets: expenseListRowInsets,
+                    onOpenDetail: onOpenDetail,
+                    onDuplicate: onDuplicate
+                )
+            }
+
+            if !display.archiveMonths.isEmpty {
+                VStack(spacing: 0) {
+                    Divider()
+                        .padding(.vertical, 16)
+
+                    ForEach(display.archiveMonths) { archive in
+                        let monthTitle: String = {
+                            monthFormatter.locale = appSettingsManager.interfaceLocale
+                            return monthFormatter.string(from: archive.monthStart)
+                        }()
+
+                        Button {
+                            onSelectArchiveMonth(archive.monthStart)
+                        } label: {
+                            ExpenseMonthFolderCard(
+                                monthTitle: monthTitle,
+                                transactionCount: archive.transactionCount
+                            )
+                        }
+                        .buttonStyle(BuxMicroShrinkStyle())
+                        .padding(expenseListRowInsets)
+                    }
                 }
             }
         }
@@ -878,122 +1043,6 @@ struct ExpenseListBodyView: View, Equatable {
         }
         .padding(.top, 24)
         .padding(.bottom, 8)
-    }
-
-    @ViewBuilder
-    private func expenseRowContent(expense: ExpenseRowDisplay, record: ExpenseRecord) -> some View {
-        ExpandableExpenseCard(
-            expense: expense,
-            record: record,
-            expandedId: $expandedExpenseId,
-            onOpenDetail: {
-                withAnimation(.buxSnap) {
-                    onOpenDetail(record)
-                }
-            }
-        ) {
-            withAnimation(.buxSnap) {
-                activeSheet = .edit(record.toTransaction())
-            }
-        }
-        .environmentObject(themeManager)
-        .environmentObject(brain)
-        .padding(expenseListRowInsets)
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            if record.isSpendingOutflow, record.bridgeKind == nil {
-                Button {
-                    withAnimation(.buxSnap) {
-                        activeSheet = .editWithCategorySplit(record.toTransaction())
-                    }
-                } label: {
-                    Label(BuxCatalogLabel.string("Split categories", locale: appSettingsManager.interfaceLocale), systemImage: "square.split.2x1")
-                }
-                .tint(themeManager.contrastAccentColor(for: colorScheme))
-            }
-        }
-        .buxPadExpenseRowInteractions(recordId: record.id, enabled: BuxPadIdiom.isPad && usesPadSplitLayout)
-        .background {
-            if usesPadSplitLayout, selectedExpenseId == record.id {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(themeManager.contrastAccentColor(for: colorScheme).opacity(0.08))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(
-                                themeManager.contrastAccentColor(for: colorScheme).opacity(0.35),
-                                lineWidth: 1.5
-                            )
-                    )
-            }
-        }
-        .contextMenu {
-            if usesPadSplitLayout, let padNavigationBrain, selectedExpenseId != record.id {
-                Button {
-                    padNavigationBrain.selectExpense(record.id)
-                } label: {
-                    Label(BuxCatalogLabel.string("Select", locale: appSettingsManager.interfaceLocale), systemImage: "checkmark.circle")
-                }
-            }
-
-            Button {
-                noteDraft = record.notes ?? ""
-                noteRecord = record
-            } label: {
-                Label(BuxCatalogLabel.string("Note", locale: appSettingsManager.interfaceLocale), systemImage: "note.text")
-            }
-
-            Button {
-                withAnimation(.buxSnap) {
-                    activeSheet = .edit(record.toTransaction())
-                }
-            } label: {
-                Label(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale), systemImage: "pencil")
-            }
-
-            Button {
-                categorySheetTransaction = record.toTransaction()
-            } label: {
-                Label(BuxCatalogLabel.string("Category", locale: appSettingsManager.interfaceLocale), systemImage: "tag")
-            }
-
-            if record.isSpendingOutflow, record.bridgeKind == nil {
-                Button {
-                    withAnimation(.buxSnap) {
-                        activeSheet = .editWithCategorySplit(record.toTransaction())
-                    }
-                } label: {
-                    Label(BuxCatalogLabel.string("Split categories", locale: appSettingsManager.interfaceLocale), systemImage: "square.split.2x1")
-                }
-            }
-
-            Button {
-                onDuplicate(record)
-            } label: {
-                Label(BuxCatalogLabel.string("Duplicate", locale: appSettingsManager.interfaceLocale), systemImage: "plus.square.on.square")
-            }
-
-            Button(role: .destructive) {
-                padDeleteConfirmRecord = record
-            } label: {
-                Label(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
-            }
-
-            if usesPadSplitLayout, let padNavigationBrain, !padSceneBrainRegistry.isAuxiliary(padNavigationBrain) {
-                Divider()
-                Button {
-                    padNavigationBrain.selectExpense(record.id)
-                    BuxPadWindowLauncher.openExpenseWindow(
-                        from: padNavigationBrain,
-                        registry: padSceneBrainRegistry,
-                        openWindow: openWindow
-                    )
-                } label: {
-                    Label(
-                        BuxCatalogLabel.string("Open in New Window", locale: appSettingsManager.interfaceLocale),
-                        systemImage: "macwindow.on.rectangle"
-                    )
-                }
-            }
-        }
     }
 }
 

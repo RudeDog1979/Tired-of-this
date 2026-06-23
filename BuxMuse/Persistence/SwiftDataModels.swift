@@ -64,6 +64,8 @@ final class ExpenseEntity {
     var isCategorySplit: Bool
     /// Personal vs shared household scope for iCloud sync.
     var householdScopeRaw: String
+    /// Apple Wallet / FinanceKit unique transaction id to prevent duplicate imports
+    var financeKitTransactionId: String?
     @Relationship(deleteRule: .cascade, inverse: \ExpenseSplitLineEntity.expense)
     var splitLines: [ExpenseSplitLineEntity]
 
@@ -112,10 +114,12 @@ final class ExpenseEntity {
         bridgeCounterpartyHustleId: UUID? = nil,
         isCategorySplit: Bool = false,
         householdScopeRaw: String = HouseholdScope.personal.rawValue,
+        financeKitTransactionId: String? = nil,
         splitLines: [ExpenseSplitLineEntity] = []
     ) {
         self.id = id
         self.name = name
+        self.financeKitTransactionId = financeKitTransactionId
         self.amountValue = amountValue
         self.currencyCode = currencyCode
         self.categoryId = categoryId

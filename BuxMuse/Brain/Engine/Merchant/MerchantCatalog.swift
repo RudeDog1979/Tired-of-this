@@ -13,14 +13,14 @@ struct MerchantCatalogEntry: Sendable, Equatable {
     /// Alternate spellings, abbreviations, and statement labels.
     let searchNames: [String]
 
-    var normalizedKeys: [String] {
+    nonisolated var normalizedKeys: [String] {
         searchNames.map { MerchantLogoEngine.normalizeMerchantName($0) }
     }
 }
 
 enum MerchantCatalog {
     /// Curated retailers — UK, PL, and common international brands.
-    static let entries: [MerchantCatalogEntry] = [
+    nonisolated static let entries: [MerchantCatalogEntry] = [
         // Poland
         MerchantCatalogEntry(displayName: "Biedronka", domain: "biedronka.pl", searchNames: ["Biedronka", "Jeronimo Martins"]),
         MerchantCatalogEntry(displayName: "Lidl", domain: "lidl.pl", searchNames: ["Lidl", "Lidl GB", "Lidl PL"]),
@@ -100,7 +100,7 @@ enum MerchantCatalog {
         MerchantCatalogEntry(displayName: "Target", domain: "target.com", searchNames: ["Target"]),
     ]
 
-    private static let byNormalizedName: [String: MerchantCatalogEntry] = {
+    private nonisolated static let byNormalizedName: [String: MerchantCatalogEntry] = {
         var map: [String: MerchantCatalogEntry] = [:]
         for entry in entries {
             for key in entry.normalizedKeys where !key.isEmpty {
@@ -111,7 +111,7 @@ enum MerchantCatalog {
     }()
 
     /// Best domain for logo fetch — exact catalog hit first, then fuzzy name match.
-    static func domain(for merchantName: String) -> String? {
+    nonisolated static func domain(for merchantName: String) -> String? {
         let normalized = MerchantLogoEngine.normalizeMerchantName(merchantName)
         guard !normalized.isEmpty else { return nil }
         if let hit = byNormalizedName[normalized] { return hit.domain }
@@ -120,7 +120,7 @@ enum MerchantCatalog {
     }
 
     /// Autocomplete — prefix, contains, word-start, and fuzzy (typo-tolerant).
-    static func matchingEntries(for query: String, limit: Int = 12) -> [MerchantCatalogEntry] {
+    nonisolated static func matchingEntries(for query: String, limit: Int = 12) -> [MerchantCatalogEntry] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedQuery = MerchantLogoEngine.normalizeMerchantName(trimmed)
         guard !normalizedQuery.isEmpty else { return [] }
@@ -175,7 +175,7 @@ enum MerchantCatalog {
         return results
     }
 
-    private static func matchesWordPrefixes(_ queryWords: [String], in name: String) -> Bool {
+    private nonisolated static func matchesWordPrefixes(_ queryWords: [String], in name: String) -> Bool {
         guard !queryWords.isEmpty else { return false }
         let nameWords = name.split(whereSeparator: { $0.isWhitespace || !$0.isLetter }).map { String($0).lowercased() }
         guard !nameWords.isEmpty else { return false }

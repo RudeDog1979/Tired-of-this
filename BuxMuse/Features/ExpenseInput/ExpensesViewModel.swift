@@ -16,7 +16,7 @@ final class ExpensesViewModel: ObservableObject {
     @Published private(set) var merchants: [ExpenseMerchantRecord] = []
 
     func reloadCatalog(brain: BuxMuseBrain) {
-        categories = (try? brain.fetchAllCategoryRecords()) ?? []
+        categories = brain.categoryRecords
         merchants = (try? brain.fetchAllMerchantRecords()) ?? []
     }
 
@@ -45,10 +45,12 @@ final class ExpensesViewModel: ObservableObject {
         let query = filters.searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         return records.filter { record in
             if !query.isEmpty {
+                let walletRaw = record.notes.flatMap { WalletStatementIntelligence.rawLabelFromStoredNote($0) } ?? ""
                 let haystack = [
                     record.name,
                     record.merchantName,
-                    record.notes ?? ""
+                    record.notes ?? "",
+                    walletRaw
                 ].joined(separator: " ").lowercased()
                 guard haystack.contains(query) else { return false }
             }

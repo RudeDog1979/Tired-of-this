@@ -8,34 +8,27 @@
 
 import Foundation
 
-enum BuxStringCatalog {
-    private static let lock = NSLock()
-    private static var bundleByTag: [String: Bundle] = [:]
-
+enum BuxStringCatalog: Sendable {
     /// BCP-47 tag matching compiled folders (`es-419`, `es-ES`, …).
-    static func resourceTag(for locale: Locale) -> String {
+    nonisolated static func resourceTag(for locale: Locale) -> String {
         locale.identifier.replacingOccurrences(of: "_", with: "-")
     }
 
-    private static func bundle(forResourceTag tag: String) -> Bundle? {
-        lock.lock()
-        defer { lock.unlock() }
-        if let cached = bundleByTag[tag] { return cached }
+    nonisolated private static func bundle(forResourceTag tag: String) -> Bundle? {
         guard let path = Bundle.main.path(forResource: tag, ofType: "lproj"),
               let bundle = Bundle(path: path) else {
             return nil
         }
-        bundleByTag[tag] = bundle
         return bundle
     }
 
-    private static func lookupInBundle(_ key: String, bundle: Bundle) -> String? {
+    nonisolated private static func lookupInBundle(_ key: String, bundle: Bundle) -> String? {
         let value = bundle.localizedString(forKey: key, value: key, table: nil)
         return value != key ? value : nil
     }
 
     /// Localized UI string for `key` using Settings interface locale (not device language).
-    static func localized(_ key: String, locale: Locale) -> String {
+    nonisolated static func localized(_ key: String, locale: Locale) -> String {
         let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return key }
 
@@ -60,7 +53,7 @@ enum BuxStringCatalog {
         return trimmed
     }
 
-    static func localizedFormat(_ key: String, locale: Locale, _ arguments: CVarArg...) -> String {
+    nonisolated static func localizedFormat(_ key: String, locale: Locale, _ arguments: CVarArg...) -> String {
         let format = localized(key, locale: locale)
         let specifiers = formatSpecifiers(in: format)
         let prepared: [CVarArg]
@@ -78,7 +71,7 @@ enum BuxStringCatalog {
     }
 
     /// Parses `%@`, `%lld`, `%d`, etc. Skips `%%` literals.
-    private static func formatSpecifiers(in format: String) -> [String] {
+    nonisolated private static func formatSpecifiers(in format: String) -> [String] {
         var specs: [String] = []
         var index = format.startIndex
         while index < format.endIndex {
@@ -128,7 +121,7 @@ enum BuxStringCatalog {
         return specs
     }
 
-    private static func coerce(_ argument: CVarArg, for specifier: String) -> CVarArg {
+    nonisolated private static func coerce(_ argument: CVarArg, for specifier: String) -> CVarArg {
         switch specifier {
         case "%@":
             return stringArgument(argument)
@@ -139,7 +132,7 @@ enum BuxStringCatalog {
         }
     }
 
-    private static func coerceLoose(_ argument: CVarArg) -> CVarArg {
+    nonisolated private static func coerceLoose(_ argument: CVarArg) -> CVarArg {
         switch argument {
         case is Int, is Int32, is Int64, is UInt:
             return stringArgument(argument)
@@ -148,7 +141,7 @@ enum BuxStringCatalog {
         }
     }
 
-    private static func stringArgument(_ argument: CVarArg) -> CVarArg {
+    nonisolated private static func stringArgument(_ argument: CVarArg) -> CVarArg {
         switch argument {
         case let value as String: return value
         case let value as Int: return String(value)
@@ -160,7 +153,7 @@ enum BuxStringCatalog {
         }
     }
 
-    private static func integerArgument(_ argument: CVarArg) -> CVarArg {
+    nonisolated private static func integerArgument(_ argument: CVarArg) -> CVarArg {
         switch argument {
         case let value as Int: return value
         case let value as Int32: return Int(value)

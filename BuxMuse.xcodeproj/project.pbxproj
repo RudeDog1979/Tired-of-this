@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E23C9B092FB312D0006982E1 /* BuxMuseTimerWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E23C9B012FB312D0006982E1 /* BuxMuseTimerWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E2GRDB0032FB312CE006982E0 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = E2GRDB0022FB312CE006982E0 /* GRDB */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +86,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E2GRDB0032FB312CE006982E0 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,6 +160,7 @@
 			);
 			name = BuxMuse;
 			packageProductDependencies = (
+				E2GRDB0022FB312CE006982E0 /* GRDB */,
 			);
 			productName = BuxMuse;
 			productReference = E23C9A952FB312CE006982E0 /* BuxMuse.app */;
@@ -274,6 +277,9 @@
 			);
 			mainGroup = E23C9A8C2FB312CE006982E0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E2GRDB0012FB312CE006982E0 /* XCRemoteSwiftPackageReference "GRDB" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E23C9A962FB312CE006982E0 /* Products */;
 			projectDirPath = "";
@@ -501,7 +507,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = BuxMuse.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -509,8 +515,10 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "BuxMuse needs camera access to scan physical receipts and documents.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "BuxMuse secures your local financial summaries with Face ID authentication.";
+				INFOPLIST_KEY_NSFinancialDataUsageDescription = "BuxMuse reads transactions from Apple Wallet only when you turn on Wallet sync, to categorize spending and show balances in your ledger. Your financial data stays on your device and is not sold or shared.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "BuxMuse does not write health data; this permission is reserved for future wellness integrations.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "BuxMuse uses your location to fill start or end addresses when logging business mileage.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "BuxMuse needs photo library access to let you select stored receipt images.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "BuxMuse sends local reminders before subscriptions and trials renew.";
@@ -523,7 +531,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.buxmuse.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -544,7 +552,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = BuxMuse.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -552,8 +560,10 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "BuxMuse needs camera access to scan physical receipts and documents.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "BuxMuse secures your local financial summaries with Face ID authentication.";
+				INFOPLIST_KEY_NSFinancialDataUsageDescription = "BuxMuse reads transactions from Apple Wallet only when you turn on Wallet sync, to categorize spending and show balances in your ledger. Your financial data stays on your device and is not sold or shared.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "BuxMuse does not write health data; this permission is reserved for future wellness integrations.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "BuxMuse uses your location to fill start or end addresses when logging business mileage.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "BuxMuse needs photo library access to let you select stored receipt images.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "BuxMuse sends local reminders before subscriptions and trials renew.";
@@ -566,7 +576,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.buxmuse.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -584,11 +594,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.buxmuse.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -606,11 +616,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.buxmuse.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -627,10 +637,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.buxmuse.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -647,10 +657,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.buxmuse.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -669,7 +679,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = BuxMuseTimerWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TimerWidgetInfo.plist;
@@ -682,7 +692,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.buxmuse.app.TimerWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -698,7 +708,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = BuxMuseTimerWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 8J85UK6P84;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TimerWidgetInfo.plist;
@@ -711,7 +721,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.buxmuse.app.TimerWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -770,6 +780,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E2GRDB0012FB312CE006982E0 /* XCRemoteSwiftPackageReference "GRDB" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E2GRDB0022FB312CE006982E0 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E2GRDB0012FB312CE006982E0 /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E23C9A8D2FB312CE006982E0 /* Project object */;
 }
