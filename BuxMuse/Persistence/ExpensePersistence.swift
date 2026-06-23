@@ -24,6 +24,7 @@ extension PersistenceController {
         }
 
         try syncMissingSystemCategoriesIfNeeded()
+        try normalizeSystemCategoryRecordsIfNeeded()
         try migrateLegacyExpenseRowsIfNeeded()
         try sanitizeMerchantEntitiesIfNeeded()
 
@@ -87,6 +88,38 @@ extension PersistenceController {
         }
 
         if changed { try context.save() }
+    }
+
+    /// Repairs system categories whose `name` was saved as a localized label (e.g. "Otro" instead of "Other").
+    private func normalizeSystemCategoryRecordsIfNeeded() throws {
+        let migrationKey = "buxmuse.categories.normalizeEnglishKeys.v1"
+        guard !UserDefaults.standard.bool(forKey: migrationKey) else { return }
+
+        let entities = try context.fetch(FetchDescriptor<CategoryEntity>())
+        var changed = false
+        for entity in entities {
+            guard !entity.isCustom else { continue }
+
+            if let raw = entity.systemCategoryRaw,
+               let system = TransactionCategory(rawValue: raw) {
+                let englishKey = system.catalogLabelKey
+                if entity.name != englishKey {
+                    entity.name = englishKey
+                    changed = true
+                }
+                continue
+            }
+
+            if let system = CustomBudgetCategory.resolvedSystemCategory(storedName: entity.name) {
+                entity.systemCategoryRaw = system.rawValue
+                entity.name = system.catalogLabelKey
+                entity.isCustom = false
+                changed = true
+            }
+        }
+
+        if changed { try context.save() }
+        UserDefaults.standard.set(true, forKey: migrationKey)
     }
 
     private func stableCategoryId(for category: TransactionCategory) -> UUID {

@@ -32,6 +32,8 @@ private struct BuxPadReceiptDetailPencilChromeModifier: ViewModifier {
     @State private var showMarkup = false
     @State private var previewToken = 0
 
+    private var interfaceLocale: Locale { BuxInterfaceLocale.currentInterfaceLocale }
+
     private var canMarkup: Bool {
         BuxPadIdiom.isPad && receipt.localImagePath != nil
     }
@@ -54,7 +56,11 @@ private struct BuxPadReceiptDetailPencilChromeModifier: ViewModifier {
                         Button {
                             showMarkup = true
                         } label: {
-                            Label("Markup", systemImage: "pencil.tip.crop.circle")
+                            Label {
+                                Text(BuxLocalizedString.string("Markup", locale: interfaceLocale))
+                            } icon: {
+                                Image(systemName: "pencil.tip.crop.circle")
+                            }
                         }
                         .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
                     }
@@ -72,12 +78,16 @@ private struct BuxPadReceiptDetailPencilChromeModifier: ViewModifier {
     private func receiptPreviewCard(_ image: UIImage) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Label("Receipt scan", systemImage: "doc.viewfinder")
+                Label {
+                    Text(BuxLocalizedString.string("Receipt scan", locale: interfaceLocale))
+                } icon: {
+                    Image(systemName: "doc.viewfinder")
+                }
                     .font(.system(size: 12, weight: .bold))
                     .buxLabelSecondary()
                 Spacer()
                 if BuxPadReceiptMarkupStore.hasMarkup(for: receipt.id) {
-                    Text("Markup saved")
+                    Text(BuxLocalizedString.string("Markup saved", locale: interfaceLocale))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                         .padding(.horizontal, 8)
@@ -132,7 +142,11 @@ extension View {
     func buxPadScannerMarkupButton(action: @escaping () -> Void) -> some View {
         if BuxPadIdiom.isPad {
             Button(action: action) {
-                Label("Mark up with Apple Pencil", systemImage: "pencil.tip.crop.circle")
+                Label {
+                    Text(BuxLocalizedString.string("Mark up with Apple Pencil", locale: BuxInterfaceLocale.currentInterfaceLocale))
+                } icon: {
+                    Image(systemName: "pencil.tip.crop.circle")
+                }
                     .font(.system(size: 14, weight: .semibold))
                     .frame(maxWidth: .infinity)
             }

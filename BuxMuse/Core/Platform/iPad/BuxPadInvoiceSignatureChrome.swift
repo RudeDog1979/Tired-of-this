@@ -41,14 +41,19 @@ private struct BuxPadInvoiceSignatureChromeModifier: ViewModifier {
     }
 
     private var signaturePanel: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let interfaceLocale = BuxInterfaceLocale.currentInterfaceLocale
+        return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label("Provider signature", systemImage: "signature")
+                Label {
+                    Text(BuxLocalizedString.string("Provider signature", locale: interfaceLocale))
+                } icon: {
+                    Image(systemName: "signature")
+                }
                     .font(.system(size: 12, weight: .bold))
                     .buxLabelSecondary()
                 Spacer()
                 if hasSignature {
-                    Text("Saved")
+                    Text(BuxLocalizedString.string("Saved", locale: interfaceLocale))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                         .padding(.horizontal, 8)
@@ -83,7 +88,7 @@ private struct BuxPadInvoiceSignatureChromeModifier: ViewModifier {
                 )
 
                 if hasSignature {
-                    Button("Clear") {
+                    Button(BuxLocalizedString.string("Clear", locale: interfaceLocale)) {
                         BuxPadInvoiceSignatureStore.clearSignature(for: invoiceId)
                         previewToken &+= 1
                     }

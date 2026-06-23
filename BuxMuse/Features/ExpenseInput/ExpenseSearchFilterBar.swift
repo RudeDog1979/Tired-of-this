@@ -79,7 +79,8 @@ struct ExpenseFilterSheet: View {
                         ) {
                             BuxCatalogText.text("Any").tag(UUID?.none)
                             ForEach(categories) { category in
-                                Text(category.name).tag(UUID?.some(category.id))
+                                Text(category.localizedDisplayName(locale: locale))
+                                    .tag(UUID?.some(category.id))
                             }
                         }
                         .tint(themeManager.contrastAccentColor(for: colorScheme))

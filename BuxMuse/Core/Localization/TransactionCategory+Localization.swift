@@ -69,13 +69,26 @@ extension CustomBudgetCategory {
 extension ExpenseCategoryRecord {
     /// Localized chip/list label; custom categories keep user-defined names.
     func localizedDisplayName(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
-        if isCustom { return name }
         if let raw = systemCategoryRaw, let system = TransactionCategory(rawValue: raw) {
             return system.localizedDisplayName(locale: locale)
         }
-        return BuxLocalizedString.string(
-            String.LocalizationValue(stringLiteral: name),
-            locale: locale
-        )
+        if let system = CustomBudgetCategory.resolvedSystemCategory(storedName: name) {
+            return system.localizedDisplayName(locale: locale)
+        }
+        if isCustom {
+            return name
+        }
+        return BuxCatalogLabel.string(name, locale: locale)
+    }
+
+    /// English catalog key for persistence — repairs localized names saved by older builds.
+    func normalizedStorageName() -> String {
+        if let raw = systemCategoryRaw, let system = TransactionCategory(rawValue: raw) {
+            return system.catalogLabelKey
+        }
+        if let system = CustomBudgetCategory.resolvedSystemCategory(storedName: name) {
+            return system.catalogLabelKey
+        }
+        return name
     }
 }

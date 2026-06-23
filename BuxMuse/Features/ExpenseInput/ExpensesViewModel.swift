@@ -82,12 +82,9 @@ final class ExpensesViewModel: ObservableObject {
         ExpenseTimelineGrouper.group(records)
     }
 
-    func categoryName(for record: ExpenseRecord) -> String {
-        if let id = record.categoryId,
-           let match = categories.first(where: { $0.id == id }) {
-            return match.name
-        }
-        return record.transactionCategory.displayName
+    func categoryName(for record: ExpenseRecord, locale: Locale) -> String {
+        let categoriesById = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
+        return record.resolvedCategoryLabel(categoriesById: categoriesById, locale: locale)
     }
 
     var availableHeatZones: [String] {

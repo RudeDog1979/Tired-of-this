@@ -1243,7 +1243,7 @@ struct AddExpenseSheet: View {
                                 Image(systemName: option.systemImage)
                                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                                     .frame(width: 20)
-                                Text(option.label)
+                                Text(option.localizedLabel(locale: appSettingsManager.interfaceLocale))
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 Spacer()

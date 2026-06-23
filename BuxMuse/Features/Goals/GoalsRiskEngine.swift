@@ -101,7 +101,8 @@ public final class GoalsRiskEngine {
         if !overspendAlerts.isEmpty {
             let totalOverspendPercent = overspendAlerts.reduce(0.0) { $0 + $1.overspendPercentage }
             if totalOverspendPercent > 30.0 {
-                let categoryName = overspendAlerts.first?.category.localizedDisplayName(locale: locale) ?? BuxLocalizedString.string("other", locale: locale)
+                let categoryName = overspendAlerts.first?.category.localizedDisplayName(locale: locale)
+                    ?? TransactionCategory.other.localizedDisplayName(locale: locale)
                 risks.append(GoalRisk(
                     type: .overspendThreat,
                     description: BuxLocalizedString.format(

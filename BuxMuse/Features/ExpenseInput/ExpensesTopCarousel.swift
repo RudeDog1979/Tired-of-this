@@ -511,7 +511,7 @@ struct ExpensesTopCarousel: View {
                 }
             } else {
                 Spacer()
-                Text("No recent transaction trend data available.")
+                BuxCatalogText.text("No recent transaction trend data available.")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -628,7 +628,7 @@ struct ExpensesTopCarousel: View {
                                 BuxCatalogText.text("Top Category")
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.gray)
-                                Text("None yet")
+                                BuxCatalogText.text("None yet")
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(.gray)
                             }
@@ -669,7 +669,7 @@ struct ExpensesTopCarousel: View {
                                 BuxCatalogText.text("Top Merchant")
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.gray)
-                                Text("None yet")
+                                BuxCatalogText.text("None yet")
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(.gray)
                             }

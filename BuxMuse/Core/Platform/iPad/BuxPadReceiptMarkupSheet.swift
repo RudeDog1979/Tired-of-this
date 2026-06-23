@@ -51,20 +51,20 @@ struct BuxPadReceiptMarkupSheet: View {
                     ProgressView()
                 }
             }
-            .navigationTitle("Receipt Markup")
+            .navigationTitle(BuxLocalizedString.string("Receipt Markup", locale: BuxInterfaceLocale.currentInterfaceLocale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     BuxToolbarCancelButton { dismiss() }
                 }
                 ToolbarItem(placement: .bottomBar) {
-                    Button("Clear markup") {
+                    Button(BuxLocalizedString.string("Clear markup", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                         drawing = PKDrawing()
                     }
                     .font(.system(size: 15, weight: .semibold))
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button(BuxLocalizedString.string("Save", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                         saveMarkup()
                         BuxSaveFeedback.success()
                         dismiss()

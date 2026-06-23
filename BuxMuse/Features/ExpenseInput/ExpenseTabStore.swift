@@ -143,6 +143,14 @@ final class ExpenseTabStore: ObservableObject {
             }
             .store(in: &cancellables)
 
+        appSettings.$interfaceLanguage
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.refreshLedgerFromExpenses(forceDisplay: true)
+            }
+            .store(in: &cancellables)
+
         NotificationCenter.default.publisher(for: .buxMuseWalletSyncDidComplete)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in

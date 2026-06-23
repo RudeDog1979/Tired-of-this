@@ -390,7 +390,7 @@ struct ExpenseTabView: View {
                         BuxCatalogText.text("Any category")
                     }
                     ForEach(listModel.categories) { category in
-                        Button(category.name) {
+                        Button(category.localizedDisplayName(locale: locale)) {
                             listModel.filters.categoryId = category.id
                         }
                     }

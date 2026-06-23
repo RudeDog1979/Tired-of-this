@@ -35,8 +35,8 @@ public final class CategoryInsightsEngine {
             if recentTotal > avgHistoricalTotal * 1.35 && avgHistoricalTotal > 0 {
                 let pct = InsightMoneyFormat.percentChange(from: recentTotal / avgHistoricalTotal)
                 insights.append(FinancialInsight(
-                    title: "\(cat.displayName) Overspend",
-                    value: "Overspend Spike",
+                    title: BuxLocalizedString.format("%@ Overspend", locale: locale, catName),
+                    value: BuxLocalizedString.string("Overspend Spike", locale: locale),
                     description: BuxLocalizedString.format(
                         "You spent more on %@ this month.",
                         locale: locale,
@@ -79,8 +79,8 @@ public final class CategoryInsightsEngine {
             if recentTotal < avgHistoricalTotal * 0.65 && avgHistoricalTotal > 50 {
                 let surplus = avgHistoricalTotal - recentTotal
                 insights.append(FinancialInsight(
-                    title: "\(cat.displayName) Optimization",
-                    value: "Savings Gained",
+                    title: BuxLocalizedString.format("%@ Optimization", locale: locale, catName),
+                    value: BuxLocalizedString.string("Savings Gained", locale: locale),
                     description: BuxLocalizedString.format(
                         "Excellent job limiting your %@ budget.",
                         locale: locale,

@@ -30,7 +30,7 @@ struct BuxPadTaxEnvelopeHost: View {
                     selectedTab = tab
                 } label: {
                     HStack {
-                        Text(tab.label(locale: .current))
+                        Text(tab.label(locale: BuxInterfaceLocale.currentInterfaceLocale))
                         Spacer(minLength: 0)
                         if selectedTab == tab {
                             Image(systemName: "checkmark")
@@ -43,6 +43,6 @@ struct BuxPadTaxEnvelopeHost: View {
             }
         }
         .listStyle(.sidebar)
-        .navigationTitle("Tax Envelope")
+        .navigationTitle(BuxLocalizedString.string("Tax Envelope", locale: BuxInterfaceLocale.currentInterfaceLocale))
     }
 }

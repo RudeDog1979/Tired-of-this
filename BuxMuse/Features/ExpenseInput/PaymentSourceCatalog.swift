@@ -20,6 +20,7 @@ enum PaymentSourceKind: String, Codable, CaseIterable {
 
 struct PaymentSourceOption: Identifiable, Hashable {
     let id: String
+    /// English catalog key — persisted on expense rows.
     let label: String
     let kind: PaymentSourceKind
     let systemImage: String
@@ -29,6 +30,10 @@ struct PaymentSourceOption: Identifiable, Hashable {
         case .credit, .bnpl, .storeCredit: return true
         default: return false
         }
+    }
+
+    func localizedLabel(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String {
+        BuxCatalogLabel.string(label, locale: locale)
     }
 }
 

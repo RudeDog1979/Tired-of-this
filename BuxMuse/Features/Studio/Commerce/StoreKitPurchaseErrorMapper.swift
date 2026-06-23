@@ -13,14 +13,7 @@ enum StoreKitPurchaseErrorMapper {
         }
 
         if let purchaseError = error as? Product.PurchaseError {
-            switch purchaseError {
-            case .invalidQuantity:
-                return BuxCatalogLabel.string("Invalid purchase quantity.", locale: locale)
-            case .productUnavailable:
-                return BuxCatalogLabel.string("This product is not available right now. Try again in a moment.", locale: locale)
-            @unknown default:
-                break
-            }
+            return purchaseErrorMessage(for: purchaseError, locale: locale)
         }
 
         let nsError = error as NSError
@@ -50,5 +43,39 @@ enum StoreKitPurchaseErrorMapper {
         }
 
         return error.localizedDescription
+    }
+
+    /// `if` chains avoid non-exhaustive `switch` when StoreKit adds SDK-only cases (e.g. iOS 26.5+).
+    nonisolated private static func purchaseErrorMessage(
+        for purchaseError: Product.PurchaseError,
+        locale: Locale
+    ) -> String {
+        if purchaseError == .invalidQuantity {
+            return BuxCatalogLabel.string("Invalid purchase quantity.", locale: locale)
+        }
+        if purchaseError == .productUnavailable {
+            return BuxCatalogLabel.string("This product is not available right now. Try again in a moment.", locale: locale)
+        }
+        if purchaseError == .purchaseNotAllowed {
+            return BuxCatalogLabel.string("In-app purchases are not allowed on this device. Check Screen Time restrictions.", locale: locale)
+        }
+        if purchaseError == .ineligibleForOffer {
+            return BuxCatalogLabel.string("You are not eligible for this offer.", locale: locale)
+        }
+        if purchaseError == .invalidOfferIdentifier
+            || purchaseError == .invalidOfferPrice
+            || purchaseError == .invalidOfferSignature
+            || purchaseError == .missingOfferParameters {
+            return BuxCatalogLabel.string("This offer could not be applied. Try again without a promo code.", locale: locale)
+        }
+        if #available(iOS 26.5, macOS 26.5, tvOS 26.5, watchOS 26.5, visionOS 26.5, *) {
+            if purchaseError == .paymentMethodBindingConfigurationRequired {
+                return BuxCatalogLabel.string(
+                    "Add or confirm your payment method in Settings, then try again.",
+                    locale: locale
+                )
+            }
+        }
+        return BuxCatalogLabel.string("Something went wrong with the purchase.", locale: locale)
     }
 }

@@ -34,10 +34,14 @@ struct ExpenseCategoryListSheet: View {
 
                             if category.isCustom {
                                 Menu {
-                                    Button("Merge…") { mergeSource = category }
-                                    Button("Delete", role: .destructive) {
+                                    Button { mergeSource = category } label: {
+                                        BuxCatalogText.text("Merge…")
+                                    }
+                                    Button(role: .destructive) {
                                         _ = try? brain.deleteCategory(id: category.id)
                                         reload()
+                                    } label: {
+                                        BuxCatalogText.text("Delete")
                                     }
                                 } label: {
                                     Image(systemName: "ellipsis.circle")
@@ -325,7 +329,7 @@ struct ExpenseCategoryMergeSheet: View {
                     .padding(.top, 24)
                     .padding(.horizontal, BuxLayout.marginHorizontal)
                 List(targets) { target in
-                    Button(target.name) {
+                    Button(target.localizedDisplayName(locale: appSettingsManager.interfaceLocale)) {
                         onMerge(target)
                         dismiss()
                     }

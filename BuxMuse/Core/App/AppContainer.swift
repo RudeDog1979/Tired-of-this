@@ -231,6 +231,12 @@ final class AppContainer: ObservableObject {
             settingsStore.pushRegionalPreferences(from: self.appSettingsManager)
             settingsStore.save()
             PersonalCloudSyncEngine.shared.scheduleSettingsPush()
+            self.goalsEngine.invalidateLocalizedCaches(andRecalculate: self.financialBridge.engine)
+            self.goalsViewModel.refreshSelectedDetailIfNeeded()
+            self.insightsViewModel.recalculate()
+            self.studioBrain.refreshAll()
+            self.brain.scheduleSnapshotRefresh()
+            self.brain.refreshExpenses()
         }
         .store(in: &cancellables)
 

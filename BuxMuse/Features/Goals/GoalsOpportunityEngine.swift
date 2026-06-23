@@ -74,8 +74,8 @@ public final class GoalsOpportunityEngine {
                 let newMonthsToComplete = NSDecimalNumber(decimal: remaining / newSavingsRate).doubleValue
                 let monthDifference = max(0.5, monthsToExpected - newMonthsToComplete)
                 let formatDiff = String(format: "%.1f", monthDifference)
-                let categoryName = topCategoryOpportunity.category?.localizedDisplayName(locale: locale).lowercased()
-                    ?? BuxLocalizedString.string("other", locale: locale)
+                let categoryName = topCategoryOpportunity.category?.localizedDisplayName(locale: locale)
+                    ?? TransactionCategory.other.localizedDisplayName(locale: locale)
                 list.append(GoalOpportunity(
                     description: BuxLocalizedString.format(
                         "Trim %@ expenses by 15%%.",

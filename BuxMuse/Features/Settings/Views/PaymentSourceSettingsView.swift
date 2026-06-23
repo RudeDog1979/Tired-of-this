@@ -10,6 +10,7 @@ import SwiftUI
 struct PaymentSourceSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
@@ -39,7 +40,7 @@ struct PaymentSourceSettingsView: View {
 
                         FlowLayout(spacing: 8) {
                             ForEach(PaymentSourceCatalog.all.prefix(12)) { option in
-                                Text(option.label)
+                                Text(option.localizedLabel(locale: appSettingsManager.interfaceLocale))
                                     .font(.system(size: 11, weight: .semibold))
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 6)
