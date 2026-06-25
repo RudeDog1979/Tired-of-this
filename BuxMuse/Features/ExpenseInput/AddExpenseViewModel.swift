@@ -60,6 +60,7 @@ public final class AddExpenseViewModel: ObservableObject {
 
     @Published public var isSubscription = false
     @Published public var isRecurring = false
+    @Published public var isExcludedFromSpending = false
     @Published public var isTrial = false
     @Published public var subscriptionStartDate = Date()
     @Published public var trialEndDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
@@ -169,6 +170,7 @@ public final class AddExpenseViewModel: ObservableObject {
                     categorySplitDraftLines = record.splitLines.map { ExpenseCategorySplitLine.from($0) }
                 }
                 householdScope = record.householdScope
+                isExcludedFromSpending = record.isExcludedFromSpending
             }
         } else if let preset = presetCategory {
             selectedCategory = preset
@@ -699,7 +701,17 @@ public final class AddExpenseViewModel: ObservableObject {
         if let editingId, let existing = try? brain.fetchExpenseRecord(id: editingId) {
             record.merchantId = selectedMerchantId ?? (isIncomeEntry ? nil : existing.merchantId)
             record.createdAt = existing.createdAt
+            record.financeKitTransactionId = existing.financeKitTransactionId
+            record.walletAccountId = existing.walletAccountId
+            record.walletIsPending = existing.walletIsPending
+            record.walletCategoryUserConfirmed = existing.walletCategoryUserConfirmed
+            record.walletCategoryConfidence = existing.walletCategoryConfidence
+            if record.incomeRole == nil {
+                record.incomeRole = existing.incomeRole
+            }
         }
+
+        record.isExcludedFromSpending = !treatsAsIncome && isExcludedFromSpending
 
         record.emotion = emotionTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : emotionTag
 

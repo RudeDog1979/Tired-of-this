@@ -1,6 +1,6 @@
 //
 //  StudioPurchaseManager.swift
-//  BuxMuse — StoreKit 2: base app subscription, 7-day trial, Studio add-ons.
+//  BuxMuse — StoreKit 2: base app subscription, Apple intro trials, Studio add-ons.
 //
 
 import Combine
@@ -70,6 +70,12 @@ final class StudioPurchaseManager: ObservableObject {
     @Published var lastErrorMessage: String?
     @Published private(set) var entitlementsDidLoad = false
     @Published private(set) var didLoadProducts = false
+    @Published private(set) var baseIntroOfferEligible = false
+    @Published private(set) var baseInIntroductoryOffer = false
+    @Published private(set) var baseIntroOfferDaysRemaining: Int?
+    @Published private(set) var proIntroOfferEligible = false
+    @Published private(set) var proInIntroductoryOffer = false
+    @Published private(set) var proIntroOfferDaysRemaining: Int?
 
     private var updatesTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
@@ -86,15 +92,16 @@ final class StudioPurchaseManager: ObservableObject {
 
     // MARK: - Access
 
-    var isTrialActive: Bool {
+    /// Legacy local trial (pre–Apple intro offer installs only; no new trials are started).
+    var isLegacyLocalTrialActive: Bool {
         settings.isPremiumTrialActive
     }
 
-    var trialDaysRemaining: Int {
+    var legacyLocalTrialDaysRemaining: Int {
         settings.premiumTrialDaysRemaining
     }
 
-    /// Full app access: active BuxMuse sub or 7-day trial.
+    /// Full app access: active BuxMuse sub, legacy local trial, or grandfathered install.
     var hasActiveSubscription: Bool {
         baseSubscriptionActive || settings.isPremiumTrialActive || settings.premiumLegacyEntitled
     }
@@ -122,7 +129,6 @@ final class StudioPurchaseManager: ObservableObject {
 
     func start() {
         reconcileLegacyEntitlementsIfNeeded()
-        settings.ensurePremiumTrialStarted()
         objectWillChange.send()
         updatesTask?.cancel()
         updatesTask = Task { await listenForTransactions() }
@@ -151,6 +157,7 @@ final class StudioPurchaseManager: ObservableObject {
                 locale: BuxInterfaceLocale.currentInterfaceLocale
             )
         }
+        await refreshSubscriptionOfferState()
     }
 
     func refreshEntitlements() async {
@@ -176,6 +183,7 @@ final class StudioPurchaseManager: ObservableObject {
         proSubscriptionActive = pro
         entitlementsDidLoad = true
         applyEntitlementsToSettings()
+        await refreshSubscriptionOfferState()
         objectWillChange.send()
     }
 
@@ -324,6 +332,38 @@ final class StudioPurchaseManager: ObservableObject {
             return nil
         }
     }
+
+    private func refreshSubscriptionOfferState() async {
+        baseIntroOfferEligible = await BuxStoreKitIntroOfferCopy.isEligibleForIntroOffer(
+            product: product(for: .baseMonthly)
+        )
+        let baseStatus = await activeIntroOfferStatus(for: [.baseMonthly, .baseYearly])
+        baseInIntroductoryOffer = baseStatus.isActive
+        baseIntroOfferDaysRemaining = baseStatus.daysRemaining
+
+        proIntroOfferEligible = await BuxStoreKitIntroOfferCopy.isEligibleForIntroOffer(
+            product: product(for: .studioProMonthly)
+        )
+        let proStatus = await activeIntroOfferStatus(for: [.studioProMonthly, .studioProYearly])
+        proInIntroductoryOffer = proStatus.isActive
+        proIntroOfferDaysRemaining = proStatus.daysRemaining
+    }
+
+    private func activeIntroOfferStatus(for productIDs: [BuxMuseProductID]) async -> BuxStoreKitIntroOfferCopy.ActiveIntroOfferStatus {
+        for productID in productIDs {
+            let status = await BuxStoreKitIntroOfferCopy.activeIntroOfferStatus(for: product(for: productID))
+            if status.isActive { return status }
+        }
+        return BuxStoreKitIntroOfferCopy.ActiveIntroOfferStatus()
+    }
+
+    func trialLengthLabel(for productID: BuxMuseProductID, locale: Locale) -> String? {
+        BuxStoreKitIntroOfferCopy.trialLengthLabel(for: product(for: productID), locale: locale)
+    }
+
+    func subscribeAfterTrialLabel(for productID: BuxMuseProductID, locale: Locale) -> String? {
+        BuxStoreKitIntroOfferCopy.subscribeAfterTrialLabel(for: product(for: productID), locale: locale)
+    }
 }
 
 // MARK: - Legacy API aliases
@@ -331,8 +371,8 @@ final class StudioPurchaseManager: ObservableObject {
 extension StudioPurchaseManager {
     var hasPremiumAccess: Bool { hasActiveSubscription }
     var premiumSubscriptionActive: Bool { baseSubscriptionActive }
-    var isPremiumTrialActive: Bool { isTrialActive }
-    var premiumTrialDaysRemaining: Int { trialDaysRemaining }
+    var isPremiumTrialActive: Bool { baseInIntroductoryOffer || isLegacyLocalTrialActive }
+    var premiumTrialDaysRemaining: Int { baseIntroOfferDaysRemaining ?? legacyLocalTrialDaysRemaining }
     var purchasedSimple: Bool { ownsSimpleOneTimePurchase || proSubscriptionActive }
 
     func purchasePremium(period: BuxMuseBillingPeriod) async throws -> Bool {

@@ -18,27 +18,56 @@ enum ExpenseRenewalReminderScheduler {
     }
 
     static func requestAuthorizationIfNeeded() async -> Bool {
-        if isTesting { return false }
+        await BuxNotificationPolicy.requestAuthorizationIfNeeded()
+    }
+
+    static func rescheduleAll(records: [ExpenseRecord]) async {
+        if isTesting { return }
+        let policy = await MainActor.run { BuxNotificationSettingsSnapshot.current }
+        guard BuxNotificationPolicy.billRemindersAllowed(policy) else {
+            cancelAll()
+            return
+        }
+        guard await requestAuthorizationIfNeeded() else { return }
+
+        let activeIds = Set(records.map(\.id))
         let center = UNUserNotificationCenter.current()
-        let settings = await center.notificationSettings()
-        switch settings.authorizationStatus {
-        case .authorized, .provisional, .ephemeral:
-            return true
-        case .notDetermined:
-            return (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-        default:
-            return false
+        let pending = await center.pendingNotificationRequests()
+        let staleIds = pending
+            .map(\.identifier)
+            .filter { $0.hasPrefix("buxmuse.expense.renewal.") }
+            .filter { id in
+                guard let uuidString = id.split(separator: ".").last,
+                      let uuid = UUID(uuidString: String(uuidString)) else { return true }
+                return !activeIds.contains(uuid)
+            }
+        center.removePendingNotificationRequests(withIdentifiers: staleIds)
+
+        for record in records {
+            await schedule(for: record)
         }
     }
 
     static func schedule(for record: ExpenseRecord) async {
         if isTesting { return }
+        let policy = await MainActor.run { BuxNotificationSettingsSnapshot.current }
+        guard BuxNotificationPolicy.billRemindersAllowed(policy) else {
+            cancel(for: record.id)
+            return
+        }
         guard record.isSubscriptionLike || record.isTrial else {
             cancel(for: record.id)
             return
         }
         guard await requestAuthorizationIfNeeded() else { return }
-        guard let fireDate = reminderFireDate(for: record), fireDate > Date() else {
+        guard var fireDate = reminderFireDate(for: record) else {
+            cancel(for: record.id)
+            return
+        }
+        if let adjusted = BuxNotificationPolicy.adjustedFireDate(fireDate, settings: policy) {
+            fireDate = adjusted
+        }
+        guard fireDate > Date() else {
             cancel(for: record.id)
             return
         }
@@ -63,6 +92,10 @@ enum ExpenseRenewalReminderScheduler {
             )
         }
         content.sound = .default
+        content.userInfo = BuxNotificationPayload.userInfo(
+            route: .expense,
+            entityId: record.id.uuidString
+        )
 
         let components = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],
@@ -82,6 +115,11 @@ enum ExpenseRenewalReminderScheduler {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: [notificationId(expenseId)]
         )
+    }
+
+    static func cancelAll() {
+        if isTesting { return }
+        BuxNotificationPolicy.cancelNotifications(withPrefix: "buxmuse.expense.renewal.")
     }
 
     static func reminderFireDate(for record: ExpenseRecord) -> Date? {

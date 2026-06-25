@@ -13,20 +13,14 @@ enum StudioTimerNotificationScheduler {
     private static let atGoalId = "buxmuse.studio.timer.atgoal"
 
     static func requestAuthorizationIfNeeded() async -> Bool {
-        let center = UNUserNotificationCenter.current()
-        let settings = await center.notificationSettings()
-        switch settings.authorizationStatus {
-        case .authorized, .provisional, .ephemeral:
-            return true
-        case .notDetermined:
-            return (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-        default:
-            return false
-        }
+        await BuxNotificationPolicy.requestAuthorizationIfNeeded()
     }
 
     static func notifyApproaching(projectName: String, minutesLeft: Int) {
         Task {
+            let policy = await MainActor.run { BuxNotificationSettingsSnapshot.current }
+            guard BuxNotificationPolicy.studioTimerAllowed(policy) else { return }
+            guard !BuxNotificationPolicy.isWithinQuietHours(policy) else { return }
             guard await requestAuthorizationIfNeeded() else { return }
             cancelAll()
             let locale = BuxInterfaceLocale.currentInterfaceLocale
@@ -39,6 +33,7 @@ enum StudioTimerNotificationScheduler {
                 Int64(max(1, minutesLeft))
             )
             content.sound = .default
+            content.userInfo = BuxNotificationPayload.userInfo(route: .studioLogTime)
             let request = UNNotificationRequest(
                 identifier: approachingId,
                 content: content,
@@ -50,6 +45,9 @@ enum StudioTimerNotificationScheduler {
 
     static func notifyAtGoal(projectName: String) {
         Task {
+            let policy = await MainActor.run { BuxNotificationSettingsSnapshot.current }
+            guard BuxNotificationPolicy.studioTimerAllowed(policy) else { return }
+            guard !BuxNotificationPolicy.isWithinQuietHours(policy) else { return }
             guard await requestAuthorizationIfNeeded() else { return }
             cancelAll()
             let locale = BuxInterfaceLocale.currentInterfaceLocale
@@ -61,6 +59,7 @@ enum StudioTimerNotificationScheduler {
                 projectName
             )
             content.sound = .default
+            content.userInfo = BuxNotificationPayload.userInfo(route: .studioLogTime)
             let request = UNNotificationRequest(
                 identifier: atGoalId,
                 content: content,

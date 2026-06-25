@@ -20,21 +20,16 @@ enum DebtReminderScheduler {
     }
 
     static func requestAuthorizationIfNeeded() async -> Bool {
-        if isTesting { return false }
-        let center = UNUserNotificationCenter.current()
-        let settings = await center.notificationSettings()
-        switch settings.authorizationStatus {
-        case .authorized, .provisional, .ephemeral:
-            return true
-        case .notDetermined:
-            return (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-        default:
-            return false
-        }
+        await BuxNotificationPolicy.requestAuthorizationIfNeeded()
     }
 
     static func rescheduleAll(debts: [Debt]) async {
         if isTesting { return }
+        let policy = await MainActor.run { BuxNotificationSettingsSnapshot.current }
+        guard BuxNotificationPolicy.billRemindersAllowed(policy) else {
+            await cancelAllDebtReminders()
+            return
+        }
         guard await requestAuthorizationIfNeeded() else { return }
         let activeIds = Set(debts.filter { !$0.isArchived }.map(\.id))
         let center = UNUserNotificationCenter.current()
@@ -58,18 +53,28 @@ enum DebtReminderScheduler {
         if isTesting { return }
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
-        let ids = pending
-            .map(\.identifier)
-            .filter { $0.hasPrefix("buxmuse.debt.due.") }
-        center.removePendingNotificationRequests(withIdentifiers: ids)
+        let delivered = await center.deliveredNotifications()
+        let pendingIds = pending.map(\.identifier).filter { $0.hasPrefix("buxmuse.debt.due.") }
+        let deliveredIds = delivered.map(\.request.identifier).filter { $0.hasPrefix("buxmuse.debt.due.") }
+        center.removePendingNotificationRequests(withIdentifiers: pendingIds)
+        center.removeDeliveredNotifications(withIdentifiers: deliveredIds)
     }
 
     static func schedule(for debt: Debt) async {
         if isTesting { return }
+        let policy = await MainActor.run { BuxNotificationSettingsSnapshot.current }
+        guard BuxNotificationPolicy.billRemindersAllowed(policy) else {
+            cancel(for: debt.id)
+            return
+        }
         cancel(for: debt.id)
         guard debt.remindersEnabled, debt.dueDayOfMonth != nil, debt.currentBalance > 0 else { return }
         guard await requestAuthorizationIfNeeded() else { return }
-        guard let fireDate = reminderFireDate(for: debt), fireDate > Date() else { return }
+        guard var fireDate = reminderFireDate(for: debt) else { return }
+        if let adjusted = BuxNotificationPolicy.adjustedFireDate(fireDate, settings: policy) {
+            fireDate = adjusted
+        }
+        guard fireDate > Date() else { return }
 
         let locale = BuxInterfaceLocale.currentInterfaceLocale
         let content = UNMutableNotificationContent()
@@ -81,6 +86,10 @@ enum DebtReminderScheduler {
             String(leadDays)
         )
         content.sound = .default
+        content.userInfo = BuxNotificationPayload.userInfo(
+            route: .debt,
+            entityId: debt.id.uuidString
+        )
 
         let components = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],

@@ -169,8 +169,7 @@ struct BuxRootBrandThemeModifier: ViewModifier {
             .environment(\.buxSemanticTheme, semantic)
             .environment(\.buxMaterialScheme, material)
             .environment(\.buxBrandSurfaces, branded)
-            .animation(BuxMotion.themeCrossfade, value: themeManager.current.id)
-            .animation(.easeInOut(duration: 0.4), value: colorScheme)
+            .buxStableThemeLayout(themeId: themeManager.current.id)
     }
 }
 
@@ -405,6 +404,7 @@ struct BuxChevron: View {
 
 private struct BuxSemanticForegroundModifier: ViewModifier {
     @Environment(\.buxSemanticTheme) private var semantic
+    @EnvironmentObject private var themeManager: ThemeManager
     let keyPath: KeyPath<BuxSemanticTheme, Color>
 
     init(_ keyPath: KeyPath<BuxSemanticTheme, Color>) {
@@ -412,7 +412,9 @@ private struct BuxSemanticForegroundModifier: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        content.foregroundStyle(semantic[keyPath: keyPath])
+        content
+            .foregroundStyle(semantic[keyPath: keyPath])
+            .buxAnimateThemeColors(themeId: themeManager.current.id)
     }
 }
 
@@ -429,29 +431,56 @@ extension View {
 
 struct BuxPreferredColorSchemeModifier: ViewModifier {
     @ObservedObject private var settings = SettingsStore.shared
+    @State private var didApplyInitialInterfaceStyle = false
 
     func body(content: Content) -> some View {
         content
             .preferredColorScheme(settings.themeMode.colorScheme)
-            .animation(.easeInOut(duration: 0.4), value: settings.themeMode)
-            .onChange(of: settings.themeMode, initial: true) { oldValue, newValue in
-                #if canImport(UIKit)
-                let style: UIUserInterfaceStyle
-                switch newValue {
-                case .system: style = .unspecified
-                case .light: style = .light
-                case .dark: style = .dark
-                }
-                DispatchQueue.main.async {
-                    UIApplication.shared.connectedScenes
-                        .compactMap { $0 as? UIWindowScene }
-                        .flatMap { $0.windows }
-                        .forEach { window in
-                            window.overrideUserInterfaceStyle = style
-                        }
-                }
-                #endif
+            .animation(BuxMotion.displayModeCrossfade, value: settings.themeMode)
+            .onAppear {
+                applyInterfaceStyle(for: settings.themeMode, animated: false)
+                didApplyInitialInterfaceStyle = true
             }
+            .onChange(of: settings.themeMode) { _, newValue in
+                applyInterfaceStyle(for: newValue, animated: didApplyInitialInterfaceStyle)
+            }
+    }
+
+    private func applyInterfaceStyle(for mode: ThemeMode, animated: Bool) {
+        #if canImport(UIKit)
+        let style: UIUserInterfaceStyle
+        switch mode {
+        case .system: style = .unspecified
+        case .light: style = .light
+        case .dark: style = .dark
+        }
+
+        let windows = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+
+        let apply = {
+            windows.forEach { $0.overrideUserInterfaceStyle = style }
+        }
+
+        guard animated else {
+            apply()
+            return
+        }
+
+        let duration = BuxMotion.appearanceCrossfadeDuration
+        DispatchQueue.main.async {
+            windows.forEach { window in
+                UIView.transition(
+                    with: window,
+                    duration: duration,
+                    options: .transitionCrossDissolve
+                ) {
+                    window.overrideUserInterfaceStyle = style
+                }
+            }
+        }
+        #endif
     }
 }
 

@@ -83,7 +83,12 @@
           "groupNumber" : 1,
           "internalID" : "BUX_PREMIUM_MONTHLY",
           "introductoryOffers" : [
-
+            {
+              "internalID" : "BUX_PREMIUM_MONTHLY_INTRO_1W",
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P1W"
+            }
           ],
           "localizations" : [
             {
@@ -122,7 +127,12 @@
           "groupNumber" : 1,
           "internalID" : "BUX_PREMIUM_YEARLY",
           "introductoryOffers" : [
-
+            {
+              "internalID" : "BUX_PREMIUM_YEARLY_INTRO_1W",
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P1W"
+            }
           ],
           "localizations" : [
             {
@@ -174,7 +184,12 @@
           "groupNumber" : 1,
           "internalID" : "BUX_STUDIO_PRO_MONTHLY",
           "introductoryOffers" : [
-
+            {
+              "internalID" : "BUX_STUDIO_PRO_MONTHLY_INTRO_1W",
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P1W"
+            }
           ],
           "localizations" : [
             {
@@ -213,7 +228,12 @@
           "groupNumber" : 1,
           "internalID" : "BUX_STUDIO_PRO_YEARLY",
           "introductoryOffers" : [
-
+            {
+              "internalID" : "BUX_STUDIO_PRO_YEARLY_INTRO_1W",
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P1W"
+            }
           ],
           "localizations" : [
             {

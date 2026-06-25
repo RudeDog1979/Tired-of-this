@@ -22,7 +22,7 @@ struct ExpenseBudgetAttributionLine: Equatable, Sendable {
 
 enum ExpenseBudgetAttribution {
     static func lines(for record: ExpenseRecord) -> [ExpenseBudgetAttributionLine] {
-        guard record.amountValue < 0 else { return [] }
+        guard record.amountValue < 0, !record.isExcludedFromSpending else { return [] }
 
         if record.isCategorySplit, !record.splitLines.isEmpty {
             return record.splitLines

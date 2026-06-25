@@ -376,26 +376,32 @@ public final class SettingsBrain {
 
     private static func subscriptionSettingsSubtitle(locale: Locale) -> String {
         let purchaseManager = StudioPurchaseManager.shared
-        if purchaseManager.baseSubscriptionActive {
-            return BuxLocalizedString.string("BuxMuse is active", locale: locale)
-        }
-        if purchaseManager.isTrialActive {
+        if purchaseManager.baseInIntroductoryOffer || purchaseManager.isLegacyLocalTrialActive {
             return BuxLocalizedString.format(
                 "Trial · %lld days left",
                 locale: locale,
-                Int64(purchaseManager.trialDaysRemaining)
+                Int64(purchaseManager.premiumTrialDaysRemaining)
             )
         }
-        return BuxLocalizedString.string("£1.99/mo or £14.99/yr after trial", locale: locale)
+        if purchaseManager.baseSubscriptionActive {
+            return BuxLocalizedString.string("BuxMuse is active", locale: locale)
+        }
+        if purchaseManager.baseIntroOfferEligible {
+            return BuxLocalizedString.string("7-day free trial available", locale: locale)
+        }
+        return BuxLocalizedString.string("£1.99/mo or £14.99/yr", locale: locale)
     }
 
     private static func subscriptionSettingsTrailing(locale: Locale) -> String {
         let purchaseManager = StudioPurchaseManager.shared
+        if purchaseManager.baseInIntroductoryOffer || purchaseManager.isLegacyLocalTrialActive {
+            return BuxLocalizedString.format("%lldd", locale: locale, Int64(purchaseManager.premiumTrialDaysRemaining))
+        }
         if purchaseManager.baseSubscriptionActive {
             return BuxLocalizedString.string("Active", locale: locale)
         }
-        if purchaseManager.isTrialActive {
-            return BuxLocalizedString.format("%lldd", locale: locale, Int64(purchaseManager.trialDaysRemaining))
+        if purchaseManager.baseIntroOfferEligible {
+            return BuxLocalizedString.string("Try free", locale: locale)
         }
         return BuxLocalizedString.string("Subscribe", locale: locale)
     }

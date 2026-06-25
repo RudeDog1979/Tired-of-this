@@ -189,6 +189,10 @@ public final class BuxMuseBrain: ObservableObject {
         )
     }
 
+    private static func deduplicatedExpenseRecords(_ records: [ExpenseRecord]) -> [ExpenseRecord] {
+        recordsByID(records).values.sorted { $0.date > $1.date }
+    }
+
     // MARK: - Expenses (GRDB ledger)
 
     /// Full ledger reload — bulk sync, import, category merge only. Never hydrate or tab navigation.
@@ -218,6 +222,7 @@ public final class BuxMuseBrain: ObservableObject {
             loadTransactionsIntoEngine(all.map { $0.toTransaction() })
             scheduleSnapshotRefresh()
             financialBridge.objectWillChange.send()
+            NotificationCenter.default.post(name: .buxMuseFinancialDataDidChange, object: nil)
         } catch {
             print("refreshExpensesAfterWalletSync failed: \(error)")
         }
@@ -322,6 +327,15 @@ public final class BuxMuseBrain: ObservableObject {
         applyExpenseRecordDelete(id: id)
         BuxPadExpenseUndoBridge.offerUndoAfterDelete(padUndoSnapshot, brain: self)
         PersonalCloudSyncEngine.shared.pushDeletedExpense(id: id, currencyCode: currencyCode)
+    }
+
+    /// Wallet reconciliation removed a stale pending duplicate — skip undo, keep ledger cache in sync.
+    func removeWalletReconciledExpense(id: UUID) throws {
+        guard let record = try? fetchExpenseRecord(id: id) else { return }
+        ExpenseRenewalReminderScheduler.cancel(for: id)
+        try persistence.deleteExpenseRecord(id: id)
+        applyExpenseRecordDelete(id: id)
+        PersonalCloudSyncEngine.shared.pushDeletedExpense(id: id, currencyCode: record.currencyCode)
     }
 
     // MARK: - Expense records (full SwiftData model)
@@ -1134,7 +1148,7 @@ public final class BuxMuseBrain: ObservableObject {
             referenceDate: now,
             ledgerBalance: raw.ledgerBalance
         )
-        return (display, pack.currentMonth + pack.pendingWallet)
+        return (display, Self.deduplicatedExpenseRecords(pack.currentMonth + pack.pendingWallet))
     }
 
     func fetchArchiveMonthRecords(monthStart: Date) async -> [ExpenseRecord] {
@@ -1185,7 +1199,8 @@ public final class BuxMuseBrain: ObservableObject {
                 bridgeBadge: WorkspaceExpenseRowChrome.bridgeBadge(for: record, hustles: hustles),
                 isWalletPending: record.walletIsPending,
                 isSalaryTagged: record.isSalaryTagged,
-                isIncomeInflow: isIncome
+                isIncomeInflow: isIncome,
+                isExcludedFromSpending: record.isExcludedFromSpending
             )
         }
     }

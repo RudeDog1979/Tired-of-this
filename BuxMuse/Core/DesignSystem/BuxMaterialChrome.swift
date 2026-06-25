@@ -85,12 +85,14 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
         content
             .background {
                 shape.fill(fillColor)
+                    .buxAnimateThemeColors(themeId: themeManager.current.id)
             }
             .modifier(BuxMaterialClipGroupModifier(useGroup: variant == .elevated && !padFlatChrome))
             .clipShape(shape)
             .overlay {
                 if showsBorder {
                     shape.stroke(scheme.outlineVariant, lineWidth: borderLineWidth)
+                        .buxAnimateThemeColors(themeId: themeManager.current.id)
                 }
             }
             .shadow(
@@ -103,6 +105,7 @@ struct BuxMaterialCardChromeModifier: ViewModifier {
                 cornerRadius: cornerRadius,
                 enabled: settings.showsLandingCardShine
             ))
+            .buxStableThemeLayout(themeId: themeManager.current.id)
     }
 }
 
@@ -148,6 +151,7 @@ extension View {
 
     func buxMaterialCanvasBackground(themeManager: ThemeManager, colorScheme: ColorScheme) -> some View {
         themeManager.screenBackground(for: colorScheme)
+            .buxAnimateThemeColors(themeId: themeManager.current.id)
             .ignoresSafeArea()
     }
 }

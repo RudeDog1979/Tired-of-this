@@ -419,6 +419,21 @@ struct StudioPurchaseChooser: View {
     }
 
     private var proCardSubtitle: String {
+        if purchaseManager.proInIntroductoryOffer {
+            return "Add-on · requires BuxMuse · includes Simple · trial active"
+        }
+        if purchaseManager.proIntroOfferEligible {
+            if let trial = purchaseManager.trialLengthLabel(
+                for: billingPeriod.studioProProductID,
+                locale: appSettingsManager.interfaceLocale
+            ) {
+                return BuxLocalizedString.format(
+                    "Add-on · requires BuxMuse · includes Simple · %@",
+                    locale: appSettingsManager.interfaceLocale,
+                    trial
+                )
+            }
+        }
         if purchaseManager.ownsSimpleOneTimePurchase {
             return "Add-on · requires BuxMuse · includes Simple · request a Simple refund from Apple after upgrading"
         }
@@ -443,6 +458,15 @@ struct StudioPurchaseChooser: View {
     }
 
     private var proButtonTitle: String {
+        if purchaseManager.hasProStudio {
+            if purchaseManager.proInIntroductoryOffer {
+                return BuxCatalogLabel.string("Pro trial active", locale: appSettingsManager.interfaceLocale)
+            }
+            return BuxCatalogLabel.string("Pro Studio active", locale: appSettingsManager.interfaceLocale)
+        }
+        if purchaseManager.proIntroOfferEligible {
+            return BuxCatalogLabel.string("Start 7-day Pro trial", locale: appSettingsManager.interfaceLocale)
+        }
         if let price = purchaseManager.displayPrice(for: billingPeriod.studioProProductID) {
             return BuxLocalizedString.format("Subscribe to Pro — %@", locale: appSettingsManager.interfaceLocale, price)
         }

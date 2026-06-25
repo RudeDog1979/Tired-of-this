@@ -70,11 +70,13 @@ private struct BuxSurfaceModifier: ViewModifier {
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(themeManager.cardFill(for: colorScheme))
+                    .buxAnimateThemeColors(themeId: themeManager.current.id)
             )
             .overlay {
                 if chrome.strokeWidth > 0 {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .strokeBorder(chrome.stroke, lineWidth: chrome.strokeWidth)
+                        .buxAnimateThemeColors(themeId: themeManager.current.id)
                 }
             }
             .shadow(
@@ -83,5 +85,6 @@ private struct BuxSurfaceModifier: ViewModifier {
                 x: 0,
                 y: chrome.shadowY
             )
+            .buxStableThemeLayout(themeId: themeManager.current.id)
     }
 }

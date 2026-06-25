@@ -86,7 +86,7 @@ final class ExpenseTabStore: ObservableObject {
 
         if filtersActive || !pinnedFilteredDisplay {
             display = built
-            recordsById = Dictionary(uniqueKeysWithValues: mapRecords.map { ($0.id, $0) })
+            recordsById = Self.recordsDictionary(from: mapRecords)
             lastReloadToken = token
             displayRevision += 1
             brain.publishExpenseInteractionDisplay(built)
@@ -150,14 +150,6 @@ final class ExpenseTabStore: ObservableObject {
                 self?.refreshLedgerFromExpenses(forceDisplay: true)
             }
             .store(in: &cancellables)
-
-        NotificationCenter.default.publisher(for: .buxMuseWalletSyncDidComplete)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                self.forceReloadFromLedger(currency: self.appSettings.selectedCurrency)
-            }
-            .store(in: &cancellables)
     }
 
     /// Keeps dashboard wallet balance in sync with the Expenses SQL pipeline without clobbering filtered tab lists.
@@ -182,7 +174,7 @@ final class ExpenseTabStore: ObservableObject {
             let shouldRefreshDisplay = forceDisplay || !self.pinnedFilteredDisplay
             if shouldRefreshDisplay {
                 self.display = scoped.display
-                self.recordsById = Dictionary(uniqueKeysWithValues: scoped.listRecords.map { ($0.id, $0) })
+                self.recordsById = Self.recordsDictionary(from: scoped.listRecords)
                 self.lastReloadToken = [
                     "\(self.brain.expenseDataRevision)",
                     HustleManager.shared.selectedHustleId?.uuidString ?? "all",
@@ -200,5 +192,9 @@ final class ExpenseTabStore: ObservableObject {
                 self.brain.publishExpenseInteractionDisplay(patched)
             }
         }
+    }
+
+    private static func recordsDictionary(from records: [ExpenseRecord]) -> [UUID: ExpenseRecord] {
+        Dictionary(records.map { ($0.id, $0) }, uniquingKeysWith: { _, newer in newer })
     }
 }

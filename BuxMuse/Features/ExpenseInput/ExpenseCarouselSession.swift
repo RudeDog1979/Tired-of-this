@@ -37,9 +37,8 @@ final class ExpenseCarouselSession: ObservableObject {
     func bumpForDataChange(dataToken: String) {
         guard lastAnimatedDataToken != dataToken else { return }
         lastAnimatedDataToken = dataToken
-        if !hasPlayedInitialCarousel {
-            hasPlayedInitialCarousel = true
-        }
+        guard !hasPlayedInitialCarousel else { return }
+        hasPlayedInitialCarousel = true
         resetAnimationState()
     }
 

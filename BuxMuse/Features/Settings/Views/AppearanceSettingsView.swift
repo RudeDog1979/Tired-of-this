@@ -25,74 +25,12 @@ struct AppearanceSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
-            if store.brandThemesEnabled {
-                VStack(alignment: .leading, spacing: BuxLayout.tight) {
-                    BuxFormSectionLabel(title: "Brand design presets")
-                    BuxThemePickerCarousel()
-                }
-            } else {
-                BuxFormSection(title: "Accent color") {
-                    BuxAccentPickerCarousel()
-                }
-            }
+            themePresetPicker
 
             BuxFormSection(title: "Interface") {
-                BuxSettingsToggleRow(
-                    titleKey: "Brand themes",
-                    subtitleKey: "Full themed surfaces and presets — off uses standard iOS light/dark",
-                    isOn: $store.brandThemesEnabled
-                )
-
-                BuxFormRowDivider()
-
-                BuxSettingsMenuPickerRow(titleKey: "Display mode", selection: $store.themeMode) {
-                    ForEach(ThemeMode.allCases) { mode in
-                        Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
-                    }
-                }
-
-                if !store.brandThemesEnabled {
-                    BuxFormRowDivider()
-
-                    BuxSettingsToggleRow(
-                        titleKey: "Landing backdrop glow",
-                        subtitleKey: "Top-left ambient light and card edge shine — off uses plain iOS surfaces",
-                        isOn: $store.landingBackdropEnabled
-                    )
-                }
-
-                BuxFormRowDivider()
-
-                BuxSettingsToggleRow(
-                    titleKey: "Glass navigation chrome",
-                    subtitleText: glassChromeSubtitle,
-                    isOn: $store.useGlassmorphism
-                )
-
-                BuxFormRowDivider()
-
-                BuxSettingsToggleRow(
-                    titleKey: "Reduced motion",
-                    subtitleKey: "Simplify transition animations for comfort",
-                    isOn: $store.reducedMotion
-                )
-
-                BuxFormRowDivider()
-
-                BuxSettingsToggleRow(
-                    titleKey: "Solar contrast mode",
-                    subtitleKey: "Optimize contrast and text weight for direct tropical sunlight",
-                    isOn: $store.solarContrastModeEnabled
-                )
-
-                BuxFormRowDivider()
-
-                BuxSettingsToggleRow(
-                    titleKey: "visual horizon background",
-                    subtitleKey: "show spending trend lines in the dashboard wallet card",
-                    isOn: $store.showVisualHorizonBackground
-                )
+                interfaceSectionContent
             }
+            .brandThemesToggleStableLayout(store.brandThemesEnabled)
 
             if BuxPadIdiom.isPad {
                 BuxFormSection(title: "Expense quick actions") {
@@ -106,33 +44,15 @@ struct AppearanceSettingsView: View {
                         }
                     }
                 }
+                .brandThemesToggleStableLayout(store.brandThemesEnabled)
             }
 
             BuxFormSection(title: "Dashboard greeting") {
-                BuxSettingsToggleRow(
-                    titleKey: "Show greeting header on dashboard",
-                    isOn: $store.greetingHeaderEnabled
-                )
-
-                if store.greetingHeaderEnabled {
-                    BuxFormRowDivider()
-
-                    BuxSettingsToggleRow(
-                        titleKey: "Show greeting icon",
-                        subtitleKey: "Show animated time icon beside text",
-                        isOn: $store.greetingShowIcon
-                    )
-
-                    BuxFormRowDivider()
-
-                    BuxSettingsMenuPickerRow(titleKey: "Greeting style", selection: $store.greetingFontStyle) {
-                        ForEach(GreetingFontStyle.allCases) { style in
-                            Text(style.localizedDisplayName(locale: appSettingsManager.interfaceLocale)).tag(style)
-                        }
-                    }
-                }
+                greetingSectionContent
             }
+            .brandThemesToggleStableLayout(store.brandThemesEnabled)
         }
+        .animation(BuxMotion.brandThemesToggle, value: store.brandThemesEnabled)
         .tutorialAnchor(.settingsAppearanceDetail, coordinator: tutorialCoordinator)
         .buxCatalogNavigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
@@ -156,6 +76,144 @@ struct AppearanceSettingsView: View {
         .onChange(of: store.greetingHeaderEnabled) { _, _ in store.save() }
         .onChange(of: store.greetingShowIcon) { _, _ in store.save() }
         .onChange(of: store.greetingFontStyle) { _, _ in store.save() }
+    }
+
+    private var brandThemesBinding: Binding<Bool> {
+        Binding(
+            get: { store.brandThemesEnabled },
+            set: { newValue in
+                withAnimation(BuxMotion.brandThemesToggle) {
+                    store.brandThemesEnabled = newValue
+                }
+            }
+        )
+    }
+
+    @ViewBuilder
+    private var interfaceSectionContent: some View {
+        BuxSettingsToggleRow(
+            titleKey: "Brand themes",
+            subtitleKey: "Full themed surfaces and presets — off uses standard iOS light/dark",
+            isOn: brandThemesBinding
+        )
+
+        BuxFormRowDivider()
+
+        BuxSettingsMenuPickerRow(titleKey: "Display mode", selection: $store.themeMode) {
+            ForEach(ThemeMode.allCases) { mode in
+                Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
+            }
+        }
+
+        Group {
+            if !store.brandThemesEnabled {
+                BuxFormRowDivider()
+
+                BuxSettingsToggleRow(
+                    titleKey: "Landing backdrop glow",
+                    subtitleKey: "Top-left ambient light and card edge shine — off uses plain iOS surfaces",
+                    isOn: $store.landingBackdropEnabled
+                )
+            }
+        }
+        .transition(.opacity)
+
+        BuxFormRowDivider()
+
+        BuxSettingsToggleRow(
+            titleKey: "Glass navigation chrome",
+            subtitleText: glassChromeSubtitle,
+            isOn: $store.useGlassmorphism
+        )
+
+        BuxFormRowDivider()
+
+        BuxSettingsToggleRow(
+            titleKey: "Reduced motion",
+            subtitleKey: "Simplify transition animations for comfort",
+            isOn: $store.reducedMotion
+        )
+
+        BuxFormRowDivider()
+
+        BuxSettingsToggleRow(
+            titleKey: "Solar contrast mode",
+            subtitleKey: "Optimize contrast and text weight for direct tropical sunlight",
+            isOn: $store.solarContrastModeEnabled
+        )
+
+        BuxFormRowDivider()
+
+        BuxSettingsToggleRow(
+            titleKey: "visual horizon background",
+            subtitleKey: "show spending trend lines in the dashboard wallet card",
+            isOn: $store.showVisualHorizonBackground
+        )
+    }
+
+    @ViewBuilder
+    private var greetingSectionContent: some View {
+        BuxSettingsToggleRow(
+            titleKey: "Show greeting header on dashboard",
+            isOn: $store.greetingHeaderEnabled
+        )
+
+        if store.greetingHeaderEnabled {
+            BuxFormRowDivider()
+
+            BuxSettingsToggleRow(
+                titleKey: "Show greeting icon",
+                subtitleKey: "Show animated time icon beside text",
+                isOn: $store.greetingShowIcon
+            )
+
+            BuxFormRowDivider()
+
+            BuxSettingsMenuPickerRow(titleKey: "Greeting style", selection: $store.greetingFontStyle) {
+                ForEach(GreetingFontStyle.allCases) { style in
+                    Text(style.localizedDisplayName(locale: appSettingsManager.interfaceLocale)).tag(style)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var themePresetPicker: some View {
+        ZStack(alignment: .top) {
+            if store.brandThemesEnabled {
+                VStack(alignment: .leading, spacing: BuxLayout.tight) {
+                    BuxFormSectionLabel(title: "Brand design presets")
+                    BuxThemePickerCarousel()
+                }
+                .compositingGroup()
+                .transition(
+                    .asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .top)),
+                        removal: .opacity.combined(with: .move(edge: .top))
+                    )
+                )
+            } else {
+                BuxFormSection(title: "Accent color") {
+                    BuxAccentPickerCarousel()
+                }
+                .compositingGroup()
+                .transition(
+                    .asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .top)),
+                        removal: .opacity.combined(with: .move(edge: .top))
+                    )
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
+        .clipped()
+    }
+}
+
+private extension View {
+    /// Keeps labels and rows from jittering while the preset block falls in/out.
+    func brandThemesToggleStableLayout(_ brandThemesEnabled: Bool) -> some View {
+        animation(nil, value: brandThemesEnabled)
     }
 }
 

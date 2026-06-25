@@ -125,7 +125,7 @@ struct ExpenseDetailView: View {
 
     private var canLinkToDebt: Bool {
         settings.consumerDebtEnabled
-            && viewModel.record.isSpendingOutflow
+            && viewModel.record.amountValue < 0
             && linkedDebt == nil
             && !debtEngine.activeDebts.isEmpty
     }
@@ -411,6 +411,16 @@ struct ExpenseDetailView: View {
 
             primaryAction("Edit transaction", icon: "pencil") {
                 showEditSheet = true
+            }
+
+            if viewModel.record.amountValue < 0 {
+                primaryAction(
+                    viewModel.record.isExcludedFromSpending ? "Include in spending" : "Exclude from spending",
+                    icon: viewModel.record.isExcludedFromSpending ? "chart.bar.fill" : "chart.bar.xaxis"
+                ) {
+                    try? viewModel.setExcludedFromSpending(!viewModel.record.isExcludedFromSpending)
+                    onUpdated()
+                }
             }
 
             primaryAction("Convert to subscription", icon: "arrow.triangle.2.circlepath") {

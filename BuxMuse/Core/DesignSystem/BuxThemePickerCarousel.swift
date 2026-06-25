@@ -142,6 +142,7 @@ struct BuxThemePreviewStrip: View {
             .padding(.vertical, 4)
         }
         .padding(.vertical, 8)
+        .buxStableThemeLayout(themeId: themeManager.current.id)
     }
 }
 
@@ -162,7 +163,7 @@ struct BuxThemePickerCarousel: View {
 
     @ViewBuilder
     private var carouselScroll: some View {
-        let scroll = ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 14) {
                 ForEach(AppTheme.all) { theme in
                     ThemeSwatchCard(
@@ -178,14 +179,9 @@ struct BuxThemePickerCarousel: View {
                 }
             }
             .scrollTargetLayout()
-            .padding(.horizontal, BuxLayout.section)
             .padding(.vertical, 14)
         }
-
-        scroll
-            .modifier(BuxHorizontalSnapScrollModifier())
-            .modifier(BuxCarouselScrollClipModifier())
-            .buxPadViewAlignedHorizontalCarousel()
+        .buxViewAlignedHorizontalCarousel()
     }
 }
 

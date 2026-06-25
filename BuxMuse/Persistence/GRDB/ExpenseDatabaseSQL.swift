@@ -278,6 +278,7 @@ final class ExpenseDatabaseSQL: @unchecked Sendable {
                     SUM(ABS(CAST(amountValue AS REAL))) AS total
                 FROM expenses
                 WHERE date >= ? AND CAST(amountValue AS REAL) < 0
+                  AND COALESCE(isExcludedFromSpending, 0) = 0
                 GROUP BY strftime('%Y-%m', datetime(date, 'unixepoch'))
                 ORDER BY monthStart DESC
                 LIMIT ?
@@ -392,6 +393,7 @@ final class ExpenseDatabaseSQL: @unchecked Sendable {
 
     func deleteRecord(id: String) throws {
         try dbQueue.write { db in
+            try db.execute(sql: "DELETE FROM expense_split_lines WHERE expenseId = ?", arguments: [id])
             try db.execute(sql: "DELETE FROM expenses WHERE id = ?", arguments: [id])
         }
     }
@@ -614,6 +616,11 @@ final class ExpenseDatabaseSQL: @unchecked Sendable {
             try db.alter(table: "expenses") { t in
                 t.add(column: "walletCategoryUserConfirmed", .integer).notNull().defaults(to: 0)
                 t.add(column: "walletCategoryConfidence", .text)
+            }
+        }
+        migrator.registerMigration("v7_excluded_from_spending") { db in
+            try db.alter(table: "expenses") { t in
+                t.add(column: "isExcludedFromSpending", .integer).notNull().defaults(to: 0)
             }
         }
         return migrator

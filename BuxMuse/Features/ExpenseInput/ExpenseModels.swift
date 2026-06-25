@@ -154,6 +154,8 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
     public var walletCategoryConfidence: String?
     /// Explicit income subtype — e.g. linked paycheck (`salary`).
     public var incomeRole: String?
+    /// User opted out of spend totals — still appears in the ledger.
+    public var isExcludedFromSpending: Bool = false
 
     public var isSalaryTagged: Bool {
         incomeRole == "salary"
@@ -187,9 +189,9 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         amountValue > 0 && transactionCategory != .income
     }
 
-    /// Outflow expenses only — income and refunds are excluded from spend totals.
+    /// Outflow expenses only — income, refunds, and user-excluded rows stay out of spend totals.
     public var isSpendingOutflow: Bool {
-        amountValue < 0
+        amountValue < 0 && !isExcludedFromSpending
     }
 
     public var spendingAmountDouble: Double {
@@ -256,7 +258,8 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         walletIsPending: Bool = false,
         walletCategoryUserConfirmed: Bool = false,
         walletCategoryConfidence: String? = nil,
-        incomeRole: String? = nil
+        incomeRole: String? = nil,
+        isExcludedFromSpending: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -307,6 +310,7 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         self.walletCategoryUserConfirmed = walletCategoryUserConfirmed
         self.walletCategoryConfidence = walletCategoryConfidence
         self.incomeRole = incomeRole
+        self.isExcludedFromSpending = isExcludedFromSpending
     }
 
     public func toTransaction() -> Transaction {
@@ -761,6 +765,7 @@ public struct ExpenseRowDisplay: Identifiable {
     public var isWalletPending: Bool = false
     public var isSalaryTagged: Bool = false
     public var isIncomeInflow: Bool = false
+    public var isExcludedFromSpending: Bool = false
     public var linkedDebtName: String?
 }
 

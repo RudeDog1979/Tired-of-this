@@ -161,6 +161,7 @@ struct BuxThemedCardPlateBackground: View {
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         shape.fill(themeManager.cardFill(for: colorScheme))
+            .buxAnimateThemeColors(themeId: themeManager.current.id)
     }
 }
 

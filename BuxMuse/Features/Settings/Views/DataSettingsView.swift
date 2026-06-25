@@ -398,7 +398,12 @@ struct DataSettingsView: View {
             exportBeforeCloudDeleteSheet
         }
         .onChange(of: store.allowLocalBackups) { _, _ in store.save() }
-        .onChange(of: store.autoBackupFrequency) { _, _ in store.save() }
+        .onChange(of: store.autoBackupFrequency) { _, _ in
+            store.save()
+            Task {
+                await BackupNotificationScheduler.reschedule(frequency: store.autoBackupFrequency)
+            }
+        }
         .onChange(of: store.includeStudioDataInExports) { _, _ in store.save() }
         .onChange(of: store.includeAnalyticsInExports) { _, _ in store.save() }
         .onAppear {
@@ -604,6 +609,9 @@ struct DataSettingsView: View {
         MoneyMapLayoutStore.shared.resetAll()
         BuxNotificationInboxEngine.purgePersistedState()
         StudioTimerController.shared.reset()
+        Task {
+            await BuxNotificationPolicy.cancelAllScheduledNotifications()
+        }
         PersonalSyncConflictStore.shared.clearAll()
         tutorialCoordinator.tearDownForFactoryReset()
         LightweightLogoCache.shared.clearCacheSynchronously()

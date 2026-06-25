@@ -74,6 +74,7 @@ struct BuxLandingLightRimModifier: ViewModifier {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         let accent = themeManager.current.accentColor
         let isDark = colorScheme == .dark
+        let themeId = themeManager.current.id
 
         let rimmed = content.overlay {
             shape.strokeBorder(
@@ -89,6 +90,7 @@ struct BuxLandingLightRimModifier: ViewModifier {
                 ),
                 lineWidth: intensity.lineWidth
             )
+            .buxAnimateThemeColors(themeId: themeId)
         }
 
         // Accent glow shadow — hero cards only (Apple: one shadow layer, no scroll stack).
@@ -99,8 +101,10 @@ struct BuxLandingLightRimModifier: ViewModifier {
                 x: 0,
                 y: intensity.glowY
             )
+            .buxStableThemeLayout(themeId: themeId)
         } else {
             rimmed
+                .buxStableThemeLayout(themeId: themeId)
         }
     }
 }

@@ -87,6 +87,7 @@ public enum AppNotificationCategory: String, Equatable {
     case subscription
     case budget
     case bill
+    case debt
     case invoice
     case tax
     case studio

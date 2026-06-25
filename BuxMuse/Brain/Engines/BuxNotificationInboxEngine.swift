@@ -24,6 +24,7 @@ final class BuxNotificationInboxEngine {
         settings: SettingsStore,
         dashSnapshot: DashboardSnapshot,
         expenseRecords: [ExpenseRecord],
+        debts: [Debt] = [],
         studioAlerts: [StudioAlertDisplay],
         studioInvoices: [StudioInvoice],
         taxDeadlineDays: Int?,
@@ -128,12 +129,29 @@ final class BuxNotificationInboxEngine {
                                 Int64(days)
                             ),
                             date: next,
-                            category: .bill,
+                            category: record.isSubscriptionLike ? .subscription : .bill,
                             isRead: false,
                             severity: days <= 2 ? "high" : "medium"
                         ))
                     }
                 }
+            }
+
+            for reminder in DebtReminderScheduler.upcomingReminders(debts: debts) where reminder.daysUntil <= 7 {
+                items.append(AppNotificationItem(
+                    id: "debt-\(reminder.debt.id.uuidString)",
+                    title: line("Debt payment due soon", locale: locale),
+                    message: format(
+                        "%@ — due in %lld day(s).",
+                        locale: locale,
+                        reminder.debt.name,
+                        Int64(reminder.daysUntil)
+                    ),
+                    date: reminder.dueDate,
+                    category: .debt,
+                    isRead: false,
+                    severity: reminder.daysUntil <= 2 ? "high" : "medium"
+                ))
             }
         }
 
@@ -265,7 +283,10 @@ final class BuxNotificationInboxEngine {
 
     func markAllRead(_ ids: [String]) {
         var stored = Set(UserDefaults.standard.stringArray(forKey: readIdsKey) ?? [])
-        ids.forEach { stored.insert($0) }
+        ids.forEach { id in
+            stored.insert(id)
+            cancelPendingNotification(for: id)
+        }
         UserDefaults.standard.set(Array(stored), forKey: readIdsKey)
     }
 
@@ -334,6 +355,14 @@ final class BuxNotificationInboxEngine {
                 }
             }
 
+            if let debtId = debtId(from: item.id) {
+                let debtNotifId = debtNotificationId(debtId)
+                if allPendingIds.contains(debtNotifId) || allDeliveredIds.contains(debtNotifId) {
+                    pushedIds.insert(item.id)
+                    continue
+                }
+            }
+
             let notificationId = managedNotificationId(item.id)
             if managedPendingIds.contains(notificationId) {
                 pushedIds.insert(item.id)
@@ -374,16 +403,7 @@ final class BuxNotificationInboxEngine {
     }
 
     private func requestAuthorizationIfNeeded() async -> Bool {
-        let center = UNUserNotificationCenter.current()
-        let settings = await center.notificationSettings()
-        switch settings.authorizationStatus {
-        case .authorized, .provisional, .ephemeral:
-            return true
-        case .notDetermined:
-            return (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-        default:
-            return false
-        }
+        await BuxNotificationPolicy.requestAuthorizationIfNeeded()
     }
 
     private func cancelAllManagedNotifications() async {
@@ -394,13 +414,23 @@ final class BuxNotificationInboxEngine {
     }
 
     private func schedule(item: AppNotificationItem, settings: SettingsStore) async -> Bool {
-        guard !isWithinQuietHours(settings) else { return false }
-        guard let fireDate = fireDate(for: item), fireDate > Date() else { return false }
+        let policy = BuxNotificationSettingsSnapshot(settings: settings)
+        guard !BuxNotificationPolicy.isWithinQuietHours(policy) else { return false }
+        guard var fireDate = fireDate(for: item) else { return false }
+        if let adjusted = BuxNotificationPolicy.adjustedFireDate(fireDate, settings: policy) {
+            fireDate = adjusted
+        }
+        guard fireDate > Date() else { return false }
 
         let content = UNMutableNotificationContent()
         content.title = item.title
         content.body = item.message
         content.sound = .default
+        content.userInfo = BuxNotificationPayload.userInfo(
+            route: .inboxItem,
+            itemId: item.id,
+            category: item.category
+        )
 
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
@@ -425,10 +455,8 @@ final class BuxNotificationInboxEngine {
 
     private func isSchedulableCategory(_ category: AppNotificationCategory) -> Bool {
         switch category {
-        case .invoice, .tax, .budget, .bill, .studio, .digest:
+        case .invoice, .tax, .budget, .bill, .subscription, .debt, .studio, .digest:
             return true
-        default:
-            return false
         }
     }
 
@@ -466,6 +494,15 @@ final class BuxNotificationInboxEngine {
         return UUID(uuidString: String(itemId.dropFirst(5)))
     }
 
+    private func debtId(from itemId: String) -> UUID? {
+        guard itemId.hasPrefix("debt-") else { return nil }
+        return UUID(uuidString: String(itemId.dropFirst(5)))
+    }
+
+    private func debtNotificationId(_ debtId: UUID) -> String {
+        "buxmuse.debt.due.\(debtId.uuidString)"
+    }
+
     private func expenseRenewalNotificationId(_ expenseId: UUID) -> String {
         "buxmuse.expense.renewal.\(expenseId.uuidString)"
     }
@@ -488,18 +525,5 @@ final class BuxNotificationInboxEngine {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: [managedNotificationId(itemId)]
         )
-    }
-
-    private func isWithinQuietHours(_ settings: SettingsStore) -> Bool {
-        let calendar = Calendar.current
-        let now = calendar.dateComponents([.hour, .minute], from: Date())
-        guard let hour = now.hour, let minute = now.minute else { return false }
-        let current = hour * 60 + minute
-        let start = settings.quietHoursStartHour * 60 + settings.quietHoursStartMinute
-        let end = settings.quietHoursEndHour * 60 + settings.quietHoursEndMinute
-        if start <= end {
-            return current >= start && current < end
-        }
-        return current >= start || current < end
     }
 }

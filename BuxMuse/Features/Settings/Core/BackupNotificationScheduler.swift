@@ -9,33 +9,20 @@ import Foundation
 import UserNotifications
 
 public final class BackupNotificationScheduler {
+    private static let reminderId = "buxmuse.backup.reminder"
+
     public static func reschedule(frequency: AutoBackupFrequency) async {
+        let policy = await MainActor.run { BuxNotificationSettingsSnapshot.current }
         let center = UNUserNotificationCenter.current()
-        // Always cancel existing backup reminder first to avoid duplicates
-        center.removePendingNotificationRequests(withIdentifiers: ["buxmuse.backup.reminder"])
-        
-        guard frequency != .off else {
-            print("BackupNotificationScheduler: Reminders disabled.")
+        center.removePendingNotificationRequests(withIdentifiers: [reminderId])
+        center.removeDeliveredNotifications(withIdentifiers: [reminderId])
+
+        guard BuxNotificationPolicy.backupRemindersAllowed(policy) else {
             return
         }
-        
-        // Request authorization if needed
-        let settings = await center.notificationSettings()
-        var isAuthorized = false
-        switch settings.authorizationStatus {
-        case .authorized, .provisional, .ephemeral:
-            isAuthorized = true
-        case .notDetermined:
-            isAuthorized = (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-        default:
-            isAuthorized = false
-        }
-        
-        guard isAuthorized else {
-            print("BackupNotificationScheduler: Notifications not authorized.")
-            return
-        }
-        
+
+        guard await BuxNotificationPolicy.requestAuthorizationIfNeeded() else { return }
+
         let locale = BuxInterfaceLocale.currentInterfaceLocale
         let content = UNMutableNotificationContent()
         content.title = BuxCatalogLabel.string("BuxMuse Backup Reminder", locale: locale)
@@ -44,32 +31,28 @@ public final class BackupNotificationScheduler {
             locale: locale
         )
         content.sound = .default
-        
+        content.userInfo = BuxNotificationPayload.userInfo(route: .backup)
+
         let interval: TimeInterval
         switch frequency {
         case .weekly:
-            interval = 604800
+            interval = 604_800
         case .monthly:
-            interval = 2592000
+            interval = 2_592_000
         case .custom:
             let days = await MainActor.run { SettingsStore.shared.customBackupIntervalDays }
-            interval = TimeInterval(days * 86400)
+            interval = TimeInterval(days * 86_400)
         default:
             return
         }
-        
+
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: true)
         let request = UNNotificationRequest(
-            identifier: "buxmuse.backup.reminder",
+            identifier: reminderId,
             content: content,
             trigger: trigger
         )
-        
-        do {
-            try await center.add(request)
-            print("BackupNotificationScheduler: Scheduled reminder successfully (interval: \(interval)s).")
-        } catch {
-            print("BackupNotificationScheduler: Failed to schedule reminder: \(error)")
-        }
+
+        try? await center.add(request)
     }
 }

@@ -116,7 +116,27 @@ struct BuxMuseSubscriptionView: View {
 
     private var headerBlock: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if settingsStore.isPremiumTrialActive {
+            if purchaseManager.baseInIntroductoryOffer {
+                BuxCatalogDynamicText(key: "Your BuxMuse free trial is active")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                if let days = purchaseManager.baseIntroOfferDaysRemaining {
+                    Text(BuxLocalizedString.format(
+                        "%lld days remaining — cancel anytime in Settings before renewal.",
+                        locale: appSettingsManager.interfaceLocale,
+                        Int64(days)
+                    ))
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+                } else if let afterTrial = purchaseManager.subscribeAfterTrialLabel(
+                    for: baseBillingPeriod.baseProductID,
+                    locale: appSettingsManager.interfaceLocale
+                ) {
+                    Text(afterTrial)
+                        .font(.system(size: 12, weight: .medium))
+                        .buxLabelSecondary()
+                }
+            } else if settingsStore.isPremiumTrialActive {
                 BuxCatalogDynamicText(key: "Your 7-day trial is active")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
@@ -128,13 +148,23 @@ struct BuxMuseSubscriptionView: View {
                 .font(.system(size: 12, weight: .medium))
                 .buxLabelSecondary()
             } else if isBlocking {
-                BuxCatalogDynamicText(key: "Your trial has ended. Subscribe to keep using BuxMuse.")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                if purchaseManager.baseIntroOfferEligible {
+                    BuxCatalogDynamicText(key: "Start your 7-day free trial to continue using BuxMuse.")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                } else {
+                    BuxCatalogDynamicText(key: "Subscribe to continue using BuxMuse.")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                }
             } else if purchaseManager.baseSubscriptionActive {
                 BuxCatalogDynamicText(key: "Your BuxMuse subscription is active.")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+            } else if purchaseManager.baseIntroOfferEligible {
+                BuxCatalogDynamicText(key: "Try BuxMuse free for 7 days. Studio add-ons are optional.")
+                    .font(.system(size: 13, weight: .medium))
+                    .buxLabelSecondary()
             } else {
                 BuxCatalogDynamicText(key: "£1.99/month or £14.99/year for the full app. Studio is optional.")
                     .font(.system(size: 13, weight: .medium))
@@ -144,9 +174,7 @@ struct BuxMuseSubscriptionView: View {
     }
 
     private var hasStudioPurchaseAccess: Bool {
-        purchaseManager.baseSubscriptionActive
-            || settingsStore.isPremiumTrialActive
-            || settingsStore.premiumLegacyEntitled
+        purchaseManager.hasActiveSubscription
     }
 
     private var hasStudioEntitlementWithoutBaseAccess: Bool {
@@ -215,7 +243,9 @@ struct BuxMuseSubscriptionView: View {
             badge: baseAppBadge,
             bullets: [
                 "Budgets, expenses, goals, and insights",
-                "Required for app access after your trial",
+                purchaseManager.baseIntroOfferEligible
+                    ? "7-day free trial, then billed through Apple"
+                    : "Required for app access",
                 "Studio add-ons are optional and sold separately"
             ],
             buttonTitle: baseAppButtonTitle,
@@ -231,6 +261,23 @@ struct BuxMuseSubscriptionView: View {
     }
 
     private var baseAppSubtitle: String {
+        if purchaseManager.baseIntroOfferEligible,
+           let trial = purchaseManager.trialLengthLabel(
+            for: baseBillingPeriod.baseProductID,
+            locale: appSettingsManager.interfaceLocale
+           ) {
+            if let price = purchaseManager.displayPrice(for: baseBillingPeriod.baseProductID) {
+                return BuxLocalizedString.format(
+                    "%@ · then %@",
+                    locale: appSettingsManager.interfaceLocale,
+                    trial,
+                    baseBillingPeriod == .yearly
+                        ? BuxLocalizedString.format("%@/year", locale: appSettingsManager.interfaceLocale, price)
+                        : BuxLocalizedString.format("%@/month", locale: appSettingsManager.interfaceLocale, price)
+                )
+            }
+            return trial
+        }
         if let price = purchaseManager.displayPrice(for: baseBillingPeriod.baseProductID) {
             return baseBillingPeriod == .yearly
                 ? BuxLocalizedString.format("Full app · %@/year", locale: appSettingsManager.interfaceLocale, price)
@@ -366,7 +413,13 @@ struct BuxMuseSubscriptionView: View {
 
     private var baseAppButtonTitle: String {
         if purchaseManager.baseSubscriptionActive {
+            if purchaseManager.baseInIntroductoryOffer {
+                return BuxCatalogLabel.string("Trial active", locale: appSettingsManager.interfaceLocale)
+            }
             return BuxCatalogLabel.string("Subscribed", locale: appSettingsManager.interfaceLocale)
+        }
+        if purchaseManager.baseIntroOfferEligible {
+            return BuxCatalogLabel.string("Start 7-day free trial", locale: appSettingsManager.interfaceLocale)
         }
         if let price = purchaseManager.displayPrice(for: baseBillingPeriod.baseProductID) {
             return BuxLocalizedString.format("Subscribe — %@", locale: appSettingsManager.interfaceLocale, price)

@@ -68,4 +68,12 @@ final class ExpenseDetailViewModel: ObservableObject {
         try brain.markExpenseRecurring(id: record.id, type: type)
         reloadRecord()
     }
+
+    func setExcludedFromSpending(_ excluded: Bool) throws {
+        var updated = record
+        updated.isExcludedFromSpending = excluded
+        updated.updatedAt = Date()
+        _ = try brain.saveExpenseRecord(updated)
+        reloadRecord()
+    }
 }

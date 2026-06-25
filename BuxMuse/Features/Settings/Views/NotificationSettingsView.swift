@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 struct NotificationSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
+
+    @State private var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     var body: some View {
         BuxThemedCardForm {
@@ -28,6 +32,26 @@ struct NotificationSettingsView: View {
                     }
                     .tint(themeManager.contrastAccentColor(for: colorScheme))
                     .buxFormFieldPadding()
+
+                    if authorizationStatus == .denied {
+                        BuxFormRowDivider()
+                        VStack(alignment: .leading, spacing: 8) {
+                            BuxCatalogDynamicText(key: "Notifications are turned off in iOS Settings.")
+                                .font(.system(size: 12, weight: .medium))
+                                .buxLabelSecondary()
+                            Button {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    openURL(url)
+                                }
+                            } label: {
+                                BuxCatalogDynamicText(key: "Open Settings")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .buxFormFieldPadding()
+                    }
                 }
 
                 if store.notificationsEnabled {
@@ -103,6 +127,9 @@ struct NotificationSettingsView: View {
         .buxCatalogNavigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
         .environment(\.settingsEnhancedTint, true)
+        .task {
+            authorizationStatus = await BuxNotificationPolicy.authorizationStatus()
+        }
         .onChange(of: store.notificationsEnabled) { _, _ in store.save() }
         .onChange(of: store.budgetAlertsEnabled) { _, _ in store.save() }
         .onChange(of: store.billRemindersEnabled) { _, _ in store.save() }

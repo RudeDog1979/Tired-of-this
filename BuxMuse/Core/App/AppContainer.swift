@@ -116,6 +116,10 @@ final class AppContainer: ObservableObject {
             themeManager: themeManager,
             navigation: navigationCoordinator
         )
+        BuxNotificationCenterDelegate.shared.configure(
+            navigation: navigationCoordinator,
+            brain: brain
+        )
 
         wirePersistenceSideEffects()
         wireWorkspaceNexusLifecycle()
@@ -212,7 +216,11 @@ final class AppContainer: ObservableObject {
                 self.studioBrain.refreshAll()
                 self.simpleStudioBrain.refreshAll()
                 self.taxEnvelopeBrain.refreshAll()
-                Task { await DebtReminderScheduler.cancelAllDebtReminders() }
+                Task {
+                    await BuxNotificationPolicy.cancelAllScheduledNotifications()
+                    await DebtReminderScheduler.cancelAllDebtReminders()
+                    StudioTimerNotificationScheduler.cancelAll()
+                }
             }
             .store(in: &cancellables)
     }
@@ -284,6 +292,7 @@ final class AppContainer: ObservableObject {
                     countryCode: self.appSettingsManager.selectedCountry.id,
                     settings: SettingsStore.shared,
                     appSettings: self.appSettingsManager,
+                    debts: self.debtEngine.debts,
                     studioAlerts: self.studioBrain.hubDisplay.alerts,
                     studioInvoices: self.studioStore.invoices,
                     taxDeadlineDays: self.studioBrain.hubDisplay.taxSummary.taxDeadlineDays
@@ -404,6 +413,14 @@ final class AppContainer: ObservableObject {
             .store(in: &cancellables)
 
         studioBrain.$hubDisplay
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleEngagementRefresh()
+            }
+            .store(in: &cancellables)
+
+        debtEngine.$debts
             .dropFirst()
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
@@ -537,8 +554,31 @@ final class AppContainer: ObservableObject {
         .receive(on: RunLoop.main)
         .sink { [weak self] _ in
             self?.rescheduleLocalBackup()
+            self?.rescheduleBackupNotifications()
         }
         .store(in: &cancellables)
+    }
+
+    private func rescheduleBackupNotifications() {
+        let frequency = SettingsStore.shared.autoBackupFrequency
+        Task {
+            await BackupNotificationScheduler.reschedule(frequency: frequency)
+        }
+    }
+
+    func rescheduleAllLocalNotifications() {
+        scheduleEngagementRefresh()
+        Task {
+            let settings = SettingsStore.shared
+            if settings.notificationsEnabled {
+                let records = (try? brain.fetchAllExpenseRecords()) ?? []
+                await ExpenseRenewalReminderScheduler.rescheduleAll(records: records)
+                await DebtReminderScheduler.rescheduleAll(debts: debtEngine.debts)
+                await BackupNotificationScheduler.reschedule(frequency: settings.autoBackupFrequency)
+            } else {
+                await BuxNotificationPolicy.cancelAllScheduledNotifications()
+            }
+        }
     }
 
     private func wireSettingsEngagementTriggers(_ settings: SettingsStore) {
@@ -549,11 +589,15 @@ final class AppContainer: ObservableObject {
             settings.$studioInvoiceRemindersEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$taxDeadlineRemindersEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$dailySummaryEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
-            settings.$studioEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher()
+            settings.$studioEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$quietHoursStartHour.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$quietHoursStartMinute.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$quietHoursEndHour.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$quietHoursEndMinute.dropFirst().map { _ in () }.eraseToAnyPublisher()
         )
         .receive(on: RunLoop.main)
         .sink { [weak self] _ in
-            self?.scheduleEngagementRefresh()
+            self?.rescheduleAllLocalNotifications()
         }
         .store(in: &cancellables)
     }

@@ -17,16 +17,25 @@ struct BuxLandingTintBackground: View {
     var body: some View {
         ZStack {
             themeManager.screenBackground(for: colorScheme)
-            if settings.brandThemesEnabled {
-                BuxThemeAccentWash(theme: themeManager.current, colorScheme: colorScheme)
-            } else if settings.landingBackdropEnabled {
-                BuxNeutralLandingWash(
-                    colorScheme: colorScheme,
-                    accent: settings.resolvedSystemAccentColor(for: colorScheme)
-                )
+                .buxAnimateThemeColors(themeId: themeManager.current.id)
+
+            Group {
+                if settings.brandThemesEnabled {
+                    BuxThemeAccentWash(theme: themeManager.current, colorScheme: colorScheme)
+                        .transition(.opacity)
+                } else if settings.landingBackdropEnabled {
+                    BuxNeutralLandingWash(
+                        colorScheme: colorScheme,
+                        accent: settings.resolvedSystemAccentColor(for: colorScheme)
+                    )
+                    .transition(.opacity)
+                }
             }
+            .buxAnimateThemeColors(themeId: themeManager.current.id)
         }
-        .animation(BuxMotion.themeCrossfade, value: themeManager.current.id)
+        .buxStableThemeLayout(themeId: themeManager.current.id)
+        .animation(BuxMotion.brandThemesToggle, value: settings.brandThemesEnabled)
+        .animation(BuxMotion.appearanceSettingsEntry, value: settings.landingBackdropEnabled)
     }
 }
 
@@ -97,9 +106,14 @@ struct BuxHeroMeshBackground: View {
     @ObservedObject private var settings = SettingsStore.shared
 
     var body: some View {
-        if settings.brandThemesEnabled {
-            auroraWash
+        Group {
+            if settings.brandThemesEnabled {
+                auroraWash
+                    .transition(.opacity)
+            }
         }
+        .buxStableThemeLayout(themeId: themeManager.current.id)
+        .animation(BuxMotion.brandThemesToggle, value: settings.brandThemesEnabled)
     }
 
     @ViewBuilder
@@ -122,6 +136,7 @@ struct BuxHeroMeshBackground: View {
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .allowsHitTesting(false)
+        .buxAnimateThemeColors(themeId: themeManager.current.id)
         .mask {
             LinearGradient(
                 colors: [.black, .black.opacity(0.85), .clear],

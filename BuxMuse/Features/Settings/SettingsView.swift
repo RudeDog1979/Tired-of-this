@@ -631,15 +631,17 @@ struct ThemeSwatchCard: View {
                     .foregroundColor(isSelected
                         ? themeManager.labelPrimary(for: colorScheme)
                         : themeManager.labelSecondary(for: colorScheme))
+                    .buxAnimateThemeColors(themeId: themeManager.current.id)
                     .lineLimit(2)
                     .minimumScaleFactor(0.85)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 6)
 
-                if layout == .carousel, isSelected {
+                if layout == .carousel {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(theme.accentColor)
+                        .opacity(isSelected ? 1 : 0)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -658,6 +660,7 @@ struct ThemeSwatchCard: View {
         .padding(.vertical, layout == .carousel ? 4 : 0)
         .scaleEffect(isSelected ? (layout == .carousel ? 1.03 : 1.02) : 1.0)
         .animation(.buxBounce, value: isSelected)
+        .buxStableThemeLayout(themeId: themeManager.current.id)
     }
 }
 

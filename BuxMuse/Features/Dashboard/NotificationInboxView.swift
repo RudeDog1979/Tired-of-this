@@ -67,12 +67,33 @@ struct NotificationInboxView: View {
                 }
                 ToolbarItem(placement: .primaryAction) {
                     if !inbox.items.isEmpty {
-                        Button(BuxCatalogLabel.string("Dismiss All", locale: appSettingsManager.interfaceLocale)) {
-                            withAnimation(.easeInOut(duration: 0.25)) {
-                                brain.dismissAllNotifications()
+                        Menu {
+                            if inbox.unreadCount > 0 {
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.25)) {
+                                        brain.markAllNotificationsRead()
+                                    }
+                                } label: {
+                                    Label(
+                                        BuxCatalogLabel.string("Mark all read", locale: appSettingsManager.interfaceLocale),
+                                        systemImage: "checkmark.circle"
+                                    )
+                                }
                             }
+                            Button(role: .destructive) {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    brain.dismissAllNotifications()
+                                }
+                            } label: {
+                                Label(
+                                    BuxCatalogLabel.string("Dismiss all", locale: appSettingsManager.interfaceLocale),
+                                    systemImage: "trash"
+                                )
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                                .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
                         }
-                        .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
                     }
                 }
             }
@@ -119,6 +140,7 @@ struct NotificationInboxView: View {
         switch item.category {
         case .subscription, .bill: return "arrow.triangle.2.circlepath"
         case .budget: return "chart.pie.fill"
+        case .debt: return "creditcard.fill"
         case .invoice: return "doc.text.fill"
         case .tax: return "percent"
         case .studio: return "macbook"
@@ -137,29 +159,9 @@ struct NotificationInboxView: View {
     }
 
     private func handleNotificationTap(_ item: AppNotificationItem) {
-        brain.markNotificationRead(item.id)
         dismiss()
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                switch item.category {
-                case .subscription:
-                    navigationCoordinator.openSubscriptionHub()
-                case .bill:
-                    navigationCoordinator.selectedTab = .expense
-                case .budget:
-                    navigationCoordinator.selectedTab = .settings
-                case .invoice:
-                    navigationCoordinator.selectedTab = .studio
-                case .tax:
-                    navigationCoordinator.selectedTab = .studio
-                case .studio:
-                    navigationCoordinator.selectedTab = .studio
-                case .digest:
-                    navigationCoordinator.selectedTab = .home
-                    navigationCoordinator.openTipPopupRequest = true
-                }
-            }
+            BuxNotificationRouter.applyInboxItem(item, navigation: navigationCoordinator, brain: brain)
         }
     }
 }

@@ -80,13 +80,48 @@ enum BuxMotion {
         reducedMotion ? .easeInOut(duration: 0.22) : .easeInOut(duration: 0.34)
     }
 
+    /// Brand themes on/off — preset block reveal in Appearance settings.
+    static var brandThemesToggle: Animation {
+        reducedMotion ? .easeInOut(duration: 0.28) : .easeInOut(duration: 0.52)
+    }
+
     /// Brand theme crossfade — smooth, ~1s ease.
     static var themeCrossfade: Animation {
         reducedMotion ? .easeInOut(duration: 0.2) : .easeInOut(duration: 1.0)
     }
 
+    /// Light / dark / system display mode — matches theme crossfade timing.
+    static var displayModeCrossfade: Animation { themeCrossfade }
+
+    static var appearanceCrossfadeDuration: TimeInterval {
+        reducedMotion ? 0.2 : 1.0
+    }
+
     static func categoryCardDelay(index: Int) -> Animation {
         slide.delay(reducedMotion ? 0 : Double(index) * 0.055)
+    }
+}
+
+extension View {
+    /// Locks frames, shadows, and typography during brand-theme changes.
+    func buxStableThemeLayout(themeId: String) -> some View {
+        animation(nil, value: themeId)
+    }
+
+    /// Crossfades theme-driven colors without shifting layout.
+    func buxAnimateThemeColors(themeId: String) -> some View {
+        modifier(BuxAnimateAppearanceColorsModifier(themeId: themeId))
+    }
+}
+
+private struct BuxAnimateAppearanceColorsModifier: ViewModifier {
+    let themeId: String
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content
+            .animation(BuxMotion.themeCrossfade, value: themeId)
+            .animation(BuxMotion.themeCrossfade, value: colorScheme)
     }
 }
 

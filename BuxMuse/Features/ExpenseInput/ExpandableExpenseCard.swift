@@ -161,6 +161,8 @@ struct ExpandableExpenseCard: View {
             || expense.isUnassignedWorkspace
             || expense.bridgeBadge != nil
             || record.walletIsPending
+            || expense.isExcludedFromSpending
+            || record.isExcludedFromSpending
             || expense.isSalaryTagged
             || record.isSalaryTagged
             || expense.linkedDebtName != nil
@@ -185,6 +187,12 @@ struct ExpandableExpenseCard: View {
                     BuxLocalizedString.string("Pending", locale: appSettingsManager.interfaceLocale),
                     foreground: .orange,
                     background: Color.orange.opacity(0.14)
+                )
+            } else if expense.isExcludedFromSpending || record.isExcludedFromSpending {
+                ledgerStatusBadge(
+                    BuxLocalizedString.string("Excluded", locale: appSettingsManager.interfaceLocale),
+                    foreground: themeManager.labelSecondary(for: colorScheme),
+                    background: themeManager.labelSecondary(for: colorScheme).opacity(0.14)
                 )
             } else if expense.isSalaryTagged || record.isSalaryTagged {
                 ledgerStatusBadge(

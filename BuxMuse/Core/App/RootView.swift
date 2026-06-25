@@ -31,9 +31,8 @@ struct RootView: View {
     @State private var didEnterBackground = false
 
     private var hasAppAccess: Bool {
-        purchaseManager.baseSubscriptionActive
-            || settingsStore.isPremiumTrialActive
-            || settingsStore.premiumLegacyEntitled
+        if !settingsStore.hasCompletedOnboarding { return true }
+        return purchaseManager.hasActiveSubscription
     }
 
     var body: some View {

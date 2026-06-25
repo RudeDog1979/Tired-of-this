@@ -186,6 +186,7 @@ struct AddExpenseSheet: View {
                         dateCard
 
                         if !isIncomeMode {
+                            excludeFromSpendingCard
                             moreOptionsSection
                         }
 
@@ -936,12 +937,31 @@ struct AddExpenseSheet: View {
             }
             .buttonStyle(.plain)
 
-            if showBillingOptions || viewModel.isSubscription || viewModel.isRecurring {
+            if showBillingOptions {
                 subscriptionCard
                 if !viewModel.isEditing {
                     recurringCard
                 }
             }
+        }
+    }
+
+    private var excludeFromSpendingCard: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.tight) {
+            Toggle(isOn: $viewModel.isExcludedFromSpending) {
+                VStack(alignment: .leading, spacing: 4) {
+                    BuxCatalogText.text("Exclude from spending")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                    BuxCatalogText.text("Keeps this in your ledger but leaves it out of spend totals and charts.")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .tint(themeManager.contrastAccentColor(for: colorScheme))
+            .padding(BuxLayout.section)
+            .expensesThemedCardChrome(cornerRadius: 20)
         }
     }
 

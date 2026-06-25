@@ -17,8 +17,8 @@ struct BuxMuseApp: App {
                 .buxPreferredColorScheme()
                 .buxAppContainerEnvironment(container, padBrain: container.padNavigationBrain)
                 .task {
-                    _ = await ExpenseRenewalReminderScheduler.requestAuthorizationIfNeeded()
-                    container.scheduleEngagementRefresh()
+                    _ = await BuxNotificationPolicy.requestAuthorizationIfNeeded()
+                    container.rescheduleAllLocalNotifications()
                     container.scheduleTipsRefresh()
                     container.scheduleTaxCatalogRefresh()
                 }

@@ -47,6 +47,7 @@ extension BuxMuseBrain {
     public func refreshNotificationInbox(
         settings: SettingsStore,
         appSettings: AppSettingsManager,
+        debts: [Debt] = [],
         studioAlerts: [StudioAlertDisplay] = [],
         studioInvoices: [StudioInvoice] = [],
         taxDeadlineDays: Int? = nil
@@ -56,6 +57,7 @@ extension BuxMuseBrain {
             settings: settings,
             dashSnapshot: dashboardSnapshot,
             expenseRecords: records,
+            debts: debts,
             studioAlerts: studioAlerts,
             studioInvoices: studioInvoices,
             taxDeadlineDays: taxDeadlineDays,
@@ -111,6 +113,7 @@ extension BuxMuseBrain {
         countryCode: String,
         settings: SettingsStore,
         appSettings: AppSettingsManager,
+        debts: [Debt] = [],
         studioAlerts: [StudioAlertDisplay] = [],
         studioInvoices: [StudioInvoice] = [],
         taxDeadlineDays: Int? = nil
@@ -118,6 +121,7 @@ extension BuxMuseBrain {
         await refreshNotificationInbox(
             settings: settings,
             appSettings: appSettings,
+            debts: debts,
             studioAlerts: studioAlerts,
             studioInvoices: studioInvoices,
             taxDeadlineDays: taxDeadlineDays

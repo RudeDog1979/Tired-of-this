@@ -404,7 +404,6 @@ public final class BuxFinanceKitManager: ObservableObject {
                 _ = try persistence.reconcileWalletImports()
             }
 
-            NotificationCenter.default.post(name: .buxMuseFinancialDataDidChange, object: nil)
             NotificationCenter.default.post(name: .buxMuseWalletSyncDidComplete, object: nil)
         } catch {
             lastSyncError = error.localizedDescription
@@ -481,21 +480,54 @@ public final class BuxFinanceKitManager: ObservableObject {
         #else
         let store = FinanceStore.shared
         var didWrite = false
+        var stalePendingIDsToRemove: [UUID] = []
+        var absentPendingToResolve: [ExpenseRecord] = []
+
         for record in pendingRecords {
+            var fetchedById: FinanceKit.Transaction?
             if let financeKitId = record.financeKitTransactionId,
-               let uuid = UUID(uuidString: financeKitId),
-               let tx = try await fetchFinanceKitTransaction(id: uuid, store: store) {
+               let uuid = UUID(uuidString: financeKitId) {
+                fetchedById = try await fetchFinanceKitTransaction(id: uuid, store: store)
+            }
+
+            if let tx = fetchedById {
                 if try upsertWalletTransaction(tx, now: now, merchantContexts: &merchantContexts) {
                     didWrite = true
                 }
-                continue
+                if !financeKitTransactionIsPending(tx) {
+                    continue
+                }
             }
 
             if let tx = try await findBookedWalletTransactionMatch(for: record, store: store),
-               try applyWalletUpdateToPendingRecord(record, tx: tx, now: now, merchantContexts: &merchantContexts) {
+               try applyWalletUpdateToPendingRecord(
+                record,
+                tx: tx,
+                now: now,
+                merchantContexts: &merchantContexts,
+                stalePendingIDsToRemove: &stalePendingIDsToRemove
+               ) {
+                didWrite = true
+                continue
+            }
+
+            if fetchedById == nil, record.financeKitTransactionId != nil {
+                absentPendingToResolve.append(record)
+            }
+        }
+
+        for record in absentPendingToResolve {
+            if try resolveAbsentPendingWalletRecord(record, now: now) {
                 didWrite = true
             }
         }
+
+        for id in Set(stalePendingIDsToRemove) {
+            if try removeWalletReconciledExpense(id: id) {
+                didWrite = true
+            }
+        }
+
         return didWrite
         #endif
     }
@@ -550,11 +582,14 @@ public final class BuxFinanceKitManager: ObservableObject {
         _ record: ExpenseRecord,
         tx: FinanceKit.Transaction,
         now: Date,
-        merchantContexts: inout [WalletMerchantContext]
+        merchantContexts: inout [WalletMerchantContext],
+        stalePendingIDsToRemove: inout [UUID]
     ) throws -> Bool {
         if let existing = try persistence.fetchExpenseRecordByFinanceKitId(tx.id.uuidString),
            existing.id != record.id {
-            return try upsertWalletTransaction(tx, now: now, merchantContexts: &merchantContexts)
+            _ = try upsertWalletTransaction(tx, now: now, merchantContexts: &merchantContexts)
+            stalePendingIDsToRemove.append(record.id)
+            return true
         }
 
         var existing = record
@@ -574,6 +609,22 @@ public final class BuxFinanceKitManager: ObservableObject {
 
         existing.updatedAt = now
         _ = try persistence.upsertExpenseRecord(existing)
+        return true
+    }
+
+    /// Clears the pending badge when FinanceKit no longer exposes that hold and no booked match exists.
+    private func resolveAbsentPendingWalletRecord(_ record: ExpenseRecord, now: Date) throws -> Bool {
+        guard record.walletIsPending else { return false }
+        var updated = record
+        updated.walletIsPending = false
+        updated.updatedAt = now
+        _ = try persistence.upsertExpenseRecord(updated)
+        return true
+    }
+
+    @discardableResult
+    private func removeWalletReconciledExpense(id: UUID) throws -> Bool {
+        try persistence.deleteExpenseRecord(id: id)
         return true
     }
 

@@ -42,6 +42,8 @@ struct ExpenseSubscriptionFieldsView: View {
                     BuxCatalogText.text("Renewal is based on the expense date.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
 
                 reminderSection

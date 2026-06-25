@@ -19,7 +19,8 @@ enum ExpenseGRDBRecordMapper {
         "isBarterExchange", "barterGoodsGiven", "barterGoodsReceived", "barterEstimatedValue",
         "bridgeGroupId", "bridgeKind", "bridgeRole", "bridgeSharePercent", "bridgePeerExpenseId",
         "bridgeCounterpartyHustleId", "isCategorySplit", "householdScopeRaw", "financeKitTransactionId",
-        "walletAccountId", "walletIsPending", "incomeRole", "walletCategoryUserConfirmed", "walletCategoryConfidence"
+        "walletAccountId", "walletIsPending", "incomeRole", "walletCategoryUserConfirmed", "walletCategoryConfidence",
+        "isExcludedFromSpending"
     ]
 
     static func expenseArguments(for record: ExpenseRecord) -> [DatabaseValueConvertible?] {
@@ -73,7 +74,8 @@ enum ExpenseGRDBRecordMapper {
             record.walletIsPending ? 1 : 0,
             record.incomeRole,
             record.walletCategoryUserConfirmed ? 1 : 0,
-            record.walletCategoryConfidence
+            record.walletCategoryConfidence,
+            record.isExcludedFromSpending ? 1 : 0
         ]
     }
 
@@ -128,7 +130,8 @@ enum ExpenseGRDBRecordMapper {
             bridgeCounterpartyHustleId: uuid(row, "bridgeCounterpartyHustleId"),
             isCategorySplit: bool(row, "isCategorySplit"),
             splitLines: splitLines,
-            householdScope: HouseholdScope(rawValue: row["householdScopeRaw"] as String? ?? "") ?? .personal
+            householdScope: HouseholdScope(rawValue: row["householdScopeRaw"] as String? ?? "") ?? .personal,
+            isExcludedFromSpending: bool(row, "isExcludedFromSpending")
         )
         record.financeKitTransactionId = row["financeKitTransactionId"] as String?
         record.walletAccountId = row["walletAccountId"] as String?

@@ -192,10 +192,7 @@ public final class SettingsStore: ObservableObject {
     }
 
     func ensurePremiumTrialStarted() {
-        guard premiumTrialStartDate == nil, !premiumLegacyEntitled else { return }
-        premiumTrialStartDate = Date()
-        save(notifyCloudSync: false)
-        objectWillChange.send()
+        // Deprecated: trials are Apple-managed introductory offers. Kept for API compatibility.
     }
 
     // MARK: - Notifications Settings
@@ -1147,7 +1144,6 @@ public final class SettingsStore: ObservableObject {
                 }
                 
                 self.isLoaded = true
-                ensurePremiumTrialStarted()
                 print("SettingsStore: successfully loaded settings.")
                 return
             } catch {
@@ -1158,7 +1154,6 @@ public final class SettingsStore: ObservableObject {
         // Defaults seed
         seedDefaults()
         self.isLoaded = true
-        ensurePremiumTrialStarted()
     }
     
     private func seedDefaults() {

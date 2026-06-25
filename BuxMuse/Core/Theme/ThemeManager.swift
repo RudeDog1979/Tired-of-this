@@ -544,13 +544,7 @@ public final class ThemeManager: ObservableObject {
     }
 
     private func setCurrentThemeWithoutPersistence(_ theme: AppTheme) {
-        if SettingsStore.shared.reducedMotion {
-            current = theme
-        } else {
-            withAnimation(BuxMotion.themeCrossfade) {
-                current = theme
-            }
-        }
+        current = theme
     }
 
     // MARK: - Unified surfaces (M3 material roles)
