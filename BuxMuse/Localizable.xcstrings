@@ -16826,6 +16826,29 @@
         }
       }
     },
+    "Cancel on %@'s website — sign in, open billing or subscriptions, and turn off renewal." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancela en el sitio web de %@: inicia sesión, abre facturación o suscripciones y desactiva la renovación."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancela en el sitio web de %@: inicia sesión, abre facturación o suscripciones y desactiva la renovación."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancela en el sitio web de %@: inicia sesión, abre facturación o suscripciones y desactiva la renovación."
+          }
+        }
+      }
+    },
     "Cancel or optimize: %@ benefits %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -36230,6 +36253,29 @@
         }
       }
     },
+    "Go to %@ website" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir al sitio web de %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir al sitio web de %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir al sitio web de %@"
+          }
+        }
+      }
+    },
     "Goal" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -39309,6 +39355,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Si %@ %@"
+          }
+        }
+      }
+    },
+    "If you subscribed through Apple, use Manage in App Store. Otherwise cancel on the provider's website." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si te suscribiste a través de Apple, usa Administrar en App Store. Si no, cancela en el sitio web del proveedor."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si te suscribiste a través de Apple, usa Administrar en App Store. Si no, cancela en el sitio web del proveedor."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si te suscribiste a través de Apple, usa Gestionar en App Store. Si no, cancela en el sitio web del proveedor."
           }
         }
       }
@@ -47233,6 +47302,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gestionar categorías"
+          }
+        }
+      }
+    },
+    "Manage in App Store" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administrar en App Store"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administrar en App Store"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestionar en App Store"
           }
         }
       }
@@ -84531,6 +84623,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esta sesión añade aproximadamente %@."
+          }
+        }
+      }
+    },
+    "This subscription looks billed through Apple. Open Subscriptions in your Apple ID settings to cancel." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta suscripción parece facturarse a través de Apple. Abre Suscripciones en la configuración de tu ID de Apple para cancelar."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta suscripción parece facturarse a través de Apple. Abre Suscripciones en la configuración de tu ID de Apple para cancelar."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta suscripción parece facturarse a través de Apple. Abre Suscripciones en los ajustes de tu ID de Apple para cancelar."
           }
         }
       }

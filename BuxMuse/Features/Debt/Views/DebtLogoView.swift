@@ -144,7 +144,7 @@ struct DebtInstitutionLogoView: View {
             return
         }
 
-        guard let fetched = await MerchantLogoEngine.fetchRemoteLogo(plan: plan) else {
+        guard let fetched = await MerchantLogoFetchCoordinator.shared.image(for: plan, shouldFetch: shouldFetch) else {
             loadFailed = true
             return
         }

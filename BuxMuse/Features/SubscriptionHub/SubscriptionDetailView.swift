@@ -10,6 +10,7 @@ import SwiftUI
 
 struct SubscriptionDetailView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.openURL) private var openURL
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var appSettingsManager: AppSettingsManager
 
@@ -177,12 +178,50 @@ struct SubscriptionDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             BuxDetailSectionHeader(title: "How to cancel")
 
-            Text(detail.cancellationSteps)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .buxDetailSectionCard(cornerRadius: BuxDetailStyle.rowCardRadius)
+            VStack(alignment: .leading, spacing: 12) {
+                Text(detail.cancellation.instructions)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if detail.cancellation.appStoreManageURL != nil {
+                    BuxButton(
+                        title: BuxLocalizedString.string(
+                            "Manage in App Store",
+                            locale: appSettingsManager.interfaceLocale
+                        ),
+                        systemImage: "apple.logo",
+                        expands: true
+                    ) {
+                        if let url = detail.cancellation.appStoreManageURL {
+                            openURL(url)
+                        }
+                    }
+                }
+
+                if let websiteURL = detail.cancellation.providerWebsiteURL {
+                    BuxButton(
+                        title: providerWebsiteButtonTitle(for: websiteURL),
+                        systemImage: "safari",
+                        expands: true
+                    ) {
+                        openURL(websiteURL)
+                    }
+                }
+            }
+            .buxDetailSectionCard(cornerRadius: BuxDetailStyle.rowCardRadius)
         }
+    }
+
+    private func providerWebsiteButtonTitle(for url: URL) -> String {
+        let host = url.host?
+            .replacingOccurrences(of: "www.", with: "")
+            ?? detail.info.merchantName
+        return BuxLocalizedString.format(
+            "Go to %@ website",
+            locale: appSettingsManager.interfaceLocale,
+            host
+        )
     }
 
     private var insightsSection: some View {

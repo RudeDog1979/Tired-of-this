@@ -69,18 +69,90 @@ enum IncomeSourceQuickPick: String, CaseIterable, Identifiable {
 
 /// When to show merchant logos vs income/refund/category SF Symbols.
 enum ExpenseLedgerAvatarPolicy {
-    /// Explicit store link only — never guess a brand from free-text income labels.
+    private static let transferKeywords: [String] = [
+        "internet transfer", "online transfer", "online banking", "bank transfer",
+        "wire transfer", "faster payment", "faster payments", "fps payment",
+        "standing order", "direct debit", "sepa", "ach ", "ach transfer",
+        "transfer to", "transfer from", "payment to", "payment from",
+        "mobile transfer", "internal transfer", "account transfer",
+        "sent you", "sent me", "received from", "money sent", "money received",
+        "p2p", "person to person", "remittance", "interac", "eft ",
+        "bacs payment", "chaps payment", "wire ", " remit",
+    ]
+
+    static func isMoneyTransfer(for record: ExpenseRecord) -> Bool {
+        if record.isRefund { return false }
+        if IncomeSourceQuickPick.matchingStoredLabel(record.name) != nil { return false }
+
+        let haystack = walletLabelHaystack(for: record)
+        guard !haystack.isEmpty else { return false }
+
+        if hasKnownMerchantBrand(for: record, haystack: haystack) { return false }
+
+        let folded = haystack
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            .lowercased()
+        let hasTransferKeyword = matchesTransferKeywords(folded)
+        let isBank = WalletCategoryLexicon.isFinancialInstitution(folded)
+
+        // Bank-branded movement — keep bank logo (user OK with that).
+        if isBank { return false }
+
+        if hasTransferKeyword { return true }
+
+        // Credits from a person (e.g. wife) — money in, not a store.
+        if record.amountValue > 0 {
+            switch record.transactionCategory {
+            case .personal, .other:
+                return true
+            case .income:
+                if SalaryPayrollMatcher.isSalaryTagged(record) { return false }
+                if hasTransferKeyword { return true }
+                // Wallet credits tagged income but linked to a person, not a retailer.
+                if record.merchantId != nil { return true }
+                return false
+            default:
+                break
+            }
+        }
+
+        // Debits to a person / cash movement without a retail brand.
+        if record.amountValue < 0, record.transactionCategory == .personal {
+            return true
+        }
+
+        return false
+    }
+
     static func shouldUseMerchantLogo(for record: ExpenseRecord) -> Bool {
-        record.merchantId != nil
+        if isMoneyTransfer(for: record) { return false }
+        if record.merchantId != nil { return true }
+        guard record.amountValue <= 0, record.transactionCategory != .income else { return false }
+        if IncomeSourceQuickPick.matchingStoredLabel(record.name) != nil { return false }
+        if record.isRefund { return false }
+        return resolvedMerchantDisplayName(for: record) != nil
+    }
+
+    static func resolvedMerchantDisplayName(for record: ExpenseRecord) -> String? {
+        let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !store.isEmpty { return store }
+        if record.merchantId != nil {
+            let label = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            return label.isEmpty ? nil : label
+        }
+        let label = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !label.isEmpty else { return nil }
+        if IncomeSourceQuickPick.matchingStoredLabel(label) != nil { return nil }
+        return label
     }
 
     static func merchantLogoName(for record: ExpenseRecord, linkedMerchantName: String?) -> String? {
         guard shouldUseMerchantLogo(for: record) else { return nil }
-        guard let linked = linkedMerchantName?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !linked.isEmpty else {
-            return nil
+        if let linked = linkedMerchantName?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !linked.isEmpty {
+            return linked
         }
-        return linked
+        return resolvedMerchantDisplayName(for: record)
     }
 
     static func resolvedStyle(
@@ -88,6 +160,10 @@ enum ExpenseLedgerAvatarPolicy {
         categoryRecords: [ExpenseCategoryRecord],
         locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> (symbol: String, foreground: Color, background: Color) {
+        if isMoneyTransfer(for: record) {
+            return moneyTransferStyle(for: record)
+        }
+
         if record.isRefund {
             return quickPickStyle(.refund)
         }
@@ -149,6 +225,38 @@ enum ExpenseLedgerAvatarPolicy {
             return ("arrow.down.circle.fill", .green, Color.green.opacity(0.18))
         }
     }
+
+    private static func moneyTransferStyle(for record: ExpenseRecord) -> (String, Color, Color) {
+        if record.amountValue > 0 {
+            return ("banknote.fill", .green, Color.green.opacity(0.2))
+        }
+        return ("arrow.up.circle.fill", .orange, Color.orange.opacity(0.2))
+    }
+
+    private static func walletLabelHaystack(for record: ExpenseRecord) -> String {
+        if let notes = record.notes,
+           let raw = WalletStatementIntelligence.rawLabelFromStoredNote(notes),
+           !raw.isEmpty {
+            return raw
+        }
+        let merchant = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !merchant.isEmpty { return merchant }
+        return record.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func matchesTransferKeywords(_ haystack: String) -> Bool {
+        transferKeywords.contains { haystack.contains($0) }
+    }
+
+    private static func hasKnownMerchantBrand(for record: ExpenseRecord, haystack: String) -> Bool {
+        let country = (
+            MerchantDomainResolver.resolveCountryFromCurrency(record.currencyCode)
+                ?? MerchantDomainResolver.currentCountryISO()
+        ).uppercased()
+        if MerchantBrandIndex.resolve(label: haystack, countryISO: country) != nil { return true }
+        if MerchantCatalog.domain(for: haystack) != nil { return true }
+        return false
+    }
 }
 
 struct ExpenseLedgerAvatarView: View {
@@ -163,6 +271,7 @@ struct ExpenseLedgerAvatarView: View {
                 AsyncMerchantLogoView(
                     merchantName: logoContext.name,
                     knownDomain: logoContext.knownDomain,
+                    merchantRecordId: record.merchantId,
                     size: size
                 )
             } else {
@@ -173,12 +282,13 @@ struct ExpenseLedgerAvatarView: View {
     }
 
     private var linkedLogoContext: (name: String, knownDomain: String?)? {
-        guard let context = brain.merchantLogoContext(for: record) else { return nil }
+        guard ExpenseLedgerAvatarPolicy.shouldUseMerchantLogo(for: record) else { return nil }
+        let context = brain.merchantLogoContext(for: record)
         guard let name = ExpenseLedgerAvatarPolicy.merchantLogoName(
             for: record,
-            linkedMerchantName: context.name
+            linkedMerchantName: context?.name
         ) else { return nil }
-        return (name, context.knownDomain)
+        return (name, context?.knownDomain)
     }
 
     private var categoryAvatar: some View {

@@ -79,6 +79,10 @@
     "es-419": "Cancela membresías sin uso y pausa compras no esenciales.",
     "es-ES": "Cancela membresías sin uso y pausa compras no esenciales."
   },
+  "Cancel on %@'s website — sign in, open billing or subscriptions, and turn off renewal.": {
+    "es-419": "Cancela en el sitio web de %@: inicia sesión, abre facturación o suscripciones y desactiva la renovación.",
+    "es-ES": "Cancela en el sitio web de %@: inicia sesión, abre facturación o suscripciones y desactiva la renovación."
+  },
   "Cash Drawer": {
     "es-419": "Caja de efectivo",
     "es-ES": "Caja de efectivo"
@@ -171,6 +175,10 @@
     "es-419": "Primera vez registrado",
     "es-ES": "Primera vez registrado"
   },
+  "Go to %@ website": {
+    "es-419": "Ir al sitio web de %@",
+    "es-ES": "Ir al sitio web de %@"
+  },
   "Goal Ahead of Schedule": {
     "es-419": "Meta adelantada al cronograma",
     "es-ES": "Meta adelantada al cronograma"
@@ -203,6 +211,10 @@
     "es-419": "Cómo cancelar",
     "es-ES": "Cómo cancelar"
   },
+  "If you subscribed through Apple, use Manage in App Store. Otherwise cancel on the provider's website.": {
+    "es-419": "Si te suscribiste a través de Apple, usa Administrar en App Store. Si no, cancela en el sitio web del proveedor.",
+    "es-ES": "Si te suscribiste a través de Apple, usa Gestionar en App Store. Si no, cancela en el sitio web del proveedor."
+  },
   "Insight Deep Dive": {
     "es-419": "Inmersión en el insight",
     "es-ES": "Profundización del insight"
@@ -218,6 +230,10 @@
   "Late Night Transport Surge": {
     "es-419": "Pico de transporte nocturno",
     "es-ES": "Pico de transporte nocturno"
+  },
+  "Manage in App Store": {
+    "es-419": "Administrar en App Store",
+    "es-ES": "Gestionar en App Store"
   },
   "Log Subscription as Cancelled": {
     "es-419": "Registrar suscripción como cancelada",
@@ -418,6 +434,10 @@
   "Synced": {
     "es-419": "Sincronizado",
     "es-ES": "Sincronizado"
+  },
+  "This subscription looks billed through Apple. Open Subscriptions in your Apple ID settings to cancel.": {
+    "es-419": "Esta suscripción parece facturarse a través de Apple. Abre Suscripciones en la configuración de tu ID de Apple para cancelar.",
+    "es-ES": "Esta suscripción parece facturarse a través de Apple. Abre Suscripciones en los ajustes de tu ID de Apple para cancelar."
   },
   "This Quarter": {
     "es-419": "Este trimestre",

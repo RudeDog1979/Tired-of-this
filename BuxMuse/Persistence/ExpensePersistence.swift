@@ -625,8 +625,14 @@ extension PersistenceController {
             entity.name = trimmed
         }
         entity.lastSeenAt = Date()
-        if entity.logoURL == nil, let domain, !domain.isEmpty {
-            entity.logoURL = MerchantLogoEngine.googleFaviconURL(for: domain)
+        let storedDomain = entity.logoURL.flatMap { MerchantLogoEngine.domain(fromStoredLogoURL: $0) }
+        let resolved = domain?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let preferred = MerchantDomainResolver.preferredLogoDomain(stored: storedDomain, resolved: resolved) {
+            entity.logoURL = MerchantLogoEngine.googleFaviconURL(for: preferred)
+            MerchantLogoEngine.schedulePrefetch(
+                for: trimmed.isEmpty ? merchant.name : trimmed,
+                knownDomain: preferred
+            )
         }
         try context.save()
         return ExpenseMerchantRecord.from(entity)
@@ -645,16 +651,19 @@ extension PersistenceController {
                 userInfo: [NSLocalizedDescriptionKey: "Merchant name is required."]
             )
         }
-        let resolvedDomain = domain?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedDomain = domain?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedDomain = trimmedDomain.flatMap { MerchantDomainResolver.isPlausibleLogoHost($0) ? $0 : nil }
+            ?? MerchantLogoEngine.resolveDomain(for: trimmed)
         let entity = MerchantEntity(
             normalizedName: normalized,
             name: trimmed,
             disambiguator: "",
-            logoURL: resolvedDomain.flatMap { $0.isEmpty ? nil : MerchantLogoEngine.googleFaviconURL(for: $0) },
+            logoURL: resolvedDomain.flatMap { MerchantLogoEngine.googleFaviconURL(for: $0) },
             cluster: MerchantIntelligence.normalize(trimmed)
         )
         context.insert(entity)
         try context.save()
+        MerchantLogoEngine.schedulePrefetch(for: trimmed, knownDomain: resolvedDomain)
         return ExpenseMerchantRecord.from(entity)
     }
 
@@ -683,6 +692,7 @@ extension PersistenceController {
            !trimmed.isEmpty,
            let domain = MerchantLogoEngine.resolveDomain(for: trimmed) {
             entity.logoURL = MerchantLogoEngine.googleFaviconURL(for: domain)
+            MerchantLogoEngine.schedulePrefetch(for: trimmed, knownDomain: domain)
         }
         try context.save()
         return ExpenseMerchantRecord.from(entity)
@@ -707,6 +717,7 @@ extension PersistenceController {
         )
         context.insert(entity)
         try context.save()
+        MerchantLogoEngine.schedulePrefetch(for: trimmed, knownDomain: domain)
         return ExpenseMerchantRecord.from(entity)
     }
 

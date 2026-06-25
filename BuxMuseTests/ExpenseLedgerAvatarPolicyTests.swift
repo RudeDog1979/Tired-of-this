@@ -8,6 +8,19 @@ import XCTest
 
 final class ExpenseLedgerAvatarPolicyTests: XCTestCase {
 
+    func testExpenseMerchantNameShowsLogoWithoutLink() {
+        let record = ExpenseRecord(
+            name: "Groceries",
+            amountValue: -42,
+            currencyCode: "GBP",
+            date: Date(),
+            categoryRaw: TransactionCategory.shopping.rawValue,
+            merchantName: "Tesco"
+        )
+        XCTAssertTrue(ExpenseLedgerAvatarPolicy.shouldUseMerchantLogo(for: record))
+        XCTAssertEqual(ExpenseLedgerAvatarPolicy.resolvedMerchantDisplayName(for: record), "Tesco")
+    }
+
     func testIncomeWithoutMerchantLinkUsesCategoryAvatar() {
         let record = makeRecord(name: "Salary", amount: 500, category: .income)
         XCTAssertFalse(ExpenseLedgerAvatarPolicy.shouldUseMerchantLogo(for: record))
@@ -42,6 +55,35 @@ final class ExpenseLedgerAvatarPolicyTests: XCTestCase {
         let record = makeRecord(name: "Client payment", amount: 800, category: .income)
         let style = ExpenseLedgerAvatarPolicy.resolvedStyle(for: record, categoryRecords: [])
         XCTAssertEqual(style.symbol, "arrow.down.circle.fill")
+    }
+
+    func testInternetTransferUsesMoneyOutIcon() {
+        let record = makeRecord(name: "Internet Transfer", amount: -120, category: .utilities)
+        XCTAssertTrue(ExpenseLedgerAvatarPolicy.isMoneyTransfer(for: record))
+        XCTAssertFalse(ExpenseLedgerAvatarPolicy.shouldUseMerchantLogo(for: record))
+        let style = ExpenseLedgerAvatarPolicy.resolvedStyle(for: record, categoryRecords: [])
+        XCTAssertEqual(style.symbol, "arrow.up.circle.fill")
+    }
+
+    func testWifeTransferInUsesMoneyInIconNotMerchant() {
+        let record = makeRecord(name: "Jane Smith", amount: 200, category: .income, merchantId: UUID())
+        XCTAssertTrue(ExpenseLedgerAvatarPolicy.isMoneyTransfer(for: record))
+        XCTAssertFalse(ExpenseLedgerAvatarPolicy.shouldUseMerchantLogo(for: record))
+        let style = ExpenseLedgerAvatarPolicy.resolvedStyle(for: record, categoryRecords: [])
+        XCTAssertEqual(style.symbol, "banknote.fill")
+    }
+
+    func testTescoStillUsesMerchantLogo() {
+        let record = ExpenseRecord(
+            name: "Groceries",
+            amountValue: -42,
+            currencyCode: "GBP",
+            date: Date(),
+            categoryRaw: TransactionCategory.groceries.rawValue,
+            merchantName: "Tesco"
+        )
+        XCTAssertFalse(ExpenseLedgerAvatarPolicy.isMoneyTransfer(for: record))
+        XCTAssertTrue(ExpenseLedgerAvatarPolicy.shouldUseMerchantLogo(for: record))
     }
 
     private func makeRecord(

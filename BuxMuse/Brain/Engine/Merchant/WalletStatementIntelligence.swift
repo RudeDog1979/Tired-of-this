@@ -196,6 +196,18 @@ public enum WalletStatementIntelligence {
         }
 
         let canonical = canonicalName(from: tokens, fallback: stripped)
+        let countryISO = MerchantDomainResolver.currentCountryISO()
+        if let brandDomain = MerchantBrandIndex.resolve(label: stripped, countryISO: countryISO) {
+            return WalletStatementResolution(
+                canonicalName: canonical,
+                domain: brandDomain,
+                matchedMerchantId: nil,
+                confidence: .high,
+                rawLabel: rawLabel,
+                matchSource: .tokenHeuristic
+            )
+        }
+
         let domain = domainHeuristic(from: tokens, fallbackName: canonical)
         let confidence: WalletMatchConfidence = domain == nil ? .low : .medium
 
@@ -266,11 +278,20 @@ public enum WalletStatementIntelligence {
 
     // MARK: - Domain extraction
 
+    private nonisolated static let embeddedDomainTLDPattern =
+        #"co\.uk|com\.mx|com\.do|com\.ar|com\.br|com\.co|com\.ec|com\.pe|com\.gt|com\.hn|com\.sv|com\.ni|com\.pa|co\.cr|com\.pl|co\.pl|com|net|org|io|app|es|mx|do|pl|uk|de|fr|eu"#
+
+    /// Public wrapper for logo domain extraction from statement text.
+    public nonisolated static func extractDomainForLogo(from text: String) -> String? {
+        extractDomain(from: text)
+    }
+
     private nonisolated static func extractDomain(from text: String) -> String? {
+        let tld = embeddedDomainTLDPattern
         let candidates = [
             #"(?i)https?://([^/\s]+)"#,
             #"(?i)www\.([^/\s]+)"#,
-            #"(?i)\b([a-z0-9][a-z0-9-]*\.(?:co\.uk|com\.pl|co\.pl|com|net|org|io|app|pl|uk|de|fr|eu))\b"#,
+            "(?i)\\b([a-z0-9][a-z0-9-]*\\.(?:\(tld)))\\b",
         ]
 
         for pattern in candidates {
@@ -288,7 +309,7 @@ public enum WalletStatementIntelligence {
 
         // Glued URL labels like WWW.VOXI.COM after punctuation removal in other paths.
         let compact = text.lowercased().replacingOccurrences(of: " ", with: "")
-        if let regex = try? NSRegularExpression(pattern: #"(?i)(?:www\.)?([a-z0-9-]+\.(?:co\.uk|com\.pl|co\.pl|com|net|org|io|app|pl|uk))"#),
+        if let regex = try? NSRegularExpression(pattern: "(?i)(?:www\\.)?([a-z0-9-]+\\.(?:\(embeddedDomainTLDPattern)))"),
            let match = regex.firstMatch(in: compact, range: NSRange(compact.startIndex..<compact.endIndex, in: compact)),
            match.numberOfRanges > 1,
            let capture = Range(match.range(at: 1), in: compact) {
@@ -356,11 +377,7 @@ public enum WalletStatementIntelligence {
     }
 
     private nonisolated static func domainHeuristic(from tokens: [String], fallbackName: String) -> String? {
-        if let domain = extractDomain(from: fallbackName) { return domain }
-        guard let primary = tokens.first(where: { $0.count >= 3 }) ?? tokens.first else { return nil }
-        let squished = primary.replacingOccurrences(of: " ", with: "")
-        guard squished.count >= 3 else { return nil }
-        return "\(squished).com"
+        extractDomain(from: fallbackName)
     }
 
     // MARK: - Merchant matching

@@ -34,50 +34,12 @@ public struct BillingCycleAIEngine {
         let expenses = filtered.filter { $0.amount.value < 0 }
         guard expenses.count >= 2 else { return nil }
         
-        // 1. Detect Billing Cycle based on average days between transactions
-        var intervals: [TimeInterval] = []
-        for i in 1..<expenses.count {
-            let diff = expenses[i].date.timeIntervalSince(expenses[i - 1].date)
-            intervals.append(diff)
-        }
-        
-        let avgInterval = intervals.reduce(0.0, +) / Double(intervals.count)
-        let avgDays = avgInterval / 86400.0
-        
-        let billingCycle: SubscriptionBillingCycle
-        let nextRenewal: Date
-        
-        if avgDays >= 5 && avgDays <= 9 {
-            billingCycle = .weekly
-            nextRenewal = Calendar.current.date(byAdding: .day, value: 7, to: expenses.last!.date) ?? Date()
-        } else if avgDays >= 26 && avgDays <= 29 {
-            billingCycle = .day28
-            nextRenewal = Calendar.current.date(byAdding: .day, value: 28, to: expenses.last!.date) ?? Date()
-        } else if avgDays > 29 && avgDays <= 30.2 {
-            billingCycle = .day30
-            nextRenewal = Calendar.current.date(byAdding: .day, value: 30, to: expenses.last!.date) ?? Date()
-        } else if avgDays > 30.2 && avgDays <= 31.5 {
-            billingCycle = .day31
-            nextRenewal = Calendar.current.date(byAdding: .day, value: 31, to: expenses.last!.date) ?? Date()
-        } else if avgDays > 25 && avgDays <= 32 {
-            // General monthly fallback
-            billingCycle = .monthly
-            nextRenewal = Calendar.current.date(byAdding: .month, value: 1, to: expenses.last!.date) ?? Date()
-        } else if avgDays >= 85 && avgDays <= 95 {
-            billingCycle = .quarterly
-            nextRenewal = Calendar.current.date(byAdding: .month, value: 3, to: expenses.last!.date) ?? Date()
-        } else if avgDays >= 170 && avgDays <= 190 {
-            billingCycle = .semiAnnual
-            nextRenewal = Calendar.current.date(byAdding: .month, value: 6, to: expenses.last!.date) ?? Date()
-        } else if avgDays >= 350 && avgDays <= 375 {
-            billingCycle = .yearly
-            nextRenewal = Calendar.current.date(byAdding: .year, value: 1, to: expenses.last!.date) ?? Date()
-        } else {
-            // Irregular patterns
-            billingCycle = .irregular
-            let estimatedDays = Int(round(avgDays > 0 ? avgDays : 30))
-            nextRenewal = Calendar.current.date(byAdding: .day, value: estimatedDays, to: expenses.last!.date) ?? Date()
-        }
+        let detection = SubscriptionBillingCycleDetector.detectCycle(
+            expenses: expenses,
+            category: category
+        )
+        let billingCycle = detection.cycle
+        let nextRenewal = detection.nextRenewal
         
         // 2. Identify Latest Cost
         let latestCost = expenses.last!.amount
@@ -397,17 +359,19 @@ public struct BillingCycleAIEngine {
         
         // Price history graph (first 6 items)
         let graphValues = Array(prices.prefix(6).reversed())
+
+        let merchantExpenses = expenses.sorted { $0.date < $1.date }
+        let cancellation = SubscriptionBillingChannelDetector.buildCancellationGuide(
+            merchantName: info.merchantName,
+            transactions: merchantExpenses,
+            locale: locale
+        )
         
         return SubscriptionDetail(
             info: info,
             history: expenses,
             priceHistoryGraph: graphValues,
-            cancellationSteps: BuxLocalizedString.format(
-                "To cancel, go to Settings on your iPhone → Tap Mitchell Santos → Subscriptions → Select %@ → Tap Cancel Subscription. Alternatively, log in direct to %@ and delete billing profile.",
-                locale: locale,
-                info.merchantName,
-                MerchantLogoEngine.resolveDomain(for: info.merchantName) ?? "service.com"
-            ),
+            cancellation: cancellation,
             budgetImpactMonthly: budgetMonthly,
             budgetImpactYearly: budgetYearly,
             costChangePercentage: changePercent,

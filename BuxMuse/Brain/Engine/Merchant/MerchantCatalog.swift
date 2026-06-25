@@ -61,7 +61,7 @@ enum MerchantCatalog {
         MerchantCatalogEntry(displayName: "Home Bargains", domain: "homebargains.co.uk", searchNames: ["Home Bargains"]),
         MerchantCatalogEntry(displayName: "Sports Direct", domain: "sportsdirect.com", searchNames: ["Sports Direct", "SportsDirect"]),
         MerchantCatalogEntry(displayName: "JD Sports", domain: "jdsports.co.uk", searchNames: ["JD Sports", "JD"]),
-        MerchantCatalogEntry(displayName: "Amazon", domain: "amazon.co.uk", searchNames: ["Amazon", "Amazon UK", "Amazon.co.uk", "AMZN Mktp"]),
+        MerchantCatalogEntry(displayName: "Amazon", domain: "amazon.co.uk", searchNames: ["Amazon", "Amazon UK", "Amazon.co.uk", "AMZN Mktp", "AMZN", "Amzn", "AMZ", "Amz"]),
         MerchantCatalogEntry(displayName: "Deliveroo", domain: "deliveroo.co.uk", searchNames: ["Deliveroo"]),
         MerchantCatalogEntry(displayName: "Uber Eats", domain: "ubereats.com", searchNames: ["Uber Eats", "UberEats"]),
         MerchantCatalogEntry(displayName: "Greggs", domain: "greggs.co.uk", searchNames: ["Greggs"]),

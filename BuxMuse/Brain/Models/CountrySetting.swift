@@ -48,7 +48,27 @@ public enum CountryCatalog {
             return Locale.Region.isoRegions(ofCategory: .territory)
                 .filter { $0.identifier.count == 2 }
         }
+        // iOS 18 fallback
         return Locale.Region.isoRegions.filter { $0.identifier.count == 2 }
+    }
+
+    /// Device region — callable from background threads (iOS 18+).
+    public nonisolated static func deviceRegionCodeNonisolated() -> String {
+        var candidates: [String] = []
+        if #available(iOS 16, *) {
+            if let id = Locale.current.region?.identifier, !id.isEmpty {
+                candidates.append(id)
+            }
+        }
+        if let code = (Locale.current as NSLocale).object(forKey: .countryCode) as? String,
+           !code.isEmpty {
+            candidates.append(code)
+        }
+        for raw in candidates {
+            let code = normalizeRegionCodeNonisolated(raw)
+            if code.count == 2 { return code }
+        }
+        return "US"
     }
 
     public static func country(for isoCode: String) -> CountrySetting? {
@@ -65,6 +85,10 @@ public enum CountryCatalog {
     }
 
     private static func normalizeRegionCode(_ raw: String) -> String {
+        normalizeRegionCodeNonisolated(raw)
+    }
+
+    private nonisolated static func normalizeRegionCodeNonisolated(_ raw: String) -> String {
         switch raw.uppercased() {
         case "UK": return "GB"
         default: return raw.uppercased()
@@ -73,30 +97,7 @@ public enum CountryCatalog {
 
     /// Device region (Settings → General → Region), with iOS 18-safe fallbacks.
     public static func deviceRegionCode() -> String {
-        var candidates: [String] = []
-        for locale in [Locale.autoupdatingCurrent, Locale.current] {
-            if #available(iOS 16, *) {
-                if let id = locale.region?.identifier, !id.isEmpty {
-                    candidates.append(id)
-                }
-                if let id = locale.language.region?.identifier, !id.isEmpty {
-                    candidates.append(id)
-                }
-            }
-            if let code = (locale as NSLocale).object(forKey: .countryCode) as? String, !code.isEmpty {
-                candidates.append(code)
-            }
-        }
-        for raw in candidates {
-            let code = normalizeRegionCode(raw)
-            if code.count == 2, country(for: code) != nil {
-                return code
-            }
-        }
-        if let first = candidates.first {
-            return normalizeRegionCode(first)
-        }
-        return "US"
+        deviceRegionCodeNonisolated()
     }
 
     public static func detectedFromDevice() -> CountrySetting {

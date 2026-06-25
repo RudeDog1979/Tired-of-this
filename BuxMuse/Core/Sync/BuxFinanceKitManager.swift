@@ -50,6 +50,7 @@ public final class BuxFinanceKitManager: ObservableObject {
     private var automaticSyncTask: Task<Void, Never>?
     private var didScheduleDeferredSessionSync = false
     private var pendingSyncRequest: (startDate: Date, now: Date, isInitial: Bool)?
+    private var walletSyncCloudPushIDs = Set<UUID>()
     
     private static let deferredSessionSyncDelay: TimeInterval = 60
     private static let automaticSyncInterval: TimeInterval = 3600
@@ -374,6 +375,7 @@ public final class BuxFinanceKitManager: ObservableObject {
 
         isSyncing = true
         lastSyncError = nil
+        walletSyncCloudPushIDs.removeAll()
         
         try? await Task.sleep(for: .milliseconds(isInitialHistoricalImport ? 600 : 0))
         
@@ -404,6 +406,7 @@ public final class BuxFinanceKitManager: ObservableObject {
                 _ = try persistence.reconcileWalletImports()
             }
 
+            await flushWalletExpensesToCloud()
             NotificationCenter.default.post(name: .buxMuseWalletSyncDidComplete, object: nil)
         } catch {
             lastSyncError = error.localizedDescription
@@ -608,7 +611,7 @@ public final class BuxFinanceKitManager: ObservableObject {
         guard snapshotChanged || linkChanged || classificationChanged else { return false }
 
         existing.updatedAt = now
-        _ = try persistence.upsertExpenseRecord(existing)
+        _ = try persistWalletExpense(existing)
         return true
     }
 
@@ -618,7 +621,7 @@ public final class BuxFinanceKitManager: ObservableObject {
         var updated = record
         updated.walletIsPending = false
         updated.updatedAt = now
-        _ = try persistence.upsertExpenseRecord(updated)
+        _ = try persistWalletExpense(updated)
         return true
     }
 
@@ -658,6 +661,21 @@ public final class BuxFinanceKitManager: ObservableObject {
     }
 
     @discardableResult
+    private func persistWalletExpense(_ record: ExpenseRecord) throws -> ExpenseRecord {
+        let saved = try persistence.upsertExpenseRecord(record)
+        walletSyncCloudPushIDs.insert(saved.id)
+        return saved
+    }
+
+    private func flushWalletExpensesToCloud() async {
+        guard !walletSyncCloudPushIDs.isEmpty else { return }
+        let ids = walletSyncCloudPushIDs
+        walletSyncCloudPushIDs.removeAll()
+        let records: [ExpenseRecord] = ids.compactMap { try? persistence.fetchExpenseRecord(id: $0) }
+        await PersonalCloudSyncEngine.shared.pushExpenses(records)
+    }
+
+    @discardableResult
     private func upsertWalletTransaction(
         _ tx: FinanceKit.Transaction,
         now: Date,
@@ -677,7 +695,7 @@ public final class BuxFinanceKitManager: ObservableObject {
             guard snapshotChanged || classificationChanged else { return false }
 
             existing.updatedAt = now
-            _ = try persistence.upsertExpenseRecord(existing)
+            _ = try persistWalletExpense(existing)
             return true
         }
 
@@ -713,6 +731,10 @@ public final class BuxFinanceKitManager: ObservableObject {
         )
         record.financeKitTransactionId = txId
         
+        if isSubscriptionLike {
+            record.nextExpectedDate = Calendar.current.date(byAdding: .month, value: 1, to: record.date)
+        }
+
         record.categoryId = try persistence.categoryId(for: category)
         _ = applyWalletIncomeClassification(to: &record, alignedAmount: record.amountValue)
         if let merchant = try persistence.resolveWalletImportedMerchant(
@@ -728,7 +750,7 @@ public final class BuxFinanceKitManager: ObservableObject {
             )
         }
         
-        _ = try persistence.upsertExpenseRecord(record)
+        _ = try persistWalletExpense(record)
         return true
     }
 
@@ -963,7 +985,7 @@ public final class BuxFinanceKitManager: ObservableObject {
                 existing.walletIsPending = mock.isPending
                 existing.amountValue = mock.amount
                 existing.updatedAt = now
-                _ = try persistence.upsertExpenseRecord(existing)
+                _ = try persistWalletExpense(existing)
                 continue
             }
             
@@ -1006,7 +1028,7 @@ public final class BuxFinanceKitManager: ObservableObject {
                 )
             }
             
-            _ = try persistence.upsertExpenseRecord(record)
+            _ = try persistWalletExpense(record)
         }
     }
 }

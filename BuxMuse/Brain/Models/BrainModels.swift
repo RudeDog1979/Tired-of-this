@@ -266,6 +266,31 @@ public struct SubscriptionRisk: Codable, Equatable, Identifiable {
     }
 }
 
+public enum SubscriptionBillingChannel: String, Codable, Equatable {
+    case apple
+    case direct
+    case unknown
+}
+
+public struct SubscriptionCancellationGuide: Codable, Equatable {
+    public let instructions: String
+    public let channel: SubscriptionBillingChannel
+    public let appStoreManageURL: URL?
+    public let providerWebsiteURL: URL?
+
+    public init(
+        instructions: String,
+        channel: SubscriptionBillingChannel,
+        appStoreManageURL: URL?,
+        providerWebsiteURL: URL?
+    ) {
+        self.instructions = instructions
+        self.channel = channel
+        self.appStoreManageURL = appStoreManageURL
+        self.providerWebsiteURL = providerWebsiteURL
+    }
+}
+
 public struct SubscriptionInfo: Identifiable, Codable, Equatable {
     /// Parallel billing instances for the same merchant (e.g. two identical subscriptions).
     public let instanceIndex: Int
@@ -321,18 +346,30 @@ public struct SubscriptionDetail: Codable, Equatable, Identifiable {
     public let info: SubscriptionInfo
     public let history: [Transaction]
     public let priceHistoryGraph: [Decimal]
-    public let cancellationSteps: String
+    public let cancellation: SubscriptionCancellationGuide
     public let budgetImpactMonthly: MoneyAmount
     public let budgetImpactYearly: MoneyAmount
     public let costChangePercentage: Double // change over last 6 months
     public let usageInsights: String
     public let alternatives: [String]
+
+    public var cancellationSteps: String { cancellation.instructions }
     
-    public init(info: SubscriptionInfo, history: [Transaction], priceHistoryGraph: [Decimal], cancellationSteps: String, budgetImpactMonthly: MoneyAmount, budgetImpactYearly: MoneyAmount, costChangePercentage: Double, usageInsights: String, alternatives: [String]) {
+    public init(
+        info: SubscriptionInfo,
+        history: [Transaction],
+        priceHistoryGraph: [Decimal],
+        cancellation: SubscriptionCancellationGuide,
+        budgetImpactMonthly: MoneyAmount,
+        budgetImpactYearly: MoneyAmount,
+        costChangePercentage: Double,
+        usageInsights: String,
+        alternatives: [String]
+    ) {
         self.info = info
         self.history = history
         self.priceHistoryGraph = priceHistoryGraph
-        self.cancellationSteps = cancellationSteps
+        self.cancellation = cancellation
         self.budgetImpactMonthly = budgetImpactMonthly
         self.budgetImpactYearly = budgetImpactYearly
         self.costChangePercentage = costChangePercentage

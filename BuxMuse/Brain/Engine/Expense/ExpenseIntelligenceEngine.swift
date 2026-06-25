@@ -145,45 +145,37 @@ struct ExpenseIntelligenceEngine {
     }
 
     private static func detectRecurrence(record: ExpenseRecord, history: [ExpenseRecord]) -> RecurrenceDetection {
-        let expenses = history.filter { $0.amountValue < 0 }
-        guard expenses.count >= 2 else {
+        let expenseTransactions = history
+            .filter { $0.amountValue < 0 }
+            .sorted { $0.date < $1.date }
+            .map { $0.toTransaction() }
+
+        let deduped = SubscriptionBillingCycleDetector.dedupedExpenseCharges(expenseTransactions)
+        guard deduped.count >= 2 else {
             return RecurrenceDetection(isRecurring: false, recurrenceType: nil, confidence: nil, nextDate: nil, heatBucket: nil)
         }
 
-        var intervals: [TimeInterval] = []
-        for i in 1..<expenses.count {
-            intervals.append(expenses[i].date.timeIntervalSince(expenses[i - 1].date))
-        }
-        let avgDays = (intervals.reduce(0, +) / Double(intervals.count)) / 86_400
+        let detection = SubscriptionBillingCycleDetector.detectCycle(
+            expenses: deduped,
+            category: record.transactionCategory
+        )
 
-        let type: String?
-        if avgDays >= 5 && avgDays <= 9 { type = "weekly" }
-        else if avgDays >= 12 && avgDays <= 16 { type = "bi-weekly" }
-        else if avgDays >= 25 && avgDays <= 35 { type = "monthly" }
-        else if avgDays >= 350 && avgDays <= 380 { type = "yearly" }
-        else if avgDays > 0 { type = "irregular" }
-        else { type = nil }
-
-        guard let type else {
-            return RecurrenceDetection(isRecurring: false, recurrenceType: nil, confidence: nil, nextDate: nil, heatBucket: nil)
+        let type: String
+        switch detection.cycle {
+        case .weekly: type = "weekly"
+        case .monthly, .day28, .day30, .day31, .irregular: type = "monthly"
+        case .quarterly: type = "quarterly"
+        case .semiAnnual: type = "semi-annual"
+        case .yearly: type = "yearly"
         }
 
-        let confidence = min(1.0, Double(expenses.count) / 6.0)
-        let last = expenses.last?.date ?? record.date
-        let next: Date?
-        switch type {
-        case "weekly": next = Calendar.current.date(byAdding: .day, value: 7, to: last)
-        case "bi-weekly": next = Calendar.current.date(byAdding: .day, value: 14, to: last)
-        case "monthly": next = Calendar.current.date(byAdding: .month, value: 1, to: last)
-        case "yearly": next = Calendar.current.date(byAdding: .year, value: 1, to: last)
-        default: next = Calendar.current.date(byAdding: .day, value: Int(avgDays), to: last)
-        }
+        let confidence = min(1.0, Double(deduped.count) / 6.0)
 
         return RecurrenceDetection(
             isRecurring: true,
             recurrenceType: type,
             confidence: confidence,
-            nextDate: next,
+            nextDate: detection.nextRenewal,
             heatBucket: nil
         )
     }

@@ -55,10 +55,10 @@ final class SubscriptionHubTests: XCTestCase {
         
         let netflix = subs.first!
         XCTAssertEqual(netflix.merchantName, "Netflix")
-        XCTAssertEqual(netflix.billingCycle, .day30)
+        XCTAssertEqual(netflix.billingCycle, .monthly)
         
-        // Assert next renewal prediction is roughly 30 days after the last charge
-        let expectedRenewal = calendar.date(byAdding: .day, value: 30, to: tx2.date)!
+        // Assert next renewal prediction is roughly one month after the last charge
+        let expectedRenewal = calendar.date(byAdding: .month, value: 1, to: tx2.date)!
         XCTAssertEqual(
             calendar.startOfDay(for: netflix.nextRenewalDate),
             calendar.startOfDay(for: expectedRenewal)
@@ -105,13 +105,13 @@ final class SubscriptionHubTests: XCTestCase {
         viewModel.refreshData()
         
         // Verify Weekly and Monthly cost totals
-        // Spotify is weekly: $5.00/week -> $5.00 weekly total. Netflix is day30: $10.00 monthly.
-        // Spotify monthly projection: 5 * 4.33 = 21.65. Combined monthly: 10 + 21.65 = 31.65
-        XCTAssertEqual(viewModel.totalWeeklyCost.value, 5.00)
-        XCTAssertEqual(viewModel.totalMonthlyCost.value, 31.65)
+        // Spotify has only two charges 7 days apart — treated as monthly (not weekly).
+        // Netflix is day30: $10.00 monthly. Spotify: $5.00 monthly. Combined: $15.00
+        XCTAssertEqual(viewModel.totalWeeklyCost.value, 0)
+        XCTAssertEqual(viewModel.totalMonthlyCost.value, 15.00)
         
-        // Daily burn rate: $31.65 / 30.42 ≈ 1.04
-        XCTAssertEqual(round(NSDecimalNumber(decimal: viewModel.dailyBurnRate.value).doubleValue * 100.0) / 100.0, 1.04)
+        // Daily burn rate: $15.00 / 30.42 ≈ 0.49
+        XCTAssertEqual(round(NSDecimalNumber(decimal: viewModel.dailyBurnRate.value).doubleValue * 100.0) / 100.0, 0.49)
         
         // Health score should start at 100 as there are no active price hikes or double charges
         XCTAssertEqual(viewModel.healthScore, 100)
@@ -231,5 +231,100 @@ final class SubscriptionHubTests: XCTestCase {
         // Test simulated cancellation
         viewModel.simulateCancel(merchantName: "Prime Video")
         XCTAssertEqual(viewModel.subscriptions.count, 0)
+    }
+
+    func testTwoChargesSevenDaysApartDefaultToMonthlyNotWeekly() {
+        let calendar = Calendar.current
+        let today = Date()
+
+        let tx1 = Transaction(
+            date: calendar.date(byAdding: .day, value: -7, to: today)!,
+            amount: MoneyAmount(value: -15.00, currencyCode: "USD"),
+            merchantName: "Voxi",
+            category: .subscriptions
+        )
+        let tx2 = Transaction(
+            date: today,
+            amount: MoneyAmount(value: -15.00, currencyCode: "USD"),
+            merchantName: "Voxi",
+            category: .subscriptions
+        )
+
+        engine.addTransaction(tx1)
+        engine.addTransaction(tx2)
+
+        let subs = engine.activeSubscriptions()
+        XCTAssertEqual(subs.count, 1)
+        XCTAssertEqual(subs.first?.billingCycle, .monthly)
+    }
+
+    func testCancellationGuideRemovesMitchellAndProvidesLinks() {
+        let calendar = Calendar.current
+        let today = Date()
+
+        let appleTx = Transaction(
+            date: calendar.date(byAdding: .day, value: -30, to: today)!,
+            amount: MoneyAmount(value: -2.99, currencyCode: "USD"),
+            merchantName: "Apple.com/Bill iCloud",
+            category: .subscriptions,
+            notes: WalletStatementIntelligence.walletImportNotes(rawLabel: "APPLE.COM/BILL")
+        )
+        engine.addTransaction(appleTx)
+        engine.addTransaction(Transaction(
+            date: today,
+            amount: MoneyAmount(value: -2.99, currencyCode: "USD"),
+            merchantName: "Apple.com/Bill iCloud",
+            category: .subscriptions,
+            notes: WalletStatementIntelligence.walletImportNotes(rawLabel: "APPLE.COM/BILL")
+        ))
+
+        let detail = engine.subscriptionDetail(for: "Apple.com/Bill iCloud")
+        XCTAssertNotNil(detail)
+        XCTAssertFalse(detail!.cancellation.instructions.localizedCaseInsensitiveContains("Mitchell Santos"))
+        XCTAssertEqual(detail!.cancellation.channel, .apple)
+        XCTAssertNotNil(detail!.cancellation.appStoreManageURL)
+
+        let voxiDetail = BillingCycleAIEngine.subscriptionDetail(
+            info: SubscriptionInfo(
+                merchantName: "WWW.VOXI.COM",
+                cost: MoneyAmount(value: -15, currencyCode: "USD"),
+                billingCycle: .monthly,
+                nextRenewalDate: today,
+                category: .subscriptions,
+                risks: []
+            ),
+            allTransactions: [
+                Transaction(
+                    date: calendar.date(byAdding: .day, value: -30, to: today)!,
+                    amount: MoneyAmount(value: -15, currencyCode: "USD"),
+                    merchantName: "WWW.VOXI.COM",
+                    category: .subscriptions
+                )
+            ]
+        )
+        XCTAssertEqual(voxiDetail.cancellation.channel, .direct)
+        XCTAssertNotNil(voxiDetail.cancellation.appStoreManageURL)
+        XCTAssertNotNil(voxiDetail.cancellation.providerWebsiteURL)
+        XCTAssertTrue(voxiDetail.cancellation.providerWebsiteURL?.absoluteString.contains("voxi.com") == true)
+    }
+
+    func testCancellationGuideAlwaysOffersAppStoreForDirectBilledMerchant() {
+        let today = Date()
+        let guide = SubscriptionBillingChannelDetector.buildCancellationGuide(
+            merchantName: "Netflix",
+            transactions: [
+                Transaction(
+                    date: today,
+                    amount: MoneyAmount(value: -15.49, currencyCode: "USD"),
+                    merchantName: "Netflix",
+                    category: .subscriptions
+                )
+            ],
+            locale: Locale(identifier: "en")
+        )
+
+        XCTAssertEqual(guide.channel, .direct)
+        XCTAssertEqual(guide.appStoreManageURL, SubscriptionBillingChannelDetector.appStoreManageURL)
+        XCTAssertNotNil(guide.providerWebsiteURL)
     }
 }

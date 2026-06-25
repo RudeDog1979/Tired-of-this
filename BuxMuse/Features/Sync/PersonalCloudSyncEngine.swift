@@ -292,11 +292,12 @@ final class PersonalCloudSyncEngine: ObservableObject {
             return
         }
         isApplyingRemote = true
-        defer { isApplyingRemote = false }
         await pullRemoteChangesIfIdle()
+        isApplyingRemote = false
         if shouldPushLocalMasterData(brain: brain) {
             await reconcileMasterDataIfNeeded()
         }
+        await pushAllLocalExpenses()
     }
 
     @discardableResult
@@ -313,6 +314,21 @@ final class PersonalCloudSyncEngine: ObservableObject {
     func pushExpenseIfNeeded(_ record: ExpenseRecord) {
         guard isEnabled, !isApplyingRemote else { return }
         Task { await pushExpense(record) }
+    }
+
+    /// Bulk push after wallet import or manual sync — uploads local rows CloudKit never received.
+    func pushExpenses(_ records: [ExpenseRecord]) async {
+        guard isEnabled, !isApplyingRemote else { return }
+        guard !records.isEmpty else { return }
+        for record in records {
+            await pushExpense(record)
+        }
+    }
+
+    func pushAllLocalExpenses() async {
+        guard isEnabled, !isApplyingRemote, let brain else { return }
+        let expenses = (try? brain.fetchAllExpenseRecords()) ?? []
+        await pushExpenses(expenses)
     }
 
     func pushDeletedExpense(id: UUID, currencyCode: String = "USD") {

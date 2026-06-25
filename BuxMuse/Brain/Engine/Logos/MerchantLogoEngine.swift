@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Combine
 import CryptoKit
 import ImageIO
 #if canImport(UIKit)
@@ -80,58 +79,60 @@ public struct MerchantLogoEngine {
     }
     
     // MARK: - Domain Resolver
-    public nonisolated static func resolveDomain(for merchantName: String) -> String? {
-        let intelligence = WalletStatementIntelligence.resolve(
-            rawLabel: merchantName,
-            contexts: []
+    public nonisolated static func resolveDomain(
+        for merchantName: String,
+        countryISO: String? = nil,
+        currencyCode: String? = nil
+    ) -> String? {
+        MerchantDomainResolver.resolveDomain(
+            for: merchantName,
+            countryISO: countryISO,
+            currencyCode: currencyCode
         )
-        if let domain = intelligence.domain {
-            switch intelligence.confidence {
-            case .high, .medium:
-                return domain
-            case .low:
-                break
+    }
+
+    /// Low-priority warm-up after merchant persistence — never blocks save/import paths.
+    public static func schedulePrefetch(for merchantName: String, knownDomain: String? = nil) {
+        let name = merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        let domain = knownDomain?.trimmingCharacters(in: .whitespacesAndNewlines)
+        Task.detached(priority: .utility) {
+            let shouldFetch = await MainActor.run { ConnectivityBrain.shared.shouldFetchMerchantIcons }
+            guard shouldFetch else { return }
+            let plan = fetchPlan(for: name, knownDomain: domain?.isEmpty == false ? domain : nil)
+            guard let plan else { return }
+            await MerchantLogoFetchCoordinator.shared.prefetch(plan: plan, shouldFetch: true)
+        }
+    }
+
+    /// After wallet sync, warm every linked merchant logo in parallel (deduped by cache key).
+    static func scheduleBulkPrefetch(merchants: [ExpenseMerchantRecord]) {
+        let inputs: [(name: String, domain: String?)] = merchants.compactMap { merchant in
+            let name = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { return nil }
+            let domain = merchant.logoURL.flatMap { domain(fromStoredLogoURL: $0) }
+            return (name, domain)
+        }
+        guard !inputs.isEmpty else { return }
+        Task.detached(priority: .utility) {
+            let shouldFetch = await MainActor.run { ConnectivityBrain.shared.shouldFetchMerchantIcons }
+            guard shouldFetch else { return }
+            var plans: [FetchPlan] = []
+            var seen = Set<String>()
+            for input in inputs {
+                let plan: FetchPlan?
+                if let domain = input.domain, !domain.isEmpty {
+                    plan = fetchPlanForKnownDomain(domain) ?? fetchPlan(for: input.name, knownDomain: domain)
+                } else {
+                    plan = fetchPlan(for: input.name, knownDomain: nil)
+                }
+                guard let plan, seen.insert(plan.cacheKey).inserted else { continue }
+                if MerchantLogoFetchCoordinator.shared.cachedImage(forCacheKey: plan.cacheKey) == nil {
+                    plans.append(plan)
+                }
             }
+            await MerchantLogoFetchCoordinator.shared.prefetchPlans(plans, shouldFetch: true)
         }
-
-        if let catalogDomain = MerchantCatalog.domain(for: merchantName) {
-            return catalogDomain
-        }
-
-        let normalized = normalizeMerchantName(merchantName)
-        guard !normalized.isEmpty else { return nil }
-        
-        // Legacy inline map (kept for merchants not yet in catalog)
-        let knownMerchants: [String: String] = [
-            "starbucks": "starbucks.com",
-            "apple": "apple.com",
-            "netflix": "netflix.com",
-            "spotify": "spotify.com",
-            "uber": "uber.com",
-            "amazon": "amazon.co.uk",
-            "mcdonalds": "mcdonalds.com",
-            "nike": "nike.com",
-            "google": "google.com",
-            "microsoft": "microsoft.com",
-            "airbnb": "airbnb.com",
-            "walmart": "walmart.com",
-            "target": "target.com",
-            "steam": "steampowered.com",
-            "playstation": "playstation.com",
-            "xbox": "xbox.com"
-        ]
-        
-        if let directDomain = knownMerchants[normalized] {
-            return directDomain
-        }
-        
-        // Heuristic fallback: strip spaces and append .com
-        let squished = normalized.replacingOccurrences(of: " ", with: "")
-        if !squished.isEmpty {
-            return "\(squished).com"
-        }
-        
-        return nil
     }
 
     public nonisolated static func googleFaviconURL(for domain: String, size: Int = 256) -> String {
@@ -148,19 +149,13 @@ public struct MerchantLogoEngine {
     /// Domain-first cache key so "Biedronka" and typos share the same logo.
     public nonisolated static func fetchPlan(for merchantName: String, knownDomain: String? = nil) -> FetchPlan? {
         if let knownDomain,
+           MerchantDomainResolver.isPlausibleLogoHost(knownDomain),
            let plan = fetchPlanForKnownDomain(knownDomain) {
             return plan
         }
 
-        let normalized = normalizeMerchantName(merchantName)
-        guard !normalized.isEmpty else { return nil }
-
-        let domain = resolveDomain(for: merchantName)
-        let cacheKey = domain ?? normalized
-        let host = domain ?? "\(normalized.replacingOccurrences(of: " ", with: "")).com"
-        let urls = remoteLogoURLs(forHost: host).compactMap(URL.init(string:))
-        guard !urls.isEmpty else { return nil }
-        return FetchPlan(cacheKey: cacheKey, urls: urls)
+        guard let domain = resolveDomain(for: merchantName) else { return nil }
+        return fetchPlanForKnownDomain(domain)
     }
 
     /// Only resolves logos for an explicit known domain — no heuristic `.com` guessing.
@@ -195,28 +190,13 @@ public struct MerchantLogoEngine {
     }
 
     public static func fetchRemoteLogo(plan: FetchPlan) async -> UIImage? {
-        var bestPayload: LogoPayload?
-        var bestScore: CGFloat = 0
-
-        await withTaskGroup(of: LogoPayload?.self) { group in
-            for url in plan.urls {
-                group.addTask { await fetchLogoPayload(from: url) }
-            }
-
-            for await payload in group {
-                guard let payload, isUsableLogo(payload) else { continue }
-                let score = logoQualityScore(payload)
-                if score > bestScore {
-                    bestScore = score
-                    bestPayload = payload
-                }
-            }
+        for url in plan.urls {
+            guard let payload = await fetchLogoPayload(from: url), isUsableLogo(payload) else { continue }
+            let normalized = normalizeForDisplay(payload.image)
+            LightweightLogoCache.shared.saveImage(normalized, forKey: plan.cacheKey)
+            return normalized
         }
-
-        guard let bestPayload else { return nil }
-        let normalized = normalizeForDisplay(bestPayload.image)
-        LightweightLogoCache.shared.saveImage(normalized, forKey: plan.cacheKey)
-        return normalized
+        return nil
     }
 
     private struct LogoPayload {
@@ -240,7 +220,7 @@ public struct MerchantLogoEngine {
     }
 
     private static func fetchLogoPayload(from url: URL) async -> LogoPayload? {
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 8)
+        var request = URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 4)
         request.httpShouldHandleCookies = false
         request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", forHTTPHeaderField: "User-Agent")
 
@@ -327,22 +307,22 @@ public struct MerchantLogoEngine {
 }
 
 // MARK: - Local Cache Manager
-public final class LightweightLogoCache: ObservableObject {
-    public static let shared = LightweightLogoCache()
+public final class LightweightLogoCache: @unchecked Sendable {
+    public nonisolated static let shared = LightweightLogoCache()
 
-    private var memoryCache = NSCache<NSString, UIImage>()
-    private var lruList: [String] = []
-    private let maxMemoryCount = 50
-    private let maxDiskSize: Int = 10 * 1024 * 1024 // 10 MB
+    private nonisolated(unsafe) var memoryCache = NSCache<NSString, UIImage>()
+    private nonisolated(unsafe) var lruList: [String] = []
+    private nonisolated let maxMemoryCount = 50
+    private nonisolated let maxDiskSize: Int = 10 * 1024 * 1024 // 10 MB
     /// All memory + disk + LRU mutations run on one queue (fixes EXC_BAD_ACCESS from concurrent `lruList` access).
-    private let cacheQueue = DispatchQueue(label: "com.buxmuse.app.merchant-logo-cache")
+    private nonisolated let cacheQueue = DispatchQueue(label: "com.buxmuse.app.merchant-logo-cache")
 
-    private init() {
+    private nonisolated init() {
         memoryCache.countLimit = maxMemoryCount
         removeLegacySharedLogoArtifacts()
     }
 
-    private var diskCacheDirectory: URL {
+    private nonisolated func diskCacheDirectoryURL() -> URL {
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
         let dir = paths[0].appendingPathComponent("BuxMuseMerchantLogosV5")
         if !FileManager.default.fileExists(atPath: dir.path) {
@@ -351,7 +331,7 @@ public final class LightweightLogoCache: ObservableObject {
         return dir
     }
 
-    public func getImage(forKey key: String) -> UIImage? {
+    public nonisolated func getImage(forKey key: String) -> UIImage? {
         cacheQueue.sync {
             let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmedKey.isEmpty else { return nil }
@@ -362,7 +342,7 @@ public final class LightweightLogoCache: ObservableObject {
                 return memoryImage
             }
 
-            let fileURL = diskCacheDirectory.appendingPathComponent(trimmedKey.cacheFilename())
+            let fileURL = diskCacheDirectoryURL().appendingPathComponent(trimmedKey.cacheFilename())
             if let fileData = try? Data(contentsOf: fileURL),
                let diskImage = UIImage(data: fileData) {
                 memoryCache.setObject(diskImage, forKey: nsKey)
@@ -373,7 +353,7 @@ public final class LightweightLogoCache: ObservableObject {
         }
     }
 
-    public func saveImage(_ image: UIImage, forKey key: String) {
+    public nonisolated func saveImage(_ image: UIImage, forKey key: String) {
         cacheQueue.async { [weak self] in
             guard let self else { return }
             let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -383,7 +363,7 @@ public final class LightweightLogoCache: ObservableObject {
             self.memoryCache.setObject(image, forKey: nsKey)
             self.touchLRU(trimmedKey)
 
-            let fileURL = self.diskCacheDirectory.appendingPathComponent(trimmedKey.cacheFilename())
+            let fileURL = self.diskCacheDirectoryURL().appendingPathComponent(trimmedKey.cacheFilename())
             if let imageData = image.pngData() {
                 try? imageData.write(to: fileURL)
                 self.pruneDiskCacheIfNeeded()
@@ -391,7 +371,7 @@ public final class LightweightLogoCache: ObservableObject {
         }
     }
 
-    private func touchLRU(_ key: String) {
+    private nonisolated func touchLRU(_ key: String) {
         if let idx = lruList.firstIndex(of: key) {
             lruList.remove(at: idx)
         }
@@ -402,12 +382,12 @@ public final class LightweightLogoCache: ObservableObject {
         }
     }
 
-    public func clearCache() {
+    public nonisolated func clearCache() {
         clearCacheSynchronously()
     }
 
     /// Used during Settings → Delete all data so stale favicons cannot survive a reset.
-    public func clearCacheSynchronously() {
+    public nonisolated func clearCacheSynchronously() {
         cacheQueue.sync {
             memoryCache.removeAllObjects()
             lruList.removeAll()
@@ -415,7 +395,7 @@ public final class LightweightLogoCache: ObservableObject {
         }
     }
 
-    private func removeAllLogoCacheDirectories() {
+    private nonisolated func removeAllLogoCacheDirectories() {
         let manager = FileManager.default
         guard let caches = manager.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
         for folder in ["BuxMuseMerchantLogos", "BuxMuseMerchantLogosV3", "BuxMuseMerchantLogosV4", "BuxMuseMerchantLogosV5"] {
@@ -426,8 +406,8 @@ public final class LightweightLogoCache: ObservableObject {
         }
     }
 
-    private func pruneDiskCacheIfNeeded() {
-        let dir = diskCacheDirectory
+    private nonisolated func pruneDiskCacheIfNeeded() {
+        let dir = diskCacheDirectoryURL()
         let manager = FileManager.default
         guard let files = try? manager.contentsOfDirectory(
             at: dir,
@@ -456,10 +436,9 @@ public final class LightweightLogoCache: ObservableObject {
     }
 
     /// Older builds wrote every empty-key logo to `merchant.png`, which made unrelated merchants share one image.
-    private func removeLegacySharedLogoArtifacts() {
+    private nonisolated func removeLegacySharedLogoArtifacts() {
         let manager = FileManager.default
-        let caches = manager.urls(for: .cachesDirectory, in: .userDomainMask).first
-        guard let caches else { return }
+        guard let caches = manager.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
         for folder in ["BuxMuseMerchantLogosV4", "BuxMuseMerchantLogosV3", "BuxMuseMerchantLogos"] {
             let legacy = caches.appendingPathComponent(folder).appendingPathComponent("merchant.png")
             try? manager.removeItem(at: legacy)
@@ -469,7 +448,7 @@ public final class LightweightLogoCache: ObservableObject {
 
 // MARK: - Helpers
 extension String {
-    fileprivate func cacheFilename() -> String {
+    nonisolated fileprivate func cacheFilename() -> String {
         let digest = SHA256.hash(data: Data(utf8))
         let hex = digest.map { String(format: "%02x", $0) }.joined()
         return hex + ".png"

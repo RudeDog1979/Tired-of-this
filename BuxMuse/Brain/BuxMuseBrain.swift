@@ -223,6 +223,9 @@ public final class BuxMuseBrain: ObservableObject {
             scheduleSnapshotRefresh()
             financialBridge.objectWillChange.send()
             NotificationCenter.default.post(name: .buxMuseFinancialDataDidChange, object: nil)
+            if let merchants = try? persistence.fetchAllMerchantRecords() {
+                MerchantLogoEngine.scheduleBulkPrefetch(merchants: merchants)
+            }
         } catch {
             print("refreshExpensesAfterWalletSync failed: \(error)")
         }
@@ -672,26 +675,35 @@ public final class BuxMuseBrain: ObservableObject {
         try persistence.fetchMerchantRecord(id: id)
     }
 
-    /// Store/brand string and optional persisted domain for `AsyncMerchantLogoView`.
     func merchantLogoContext(for record: ExpenseRecord) -> (name: String, knownDomain: String?)? {
-        guard let merchantId = record.merchantId else {
-            if record.amountValue > 0 || record.transactionCategory == .income {
-                return nil
-            }
-            let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
-            let label = record.name.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !store.isEmpty, store.caseInsensitiveCompare(label) != .orderedSame else { return nil }
-            return (store, nil)
-        }
-        if let merchant = try? persistence.fetchMerchantRecord(id: merchantId) {
+        if let merchantId = record.merchantId,
+           let merchant = try? persistence.fetchMerchantRecord(id: merchantId) {
             let linked = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !linked.isEmpty else { return nil }
-            let domain = merchant.logoURL.flatMap { MerchantLogoEngine.domain(fromStoredLogoURL: $0) }
+            let storedDomain = merchant.logoURL.flatMap { MerchantLogoEngine.domain(fromStoredLogoURL: $0) }
+            let resolveLabel = WalletStatementIntelligence.walletRawLabel(for: record)
+            let resolved = MerchantLogoEngine.resolveDomain(
+                for: resolveLabel.isEmpty ? linked : resolveLabel,
+                currencyCode: record.currencyCode
+            )
+            let domain = MerchantDomainResolver.preferredLogoDomain(stored: storedDomain, resolved: resolved)
             return (linked, domain)
         }
-        let store = record.merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !store.isEmpty else { return nil }
-        return (store, nil)
+
+        if record.amountValue > 0 || record.transactionCategory == .income {
+            return nil
+        }
+
+        guard let displayName = ExpenseLedgerAvatarPolicy.resolvedMerchantDisplayName(for: record) else {
+            return nil
+        }
+
+        let resolveLabel = WalletStatementIntelligence.walletRawLabel(for: record)
+        let domain = MerchantLogoEngine.resolveDomain(
+            for: resolveLabel.isEmpty ? displayName : resolveLabel,
+            currencyCode: record.currencyCode
+        )
+        return (displayName, domain)
     }
 
     /// Store/brand string for `AsyncMerchantLogoView` when the user explicitly linked a merchant.
