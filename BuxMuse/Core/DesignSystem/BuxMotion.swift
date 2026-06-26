@@ -162,12 +162,16 @@ private final class BuxProMotionBoostAnchorView: UIView {
     }
 }
 
+private final class BuxProMotionBoostCoordinator {
+    var lastTrigger: Any?
+}
+
 private struct BuxProMotionBoostRepresentable<T: Equatable>: UIViewRepresentable {
     let trigger: T
     let duration: TimeInterval
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
+    func makeCoordinator() -> BuxProMotionBoostCoordinator {
+        BuxProMotionBoostCoordinator()
     }
 
     func makeUIView(context: Context) -> BuxProMotionBoostAnchorView {
@@ -180,10 +184,6 @@ private struct BuxProMotionBoostRepresentable<T: Equatable>: UIViewRepresentable
             uiView.boost(for: duration)
         }
         coordinator.lastTrigger = trigger
-    }
-
-    final class Coordinator {
-        var lastTrigger: Any?
     }
 }
 
