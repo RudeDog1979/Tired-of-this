@@ -111,11 +111,13 @@ public struct MerchantLogoEngine {
 
     /// After wallet sync, warm every linked merchant logo in parallel (deduped by cache key).
     static func scheduleBulkPrefetch(merchants: [ExpenseMerchantRecord]) {
-        let inputs: [(name: String, domain: String?)] = merchants.compactMap { merchant -> (name: String, domain: String?)? in
+        var inputs: [(name: String, domain: String?)] = []
+        inputs.reserveCapacity(merchants.count)
+        for merchant in merchants {
             let name = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !name.isEmpty else { return nil }
-            let domain = merchant.logoURL.flatMap { domain(fromStoredLogoURL: $0) }
-            return (name, domain)
+            guard !name.isEmpty else { continue }
+            let domain = merchant.logoURL.flatMap { Self.domain(fromStoredLogoURL: $0) }
+            inputs.append((name: name, domain: domain))
         }
         guard !inputs.isEmpty else { return }
         Task.detached(priority: .utility) {
