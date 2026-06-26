@@ -36,6 +36,9 @@ public actor MerchantLogoFetchCoordinator {
             return cached
         }
         guard shouldFetch else { return nil }
+        if MerchantLogoNegativeCache.isFailure(key) {
+            return nil
+        }
 
         if let existing = inFlight[key] {
             return await existing.value

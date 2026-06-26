@@ -43,6 +43,11 @@ enum BuxNotificationRouter {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                 navigation.openSubscriptionHub()
             }
+        case .dailyTip:
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                navigation.selectedTab = .home
+                navigation.openTipPopupRequest = true
+            }
         }
     }
 

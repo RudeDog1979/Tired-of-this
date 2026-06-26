@@ -34,6 +34,16 @@ extension BuxMuseBrain {
             tipPulseToken += 1
             didPulseTipThisSession = true
         }
+
+        await rescheduleDailyTipNotification(countryCode: countryCode, settings: SettingsStore.shared)
+    }
+
+    public func rescheduleDailyTipNotification(countryCode: String, settings: SettingsStore) async {
+        await DailyTipNotificationScheduler.reschedule(
+            settings: settings,
+            countryCode: countryCode,
+            tipsEngine: tipsEngine
+        )
     }
 
     public func markDailyTipSeen() {
@@ -50,7 +60,8 @@ extension BuxMuseBrain {
         debts: [Debt] = [],
         studioAlerts: [StudioAlertDisplay] = [],
         studioInvoices: [StudioInvoice] = [],
-        taxDeadlineDays: Int? = nil
+        taxDeadlineDays: Int? = nil,
+        countryCode: String? = nil
     ) async {
         let records = (try? fetchAllExpenseRecords()) ?? []
         notificationInboxDisplay = inboxEngine.rebuildInbox(
@@ -66,6 +77,9 @@ extension BuxMuseBrain {
             locale: appSettings.interfaceLocale
         )
         await inboxEngine.syncLocalNotifications(settings: settings, inbox: notificationInboxDisplay)
+        if let countryCode {
+            await rescheduleDailyTipNotification(countryCode: countryCode, settings: settings)
+        }
     }
 
     public func markNotificationRead(_ id: String) {
@@ -124,7 +138,8 @@ extension BuxMuseBrain {
             debts: debts,
             studioAlerts: studioAlerts,
             studioInvoices: studioInvoices,
-            taxDeadlineDays: taxDeadlineDays
+            taxDeadlineDays: taxDeadlineDays,
+            countryCode: countryCode
         )
     }
 }

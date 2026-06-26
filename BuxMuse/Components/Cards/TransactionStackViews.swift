@@ -139,7 +139,11 @@ private struct RecentTransactionLedgerAvatarView: View {
         } else if transaction.category == .income || transaction.amount.value > 0 {
             ledgerSymbolAvatar(symbol: "arrow.down.circle.fill", foreground: .green)
         } else {
-            AsyncMerchantLogoView(merchantName: transaction.merchantName, size: size)
+            AsyncMerchantLogoView(
+                merchantName: transaction.merchantName,
+                categoryFallback: MerchantCategoryAvatarFallback.style(for: transaction.category),
+                size: size
+            )
         }
     }
 

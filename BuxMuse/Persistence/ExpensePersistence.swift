@@ -242,6 +242,11 @@ extension PersistenceController {
             if saved.transactionCategory == .income {
                 let brand = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
                 saved.merchantName = brand.isEmpty ? saved.name : brand
+            } else if merchantSelection != nil {
+                let brand = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !brand.isEmpty {
+                    saved.merchantName = brand
+                }
             } else if saved.merchantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 saved.merchantName = merchant.name
             }
@@ -510,13 +515,16 @@ extension PersistenceController {
                 changed.notes = importNotes
                 didChange = true
             }
-            if changed.name != displayName {
-                changed.name = displayName
-                didChange = true
-            }
-            if changed.merchantName != displayName {
-                changed.merchantName = displayName
-                didChange = true
+
+            if !record.walletCategoryUserConfirmed {
+                if changed.name != displayName {
+                    changed.name = displayName
+                    didChange = true
+                }
+                if changed.merchantName != displayName {
+                    changed.merchantName = displayName
+                    didChange = true
+                }
             }
 
             if !record.walletCategoryUserConfirmed,
@@ -549,7 +557,8 @@ extension PersistenceController {
                 }
             }
 
-            if let merchant = try resolveWalletImportedMerchant(
+            if !record.walletCategoryUserConfirmed,
+               let merchant = try resolveWalletImportedMerchant(
                 resolution: resolution,
                 rawStatementLabel: raw
             ) {

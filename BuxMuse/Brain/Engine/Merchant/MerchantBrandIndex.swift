@@ -109,7 +109,11 @@ enum MerchantBrandIndex {
         var bestScore = 0
         var bestDomain: String?
         for candidate in substringCandidates {
-            guard normalized.contains(candidate.token) || compact.contains(candidate.token) else { continue }
+            guard matchesToken(
+                candidate.token,
+                normalized: normalized,
+                compact: compact
+            ) else { continue }
             var score = candidate.tokenLength * 10
             if candidate.countries.isEmpty || candidate.countries.contains(country) {
                 score += 60
@@ -122,5 +126,73 @@ enum MerchantBrandIndex {
             }
         }
         return bestDomain
+    }
+
+    /// Wallet-mangled compact labels: `nq82famazon` → Amazon, `robloxcorp` → Roblox.
+    nonisolated static func embeddedBrandToken(in compact: String) -> String? {
+        let normalized = compact.lowercased().filter { $0.isLetter || $0.isNumber }
+        guard normalized.count >= 5 else { return nil }
+
+        var bestToken: String?
+        var bestLength = 0
+        for candidate in substringCandidates where candidate.token.count >= 4 {
+            guard matchesEmbeddedToken(candidate.token, in: normalized) else { continue }
+            if candidate.token.count > bestLength {
+                bestLength = candidate.token.count
+                bestToken = candidate.token
+            }
+        }
+        return bestToken
+    }
+
+    nonisolated static func resolveEmbedded(in compact: String, countryISO: String) -> String? {
+        guard let token = embeddedBrandToken(in: compact) else { return nil }
+        return resolve(label: token, countryISO: countryISO)
+    }
+
+    /// Word-boundary token match — avoids `dino` ⊂ `dominos`, `super` ⊂ `supermarkets`, etc.
+    private nonisolated static func matchesToken(
+        _ token: String,
+        normalized: String,
+        compact: String
+    ) -> Bool {
+        if normalized == token || compact == token { return true }
+
+        let words = normalized.split(separator: " ").map(String.init)
+        if words.contains(token) { return true }
+
+        let allowedSuffixes: Set<String> = ["s", "es", "co", "uk", "ie", "gb"]
+        for word in words where word.hasPrefix(token) && word.count > token.count {
+            let suffix = String(word.dropFirst(token.count))
+            guard word.count - token.count <= 2, allowedSuffixes.contains(suffix) else { continue }
+            return true
+        }
+
+        if compact.hasPrefix(token) {
+            let remainder = String(compact.dropFirst(token.count))
+            if remainder.isEmpty { return true }
+            if remainder.count <= 2, allowedSuffixes.contains(remainder) { return true }
+        }
+
+        return false
+    }
+
+    private nonisolated static func matchesEmbeddedToken(_ token: String, in compact: String) -> Bool {
+        guard let range = compact.range(of: token) else { return false }
+
+        let before = String(compact[..<range.lowerBound])
+        let after = String(compact[range.upperBound...])
+
+        if before.count > 10 { return false }
+        if before.filter(\.isNumber).count > 6 { return false }
+
+        if after.isEmpty { return true }
+
+        let allowedAfter: Set<String> = [
+            "corp", "corporation", "ltd", "limited", "inc", "llc", "plc", "co", "uk", "com",
+        ]
+        if allowedAfter.contains(after) { return true }
+        if after.count <= 2, after.allSatisfy(\.isLetter) { return true }
+        return false
     }
 }

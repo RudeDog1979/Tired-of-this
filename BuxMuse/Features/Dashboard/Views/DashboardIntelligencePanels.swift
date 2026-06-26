@@ -14,6 +14,9 @@ struct DashboardFeatureInsightStrips: View {
 
     let strips: [FeatureInsightStrip]
     var onOpenStudioSettings: (() -> Void)?
+    var onOpenPaymentSettings: (() -> Void)?
+    var onOpenExpenses: (() -> Void)?
+    var onDismissHost: (() -> Void)?
 
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
@@ -61,7 +64,7 @@ struct DashboardFeatureInsightStrips: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if !strip.isFeatureEnabled || !strip.hasData, let cta = strip.ctaLabel {
-                Button(action: { onOpenStudioSettings?() }) {
+                Button(action: { handleStripCTA(strip) }) {
                     Text(BuxInsightCopy.copy(cta, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
@@ -75,6 +78,22 @@ struct DashboardFeatureInsightStrips: View {
         .frame(width: 168, alignment: .leading)
         .dashboardMaterialCardChrome(strip.hasData ? .filled : .outlined)
         .opacity(strip.isFeatureEnabled ? 1 : 0.72)
+    }
+
+    private func handleStripCTA(_ strip: FeatureInsightStrip) {
+        switch strip.id {
+        case "payment_sources":
+            if strip.isFeatureEnabled {
+                onDismissHost?()
+                onOpenExpenses?()
+            } else {
+                onDismissHost?()
+                onOpenPaymentSettings?()
+            }
+        default:
+            onDismissHost?()
+            onOpenStudioSettings?()
+        }
     }
 
     private func accent(for name: String) -> Color {
@@ -96,12 +115,14 @@ struct DashboardInsightsPanel: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var insightsViewModel: InsightsViewModel
+    @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
 
     let categorySlideDirection: Int
     let categoryMotionToken: UUID
     let isScreenLoaded: Bool
     var showsFeatureStrips: Bool = true
     var onOpenStudioSettings: (() -> Void)?
+    var onDismissHost: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: BuxTokens.block) {
@@ -110,7 +131,10 @@ struct DashboardInsightsPanel: View {
             if showsFeatureStrips {
                 DashboardFeatureInsightStrips(
                     strips: insightsViewModel.featureStrips,
-                    onOpenStudioSettings: onOpenStudioSettings
+                    onOpenStudioSettings: onOpenStudioSettings,
+                    onOpenPaymentSettings: { navigationCoordinator.openPaymentSettings() },
+                    onOpenExpenses: { navigationCoordinator.openExpensesTab() },
+                    onDismissHost: onDismissHost
                 )
                 .buxDashboardCategoryCard(index: 2, direction: categorySlideDirection, motionToken: categoryMotionToken)
             }

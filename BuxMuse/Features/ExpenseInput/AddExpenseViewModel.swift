@@ -704,8 +704,12 @@ public final class AddExpenseViewModel: ObservableObject {
             record.financeKitTransactionId = existing.financeKitTransactionId
             record.walletAccountId = existing.walletAccountId
             record.walletIsPending = existing.walletIsPending
-            record.walletCategoryUserConfirmed = existing.walletCategoryUserConfirmed
             record.walletCategoryConfidence = existing.walletCategoryConfidence
+            if existing.financeKitTransactionId != nil {
+                record.walletCategoryUserConfirmed = true
+            } else {
+                record.walletCategoryUserConfirmed = existing.walletCategoryUserConfirmed
+            }
             if record.incomeRole == nil {
                 record.incomeRole = existing.incomeRole
             }
@@ -913,7 +917,13 @@ public final class AddExpenseViewModel: ObservableObject {
 
     private func reloadEditingRecord() {
         guard let editingId, let record = try? brain.fetchExpenseRecord(id: editingId) else { return }
-        merchantName = record.name
+        if let merchantId = record.merchantId,
+           let merchant = try? brain.fetchMerchantRecord(id: merchantId),
+           !merchant.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            merchantName = merchant.name
+        } else {
+            merchantName = record.name
+        }
         selectedCategory = record.transactionCategory
         selectedCategoryId = record.categoryId
         selectedMerchantId = record.merchantId

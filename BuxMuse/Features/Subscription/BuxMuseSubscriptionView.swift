@@ -34,43 +34,28 @@ struct BuxMuseSubscriptionView: View {
     }
 
     private var subscriptionContent: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BuxTokens.section) {
-                headerBlock
-                if purchaseManager.didLoadProducts && purchaseManager.products.isEmpty {
-                    productsUnavailableBanner
+        Group {
+            if isBlocking {
+                ScrollView {
+                    subscriptionStack
+                        .padding(.horizontal, BuxTokens.marginRegular)
+                        .padding(.vertical, BuxTokens.section)
                 }
-                billingToggle
-                baseAppCard
-                if isBlocking && !hasStudioPurchaseAccess {
-                    studioUnavailableFootnote
-                    if hasStudioEntitlementWithoutBaseAccess {
-                        studioEntitlementWithoutBaseNotice
-                    }
+                .background {
+                    BuxLandingTintBackground()
                 }
-                if hasStudioPurchaseAccess {
-                    optionalAddOnsDivider
-                    StudioPurchaseChooser(
-                        style: .subscriptionCards,
-                        billingPeriod: $proBillingPeriod,
-                        onPurchaseSimple: { try await StudioPurchaseFlow.purchaseSimple(purchaseManager: purchaseManager) },
-                        onPurchasePro: { _ = try await purchaseManager.purchaseProStudio(period: proBillingPeriod) },
-                        onError: { errorMessage = $0 }
-                    )
-                    .environmentObject(themeManager)
-                    .environmentObject(appSettingsManager)
+                .background(themeManager.screenBackground(for: colorScheme))
+            } else {
+                ScrollView(showsIndicators: false) {
+                    subscriptionStack
+                        .buxScreenContentMargins()
+                        .padding(.top, BuxLayout.tight)
+                        .padding(.bottom, 32)
                 }
-                enterpriseBlock
-                footerBlock
-                restoreButton
+                .buxSettingsDrillInChrome()
+                .scrollDismissesKeyboard(.interactively)
             }
-            .padding(.horizontal, BuxTokens.marginRegular)
-            .padding(.vertical, BuxTokens.section)
         }
-        .background {
-            BuxLandingTintBackground()
-        }
-        .background(themeManager.screenBackground(for: colorScheme))
         .buxCatalogNavigationTitle(isBlocking ? "Subscribe to continue" : "Subscription")
         .navigationBarTitleDisplayMode(.inline)
         .alert(
@@ -88,6 +73,38 @@ struct BuxMuseSubscriptionView: View {
         }
         .task {
             await purchaseManager.loadProducts()
+        }
+    }
+
+    private var subscriptionStack: some View {
+        VStack(alignment: .leading, spacing: BuxTokens.section) {
+            headerBlock
+            if purchaseManager.didLoadProducts && purchaseManager.products.isEmpty {
+                productsUnavailableBanner
+            }
+            billingToggle
+            baseAppCard
+            if isBlocking && !hasStudioPurchaseAccess {
+                studioUnavailableFootnote
+                if hasStudioEntitlementWithoutBaseAccess {
+                    studioEntitlementWithoutBaseNotice
+                }
+            }
+            if hasStudioPurchaseAccess {
+                optionalAddOnsDivider
+                StudioPurchaseChooser(
+                    style: .subscriptionCards,
+                    billingPeriod: $proBillingPeriod,
+                    onPurchaseSimple: { try await StudioPurchaseFlow.purchaseSimple(purchaseManager: purchaseManager) },
+                    onPurchasePro: { _ = try await purchaseManager.purchaseProStudio(period: proBillingPeriod) },
+                    onError: { errorMessage = $0 }
+                )
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+            }
+            enterpriseBlock
+            footerBlock
+            restoreButton
         }
     }
 

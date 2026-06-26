@@ -53,25 +53,31 @@ enum FeatureInsightStripEngine {
 
         // Payment sources
         let creditInsight = PaymentSourceInsightsEngine.generateInsights(transactions: transactions, locale: locale).first
+        let paymentTrackingOn = store.paymentSourceTrackingEnabled
         strips.append(
             FeatureInsightStrip(
                 id: "payment_sources",
                 title: BuxLocalizedString.string("Credit & BNPL", locale: locale),
                 value: creditInsight?.value ?? BuxLocalizedString.string(
-                    store.paymentSourceTrackingEnabled ? "Tag expenses" : "Off",
+                    paymentTrackingOn ? "No tags yet" : "Off",
                     locale: locale
                 ),
                 subtitle: creditInsight?.description ?? BuxLocalizedString.string(
-                    "Enable payment tagging in Settings",
+                    paymentTrackingOn
+                        ? "When adding an expense, expand How did you pay? to tag credit or BNPL."
+                        : "Enable payment tagging in Settings",
                     locale: locale
                 ),
                 systemIcon: "creditcard.trianglebadge.exclamationmark",
                 accentColorName: "orange",
-                isFeatureEnabled: store.paymentSourceTrackingEnabled,
+                isFeatureEnabled: paymentTrackingOn,
                 hasData: creditInsight != nil,
-                ctaLabel: store.paymentSourceTrackingEnabled
+                ctaLabel: creditInsight != nil
                     ? nil
-                    : BuxLocalizedString.string("Settings → Payment Sources", locale: locale)
+                    : BuxLocalizedString.string(
+                        paymentTrackingOn ? "Go to Expenses" : "Settings → Payment Sources",
+                        locale: locale
+                    )
             )
         )
 

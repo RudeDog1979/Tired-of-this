@@ -589,6 +589,8 @@ final class AppContainer: ObservableObject {
             settings.$studioInvoiceRemindersEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$taxDeadlineRemindersEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$dailySummaryEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$dailyTipNotificationsEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
+            settings.$quietHoursEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$studioEnabled.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$quietHoursStartHour.dropFirst().map { _ in () }.eraseToAnyPublisher(),
             settings.$quietHoursStartMinute.dropFirst().map { _ in () }.eraseToAnyPublisher(),

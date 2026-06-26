@@ -11,8 +11,8 @@ enum SalaryPayrollMatcher {
     static let salaryRole = "salary"
     private static let paydayWindowDays = 3
 
-    static func isSalaryTagged(_ record: ExpenseRecord) -> Bool {
-        record.incomeRole == salaryRole
+    nonisolated static func isSalaryTagged(_ record: ExpenseRecord) -> Bool {
+        record.isSalaryTagged
     }
 
     static func normalizeMatchKey(from label: String) -> String {

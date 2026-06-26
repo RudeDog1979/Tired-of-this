@@ -57,7 +57,6 @@ enum MerchantDomainResolver {
     }
 
     /// Primary resolver used by logo fetch + merchant persistence.
-    /// Brand catalog always wins; never squish wallet garbage into fake `.com` hosts.
     nonisolated static func resolveDomain(
         for merchantName: String,
         countryISO: String? = nil,
@@ -69,27 +68,108 @@ enum MerchantDomainResolver {
                 ?? currentCountryISO()
         ).uppercased()
 
-        if let brandDomain = MerchantBrandIndex.resolve(label: merchantName, countryISO: country) {
-            return brandDomain
+        for candidate in MerchantLabelParser.resolveCandidates(from: merchantName) {
+            if let domain = resolveCandidate(candidate, countryISO: country) {
+                return domain
+            }
         }
 
-        if let catalogDomain = MerchantCatalog.domain(for: merchantName) {
-            return catalogDomain
+        return guessDomainFromBrandTokens(
+            MerchantLabelParser.brandTokens(from: merchantName),
+            countryISO: country
+        )
+    }
+
+    private nonisolated static func resolveCandidate(_ label: String, countryISO: String) -> String? {
+        if let domain = MerchantAliasIndex.domain(for: label), isPlausibleLogoHost(domain) {
+            return domain
+        }
+        if let domain = MerchantBrandIndex.resolve(label: label, countryISO: countryISO),
+           isPlausibleLogoHost(domain) {
+            return domain
+        }
+        if let domain = MerchantCatalog.domain(for: label, allowFuzzy: false), isPlausibleLogoHost(domain) {
+            return domain
         }
 
-        if let legacy = legacyKnownMerchants[MerchantLogoEngine.normalizeMerchantName(merchantName)] {
+        let normalized = MerchantLogoEngine.normalizeMerchantName(label)
+        if let legacy = legacyKnownMerchants[normalized], isPlausibleLogoHost(legacy) {
             return legacy
         }
 
         let intelligence = WalletStatementIntelligence.resolve(
-            rawLabel: merchantName,
+            rawLabel: label,
             contexts: []
         )
-        if intelligence.confidence == .high, let domain = intelligence.domain, isPlausibleLogoHost(domain) {
+        if intelligence.confidence == .high,
+           let domain = intelligence.domain,
+           isPlausibleLogoHost(domain) {
             return domain
         }
 
         return nil
+    }
+
+    /// Brand-led statement labels → token + country TLD (Domino Pizza Milton → dominos.co.uk).
+    private nonisolated static func guessDomainFromBrandTokens(
+        _ words: [String],
+        countryISO: String
+    ) -> String? {
+        guard !words.isEmpty, words.count <= 6 else { return nil }
+        let joined = words.joined(separator: " ")
+        guard joined.rangeOfCharacter(from: .decimalDigits) == nil else { return nil }
+
+        let qualifies: Bool
+        if words.count == 1 {
+            qualifies = words[0].count >= 4 && !categoryDescriptorTokens.contains(words[0])
+        } else {
+            qualifies = words.contains { categoryDescriptorTokens.contains($0) }
+        }
+        guard qualifies else { return nil }
+
+        let primary = words[0]
+        guard primary.count >= 4, primary.count <= 18, primary.allSatisfy(\.isLetter) else { return nil }
+
+        for stem in domainStems(
+            for: primary,
+            preferPlural: words.contains { categoryDescriptorTokens.contains($0) }
+        ) {
+            for suffix in MerchantDomainTLDTable.suffixes(for: countryISO) {
+                let host = stem + suffix
+                if isPlausibleLogoHost(host) { return host }
+            }
+        }
+        return nil
+    }
+
+    private nonisolated static let categoryDescriptorTokens: Set<String> = [
+        "pizza", "coffee", "shop", "store", "market", "express", "mobile", "online",
+        "restaurant", "cafe", "bakery", "pharmacy", "supermarket", "grocery", "foods",
+        "kitchen", "grill", "burger", "chicken", "sushi", "delivery", "services",
+    ]
+
+    private nonisolated static func domainStems(for primary: String, preferPlural: Bool = false) -> [String] {
+        var stems: [String] = []
+        func append(_ value: String) {
+            guard !value.isEmpty, !stems.contains(value) else { return }
+            stems.append(value)
+        }
+
+        if preferPlural, !primary.hasSuffix("s") {
+            append(primary + "s")
+            append(primary)
+            append(primary + "es")
+        } else {
+            append(primary)
+            if !primary.hasSuffix("s") {
+                append(primary + "s")
+                append(primary + "es")
+            }
+        }
+        if primary.hasSuffix("s"), primary.count > 3 {
+            append(String(primary.dropLast()))
+        }
+        return stems
     }
 
     /// Rejects wallet-mangled hosts like `nq82famazon.co.uk` or `wasabi161victorialondon.com`.

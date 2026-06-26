@@ -226,6 +226,7 @@ struct DataSettingsView: View {
                 BuxFormRowDivider()
                 Button {
                     LightweightLogoCache.shared.clearCacheSynchronously()
+                    MerchantLogoNegativeCache.clearAll()
                     showLogoCacheClearedAlert = true
                     refreshStorageBreakdown()
                 } label: {
@@ -615,6 +616,7 @@ struct DataSettingsView: View {
         PersonalSyncConflictStore.shared.clearAll()
         tutorialCoordinator.tearDownForFactoryReset()
         LightweightLogoCache.shared.clearCacheSynchronously()
+        MerchantLogoNegativeCache.clearAll()
         SimpleStudioScanImageStore.purgeAllStoredImages()
         TaxTranslationCache.clearAll()
         exportURL = nil

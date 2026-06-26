@@ -202,6 +202,28 @@ public final class SettingsStore: ObservableObject {
     @Published public var studioInvoiceRemindersEnabled: Bool = true
     @Published public var taxDeadlineRemindersEnabled: Bool = true
     @Published public var dailySummaryEnabled: Bool = false
+    @Published public var quietHoursEnabled: Bool = {
+        if UserDefaults.standard.object(forKey: "buxmuse.quiethours.enabled") == nil {
+            return false
+        }
+        return UserDefaults.standard.bool(forKey: "buxmuse.quiethours.enabled")
+    }() {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(quietHoursEnabled, forKey: "buxmuse.quiethours.enabled")
+        }
+    }
+    @Published public var dailyTipNotificationsEnabled: Bool = {
+        if UserDefaults.standard.object(forKey: "buxmuse.dailytip.notifications") == nil {
+            return true
+        }
+        return UserDefaults.standard.bool(forKey: "buxmuse.dailytip.notifications")
+    }() {
+        didSet {
+            guard isLoaded else { return }
+            UserDefaults.standard.set(dailyTipNotificationsEnabled, forKey: "buxmuse.dailytip.notifications")
+        }
+    }
     @Published public var quietHoursStartHour: Int = 22
     @Published public var quietHoursStartMinute: Int = 0
     @Published public var quietHoursEndHour: Int = 7

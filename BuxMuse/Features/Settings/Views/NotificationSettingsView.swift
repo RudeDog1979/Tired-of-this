@@ -101,26 +101,53 @@ struct NotificationSettingsView: View {
                         }
                         .tint(themeManager.contrastAccentColor(for: colorScheme))
                         .buxFormFieldPadding()
+                        BuxFormRowDivider()
+                        Toggle(isOn: $store.dailyTipNotificationsEnabled) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                BuxCatalogDynamicText(key: "Daily tip & scam alert")
+                                    .font(.system(size: 15, weight: .semibold))
+                                BuxCatalogDynamicText(key: "Morning notification with today's money tip and scam watch-out")
+                                    .font(.system(size: 11))
+                                    .buxLabelSecondary()
+                            }
+                        }
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
+                        .buxFormFieldPadding()
                     }
 
                     BuxFormSection(title: "Quiet hours") {
-                        DatePicker(
-                            selection: quietHoursStartBinding,
-                            displayedComponents: .hourAndMinute
-                        ) {
-                            Text(BuxCatalogLabel.string("Silence starts", locale: appSettingsManager.interfaceLocale))
+                        Toggle(isOn: $store.quietHoursEnabled) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                BuxCatalogDynamicText(key: "Enable quiet hours")
+                                    .font(.system(size: 15, weight: .semibold))
+                                BuxCatalogDynamicText(key: "Silence alerts during the hours you choose")
+                                    .font(.system(size: 11))
+                                    .buxLabelSecondary()
+                            }
                         }
-                            .tint(themeManager.contrastAccentColor(for: colorScheme))
-                            .buxFormFieldPadding()
-                        BuxFormRowDivider()
-                        DatePicker(
-                            selection: quietHoursEndBinding,
-                            displayedComponents: .hourAndMinute
-                        ) {
-                            Text(BuxCatalogLabel.string("Silence ends", locale: appSettingsManager.interfaceLocale))
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
+                        .buxFormFieldPadding()
+
+                        if store.quietHoursEnabled {
+                            BuxFormRowDivider()
+                            DatePicker(
+                                selection: quietHoursStartBinding,
+                                displayedComponents: .hourAndMinute
+                            ) {
+                                Text(BuxCatalogLabel.string("Silence starts", locale: appSettingsManager.interfaceLocale))
+                            }
+                                .tint(themeManager.contrastAccentColor(for: colorScheme))
+                                .buxFormFieldPadding()
+                            BuxFormRowDivider()
+                            DatePicker(
+                                selection: quietHoursEndBinding,
+                                displayedComponents: .hourAndMinute
+                            ) {
+                                Text(BuxCatalogLabel.string("Silence ends", locale: appSettingsManager.interfaceLocale))
+                            }
+                                .tint(themeManager.contrastAccentColor(for: colorScheme))
+                                .buxFormFieldPadding()
                         }
-                            .tint(themeManager.contrastAccentColor(for: colorScheme))
-                            .buxFormFieldPadding()
                     }
                 }
             }
@@ -136,6 +163,8 @@ struct NotificationSettingsView: View {
         .onChange(of: store.studioInvoiceRemindersEnabled) { _, _ in store.save() }
         .onChange(of: store.taxDeadlineRemindersEnabled) { _, _ in store.save() }
         .onChange(of: store.dailySummaryEnabled) { _, _ in store.save() }
+        .onChange(of: store.dailyTipNotificationsEnabled) { _, _ in store.save() }
+        .onChange(of: store.quietHoursEnabled) { _, _ in store.save() }
     }
 
     private var quietHoursStartBinding: Binding<Date> {

@@ -17,6 +17,8 @@ struct BuxNotificationSettingsSnapshot: Sendable {
     var quietHoursStartMinute: Int
     var quietHoursEndHour: Int
     var quietHoursEndMinute: Int
+    var quietHoursEnabled: Bool
+    var dailyTipNotificationsEnabled: Bool
 
     @MainActor
     init(settings: SettingsStore) {
@@ -30,6 +32,8 @@ struct BuxNotificationSettingsSnapshot: Sendable {
         quietHoursStartMinute = settings.quietHoursStartMinute
         quietHoursEndHour = settings.quietHoursEndHour
         quietHoursEndMinute = settings.quietHoursEndMinute
+        quietHoursEnabled = settings.quietHoursEnabled
+        dailyTipNotificationsEnabled = settings.dailyTipNotificationsEnabled
     }
 
     @MainActor
@@ -49,7 +53,8 @@ enum BuxNotificationPolicy {
         "buxmuse.expense.renewal.",
         "buxmuse.debt.due.",
         "buxmuse.studio.timer.",
-        "buxmuse.backup.reminder"
+        "buxmuse.backup.reminder",
+        "buxmuse.daily.tip"
     ]
 
     static func notificationsAllowed(_ settings: BuxNotificationSettingsSnapshot) -> Bool {
@@ -75,6 +80,7 @@ enum BuxNotificationPolicy {
     }
 
     static func isWithinQuietHours(_ settings: BuxNotificationSettingsSnapshot, at date: Date = Date()) -> Bool {
+        guard settings.quietHoursEnabled else { return false }
         let calendar = Calendar.current
         let components = calendar.dateComponents([.hour, .minute], from: date)
         guard let hour = components.hour, let minute = components.minute else { return false }

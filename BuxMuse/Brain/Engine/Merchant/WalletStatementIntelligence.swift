@@ -141,7 +141,19 @@ public enum WalletStatementIntelligence {
             )
         }
 
+        let countryISO = MerchantDomainResolver.currentCountryISO()
         let stripped = stripProcessorPrefixes(trimmed)
+        if let aliasDomain = resolveAliasDomain(stripped, countryISO: countryISO) {
+            return WalletStatementResolution(
+                canonicalName: titleCaseDomainBrand(aliasDomain),
+                domain: aliasDomain,
+                matchedMerchantId: nil,
+                confidence: .high,
+                rawLabel: rawLabel,
+                matchSource: .tokenHeuristic
+            )
+        }
+
         if let extracted = extractDomain(from: stripped) {
             let canonical = titleCaseDomainBrand(extracted)
             return WalletStatementResolution(
@@ -196,7 +208,6 @@ public enum WalletStatementIntelligence {
         }
 
         let canonical = canonicalName(from: tokens, fallback: stripped)
-        let countryISO = MerchantDomainResolver.currentCountryISO()
         if let brandDomain = MerchantBrandIndex.resolve(label: stripped, countryISO: countryISO) {
             return WalletStatementResolution(
                 canonicalName: canonical,
@@ -277,6 +288,24 @@ public enum WalletStatementIntelligence {
     }
 
     // MARK: - Domain extraction
+
+    private nonisolated static func resolveAliasDomain(_ label: String, countryISO: String) -> String? {
+        for candidate in MerchantLabelParser.resolveCandidates(from: label) {
+            if let domain = MerchantAliasIndex.domain(for: candidate),
+               MerchantDomainResolver.isPlausibleLogoHost(domain) {
+                return domain
+            }
+            if let domain = MerchantBrandIndex.resolve(label: candidate, countryISO: countryISO),
+               MerchantDomainResolver.isPlausibleLogoHost(domain) {
+                return domain
+            }
+            if let domain = MerchantCatalog.domain(for: candidate, allowFuzzy: false),
+               MerchantDomainResolver.isPlausibleLogoHost(domain) {
+                return domain
+            }
+        }
+        return nil
+    }
 
     private nonisolated static let embeddedDomainTLDPattern =
         #"co\.uk|com\.mx|com\.do|com\.ar|com\.br|com\.co|com\.ec|com\.pe|com\.gt|com\.hn|com\.sv|com\.ni|com\.pa|co\.cr|com\.pl|co\.pl|com|net|org|io|app|es|mx|do|pl|uk|de|fr|eu"#
@@ -395,14 +424,10 @@ public enum WalletStatementIntelligence {
         normalizedFull: String,
         contexts: [WalletMerchantContext]
     ) -> WalletMerchantContext? {
-        let rawLower = raw.lowercased()
         for context in contexts {
             for label in context.statementLabels {
                 let norm = MerchantLogoEngine.normalizeMerchantName(label)
                 if norm == normalizedFull || label.caseInsensitiveCompare(raw) == .orderedSame {
-                    return context
-                }
-                if rawLower.contains(label.lowercased()) || label.lowercased().contains(rawLower) {
                     return context
                 }
             }
@@ -456,6 +481,8 @@ public enum WalletStatementIntelligence {
            let hit = contexts.first(where: { $0.domain?.lowercased() == domain.lowercased() }) {
             return hit
         }
+        // A concrete wallet domain should not fuzzy-link to an unrelated merchant record.
+        if domain != nil { return nil }
         return fuzzyMatchMerchant(tokens: tokens, normalizedFull: normalized, contexts: contexts)?.context
     }
 

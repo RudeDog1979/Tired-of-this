@@ -38,6 +38,10 @@ public struct MerchantLogoEngine {
         // Remove emojis
         clean = clean.filter { !$0.isEmoji }
 
+        // Domino's → dominos, Nando's → nandos (keeps brand stem before punctuation strip)
+        clean = clean.replacingOccurrences(of: "'s", with: "s")
+        clean = clean.replacingOccurrences(of: "\u{2019}s", with: "s")
+
         // Remove common suffixes
         let suffixes = ["ltd", "inc", "s.a.", "sa", "llc", "corp", "co", "incorporated", "limited"]
         for suffix in suffixes {
@@ -119,7 +123,7 @@ public struct MerchantLogoEngine {
             guard shouldFetch else { return }
             var plans: [FetchPlan] = []
             var seen = Set<String>()
-            for input in inputs {
+            for input in inputs.prefix(32) {
                 let plan: FetchPlan?
                 if let domain = input.domain, !domain.isEmpty {
                     plan = fetchPlanForKnownDomain(domain) ?? fetchPlan(for: input.name, knownDomain: domain)
@@ -196,6 +200,7 @@ public struct MerchantLogoEngine {
             LightweightLogoCache.shared.saveImage(normalized, forKey: plan.cacheKey)
             return normalized
         }
+        MerchantLogoNegativeCache.markFailure(plan.cacheKey)
         return nil
     }
 

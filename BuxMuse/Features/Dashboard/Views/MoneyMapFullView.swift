@@ -134,10 +134,12 @@ struct MoneyMapFullView: View {
                     onOpenStudioSettings: {
                         dismiss()
                         onOpenStudioSettings?()
-                    }
+                    },
+                    onDismissHost: { dismiss() }
                 )
                 .environmentObject(themeManager)
                 .environmentObject(insightsViewModel)
+                .environmentObject(navigationCoordinator)
                 .buxScreenEntrance(index: 2, isVisible: appeared)
 
                 if settingsStore.burnoutGuardEnabled {

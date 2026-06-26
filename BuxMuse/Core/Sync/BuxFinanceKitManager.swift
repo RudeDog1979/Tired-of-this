@@ -362,7 +362,7 @@ public final class BuxFinanceKitManager: ObservableObject {
     private func incrementalSyncStartDate(relativeTo now: Date) -> Date {
         let calendar = Calendar.current
         if let lastSync = SettingsStore.shared.appleWalletLastSyncDate {
-            return calendar.date(byAdding: .day, value: -7, to: lastSync) ?? lastSync
+            return calendar.date(byAdding: .day, value: -2, to: lastSync) ?? lastSync
         }
         return calendar.date(byAdding: .month, value: -1, to: now) ?? now
     }
@@ -381,9 +381,10 @@ public final class BuxFinanceKitManager: ObservableObject {
         
         do {
             let isAuthorized = try await checkAuthorizationStatus()
+            var ledgerChanged = false
 
             #if targetEnvironment(simulator)
-            try await importMockTransactions(since: startDate, now: now)
+            ledgerChanged = try await importMockTransactions(since: startDate, now: now)
             #else
             guard isAuthorized else {
                 if isInitialHistoricalImport {
@@ -396,7 +397,7 @@ public final class BuxFinanceKitManager: ObservableObject {
                 }
                 return
             }
-            try await importRealTransactions(since: startDate, now: now)
+            ledgerChanged = try await importRealTransactions(since: startDate, now: now)
             #endif
 
             SettingsStore.shared.appleWalletLastSyncDate = now
@@ -404,10 +405,13 @@ public final class BuxFinanceKitManager: ObservableObject {
                 SettingsStore.shared.appleWalletInitialSyncCompleted = true
                 SettingsStore.shared.appleWalletAutoSyncEnabled = true
                 _ = try persistence.reconcileWalletImports()
+                ledgerChanged = true
             }
 
-            await flushWalletExpensesToCloud()
-            NotificationCenter.default.post(name: .buxMuseWalletSyncDidComplete, object: nil)
+            if ledgerChanged {
+                await flushWalletExpensesToCloud()
+                NotificationCenter.default.post(name: .buxMuseWalletSyncDidComplete, object: nil)
+            }
         } catch {
             lastSyncError = error.localizedDescription
         }
@@ -421,7 +425,8 @@ public final class BuxFinanceKitManager: ObservableObject {
     }
     
     /// Real Apple Wallet transaction fetch using FinanceStore.
-    private func importRealTransactions(since startDate: Date, now: Date) async throws {
+    @discardableResult
+    private func importRealTransactions(since startDate: Date, now: Date) async throws -> Bool {
         let store = FinanceStore.shared
         
         let queryPredicate = #Predicate<FinanceKit.Transaction> { transaction in
@@ -437,14 +442,25 @@ public final class BuxFinanceKitManager: ObservableObject {
         
         let walletTransactions = try await store.transactions(query: query)
         var merchantContexts = try persistence.buildWalletMerchantContexts()
+        var didWrite = false
 
         for tx in walletTransactions {
-            _ = try upsertWalletTransaction(tx, now: now, merchantContexts: &merchantContexts)
+            if try upsertWalletTransaction(tx, now: now, merchantContexts: &merchantContexts) {
+                didWrite = true
+            }
         }
 
-        _ = try await importOpenWalletTransactions(now: now, merchantContexts: &merchantContexts)
-        _ = try await refreshTrackedPendingWalletTransactions(now: now, merchantContexts: &merchantContexts)
-        _ = try? persistence.reconcileWalletImports()
+        if try await importOpenWalletTransactions(now: now, merchantContexts: &merchantContexts) {
+            didWrite = true
+        }
+        if try await refreshTrackedPendingWalletTransactions(now: now, merchantContexts: &merchantContexts) {
+            didWrite = true
+        }
+        let reconciled = (try? persistence.reconcileWalletImports()) ?? 0
+        if reconciled > 0 {
+            didWrite = true
+        }
+        return didWrite
     }
 
     /// Pulls all open (pending/authorized) Wallet transactions regardless of last sync window.
@@ -806,18 +822,21 @@ public final class BuxFinanceKitManager: ObservableObject {
         ) else { return false }
 
         var changed = false
+        let userLocked = record.walletCategoryUserConfirmed
         let importNotes = WalletStatementIntelligence.walletImportNotes(rawLabel: classification.rawLabel)
         if record.notes != importNotes {
             record.notes = importNotes
             changed = true
         }
-        if record.name != classification.displayName {
-            record.name = classification.displayName
-            changed = true
-        }
-        if record.merchantName != classification.displayName {
-            record.merchantName = classification.displayName
-            changed = true
+        if !userLocked {
+            if record.name != classification.displayName {
+                record.name = classification.displayName
+                changed = true
+            }
+            if record.merchantName != classification.displayName {
+                record.merchantName = classification.displayName
+                changed = true
+            }
         }
 
         if WalletTransactionClassifier.shouldRefreshCategory(
@@ -850,7 +869,8 @@ public final class BuxFinanceKitManager: ObservableObject {
             }
         }
 
-        if let merchant = try persistence.resolveWalletImportedMerchant(
+        if !userLocked,
+           let merchant = try persistence.resolveWalletImportedMerchant(
             resolution: classification.resolution,
             rawStatementLabel: classification.rawLabel
         ) {
@@ -934,7 +954,8 @@ public final class BuxFinanceKitManager: ObservableObject {
         return Self.knownSubscriptionKeywords.contains(where: { lower.contains($0) })
     }
     
-    private func importMockTransactions(since startDate: Date, now: Date) async throws {
+    @discardableResult
+    private func importMockTransactions(since startDate: Date, now: Date) async throws -> Bool {
         struct MockTx {
             let id: String
             let name: String
@@ -973,6 +994,7 @@ public final class BuxFinanceKitManager: ObservableObject {
         
         let calendar = Calendar.current
         var merchantContexts = try persistence.buildWalletMerchantContexts()
+        var didWrite = false
         
         for mock in mockData {
             guard let txDate = calendar.date(byAdding: .day, value: -mock.daysAgo, to: now) else { continue }
@@ -986,6 +1008,7 @@ public final class BuxFinanceKitManager: ObservableObject {
                 existing.amountValue = mock.amount
                 existing.updatedAt = now
                 _ = try persistWalletExpense(existing)
+                didWrite = true
                 continue
             }
             
@@ -1029,6 +1052,8 @@ public final class BuxFinanceKitManager: ObservableObject {
             }
             
             _ = try persistWalletExpense(record)
+            didWrite = true
         }
+        return didWrite
     }
 }

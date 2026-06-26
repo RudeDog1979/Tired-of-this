@@ -1294,17 +1294,31 @@ private struct DashboardHeroSection: View {
 
     private var heroNotificationBell: some View {
         let diameter = heroBellSize
-        let hasUnread = brain.notificationInboxDisplay.unreadCount > 0
+        let unreadCount = brain.notificationInboxDisplay.unreadCount
 
         return Button(action: { activeSheet = .notificationInbox }) {
-            Image(systemName: hasUnread ? "bell.fill" : "bell")
-                .font(.system(size: heroBellIconSize, weight: .semibold))
-                .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
-                .frame(width: diameter, height: diameter)
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: unreadCount > 0 ? "bell.fill" : "bell")
+                    .font(.system(size: heroBellIconSize, weight: .semibold))
+                    .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
+                    .frame(width: diameter, height: diameter)
+
+                if unreadCount > 0 {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 12, height: 12)
+                        .overlay {
+                            Circle()
+                                .strokeBorder(Color.white.opacity(0.9), lineWidth: 1.5)
+                        }
+                        .offset(x: 1, y: 1)
+                }
+            }
+            .frame(width: diameter, height: diameter)
         }
         .buxHeroGlassCircleButtonStyle(diameter: diameter)
         .frame(width: diameter, height: diameter)
-        .accessibilityLabel(hasUnread ? "Notifications, unread" : "Notifications")
+        .accessibilityLabel(unreadCount > 0 ? "Notifications, unread" : "Notifications")
     }
 
     private func collapseValue(start: CGFloat, end: CGFloat) -> CGFloat {

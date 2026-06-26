@@ -43,6 +43,9 @@ public final class BuxMuseBrain: ObservableObject {
     private var allExpenseRecordsCache: [ExpenseRecord] = []
     private var expenseLedgerSignature: UInt64 = 0
     private var snapshotRebuildGeneration = 0
+    private var merchantRecordsByID: [UUID: ExpenseMerchantRecord] = [:]
+    private var logoPresentationsByExpenseID: [UUID: MerchantLogoPresentation] = [:]
+    private var logoPresentationTask: Task<Void, Never>?
 
     public var financialEngine: FinancialIntelligenceEngine { financialBridge.engine }
 
@@ -208,24 +211,14 @@ public final class BuxMuseBrain: ObservableObject {
         }
     }
 
-    /// Wallet sync writes straight to GRDB — always re-hydrate ledger + bump revision for tab refresh.
+    /// Wallet sync writes straight to GRDB — re-hydrate ledger only when data actually changed.
     public func refreshExpensesAfterWalletSync() {
         guard !isRefreshingExpenses else { return }
         isRefreshingExpenses = true
         defer { isRefreshingExpenses = false }
         do {
             let all = try persistence.expenseDatabase.fetchAllRecords()
-            expenseLedgerSignature = Self.ledgerSignature(for: all)
-            allExpenseRecordsCache = all
-            expenseRecords = HustleWorkspaceFilter.filter(all) { $0.hustleId }
-            expenseDataRevision += 1
-            loadTransactionsIntoEngine(all.map { $0.toTransaction() })
-            scheduleSnapshotRefresh()
-            financialBridge.objectWillChange.send()
-            NotificationCenter.default.post(name: .buxMuseFinancialDataDidChange, object: nil)
-            if let merchants = try? persistence.fetchAllMerchantRecords() {
-                MerchantLogoEngine.scheduleBulkPrefetch(merchants: merchants)
-            }
+            applyFetchedExpenseRecords(all)
         } catch {
             print("refreshExpensesAfterWalletSync failed: \(error)")
         }
@@ -239,9 +232,48 @@ public final class BuxMuseBrain: ObservableObject {
         allExpenseRecordsCache = all
         expenseRecords = HustleWorkspaceFilter.filter(all) { $0.hustleId }
         expenseDataRevision += 1
+        refreshMerchantRecordsCache()
+        scheduleLogoPresentationRebuild(for: all)
         loadTransactionsIntoEngine(all.map { $0.toTransaction() })
         scheduleSnapshotRefresh()
         financialBridge.objectWillChange.send()
+    }
+
+    private func refreshMerchantRecordsCache() {
+        if let merchants = try? persistence.fetchAllMerchantRecords() {
+            merchantRecordsByID = Dictionary(uniqueKeysWithValues: merchants.map { ($0.id, $0) })
+        }
+    }
+
+    private func scheduleLogoPresentationRebuild(for records: [ExpenseRecord]) {
+        let merchants = merchantRecordsByID
+        logoPresentationTask?.cancel()
+        logoPresentationTask = Task.detached(priority: .utility) { [records] in
+            var map: [UUID: MerchantLogoPresentation] = [:]
+            map.reserveCapacity(records.count)
+            for record in records {
+                if Task.isCancelled { return }
+                let linked = record.merchantId.flatMap { merchants[$0] }
+                map[record.id] = MerchantLogoPresentationEngine.build(
+                    record: record,
+                    linkedMerchant: linked
+                )
+            }
+            let builtMap = map
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                self.logoPresentationsByExpenseID = builtMap
+            }
+        }
+    }
+
+    func merchantLogoSlot(for record: ExpenseRecord) -> MerchantLogoPresentation? {
+        if let cached = logoPresentationsByExpenseID[record.id], cached.showMerchantLogo {
+            return cached
+        }
+        let linked = record.merchantId.flatMap { merchantRecordsByID[$0] }
+        let built = MerchantLogoPresentationEngine.build(record: record, linkedMerchant: linked)
+        return built.showMerchantLogo ? built : nil
     }
 
     private func applyExpenseRecordUpsert(_ record: ExpenseRecord, isNew: Bool) {
@@ -260,12 +292,17 @@ public final class BuxMuseBrain: ObservableObject {
         } else {
             financialEngine.updateTransaction(transaction)
         }
+        logoPresentationsByExpenseID[record.id] = MerchantLogoPresentationEngine.build(
+            record: record,
+            linkedMerchant: record.merchantId.flatMap { merchantRecordsByID[$0] }
+        )
         financialBridge.objectWillChange.send()
         scheduleSnapshotRefresh()
     }
 
     private func applyExpenseRecordDelete(id: UUID) {
         allExpenseRecordsCache.removeAll { $0.id == id }
+        logoPresentationsByExpenseID.removeValue(forKey: id)
         expenseLedgerSignature = Self.ledgerSignature(for: allExpenseRecordsCache)
         expenseRecords = HustleWorkspaceFilter.filter(allExpenseRecordsCache) { $0.hustleId }
         expenseDataRevision += 1
@@ -676,34 +713,40 @@ public final class BuxMuseBrain: ObservableObject {
     }
 
     func merchantLogoContext(for record: ExpenseRecord) -> (name: String, knownDomain: String?)? {
+        guard ExpenseLedgerAvatarPolicy.shouldUseMerchantLogo(for: record) else { return nil }
+
+        let walletLabel = WalletStatementIntelligence.walletRawLabel(for: record)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
         if let merchantId = record.merchantId,
-           let merchant = try? persistence.fetchMerchantRecord(id: merchantId) {
+           let merchant = merchantRecordsByID[merchantId]
+               ?? (try? persistence.fetchMerchantRecord(id: merchantId)) {
+            if merchantRecordsByID[merchantId] == nil {
+                merchantRecordsByID[merchantId] = merchant
+            }
             let linked = merchant.name.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !linked.isEmpty else { return nil }
             let storedDomain = merchant.logoURL.flatMap { MerchantLogoEngine.domain(fromStoredLogoURL: $0) }
-            let resolveLabel = WalletStatementIntelligence.walletRawLabel(for: record)
+            let resolveLabel = walletLabel.isEmpty ? linked : walletLabel
             let resolved = MerchantLogoEngine.resolveDomain(
-                for: resolveLabel.isEmpty ? linked : resolveLabel,
+                for: resolveLabel,
                 currencyCode: record.currencyCode
             )
             let domain = MerchantDomainResolver.preferredLogoDomain(stored: storedDomain, resolved: resolved)
-            return (linked, domain)
-        }
-
-        if record.amountValue > 0 || record.transactionCategory == .income {
-            return nil
+            let fetchName = walletLabel.isEmpty ? linked : walletLabel
+            return (fetchName, domain)
         }
 
         guard let displayName = ExpenseLedgerAvatarPolicy.resolvedMerchantDisplayName(for: record) else {
             return nil
         }
 
-        let resolveLabel = WalletStatementIntelligence.walletRawLabel(for: record)
+        let resolveLabel = walletLabel.isEmpty ? displayName : walletLabel
         let domain = MerchantLogoEngine.resolveDomain(
-            for: resolveLabel.isEmpty ? displayName : resolveLabel,
+            for: resolveLabel,
             currencyCode: record.currencyCode
         )
-        return (displayName, domain)
+        return (resolveLabel, domain)
     }
 
     /// Store/brand string for `AsyncMerchantLogoView` when the user explicitly linked a merchant.
@@ -713,6 +756,7 @@ public final class BuxMuseBrain: ObservableObject {
 
     func updateMerchant(_ record: ExpenseMerchantRecord) throws {
         try persistence.updateMerchant(record)
+        merchantRecordsByID[record.id] = record
     }
 
     @discardableResult

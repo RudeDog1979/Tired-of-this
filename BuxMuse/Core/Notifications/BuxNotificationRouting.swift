@@ -12,6 +12,7 @@ enum BuxNotificationRoute: String, Sendable {
     case studioLogTime = "studio_log_time"
     case backup = "backup"
     case subscription = "subscription"
+    case dailyTip = "daily_tip"
 }
 
 /// Keys written into `UNNotificationContent.userInfo`. Keep in sync with delegate extraction literals.

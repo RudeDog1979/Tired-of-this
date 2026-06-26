@@ -157,7 +157,7 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
     /// User opted out of spend totals — still appears in the ledger.
     public var isExcludedFromSpending: Bool = false
 
-    public var isSalaryTagged: Bool {
+    nonisolated public var isSalaryTagged: Bool {
         incomeRole == "salary"
     }
 
@@ -169,7 +169,7 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         NSDecimalNumber(decimal: amountValue).doubleValue
     }
 
-    public var transactionCategory: TransactionCategory {
+    nonisolated public var transactionCategory: TransactionCategory {
         TransactionCategory(rawValue: categoryRaw) ?? .other
     }
 
@@ -185,8 +185,8 @@ struct ExpenseRecord: Identifiable, Equatable, Hashable {
         return transactionCategory.localizedDisplayName(locale: locale)
     }
 
-    public var isRefund: Bool {
-        amountValue > 0 && transactionCategory != .income
+    nonisolated public var isRefund: Bool {
+        amountValue > 0 && categoryRaw != TransactionCategory.income.rawValue
     }
 
     /// Outflow expenses only — income, refunds, and user-excluded rows stay out of spend totals.
@@ -619,7 +619,7 @@ enum ExpenseTimelineGrouper {
 // MARK: - Category seeding
 
 enum ExpenseCategoryCatalog {
-    static let systemDefinitions: [(TransactionCategory, icon: String, color: String)] = [
+    nonisolated static let systemDefinitions: [(TransactionCategory, icon: String, color: String)] = [
         (.groceries, "cart.fill", "green"),
         (.restaurants, "fork.knife", "orange"),
         (.transport, "car.fill", "blue"),

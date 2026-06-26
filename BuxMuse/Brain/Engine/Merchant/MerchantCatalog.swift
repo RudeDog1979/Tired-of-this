@@ -110,11 +110,15 @@ enum MerchantCatalog {
         return map
     }()
 
-    /// Best domain for logo fetch — exact catalog hit first, then fuzzy name match.
-    nonisolated static func domain(for merchantName: String) -> String? {
+    /// Best domain for logo fetch — exact catalog hit first, then optional fuzzy name match.
+    nonisolated static func domain(for merchantName: String, allowFuzzy: Bool = true) -> String? {
+        if let alias = MerchantAliasIndex.domain(for: merchantName) {
+            return alias
+        }
         let normalized = MerchantLogoEngine.normalizeMerchantName(merchantName)
         guard !normalized.isEmpty else { return nil }
         if let hit = byNormalizedName[normalized] { return hit.domain }
+        guard allowFuzzy else { return nil }
         if let fuzzy = matchingEntries(for: merchantName, limit: 1).first { return fuzzy.domain }
         return nil
     }

@@ -197,6 +197,7 @@ enum MerchantBrandRegionalEntries {
         entry("Cursor", "cursor.com", ["Cursor", "Cursor IDE", "Cursor AI"], []),
         entry("Roblox", "roblox.com", ["Roblox", "Roblox Corp", "RBLX"], []),
         entry("Community Fibre", "communityfibre.co.uk", ["Community Fibre", "CommunityFibre"], ["GB"]),
+        entry("VOXI", "voxi.co.uk", ["VOXI", "Voxi", "WWW.VOXI.COM", "Voxi Mobile"], ["GB"]),
     ]
 
     // MARK: - Global

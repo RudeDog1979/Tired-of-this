@@ -56,4 +56,50 @@ final class MerchantLogoResolutionTests: XCTestCase {
         XCTAssertEqual(resolution.domain, "sainsburys.co.uk")
         XCTAssertEqual(resolution.confidence, .high)
     }
+
+    func testDominosPizzaResolvesUKDomainWithoutHardcoding() {
+        UserDefaults.standard.set("GB", forKey: "selected_country_id")
+        let domain = MerchantDomainResolver.resolveDomain(for: "Domino's Pizza")
+        XCTAssertEqual(domain, "dominos.co.uk")
+    }
+
+    func testDominosPossessiveNormalizesWithSpace() {
+        let normalized = MerchantLogoEngine.normalizeMerchantName("Domino's Pizza")
+        XCTAssertEqual(normalized, "dominos pizza")
+    }
+
+    func testPayPalTickerPYPLResolvesDomain() {
+        XCTAssertEqual(MerchantAliasIndex.domain(for: "PYPL"), "paypal.com")
+        XCTAssertEqual(MerchantDomainResolver.resolveDomain(for: "PYPL"), "paypal.com")
+    }
+
+    func testDominoPizzaMiltonResolvesUKDomain() {
+        UserDefaults.standard.set("GB", forKey: "selected_country_id")
+        let domain = MerchantDomainResolver.resolveDomain(for: "Domino Pizza Milton")
+        XCTAssertEqual(domain, "dominos.co.uk")
+    }
+
+    func testDominoPizzaMiltonCandidatesStripLocation() {
+        let tokens = MerchantLabelParser.brandTokens(from: "Domino Pizza Milton")
+        XCTAssertEqual(tokens, ["domino", "pizza"])
+    }
+
+    func testConsonantSkeletonPayPal() {
+        XCTAssertEqual(MerchantAliasIndex.consonantSkeleton("PayPal"), "pypl")
+    }
+
+    func testMangledAmazonCompactResolvesDomain() {
+        UserDefaults.standard.set("GB", forKey: "selected_country_id")
+        XCTAssertEqual(MerchantBrandIndex.embeddedBrandToken(in: "nq82famazon"), "amazon")
+        XCTAssertEqual(MerchantDomainResolver.resolveDomain(for: "NQ82FAMAZON"), "amazon.co.uk")
+    }
+
+    func testRobloxCorpCompactResolvesDomain() {
+        XCTAssertEqual(MerchantBrandIndex.embeddedBrandToken(in: "robloxcorp"), "roblox")
+        XCTAssertEqual(MerchantDomainResolver.resolveDomain(for: "ROBLOXCORP"), "roblox.com")
+    }
+
+    func testPayPalFullNameResolvesDomain() {
+        XCTAssertEqual(MerchantDomainResolver.resolveDomain(for: "PayPal"), "paypal.com")
+    }
 }

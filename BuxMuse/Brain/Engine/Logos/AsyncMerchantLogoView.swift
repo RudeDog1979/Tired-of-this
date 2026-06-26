@@ -10,10 +10,12 @@ import SwiftUI
 
 public struct AsyncMerchantLogoView: View {
     public let merchantName: String
-    /// Resolved domain from merchant record or offline resolver — skips guesswork at fetch time.
+    /// Pre-resolved domain — stable cache key; resolution never runs on the main thread here.
     public var knownDomain: String?
     /// Changes when a wallet/manual merchant link is created so the list picks up new logos.
     public var merchantRecordId: UUID?
+    /// Category SF Symbol while loading / when favicon fetch fails (expense list). Nil → monogram.
+    public var categoryFallback: MerchantCategoryAvatarStyle?
     public var size: CGFloat = 44
 
     @State private var image: UIImage?
@@ -23,11 +25,13 @@ public struct AsyncMerchantLogoView: View {
         merchantName: String,
         knownDomain: String? = nil,
         merchantRecordId: UUID? = nil,
+        categoryFallback: MerchantCategoryAvatarStyle? = nil,
         size: CGFloat = 44
     ) {
         self.merchantName = merchantName
         self.knownDomain = knownDomain
         self.merchantRecordId = merchantRecordId
+        self.categoryFallback = categoryFallback
         self.size = size
     }
 
@@ -46,19 +50,28 @@ public struct AsyncMerchantLogoView: View {
         merchantName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private var cacheKey: String? {
+        let domain = knownDomain?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        return (domain?.isEmpty == false) ? domain : nil
+    }
+
+    /// Domain-first when known — prevents list/edit thrash when batch resolver finishes.
     private var loadIdentity: String {
-        let domain = knownDomain?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if let cacheKey { return "d|\(cacheKey)" }
         let link = merchantRecordId?.uuidString ?? ""
-        return "\(trimmedMerchantName)|\(domain)|\(link)"
+        let fallbackKey = categoryFallback.map { "\($0.symbol)|\($0.colorName)" } ?? ""
+        return "n|\(trimmedMerchantName)|\(link)|\(fallbackKey)"
     }
 
     @ViewBuilder
     private var logoContent: some View {
         ZStack {
             if SettingsStore.shared.dataGuardModeEnabled {
-                monogramAvatar
+                placeholderAvatar
             } else {
-                monogramAvatar
+                placeholderAvatar
                     .opacity(image == nil ? 1 : 0)
 
                 if let uiImage = image {
@@ -71,9 +84,22 @@ public struct AsyncMerchantLogoView: View {
                 }
             }
         }
+        .onAppear {
+            hydrateFromDiskCacheIfNeeded()
+        }
         .task(id: loadIdentity) {
             guard !SettingsStore.shared.dataGuardModeEnabled else { return }
+            hydrateFromDiskCacheIfNeeded()
             await loadLogo()
+        }
+    }
+
+    @ViewBuilder
+    private var placeholderAvatar: some View {
+        if categoryFallback != nil {
+            categorySymbolAvatar
+        } else {
+            monogramAvatar
         }
     }
 
@@ -85,6 +111,18 @@ public struct AsyncMerchantLogoView: View {
             Image(systemName: "building.2.crop.circle")
                 .font(.system(size: size * 0.4, weight: .bold))
                 .foregroundColor(.gray)
+        }
+    }
+
+    private var categorySymbolAvatar: some View {
+        let style = categoryFallback ?? MerchantCategoryAvatarFallback.style(for: .shopping)
+        return ZStack {
+            Circle()
+                .fill(ExpenseCategoryStyle.background(for: style.colorName))
+                .frame(width: size, height: size)
+            Image(systemName: style.symbol)
+                .font(.system(size: size * 0.4, weight: .bold))
+                .foregroundStyle(ExpenseCategoryStyle.foreground(for: style.colorName))
         }
     }
 
@@ -118,27 +156,49 @@ public struct AsyncMerchantLogoView: View {
         return Color(hue: hue, saturation: 0.55, brightness: 0.62)
     }
 
-    private func loadLogo() async {
-        let name = trimmedMerchantName
-        let domain = knownDomain?.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func hydrateFromDiskCacheIfNeeded() {
+        guard image == nil else { return }
+        if let cacheKey,
+           let cached = MerchantLogoFetchCoordinator.shared.cachedImage(forCacheKey: cacheKey) {
+            applyImage(cached, animate: false)
+        }
+    }
 
-        if let domain, !domain.isEmpty,
-           let cached = MerchantLogoFetchCoordinator.shared.cachedImage(forCacheKey: domain) {
-            applyImage(cached, animate: image == nil)
+    private func loadLogo() async {
+        if image != nil { return }
+
+        let name = trimmedMerchantName
+        let domainHint = cacheKey
+
+        if let domainHint,
+           MerchantLogoNegativeCache.isFailure(domainHint) {
             return
         }
 
-        let plan = await Task.detached(priority: .userInitiated) {
-            MerchantLogoEngine.fetchPlan(
-                for: name,
-                knownDomain: domain?.isEmpty == false ? domain : nil
-            )
+        if let domainHint,
+           let cached = MerchantLogoFetchCoordinator.shared.cachedImage(forCacheKey: domainHint) {
+            applyImage(cached, animate: false)
+            return
+        }
+
+        let plan = await Task.detached(priority: .utility) { () -> MerchantLogoEngine.FetchPlan? in
+            if let domainHint,
+               let known = MerchantLogoEngine.fetchPlanForKnownDomain(domainHint) {
+                return known
+            }
+            return MerchantLogoEngine.fetchPlan(for: name, knownDomain: domainHint)
         }.value
 
-        guard let plan else { return }
+        guard let plan else {
+            return
+        }
+
+        if MerchantLogoNegativeCache.isFailure(plan.cacheKey) {
+            return
+        }
 
         if let cached = MerchantLogoFetchCoordinator.shared.cachedImage(forCacheKey: plan.cacheKey) {
-            applyImage(cached, animate: image == nil)
+            applyImage(cached, animate: false)
             return
         }
 
@@ -147,14 +207,14 @@ public struct AsyncMerchantLogoView: View {
             return
         }
 
-        applyImage(fetched, animate: true)
+        applyImage(fetched, animate: image == nil)
     }
 
     private func applyImage(_ uiImage: UIImage, animate: Bool) {
         image = uiImage
         if animate {
             loadedOpacity = 0
-            withAnimation(.easeOut(duration: 0.2)) {
+            withAnimation(.easeOut(duration: 0.15)) {
                 loadedOpacity = 1
             }
         } else {
