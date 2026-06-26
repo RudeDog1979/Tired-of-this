@@ -149,6 +149,7 @@ struct SettingsSubscriptionsDomain: Codable, Equatable {
 
 enum PersonalSettingsDomainSync {
     private static let revisionDefaultsKey = "buxmuse.personalSync.settingsDomainRevisions"
+    private static let hashDefaultsKey = "buxmuse.personalSync.settingsDomainHashes"
 
     static func domainRevisions() -> [String: Date] {
         guard let raw = UserDefaults.standard.dictionary(forKey: revisionDefaultsKey) as? [String: Date] else {
@@ -193,8 +194,7 @@ enum PersonalSettingsDomainSync {
         encoder.dateEncodingStrategy = .iso8601
         var revisions = domainRevisions()
         var changed = false
-        let hashDefaultsKey = "buxmuse.personalSync.settingsDomainHashes"
-        var hashes = UserDefaults.standard.dictionary(forKey: hashDefaultsKey) as? [String: String] ?? [:]
+        var hashes = domainHashBaseline()
 
         for domain in PersonalSettingsDomainID.allCases {
             guard let data = try? encodeDomain(domain, from: store, encoder: encoder) else { continue }
@@ -209,6 +209,20 @@ enum PersonalSettingsDomainSync {
             UserDefaults.standard.set(hashes, forKey: hashDefaultsKey)
             setDomainRevisions(revisions)
         }
+    }
+
+    static func domainHashBaseline() -> [String: String] {
+        UserDefaults.standard.dictionary(forKey: hashDefaultsKey) as? [String: String] ?? [:]
+    }
+
+    /// After applying cloud domains, align hash baselines so the next push pass does not treat restore as local edits.
+    static func syncHashBaseline(from domains: [PersonalSettingsDomainRecord]) {
+        guard !domains.isEmpty else { return }
+        var hashes = domainHashBaseline()
+        for record in domains {
+            hashes[record.domainId] = record.contentHash
+        }
+        UserDefaults.standard.set(hashes, forKey: hashDefaultsKey)
     }
 
     static func mergeDomains(
@@ -272,10 +286,15 @@ enum PersonalSettingsDomainSync {
         remoteSettingsDomains: [PersonalSettingsDomainRecord],
         remoteStudioEntities: [PersonalSyncEntityRecord],
         remoteSimpleStudioEntities: [PersonalSyncEntityRecord],
-        remoteHustleEntities: [PersonalSyncEntityRecord]
+        remoteHustleEntities: [PersonalSyncEntityRecord],
+        preferredSourceDeviceId: String? = nil
     ) {
-        if !remoteSettingsDomains.isEmpty {
-            applyDomains(remoteSettingsDomains, to: settingsStore)
+        let settingsToApply = domainsPreferringSource(
+            remoteSettingsDomains,
+            preferredSourceDeviceId: preferredSourceDeviceId
+        )
+        if !settingsToApply.isEmpty {
+            applyDomains(settingsToApply, to: settingsStore)
         }
         if !remoteStudioEntities.isEmpty {
             PersonalStudioEntitySync.apply(remoteStudioEntities, to: StudioStore.shared)
@@ -289,10 +308,47 @@ enum PersonalSettingsDomainSync {
         PersonalSyncConflictStore.shared.clearAll()
     }
 
+    /// When multiple domain payloads exist, prefer the selected source device.
+    private static func domainsPreferringSource(
+        _ domains: [PersonalSettingsDomainRecord],
+        preferredSourceDeviceId: String?
+    ) -> [PersonalSettingsDomainRecord] {
+        guard let preferredSourceDeviceId, !preferredSourceDeviceId.isEmpty else {
+            return domains
+        }
+        var byID: [String: PersonalSettingsDomainRecord] = [:]
+        for domain in domains {
+            guard let existing = byID[domain.domainId] else {
+                byID[domain.domainId] = domain
+                continue
+            }
+            if existing.deviceId == preferredSourceDeviceId { continue }
+            if domain.deviceId == preferredSourceDeviceId {
+                byID[domain.domainId] = domain
+            }
+        }
+        return Array(byID.values)
+    }
+
     static func localBudgetIsConfigured(in store: SettingsStore) -> Bool {
-        if store.budgetQuickSetupCompleted { return true }
-        if store.budgetingMode == .custom, !store.customBudgetProfiles.isEmpty { return true }
-        return false
+        budgetPayloadIsConfigured(SettingsBudgetDomain(
+            budgetingMode: store.budgetingMode,
+            defaultBudgetPeriod: store.defaultBudgetPeriod,
+            showBudgetWarnings: store.showBudgetWarnings,
+            autoAdjustBudgetsFromHistory: store.autoAdjustBudgetsFromHistory,
+            customBudgetProfiles: store.customBudgetProfiles,
+            simpleBudgetLimit: store.simpleBudgetLimit,
+            simpleBudgetCycle: store.simpleBudgetCycle,
+            simpleBudgetPeriodAnchor: store.simpleBudgetPeriodAnchor,
+            incomeFundingSource: store.incomeFundingSource,
+            salaryPayProfile: store.salaryPayProfile,
+            includeSimpleStudioIncomeInBudget: store.includeSimpleStudioIncomeInBudget,
+            includeProStudioIncomeInBudget: store.includeProStudioIncomeInBudget,
+            customBudgetLimit: store.customBudgetLimit,
+            customBudgetPeriod: store.customBudgetPeriod,
+            budgetApproachingThresholdPercent: store.budgetApproachingThresholdPercent,
+            budgetQuickSetupCompleted: store.budgetQuickSetupCompleted
+        ))
     }
 
     @MainActor
@@ -307,6 +363,7 @@ enum PersonalSettingsDomainSync {
             revisions[record.domainId] = record.updatedAt
         }
         setDomainRevisions(revisions)
+        syncHashBaseline(from: domains)
         store.save(notifyCloudSync: false)
     }
 
@@ -335,6 +392,8 @@ enum PersonalSettingsDomainSync {
                 return payload.personalCloudSyncEnabled
             }
             return false
+        case .appearance, .greeting:
+            return true
         default:
             return false
         }
@@ -359,8 +418,10 @@ enum PersonalSettingsDomainSync {
         let localConfigured = budgetDomainIsConfigured(local)
         let remoteConfigured = budgetDomainIsConfigured(remote)
         if remoteConfigured && !localConfigured { return false }
-        if !localConfigured && !remoteConfigured { return false }
         if localConfigured && !remoteConfigured { return true }
+        if !localConfigured && !remoteConfigured {
+            return local.updatedAt > remote.updatedAt && local.contentHash != remote.contentHash
+        }
         return local.updatedAt >= remote.updatedAt
     }
 
@@ -385,6 +446,10 @@ enum PersonalSettingsDomainSync {
         guard let payload else { return false }
         if payload.budgetQuickSetupCompleted { return true }
         if payload.budgetingMode == .custom, !payload.customBudgetProfiles.isEmpty { return true }
+        if payload.salaryPayProfile?.isConfigured == true { return true }
+        if payload.simpleBudgetLimit > 0 { return true }
+        if payload.simpleBudgetCycle != .monthFirst { return true }
+        if payload.incomeFundingSource == .salary { return true }
         return false
     }
 

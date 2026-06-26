@@ -30,6 +30,7 @@ struct BuxPadStudioDetailRouter: View {
                         .environmentObject(simpleStudioBrain)
                         .environment(\.buxPadStudioUsesSplitLayout, true)
                 }
+                .background(Color.clear)
 
             case .invoices:
                 studioTool {
@@ -121,15 +122,15 @@ struct BuxPadStudioDetailRouter: View {
         }
         .environment(\.studioEnhancedTint, true)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .buxReportsContainerWidth()
     }
 
     @ViewBuilder
     private func studioTool<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         NavigationStack {
             content()
-                .buxCatalogNavigationTitle(destination.title)
-                .navigationBarTitleDisplayMode(.large)
-                .buxPushedNavigationChrome()
+                .buxPadStudioToolShell(titleKey: destination.title)
         }
+        .background(Color.clear)
     }
 }

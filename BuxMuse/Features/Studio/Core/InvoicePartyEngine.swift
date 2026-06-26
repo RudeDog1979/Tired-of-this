@@ -134,8 +134,14 @@ public enum InvoicePartyEngine {
         return lines
     }
 
-    public static func partyBlock(details: InvoicePartyDetails, role: PartyRole) -> InvoicePartyBlockDisplay {
-        let heading = role == .issuer ? "FROM" : "BILL TO"
+    public static func partyBlock(
+        details: InvoicePartyDetails,
+        role: PartyRole,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> InvoicePartyBlockDisplay {
+        let heading = role == .issuer
+            ? BuxCatalogLabel.string("FROM", locale: locale)
+            : BuxCatalogLabel.string("BILL TO", locale: locale)
         var lines: [String] = formattedAddressLines(for: details, includeCountry: true)
         if !details.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             lines.append(details.email)
@@ -144,17 +150,37 @@ public enum InvoicePartyEngine {
             lines.append(details.phone)
         }
         if !details.businessRegistrationNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            lines.append("Reg: \(details.businessRegistrationNumber)")
+            lines.append(
+                BuxLocalizedString.format(
+                    "Reg: %@",
+                    locale: locale,
+                    details.businessRegistrationNumber
+                )
+            )
         }
         if !details.taxRegistrationNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            lines.append("Tax ID: \(details.taxRegistrationNumber)")
+            lines.append(
+                BuxLocalizedString.format(
+                    "Tax ID: %@",
+                    locale: locale,
+                    details.taxRegistrationNumber
+                )
+            )
         }
         if !details.tradeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
            details.tradeName != details.organizationName {
-            lines.append("Trading as: \(details.tradeName)")
+            lines.append(
+                BuxLocalizedString.format(
+                    "Trading as: %@",
+                    locale: locale,
+                    details.tradeName
+                )
+            )
         }
 
-        let title = details.primaryTitle.isEmpty ? "—" : details.primaryTitle
+        let title = details.primaryTitle.isEmpty
+            ? BuxCatalogLabel.string("—", locale: locale)
+            : details.primaryTitle
         return InvoicePartyBlockDisplay(
             heading: heading,
             title: title,
@@ -179,11 +205,19 @@ public enum InvoicePartyEngine {
             lines.append(legalName)
         }
         if !issuer.tradeName.isEmpty, issuer.tradeName != legalName {
-            lines.append("Trading as \(issuer.tradeName)")
+            lines.append(
+                BuxLocalizedString.format("Trading as %@", locale: locale, issuer.tradeName)
+            )
         }
         lines.append(contentsOf: formattedAddressLines(for: issuer, includeCountry: true))
         if !issuer.businessRegistrationNumber.isEmpty {
-            lines.append("Company registration: \(issuer.businessRegistrationNumber)")
+            lines.append(
+                BuxLocalizedString.format(
+                    "Company registration: %@",
+                    locale: locale,
+                    issuer.businessRegistrationNumber
+                )
+            )
         }
         if settings.showTaxID {
             if !issuer.taxRegistrationNumber.isEmpty {
@@ -198,7 +232,9 @@ public enum InvoicePartyEngine {
                 locale: locale,
                 englishFallback: CountryCatalog.country(for: issuer.countryCode)?.name
             )
-            lines.append("Registered in \(country)")
+            lines.append(
+                BuxLocalizedString.format("Registered in %@", locale: locale, country)
+            )
         }
 
         let trimmed = lines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
@@ -211,11 +247,16 @@ public enum InvoicePartyEngine {
         settings: StudioInvoiceSettings,
         countryCode: String,
         autoDetectBankType: Bool,
-        manualOverride: BankAccountType?
+        manualOverride: BankAccountType?,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> [InvoicePaymentLineDisplay] {
+        func label(_ key: String) -> String {
+            BuxCatalogLabel.string(key, locale: locale)
+        }
+
         guard config.showBankBlock else {
             if settings.showBankDetails, !settings.bankDetails.isEmpty {
-                return [InvoicePaymentLineDisplay(label: "Payment", value: settings.bankDetails)]
+                return [InvoicePaymentLineDisplay(label: label("Payment"), value: settings.bankDetails)]
             }
             return []
         }
@@ -229,33 +270,33 @@ public enum InvoicePartyEngine {
         )
 
         if !config.bankName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            lines.append(.init(label: "Bank", value: config.bankName))
+            lines.append(.init(label: label("Bank"), value: config.bankName))
         }
 
         switch bankType {
         case .iban:
-            if !config.iban.isEmpty { lines.append(.init(label: "IBAN", value: config.iban)) }
-            if !config.bic.isEmpty { lines.append(.init(label: "BIC / SWIFT", value: config.bic)) }
+            if !config.iban.isEmpty { lines.append(.init(label: label("IBAN"), value: config.iban)) }
+            if !config.bic.isEmpty { lines.append(.init(label: label("BIC / SWIFT"), value: config.bic)) }
         case .uk:
             if !config.sortCode.isEmpty {
-                lines.append(.init(label: "Sort Code", value: formattedSortCode(config.sortCode)))
+                lines.append(.init(label: label("Sort Code"), value: formattedSortCode(config.sortCode)))
             }
-            if !config.accountNumber.isEmpty { lines.append(.init(label: "Account Number", value: config.accountNumber)) }
-            if config.iban.isEmpty == false { lines.append(.init(label: "IBAN", value: config.iban)) }
+            if !config.accountNumber.isEmpty { lines.append(.init(label: label("Account Number"), value: config.accountNumber)) }
+            if config.iban.isEmpty == false { lines.append(.init(label: label("IBAN"), value: config.iban)) }
         case .us:
-            if !config.routingNumber.isEmpty { lines.append(.init(label: "Routing Number", value: config.routingNumber)) }
-            if !config.accountNumber.isEmpty { lines.append(.init(label: "Account Number", value: config.accountNumber)) }
+            if !config.routingNumber.isEmpty { lines.append(.init(label: label("Routing Number"), value: config.routingNumber)) }
+            if !config.accountNumber.isEmpty { lines.append(.init(label: label("Account Number"), value: config.accountNumber)) }
         case .canada:
-            if !config.transitNumber.isEmpty { lines.append(.init(label: "Transit Number", value: config.transitNumber)) }
-            if !config.institutionNumber.isEmpty { lines.append(.init(label: "Institution Number", value: config.institutionNumber)) }
-            if !config.accountNumber.isEmpty { lines.append(.init(label: "Account Number", value: config.accountNumber)) }
+            if !config.transitNumber.isEmpty { lines.append(.init(label: label("Transit Number"), value: config.transitNumber)) }
+            if !config.institutionNumber.isEmpty { lines.append(.init(label: label("Institution Number"), value: config.institutionNumber)) }
+            if !config.accountNumber.isEmpty { lines.append(.init(label: label("Account Number"), value: config.accountNumber)) }
         case .australia:
-            if !config.bsb.isEmpty { lines.append(.init(label: "BSB", value: config.bsb)) }
-            if !config.accountNumber.isEmpty { lines.append(.init(label: "Account Number", value: config.accountNumber)) }
+            if !config.bsb.isEmpty { lines.append(.init(label: label("BSB"), value: config.bsb)) }
+            if !config.accountNumber.isEmpty { lines.append(.init(label: label("Account Number"), value: config.accountNumber)) }
         case .generic:
-            if !config.accountNumber.isEmpty { lines.append(.init(label: "Account Number", value: config.accountNumber)) }
-            if !config.iban.isEmpty { lines.append(.init(label: "IBAN", value: config.iban)) }
-            if !config.bic.isEmpty { lines.append(.init(label: "BIC / SWIFT", value: config.bic)) }
+            if !config.accountNumber.isEmpty { lines.append(.init(label: label("Account Number"), value: config.accountNumber)) }
+            if !config.iban.isEmpty { lines.append(.init(label: label("IBAN"), value: config.iban)) }
+            if !config.bic.isEmpty { lines.append(.init(label: label("BIC / SWIFT"), value: config.bic)) }
         }
 
         return lines
@@ -294,15 +335,21 @@ public enum InvoicePartyEngine {
             paymentConfig: paymentConfig,
             totals: totals,
             formatAmount: formatAmount,
-            issuerBlock: partyBlock(details: issuerDetails, role: .issuer),
-            recipientBlock: partyBlock(details: recipientDetails, role: .recipient),
-            legalFooter: legalFooter(issuer: issuerDetails, settings: settings, taxProfile: taxProfile),
+            issuerBlock: partyBlock(details: issuerDetails, role: .issuer, locale: interfaceLocale),
+            recipientBlock: partyBlock(details: recipientDetails, role: .recipient, locale: interfaceLocale),
+            legalFooter: legalFooter(
+                issuer: issuerDetails,
+                settings: settings,
+                taxProfile: taxProfile,
+                locale: interfaceLocale
+            ),
             paymentDetailLines: paymentDetailLines(
                 config: paymentConfig,
                 settings: settings,
                 countryCode: countryCode,
                 autoDetectBankType: autoDetectBankType,
-                manualOverride: manualOverride
+                manualOverride: manualOverride,
+                locale: interfaceLocale
             ),
             interfaceLocale: interfaceLocale
         )

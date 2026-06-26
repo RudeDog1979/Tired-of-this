@@ -309,8 +309,10 @@ enum SimpleStudioScanEngine {
         case invalidImage
 
         var errorDescription: String? {
+            let locale = BuxInterfaceLocale.currentInterfaceLocale
             switch self {
-            case .invalidImage: return "Could not read that photo."
+            case .invalidImage:
+                return BuxLocalizedString.string("Could not read that photo.", locale: locale)
             }
         }
     }

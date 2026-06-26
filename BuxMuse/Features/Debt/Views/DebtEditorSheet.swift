@@ -253,15 +253,19 @@ struct DebtEditorSheet: View {
             minimumPayment: minPay
         )
         guard let payoff = draft.estimatedPayoffMonth else {
-            return "Add APR and minimum payment to see an estimated payoff month."
+            return BuxLocalizedString.string(
+                "Add APR and minimum payment to see an estimated payoff month.",
+                locale: appSettingsManager.interfaceLocale
+            )
         }
-        let formatter = DateFormatter()
-        formatter.locale = appSettingsManager.interfaceLocale
-        formatter.dateFormat = "MMMM yyyy"
+        let payoffLabel = BuxDisplayDate.monthYear(
+            from: payoff,
+            locale: appSettingsManager.interfaceLocale
+        )
         return BuxLocalizedString.format(
             "Estimated payoff: %@",
             locale: appSettingsManager.interfaceLocale,
-            formatter.string(from: payoff)
+            payoffLabel
         )
     }
 

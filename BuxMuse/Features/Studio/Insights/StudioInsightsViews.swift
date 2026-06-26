@@ -140,7 +140,7 @@ struct StudioInsightsDashboardView: View {
 
                     Text(snapshot.headline)
                     .font(.system(size: 16, weight: .bold))
-                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .buxPadStudioSectionInset()
 
                 if let tip = snapshot.rateOptimizerTip {
                     BuxThemedCardForm {
@@ -150,7 +150,7 @@ struct StudioInsightsDashboardView: View {
                                 .buxFormFieldPadding()
                         }
                     }
-                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .buxPadStudioSectionInset()
                 }
 
                 ForEach(snapshot.metrics) { row in
@@ -173,11 +173,11 @@ struct StudioInsightsDashboardView: View {
                     }
                     .padding(BuxLayout.section)
                     .studioThemedCardChrome(cornerRadius: 16)
-                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .buxPadStudioSectionInset()
                 }
                 }
-                .studioProToolScreenScrollChrome()
             }
+            .studioProToolScrollTopInset()
             .buxSoftScrollChrome()
         }
         .navigationTitle("")

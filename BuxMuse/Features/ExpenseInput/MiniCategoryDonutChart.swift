@@ -6,6 +6,8 @@
 import SwiftUI
 
 struct MiniCategoryDonutChart: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     let breakdown: [(String, Double)]
     var customCategories: [ExpenseCategoryRecord] = []
     var progress: Double = 1
@@ -55,7 +57,7 @@ struct MiniCategoryDonutChart: View {
                 .padding(10)
                 .allowsHitTesting(false)
         }
-        .accessibilityLabel("Category breakdown")
+        .accessibilityLabel(BuxCatalogLabel.string("Category breakdown", locale: appSettingsManager.interfaceLocale))
         .accessibilityValue(
             segments.map { "\($0.name) \(Int(($0.amount / total) * 100)) percent" }.joined(separator: ", ")
         )

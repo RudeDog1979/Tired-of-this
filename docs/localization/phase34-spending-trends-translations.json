@@ -1,0 +1,90 @@
+{
+  "Total Spending": {
+    "es-419": "Total de gastos",
+    "es-ES": "Total de gastos"
+  },
+  "Week": {
+    "es-419": "Semana",
+    "es-ES": "Semana"
+  },
+  "Year": {
+    "es-419": "Año",
+    "es-ES": "Año"
+  },
+  "By Category": {
+    "es-419": "Por categoría",
+    "es-ES": "Por categoría"
+  },
+  "By Merchant": {
+    "es-419": "Por comercio",
+    "es-ES": "Por comercio"
+  },
+  "No spending in this period.": {
+    "es-419": "No hay gastos en este periodo.",
+    "es-ES": "No hay gastos en este periodo."
+  },
+  "No transactions": {
+    "es-419": "Sin transacciones",
+    "es-ES": "Sin transacciones"
+  },
+  "Nothing matched this period and filter.": {
+    "es-419": "Nada coincidió con este periodo y filtro.",
+    "es-ES": "Nada coincidió con este periodo y filtro."
+  },
+  "Nothing matched this merchant in this period.": {
+    "es-419": "Nada coincidió con este comercio en este periodo.",
+    "es-ES": "Nada coincidió con este comercio en este periodo."
+  },
+  "Total This Week": {
+    "es-419": "Total esta semana",
+    "es-ES": "Total esta semana"
+  },
+  "Total This Month": {
+    "es-419": "Total este mes",
+    "es-ES": "Total este mes"
+  },
+  "Total This Year": {
+    "es-419": "Total este año",
+    "es-ES": "Total este año"
+  },
+  "Transaction History": {
+    "es-419": "Historial de transacciones",
+    "es-ES": "Historial de transacciones"
+  },
+  "Unknown merchant": {
+    "es-419": "Comercio desconocido",
+    "es-ES": "Comercio desconocido"
+  },
+  "last week": {
+    "es-419": "la semana pasada",
+    "es-ES": "la semana pasada"
+  },
+  "last year": {
+    "es-419": "el año pasado",
+    "es-ES": "el año pasado"
+  },
+  "Same as %@.": {
+    "es-419": "Igual que %@.",
+    "es-ES": "Igual que %@."
+  },
+  "You spent more than %@.": {
+    "es-419": "Gastaste más que %@.",
+    "es-ES": "Gastaste más que %@."
+  },
+  "You spent less than %@.": {
+    "es-419": "Gastaste menos que %@.",
+    "es-ES": "Gastaste menos que %@."
+  },
+  "You spent %@ more than the previous period.": {
+    "es-419": "Gastaste %@ más que el periodo anterior.",
+    "es-ES": "Gastaste %@ más que el periodo anterior."
+  },
+  "You spent %@ less than the previous period.": {
+    "es-419": "Gastaste %@ menos que el periodo anterior.",
+    "es-ES": "Gastaste %@ menos que el periodo anterior."
+  },
+  "No change": {
+    "es-419": "Sin cambios",
+    "es-ES": "Sin cambios"
+  }
+}

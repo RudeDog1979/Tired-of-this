@@ -102,7 +102,7 @@ private struct BuxPadAuxiliaryWindowHintBanner: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Dismiss")
+            .accessibilityLabel(BuxCatalogLabel.string("Dismiss", locale: BuxInterfaceLocale.currentInterfaceLocale))
         }
         .padding(.horizontal, BuxPadLayout.marginRegular)
         .padding(.vertical, 12)

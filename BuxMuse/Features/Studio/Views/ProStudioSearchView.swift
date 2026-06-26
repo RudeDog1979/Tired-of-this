@@ -28,7 +28,8 @@ struct ProStudioSearchView: View {
             query: query,
             studio: studioStore.currentSnapshot(),
             simple: simpleStudioStore.snapshot,
-            format: appSettingsManager.format
+            format: appSettingsManager.format,
+            locale: appSettingsManager.interfaceLocale
         )
     }
 
@@ -55,11 +56,11 @@ struct ProStudioSearchView: View {
                             resultsSection
                         }
                     }
-                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .buxPadStudioSectionInset()
                 }
-                .studioProToolScreenScrollChrome()
                 .padding(.bottom, BuxTokens.sheetBottomClearance)
             }
+            .studioProToolScrollTopInset()
             .buxSoftScrollChrome()
         }
         .navigationTitle("")

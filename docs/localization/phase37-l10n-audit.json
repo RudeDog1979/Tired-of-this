@@ -1,0 +1,70 @@
+{
+  "Offline — BuxMuse still works locally": {
+    "es-419": "Sin conexión — BuxMuse sigue funcionando en local",
+    "es-ES": "Sin conexión — BuxMuse sigue funcionando en local"
+  },
+  "Back online": {
+    "es-419": "Conexión restablecida",
+    "es-ES": "Conexión restablecida"
+  },
+  "You have %lld active video streams (%@). Consider consolidating.": {
+    "es-419": "Tienes %lld servicios de video activos (%@). Considera consolidar.",
+    "es-ES": "Tienes %lld servicios de vídeo activos (%@). Considera consolidar."
+  },
+  "Video Bundles": {
+    "es-419": "Paquetes de video",
+    "es-ES": "Paquetes de vídeo"
+  },
+  "Zombie subscription: Unused in 60 days.": {
+    "es-419": "Suscripción zombie: sin uso en 60 días.",
+    "es-ES": "Suscripción zombie: sin uso en 60 días."
+  },
+  "Cancel %@ → save %@/year": {
+    "es-419": "Cancela %@ → ahorra %@/año",
+    "es-ES": "Cancela %@ → ahorra %@/año"
+  },
+  "Netflix premium has cheaper ad-supported tiers.": {
+    "es-419": "Netflix premium tiene planes con anuncios más baratos.",
+    "es-ES": "Netflix premium tiene planes con anuncios más baratos."
+  },
+  "Downgrade tier → save %@/month": {
+    "es-419": "Baja de plan → ahorra %@/mes",
+    "es-ES": "Baja de plan → ahorra %@/mes"
+  },
+  "Billed through Apple App Store (15% markup).": {
+    "es-419": "Facturado por App Store de Apple (15% de recargo).",
+    "es-ES": "Facturado por App Store de Apple (15% de recargo)."
+  },
+  "Subscribe direct → save %@/month": {
+    "es-419": "Suscríbete directo → ahorra %@/mes",
+    "es-ES": "Suscríbete directo → ahorra %@/mes"
+  },
+  "Consolidated Bundles": {
+    "es-419": "Paquetes consolidados",
+    "es-ES": "Paquetes consolidados"
+  },
+  "Overlapping subscriptions detected.": {
+    "es-419": "Se detectaron suscripciones superpuestas.",
+    "es-ES": "Se detectaron suscripciones superpuestas."
+  },
+  "Consolidate active services → save %@/year": {
+    "es-419": "Consolida servicios activos → ahorra %@/año",
+    "es-ES": "Consolida servicios activos → ahorra %@/año"
+  },
+  "Add APR and minimum payment to see an estimated payoff month.": {
+    "es-419": "Agrega la tasa y el pago mínimo para ver el mes estimado de liquidación.",
+    "es-ES": "Añade la tasa y el pago mínimo para ver el mes estimado de liquidación."
+  },
+  "Estimated payoff: %@": {
+    "es-419": "Liquidación estimada: %@",
+    "es-ES": "Liquidación estimada: %@"
+  },
+  "quarterly": {
+    "es-419": "trimestral",
+    "es-ES": "trimestral"
+  },
+  "semi-annual": {
+    "es-419": "semestral",
+    "es-ES": "semestral"
+  }
+}

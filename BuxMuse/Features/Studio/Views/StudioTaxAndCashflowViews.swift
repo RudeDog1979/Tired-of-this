@@ -414,11 +414,11 @@ struct StudioCashflowView: View {
                     .padding(BuxLayout.section)
                     .studioThemedCardChrome(cornerRadius: 24)
                     }
-                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .buxPadStudioSectionInset()
                 }
-                .studioProToolScreenScrollChrome()
                 .environment(\.studioEnhancedTint, true)
             }
+            .studioProToolScrollTopInset()
             .buxSoftScrollChrome()
         }
         .navigationTitle("")
@@ -468,7 +468,10 @@ struct StudioDeductionsView: View {
                                 .environmentObject(store)
                                 .environmentObject(studioBrain)
                         } label: {
-                            Label("Open mileage log", systemImage: "car.fill")
+                            Label(
+                                BuxCatalogLabel.string("Open mileage log", locale: appSettingsManager.interfaceLocale),
+                                systemImage: "car.fill"
+                            )
                                 .font(.system(size: 13, weight: .semibold))
                         }
                         .padding(.top, 4)
@@ -513,11 +516,11 @@ struct StudioDeductionsView: View {
                         }
                     }
                     }
-                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .buxPadStudioSectionInset()
                 }
-                .studioProToolScreenScrollChrome()
                 .environment(\.studioEnhancedTint, true)
             }
+            .studioProToolScrollTopInset()
             .buxSoftScrollChrome()
         }
         .navigationTitle("")

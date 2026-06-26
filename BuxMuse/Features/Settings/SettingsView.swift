@@ -457,21 +457,25 @@ struct SettingsRow: View {
                     .foregroundColor(.white)
             }
 
-            BuxCatalogText.text(label)
-                .font(.system(size: compact ? 14 : 15, weight: .medium))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .layoutPriority(1)
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                BuxCatalogText.text(label)
+                    .font(.system(size: compact ? 14 : 15, weight: .medium))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                    .lineLimit(compact ? 1 : 2)
+                    .minimumScaleFactor(compact ? 0.8 : 0.85)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if showsProBadge {
+                    ProFeatureBadge(compact: true)
+                        .alignmentGuide(.firstTextBaseline) { dimensions in
+                            dimensions[.bottom] - 1
+                        }
+                }
+            }
+            .layoutPriority(0)
 
             Spacer(minLength: compact ? 4 : 8)
-
-            if showsProBadge {
-                ProFeatureBadge(compact: true)
-                    .padding(.trailing, trailingText == nil ? 4 : 0)
-            }
 
             if let trailing = trailingText {
                 BuxCatalogText.text(trailing)

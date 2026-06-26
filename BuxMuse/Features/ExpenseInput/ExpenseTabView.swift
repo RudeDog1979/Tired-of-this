@@ -37,6 +37,7 @@ struct ExpenseTabView: View {
     @State private var padDeleteConfirmRecord: ExpenseRecord?
     @State private var isExpenseSearchPresented = false
     @State private var expenseArchivePath = NavigationPath()
+    @State private var showSpendingTrends = false
 
     private var tabDisplay: ExpenseInteractionDisplay {
         expenseTabStore.display
@@ -295,6 +296,17 @@ struct ExpenseTabView: View {
             locale: appSettingsManager.interfaceLocale,
             onConfirm: deleteExpense
         )
+        .fullScreenCover(isPresented: $showSpendingTrends) {
+            SpendingTrendsView(initialMonthStart: currentCalendarMonthStart)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .environmentObject(brain)
+        }
+    }
+
+    private var currentCalendarMonthStart: Date {
+        let calendar = Calendar.current
+        return calendar.date(from: calendar.dateComponents([.year, .month], from: Date())) ?? Date()
     }
 
     @ToolbarContentBuilder
@@ -493,6 +505,7 @@ struct ExpenseTabView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .top)
             .padding(.top, BuxTokens.tight)
             .buxPadExpenseCardRail()
         }
@@ -532,7 +545,8 @@ struct ExpenseTabView: View {
                         header: display.header,
                         summary: display.summary,
                         formatAmount: { appSettingsManager.format($0) },
-                        playRequest: expenseCarouselSession.playRequest
+                        playRequest: expenseCarouselSession.playRequest,
+                        onOpenSpendingTrends: { showSpendingTrends = true }
                     )
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
@@ -627,7 +641,8 @@ struct ExpenseTabView: View {
             },
             onSelectArchiveMonth: { month in
                 expenseArchivePath.append(ExpenseArchiveMonth(monthStart: month))
-            }
+            },
+            onOpenSpendingTrends: { showSpendingTrends = true }
         )
     }
 
@@ -745,6 +760,7 @@ private struct ExpenseSearchModifier: ViewModifier {
 // MARK: - iPhone pinned overlay (isolated scroll offsets)
 
 struct IPhoneUnifiedExpenseListContainer: View {
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var brain: BuxMuseBrain
@@ -769,9 +785,14 @@ struct IPhoneUnifiedExpenseListContainer: View {
     let onOpenDetail: (ExpenseRecord) -> Void
     let onDuplicate: (ExpenseRecord) -> Void
     let onSelectArchiveMonth: (Date) -> Void
+    var onOpenSpendingTrends: (() -> Void)? = nil
 
     @State private var expenseScrollOffset: CGFloat = 0
     @State private var expenseHeroCollapseTrackingPaused = false
+
+    private var isLandscapePhone: Bool {
+        verticalSizeClass == .compact
+    }
 
     var body: some View {
         ScrollViewReader { scrollProxy in
@@ -779,7 +800,7 @@ struct IPhoneUnifiedExpenseListContainer: View {
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 0) {
                         Color.clear
-                            .frame(height: showHeroChrome ? ExpenseHeroIslandLayout.heroReservedHeight : 0)
+                            .frame(height: showHeroChrome ? ExpenseHeroIslandLayout.heroReservedHeight(landscapePhone: isLandscapePhone) : 0)
                             .id("expense_scroll_top")
                             .expenseHeroTrackScrollCollapse(
                                 scrollOffset: $expenseScrollOffset,
@@ -844,7 +865,8 @@ struct IPhoneUnifiedExpenseListContainer: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
                                 expenseHeroCollapseTrackingPaused = false
                             }
-                        }
+                        },
+                        onOpenSpendingTrends: onOpenSpendingTrends
                     )
                 }
             }
@@ -889,12 +911,6 @@ struct ExpenseListBodyView: View, Equatable {
         let fmt = DateFormatter()
         fmt.dateStyle = .full
         fmt.timeStyle = .none
-        return fmt
-    }()
-
-    private let monthFormatter: DateFormatter = {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "MMMM yyyy"
         return fmt
     }()
 
@@ -1003,10 +1019,10 @@ struct ExpenseListBodyView: View, Equatable {
                         .padding(.vertical, 16)
 
                     ForEach(display.archiveMonths) { archive in
-                        let monthTitle: String = {
-                            monthFormatter.locale = appSettingsManager.interfaceLocale
-                            return monthFormatter.string(from: archive.monthStart)
-                        }()
+                        let monthTitle = BuxDisplayDate.monthYear(
+                            from: archive.monthStart,
+                            locale: appSettingsManager.interfaceLocale
+                        )
 
                         Button {
                             onSelectArchiveMonth(archive.monthStart)

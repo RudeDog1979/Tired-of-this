@@ -118,10 +118,7 @@ extension TaxEnvelopeEngine {
             case "annually", "annual", "yearly":
                 return taxYear ?? BuxCatalogLabel.string("This year", locale: locale)
             case "monthly":
-                let formatter = DateFormatter()
-                formatter.locale = locale
-                formatter.dateFormat = "MMMM yyyy"
-                return formatter.string(from: context.now)
+                return BuxDisplayDate.monthYear(from: context.now, locale: locale)
             default:
                 return quarterly.quarterLabel
             }

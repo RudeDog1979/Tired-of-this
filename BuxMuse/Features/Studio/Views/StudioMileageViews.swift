@@ -159,7 +159,7 @@ struct StudioMileageLogView: View {
                 .onDelete(perform: deleteEntries)
             }
         }
-        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
+        .studioProToolScrollTopInset()
         .studioThemedListRows()
     }
 

@@ -44,12 +44,16 @@ struct ExpenseIntelligenceEngine {
             subscriptions: activeSubscriptions,
             locale: locale
         )
-        let heatZone = HeatZoneEngine.analyze(record: record, allRecords: allRecords)
-        let habit = HabitSignatureEngine.generateSignature(for: record, history: sameMerchant)
-        let futureImpact = FutureImpactEngine.project(amount: record.amountValue, currencyCode: record.currencyCode)
+        let heatZone = HeatZoneEngine.analyze(record: record, allRecords: allRecords, locale: locale)
+        let habit = HabitSignatureEngine.generateSignature(for: record, history: sameMerchant, locale: locale)
+        let futureImpact = FutureImpactEngine.project(
+            amount: record.amountValue,
+            currencyCode: record.currencyCode,
+            locale: locale
+        )
         let emotionSummary = EmotionalTaggingEngine.analyze(emotion: record.emotion, locale: locale)
-        let contextSummary = ContextTaggingEngine.analyze(context: record.contextTag)
-        let microCommitment = MicroCommitmentEngine.generate(for: record)
+        let contextSummary = ContextTaggingEngine.analyze(context: record.contextTag, locale: locale)
+        let microCommitment = MicroCommitmentEngine.generate(for: record, locale: locale)
         let refund = record.isRefund
         let duplicate = detectDuplicate(record: record, allRecords: allRecords)
 
@@ -66,7 +70,7 @@ struct ExpenseIntelligenceEngine {
                 display.recurrenceSummary? += BuxLocalizedString.format(
                     " · Next around %@",
                     locale: locale,
-                    next.formatted(date: .abbreviated, time: .omitted)
+                    BuxDisplayDate.transactionDay(from: next, locale: locale)
                 )
             }
         }
@@ -307,6 +311,8 @@ struct ExpenseIntelligenceEngine {
         case "weekly": return BuxLocalizedString.string("weekly", locale: locale)
         case "bi-weekly": return BuxLocalizedString.string("bi-weekly", locale: locale)
         case "monthly": return BuxLocalizedString.string("monthly", locale: locale)
+        case "quarterly": return BuxLocalizedString.string("quarterly", locale: locale)
+        case "semi-annual": return BuxLocalizedString.string("semi-annual", locale: locale)
         case "yearly": return BuxLocalizedString.string("yearly", locale: locale)
         case "irregular": return BuxLocalizedString.string("irregular", locale: locale)
         default: return type

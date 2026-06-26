@@ -37,17 +37,22 @@ struct StudioThemedListBackdrop<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        ZStack {
+        Group {
             if usesPadSplitLayout {
-                BuxLandingTintBackground()
-                    .ignoresSafeArea()
+                content()
+                    .padding(.top, BuxTokens.tight)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .buxPadDashboardCardRail()
             } else {
-                themeManager.screenBackground(for: colorScheme)
-                    .ignoresSafeArea()
-            }
+                ZStack {
+                    themeManager.screenBackground(for: colorScheme)
+                        .ignoresSafeArea()
 
-            content()
+                    content()
+                }
+            }
         }
+        .modifier(StudioPadSplitBackdropChromeModifier())
         .environment(\.studioEnhancedTint, true)
         .buxDetailNavigationChrome()
     }
@@ -66,7 +71,7 @@ extension View {
                 listStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .scrollDismissesKeyboard(.interactively)
-                    .buxListContentMargins()
+                    .modifier(StudioThemedListPhoneMarginsModifier())
                     .buxStableNavigationBarWithKeyboard()
                     .buxSoftScrollChrome()
             }
@@ -92,24 +97,99 @@ extension View {
     }
 
     /// First list row for Tier-2 Pro tool headers (Invoices, Clients, …).
-    /// Horizontal inset comes from `buxListContentMargins()` — do not pad the row again.
     func studioProToolScreenHeaderRow() -> some View {
         listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: StudioProToolHeaderLayout.bottomSpacing, trailing: 0))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
     }
 
-    /// Scroll / form content chrome — same top spacing as Studio Insights.
+    /// Scroll / form content chrome — use `studioProToolScrollTopInset()` on the List / ScrollView instead.
     func studioProToolScreenScrollChrome() -> some View {
-        padding(.vertical, StudioProToolHeaderLayout.topInset)
+        self
+    }
+
+    /// Receipts reference — unified title top inset on List / ScrollView scroll content.
+    func studioProToolScrollTopInset() -> some View {
+        contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
+    }
+
+    /// Static tool column inside `StudioThemedListBackdrop` when there is no List / ScrollView shell.
+    func studioProToolStaticTopInset() -> some View {
+        padding(.top, StudioProToolHeaderLayout.topInset)
+    }
+
+    /// iPad split `List` tools — Expenses parity: scroll chrome on list, no rail on list shell.
+    func studioProPadSplitListLayout() -> some View {
+        modifier(StudioProPadSplitListLayoutModifier())
+    }
+
+    /// iPad split `ScrollView` shell — apply to the scroll surface after inner content uses `buxPadDashboardCardRail()`.
+    func studioProPadSplitScrollLayout() -> some View {
+        modifier(StudioProPadSplitScrollLayoutModifier())
+    }
+
+    /// Phone-only scroll horizontal inset — pair with `studioProPadSplitScrollLayout()` when the view does not use section/header padding.
+    func studioPhoneScrollContentMargins() -> some View {
+        modifier(StudioPhoneScrollContentMarginsModifier())
+    }
+}
+
+private struct StudioProPadSplitListLayoutModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content
+                .padding(.top, BuxTokens.tight)
+                .modifier(StudioPadSplitScrollChromeModifier())
+        } else {
+            content
+        }
+    }
+}
+
+private struct StudioProPadSplitScrollLayoutModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content.modifier(StudioPadSplitScrollChromeModifier())
+        } else {
+            content
+        }
+    }
+}
+
+private struct StudioPhoneScrollContentMarginsModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content
+        } else {
+            content.buxScrollContentMargins()
+        }
+    }
+}
+
+private struct StudioThemedListPhoneMarginsModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content
+        } else {
+            content.buxListContentMargins()
+        }
     }
 }
 
 private struct StudioHubEmbeddedHorizontalPaddingModifier: ViewModifier {
     @Environment(\.studioHubEmbedded) private var studioHubEmbedded
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
 
     func body(content: Content) -> some View {
-        if studioHubEmbedded {
+        if studioHubEmbedded || usesPadSplitLayout {
             content
         } else {
             content.padding(.horizontal, BuxLayout.marginHorizontal)

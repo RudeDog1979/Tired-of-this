@@ -35,7 +35,7 @@ struct BuxPadKeyboardCommands: Commands {
             .disabled(!context.isNewItemEnabled)
         }
 
-        CommandMenu("Find") {
+        CommandMenu(BuxCatalogLabel.string("Find", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
             Button(context.findMenuTitle) {
                 padBrain.postPadKeyboardCommand(.focusSearch)
             }
@@ -44,14 +44,14 @@ struct BuxPadKeyboardCommands: Commands {
         }
 
         CommandGroup(after: .saveItem) {
-            Button("Save") {
+            Button(BuxCatalogLabel.string("Save", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.save)
             }
             .keyboardShortcut("s", modifiers: .command)
         }
 
         CommandGroup(replacing: .appSettings) {
-            Button("Settings") {
+            Button(BuxCatalogLabel.string("Settings", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.openSettings)
             }
             .keyboardShortcut(",", modifiers: .command)
@@ -63,44 +63,44 @@ struct BuxPadKeyboardCommands: Commands {
             }
             .keyboardShortcut("w", modifiers: .command)
 
-            Button("Dismiss Overlay") {
+            Button(BuxCatalogLabel.string("Dismiss Overlay", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.close)
             }
             .keyboardShortcut(.escape, modifiers: [])
         }
 
         CommandGroup(replacing: .undoRedo) {
-            Button("Undo") {
+            Button(BuxCatalogLabel.string("Undo", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.undo)
             }
             .keyboardShortcut("z", modifiers: .command)
 
-            Button("Redo") {
+            Button(BuxCatalogLabel.string("Redo", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.redo)
             }
             .keyboardShortcut("z", modifiers: [.command, .shift])
             .disabled(!padBrain.canExpenseRedo)
         }
 
-        CommandMenu("List") {
-            Button("Previous Item") {
+        CommandMenu(BuxCatalogLabel.string("List", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
+            Button(BuxCatalogLabel.string("Previous Item", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.selectPreviousRow)
             }
             .keyboardShortcut(.upArrow, modifiers: [])
 
-            Button("Next Item") {
+            Button(BuxCatalogLabel.string("Next Item", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.selectNextRow)
             }
             .keyboardShortcut(.downArrow, modifiers: [])
         }
 
         CommandMenu("Window") {
-            Button("New Expense Window") {
+            Button(BuxCatalogLabel.string("New Expense Window", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.openExpenseWindow)
             }
             .keyboardShortcut("n", modifiers: [.command, .shift])
 
-            Button("New Studio Window") {
+            Button(BuxCatalogLabel.string("New Studio Window", locale: BuxInterfaceLocale.currentInterfaceLocale)) {
                 padBrain.postPadKeyboardCommand(.openStudioWindow)
             }
             .keyboardShortcut("s", modifiers: [.command, .shift])

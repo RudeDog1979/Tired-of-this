@@ -934,37 +934,41 @@ public final class StudioBrain: ObservableObject {
         )
 
         let metrics: [TaxStudioMetricDisplay] = [
-            .init(id: "taxable", title: "Taxable income", value: appSettings.format(intel.breakdown.taxableIncome), subtitle: "After deductions"),
-            .init(id: "deduct", title: "Deductible expenses", value: appSettings.format(intel.breakdown.deductibleExpenses), subtitle: "Business use"),
-            .init(id: "tax", title: "Estimated tax", value: appSettings.format(intel.breakdown.totalEstimatedTax), subtitle: "Income + SE"),
-            .init(id: "etr", title: "Effective rate", value: "\(Int(intel.breakdown.effectiveRate * 100))%", subtitle: "On gross income"),
-            .init(id: "qdue", title: "Quarterly due", value: appSettings.format(intel.quarterly.totalDue), subtitle: quarterSubtitle),
-            .init(id: "vat", title: "VAT/GST net", value: appSettings.format(intel.breakdown.indirectTaxNet), subtitle: store.taxProfile.vatRegistered ? "Collected − paid" : "Not registered"),
+            .init(id: "taxable", title: BuxCatalogLabel.string("Taxable income", locale: locale), value: appSettings.format(intel.breakdown.taxableIncome), subtitle: BuxCatalogLabel.string("After deductions", locale: locale)),
+            .init(id: "deduct", title: BuxCatalogLabel.string("Deductible expenses", locale: locale), value: appSettings.format(intel.breakdown.deductibleExpenses), subtitle: BuxCatalogLabel.string("Business use", locale: locale)),
+            .init(id: "tax", title: BuxCatalogLabel.string("Estimated tax", locale: locale), value: appSettings.format(intel.breakdown.totalEstimatedTax), subtitle: BuxCatalogLabel.string("Income + SE", locale: locale)),
+            .init(id: "etr", title: BuxCatalogLabel.string("Effective rate", locale: locale), value: "\(Int(intel.breakdown.effectiveRate * 100))%", subtitle: BuxCatalogLabel.string("On gross income", locale: locale)),
+            .init(id: "qdue", title: BuxCatalogLabel.string("Quarterly due", locale: locale), value: appSettings.format(intel.quarterly.totalDue), subtitle: quarterSubtitle),
+            .init(id: "vat", title: BuxCatalogLabel.string("VAT/GST net", locale: locale), value: appSettings.format(intel.breakdown.indirectTaxNet), subtitle: store.taxProfile.vatRegistered ? BuxCatalogLabel.string("Collected − paid", locale: locale) : BuxCatalogLabel.string("Not registered", locale: locale)),
             .init(
                 id: "runway",
-                title: "Runway after tax",
+                title: BuxCatalogLabel.string("Runway after tax", locale: locale),
                 value: BuxLocalizedString.format(
                     "%.1f mo",
                     locale: locale,
                     snapshot.forecast.projectedRunwayAfterTaxMonths
                 ),
-                subtitle: "Projected"
+                subtitle: BuxCatalogLabel.string("Projected", locale: locale)
             ),
             .init(
                 id: "health",
-                title: "Tax health",
+                title: BuxCatalogLabel.string("Tax health", locale: locale),
                 value: "\(snapshot.health.score)",
-                subtitle: snapshot.health.band == .green ? "Low" : (snapshot.health.band == .yellow ? "Medium" : "Elevated")
+                subtitle: snapshot.health.band == .green
+                    ? BuxCatalogLabel.string("Low", locale: locale)
+                    : (snapshot.health.band == .yellow
+                        ? BuxCatalogLabel.string("Medium", locale: locale)
+                        : BuxCatalogLabel.string("Elevated", locale: locale))
             )
         ]
 
         let forecastRows: [TaxStudioMetricDisplay] = [
-            .init(id: "finc", title: "Projected taxable income", value: appSettings.format(snapshot.forecast.projectedTaxableIncome), subtitle: "12 months"),
-            .init(id: "ftax", title: "Projected tax owed", value: appSettings.format(snapshot.forecast.projectedTaxOwed), subtitle: "At current rates"),
-            .init(id: "fq", title: "Projected quarterly", value: appSettings.format(snapshot.forecast.projectedQuarterlyPayment), subtitle: "Estimate"),
-            .init(id: "fetr", title: "Projected ETR", value: "\(Int(snapshot.forecast.projectedEffectiveRate * 100))%", subtitle: "Effective tax rate"),
-            .init(id: "fvel", title: "Income velocity", value: appSettings.format(snapshot.forecast.monthlyIncomeVelocity), subtitle: "Per month"),
-            .init(id: "fexp", title: "Expense velocity", value: appSettings.format(snapshot.forecast.monthlyExpenseVelocity), subtitle: "Per month")
+            .init(id: "finc", title: BuxCatalogLabel.string("Projected taxable income", locale: locale), value: appSettings.format(snapshot.forecast.projectedTaxableIncome), subtitle: BuxCatalogLabel.string("12 months", locale: locale)),
+            .init(id: "ftax", title: BuxCatalogLabel.string("Projected tax owed", locale: locale), value: appSettings.format(snapshot.forecast.projectedTaxOwed), subtitle: BuxCatalogLabel.string("At current rates", locale: locale)),
+            .init(id: "fq", title: BuxCatalogLabel.string("Projected quarterly", locale: locale), value: appSettings.format(snapshot.forecast.projectedQuarterlyPayment), subtitle: BuxCatalogLabel.string("Estimate", locale: locale)),
+            .init(id: "fetr", title: BuxCatalogLabel.string("Projected ETR", locale: locale), value: "\(Int(snapshot.forecast.projectedEffectiveRate * 100))%", subtitle: BuxCatalogLabel.string("Effective tax rate", locale: locale)),
+            .init(id: "fvel", title: BuxCatalogLabel.string("Income velocity", locale: locale), value: appSettings.format(snapshot.forecast.monthlyIncomeVelocity), subtitle: BuxCatalogLabel.string("Per month", locale: locale)),
+            .init(id: "fexp", title: BuxCatalogLabel.string("Expense velocity", locale: locale), value: appSettings.format(snapshot.forecast.monthlyExpenseVelocity), subtitle: BuxCatalogLabel.string("Per month", locale: locale))
         ]
 
         let sortedTimeline = snapshot.timeline.sorted { $0.date < $1.date }

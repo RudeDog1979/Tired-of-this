@@ -54,6 +54,15 @@ extension View {
         buxPadDashboardCardRail()
     }
 
+    /// Full-screen expense drill-ins (Spending Trends, merchant detail) — iPad rail + scroll margins; iPhone unchanged.
+    func buxPadExpenseDetailScrollLayout() -> some View {
+        modifier(BuxPadExpenseDetailScrollContentModifier())
+    }
+
+    func buxPadExpenseDetailScrollSurface() -> some View {
+        modifier(BuxPadExpenseDetailScrollSurfaceModifier())
+    }
+
     func buxPadExpenseSplitNavigationChrome() -> some View {
         modifier(BuxPadExpenseSplitNavigationModifier())
     }
@@ -61,6 +70,26 @@ extension View {
     @ViewBuilder
     func buxPadExpenseSplitScrollMargins() -> some View {
         contentMargins(.top, BuxPadExpenseLayout.tabBarClearance, for: .scrollContent)
+    }
+}
+
+private struct BuxPadExpenseDetailScrollContentModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if BuxPadIdiom.isPad {
+            content.buxPadExpenseCardRail()
+        } else {
+            content.buxScreenContentMargins()
+        }
+    }
+}
+
+private struct BuxPadExpenseDetailScrollSurfaceModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if BuxPadIdiom.isPad {
+            content.buxScrollContentMargins()
+        } else {
+            content
+        }
     }
 }
 

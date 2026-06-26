@@ -24,7 +24,10 @@ struct NotificationInboxView: View {
                 Group {
                     if inbox.items.isEmpty {
                         ContentUnavailableView {
-                            Label("No Notifications", systemImage: "bell.slash")
+                            Label(
+                                BuxCatalogLabel.string("No Notifications", locale: appSettingsManager.interfaceLocale),
+                                systemImage: "bell.slash"
+                            )
                         } description: {
                             BuxCatalogDynamicText(key: "Budget alerts, renewals, and Studio reminders will appear here.")
                         }

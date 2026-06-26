@@ -10,6 +10,7 @@ import SwiftUI
 struct ProBusinessCardPalettePicker: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let design: ProBusinessCardDesign
     var onSelect: (ProBusinessCardPalette) -> Void
@@ -42,6 +43,7 @@ struct ProBusinessCardPalettePicker: View {
                 onApply: { onSelect($0) }
             )
             .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
         }
     }
 
@@ -68,7 +70,7 @@ struct ProBusinessCardPalettePicker: View {
             .frame(width: 64)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Custom colors")
+        .accessibilityLabel(BusinessCardL10n.line("Custom colors", locale: appSettingsManager.interfaceLocale))
     }
 
     private func presetButton(_ preset: (name: String, palette: ProBusinessCardPalette)) -> some View {
@@ -125,6 +127,7 @@ struct ProBusinessCardCustomColorSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @State private var accent: Color
     @State private var background: Color
@@ -155,10 +158,10 @@ struct ProBusinessCardCustomColorSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(BusinessCardL10n.line("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Apply") {
+                    Button(BusinessCardL10n.line("Apply", locale: appSettingsManager.interfaceLocale)) {
                         onApply(
                             ProBusinessCardPalette(
                                 accentHex: accent.buxHexString,

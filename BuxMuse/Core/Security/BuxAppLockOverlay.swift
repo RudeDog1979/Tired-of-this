@@ -11,6 +11,7 @@ import LocalAuthentication
 struct BuxAppLockOverlay: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let onUnlocked: () -> Void
 
@@ -48,7 +49,10 @@ struct BuxAppLockOverlay: View {
 
                 if SettingsStore.shared.biometricLockEnabled {
                     Button(action: attemptBiometricUnlock) {
-                        Label("Unlock with Face ID / Touch ID", systemImage: "faceid")
+                        Label(
+                            BuxCatalogLabel.string("Unlock with Face ID / Touch ID", locale: appSettingsManager.interfaceLocale),
+                            systemImage: "faceid"
+                        )
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 20)

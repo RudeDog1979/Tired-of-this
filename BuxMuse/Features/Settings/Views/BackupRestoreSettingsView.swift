@@ -441,7 +441,10 @@ struct BackupRestoreSettingsView: View {
                             Button {
                                 UIPasteboard.general.string = key
                             } label: {
-                                Label("Copy key", systemImage: "doc.on.doc.fill")
+                                Label(
+                                    BuxCatalogLabel.string("Copy key", locale: appSettingsManager.interfaceLocale),
+                                    systemImage: "doc.on.doc.fill"
+                                )
                                     .font(.system(size: 14, weight: .bold))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
@@ -451,7 +454,10 @@ struct BackupRestoreSettingsView: View {
 
                             if archiveURL != nil {
                                 ShareLink(item: "BuxMuse recovery key (keep private):\n\(key)\n\nBackup file saved separately.") {
-                                    Label("Share", systemImage: "square.and.arrow.up")
+                                    Label(
+                                        BuxCatalogLabel.string("Share", locale: appSettingsManager.interfaceLocale),
+                                        systemImage: "square.and.arrow.up"
+                                    )
                                         .font(.system(size: 14, weight: .bold))
                                         .frame(maxWidth: .infinity)
                                         .padding(.vertical, 12)

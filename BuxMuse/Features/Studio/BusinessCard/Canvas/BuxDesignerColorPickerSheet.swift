@@ -65,10 +65,10 @@ struct BuxDesignerColorPickerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Apply") { applyAndDismiss() }
+                    Button(BuxCatalogLabel.string("Apply", locale: appSettingsManager.interfaceLocale)) { applyAndDismiss() }
                         .fontWeight(.semibold)
                 }
             }
@@ -150,7 +150,7 @@ struct BuxDesignerColorPickerSheet: View {
                         .autocorrectionDisabled()
                         .font(.system(size: 14, weight: .semibold, design: .monospaced))
                         .onSubmit { applyHexDraft() }
-                    Button("Set") { applyHexDraft() }
+                    Button(BuxCatalogLabel.string("Set", locale: appSettingsManager.interfaceLocale)) { applyHexDraft() }
                         .font(.system(size: 13, weight: .bold))
                         .buxNativeButtonStyle(.secondary)
                         .foregroundStyle(controlTint)

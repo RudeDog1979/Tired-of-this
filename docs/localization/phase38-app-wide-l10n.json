@@ -1,0 +1,218 @@
+{
+  "iCloud sync setup is still finishing. Try again in a moment.": {
+    "es-419": "La configuración de iCloud todavía está terminando. Intenta de nuevo en un momento.",
+    "es-ES": "La configuración de iCloud todavía está terminando. Inténtalo de nuevo en un momento."
+  },
+  "iCloud sync hit a temporary Apple server issue. Tap refresh to try again.": {
+    "es-419": "iCloud tuvo un problema temporal del servidor de Apple. Toca actualizar para intentar de nuevo.",
+    "es-ES": "iCloud tuvo un problema temporal del servidor de Apple. Toca actualizar para intentarlo de nuevo."
+  },
+  "iCloud sync is catching up on this device. Tap refresh to try again.": {
+    "es-419": "iCloud se está poniendo al día en este dispositivo. Toca actualizar para intentar de nuevo.",
+    "es-ES": "iCloud se está poniendo al día en este dispositivo. Toca actualizar para intentarlo de nuevo."
+  },
+  "Sign in to iCloud on this device and try again.": {
+    "es-419": "Inicia sesión en iCloud en este dispositivo e intenta de nuevo.",
+    "es-ES": "Inicia sesión en iCloud en este dispositivo e inténtalo de nuevo."
+  },
+  "Sign in to iCloud with Apple to sync across your iPhone and iPad.": {
+    "es-419": "Inicia sesión en iCloud con Apple para sincronizar en tu iPhone y iPad.",
+    "es-ES": "Inicia sesión en iCloud con Apple para sincronizar en tu iPhone y iPad."
+  },
+  "iCloud sync is turned off.": {
+    "es-419": "La sincronización con iCloud está desactivada.",
+    "es-ES": "La sincronización con iCloud está desactivada."
+  },
+  "Enter a household name.": {
+    "es-419": "Ingresa un nombre para el hogar.",
+    "es-ES": "Introduce un nombre para el hogar."
+  },
+  "Could not create invite link.": {
+    "es-419": "No se pudo crear el enlace de invitación.",
+    "es-ES": "No se pudo crear el enlace de invitación."
+  },
+  "Could not read household share details from iCloud.": {
+    "es-419": "No se pudieron leer los detalles del hogar compartido desde iCloud.",
+    "es-ES": "No se pudieron leer los detalles del hogar compartido desde iCloud."
+  },
+  "This product is not available right now. Try again in a moment.": {
+    "es-419": "Este producto no está disponible ahora. Intenta de nuevo en un momento.",
+    "es-ES": "Este producto no está disponible ahora. Inténtalo de nuevo en un momento."
+  },
+  "Your purchase is pending approval.": {
+    "es-419": "Tu compra está pendiente de aprobación.",
+    "es-ES": "Tu compra está pendiente de aprobación."
+  },
+  "We could not verify this purchase with Apple.": {
+    "es-419": "No pudimos verificar esta compra con Apple.",
+    "es-ES": "No pudimos verificar esta compra con Apple."
+  },
+  "An active BuxMuse subscription is required.": {
+    "es-419": "Se requiere una suscripción activa de BuxMuse.",
+    "es-ES": "Se requiere una suscripción activa de BuxMuse."
+  },
+  "Something went wrong with the purchase.": {
+    "es-419": "Algo salió mal con la compra.",
+    "es-ES": "Algo salió mal con la compra."
+  },
+  "Select at least one invoice or include receipt photos to export.": {
+    "es-419": "Selecciona al menos una factura o incluye fotos de recibos para exportar.",
+    "es-ES": "Selecciona al menos una factura o incluye fotos de recibos para exportar."
+  },
+  "Could not create the invoice archive.": {
+    "es-419": "No se pudo crear el archivo de facturas.",
+    "es-ES": "No se pudo crear el archivo de facturas."
+  },
+  "Only incoming transactions can be linked as paycheck.": {
+    "es-419": "Solo las transacciones entrantes pueden vincularse como quincena.",
+    "es-ES": "Solo las transacciones entrantes pueden vincularse como nómina."
+  },
+  "Could not read that photo.": {
+    "es-419": "No se pudo leer esa foto.",
+    "es-ES": "No se pudo leer esa foto."
+  },
+  "For cheaper flights, search for fares on Tuesday or Wednesday afternoons.": {
+    "es-419": "Para vuelos más baratos, busca tarifas los martes o miércoles por la tarde.",
+    "es-ES": "Para vuelos más baratos, busca tarifas los martes o miércoles por la tarde."
+  },
+  "Romance Scams": {
+    "es-419": "Estafas románticas",
+    "es-ES": "Estafas románticas"
+  },
+  "Be wary of dating-app contacts who quickly ask for money.": {
+    "es-419": "Desconfía de contactos en apps de citas que piden dinero rápido.",
+    "es-ES": "Desconfía de contactos en apps de citas que piden dinero rápido."
+  },
+  "Phishing DMs": {
+    "es-419": "DMs de phishing",
+    "es-ES": "DMs de phishing"
+  },
+  "Avoid unsolicited social media links, even from known contacts.": {
+    "es-419": "Evita enlaces no solicitados en redes sociales, incluso de contactos conocidos.",
+    "es-ES": "Evita enlaces no solicitados en redes sociales, incluso de contactos conocidos."
+  },
+  "Global markets show mixed reactions to economic data.": {
+    "es-419": "Los mercados globales muestran reacciones mixtas a los datos económicos.",
+    "es-ES": "Los mercados globales muestran reacciones mixtas a los datos económicos."
+  },
+  "per agreement": {
+    "es-419": "según acuerdo",
+    "es-ES": "según acuerdo"
+  },
+  "agreement on file": {
+    "es-419": "acuerdo registrado",
+    "es-ES": "acuerdo registrado"
+  },
+  "Customer still owes you": {
+    "es-419": "El cliente todavía te debe",
+    "es-ES": "El cliente todavía te debe"
+  },
+  "%@ logged at %@/hr": {
+    "es-419": "%@ registradas a %@/h",
+    "es-ES": "%@ registradas a %@/h"
+  },
+  "New hours": {
+    "es-419": "Horas nuevas",
+    "es-ES": "Horas nuevas"
+  },
+  "Still owed": {
+    "es-419": "Aún pendiente",
+    "es-ES": "Aún pendiente"
+  },
+  "Hours logged": {
+    "es-419": "Horas registradas",
+    "es-ES": "Horas registradas"
+  },
+  "Time logged": {
+    "es-419": "Tiempo registrado",
+    "es-ES": "Tiempo registrado"
+  },
+  "Waiting on payment": {
+    "es-419": "Esperando pago",
+    "es-ES": "Esperando pago"
+  },
+  "This period": {
+    "es-419": "Este periodo",
+    "es-ES": "Este periodo"
+  },
+  "%lld time entries": {
+    "es-419": "%lld registros de tiempo",
+    "es-ES": "%lld registros de tiempo"
+  },
+  "No client": {
+    "es-419": "Sin cliente",
+    "es-ES": "Sin cliente"
+  },
+  "Non-billable": {
+    "es-419": "No facturable",
+    "es-ES": "No facturable"
+  },
+  "Trip": {
+    "es-419": "Viaje",
+    "es-ES": "Viaje"
+  },
+  "No client approval on file for this project. Logging time is allowed — capture agreement when you can.": {
+    "es-419": "No hay aprobación del cliente registrada para este proyecto. Puedes registrar tiempo — captura el acuerdo cuando puedas.",
+    "es-ES": "No hay aprobación del cliente registrada para este proyecto. Puedes registrar tiempo — captura el acuerdo cuando puedas."
+  },
+  "Almost at your estimate": {
+    "es-419": "Casi en tu estimación",
+    "es-ES": "Casi en tu estimación"
+  },
+  "Estimate reached": {
+    "es-419": "Estimación alcanzada",
+    "es-ES": "Estimación alcanzada"
+  },
+  "Overtime": {
+    "es-419": "Horas extra",
+    "es-ES": "Horas extra"
+  },
+  "About %lld min left on this job.": {
+    "es-419": "Quedan unos %lld min en este trabajo.",
+    "es-ES": "Quedan unos %lld min en este trabajo."
+  },
+  "Still working? Add time below or finish when done.": {
+    "es-419": "¿Sigues trabajando? Agrega tiempo abajo o termina cuando acabes.",
+    "es-ES": "¿Sigues trabajando? Añade tiempo abajo o termina cuando acabes."
+  },
+  "You're past the goal — extend or finish when done.": {
+    "es-419": "Superaste la meta — extiende o termina cuando acabes.",
+    "es-ES": "Superaste la meta — extiende o termina cuando acabes."
+  },
+  "Use project budget (%@)": {
+    "es-419": "Usar presupuesto del proyecto (%@)",
+    "es-ES": "Usar presupuesto del proyecto (%@)"
+  },
+  "Revenue = hourly rate × billable hours logged on this project.": {
+    "es-419": "Ingresos = tarifa por hora × horas facturables registradas en este proyecto.",
+    "es-ES": "Ingresos = tarifa por hora × horas facturables registradas en este proyecto."
+  },
+  "Revenue stays the fixed price — still log time to track margin and scope.": {
+    "es-419": "Los ingresos se mantienen en el precio fijo — registra tiempo para seguir margen y alcance.",
+    "es-ES": "Los ingresos se mantienen en el precio fijo — registra tiempo para seguir margen y alcance."
+  },
+  "Revenue uses the fixed price; hourly rate is kept for reference and invoices.": {
+    "es-419": "Los ingresos usan el precio fijo; la tarifa por hora se guarda como referencia y para facturas.",
+    "es-ES": "Los ingresos usan el precio fijo; la tarifa por hora se guarda como referencia y para facturas."
+  },
+  "Choose a tool from the sidebar.": {
+    "es-419": "Elige una herramienta en la barra lateral.",
+    "es-ES": "Elige una herramienta en la barra lateral."
+  },
+  "Select a transaction from the list.": {
+    "es-419": "Selecciona una transacción de la lista.",
+    "es-ES": "Selecciona una transacción de la lista."
+  },
+  "Choose a setting from the sidebar.": {
+    "es-419": "Elige un ajuste en la barra lateral.",
+    "es-ES": "Elige un ajuste en la barra lateral."
+  },
+  "Enable Studio in Settings to use this window.": {
+    "es-419": "Activa Studio en Ajustes para usar esta ventana.",
+    "es-ES": "Activa Studio en Ajustes para usar esta ventana."
+  },
+  "Open an invoice on iPad, then present it on the external display.": {
+    "es-419": "Abre una factura en iPad y preséntala en la pantalla externa.",
+    "es-ES": "Abre una factura en iPad y preséntala en la pantalla externa."
+  }
+}

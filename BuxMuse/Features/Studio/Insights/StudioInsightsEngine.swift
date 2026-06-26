@@ -36,13 +36,15 @@ public struct StudioInsightsSnapshot: Equatable, Sendable {
     public var scopeAlerts: Int
     public var timeLeakageHours: Double
 
-    public static let empty = StudioInsightsSnapshot(
-        headline: "Add projects or jobs to see Studio insights.",
-        metrics: [],
-        rateOptimizerTip: nil,
-        scopeAlerts: 0,
-        timeLeakageHours: 0
-    )
+    public static func empty(locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> StudioInsightsSnapshot {
+        StudioInsightsSnapshot(
+            headline: BuxCatalogLabel.string("Add projects or jobs to see Studio insights.", locale: locale),
+            metrics: [],
+            rateOptimizerTip: nil,
+            scopeAlerts: 0,
+            timeLeakageHours: 0
+        )
+    }
 }
 
 public enum StudioInsightsEngine {

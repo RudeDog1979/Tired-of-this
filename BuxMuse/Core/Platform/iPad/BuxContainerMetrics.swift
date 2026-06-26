@@ -10,6 +10,11 @@ private struct BuxContainerMetricsModifier: ViewModifier {
 
     private func applyContainerSize(_ newSize: CGSize) {
         guard newSize != containerSize else { return }
+        // First valid size must land synchronously — async deferral left Home tab rail at width 0 on iPad cold launch.
+        if containerSize == .zero, newSize.width >= BuxPadLayout.splitSidebarMin {
+            containerSize = newSize
+            return
+        }
         DispatchQueue.main.async {
             containerSize = newSize
         }

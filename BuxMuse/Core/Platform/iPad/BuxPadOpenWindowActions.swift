@@ -9,6 +9,7 @@ struct BuxPadOpenExpenseWindowButton: View {
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var padBrain: BuxPadNavigationBrain
     @EnvironmentObject private var padSceneBrainRegistry: BuxPadSceneBrainRegistry
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var body: some View {
         if BuxPadIdiom.isPad, !padSceneBrainRegistry.isAuxiliary(padBrain) {
@@ -19,7 +20,7 @@ struct BuxPadOpenExpenseWindowButton: View {
                     openWindow: openWindow
                 )
             } label: {
-                Label("Open Expenses in New Window", systemImage: "square.split.2x1")
+                Label(BuxCatalogLabel.string("Open Expenses in New Window", locale: appSettingsManager.interfaceLocale), systemImage: "square.split.2x1")
             }
         }
     }
@@ -30,6 +31,7 @@ struct BuxPadOpenStudioWindowButton: View {
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var padBrain: BuxPadNavigationBrain
     @EnvironmentObject private var padSceneBrainRegistry: BuxPadSceneBrainRegistry
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     init(destination: BuxPadStudioDestination?) {
         destinationRawValue = destination?.rawValue
@@ -49,7 +51,7 @@ struct BuxPadOpenStudioWindowButton: View {
                     openWindow: openWindow
                 )
             } label: {
-                Label("Open Studio in New Window", systemImage: "macwindow.on.rectangle")
+                Label(BuxCatalogLabel.string("Open Studio in New Window", locale: appSettingsManager.interfaceLocale), systemImage: "macwindow.on.rectangle")
             }
         }
     }

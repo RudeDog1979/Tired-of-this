@@ -28,13 +28,15 @@ private struct BuxPadSettingsSidebarContextMenuModifier: ViewModifier {
         content.contextMenu {
             if !isSelected {
                 Button(action: onSelect) {
-                    Label("Open", systemImage: "arrow.forward.circle")
+                    Label(BuxCatalogLabel.string("Open", locale: BuxInterfaceLocale.currentInterfaceLocale), systemImage: "arrow.forward.circle")
                 }
             }
 
             Button(action: onSelect) {
                 Label(
-                    isSelected ? "Selected" : "Select",
+                    isSelected
+                        ? BuxCatalogLabel.string("Selected", locale: BuxInterfaceLocale.currentInterfaceLocale)
+                        : BuxCatalogLabel.string("Select", locale: BuxInterfaceLocale.currentInterfaceLocale),
                     systemImage: isSelected ? "checkmark.circle.fill" : "circle"
                 )
             }

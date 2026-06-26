@@ -46,12 +46,6 @@ struct ExpenseMonthArchiveView: View {
         return fmt
     }()
 
-    private let monthFormatter: DateFormatter = {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "MMMM yyyy"
-        return fmt
-    }()
-
     private var monthLoadToken: String {
         "\(monthStart.timeIntervalSince1970)-\(brain.expenseDataRevision)"
     }
@@ -61,8 +55,7 @@ struct ExpenseMonthArchiveView: View {
     }
 
     private var monthTitle: String {
-        monthFormatter.locale = appSettingsManager.interfaceLocale
-        return monthFormatter.string(from: monthStart)
+        BuxDisplayDate.monthYear(from: monthStart, locale: appSettingsManager.interfaceLocale)
     }
 
     private var expenseListRowInsets: EdgeInsets {

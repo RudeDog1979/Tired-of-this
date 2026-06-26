@@ -291,7 +291,13 @@ struct ExpenseCategoryEditorSheet: View {
                     Circle()
                         .fill(ExpenseCategoryStyle.background(for: color))
                 }
-            Text(name.isEmpty ? "Preview" : name)
+            Group {
+                if name.isEmpty {
+                    BuxCatalogDynamicText(key: "Preview")
+                } else {
+                    Text(name)
+                }
+            }
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
         }

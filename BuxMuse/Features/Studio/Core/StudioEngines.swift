@@ -778,8 +778,10 @@ public final class StudioInvoicePDFRenderer {
         profile: StudioProfile,
         settings: StudioInvoiceSettings = StudioInvoiceSettings(),
         taxProfile: StudioTaxProfile = StudioTaxProfile(),
-        countryCode: String = ""
+        countryCode: String = "",
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> Data {
+        func L(_ key: String) -> String { BuxCatalogLabel.string(key, locale: locale) }
         let pdfMetaData = [
             "Title": "\(settings.documentLabel) \(invoice.invoiceNumber)",
             "Author": profile.businessName
@@ -793,7 +795,7 @@ public final class StudioInvoicePDFRenderer {
         let pageBounds = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
         
         let renderer = UIGraphicsPDFRenderer(bounds: pageBounds, format: format)
-        let taxName = invoice.taxLabel.isEmpty ? "Tax" : invoice.taxLabel
+        let taxName = invoice.taxLabel.isEmpty ? L("Tax") : invoice.taxLabel
         let docLabel = settings.documentLabel.uppercased()
         
         return renderer.pdfData { context in
@@ -817,7 +819,7 @@ public final class StudioInvoicePDFRenderer {
                 if settings.logoPosition == .topLeft { headerY += drawHeight + 8 }
             }
             
-            let titleString = profile.businessName.isEmpty ? "Business Name" : profile.businessName
+            let titleString = profile.businessName.isEmpty ? L("Business Name") : profile.businessName
             titleString.draw(at: CGPoint(x: 40, y: headerY), withAttributes: [.font: titleFont])
             
             if !profile.displayName.isEmpty {
@@ -829,13 +831,13 @@ public final class StudioInvoicePDFRenderer {
             
             docLabel.draw(at: CGPoint(x: 480, y: 40), withAttributes: [.font: UIFont.systemFont(ofSize: 20, weight: .bold)])
             
-            let invNumStr = "Number: \(invoice.invoiceNumber)"
+            let invNumStr = BuxLocalizedString.format("Number: %@", locale: locale, invoice.invoiceNumber)
             invNumStr.draw(at: CGPoint(x: 450, y: 65), withAttributes: [.font: bodyFont])
             
-            let dateStr = "Date: \(formattedDate(invoice.issueDate))"
+            let dateStr = BuxLocalizedString.format("Date: %@", locale: locale, formattedDate(invoice.issueDate, locale: locale))
             dateStr.draw(at: CGPoint(x: 450, y: 80), withAttributes: [.font: bodyFont])
             
-            let dueStr = "Due Date: \(formattedDate(invoice.dueDate))"
+            let dueStr = BuxLocalizedString.format("Due Date: %@", locale: locale, formattedDate(invoice.dueDate, locale: locale))
             dueStr.draw(at: CGPoint(x: 450, y: 95), withAttributes: [.font: bodyFont])
             
             let cgContext = context.cgContext
@@ -846,11 +848,12 @@ public final class StudioInvoicePDFRenderer {
             cgContext.strokePath()
             
             let billToFont = UIFont.systemFont(ofSize: 12, weight: .bold)
-            "BILL TO:".draw(at: CGPoint(x: 40, y: 135), withAttributes: [.font: billToFont])
+            L("BILL TO").draw(at: CGPoint(x: 40, y: 135), withAttributes: [.font: billToFont])
 
             let recipientBlock = InvoicePartyEngine.partyBlock(
                 details: client?.resolvedPartyDetails() ?? InvoicePartyDetails(),
-                role: .recipient
+                role: .recipient,
+                locale: locale
             )
             var billY = 155.0
             recipientBlock.title.draw(at: CGPoint(x: 40, y: billY), withAttributes: [.font: boldFont])
@@ -864,10 +867,10 @@ public final class StudioInvoicePDFRenderer {
             cgContext.addLine(to: CGPoint(x: 572, y: 220))
             cgContext.strokePath()
             
-            "Description".draw(at: CGPoint(x: 40, y: 225), withAttributes: [.font: boldFont])
-            "Qty".draw(at: CGPoint(x: 380, y: 225), withAttributes: [.font: boldFont])
-            "Unit Price".draw(at: CGPoint(x: 430, y: 225), withAttributes: [.font: boldFont])
-            "Total".draw(at: CGPoint(x: 520, y: 225), withAttributes: [.font: boldFont])
+            L("Description").draw(at: CGPoint(x: 40, y: 225), withAttributes: [.font: boldFont])
+            L("Qty").draw(at: CGPoint(x: 380, y: 225), withAttributes: [.font: boldFont])
+            L("Unit Price").draw(at: CGPoint(x: 430, y: 225), withAttributes: [.font: boldFont])
+            L("Total").draw(at: CGPoint(x: 520, y: 225), withAttributes: [.font: boldFont])
             
             cgContext.move(to: CGPoint(x: 40, y: 240))
             cgContext.addLine(to: CGPoint(x: 572, y: 240))
@@ -887,7 +890,7 @@ public final class StudioInvoicePDFRenderer {
             cgContext.strokePath()
             
             yOffset += 15.0
-            "Subtotal:".draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: boldFont])
+            L("Subtotal:").draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: boldFont])
             "\(invoice.currencyCode) \(invoice.subtotal)".draw(at: CGPoint(x: 520, y: yOffset), withAttributes: [.font: bodyFont])
             
             if invoice.taxAmount > 0 || invoice.vatRate != nil {
@@ -899,24 +902,31 @@ public final class StudioInvoicePDFRenderer {
             
             yOffset += 20.0
             let finalTotalFont = UIFont.systemFont(ofSize: 12, weight: .bold)
-            "TOTAL:".draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: finalTotalFont])
+            L("TOTAL:").draw(at: CGPoint(x: 430, y: yOffset), withAttributes: [.font: finalTotalFont])
             "\(invoice.currencyCode) \(invoice.total)".draw(at: CGPoint(x: 520, y: yOffset), withAttributes: [.font: finalTotalFont])
             
             var footerY = 650.0
-            "Payment Terms / Notes:".draw(at: CGPoint(x: 40, y: footerY), withAttributes: [.font: boldFont])
-            let notesText = invoice.notes.isEmpty ? "Payment is due within \(profile.defaultInvoicePaymentTerms) days of invoice date." : invoice.notes
+            L("Payment Terms / Notes:").draw(at: CGPoint(x: 40, y: footerY), withAttributes: [.font: boldFont])
+            let notesText = invoice.notes.isEmpty
+                ? BuxLocalizedString.format(
+                    "Payment is due within %lld days of invoice date.",
+                    locale: locale,
+                    profile.defaultInvoicePaymentTerms
+                )
+                : invoice.notes
             notesText.draw(in: CGRect(x: 40, y: footerY + 15, width: 500, height: 60), withAttributes: [.font: bodyFont])
             
             if settings.showBankDetails, !settings.bankDetails.isEmpty {
                 footerY += 80
-                "Bank / Payment Details:".draw(at: CGPoint(x: 40, y: footerY), withAttributes: [.font: boldFont])
+                L("Bank / Payment Details:").draw(at: CGPoint(x: 40, y: footerY), withAttributes: [.font: boldFont])
                 settings.bankDetails.draw(in: CGRect(x: 40, y: footerY + 15, width: 500, height: 50), withAttributes: [.font: bodyFont])
             }
 
             let legal = InvoicePartyEngine.legalFooter(
                 issuer: profile.resolvedPartyDetails(),
                 settings: settings,
-                taxProfile: taxProfile
+                taxProfile: taxProfile,
+                locale: locale
             )
             if legal.isVisible {
                 var legalY = pageHeight - 72
@@ -931,9 +941,7 @@ public final class StudioInvoicePDFRenderer {
         }
     }
     
-    private static func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+    private static func formattedDate(_ date: Date, locale: Locale) -> String {
+        BuxDisplayDate.monthDayYear(from: date, locale: locale)
     }
 }

@@ -119,7 +119,12 @@ struct StudioProjectMilestonesEditorSheet: View {
                 Text(milestone.wrappedValue.title)
                     .font(.system(size: 14, weight: .bold))
                     .strikethrough(milestone.wrappedValue.isCompleted)
-                Text(milestone.wrappedValue.dueDate.formatted(date: .abbreviated, time: .omitted))
+                Text(
+                    BuxDisplayDate.monthDay(
+                        from: milestone.wrappedValue.dueDate,
+                        locale: appSettingsManager.interfaceLocale
+                    )
+                )
                     .font(.system(size: 11, weight: .medium))
                     .buxLabelSecondary()
                 if let dep = milestone.wrappedValue.dependsOnMilestoneId,
@@ -155,7 +160,7 @@ struct StudioProjectMilestonesEditorSheet: View {
             Button(role: .destructive) {
                 milestones.removeAll { $0.id == milestone.wrappedValue.id }
             } label: {
-                Label("Delete", systemImage: "trash")
+                Label(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
             }
         }
     }
@@ -269,6 +274,7 @@ struct StudioProjectMilestonesDraftEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @Binding var milestones: [StudioProjectMilestone]
 
@@ -341,7 +347,12 @@ struct StudioProjectMilestonesDraftEditorSheet: View {
             Text(milestone.wrappedValue.title)
                 .font(.system(size: 14, weight: .semibold))
             Spacer()
-            Text(milestone.wrappedValue.dueDate.formatted(date: .abbreviated, time: .omitted))
+            Text(
+                BuxDisplayDate.monthDay(
+                    from: milestone.wrappedValue.dueDate,
+                    locale: appSettingsManager.interfaceLocale
+                )
+            )
                 .font(.system(size: 11, weight: .medium))
                 .buxLabelSecondary()
         }
@@ -351,7 +362,7 @@ struct StudioProjectMilestonesDraftEditorSheet: View {
             Button(role: .destructive) {
                 milestones.removeAll { $0.id == milestone.wrappedValue.id }
             } label: {
-                Label("Delete", systemImage: "trash")
+                Label(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
             }
         }
     }

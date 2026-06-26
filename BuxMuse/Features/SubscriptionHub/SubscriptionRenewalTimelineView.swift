@@ -16,12 +16,6 @@ struct SubscriptionRenewalTimelineView: View {
     let renewals: [SubscriptionInfo]
     let onSelect: (String) -> Void
 
-    private static let renewalDateFormatter: DateFormatter = {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "MMM d, yyyy"
-        return fmt
-    }()
-
     var body: some View {
         VStack(alignment: .leading, spacing: BuxLayout.tight + 6) {
             SubscriptionHubSectionHeader(title: "Upcoming renewals")
@@ -94,7 +88,12 @@ struct SubscriptionRenewalTimelineView: View {
                     .font(.system(size: 12))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
 
-                Text(Self.renewalDateFormatter.string(from: sub.nextRenewalDate))
+                Text(
+                    BuxDisplayDate.monthDayYear(
+                        from: sub.nextRenewalDate,
+                        locale: appSettingsManager.interfaceLocale
+                    )
+                )
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(colorScheme == .dark ? .white.opacity(0.6) : Color(red: 100/255, green: 110/255, blue: 130/255))
                     .multilineTextAlignment(.leading)

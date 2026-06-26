@@ -441,7 +441,12 @@ struct TotalSpendDetailSheet: View {
                                     .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                                 
-                                Text(record.date.formatted(date: .abbreviated, time: .omitted))
+                                Text(
+                                    BuxDisplayDate.transactionDay(
+                                        from: record.date,
+                                        locale: appSettingsManager.interfaceLocale
+                                    )
+                                )
                                     .font(.caption2)
                                     .foregroundColor(.gray)
                             }

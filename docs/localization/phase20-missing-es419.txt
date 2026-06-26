@@ -1,2 +1,2 @@
-Added 5 new keys to catalog
-Wrote 591 keys to /Users/rodolfo/App Development/iOS/Tired of this/docs/localization/phase8-keys.txt
+Added 0 new keys to catalog
+Wrote 610 keys to /Users/rodolfo/App Development/iOS/Tired of this/docs/localization/phase8-keys.txt

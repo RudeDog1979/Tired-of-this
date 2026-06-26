@@ -35,6 +35,7 @@ struct BuxPadSimpleStudioDetailRouter: View {
                         .environmentObject(navigationCoordinator)
                         .environment(\.buxPadStudioUsesSplitLayout, true)
                 }
+                .background(Color.clear)
 
             case .myMoney:
                 simpleTool {
@@ -93,23 +94,16 @@ struct BuxPadSimpleStudioDetailRouter: View {
         }
         .environment(\.studioEnhancedTint, true)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .buxReportsContainerWidth()
     }
 
     @ViewBuilder
     private func simpleTool<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         NavigationStack {
-            ZStack {
-                BuxLandingTintBackground()
-                    .ignoresSafeArea()
-
-                content()
-                    .padding(.top, BuxTokens.tight)
-                    .buxPadDashboardCardRail()
-            }
-            .modifier(StudioPadSplitScrollChromeModifier())
-            .buxCatalogNavigationTitle(destination.title)
-            .navigationBarTitleDisplayMode(.large)
-            .buxPushedNavigationChrome()
+            content()
+                .padding(.top, BuxTokens.tight)
+                .buxPadStudioToolShell(titleKey: destination.title)
         }
+        .background(Color.clear)
     }
 }

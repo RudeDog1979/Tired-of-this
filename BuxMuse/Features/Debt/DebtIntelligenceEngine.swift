@@ -151,9 +151,7 @@ enum DebtIntelligenceEngine {
         }
 
         if let payoff = debt.estimatedPayoffMonth {
-            let formatter = DateFormatter()
-            formatter.locale = locale
-            formatter.dateFormat = "MMMM yyyy"
+            let payoffLabel = BuxDisplayDate.monthYear(from: payoff, locale: locale)
             insights.append(
                 DebtInsight(
                     id: "debt.payoff.\(debt.id.uuidString)",
@@ -161,7 +159,7 @@ enum DebtIntelligenceEngine {
                     message: BuxLocalizedString.format(
                         "At your minimum payment, this could be paid off around %@.",
                         locale: locale,
-                        formatter.string(from: payoff)
+                        payoffLabel
                     ),
                     tone: .neutral,
                     systemImage: "map.fill",

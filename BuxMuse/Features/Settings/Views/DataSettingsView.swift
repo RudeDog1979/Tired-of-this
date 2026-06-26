@@ -603,6 +603,8 @@ struct DataSettingsView: View {
             print("Database purge failed: \(error)")
         }
 
+        try? persistence.purgeAllUserFinancialData()
+
         store.resetAllData()
         studioStore.purgeAllPersistedData()
         simpleStudioStore.resetAllData()

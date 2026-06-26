@@ -162,10 +162,10 @@ struct DebtsSettingsView: View {
                 summaryMetric(titleKey: "Total owed", value: appSettingsManager.format(debtEngine.totalOwed))
                 summaryMetric(titleKey: "Paid this month", value: appSettingsManager.format(debtEngine.paidThisMonth))
                 if let nextDue = debtEngine.nextDueDate {
-                    let formatter = DateFormatter()
-                    let _ = formatter.locale = appSettingsManager.interfaceLocale
-                    let _ = formatter.dateStyle = .medium
-                    summaryMetric(titleKey: "Next due", value: formatter.string(from: nextDue))
+                    summaryMetric(
+                        titleKey: "Next due",
+                        value: BuxDisplayDate.monthDayYear(from: nextDue, locale: appSettingsManager.interfaceLocale)
+                    )
                 } else {
                     summaryMetric(titleKey: "Next due", value: "—")
                 }
@@ -219,14 +219,15 @@ struct DebtsSettingsView: View {
             }
 
             if let payoff = debt.estimatedPayoffMonth {
-                let formatter = DateFormatter()
-                let _ = formatter.locale = appSettingsManager.interfaceLocale
-                let _ = formatter.dateFormat = "MMMM yyyy"
+                let payoffLabel = BuxDisplayDate.monthYear(
+                    from: payoff,
+                    locale: appSettingsManager.interfaceLocale
+                )
                 Text(
                     BuxLocalizedString.format(
                         "Est. payoff %@",
                         locale: appSettingsManager.interfaceLocale,
-                        formatter.string(from: payoff)
+                        payoffLabel
                     )
                 )
                 .font(.system(size: 11, weight: .medium))

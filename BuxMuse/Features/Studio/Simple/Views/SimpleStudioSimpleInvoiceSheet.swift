@@ -221,9 +221,7 @@ struct SimpleStudioSimpleInvoiceSheet: View {
     }
 
     private var formattedDueDate: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: dueDate)
+        BuxDisplayDate.monthDayYear(from: dueDate, locale: appSettingsManager.interfaceLocale)
     }
 
     private var invoicePreview: some View {
@@ -299,7 +297,7 @@ struct SimpleInvoiceCardView: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text(isPaid ? "PAID" : "UNPAID")
+                BuxCatalogDynamicText(key: isPaid ? "PAID" : "UNPAID")
                     .font(.system(size: 10, weight: .black))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)

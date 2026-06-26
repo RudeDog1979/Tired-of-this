@@ -13,32 +13,32 @@ struct BuxPadKeyboardContext: Equatable {
     var newItemMenuTitle: String {
         switch selectedTab {
         case .home, .expense:
-            return "New Expense"
+            return BuxCatalogLabel.string("New Expense", locale: BuxInterfaceLocale.currentInterfaceLocale)
         case .studio:
             switch studioMode {
             case .simple:
-                return "Log Time"
+                return BuxCatalogLabel.string("Log Time", locale: BuxInterfaceLocale.currentInterfaceLocale)
             case .pro:
-                return "Studio Quick Action"
+                return BuxCatalogLabel.string("Studio Quick Action", locale: BuxInterfaceLocale.currentInterfaceLocale)
             }
         case .settings:
-            return "New Expense"
+            return BuxCatalogLabel.string("New Expense", locale: BuxInterfaceLocale.currentInterfaceLocale)
         }
     }
 
     var findMenuTitle: String {
         switch selectedTab {
         case .home, .expense:
-            return "Search Expenses"
+            return BuxCatalogLabel.string("Search Expenses", locale: BuxInterfaceLocale.currentInterfaceLocale)
         case .studio:
-            return "Focus Studio Search"
+            return BuxCatalogLabel.string("Focus Studio Search", locale: BuxInterfaceLocale.currentInterfaceLocale)
         case .settings:
-            return "Focus Settings"
+            return BuxCatalogLabel.string("Focus Settings", locale: BuxInterfaceLocale.currentInterfaceLocale)
         }
     }
 
     var closeMenuTitle: String {
-        "Dismiss"
+        BuxCatalogLabel.string("Dismiss", locale: BuxInterfaceLocale.currentInterfaceLocale)
     }
 
     var isNewItemEnabled: Bool {

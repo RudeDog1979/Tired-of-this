@@ -498,7 +498,7 @@ struct SimpleBusinessCardView: View {
                         .scaledToFit()
                         .frame(width: 56, height: 56)
                         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .accessibilityLabel("Contact QR code")
+                        .accessibilityLabel(BuxCatalogLabel.string("Contact QR code", locale: appSettingsManager.interfaceLocale))
                 }
             }
         }

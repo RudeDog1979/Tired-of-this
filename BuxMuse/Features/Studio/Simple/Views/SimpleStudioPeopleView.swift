@@ -72,7 +72,8 @@ struct SimpleStudioPeopleView: View {
                 }
             }
         }
-        .scrollContentBackground(.hidden)
+        .studioThemedListRows()
+        .buxPadStudioSplitDetailLayout()
         .background {
             if !usesPadSplitLayout {
                 themeManager.screenBackground(for: colorScheme)

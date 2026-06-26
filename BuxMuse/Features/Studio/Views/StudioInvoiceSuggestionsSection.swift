@@ -109,7 +109,13 @@ struct SimpleStudioInvoiceSuggestionsSection: View {
                 .frame(width: 28)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(suggestion.customerName.isEmpty ? "Customer" : suggestion.customerName)
+                Group {
+                    if suggestion.customerName.isEmpty {
+                        BuxCatalogDynamicText(key: "Customer")
+                    } else {
+                        Text(suggestion.customerName)
+                    }
+                }
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
                     .lineLimit(1)

@@ -10,6 +10,7 @@ import SwiftUI
 struct StudioCashBarterSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
@@ -25,7 +26,7 @@ struct StudioCashBarterSettingsView: View {
                             BuxCatalogDynamicText(key: "Cash drawer")
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Text(store.dualCashDrawerEnabled ? "On" : "Off")
+                            Text(BuxCatalogLabel.string(store.dualCashDrawerEnabled ? "On" : "Off", locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 12, weight: .medium))
                                 .buxLabelSecondary()
                         }
@@ -47,7 +48,7 @@ struct StudioCashBarterSettingsView: View {
                             BuxCatalogDynamicText(key: "Barter logger")
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            Text(store.barterLoggerEnabled ? "On" : "Off")
+                            Text(BuxCatalogLabel.string(store.barterLoggerEnabled ? "On" : "Off", locale: appSettingsManager.interfaceLocale))
                                 .font(.system(size: 12, weight: .medium))
                                 .buxLabelSecondary()
                         }

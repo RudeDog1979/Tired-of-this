@@ -68,7 +68,7 @@ struct DebtBreakdownChartView: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Debt balance breakdown")
+        .accessibilityLabel(BuxCatalogLabel.string("Debt balance breakdown", locale: appSettingsManager.interfaceLocale))
     }
 
     private func legendRow(name: String, amount: Double, index: Int) -> some View {

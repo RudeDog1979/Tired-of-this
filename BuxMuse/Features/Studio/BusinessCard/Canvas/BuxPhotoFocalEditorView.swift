@@ -11,6 +11,7 @@ struct BuxPhotoFocalEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let title: String
     let image: UIImage
@@ -66,9 +67,9 @@ struct BuxPhotoFocalEditorView: View {
             .toolbarBackground(Color.black.opacity(0.92), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Apply") {
+                    Button(BuxCatalogLabel.string("Apply", locale: appSettingsManager.interfaceLocale)) {
                         let vp = viewportSize ?? CGSize(width: 320, height: 320)
                         transform = ProBusinessCardPhotoTransform(
                             zoom: Double(scale),

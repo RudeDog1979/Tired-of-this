@@ -135,8 +135,15 @@ struct StudioAgreementImportSheet: View {
 
     private func applyImport() {
         guard !options.isEmpty else { return }
+        let locale = appSettingsManager.interfaceLocale
         if let project {
-            StudioAgreementPrefillEngine.applyProject(project, options: options, to: &draft, store: store)
+            StudioAgreementPrefillEngine.applyProject(
+                project,
+                options: options,
+                to: &draft,
+                store: store,
+                locale: locale
+            )
         }
         if let job, let simpleStore {
             StudioAgreementPrefillEngine.applyJob(
@@ -144,7 +151,8 @@ struct StudioAgreementImportSheet: View {
                 options: options,
                 to: &draft,
                 studioStore: store,
-                simpleStore: simpleStore
+                simpleStore: simpleStore,
+                locale: locale
             )
         }
         draft.refreshAgreementStatus()
@@ -218,7 +226,12 @@ struct StudioAgreementApprovalSection: View {
                         .font(.system(size: 13, weight: .medium))
                         .buxLabelSecondary()
                     Spacer()
-                    Text(draft.agreementSentAt!.formatted(date: .abbreviated, time: .shortened))
+                    Text(
+                        BuxDisplayDate.dateAndTime(
+                            from: draft.agreementSentAt!,
+                            locale: appSettingsManager.interfaceLocale
+                        )
+                    )
                         .font(.system(size: 13, weight: .semibold))
                 }
                 .buxFormFieldPadding()

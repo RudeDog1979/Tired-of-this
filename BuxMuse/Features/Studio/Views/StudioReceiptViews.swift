@@ -29,8 +29,8 @@ struct StudioReceiptsListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
-                    Button("Log expense") { showExpenseEditor = true }
-                    Button("Scan receipt") { showScanner = true }
+                    Button(BuxCatalogLabel.string("Log expense", locale: appSettingsManager.interfaceLocale)) { showExpenseEditor = true }
+                    Button(BuxCatalogLabel.string("Scan receipt", locale: appSettingsManager.interfaceLocale)) { showScanner = true }
                 } label: {
                     BuxToolbarIcon(systemName: "plus")
                 }
@@ -81,7 +81,7 @@ struct StudioReceiptsListView: View {
                 .onDelete(perform: deleteReceipt)
             }
         }
-        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
+        .studioProToolScrollTopInset()
         .studioThemedListRows()
     }
 
@@ -304,7 +304,7 @@ struct StudioReceiptScannerView: View {
                                     .padding(.horizontal)
 
                                     PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                                        Label("Import from Photo Library", systemImage: "photo.on.rectangle.angled")
+                                        Label(loc("Import from Photo Library"), systemImage: "photo.on.rectangle.angled")
                                             .font(.system(size: 15, weight: .semibold))
                                             .frame(maxWidth: .infinity)
                                     }
@@ -410,7 +410,7 @@ struct StudioReceiptScannerView: View {
                 }
                 if showFields {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Log") {
+                        Button(BuxCatalogLabel.string("Log", locale: appSettingsManager.interfaceLocale)) {
                             saveReceipt()
                             dismiss()
                         }
@@ -629,17 +629,22 @@ struct StudioReceiptDetailView: View {
                         
                         Divider()
                         
-                        infoRow(label: "AMOUNT", value: appSettingsManager.format(receipt.amount), isAmount: true)
-                        infoRow(label: "DATE LOGGED", value: formattedDate(receipt.date))
-                        infoRow(label: "CATEGORY", value: receipt.category)
+                        infoRow(label: BuxCatalogLabel.string("AMOUNT", locale: appSettingsManager.interfaceLocale), value: appSettingsManager.format(receipt.amount), isAmount: true)
+                        infoRow(label: BuxCatalogLabel.string("DATE LOGGED", locale: appSettingsManager.interfaceLocale), value: formattedDate(receipt.date))
+                        infoRow(label: BuxCatalogLabel.string("CATEGORY", locale: appSettingsManager.interfaceLocale), value: receipt.category)
                         infoRow(
-                            label: "BUSINESS USE",
+                            label: BuxCatalogLabel.string("BUSINESS USE", locale: appSettingsManager.interfaceLocale),
                             value: receipt.businessUse.catalogLabel(locale: appSettingsManager.interfaceLocale)
                         )
-                        infoRow(label: "DEDUCTIBLE", value: receipt.isDeductible ? "\(Int(receipt.deductiblePercentage))%" : "Non-Deductible")
+                        infoRow(
+                            label: BuxCatalogLabel.string("DEDUCTIBLE", locale: appSettingsManager.interfaceLocale),
+                            value: receipt.isDeductible
+                                ? "\(Int(receipt.deductiblePercentage))%"
+                                : BuxCatalogLabel.string("Non-Deductible", locale: appSettingsManager.interfaceLocale)
+                        )
                         if receipt.isDeductible {
                             infoRow(
-                                label: "DEDUCTIBLE AMOUNT",
+                                label: BuxCatalogLabel.string("DEDUCTIBLE AMOUNT", locale: appSettingsManager.interfaceLocale),
                                 value: appSettingsManager.format(effectiveDeductibleAmount)
                             )
                         }
@@ -666,7 +671,7 @@ struct StudioReceiptDetailView: View {
         .buxCatalogNavigationTitle("Expense Details")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Edit") { showEdit = true }
+                Button(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale)) { showEdit = true }
                     .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
             }
         }
@@ -704,9 +709,7 @@ struct StudioReceiptDetailView: View {
     }
     
     private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        BuxDisplayDate.monthDayYear(from: date, locale: appSettingsManager.interfaceLocale)
     }
 }
 

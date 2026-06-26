@@ -185,7 +185,10 @@ struct StudioAgreementTermsEditorView: View {
     private var previewSection: some View {
         BuxFormSection(title: "Preview") {
             Button { showPreview = true } label: {
-                Label("Preview full terms", systemImage: "doc.text.magnifyingglass")
+                Label(
+                    BuxCatalogLabel.string("Preview full terms", locale: appSettingsManager.interfaceLocale),
+                    systemImage: "doc.text.magnifyingglass"
+                )
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }
@@ -207,7 +210,10 @@ struct StudioAgreementTermsEditorView: View {
                 settings.agreementDefaultCustomTerms = customText
                 BuxSaveFeedback.success()
             } label: {
-                Label("Save as my default terms", systemImage: "bookmark.fill")
+                Label(
+                    BuxCatalogLabel.string("Save as my default terms", locale: appSettingsManager.interfaceLocale),
+                    systemImage: "bookmark.fill"
+                )
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             }

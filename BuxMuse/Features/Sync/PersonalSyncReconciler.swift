@@ -9,6 +9,7 @@ enum PersonalSyncReconciler {
     private static let manifestDefaultsKey = "buxmuse.personalSync.dualReconcileVersion"
 
     @MainActor
+    @discardableResult
     static func reconcileAfterPull(
         brain: BuxMuseBrain,
         settingsStore: SettingsStore,
@@ -16,9 +17,14 @@ enum PersonalSyncReconciler {
         remoteStudioEntities: [PersonalSyncEntityRecord],
         remoteSimpleStudioEntities: [PersonalSyncEntityRecord],
         remoteHustleEntities: [PersonalSyncEntityRecord],
-        manifest: PersonalSyncManifestPayload?
-    ) -> [PersonalSyncConflict] {
-        let expenseCount = (try? brain.fetchAllExpenseRecords())?.count ?? 0
+        manifest: PersonalSyncManifestPayload?,
+        preferLocalMerge: Bool = false,
+        forceCloudAdopt: Bool = false,
+        remoteExpenseCount: Int = 0,
+        preferredRestoreSourceDeviceId: String? = nil
+    ) -> (conflicts: [PersonalSyncConflict], adoptedCloudBackup: Bool) {
+        let localExpenseCount = (try? brain.fetchAllExpenseRecords())?.count ?? 0
+        let expenseCount = max(localExpenseCount, remoteExpenseCount)
         let pendingRestore = PersonalCloudSyncEngine.isPendingCloudRestoreAfterWipe
         let localMeaningful = localHasMeaningfulUserData(brain: brain, settingsStore: settingsStore)
         let cloudHas = cloudHasUserData(
@@ -29,20 +35,25 @@ enum PersonalSyncReconciler {
             expenseCount: expenseCount
         )
 
-        // Fresh device / post-wipe restore: apply iCloud silently — no merge conflicts.
-        if cloudHas && (pendingRestore || !localMeaningful) {
+        // Joining device or explicit restore: apply iCloud wholesale — never merge defaults over a backup.
+        let shouldAdoptCloud = cloudHas && !preferLocalMerge && (
+            pendingRestore || forceCloudAdopt || !localMeaningful
+        )
+        if shouldAdoptCloud {
             PersonalSettingsDomainSync.applyCloudRestore(
                 settingsStore: settingsStore,
                 remoteSettingsDomains: remoteSettingsDomains,
                 remoteStudioEntities: remoteStudioEntities,
                 remoteSimpleStudioEntities: remoteSimpleStudioEntities,
-                remoteHustleEntities: remoteHustleEntities
+                remoteHustleEntities: remoteHustleEntities,
+                preferredSourceDeviceId: preferredRestoreSourceDeviceId
             )
+            try? brain.reconcileSalaryPayrollAfterSettingsSync()
             PersonalCloudSyncEngine.clearPendingCloudRestore()
             if shouldRunDualDevicePass(brain: brain, manifest: manifest) {
                 markDualDeviceReconcileComplete()
             }
-            return []
+            return ([], true)
         }
 
         var conflicts: [PersonalSyncConflict] = []
@@ -50,6 +61,7 @@ enum PersonalSyncReconciler {
         let localSettings = PersonalSettingsDomainSync.exportAllDomains(from: settingsStore)
         let settingsMerge = PersonalSettingsDomainSync.mergeDomains(local: localSettings, remote: remoteSettingsDomains)
         PersonalSettingsDomainSync.applyDomains(settingsMerge.merged, to: settingsStore)
+        try? brain.reconcileSalaryPayrollAfterSettingsSync()
         conflicts.append(contentsOf: settingsMerge.conflicts)
 
         let localStudio = PersonalStudioEntitySync.exportAll(from: StudioStore.shared)
@@ -77,7 +89,7 @@ enum PersonalSyncReconciler {
             PersonalSyncConflictStore.shared.clearAll()
             conflicts = []
         }
-        return conflicts
+        return (conflicts, false)
     }
 
     /// True when this device has real user financial/studio data — not onboarding/setup shells alone.

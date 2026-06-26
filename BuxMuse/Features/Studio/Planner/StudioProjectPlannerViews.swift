@@ -294,8 +294,6 @@ struct StudioProjectPlannerSection: View {
     }
 
     private func shortDate(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateStyle = .short
-        return f.string(from: date)
+        BuxDisplayDate.monthDay(from: date, locale: appSettingsManager.interfaceLocale)
     }
 }

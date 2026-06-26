@@ -23,13 +23,15 @@ enum StudioAgreementPrefillEngine {
         _ project: StudioProject,
         options: StudioAgreementPrefillOptions,
         to draft: inout AgreementDraft,
-        store: StudioStore
+        store: StudioStore,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) {
+        let defaultTitle = BuxCatalogLabel.string("Client agreement", locale: locale)
         if options.contains(.links) {
             draft.projectId = project.id
             if draft.clientId == nil { draft.clientId = project.clientId }
-            if draft.title.isEmpty || draft.title == "Client agreement" {
-                draft.title = "\(project.name) agreement"
+            if draft.title.isEmpty || draft.title == defaultTitle {
+                draft.title = BuxLocalizedString.format("%@ agreement", locale: locale, project.name)
             }
         }
         if options.contains(.scope), draft.scopeBullets.isEmpty {
@@ -46,18 +48,27 @@ enum StudioAgreementPrefillEngine {
             if !planned.isEmpty {
                 draft.deliverables = planned
             } else if project.budgetedHours > 0 {
-                draft.deliverables = "Work delivered within agreed scope and revision limits."
+                draft.deliverables = BuxCatalogLabel.string(
+                    "Work delivered within agreed scope and revision limits.",
+                    locale: locale
+                )
             }
         }
         if options.contains(.money), draft.paymentAmountNotes.isEmpty {
-            draft.paymentAmountNotes = moneyLine(project: project, store: store)
+            draft.paymentAmountNotes = moneyLine(project: project, store: store, locale: locale)
         }
         if options.contains(.timeline), draft.timelineNotes.isEmpty {
-            draft.timelineNotes = timelineLine(project: project)
+            draft.timelineNotes = timelineLine(project: project, locale: locale)
         }
         if options.contains(.money), draft.paymentTerms.isEmpty {
             let days = store.profile.defaultInvoicePaymentTerms
-            if days > 0 { draft.paymentTerms = "Payment due within \(days) days of invoice." }
+            if days > 0 {
+                draft.paymentTerms = BuxLocalizedString.format(
+                    "Payment due within %lld days of invoice.",
+                    locale: locale,
+                    Int64(days)
+                )
+            }
         }
     }
 
@@ -67,9 +78,11 @@ enum StudioAgreementPrefillEngine {
         options: StudioAgreementPrefillOptions,
         to draft: inout AgreementDraft,
         studioStore: StudioStore,
-        simpleStore: SimpleStudioStore
+        simpleStore: SimpleStudioStore,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) {
         guard job.kind == .job else { return }
+        let defaultTitle = BuxCatalogLabel.string("Client agreement", locale: locale)
         if options.contains(.links) {
             draft.linkedJobEntryId = job.id
             if let customer = simpleStore.customer(named: job.customerName),
@@ -79,10 +92,10 @@ enum StudioAgreementPrefillEngine {
                 draft.clientId = match.id
             }
             let label = job.jobLabel?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            if !label.isEmpty, draft.title.isEmpty || draft.title == "Client agreement" {
-                draft.title = "\(label) agreement"
-            } else if draft.title.isEmpty || draft.title == "Client agreement" {
-                draft.title = "\(job.customerName) agreement"
+            if !label.isEmpty, draft.title.isEmpty || draft.title == defaultTitle {
+                draft.title = BuxLocalizedString.format("%@ agreement", locale: locale, label)
+            } else if draft.title.isEmpty || draft.title == defaultTitle {
+                draft.title = BuxLocalizedString.format("%@ agreement", locale: locale, job.customerName)
             }
             if draft.signOffName.isEmpty { draft.signOffName = job.customerName }
         }
@@ -95,65 +108,122 @@ enum StudioAgreementPrefillEngine {
             draft.scopeBullets = parts.joined(separator: "\n")
         }
         if options.contains(.money), draft.paymentAmountNotes.isEmpty {
-            draft.paymentAmountNotes = moneyLine(job: job, formatter: studioStore.profile.currencyCode)
+            draft.paymentAmountNotes = moneyLine(
+                job: job,
+                formatter: studioStore.profile.currencyCode,
+                locale: locale
+            )
         }
         if options.contains(.timeline), draft.timelineNotes.isEmpty {
-            draft.timelineNotes = timelineLine(job: job)
+            draft.timelineNotes = timelineLine(job: job, locale: locale)
         }
     }
 
-    private static func moneyLine(project: StudioProject, store: StudioStore) -> String {
+    private static func moneyLine(project: StudioProject, store: StudioStore, locale: Locale) -> String {
         var parts: [String] = []
         if let fixed = project.fixedFee, fixed > 0 {
-            parts.append("Fixed fee: \(formatMoney(fixed, code: store.profile.currencyCode))")
+            parts.append(
+                BuxLocalizedString.format(
+                    "Fixed fee: %@",
+                    locale: locale,
+                    formatMoney(fixed, code: store.profile.currencyCode)
+                )
+            )
         }
         if let rate = project.hourlyRate, rate > 0 {
-            parts.append("Hourly: \(formatMoney(rate, code: store.profile.currencyCode)) / hr")
+            parts.append(
+                BuxLocalizedString.format(
+                    "Hourly: %@ / hr",
+                    locale: locale,
+                    formatMoney(rate, code: store.profile.currencyCode)
+                )
+            )
         }
         return parts.joined(separator: "\n")
     }
 
-    private static func moneyLine(job: SimpleStudioEntry, formatter code: String) -> String {
+    private static func moneyLine(job: SimpleStudioEntry, formatter code: String, locale: Locale) -> String {
         switch job.resolvedPayStyle {
         case .onePrice:
             if let agreed = job.agreedPrice, agreed > 0 {
-                return "Agreed price: \(formatMoney(agreed, code: code))"
+                return BuxLocalizedString.format(
+                    "Agreed price: %@",
+                    locale: locale,
+                    formatMoney(agreed, code: code)
+                )
             }
         case .byTheHour:
             if let rate = job.hourlyRate, rate > 0 {
-                return "Hourly rate: \(formatMoney(rate, code: code)) / hr"
+                return BuxLocalizedString.format(
+                    "Hourly rate: %@ / hr",
+                    locale: locale,
+                    formatMoney(rate, code: code)
+                )
             }
         }
         if job.amount > 0 {
-            return "Amount discussed: \(formatMoney(job.amount, code: code))"
+            return BuxLocalizedString.format(
+                "Amount discussed: %@",
+                locale: locale,
+                formatMoney(job.amount, code: code)
+            )
         }
         return ""
     }
 
-    private static func timelineLine(project: StudioProject) -> String {
+    private static func timelineLine(project: StudioProject, locale: Locale) -> String {
         var parts: [String] = []
-        let start = DateFormatter.localizedString(from: project.startDate, dateStyle: .medium, timeStyle: .none)
-        parts.append("Start: \(start)")
+        let start = BuxDisplayDate.monthDayYear(from: project.startDate, locale: locale)
+        parts.append(BuxLocalizedString.format("Start: %@", locale: locale, start))
         if let end = project.endDate {
-            let endStr = DateFormatter.localizedString(from: end, dateStyle: .medium, timeStyle: .none)
-            parts.append("End: \(endStr)")
+            let endStr = BuxDisplayDate.monthDayYear(from: end, locale: locale)
+            parts.append(BuxLocalizedString.format("End: %@", locale: locale, endStr))
         }
         if project.budgetedHours > 0 {
-            parts.append("Budget: \(String(format: "%.1f", project.budgetedHours)) hours")
+            parts.append(
+                BuxLocalizedString.format(
+                    "Budget: %.1f hours",
+                    locale: locale,
+                    project.budgetedHours
+                )
+            )
         }
         if project.allowedRevisions > 0 {
-            parts.append("Included revisions: \(project.allowedRevisions)")
+            parts.append(
+                BuxLocalizedString.format(
+                    "Included revisions: %lld",
+                    locale: locale,
+                    Int64(project.allowedRevisions)
+                )
+            )
         }
         return parts.joined(separator: "\n")
     }
 
-    private static func timelineLine(job: SimpleStudioEntry) -> String {
+    private static func timelineLine(job: SimpleStudioEntry, locale: Locale) -> String {
         guard let seconds = job.plannedWorkSeconds, seconds > 0 else { return "" }
         let h = Int(seconds) / 3600
         let m = (Int(seconds) % 3600) / 60
-        if h > 0, m > 0 { return "Planned time on site: \(h) h \(m) min" }
-        if h > 0 { return "Planned time on site: \(h) h" }
-        return "Planned time on site: \(m) min"
+        if h > 0, m > 0 {
+            return BuxLocalizedString.format(
+                "Planned time on site: %lld h %lld min",
+                locale: locale,
+                Int64(h),
+                Int64(m)
+            )
+        }
+        if h > 0 {
+            return BuxLocalizedString.format(
+                "Planned time on site: %lld h",
+                locale: locale,
+                Int64(h)
+            )
+        }
+        return BuxLocalizedString.format(
+            "Planned time on site: %lld min",
+            locale: locale,
+            Int64(m)
+        )
     }
 
     private static func formatMoney(_ value: Decimal, code: String) -> String {

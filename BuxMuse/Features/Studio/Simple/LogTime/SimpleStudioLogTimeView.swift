@@ -45,7 +45,7 @@ struct SimpleStudioLogTimeView: View {
     private var approvalBanner: some View {
         if let job = selectedJob, job.kind == .job, (job.agreedPrice ?? 0) <= 0 {
             SimpleStudioQuoteReminderBanner(
-                message: "No price on this job yet — send a quote first. You can still log time."
+                message: loc("No price on this job yet — send a quote first. You can still log time.")
             )
             .padding(.horizontal, BuxTokens.marginRegular)
         }
@@ -126,9 +126,11 @@ struct SimpleStudioLogTimeView: View {
                     Spacer().frame(height: BuxTokens.block)
                 }
                 .padding(.top, BuxLayout.tight)
+                .buxPadDashboardCardRail()
                 .environment(\.studioEnhancedTint, true)
             }
-            .buxScrollContentMargins()
+            .studioProPadSplitScrollLayout()
+            .studioPhoneScrollContentMargins()
         }
         .buxCatalogNavigationTitle("Work clock")
         .navigationBarTitleDisplayMode(.inline)
@@ -247,7 +249,9 @@ struct SimpleStudioLogTimeView: View {
                 .font(.system(size: 28, weight: .bold, design: .rounded))
                 .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
 
-            Text(snapshot.style == .byTheHour ? "Owed from hours so far" : "Agreed price for the job")
+            BuxCatalogDynamicText(
+                key: snapshot.style == .byTheHour ? "Owed from hours so far" : "Agreed price for the job"
+            )
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
 

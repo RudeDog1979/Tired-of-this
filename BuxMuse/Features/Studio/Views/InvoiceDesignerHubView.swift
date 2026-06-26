@@ -433,7 +433,7 @@ struct InvoiceDesignerHubView: View {
                                     lineItems.remove(at: idx)
                                 }
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                Label(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
                             }
                             .tint(BuxSwipeActionTint.delete)
                         }
@@ -646,7 +646,7 @@ struct InvoiceDesignerHubView: View {
                             engine.templateConfig = synced
                         }
                     } label: {
-                        Label("Sync from card", systemImage: "arrow.triangle.2.circlepath")
+                        Label(BuxCatalogLabel.string("Sync from card", locale: appSettingsManager.interfaceLocale), systemImage: "arrow.triangle.2.circlepath")
                             .font(.system(size: 13, weight: .semibold))
                     }
                     .buttonStyle(.bordered)
@@ -655,7 +655,7 @@ struct InvoiceDesignerHubView: View {
                         Button {
                             store.unlinkInvoiceBrandFromCard()
                         } label: {
-                            Label("Customize only", systemImage: "pencil")
+                            Label(BuxCatalogLabel.string("Customize only", locale: appSettingsManager.interfaceLocale), systemImage: "pencil")
                                 .font(.system(size: 13, weight: .semibold))
                         }
                         .buttonStyle(.bordered)
@@ -859,7 +859,13 @@ struct InvoiceDesignerHubView: View {
             designerSection("Invoice Notes") {
                 Button(action: { showNotesEditor = true }) {
                     HStack {
-                        Text(notes.isEmpty ? "Tap to add notes & payment terms…" : notes)
+                        Group {
+                            if notes.isEmpty {
+                                BuxCatalogDynamicText(key: "Tap to add notes & payment terms…")
+                            } else {
+                                Text(notes)
+                            }
+                        }
                             .font(.system(size: 12))
                             .foregroundColor(notes.isEmpty ? .gray : Color(UIColor.label))
                             .lineLimit(3)
@@ -1034,7 +1040,11 @@ struct InvoiceDesignerHubView: View {
                     Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                         .foregroundColor(Color(UIColor.label))
-                    Text(mode == .exclusive ? "Tax added on top of line item prices" : "Tax extracted from line item prices")
+                    BuxCatalogDynamicText(
+                        key: mode == .exclusive
+                            ? "Tax added on top of line item prices"
+                            : "Tax extracted from line item prices"
+                    )
                         .font(.system(size: 10))
                         .buxLabelSecondary()
                 }

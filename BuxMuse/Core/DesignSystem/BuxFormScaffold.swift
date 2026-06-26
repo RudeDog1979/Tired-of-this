@@ -161,6 +161,7 @@ struct BuxFormRowDivider: View {
 }
 
 struct BuxThemedCardForm<Content: View>: View {
+    @Environment(\.studioEnhancedTint) private var studioEnhancedTint
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -169,7 +170,7 @@ struct BuxThemedCardForm<Content: View>: View {
                 content()
             }
             .buxScreenContentMargins()
-            .padding(.top, BuxLayout.tight)
+            .padding(.top, studioEnhancedTint ? 0 : BuxLayout.tight)
             .padding(.bottom, 32)
         }
         .buxSettingsDrillInChrome()

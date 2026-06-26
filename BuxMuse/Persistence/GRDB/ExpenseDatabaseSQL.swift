@@ -194,6 +194,33 @@ final class ExpenseDatabaseSQL: @unchecked Sendable {
         }
     }
 
+    func fetchAllExpenseMonthIndex(
+        hustleId: UUID?,
+        includeUnassigned: Bool
+    ) throws -> [ArchiveMonthRow] {
+        try dbQueue.read { db in
+            let workspace = Self.workspaceClause(hustleId: hustleId, includeUnassigned: includeUnassigned)
+            let rows = try Row.fetchAll(db, sql: """
+                SELECT
+                    CAST(strftime('%s', strftime('%Y-%m-01', datetime(date, 'unixepoch'))) AS REAL) AS monthStart,
+                    COUNT(*) AS transactionCount
+                FROM expenses
+                WHERE 1 = 1\(workspace.sql)
+                GROUP BY strftime('%Y-%m', datetime(date, 'unixepoch'))
+                ORDER BY monthStart DESC
+                """, arguments: StatementArguments(workspace.arguments))
+
+            var archiveRows: [ArchiveMonthRow] = []
+            archiveRows.reserveCapacity(rows.count)
+            for row in rows {
+                guard let start = row["monthStart"] as Double?,
+                      let count = row["transactionCount"] as Int? else { continue }
+                archiveRows.append(ArchiveMonthRow(monthStart: start, transactionCount: count))
+            }
+            return archiveRows
+        }
+    }
+
     func fetchRecentRecordsRaw(
         limit: Int,
         hustleId: UUID?,

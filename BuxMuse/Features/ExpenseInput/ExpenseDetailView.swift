@@ -251,7 +251,7 @@ struct ExpenseDetailView: View {
                 }
 
                 Label(
-                    viewModel.record.date.formatted(date: .abbreviated, time: .shortened),
+                    BuxDisplayDate.dateAndTime(from: viewModel.record.date, locale: appSettingsManager.interfaceLocale),
                     systemImage: "calendar"
                 )
                 .font(.system(size: 12, weight: .medium))
@@ -510,10 +510,10 @@ struct ExpenseDetailView: View {
             items.append(.init(title: BuxCatalogLabel.string("Merchant", locale: locale), body: s, icon: "building.2", isWarning: false))
         }
         if let s = intel.goalsImpact {
-            items.append(.init(title: "Goals", body: s, icon: "target", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Goals", locale: locale), body: s, icon: "target", isWarning: false))
         }
         if let s = intel.subscriptionsImpact {
-            items.append(.init(title: "Subscriptions", body: s, icon: "creditcard", isWarning: false))
+            items.append(.init(title: BuxCatalogLabel.string("Subscriptions", locale: locale), body: s, icon: "creditcard", isWarning: false))
         }
         return items
     }

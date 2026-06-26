@@ -23,7 +23,6 @@ enum TaxEnvelopeTab: String, CaseIterable, Identifiable {
 
 struct TaxEnvelopeRootView: View {
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var taxEnvelopeBrain: TaxEnvelopeBrain
@@ -41,15 +40,7 @@ struct TaxEnvelopeRootView: View {
     private var locale: Locale { appSettingsManager.interfaceLocale }
 
     var body: some View {
-        ZStack {
-            if usesPadSplitLayout {
-                BuxLandingTintBackground()
-                    .ignoresSafeArea()
-            } else {
-                themeManager.screenBackground(for: colorScheme)
-                    .ignoresSafeArea()
-            }
-
+        StudioThemedListBackdrop {
             VStack(alignment: .leading, spacing: BuxTokens.block) {
                 header
                 paymentScheduleCard
@@ -57,8 +48,7 @@ struct TaxEnvelopeRootView: View {
                 tabContent
                 footerActions
             }
-            .padding(.horizontal, BuxTokens.marginRegular)
-            .padding(.top, BuxTokens.tight)
+            .studioProToolStaticTopInset()
         }
         .buxCatalogNavigationTitle("Tax savings")
         .buxInterfaceLocale()

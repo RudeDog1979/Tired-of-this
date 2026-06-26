@@ -44,7 +44,113 @@ private struct BuxPadSidebarToggleTint: UIViewControllerRepresentable {
     }
 }
 
+/// iPad split detail column — persistent landing/theme wash; tool content transitions above it.
+struct BuxPadSplitDetailCanvas<Selection: Equatable, Content: View>: View {
+    let selection: Selection
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack {
+            BuxLandingTintBackground()
+                .ignoresSafeArea()
+                .animation(nil, value: selection)
+
+            content()
+        }
+    }
+}
+
+private struct BuxPadStudioToolShellModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+    let navigationTitleKey: String
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
+                .buxPadStudioToolNavigationChrome()
+        } else {
+            content
+                .buxCatalogNavigationTitle(navigationTitleKey)
+                .navigationBarTitleDisplayMode(.large)
+                .buxPadStudioToolNavigationChrome()
+        }
+    }
+}
+
 extension View {
+    /// Pro Studio sidebar tools — inline nav on iPad split; embedded screen headers own the title.
+    func buxPadStudioToolShell(titleKey: String) -> some View {
+        modifier(BuxPadStudioToolShellModifier(navigationTitleKey: titleKey))
+    }
+}
+
+private struct BuxPadStudioToolNavigationChromeModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content.buxDetailNavigationChrome()
+        } else {
+            content.buxPushedNavigationChrome()
+        }
+    }
+}
+
+struct StudioPadSplitBackdropChromeModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content.modifier(StudioPadSplitScrollChromeModifier())
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    /// Settings-parity iPad split column — centered rail + adaptive margins (Tax envelope, My Money, …).
+    func buxPadStudioSplitDetailLayout() -> some View {
+        modifier(StudioPadSplitDetailLayoutModifier())
+    }
+}
+
+private struct StudioPadSplitDetailLayoutModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .buxPadDashboardCardRail()
+                .modifier(StudioPadSplitBackdropChromeModifier())
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    /// Pro Studio list tools — on iPad split keep nav transparent so landing wash shows through.
+    func buxPadStudioToolNavigationChrome() -> some View {
+        modifier(BuxPadStudioToolNavigationChromeModifier())
+    }
+
+    /// iPad split **detail column** — ease slide/fade only; keeps spring bounce off chrome and backdrop.
+    func buxPadSplitDetailTransition() -> some View {
+        transition(.asymmetric(
+            insertion: .move(edge: .trailing).combined(with: .opacity),
+            removal: .opacity
+        ))
+    }
+
+    /// Pair with `buxPadSplitDetailTransition()` on the detail column (matches Settings split host).
+    func buxPadSplitDetailNavigationAnimation<ID: Equatable>(value: ID) -> some View {
+        animation(BuxMotion.appearanceSettingsEntry, value: value)
+    }
+
     /// Sidebar column only — tints the system collapse/expand control with BuxMuse readable accent.
     func buxPadSidebarToggleTint(_ color: Color) -> some View {
         background {
@@ -114,5 +220,82 @@ struct StudioPadSplitScrollChromeModifier: ViewModifier {
                 .contentMargins(.top, BuxLayout.dashboardRootTabScrollTopInset, for: .scrollContent)
                 .buxRootTabScrollChrome()
         }
+    }
+}
+
+private struct StudioPadAdaptiveScrollContentModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content.buxPadDashboardCardRail()
+        } else {
+            content
+        }
+    }
+}
+
+private struct StudioPadAdaptiveScrollSurfaceModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content.modifier(StudioPadSplitScrollChromeModifier())
+        } else {
+            content
+        }
+    }
+}
+
+private struct StudioPadSectionInsetModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content
+        } else {
+            content.padding(.horizontal, BuxTokens.marginRegular)
+        }
+    }
+}
+
+private struct StudioThemedListPadLayoutModifier: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
+
+    func body(content: Content) -> some View {
+        if usesPadSplitLayout {
+            content
+                .buxPadDashboardCardRail()
+                .modifier(StudioPadSplitScrollChromeModifier())
+        } else {
+            content.buxListContentMargins()
+        }
+    }
+}
+
+extension View {
+    /// iPad split list/scroll **content** — centered 720pt rail (apply to `VStack` / `LazyVStack` inside scroll).
+    func buxPadStudioAdaptiveScrollContent() -> some View {
+        modifier(StudioPadAdaptiveScrollContentModifier())
+    }
+
+    /// iPad split list/scroll **surface** — adaptive margins + tab clearance (apply to `ScrollView` / `List`).
+    func buxPadStudioAdaptiveScrollSurface() -> some View {
+        modifier(StudioPadAdaptiveScrollSurfaceModifier())
+    }
+
+    /// iPad split static column — rail + adaptive scroll chrome (Tax envelope, etc.).
+    func buxPadStudioAdaptiveColumnLayout() -> some View {
+        modifier(StudioPadAdaptiveScrollContentModifier())
+            .modifier(StudioPadAdaptiveScrollSurfaceModifier())
+    }
+
+    /// Section/card inset — phone keeps 20pt rails; iPad split relies on adaptive chrome.
+    func buxPadStudioSectionInset() -> some View {
+        modifier(StudioPadSectionInsetModifier())
+    }
+
+    func buxPadStudioThemedListPadLayout() -> some View {
+        modifier(StudioThemedListPadLayoutModifier())
     }
 }

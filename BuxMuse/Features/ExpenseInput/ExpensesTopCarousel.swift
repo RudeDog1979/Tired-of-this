@@ -32,6 +32,7 @@ struct ExpensesTopCarousel: View {
     let formatAmount: (Decimal) -> String
     let playRequest: UUID
     let session: ExpenseCarouselSession
+    var onOpenSpendingTrends: (() -> Void)? = nil
 
     @State private var playedPages: Set<Int>
     @State private var pageProgress: [Int: Double]
@@ -63,7 +64,8 @@ struct ExpensesTopCarousel: View {
         summary: ExpensesSummaryDisplay,
         formatAmount: @escaping (Decimal) -> String,
         playRequest: UUID,
-        session: ExpenseCarouselSession? = nil
+        session: ExpenseCarouselSession? = nil,
+        onOpenSpendingTrends: (() -> Void)? = nil
     ) {
         self.header = header
         self.summary = summary
@@ -71,6 +73,7 @@ struct ExpensesTopCarousel: View {
         self.playRequest = playRequest
         let resolvedSession = session ?? ExpenseCarouselSession.shared
         self.session = resolvedSession
+        self.onOpenSpendingTrends = onOpenSpendingTrends
         _playedPages = State(initialValue: resolvedSession.playedPages)
         _pageProgress = State(initialValue: resolvedSession.pageProgress)
     }
@@ -141,7 +144,11 @@ struct ExpensesTopCarousel: View {
                                         .onTapGesture {
                                             let impact = UIImpactFeedbackGenerator(style: .medium)
                                             impact.impactOccurred()
-                                            activeDetailSheet = .monthlySummary
+                                            if let onOpenSpendingTrends {
+                                                onOpenSpendingTrends()
+                                            } else {
+                                                activeDetailSheet = .monthlySummary
+                                            }
                                         }
                                 }
                             }
@@ -365,15 +372,11 @@ struct ExpensesTopCarousel: View {
             amountByDay[calendar.startOfDay(for: date)] = points[index]
         }
 
-        let formatter = DateFormatter()
-        formatter.locale = appSettingsManager.interfaceLocale
-        formatter.dateFormat = "E"
-
         return (0..<7).compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: offset, to: weekStart) else { return nil }
             let dayStart = calendar.startOfDay(for: date)
             let amount = BuxChartMotion.scaled(amountByDay[dayStart] ?? 0, progress: progress)
-            return (formatter.string(from: date), amount)
+            return (BuxDisplayDate.shortWeekday(from: date, locale: appSettingsManager.interfaceLocale), amount)
         }
     }
 
@@ -383,10 +386,7 @@ struct ExpensesTopCarousel: View {
         guard let date = calendar.date(byAdding: .day, value: -6 + index, to: today) else {
             return "D\(index + 1)"
         }
-        let formatter = DateFormatter()
-        formatter.locale = appSettingsManager.interfaceLocale
-        formatter.dateFormat = "E"
-        return formatter.string(from: date)
+        return BuxDisplayDate.shortWeekday(from: date, locale: appSettingsManager.interfaceLocale)
     }
 
     private func trendContent(progress: Double) -> some View {
@@ -801,6 +801,7 @@ struct ExpensesHeroCarouselHost: View, Equatable {
     let summary: ExpensesSummaryDisplay
     let formatAmount: (Decimal) -> String
     let playRequest: UUID
+    var onOpenSpendingTrends: (() -> Void)? = nil
 
     static func == (lhs: ExpensesHeroCarouselHost, rhs: ExpensesHeroCarouselHost) -> Bool {
         lhs.playRequest == rhs.playRequest &&
@@ -830,7 +831,8 @@ struct ExpensesHeroCarouselHost: View, Equatable {
             summary: summary,
             formatAmount: formatAmount,
             playRequest: playRequest,
-            session: session
+            session: session,
+            onOpenSpendingTrends: onOpenSpendingTrends
         )
         .id(playRequest)
     }

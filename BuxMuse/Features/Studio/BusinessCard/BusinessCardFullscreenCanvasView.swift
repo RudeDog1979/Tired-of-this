@@ -49,13 +49,13 @@ struct BusinessCardFullscreenCanvasView: View {
 
     private var topBar: some View {
         HStack {
-            Button("Cancel") { dismiss() }
+            Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() }
             Spacer()
             BuxCatalogDynamicText(key: "Move layers")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(.white)
             Spacer()
-            Button("Done") { onSave(); dismiss() }
+            Button(BuxCatalogLabel.string("Done", locale: appSettingsManager.interfaceLocale)) { onSave(); dismiss() }
                 .fontWeight(.semibold)
         }
         .foregroundStyle(.white)

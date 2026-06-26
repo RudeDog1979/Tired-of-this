@@ -185,10 +185,12 @@ struct SimpleStudioMyMoneyView: View {
 
                 SimpleStudioTaxSection(tile: display.taxTile)
             }
-            .padding(.horizontal, BuxTokens.marginRegular)
+            .buxPadDashboardCardRail()
             .padding(.vertical, BuxTokens.section)
             .environment(\.studioEnhancedTint, true)
         }
+        .studioProPadSplitScrollLayout()
+        .studioPhoneScrollContentMargins()
         .background {
             if !usesPadSplitLayout {
                 themeManager.screenBackground(for: colorScheme)

@@ -129,7 +129,7 @@ struct CardProCanvasView: View {
                     onChange: { canvasToolbarDidChange() }
                 )
                     .buxCatalogNavigationTitle("Bux Layers")
-                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showLayerPanel = false } } }
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button(BuxCatalogLabel.string("Done", locale: appSettingsManager.interfaceLocale)) { showLayerPanel = false } } }
             }
         }
         .sheet(isPresented: $showBackgroundEditor) {
@@ -149,7 +149,7 @@ struct CardProCanvasView: View {
                     onChange: { snapshotForUndo() }
                 )
                 .buxCatalogNavigationTitle("Bux Background")
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showBackgroundEditor = false } } }
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button(BuxCatalogLabel.string("Done", locale: appSettingsManager.interfaceLocale)) { showBackgroundEditor = false } } }
             }
         }
         .fullScreenCover(item: $photoStudioSession) { session in
@@ -510,12 +510,12 @@ struct CardProCanvasView: View {
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
             HStack(spacing: 8) {
-                Button("Choose photo") { startBackgroundPhotoPick() }
+                Button(BuxCatalogLabel.string("Choose photo", locale: appSettingsManager.interfaceLocale)) { startBackgroundPhotoPick() }
                     .font(.system(size: 13, weight: .semibold))
                     .buxNativeButtonStyle(.secondary)
                     .foregroundStyle(controlTint)
                 if design.canvasDocument?.background.photoPath != nil {
-                    Button("Adjust") { openBackgroundPhotoAdjust() }
+                    Button(BuxCatalogLabel.string("Adjust", locale: appSettingsManager.interfaceLocale)) { openBackgroundPhotoAdjust() }
                         .font(.system(size: 13, weight: .semibold))
                         .buxNativeButtonStyle(.secondary)
                         .foregroundStyle(controlTint)
@@ -843,9 +843,9 @@ struct CardProCanvasView: View {
                     .background(Color(uiColor: .secondarySystemGroupedBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 HStack {
-                    Button("Cancel") { inlineEditLayerID = nil }
+                    Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) { inlineEditLayerID = nil }
                     Spacer()
-                    Button("Apply") { applyInlineEdit(layerID: layerID) }
+                    Button(BuxCatalogLabel.string("Apply", locale: appSettingsManager.interfaceLocale)) { applyInlineEdit(layerID: layerID) }
                         .fontWeight(.semibold)
                         .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
                 }

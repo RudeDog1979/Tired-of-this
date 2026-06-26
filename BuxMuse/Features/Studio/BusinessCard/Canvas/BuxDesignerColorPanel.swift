@@ -46,7 +46,13 @@ struct BuxDesignerColorPanel: View {
                     BuxDesignerColorWell(hex: currentHex, size: swatchSize, showsRing: true)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(title), open color picker")
+                .accessibilityLabel(
+                    BuxLocalizedString.format(
+                        "%@, open color picker",
+                        locale: appSettingsManager.interfaceLocale,
+                        BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale)
+                    )
+                )
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .center, spacing: 6) {
@@ -81,7 +87,13 @@ struct BuxDesignerColorPanel: View {
                 .background(controlTint.opacity(0.12), in: Circle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("More colors for \(title)")
+        .accessibilityLabel(
+            BuxLocalizedString.format(
+                "More colors for %@",
+                locale: appSettingsManager.interfaceLocale,
+                BusinessCardL10n.line(title, locale: appSettingsManager.interfaceLocale)
+            )
+        )
     }
 
     private func presetSwatch(label: String, hex: String) -> some View {
@@ -92,6 +104,6 @@ struct BuxDesignerColorPanel: View {
             BuxDesignerColorWell(hex: hex, size: swatchSize, showsRing: selected)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(label)
+        .accessibilityLabel(BusinessCardL10n.line(label, locale: appSettingsManager.interfaceLocale))
     }
 }

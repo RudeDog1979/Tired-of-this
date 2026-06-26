@@ -48,11 +48,15 @@ public enum StudioInvoiceArchiveEngine {
         case writeFailed
 
         public var errorDescription: String? {
+            let locale = BuxInterfaceLocale.currentInterfaceLocale
             switch self {
             case .nothingToExport:
-                return "Select at least one invoice or include receipt photos to export."
+                return BuxLocalizedString.string(
+                    "Select at least one invoice or include receipt photos to export.",
+                    locale: locale
+                )
             case .writeFailed:
-                return "Could not create the invoice archive."
+                return BuxLocalizedString.string("Could not create the invoice archive.", locale: locale)
             }
         }
     }
@@ -252,7 +256,8 @@ public enum StudioInvoiceArchiveEngine {
             profile: studioStore.profile,
             settings: studioStore.invoiceSettings,
             taxProfile: studioStore.taxProfile,
-            countryCode: appSettings.selectedCountry.id
+            countryCode: appSettings.selectedCountry.id,
+            locale: appSettings.interfaceLocale
         )
     }
 

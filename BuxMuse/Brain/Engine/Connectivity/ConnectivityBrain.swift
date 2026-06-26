@@ -60,13 +60,17 @@ public final class ConnectivityBrain: ObservableObject {
 
     private func apply(online: Bool) {
         isOnline = online
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
 
         if !online {
             wasOffline = true
             guard !didShowOfflineToastThisSession else { return }
             didShowOfflineToastThisSession = true
             activeToast = ConnectivityToast(
-                message: "Offline — BuxMuse still works locally",
+                message: BuxLocalizedString.string(
+                    "Offline — BuxMuse still works locally",
+                    locale: locale
+                ),
                 style: .offline
             )
             scheduleToastDismiss()
@@ -75,7 +79,10 @@ public final class ConnectivityBrain: ObservableObject {
 
         if wasOffline {
             wasOffline = false
-            activeToast = ConnectivityToast(message: "Back online", style: .online)
+            activeToast = ConnectivityToast(
+                message: BuxLocalizedString.string("Back online", locale: locale),
+                style: .online
+            )
             scheduleToastDismiss()
         }
     }

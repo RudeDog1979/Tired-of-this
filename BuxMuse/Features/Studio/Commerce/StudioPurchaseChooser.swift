@@ -226,10 +226,17 @@ struct StudioPurchaseChooser: View {
 
     // MARK: - Subscription cards
 
+    private var simpleCardSubtitle: String {
+        BuxCatalogLabel.string(
+            "Add-on · requires BuxMuse · one-time unlock",
+            locale: appSettingsManager.interfaceLocale
+        )
+    }
+
     private var simpleSubscriptionCard: some View {
         StudioPricingCard(
             title: "Simple Studio",
-            subtitle: "Add-on · requires BuxMuse · one-time unlock",
+            subtitle: simpleCardSubtitle,
             priceID: .studioSimple,
             badge: nil,
             bullets: [
@@ -419,27 +426,40 @@ struct StudioPurchaseChooser: View {
     }
 
     private var proCardSubtitle: String {
+        let locale = appSettingsManager.interfaceLocale
         if purchaseManager.proInIntroductoryOffer {
-            return "Add-on · requires BuxMuse · includes Simple · trial active"
+            return BuxCatalogLabel.string(
+                "Add-on · requires BuxMuse · includes Simple · trial active",
+                locale: locale
+            )
         }
         if purchaseManager.proIntroOfferEligible {
             if let trial = purchaseManager.trialLengthLabel(
                 for: billingPeriod.studioProProductID,
-                locale: appSettingsManager.interfaceLocale
+                locale: locale
             ) {
                 return BuxLocalizedString.format(
                     "Add-on · requires BuxMuse · includes Simple · %@",
-                    locale: appSettingsManager.interfaceLocale,
+                    locale: locale,
                     trial
                 )
             }
         }
         if purchaseManager.ownsSimpleOneTimePurchase {
-            return "Add-on · requires BuxMuse · includes Simple · request a Simple refund from Apple after upgrading"
+            return BuxCatalogLabel.string(
+                "Add-on · requires BuxMuse · includes Simple · request a Simple refund from Apple after upgrading",
+                locale: locale
+            )
         }
         return billingPeriod == .yearly
-            ? "Add-on · requires BuxMuse · includes Simple · billed yearly"
-            : "Add-on · requires BuxMuse · includes Simple · billed monthly"
+            ? BuxCatalogLabel.string(
+                "Add-on · requires BuxMuse · includes Simple · billed yearly",
+                locale: locale
+            )
+            : BuxCatalogLabel.string(
+                "Add-on · requires BuxMuse · includes Simple · billed monthly",
+                locale: locale
+            )
     }
 
     private var proCardBullets: [String] {
@@ -523,7 +543,7 @@ private struct StudioPricingCard: View {
                     Text(BuxCatalogLabel.string(title, locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    Text(BuxCatalogLabel.string(subtitle, locale: appSettingsManager.interfaceLocale))
+                    Text(subtitle)
                         .font(.system(size: 12, weight: .medium))
                         .buxLabelSecondary()
                 }

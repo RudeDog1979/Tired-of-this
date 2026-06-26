@@ -1,0 +1,34 @@
+{
+  "This expense falls into your high-spend late-night zone.": {
+    "es-419": "Este gasto cae en tu zona de alto gasto nocturno.",
+    "es-ES": "Este gasto cae en tu zona de alto gasto nocturno."
+  },
+  "Your spending spikes on weekends — this fits that window.": {
+    "es-419": "Tus gastos suben los fines de semana — encaja en esa ventana.",
+    "es-ES": "Tus gastos suben los fines de semana — encaja en esa ventana."
+  },
+  "Payday window spend — watch impulse purchases here.": {
+    "es-419": "Gasto en ventana de quincena — cuida las compras impulsivas aquí.",
+    "es-ES": "Gasto en ventana de quincena — cuida las compras impulsivas aquí."
+  },
+  "If repeated monthly, this costs %@ a year and %@ over 5 years.": {
+    "es-419": "Si se repite cada mes, cuesta %@ al año y %@ en 5 años.",
+    "es-ES": "Si se repite cada mes, cuesta %@ al año y %@ en 5 años."
+  },
+  "Try capping your next visit here to 10% less.": {
+    "es-419": "Intenta limitar tu próxima visita aquí a un 10% menos.",
+    "es-ES": "Intenta limitar tu próxima visita aquí a un 10% menos."
+  },
+  "Commit to delaying your next large purchase in this category by 48 hours.": {
+    "es-419": "Comprométete a retrasar 48 horas tu próxima compra grande en esta categoría.",
+    "es-ES": "Comprométete a retrasar 48 horas tu próxima compra grande en esta categoría."
+  },
+  "You frequently spend this amount at %@.": {
+    "es-419": "Sueles gastar esta cantidad en %@.",
+    "es-ES": "Sueles gastar esta cantidad en %@."
+  },
+  "Context: %@": {
+    "es-419": "Contexto: %@",
+    "es-ES": "Contexto: %@"
+  }
+}

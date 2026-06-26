@@ -32,7 +32,6 @@ struct StudioProfileView: View {
             BuxThemedCardForm {
                 StudioProToolScreenHeader(titleKey: "Business Profile")
                     .studioProToolScrollPlacementEmbedded()
-                    .padding(.top, StudioProToolHeaderLayout.topInset - BuxLayout.tight)
 
                 BuxFormSection(title: "Business details") {
                     PhotoPickCropRow(
@@ -117,6 +116,7 @@ struct StudioProfileView: View {
                     .buxFormFieldPadding()
                 }
             }
+            .studioProToolScrollTopInset()
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)

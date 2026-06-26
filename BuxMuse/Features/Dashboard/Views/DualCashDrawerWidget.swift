@@ -320,13 +320,11 @@ struct QuickCashDrawerAdjustSheet: View {
                 .buttonStyle(.plain)
             }
             .padding(.vertical)
-            .navigationTitle(
-                Text(LocalizedStringKey(stringLiteral: "Log Physical Cash"))
-            )
+            .buxCatalogNavigationTitle("Log Physical Cash")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() }
                 }
             }
         }

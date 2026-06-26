@@ -159,6 +159,7 @@ enum ProStudioSearchEngine {
         studio: StudioSnapshot,
         simple: SimpleStudioSnapshot?,
         format: (Decimal) -> String,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale,
         now: Date = Date(),
         calendar: Calendar = .current
     ) -> [Result] {
@@ -168,12 +169,13 @@ enum ProStudioSearchEngine {
         let parsed = parse(trimmed, now: now, calendar: calendar)
         var results: [Result] = []
 
-        results.append(contentsOf: searchClients(parsed: parsed, clients: studio.clients, format: format))
+        results.append(contentsOf: searchClients(parsed: parsed, clients: studio.clients, format: format, locale: locale))
         results.append(contentsOf: searchInvoices(
             parsed: parsed,
             invoices: studio.invoices,
             clients: studio.clients,
             format: format,
+            locale: locale,
             now: now,
             calendar: calendar
         ))
@@ -182,17 +184,20 @@ enum ProStudioSearchEngine {
             projects: studio.projects,
             clients: studio.clients,
             format: format,
+            locale: locale,
             calendar: calendar
         ))
         results.append(contentsOf: searchReceipts(
             parsed: parsed,
             receipts: studio.receipts,
             format: format,
+            locale: locale,
             calendar: calendar
         ))
         results.append(contentsOf: searchMileage(
             parsed: parsed,
             entries: studio.mileageEntries,
+            locale: locale,
             calendar: calendar
         ))
 
@@ -267,7 +272,8 @@ enum ProStudioSearchEngine {
     private static func searchClients(
         parsed: ParsedQuery,
         clients: [StudioClient],
-        format: (Decimal) -> String
+        format: (Decimal) -> String,
+        locale: Locale
     ) -> [Result] {
         clients.compactMap { client in
             let score = scoreClient(client, parsed: parsed)
@@ -286,7 +292,7 @@ enum ProStudioSearchEngine {
                 subtitle: subtitleParts.joined(separator: " · "),
                 detail: client.address,
                 amountFormatted: client.defaultRate.map(format),
-                matchReason: matchReason(for: parsed, fallback: "Client"),
+                matchReason: matchReason(for: parsed, fallback: "Client", locale: locale),
                 timestamp: Date(),
                 score: score
             )
@@ -298,6 +304,7 @@ enum ProStudioSearchEngine {
         invoices: [StudioInvoice],
         clients: [StudioClient],
         format: (Decimal) -> String,
+        locale: Locale,
         now: Date,
         calendar: Calendar
     ) -> [Result] {
@@ -308,16 +315,19 @@ enum ProStudioSearchEngine {
             let score = scoreInvoice(invoice, clients: clients, parsed: parsed, now: now)
             guard score > 0 else { return nil }
 
-            let clientName = clients.first { $0.id == invoice.clientId }?.name ?? "Client"
+            let clientName = clients.first { $0.id == invoice.clientId }?.name
+                ?? BuxCatalogLabel.string("Client", locale: locale)
             return Result(
                 id: invoice.id,
                 kind: .invoice(invoice.id),
                 section: .invoices,
-                title: invoice.invoiceNumber.isEmpty ? "Invoice · \(clientName)" : invoice.invoiceNumber,
+                title: invoice.invoiceNumber.isEmpty
+                    ? "\(BuxCatalogLabel.string("Invoice", locale: locale)) · \(clientName)"
+                    : invoice.invoiceNumber,
                 subtitle: clientName,
                 detail: invoice.status.rawValue,
                 amountFormatted: format(invoice.total),
-                matchReason: matchReason(for: parsed, fallback: "Invoice"),
+                matchReason: matchReason(for: parsed, fallback: "Invoice", locale: locale),
                 timestamp: invoice.issueDate,
                 score: score
             )
@@ -329,6 +339,7 @@ enum ProStudioSearchEngine {
         projects: [StudioProject],
         clients: [StudioClient],
         format: (Decimal) -> String,
+        locale: Locale,
         calendar: Calendar
     ) -> [Result] {
         var results: [Result] = []
@@ -339,7 +350,8 @@ enum ProStudioSearchEngine {
 
             let score = scoreProject(project, clients: clients, parsed: parsed)
             if score > 0 {
-                let clientName = project.clientId.flatMap { id in clients.first { $0.id == id }?.name } ?? "No client"
+                let clientName = project.clientId.flatMap { id in clients.first { $0.id == id }?.name }
+                    ?? BuxCatalogLabel.string("No client", locale: locale)
                 let amount = project.fixedFee ?? project.hourlyRate
                 results.append(Result(
                     id: project.id,
@@ -347,9 +359,13 @@ enum ProStudioSearchEngine {
                     section: .projects,
                     title: project.name,
                     subtitle: clientName,
-                    detail: "\(project.timeEntries.count) time entries",
+                    detail: BuxLocalizedString.format(
+                        "%lld time entries",
+                        locale: locale,
+                        project.timeEntries.count
+                    ),
                     amountFormatted: amount.map(format),
-                    matchReason: matchReason(for: parsed, fallback: "Project"),
+                    matchReason: matchReason(for: parsed, fallback: "Project", locale: locale),
                     timestamp: project.startDate,
                     score: score
                 ))
@@ -366,9 +382,11 @@ enum ProStudioSearchEngine {
                         section: .time,
                         title: project.name,
                         subtitle: entry.notes.isEmpty ? formattedDuration(entry.duration) : entry.notes,
-                        detail: entry.isBillable ? "Billable" : "Non-billable",
+                        detail: entry.isBillable
+                            ? BuxCatalogLabel.string("Billable", locale: locale)
+                            : BuxCatalogLabel.string("Non-billable", locale: locale),
                         amountFormatted: nil,
-                        matchReason: "Time logged",
+                        matchReason: BuxCatalogLabel.string("Time logged", locale: locale),
                         timestamp: entry.startTime,
                         score: timeScore
                     ))
@@ -383,6 +401,7 @@ enum ProStudioSearchEngine {
         parsed: ParsedQuery,
         receipts: [StudioReceipt],
         format: (Decimal) -> String,
+        locale: Locale,
         calendar: Calendar
     ) -> [Result] {
         receipts.compactMap { receipt in
@@ -396,11 +415,15 @@ enum ProStudioSearchEngine {
                 id: receipt.id,
                 kind: .receipt(receipt.id),
                 section: .receipts,
-                title: receipt.merchant.isEmpty ? "Receipt" : receipt.merchant,
+                title: receipt.merchant.isEmpty
+                    ? BuxCatalogLabel.string("Receipt", locale: locale)
+                    : receipt.merchant,
                 subtitle: receipt.category,
-                detail: receipt.isDeductible ? "Deductible" : receipt.businessUse.rawValue,
+                detail: receipt.isDeductible
+                    ? BuxCatalogLabel.string("Deductible", locale: locale)
+                    : receipt.businessUse.rawValue,
                 amountFormatted: format(receipt.amount),
-                matchReason: matchReason(for: parsed, fallback: "Receipt"),
+                matchReason: matchReason(for: parsed, fallback: "Receipt", locale: locale),
                 timestamp: receipt.date,
                 score: score
             )
@@ -410,6 +433,7 @@ enum ProStudioSearchEngine {
     private static func searchMileage(
         parsed: ParsedQuery,
         entries: [MileageEntry],
+        locale: Locale,
         calendar: Calendar
     ) -> [Result] {
         entries.compactMap { entry in
@@ -425,11 +449,11 @@ enum ProStudioSearchEngine {
                 id: entry.id,
                 kind: .mileage(entry.id),
                 section: .mileage,
-                title: route.isEmpty ? "Trip" : route,
+                title: route.isEmpty ? BuxCatalogLabel.string("Trip", locale: locale) : route,
                 subtitle: entry.purpose.rawValue,
                 detail: entry.notes,
                 amountFormatted: String(format: "%.1f mi", entry.distance),
-                matchReason: matchReason(for: parsed, fallback: "Mileage"),
+                matchReason: matchReason(for: parsed, fallback: "Mileage", locale: locale),
                 timestamp: entry.date,
                 score: score
             )
@@ -604,19 +628,21 @@ enum ProStudioSearchEngine {
         return "\(minutes)m"
     }
 
-    private static func matchReason(for parsed: ParsedQuery, fallback: String) -> String {
-        if parsed.proIntents.contains(.overdue) { return "Overdue" }
-        if parsed.proIntents.contains(.draft) { return "Draft" }
-        if parsed.proIntents.contains(.unpaid) { return "Unpaid" }
-        if parsed.proIntents.contains(.paid) { return "Paid" }
-        if parsed.proIntents.contains(.deductible) { return "Deductible" }
-        if parsed.proIntents.contains(.mileage) { return "Mileage" }
-        if parsed.proIntents.contains(.receipts) { return "Receipt" }
-        if parsed.proIntents.contains(.projects) { return "Project" }
-        if parsed.proIntents.contains(.clients) { return "Client" }
-        if parsed.proIntents.contains(.time) { return "Time logged" }
-        if parsed.simpleParsed.intents.contains(.waitingOnMe) { return "Waiting on payment" }
-        if parsed.simpleParsed.dateRange != nil { return "This period" }
-        return fallback
+    private static func matchReason(for parsed: ParsedQuery, fallback: String, locale: Locale) -> String {
+        if parsed.proIntents.contains(.overdue) { return BuxCatalogLabel.string("Overdue", locale: locale) }
+        if parsed.proIntents.contains(.draft) { return BuxCatalogLabel.string("Draft", locale: locale) }
+        if parsed.proIntents.contains(.unpaid) { return BuxCatalogLabel.string("Unpaid", locale: locale) }
+        if parsed.proIntents.contains(.paid) { return BuxCatalogLabel.string("Paid", locale: locale) }
+        if parsed.proIntents.contains(.deductible) { return BuxCatalogLabel.string("Deductible", locale: locale) }
+        if parsed.proIntents.contains(.mileage) { return BuxCatalogLabel.string("Mileage", locale: locale) }
+        if parsed.proIntents.contains(.receipts) { return BuxCatalogLabel.string("Receipt", locale: locale) }
+        if parsed.proIntents.contains(.projects) { return BuxCatalogLabel.string("Project", locale: locale) }
+        if parsed.proIntents.contains(.clients) { return BuxCatalogLabel.string("Client", locale: locale) }
+        if parsed.proIntents.contains(.time) { return BuxCatalogLabel.string("Time logged", locale: locale) }
+        if parsed.simpleParsed.intents.contains(.waitingOnMe) {
+            return BuxCatalogLabel.string("Waiting on payment", locale: locale)
+        }
+        if parsed.simpleParsed.dateRange != nil { return BuxCatalogLabel.string("This period", locale: locale) }
+        return BuxCatalogLabel.string(fallback, locale: locale)
     }
 }

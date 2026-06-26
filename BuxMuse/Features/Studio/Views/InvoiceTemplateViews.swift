@@ -726,7 +726,11 @@ public struct ModernInvoiceTemplateView: View {
                         .cornerRadius(context.templateConfig.cornerStyle.radius)
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(context.issuerBlock.title.isEmpty ? "Your Business" : context.issuerBlock.title)
+                    Text(
+                        context.issuerBlock.title.isEmpty
+                            ? BuxCatalogLabel.string("Your Business", locale: context.interfaceLocale)
+                            : context.issuerBlock.title
+                    )
                         .font(typo.headingFont(size: 17, weight: .bold))
                         .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig))
                     if let subtitle = context.issuerBlock.subtitle, !subtitle.isEmpty {
@@ -782,7 +786,7 @@ public struct ModernInvoiceTemplateView: View {
             Text(label + ":")
                 .font(typo.bodyFont(size: 8, weight: .medium))
                 .foregroundColor(Color(UIColor.secondaryLabel))
-            Text(date.formatted(date: .abbreviated, time: .omitted))
+            Text(BuxDisplayDate.monthDay(from: date, locale: context.interfaceLocale))
                 .font(typo.bodyFont(size: 8, weight: .semibold))
                 .foregroundColor(Color(UIColor.label))
         }
@@ -822,7 +826,11 @@ public struct MinimalistInvoiceTemplateView: View {
                                     .scaledToFit()
                                     .frame(height: 32)
                             }
-                            Text(context.issuerBlock.title.isEmpty ? "Your Business" : context.issuerBlock.title)
+                            Text(
+                        context.issuerBlock.title.isEmpty
+                            ? BuxCatalogLabel.string("Your Business", locale: context.interfaceLocale)
+                            : context.issuerBlock.title
+                    )
                                 .font(typo.headingFont(size: 22, weight: .light))
                                 .foregroundColor(secondary)
                         }
@@ -955,7 +963,7 @@ public struct MinimalistInvoiceTemplateView: View {
             Text(label)
                 .font(typo.bodyFont(size: 7.5))
                 .foregroundColor(secondary) // Use secondary (accent) color
-            Text(date.formatted(date: .abbreviated, time: .omitted))
+            Text(BuxDisplayDate.monthDay(from: date, locale: context.interfaceLocale))
                 .font(typo.bodyFont(size: 8, weight: .medium))
                 .foregroundColor(Color(UIColor.label))
         }
@@ -1091,7 +1099,11 @@ public struct ExecutiveInvoiceTemplateView: View {
                         )
                 }
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(context.profile.businessName.isEmpty ? "Your Business" : context.profile.businessName)
+                    Text(
+                        context.profile.businessName.isEmpty
+                            ? BuxCatalogLabel.string("Your Business", locale: context.interfaceLocale)
+                            : context.profile.businessName
+                    )
                         .font(typo.headingFont(size: 18, weight: .bold))
                         .foregroundColor(InvoiceBrandRendering.headerForeground(config: context.templateConfig))
                     if !context.profile.displayName.isEmpty {
@@ -1118,8 +1130,11 @@ public struct ExecutiveInvoiceTemplateView: View {
                         Text(
                             BuxLocalizedString.format(
                                 "Issued: %@",
-                                locale: BuxInterfaceLocale.currentInterfaceLocale,
-                                context.invoice.issueDate.formatted(date: .abbreviated, time: .omitted)
+                                locale: context.interfaceLocale,
+                                BuxDisplayDate.monthDay(
+                                    from: context.invoice.issueDate,
+                                    locale: context.interfaceLocale
+                                )
                             )
                         )
                             .font(typo.bodyFont(size: 7.5))
@@ -1127,8 +1142,11 @@ public struct ExecutiveInvoiceTemplateView: View {
                         Text(
                             BuxLocalizedString.format(
                                 "Due: %@",
-                                locale: BuxInterfaceLocale.currentInterfaceLocale,
-                                context.invoice.dueDate.formatted(date: .abbreviated, time: .omitted)
+                                locale: context.interfaceLocale,
+                                BuxDisplayDate.monthDay(
+                                    from: context.invoice.dueDate,
+                                    locale: context.interfaceLocale
+                                )
                             )
                         )
                             .font(typo.bodyFont(size: 7.5, weight: .semibold))

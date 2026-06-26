@@ -10,6 +10,7 @@ import SwiftUI
 struct BusinessCardStudioHeader: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var compact: Bool = false
 
@@ -33,7 +34,7 @@ struct BusinessCardStudioHeader: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Business Card Pro Studio")
+        .accessibilityLabel(BusinessCardL10n.line("Business Card Pro Studio", locale: appSettingsManager.interfaceLocale))
     }
 
     private func studioTitle(size: CGFloat, weight: Font.Weight) -> some View {

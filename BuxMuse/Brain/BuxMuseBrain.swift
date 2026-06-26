@@ -397,6 +397,57 @@ public final class BuxMuseBrain: ObservableObject {
         try persistence.fetchExpenseRecord(id: id)
     }
 
+    func fetchExpenseRecord(financeKitTransactionId: String) throws -> ExpenseRecord? {
+        try persistence.fetchExpenseRecordByFinanceKitId(financeKitTransactionId)
+    }
+
+    /// After budget / paycheck settings arrive from iCloud, relink anchor rows and auto-tag salary deposits on this device.
+    func reconcileSalaryPayrollAfterSettingsSync() throws {
+        let store = SettingsStore.shared
+        var profile = store.salaryPayProfile
+        guard profile.isConfigured else { return }
+
+        if let anchorId = profile.anchorExpenseId,
+           (try? fetchExpenseRecord(id: anchorId)) != nil {
+            // Anchor UUID from another device already exists locally.
+        } else if let financeKitId = profile.anchorFinanceKitId,
+                  let match = try? fetchExpenseRecord(financeKitTransactionId: financeKitId) {
+            profile.anchorExpenseId = match.id
+        } else if let match = bestLocalPaycheckAnchor(for: profile) {
+            profile.anchorExpenseId = match.id
+            if profile.anchorFinanceKitId == nil {
+                profile.anchorFinanceKitId = match.financeKitTransactionId
+            }
+        }
+
+        if profile != store.salaryPayProfile {
+            store.salaryPayProfile = profile
+            store.save(notifyCloudSync: false)
+        }
+
+        try retroactivelyApplySalaryProfile(store.salaryPayProfile)
+    }
+
+    private func bestLocalPaycheckAnchor(for profile: SalaryPayProfile) -> ExpenseRecord? {
+        let records = (try? fetchAllExpenseRecords()) ?? []
+        return records
+            .filter { $0.amountValue > 0 }
+            .sorted { $0.date > $1.date }
+            .first { record in
+                if let anchorId = profile.anchorExpenseId, record.id == anchorId { return true }
+                if let financeKitId = profile.anchorFinanceKitId,
+                   let recordFinanceKitId = record.financeKitTransactionId,
+                   financeKitId == recordFinanceKitId {
+                    return true
+                }
+                return SalaryPayrollMatcher.matches(
+                    record: record,
+                    profile: profile,
+                    weekStartDay: SettingsStore.shared.weekStartDay
+                )
+            }
+    }
+
     @discardableResult
     func linkPaycheck(
         from record: ExpenseRecord,
@@ -404,8 +455,12 @@ public final class BuxMuseBrain: ObservableObject {
         payAnchorDate: Date
     ) throws -> ExpenseRecord {
         guard record.amountValue > 0 else {
+            let locale = BuxInterfaceLocale.currentInterfaceLocale
             throw NSError(domain: "BuxMuseBrain", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "Only incoming transactions can be linked as paycheck."
+                NSLocalizedDescriptionKey: BuxLocalizedString.string(
+                    "Only incoming transactions can be linked as paycheck.",
+                    locale: locale
+                )
             ])
         }
 

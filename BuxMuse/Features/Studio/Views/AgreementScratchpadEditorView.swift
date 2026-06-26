@@ -27,7 +27,6 @@ struct AgreementScratchpadListView: View {
             BuxThemedCardForm {
                 StudioProToolScreenHeader(titleKey: "Agreements")
                     .studioProToolScrollPlacementEmbedded()
-                    .padding(.top, StudioProToolHeaderLayout.topInset - BuxLayout.tight)
 
                 BuxFormSection(title: "Import your agreement") {
                     Text(AgreementImportedDocumentLimits.limitsNotice(locale: locale))
@@ -122,6 +121,7 @@ struct AgreementScratchpadListView: View {
                     .buxFormFieldPadding()
                 }
             }
+            .studioProToolScrollTopInset()
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
@@ -234,7 +234,7 @@ struct AgreementScratchpadListView: View {
            let name = store.projects.first(where: { $0.id == projectId })?.name {
             parts.append(name)
         }
-        parts.append(draft.updatedAt.formatted(date: .abbreviated, time: .omitted))
+        parts.append(BuxDisplayDate.monthDay(from: draft.updatedAt, locale: locale))
         return parts.joined(separator: " · ")
     }
 }
@@ -649,7 +649,7 @@ struct AgreementScratchpadEditorView: View {
 
     private func invoicePickerLabel(_ invoice: StudioInvoice) -> String {
         let number = invoice.invoiceNumber.isEmpty ? "Draft" : invoice.invoiceNumber
-        return "\(number) · \(invoice.issueDate.formatted(date: .abbreviated, time: .omitted))"
+        return "\(number) · \(BuxDisplayDate.monthDay(from: invoice.issueDate, locale: appSettingsManager.interfaceLocale))"
     }
 
     private var workAlreadyStarted: Bool {
@@ -713,7 +713,8 @@ struct AgreementScratchpadEditorView: View {
         draft.formattedShareText(
             clientName: draft.clientId.flatMap { id in store.clients.first(where: { $0.id == id })?.name },
             projectName: draft.projectId.flatMap { id in store.projects.first(where: { $0.id == id })?.name },
-            providerName: resolvedProviderName
+            providerName: resolvedProviderName,
+            locale: locale
         )
     }
 
@@ -851,7 +852,7 @@ struct AgreementScratchpadEditorView: View {
                             BuxLocalizedString.format(
                                 "Signed · %@",
                                 locale: appSettingsManager.interfaceLocale,
-                                signedAt.formatted(date: .abbreviated, time: .omitted)
+                                BuxDisplayDate.monthDay(from: signedAt, locale: appSettingsManager.interfaceLocale)
                             )
                         )
                             .font(.system(size: 11, weight: .medium))

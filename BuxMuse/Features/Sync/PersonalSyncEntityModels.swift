@@ -12,7 +12,7 @@ import UIKit
 // MARK: - Schema
 
 nonisolated enum PersonalSyncSchema {
-    static let currentVersion = 2
+    static let currentVersion = 3
 }
 
 // MARK: - Generic entity envelope
@@ -143,21 +143,160 @@ enum PersonalHustleEntityKind: String {
 
 // MARK: - Manifest
 
+nonisolated struct PersonalCloudBackupSummary: Equatable, Sendable {
+    var lastBackupAt: Date?
+    var expenseRecordCount: Int
+    var hasConfiguredSettings: Bool
+    var registeredDeviceCount: Int
+    var sourceDeviceName: String?
+    var recommendedSourceDeviceId: String?
+    var registeredDevices: [PersonalSyncRegisteredDevice]
+
+    init(
+        lastBackupAt: Date?,
+        expenseRecordCount: Int,
+        hasConfiguredSettings: Bool,
+        registeredDeviceCount: Int,
+        sourceDeviceName: String?,
+        recommendedSourceDeviceId: String? = nil,
+        registeredDevices: [PersonalSyncRegisteredDevice] = []
+    ) {
+        self.lastBackupAt = lastBackupAt
+        self.expenseRecordCount = expenseRecordCount
+        self.hasConfiguredSettings = hasConfiguredSettings
+        self.registeredDeviceCount = registeredDeviceCount
+        self.sourceDeviceName = sourceDeviceName
+        self.recommendedSourceDeviceId = recommendedSourceDeviceId
+        self.registeredDevices = registeredDevices
+    }
+
+    var hasBackupContent: Bool {
+        expenseRecordCount > 0
+            || hasConfiguredSettings
+            || !registeredDevices.isEmpty
+            || lastBackupAt != nil
+    }
+
+    var sortedDevices: [PersonalSyncRegisteredDevice] {
+        registeredDevices.sorted { $0.lastSeenAt > $1.lastSeenAt }
+    }
+
+    /// Other devices in the shared backup — excludes this iPad/iPhone.
+    func peerDevices(excludingDeviceId: String) -> [PersonalSyncRegisteredDevice] {
+        sortedDevices.filter { $0.deviceId != excludingDeviceId }
+    }
+
+    func displayName(for device: PersonalSyncRegisteredDevice) -> String {
+        let nameCount = registeredDevices.filter { $0.name == device.name }.count
+        guard nameCount > 1 else { return device.name }
+        return "\(device.name) (\(String(device.deviceId.suffix(4))))"
+    }
+}
+
+nonisolated struct PersonalSyncRegisteredDevice: Codable, Equatable, Sendable {
+    var deviceId: String
+    var name: String
+    var lastSeenAt: Date
+}
+
 nonisolated struct PersonalSyncManifestPayload: Codable, Equatable, Sendable {
     var schemaVersion: Int
     var dualDeviceReconcileCompletedVersion: Int?
     var lastFullReconcileAt: Date?
     var registeredDeviceIds: [String]
+    var registeredDevices: [PersonalSyncRegisteredDevice]
     var updatedAt: Date
 
-    static func fresh(deviceId: String) -> PersonalSyncManifestPayload {
-        PersonalSyncManifestPayload(
+    enum CodingKeys: String, CodingKey {
+        case schemaVersion
+        case dualDeviceReconcileCompletedVersion
+        case lastFullReconcileAt
+        case registeredDeviceIds
+        case registeredDevices
+        case updatedAt
+    }
+
+    init(
+        schemaVersion: Int,
+        dualDeviceReconcileCompletedVersion: Int?,
+        lastFullReconcileAt: Date?,
+        registeredDeviceIds: [String],
+        registeredDevices: [PersonalSyncRegisteredDevice],
+        updatedAt: Date
+    ) {
+        self.schemaVersion = schemaVersion
+        self.dualDeviceReconcileCompletedVersion = dualDeviceReconcileCompletedVersion
+        self.lastFullReconcileAt = lastFullReconcileAt
+        self.registeredDeviceIds = registeredDeviceIds
+        self.registeredDevices = registeredDevices
+        self.updatedAt = updatedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let decodedUpdatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        let decodedDeviceIds = try container.decodeIfPresent([String].self, forKey: .registeredDeviceIds) ?? []
+        let decodedDevices: [PersonalSyncRegisteredDevice]
+        if let devices = try container.decodeIfPresent([PersonalSyncRegisteredDevice].self, forKey: .registeredDevices) {
+            decodedDevices = devices
+        } else {
+            decodedDevices = decodedDeviceIds.map { deviceId in
+                PersonalSyncRegisteredDevice(
+                    deviceId: deviceId,
+                    name: PersonalSyncDeviceIdentity.legacyDeviceLabel,
+                    lastSeenAt: decodedUpdatedAt
+                )
+            }
+        }
+        schemaVersion = try container.decode(Int.self, forKey: .schemaVersion)
+        dualDeviceReconcileCompletedVersion = try container.decodeIfPresent(Int.self, forKey: .dualDeviceReconcileCompletedVersion)
+        lastFullReconcileAt = try container.decodeIfPresent(Date.self, forKey: .lastFullReconcileAt)
+        updatedAt = decodedUpdatedAt
+        registeredDevices = decodedDevices
+        registeredDeviceIds = decodedDeviceIds.isEmpty ? decodedDevices.map(\.deviceId) : decodedDeviceIds
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(schemaVersion, forKey: .schemaVersion)
+        try container.encodeIfPresent(dualDeviceReconcileCompletedVersion, forKey: .dualDeviceReconcileCompletedVersion)
+        try container.encodeIfPresent(lastFullReconcileAt, forKey: .lastFullReconcileAt)
+        try container.encode(registeredDevices.map(\.deviceId), forKey: .registeredDeviceIds)
+        try container.encode(registeredDevices, forKey: .registeredDevices)
+        try container.encode(updatedAt, forKey: .updatedAt)
+    }
+
+    static func fresh(deviceId: String, deviceName: String) -> PersonalSyncManifestPayload {
+        let now = Date()
+        let device = PersonalSyncRegisteredDevice(deviceId: deviceId, name: deviceName, lastSeenAt: now)
+        return PersonalSyncManifestPayload(
             schemaVersion: PersonalSyncSchema.currentVersion,
             dualDeviceReconcileCompletedVersion: nil,
             lastFullReconcileAt: nil,
             registeredDeviceIds: [deviceId],
-            updatedAt: Date()
+            registeredDevices: [device],
+            updatedAt: now
         )
+    }
+
+    func registeringDevice(id deviceId: String, name deviceName: String, at date: Date = Date()) -> PersonalSyncManifestPayload {
+        var manifest = self
+        if let index = manifest.registeredDevices.firstIndex(where: { $0.deviceId == deviceId }) {
+            manifest.registeredDevices[index].name = deviceName
+            manifest.registeredDevices[index].lastSeenAt = date
+        } else {
+            manifest.registeredDevices.append(
+                PersonalSyncRegisteredDevice(deviceId: deviceId, name: deviceName, lastSeenAt: date)
+            )
+        }
+        manifest.registeredDeviceIds = manifest.registeredDevices.map(\.deviceId)
+        return manifest
+    }
+
+    func preferredBackupSourceDevice(excludingDeviceId: String? = nil) -> PersonalSyncRegisteredDevice? {
+        registeredDevices
+            .filter { excludingDeviceId == nil || $0.deviceId != excludingDeviceId }
+            .max(by: { $0.lastSeenAt < $1.lastSeenAt })
     }
 }
 
@@ -237,8 +376,17 @@ enum PersonalCloudField {
 }
 
 enum PersonalSyncDeviceIdentity {
+    nonisolated static let legacyDeviceLabel = "Synced device"
+
+    @MainActor
     static var currentDeviceId: String {
         UIDevice.current.identifierForVendor?.uuidString ?? "buxmuse-device-unknown"
+    }
+
+    @MainActor
+    static var currentDeviceName: String {
+        let trimmed = UIDevice.current.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? legacyDeviceLabel : trimmed
     }
 }
 

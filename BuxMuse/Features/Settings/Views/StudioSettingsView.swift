@@ -210,7 +210,10 @@ struct StudioSettingsView: View {
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Spacer()
                             if studioStore.taxProfile.isTaxProfileConfigured {
-                                Text(studioStore.taxProfile.selectedTaxCountry ?? "Custom")
+                                Text(
+                                    studioStore.taxProfile.selectedTaxCountry
+                                        ?? BuxCatalogLabel.string("Custom", locale: appSettingsManager.interfaceLocale)
+                                )
                                     .font(.system(size: 12, weight: .semibold))
                                     .buxLabelSecondary()
                             } else {

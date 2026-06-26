@@ -1333,28 +1333,39 @@ public struct AgreementDraft: Codable, Identifiable, Equatable, Sendable {
     public func formattedShareText(
         clientName: String?,
         projectName: String?,
-        providerName: String? = nil
+        providerName: String? = nil,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> String {
+        func loc(_ key: String) -> String {
+            BuxCatalogLabel.string(key, locale: locale)
+        }
+
         var lines: [String] = [title]
-        if let clientName, !clientName.isEmpty { lines.append("Client: \(clientName)") }
-        if let projectName, !projectName.isEmpty { lines.append("Project: \(projectName)") }
-        if let providerName, !providerName.isEmpty { lines.append("Provider: \(providerName)") }
-        lines.append("Status: \(statusDisplayLabel)")
+        if let clientName, !clientName.isEmpty {
+            lines.append(BuxLocalizedString.format("Client: %@", locale: locale, clientName))
+        }
+        if let projectName, !projectName.isEmpty {
+            lines.append(BuxLocalizedString.format("Project: %@", locale: locale, projectName))
+        }
+        if let providerName, !providerName.isEmpty {
+            lines.append(BuxLocalizedString.format("Provider: %@", locale: locale, providerName))
+        }
+        lines.append(BuxLocalizedString.format("Status: %@", locale: locale, statusDisplayLabel))
         if let channel = approvalChannel {
-            lines.append("Approval: \(channel.title)")
+            lines.append(BuxLocalizedString.format("Approval: %@", locale: locale, channel.title))
         }
         lines.append("")
 
-        appendSection("Scope", body: scopeBullets, to: &lines)
-        appendSection("Deliverables", body: deliverables, to: &lines)
-        appendSection("Out of scope", body: outOfScope, to: &lines)
-        appendSection("Payment", body: paymentAmountNotes, to: &lines)
-        appendSection("Payment terms", body: paymentTerms, to: &lines)
-        appendSection("Timeline", body: timelineNotes, to: &lines)
+        appendSection(loc("Scope"), body: scopeBullets, to: &lines)
+        appendSection(loc("Deliverables"), body: deliverables, to: &lines)
+        appendSection(loc("Out of scope"), body: outOfScope, to: &lines)
+        appendSection(loc("Payment"), body: paymentAmountNotes, to: &lines)
+        appendSection(loc("Payment terms"), body: paymentTerms, to: &lines)
+        appendSection(loc("Timeline"), body: timelineNotes, to: &lines)
         if hasTermsContent {
             appendSection(
-                "Terms & conditions",
-                body: composedTermsAndConditions(locale: BuxInterfaceLocale.currentInterfaceLocale),
+                loc("Terms & conditions"),
+                body: composedTermsAndConditions(locale: locale),
                 to: &lines
             )
         }

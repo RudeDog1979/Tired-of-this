@@ -43,11 +43,13 @@ struct SimpleStudioSearchView: View {
                     resultsSection
                 }
             }
-            .padding(.horizontal, BuxTokens.marginRegular)
+            .studioHubEmbeddedHorizontalPadding()
+            .buxPadDashboardCardRail()
             .padding(.vertical, BuxTokens.section)
             .padding(.bottom, BuxTokens.sheetBottomClearance)
             .environment(\.studioEnhancedTint, true)
         }
+        .studioProPadSplitScrollLayout()
         .background {
             if !usesPadSplitLayout {
                 themeManager.screenBackground(for: colorScheme)

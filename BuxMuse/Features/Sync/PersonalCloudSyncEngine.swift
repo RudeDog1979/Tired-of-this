@@ -117,10 +117,11 @@ private enum PersonalCloudSyncMetadata {
     }
 
     /// Clears on-device sync bookkeeping only — never deletes CloudKit records.
-    /// When `preserveCloudSnapshot` is true (factory reset), skip empty initial upload on re-enable.
     static func resetLocalState(preserveCloudSnapshot: Bool = true) {
         lastSyncedAt = nil
-        initialUploadCompleted = preserveCloudSnapshot
+        // Always require a cloud adopt/join pass after reset — never treat device as upload source.
+        initialUploadCompleted = false
+        _ = preserveCloudSnapshot
         settingsRevision = nil
         studioRevision = nil
         simpleStudioRevision = nil
@@ -154,6 +155,12 @@ final class PersonalCloudSyncEngine: ObservableObject {
     private var foregroundPullTimer: Timer?
     private var isPullInFlight = false
     private(set) var isApplyingRemote = false
+    private(set) var lastPullAdoptedCloudBackup = false
+    private var preferLocalMergeOnNextPull = false
+    private var forceCloudAdoptOnNextPull = false
+    private var lastPullReceivedRemoteUserData = false
+    private var forceFullZoneFetchOnNextPull = false
+    private var preferredRestoreSourceDeviceIdOnNextPull: String?
 
     private var settingsStore: SettingsStore { SettingsStore.shared }
 
@@ -209,6 +216,14 @@ final class PersonalCloudSyncEngine: ObservableObject {
         PersonalCloudSyncMetadata.pendingCloudRestore = false
     }
 
+    static var hasCompletedInitialCloudUpload: Bool {
+        PersonalCloudSyncMetadata.initialUploadCompleted
+    }
+
+    static var lastCloudSyncDate: Date? {
+        PersonalCloudSyncMetadata.lastSyncedAt
+    }
+
     /// Permanently deletes the personal sync zone and all CloudKit records in it.
     func deleteAllCloudData() async throws {
         cancelPendingPushWork()
@@ -221,6 +236,7 @@ final class PersonalCloudSyncEngine: ObservableObject {
         }
 
         _ = try? await privateDatabase.deleteSubscription(withID: Self.zoneSubscriptionID)
+        try await purgeAllRecordsInPersonalZone()
 
         do {
             _ = try await privateDatabase.modifyRecordZones(saving: [], deleting: [personalZoneID])
@@ -237,6 +253,73 @@ final class PersonalCloudSyncEngine: ObservableObject {
         refreshEnabledState()
     }
 
+    /// Deletes every record in the personal sync zone before the zone itself is removed.
+    private func purgeAllRecordsInPersonalZone() async throws {
+        let zoneID = personalZoneID
+        var recordIDs: [CKRecord.ID] = []
+        var changeToken: CKServerChangeToken?
+        var done = false
+
+        while !done {
+            let fetched = try await fetchAllRecordIDs(in: zoneID, previousToken: changeToken)
+            recordIDs.append(contentsOf: fetched.recordIDs)
+            changeToken = fetched.nextToken
+            done = fetched.moreComing == false
+        }
+
+        guard !recordIDs.isEmpty else { return }
+
+        let batchSize = 400
+        var index = 0
+        while index < recordIDs.count {
+            let end = min(index + batchSize, recordIDs.count)
+            let batch = Array(recordIDs[index..<end])
+            _ = try await privateDatabase.modifyRecords(saving: [], deleting: batch)
+            index = end
+        }
+    }
+
+    private func fetchAllRecordIDs(
+        in zoneID: CKRecordZone.ID,
+        previousToken: CKServerChangeToken?
+    ) async throws -> (recordIDs: [CKRecord.ID], nextToken: CKServerChangeToken?, moreComing: Bool) {
+        try await withCheckedThrowingContinuation { continuation in
+            var collected: [CKRecord.ID] = []
+            var nextToken: CKServerChangeToken?
+            var moreComing = false
+
+            let configuration = CKFetchRecordZoneChangesOperation.ZoneConfiguration()
+            configuration.previousServerChangeToken = previousToken
+
+            let operation = CKFetchRecordZoneChangesOperation(
+                recordZoneIDs: [zoneID],
+                configurationsByRecordZoneID: [zoneID: configuration]
+            )
+
+            operation.recordWasChangedBlock = { _, result in
+                if case .success(let record) = result {
+                    collected.append(record.recordID)
+                }
+            }
+            operation.recordZoneFetchResultBlock = { _, result in
+                if case .success(let payload) = result {
+                    nextToken = payload.serverChangeToken
+                    moreComing = payload.moreComing
+                }
+            }
+            operation.fetchRecordZoneChangesResultBlock = { result in
+                switch result {
+                case .success:
+                    continuation.resume(returning: (collected, nextToken, moreComing))
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+
+            privateDatabase.add(operation)
+        }
+    }
+
     private func cancelPendingPushWork() {
         settingsPushWork?.cancel()
         studioPushWork?.cancel()
@@ -244,7 +327,11 @@ final class PersonalCloudSyncEngine: ObservableObject {
         hustlesPushWork?.cancel()
     }
 
-    func setEnabled(_ enabled: Bool) async {
+    func setEnabled(
+        _ enabled: Bool,
+        preferLocalMerge: Bool = false,
+        preferredRestoreSourceDeviceId: String? = nil
+    ) async {
         settingsStore.personalCloudSyncEnabled = enabled
         settingsStore.save(notifyCloudSync: false)
         refreshEnabledState()
@@ -252,28 +339,67 @@ final class PersonalCloudSyncEngine: ObservableObject {
             stopForegroundPullTimer()
             return
         }
+        syncStatus = .syncing
         guard await ensureAccountAvailable() else { return }
         do {
             try await ensurePersonalZoneExists()
-            await ensurePersonalRecordTypesExist()
         } catch {
             syncStatus = .error(userFacingSyncError(error, feature: "iCloud"))
             return
         }
+        preferLocalMergeOnNextPull = preferLocalMerge
+        forceCloudAdoptOnNextPull = !preferLocalMerge
+        forceFullZoneFetchOnNextPull = !preferLocalMerge
+        preferredRestoreSourceDeviceIdOnNextPull = preferredRestoreSourceDeviceId
+        if !preferLocalMerge {
+            PersonalCloudSyncMetadata.zoneChangeToken = nil
+        }
         isApplyingRemote = true
-        defer { isApplyingRemote = false }
-        await pullRemoteChangesIfIdle()
+        defer {
+            isApplyingRemote = false
+            preferLocalMergeOnNextPull = false
+            forceCloudAdoptOnNextPull = false
+            forceFullZoneFetchOnNextPull = false
+            preferredRestoreSourceDeviceIdOnNextPull = nil
+        }
+        await pullRemoteChangesIfIdle(forceFullZoneFetch: !preferLocalMerge)
+
+        if !preferLocalMerge, !lastPullAdoptedCloudBackup, !lastPullReceivedRemoteUserData {
+            PersonalCloudSyncMetadata.zoneChangeToken = nil
+            await pullRemoteChangesIfIdle(forceFullZoneFetch: true)
+        }
+
+        if !preferLocalMerge, !lastPullAdoptedCloudBackup, !lastPullReceivedRemoteUserData {
+            syncStatus = .error("Could not download your iCloud backup. Check that you are signed into iCloud and try again.")
+            settingsStore.personalCloudSyncEnabled = false
+            settingsStore.save(notifyCloudSync: false)
+            refreshEnabledState()
+            return
+        }
+
         if !PersonalCloudSyncMetadata.initialUploadCompleted {
-            await performInitialUpload()
-            PersonalCloudSyncMetadata.initialUploadCompleted = true
+            if lastPullAdoptedCloudBackup || lastPullReceivedRemoteUserData {
+                PersonalCloudSyncMetadata.initialUploadCompleted = true
+            } else if preferLocalMerge {
+                await performInitialUpload()
+                PersonalCloudSyncMetadata.initialUploadCompleted = true
+            }
         } else {
             await reconcileInitialUploadIfNeeded()
         }
-        if shouldPushLocalMasterData(brain: brain) {
+        if shouldPushLocalMasterData(brain: brain), !lastPullAdoptedCloudBackup, preferLocalMerge {
             await reconcileMasterDataIfNeeded()
         }
-        await ensureZoneSubscription()
         startForegroundPullTimer()
+        Task {
+            await ensurePersonalRecordTypesExist()
+            await ensureZoneSubscription()
+        }
+    }
+
+    /// Pre-enable iCloud account check for settings UI (does not turn sync on).
+    func ensureAccountAvailableForEnable() async -> Bool {
+        await ensureAccountAvailable()
     }
 
     private func shouldPushLocalMasterData(brain: BuxMuseBrain?) -> Bool {
@@ -283,10 +409,10 @@ final class PersonalCloudSyncEngine: ObservableObject {
 
     func syncNow() async {
         guard isEnabled else { return }
+        syncStatus = .syncing
         guard await ensureAccountAvailable() else { return }
         do {
             try await ensurePersonalZoneExists()
-            await ensurePersonalRecordTypesExist()
         } catch {
             syncStatus = .error(userFacingSyncError(error, feature: "iCloud"))
             return
@@ -294,10 +420,62 @@ final class PersonalCloudSyncEngine: ObservableObject {
         isApplyingRemote = true
         await pullRemoteChangesIfIdle()
         isApplyingRemote = false
-        if shouldPushLocalMasterData(brain: brain) {
+        if shouldPushLocalMasterData(brain: brain), !lastPullAdoptedCloudBackup {
             await reconcileMasterDataIfNeeded()
         }
         await pushAllLocalExpenses()
+        Task { await ensurePersonalRecordTypesExist() }
+    }
+
+    /// Fast pre-enable probe — manifest + legacy masters only (no schema bootstrap, no full zone scan).
+    func fetchCloudBackupSummary() async -> PersonalCloudBackupSummary? {
+        guard await ensureAccountAvailable() else { return nil }
+        do {
+            try await ensurePersonalZoneExists()
+        } catch {
+            return nil
+        }
+
+        let manifestID = makeRecordID(recordName: "personal-sync-manifest")
+        async let manifestTask = fetchManifestRecord(recordID: manifestID)
+        async let mastersTask = fetchMasterRecordsDirectly()
+        let manifest = await manifestTask
+        let masterRecords = await mastersTask
+
+        if let manifest {
+            let devices = manifest.registeredDevices.sorted { $0.lastSeenAt > $1.lastSeenAt }
+            let sourceDevice = manifest.preferredBackupSourceDevice(
+                excludingDeviceId: PersonalSyncDeviceIdentity.currentDeviceId
+            ) ?? manifest.preferredBackupSourceDevice()
+            return PersonalCloudBackupSummary(
+                lastBackupAt: manifest.lastFullReconcileAt ?? manifest.updatedAt,
+                expenseRecordCount: 0,
+                hasConfiguredSettings: true,
+                registeredDeviceCount: devices.count,
+                sourceDeviceName: sourceDevice?.name,
+                recommendedSourceDeviceId: sourceDevice?.deviceId,
+                registeredDevices: devices
+            )
+        }
+
+        if masterRecords.contains(where: masterRecordHasContent) {
+            return PersonalCloudBackupSummary(
+                lastBackupAt: masterRecords.compactMap { $0[PersonalCloudField.updatedAt] as? Date }.max(),
+                expenseRecordCount: 0,
+                hasConfiguredSettings: true,
+                registeredDeviceCount: 0,
+                sourceDeviceName: nil,
+                registeredDevices: []
+            )
+        }
+
+        return nil
+    }
+
+    /// Always prompt before first enable when iCloud already has a backup.
+    func shouldOfferRestoreChoice(summary: PersonalCloudBackupSummary) -> Bool {
+        guard !settingsStore.personalCloudSyncEnabled else { return false }
+        return summary.hasBackupContent
     }
 
     @discardableResult
@@ -431,16 +609,18 @@ final class PersonalCloudSyncEngine: ObservableObject {
             return
         }
         await pullRemoteChangesIfIdle()
-        await reconcileMasterDataIfNeeded()
+        if shouldPushLocalMasterData(brain: brain), !lastPullAdoptedCloudBackup {
+            await reconcileMasterDataIfNeeded()
+        }
         await ensureZoneSubscription()
         startForegroundPullTimer()
     }
 
-    private func pullRemoteChangesIfIdle() async {
+    private func pullRemoteChangesIfIdle(forceFullZoneFetch: Bool = false) async {
         guard isEnabled, !isPullInFlight else { return }
         isPullInFlight = true
         defer { isPullInFlight = false }
-        await pullRemoteChanges()
+        await pullRemoteChanges(forceFullZoneFetch: forceFullZoneFetch)
     }
 
     private func startForegroundPullTimer() {
@@ -722,14 +902,34 @@ final class PersonalCloudSyncEngine: ObservableObject {
     }
 
     private func pushSyncManifestIfNeeded() async {
+        await saveSyncManifest(lastFullReconcileAt: PersonalCloudSyncMetadata.lastSyncedAt)
+    }
+
+    /// Registers this device in the manifest after pull-only sessions (e.g. cloud restore on a new device).
+    private func touchSyncManifestPresence() async {
+        await saveSyncManifest(lastFullReconcileAt: nil)
+    }
+
+    private func saveSyncManifest(lastFullReconcileAt: Date?) async {
         guard isEnabled, await ensureAccountAvailable() else { return }
-        var manifest = PersonalSyncManifestPayload.fresh(deviceId: PersonalSyncDeviceIdentity.currentDeviceId)
+        let recordID = makeRecordID(recordName: "personal-sync-manifest")
+        let existing = await fetchManifestRecord(recordID: recordID)
+        let now = Date()
+        var manifest = (existing ?? PersonalSyncManifestPayload.fresh(
+            deviceId: PersonalSyncDeviceIdentity.currentDeviceId,
+            deviceName: PersonalSyncDeviceIdentity.currentDeviceName
+        )).registeringDevice(
+            id: PersonalSyncDeviceIdentity.currentDeviceId,
+            name: PersonalSyncDeviceIdentity.currentDeviceName,
+            at: now
+        )
         manifest.dualDeviceReconcileCompletedVersion = PersonalSyncReconciler.dualDeviceReconcileCompletedVersion()
-        manifest.lastFullReconcileAt = PersonalCloudSyncMetadata.lastSyncedAt
-        manifest.updatedAt = Date()
+        if let lastFullReconcileAt {
+            manifest.lastFullReconcileAt = lastFullReconcileAt
+        }
+        manifest.updatedAt = now
         guard let json = try? JSONEncoder().encode(manifest),
               let jsonString = String(data: json, encoding: .utf8) else { return }
-        let recordID = makeRecordID(recordName: "personal-sync-manifest")
         do {
             _ = try await upsertCloudRecord(recordID: recordID, recordType: PersonalCloudRecordType.manifest) { record in
                 record[PersonalCloudField.payloadJSON] = jsonString as CKRecordValue
@@ -738,6 +938,11 @@ final class PersonalCloudSyncEngine: ObservableObject {
         } catch {
             syncStatus = .error(userFacingSyncError(error, feature: "iCloud"))
         }
+    }
+
+    private func fetchManifestRecord(recordID: CKRecord.ID) async -> PersonalSyncManifestPayload? {
+        guard let record = await fetchRecordIfExists(recordID) else { return nil }
+        return decodeManifestRecord(record)
     }
 
     private func upsertSettingsDomainRecord(_ domain: PersonalSettingsDomainRecord, recordID: CKRecord.ID) async {
@@ -882,9 +1087,12 @@ final class PersonalCloudSyncEngine: ObservableObject {
         var hustleEntities: [PersonalSyncEntityRecord] = []
         var manifest: PersonalSyncManifestPayload?
         var importedLegacySettings = false
+        var remoteExpenseCount = 0
 
         for record in records where !record.recordID.recordName.contains("bootstrap") {
             switch record.recordType {
+            case PersonalCloudRecordType.expense:
+                remoteExpenseCount += 1
             case PersonalCloudRecordType.settingsDomain:
                 if let domain = decodeSettingsDomainRecord(record) { settingsDomains.append(domain) }
             case PersonalCloudRecordType.settings:
@@ -913,19 +1121,24 @@ final class PersonalCloudSyncEngine: ObservableObject {
         if importedLegacySettings {
             settingsDomains = PersonalSettingsDomainSync.exportAllDomains(from: settingsStore)
         }
-        if studioEntities.isEmpty, StudioStore.shared.didLoadPersistedSnapshot {
+        if studioEntities.isEmpty, StudioStore.shared.didLoadPersistedSnapshot, !forceCloudAdoptOnNextPull {
             studioEntities = PersonalStudioEntitySync.exportAll(from: StudioStore.shared)
         }
 
-        _ = PersonalSyncReconciler.reconcileAfterPull(
+        let reconcileResult = PersonalSyncReconciler.reconcileAfterPull(
             brain: brain,
             settingsStore: settingsStore,
             remoteSettingsDomains: settingsDomains,
             remoteStudioEntities: studioEntities,
             remoteSimpleStudioEntities: simpleStudioEntities,
             remoteHustleEntities: hustleEntities,
-            manifest: manifest
+            manifest: manifest,
+            preferLocalMerge: preferLocalMergeOnNextPull,
+            forceCloudAdopt: forceCloudAdoptOnNextPull,
+            remoteExpenseCount: remoteExpenseCount,
+            preferredRestoreSourceDeviceId: preferredRestoreSourceDeviceIdOnNextPull
         )
+        lastPullAdoptedCloudBackup = reconcileResult.adoptedCloudBackup
         pendingConflictCount = PersonalSyncConflictStore.shared.unresolvedCount
     }
 
@@ -1011,32 +1224,48 @@ final class PersonalCloudSyncEngine: ObservableObject {
 
     // MARK: - Pull
 
-    func pullRemoteChanges() async {
+    func pullRemoteChanges(forceFullZoneFetch: Bool = false) async {
         guard isEnabled, let brain else { return }
         guard await ensureAccountAvailable() else { return }
         syncStatus = .syncing
-        isApplyingRemote = true
-        defer { isApplyingRemote = false }
+        lastPullAdoptedCloudBackup = false
+        let useFullZoneFetch = forceFullZoneFetch || forceFullZoneFetchOnNextPull
+        if useFullZoneFetch {
+            PersonalCloudSyncMetadata.zoneChangeToken = nil
+        }
+        let zoneFetchToken = useFullZoneFetch ? nil : PersonalCloudSyncMetadata.zoneChangeToken
 
         var syncErrors: [String] = []
+        var pulledRecords: [CKRecord] = []
 
         do {
-            let zoneRecords = try await fetchRecordsFromPersonalZone()
-            let masterRecords = await fetchMasterRecordsDirectly()
-            let records = mergeRecordsPreferringNewer(zoneRecords, masterRecords)
-            applyRemoteRecords(records, into: brain, errors: &syncErrors)
+            async let zoneRecordsTask = fetchZoneRecords(
+                persistChangeToken: true,
+                previousToken: zoneFetchToken
+            )
+            async let masterRecordsTask = fetchMasterRecordsDirectly()
+            let zoneRecords = try await zoneRecordsTask
+            let masterRecords = await masterRecordsTask
+            pulledRecords = mergeRecordsPreferringNewer(zoneRecords, masterRecords)
+            applyRemoteRecords(pulledRecords, into: brain, errors: &syncErrors)
         } catch let error as CKError where error.code == .changeTokenExpired {
             PersonalCloudSyncMetadata.zoneChangeToken = nil
             do {
-                let zoneRecords = try await fetchRecordsFromPersonalZone()
-                let masterRecords = await fetchMasterRecordsDirectly()
-                let records = mergeRecordsPreferringNewer(zoneRecords, masterRecords)
-                applyRemoteRecords(records, into: brain, errors: &syncErrors)
+                async let zoneRecordsTask = fetchZoneRecords(persistChangeToken: true, previousToken: nil)
+                async let masterRecordsTask = fetchMasterRecordsDirectly()
+                let zoneRecords = try await zoneRecordsTask
+                let masterRecords = await masterRecordsTask
+                pulledRecords = mergeRecordsPreferringNewer(zoneRecords, masterRecords)
+                applyRemoteRecords(pulledRecords, into: brain, errors: &syncErrors)
             } catch {
                 syncErrors.append(userFacingSyncError(error, feature: "iCloud"))
             }
         } catch {
             syncErrors.append(userFacingSyncError(error, feature: "iCloud"))
+        }
+
+        lastPullReceivedRemoteUserData = pulledRecords.contains {
+            !$0.recordID.recordName.contains("bootstrap")
         }
 
         brain.refreshExpenses()
@@ -1049,6 +1278,9 @@ final class PersonalCloudSyncEngine: ObservableObject {
         if uniqueErrors.isEmpty {
             PersonalCloudSyncMetadata.lastSyncedAt = Date()
             syncStatus = .lastSynced(Date())
+            if lastPullAdoptedCloudBackup || lastPullReceivedRemoteUserData {
+                await touchSyncManifestPresence()
+            }
         } else if uniqueErrors.count == 1 {
             syncStatus = .error(uniqueErrors[0])
         } else {
@@ -1087,13 +1319,97 @@ final class PersonalCloudSyncEngine: ObservableObject {
         }
         if payload.isDeleted {
             try? brain.persistence.deleteExpenseRecord(id: payload.id)
+            if let financeKitId = normalizedFinanceKitId(payload.financeKitTransactionId),
+               let linked = try? brain.fetchExpenseRecord(financeKitTransactionId: financeKitId),
+               linked.id != payload.id {
+                try? brain.persistence.deleteExpenseRecord(id: linked.id)
+            }
             return
         }
+
+        var incoming = payload.toExpenseRecord()
+
+        if let financeKitId = normalizedFinanceKitId(payload.financeKitTransactionId),
+           let existingByFinanceKit = try? brain.fetchExpenseRecord(financeKitTransactionId: financeKitId),
+           existingByFinanceKit.id != payload.id {
+            if existingByFinanceKit.updatedAt >= payload.updatedAt {
+                return
+            }
+            incoming = expenseRecord(incoming, replacingID: existingByFinanceKit.id)
+            _ = try? brain.saveExpenseRecord(incoming, merchantSelection: nil)
+            return
+        }
+
         if let existing = try? brain.fetchExpenseRecord(id: payload.id),
            existing.updatedAt >= payload.updatedAt {
             return
         }
-        _ = try? brain.saveExpenseRecord(payload.toExpenseRecord(), merchantSelection: nil)
+        _ = try? brain.saveExpenseRecord(incoming, merchantSelection: nil)
+    }
+
+    private func normalizedFinanceKitId(_ raw: String?) -> String? {
+        guard let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else {
+            return nil
+        }
+        return trimmed
+    }
+
+    private func expenseRecord(_ record: ExpenseRecord, replacingID id: UUID) -> ExpenseRecord {
+        var replaced = ExpenseRecord(
+            id: id,
+            name: record.name,
+            amountValue: record.amountValue,
+            currencyCode: record.currencyCode,
+            categoryId: record.categoryId,
+            merchantId: record.merchantId,
+            date: record.date,
+            notes: record.notes,
+            isRecurring: record.isRecurring,
+            recurrenceType: record.recurrenceType,
+            recurrenceConfidence: record.recurrenceConfidence,
+            nextExpectedDate: record.nextExpectedDate,
+            isSubscriptionLike: record.isSubscriptionLike,
+            isTrial: record.isTrial,
+            subscriptionStartDate: record.subscriptionStartDate,
+            trialEndDate: record.trialEndDate,
+            renewalReminderDays: record.renewalReminderDays,
+            heatZoneBucket: record.heatZoneBucket,
+            emotion: record.emotion,
+            contextTag: record.contextTag,
+            habitSignatureId: record.habitSignatureId,
+            subscriptionConfidence: record.subscriptionConfidence,
+            microCommitmentType: record.microCommitmentType,
+            microCommitmentValue: record.microCommitmentValue,
+            futureImpact1Y: record.futureImpact1Y,
+            futureImpact5Y: record.futureImpact5Y,
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt,
+            categoryRaw: record.categoryRaw,
+            merchantName: record.merchantName,
+            hustleId: record.hustleId,
+            paymentMethod: record.paymentMethod,
+            isBarterExchange: record.isBarterExchange,
+            barterGoodsGiven: record.barterGoodsGiven,
+            barterGoodsReceived: record.barterGoodsReceived,
+            barterEstimatedValue: record.barterEstimatedValue,
+            bridgeGroupId: record.bridgeGroupId,
+            bridgeKind: record.bridgeKind,
+            bridgeRole: record.bridgeRole,
+            bridgeSharePercent: record.bridgeSharePercent,
+            bridgePeerExpenseId: record.bridgePeerExpenseId,
+            bridgeCounterpartyHustleId: record.bridgeCounterpartyHustleId,
+            isCategorySplit: record.isCategorySplit,
+            splitLines: record.splitLines,
+            householdScope: record.householdScope,
+            walletIsPending: record.walletIsPending,
+            walletCategoryUserConfirmed: record.walletCategoryUserConfirmed,
+            walletCategoryConfidence: record.walletCategoryConfidence,
+            incomeRole: record.incomeRole,
+            isExcludedFromSpending: record.isExcludedFromSpending
+        )
+        replaced.financeKitTransactionId = record.financeKitTransactionId
+        replaced.walletAccountId = record.walletAccountId
+        return replaced
     }
 
     private func applyDebtRecord(_ record: CKRecord, merged: inout [Debt]) {
@@ -1129,9 +1445,16 @@ final class PersonalCloudSyncEngine: ObservableObject {
     }
 
     private func fetchRecordsFromPersonalZone() async throws -> [CKRecord] {
+        try await fetchZoneRecords(persistChangeToken: true, previousToken: PersonalCloudSyncMetadata.zoneChangeToken)
+    }
+
+    private func fetchZoneRecords(
+        persistChangeToken: Bool,
+        previousToken: CKServerChangeToken?
+    ) async throws -> [CKRecord] {
         let zoneID = personalZoneID
         let configuration = CKFetchRecordZoneChangesOperation.ZoneConfiguration()
-        configuration.previousServerChangeToken = PersonalCloudSyncMetadata.zoneChangeToken
+        configuration.previousServerChangeToken = previousToken
 
         return try await withCheckedThrowingContinuation { continuation in
             var fetchedRecords: [CKRecord] = []
@@ -1147,7 +1470,7 @@ final class PersonalCloudSyncEngine: ObservableObject {
             }
 
             operation.recordZoneFetchResultBlock = { _, result in
-                if case .success(let zoneResult) = result {
+                if persistChangeToken, case .success(let zoneResult) = result {
                     PersonalCloudSyncMetadata.zoneChangeToken = zoneResult.serverChangeToken
                 }
             }
@@ -1223,18 +1546,31 @@ final class PersonalCloudSyncEngine: ObservableObject {
     }
 
     private func userFacingSyncError(_ error: Error, feature: String) -> String {
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         let message = error.localizedDescription.lowercased()
         if isMissingRecordTypeError(error, recordType: "") {
-            return "iCloud sync setup is still finishing. Try again in a moment."
+            return BuxLocalizedString.string(
+                "iCloud sync setup is still finishing. Try again in a moment.",
+                locale: locale
+            )
         }
         if message.contains("not marked queryable") {
-            return "iCloud sync hit a temporary Apple server issue. Tap refresh to try again."
+            return BuxLocalizedString.string(
+                "iCloud sync hit a temporary Apple server issue. Tap refresh to try again.",
+                locale: locale
+            )
         }
         if message.contains("did not find record type") {
-            return "iCloud sync setup is still finishing. Try again in a moment."
+            return BuxLocalizedString.string(
+                "iCloud sync setup is still finishing. Try again in a moment.",
+                locale: locale
+            )
         }
         if message.contains("already exists") {
-            return "iCloud sync is catching up on this device. Tap refresh to try again."
+            return BuxLocalizedString.string(
+                "iCloud sync is catching up on this device. Tap refresh to try again.",
+                locale: locale
+            )
         }
         return error.localizedDescription
     }
@@ -1257,14 +1593,21 @@ final class PersonalCloudSyncEngine: ObservableObject {
     ]
 
     private func fetchMasterRecordsDirectly() async -> [CKRecord] {
-        var records: [CKRecord] = []
-        for name in Self.masterRecordNames {
-            let recordID = makeRecordID(recordName: name)
-            if let record = try? await privateDatabase.record(for: recordID) {
-                records.append(record)
+        let recordIDs = Self.masterRecordNames.map { makeRecordID(recordName: $0) }
+        return await withTaskGroup(of: CKRecord?.self) { group in
+            for recordID in recordIDs {
+                group.addTask {
+                    try? await self.privateDatabase.record(for: recordID)
+                }
             }
+            var records: [CKRecord] = []
+            for await record in group {
+                if let record {
+                    records.append(record)
+                }
+            }
+            return records
         }
-        return records
     }
 
     private func fetchRecordIfExists(_ recordID: CKRecord.ID) async -> CKRecord? {
@@ -1371,9 +1714,13 @@ enum PersonalCloudSyncDeletionError: LocalizedError {
     case iCloudUnavailable
 
     var errorDescription: String? {
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         switch self {
         case .iCloudUnavailable:
-            return "Sign in to iCloud on this device and try again."
+            return BuxLocalizedString.string(
+                "Sign in to iCloud on this device and try again.",
+                locale: locale
+            )
         }
     }
 }

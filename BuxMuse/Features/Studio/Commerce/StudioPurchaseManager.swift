@@ -16,19 +16,29 @@ enum StudioPurchaseError: LocalizedError {
     case unknown
 
     var errorDescription: String? {
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         switch self {
         case .productUnavailable:
-            return "This product is not available right now. Try again in a moment."
+            return BuxLocalizedString.string(
+                "This product is not available right now. Try again in a moment.",
+                locale: locale
+            )
         case .purchasePending:
-            return "Your purchase is pending approval."
+            return BuxLocalizedString.string("Your purchase is pending approval.", locale: locale)
         case .userCancelled:
             return nil
         case .unverifiedTransaction:
-            return "We could not verify this purchase with Apple."
+            return BuxLocalizedString.string(
+                "We could not verify this purchase with Apple.",
+                locale: locale
+            )
         case .subscriptionRequired:
-            return "An active BuxMuse subscription is required."
+            return BuxLocalizedString.string(
+                "An active BuxMuse subscription is required.",
+                locale: locale
+            )
         case .unknown:
-            return "Something went wrong with the purchase."
+            return BuxLocalizedString.string("Something went wrong with the purchase.", locale: locale)
         }
     }
 }

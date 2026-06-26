@@ -58,7 +58,8 @@ struct SubscriptionOpportunitiesView: View {
     private func refreshCache() {
         cachedOpportunities = SubscriptionHubSectionCache.opportunities(
             from: subscriptions,
-            settingsManager: appSettingsManager
+            settingsManager: appSettingsManager,
+            locale: appSettingsManager.interfaceLocale
         )
     }
 

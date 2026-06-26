@@ -76,9 +76,11 @@ struct BusinessCardPhotoEditorSheet: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(Color.black.opacity(0.92), for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(BusinessCardL10n.line("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() }
+                }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { saveCropped() }.fontWeight(.semibold)
+                    Button(BusinessCardL10n.line("Done", locale: appSettingsManager.interfaceLocale)) { saveCropped() }.fontWeight(.semibold)
                 }
             }
         }

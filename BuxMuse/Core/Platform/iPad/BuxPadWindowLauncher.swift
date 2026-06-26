@@ -72,7 +72,7 @@ private struct BuxPadStudioOpenInNewWindowContextMenuModifier: ViewModifier {
                         openWindow: openWindow
                     )
                 } label: {
-                    Label("Open in New Window", systemImage: "macwindow.on.rectangle")
+                    Label(BuxCatalogLabel.string("Open in New Window", locale: BuxInterfaceLocale.currentInterfaceLocale), systemImage: "macwindow.on.rectangle")
                 }
             }
         }
@@ -96,7 +96,7 @@ private struct BuxPadExpenseOpenInNewWindowContextMenuModifier: ViewModifier {
                         openWindow: openWindow
                     )
                 } label: {
-                    Label("Open in New Window", systemImage: "macwindow.on.rectangle")
+                    Label(BuxCatalogLabel.string("Open in New Window", locale: BuxInterfaceLocale.currentInterfaceLocale), systemImage: "macwindow.on.rectangle")
                 }
             }
         }

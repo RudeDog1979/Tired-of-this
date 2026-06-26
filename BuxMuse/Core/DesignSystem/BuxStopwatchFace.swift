@@ -7,6 +7,7 @@ import SwiftUI
 
 struct BuxStopwatchFace: View {
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     /// Frozen elapsed when paused.
     let elapsed: TimeInterval
@@ -31,8 +32,10 @@ struct BuxStopwatchFace: View {
         }
         .frame(width: faceSize, height: faceSize)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Stopwatch")
-        .accessibilityValue(isRunning ? "Running" : "Paused")
+        .accessibilityLabel(BuxCatalogLabel.string("Stopwatch", locale: appSettingsManager.interfaceLocale))
+        .accessibilityValue(
+            BuxCatalogLabel.string(isRunning ? "Running" : "Paused", locale: appSettingsManager.interfaceLocale)
+        )
     }
 
     @ViewBuilder
@@ -146,7 +149,7 @@ struct BuxStopwatchFace: View {
                     .font(.system(size: 14, weight: .semibold, design: .monospaced))
             }
 
-            Text(isRunning ? "RUNNING" : "PAUSED")
+            Text(BuxCatalogLabel.string(isRunning ? "RUNNING" : "PAUSED", locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 10, weight: .bold))
                 .kerning(1.2)
                 .foregroundStyle(isRunning ? accent : Color.gray)

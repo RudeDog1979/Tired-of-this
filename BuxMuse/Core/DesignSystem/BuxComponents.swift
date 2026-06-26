@@ -383,6 +383,116 @@ extension View {
 
 // MARK: - Navigation drawer search (visible by default; scroll up to minimize)
 
+private enum BuxPadDrawerSearchLayout {
+    static func usesRailSearch(studioSplit: Bool, expenseSplit: Bool) -> Bool {
+        BuxPadIdiom.isPad && (studioSplit || expenseSplit)
+    }
+}
+
+private struct BuxPadRailDrawerSearchBar: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxSemanticTheme) private var semantic
+
+    @Binding var text: String
+    @Binding var isPresented: Bool
+    let prompt: String
+    var focusOnPresent: FocusState<Bool>.Binding
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 17, weight: .medium))
+                .foregroundStyle(.secondary)
+
+            TextField(
+                "",
+                text: $text,
+                prompt: Text(prompt)
+            )
+            .textFieldStyle(.plain)
+            .focused(focusOnPresent)
+            .submitLabel(.search)
+            .tint(semantic.accent)
+
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(Text(BuxCatalogLabel.string("Clear", locale: BuxInterfaceLocale.currentInterfaceLocale)))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background {
+            let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+            if #available(iOS 26.0, *) {
+                shape
+                    .fill(.clear)
+                    .glassEffect(.regular, in: shape)
+            } else {
+                shape.fill(.quaternary.opacity(colorScheme == .dark ? 0.35 : 0.55))
+            }
+        }
+        .onChange(of: isPresented) { _, presented in
+            if presented {
+                focusOnPresent.wrappedValue = true
+            } else {
+                focusOnPresent.wrappedValue = false
+            }
+        }
+        .onChange(of: focusOnPresent.wrappedValue) { _, focused in
+            if focused, !isPresented {
+                isPresented = true
+            }
+        }
+    }
+}
+
+private struct BuxPadRailDrawerSearchInsetModifier<ScopeContent: View>: ViewModifier {
+    @Environment(\.buxSemanticTheme) private var semantic
+    @Environment(\.buxPadStudioUsesSplitLayout) private var studioSplit
+    @Environment(\.buxPadExpenseUsesSplitLayout) private var expenseSplit
+
+    @Binding var searchText: String
+    @Binding var isPresented: Bool
+    let prompt: String
+    @ViewBuilder var scopeContent: () -> ScopeContent
+
+    @FocusState private var isSearchFocused: Bool
+
+    private var usesPadSplitRailSearch: Bool {
+        BuxPadDrawerSearchLayout.usesRailSearch(studioSplit: studioSplit, expenseSplit: expenseSplit)
+    }
+
+    func body(content: Content) -> some View {
+        if usesPadSplitRailSearch {
+            content
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        BuxPadRailDrawerSearchBar(
+                            text: $searchText,
+                            isPresented: $isPresented,
+                            prompt: prompt,
+                            focusOnPresent: $isSearchFocused
+                        )
+                        scopeContent()
+                    }
+                    .buxPadDashboardCardRail()
+                    .padding(.top, BuxLayout.tight)
+                    .padding(.bottom, BuxLayout.tight)
+                }
+                .tint(semantic.accent)
+        } else {
+            content
+        }
+    }
+}
+
 // MARK: - Centered top bar (true screen-center title)
 
 struct BuxCenteredTopBar<Leading: View, Trailing: View>: View {
@@ -413,40 +523,84 @@ struct BuxCenteredTopBar<Leading: View, Trailing: View>: View {
 
 struct BuxDrawerSearchModifier: ViewModifier {
     @Environment(\.buxSemanticTheme) private var semantic
+    @Environment(\.buxPadStudioUsesSplitLayout) private var studioSplit
+    @Environment(\.buxPadExpenseUsesSplitLayout) private var expenseSplit
+
     @Binding var searchText: String
     let prompt: String
     @Binding var isPresented: Bool
 
+    private var usesPadSplitRailSearch: Bool {
+        BuxPadDrawerSearchLayout.usesRailSearch(studioSplit: studioSplit, expenseSplit: expenseSplit)
+    }
+
     func body(content: Content) -> some View {
-        content
-            .searchable(
-                text: $searchText,
-                isPresented: $isPresented,
-                placement: .navigationBarDrawer(displayMode: .automatic),
-                prompt: prompt
-            )
-            .tint(semantic.accent)
+        if usesPadSplitRailSearch {
+            content
+                .modifier(
+                    BuxPadRailDrawerSearchInsetModifier(
+                        searchText: $searchText,
+                        isPresented: $isPresented,
+                        prompt: prompt,
+                        scopeContent: { EmptyView() }
+                    )
+                )
+        } else {
+            content
+                .searchable(
+                    text: $searchText,
+                    isPresented: $isPresented,
+                    placement: .navigationBarDrawer(displayMode: .automatic),
+                    prompt: prompt
+                )
+                .tint(semantic.accent)
+        }
     }
 }
 
 /// Navigation drawer + scope chips (Expenses / Studio Tax pattern).
 struct BuxDrawerScopeModifier<Scope: Hashable, ScopeContent: View>: ViewModifier {
+    @Environment(\.buxPadStudioUsesSplitLayout) private var studioSplit
+    @Environment(\.buxPadExpenseUsesSplitLayout) private var expenseSplit
+
     @Binding var searchText: String
     @Binding var selection: Scope
     @Binding var isPresented: Bool
     let prompt: String
     @ViewBuilder let scopes: () -> ScopeContent
 
+    private var usesPadSplitRailSearch: Bool {
+        BuxPadDrawerSearchLayout.usesRailSearch(studioSplit: studioSplit, expenseSplit: expenseSplit)
+    }
+
     func body(content: Content) -> some View {
-        content
-            .modifier(BuxDrawerSearchModifier(
-                searchText: $searchText,
-                prompt: prompt,
-                isPresented: $isPresented
-            ))
-            .searchScopes($selection) {
-                scopes()
-            }
+        if usesPadSplitRailSearch {
+            content
+                .modifier(
+                    BuxPadRailDrawerSearchInsetModifier(
+                        searchText: $searchText,
+                        isPresented: $isPresented,
+                        prompt: prompt,
+                        scopeContent: {
+                            Picker("", selection: $selection) {
+                                scopes()
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
+                        }
+                    )
+                )
+        } else {
+            content
+                .modifier(BuxDrawerSearchModifier(
+                    searchText: $searchText,
+                    prompt: prompt,
+                    isPresented: $isPresented
+                ))
+                .searchScopes($selection) {
+                    scopes()
+                }
+        }
     }
 }
 

@@ -157,7 +157,7 @@ public final class SettingsBrain {
                 ),
                 SettingsRowDisplay(
                     title: "Look & feel",
-                    subtitle: "Theme, colors, motion",
+                    subtitle: BuxCatalogLabel.string("Theme, colors, motion", locale: interfaceLocale),
                     iconName: "paintpalette.fill",
                     hexColor: "#00E5FF",
                     trailingText: currentThemeName,
@@ -165,7 +165,7 @@ public final class SettingsBrain {
                 ),
                 SettingsRowDisplay(
                     title: "Currency & language",
-                    subtitle: "Currency code, formatting",
+                    subtitle: BuxCatalogLabel.string("Currency code, formatting", locale: interfaceLocale),
                     iconName: "globe",
                     hexColor: "#BF5AF2",
                     trailingText: "\(activeCurrencyFlag) \(activeCurrencyCode)",
@@ -196,8 +196,8 @@ public final class SettingsBrain {
                 SettingsRowDisplay(
                     title: "Apple Wallet Sync",
                     subtitle: store.appleWalletSyncEnabled
-                        ? "Automatically sync and match transactions"
-                        : "Off — tap to connect Apple Wallet",
+                        ? BuxCatalogLabel.string("Automatically sync and match transactions", locale: interfaceLocale)
+                        : BuxCatalogLabel.string("Off — tap to connect Apple Wallet", locale: interfaceLocale),
                     iconName: "wallet.pass.fill",
                     hexColor: "#007AFF",
                     trailingText: Self.localizedOnOff(store.appleWalletSyncEnabled, locale: interfaceLocale),
@@ -206,8 +206,8 @@ public final class SettingsBrain {
                 SettingsRowDisplay(
                     title: "Debts",
                     subtitle: store.consumerDebtEnabled
-                        ? "Credit cards, loans, and payoff tracking"
-                        : "Off — turn on to track what you owe",
+                        ? BuxCatalogLabel.string("Credit cards, loans, and payoff tracking", locale: interfaceLocale)
+                        : BuxCatalogLabel.string("Off — turn on to track what you owe", locale: interfaceLocale),
                     iconName: "creditcard.fill",
                     hexColor: "#FF6B6B",
                     trailingText: Self.localizedOnOff(store.consumerDebtEnabled, locale: interfaceLocale),
@@ -216,8 +216,8 @@ public final class SettingsBrain {
                 SettingsRowDisplay(
                     title: "Household",
                     subtitle: store.householdCloudRecordName == nil
-                        ? "Share expenses with family via iCloud"
-                        : (store.householdDisplayName ?? "Active household"),
+                        ? BuxCatalogLabel.string("Share expenses with family via iCloud", locale: interfaceLocale)
+                        : (store.householdDisplayName ?? BuxCatalogLabel.string("Active household", locale: interfaceLocale)),
                     iconName: "person.2.circle.fill",
                     hexColor: "#4ECDC4",
                     trailingText: store.householdCloudRecordName == nil ? nil : store.householdDisplayName,
@@ -262,8 +262,8 @@ public final class SettingsBrain {
                 SettingsRowDisplay(
                     title: "Sync with iCloud",
                     subtitle: store.personalCloudSyncEnabled
-                        ? "Stored in Apple's iCloud — BuxMuse cannot see it"
-                        : "Sync across iPhone and iPad via Apple's iCloud",
+                        ? BuxCatalogLabel.string("Stored in Apple's iCloud — BuxMuse cannot see it", locale: interfaceLocale)
+                        : BuxCatalogLabel.string("Sync across iPhone and iPad via Apple's iCloud", locale: interfaceLocale),
                     iconName: "icloud.fill",
                     hexColor: "#007AFF",
                     trailingText: Self.localizedOnOff(store.personalCloudSyncEnabled, locale: interfaceLocale),
@@ -271,14 +271,14 @@ public final class SettingsBrain {
                 ),
                 SettingsRowDisplay(
                     title: "Backup & export",
-                    subtitle: "Encrypted archive, export, restore",
+                    subtitle: BuxCatalogLabel.string("Encrypted archive, export, restore", locale: interfaceLocale),
                     iconName: "arrow.down.doc.fill",
                     hexColor: "#E0C3FC",
                     destination: .data
                 ),
                 SettingsRowDisplay(
                     title: "App lock",
-                    subtitle: "Face ID, Touch ID, or PIN",
+                    subtitle: BuxCatalogLabel.string("Face ID, Touch ID, or PIN", locale: interfaceLocale),
                     iconName: "lock.fill",
                     hexColor: "#0A84FF",
                     trailingText: lockSummary,
@@ -286,7 +286,7 @@ public final class SettingsBrain {
                 ),
                 SettingsRowDisplay(
                     title: "About BuxMuse",
-                    subtitle: "Version, privacy, credits",
+                    subtitle: BuxCatalogLabel.string("Version, privacy, credits", locale: interfaceLocale),
                     iconName: "info.circle.fill",
                     hexColor: "#8E8E93",
                     trailingText: "v\(marketingVersion)",
@@ -334,7 +334,7 @@ public final class SettingsBrain {
             rows: [
                 SettingsRowDisplay(
                     title: "Payment methods",
-                    subtitle: "Tags for cards, PayPal, Klarna, and more",
+                    subtitle: BuxCatalogLabel.string("Tags for cards, PayPal, Klarna, and more", locale: interfaceLocale),
                     iconName: "creditcard.fill",
                     hexColor: "#5856D6",
                     trailingText: Self.localizedOnOff(store.paymentSourceTrackingEnabled, locale: interfaceLocale),
@@ -342,7 +342,7 @@ public final class SettingsBrain {
                 ),
                 SettingsRowDisplay(
                     title: "Scope radar",
-                    subtitle: "Catch unpaid scope creep early",
+                    subtitle: BuxCatalogLabel.string("Catch unpaid scope creep early", locale: interfaceLocale),
                     iconName: "scope",
                     hexColor: "#FF6482",
                     trailingText: Self.localizedOnOff(store.antiScopeCreepEnabled, locale: interfaceLocale),
@@ -351,7 +351,7 @@ public final class SettingsBrain {
                 ),
                 SettingsRowDisplay(
                     title: "Agreement scratchpad",
-                    subtitle: "Draft client terms before you send",
+                    subtitle: BuxCatalogLabel.string("Draft client terms before you send", locale: interfaceLocale),
                     iconName: "doc.text.fill",
                     hexColor: "#5E5CE6",
                     trailingText: Self.localizedOnOff(store.agreementScratchpadEnabled, locale: interfaceLocale),
@@ -360,7 +360,7 @@ public final class SettingsBrain {
                 ),
                 SettingsRowDisplay(
                     title: "Workload & energy",
-                    subtitle: "Burnout guard for heavy weeks",
+                    subtitle: BuxCatalogLabel.string("Burnout guard for heavy weeks", locale: interfaceLocale),
                     iconName: "bolt.heart.fill",
                     hexColor: "#FF375F",
                     trailingText: Self.localizedOnOff(store.burnoutGuardEnabled, locale: interfaceLocale),

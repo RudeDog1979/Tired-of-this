@@ -1,9 +1,12 @@
 (\(option.deductibilityPercent)%)
 /month
 7-day trend
+APR %
 Abyssal
 Accent Color
 Accent color
+Account
+Active debts
 Active savings goals
 Add
 Add Cash
@@ -14,26 +17,23 @@ Add a client, invoice, or receipt to start tracking tax, cashflow, and deduction
 Add a new gig workspace
 Add category
 Add client
+Add debt
 Add expense
 Add expenses to unlock spending insights.
+Add line
 Add milestone
-Add note
-Add overlay tint
 Add text
-Add your photo
+Add your first debt
 Address
 Adjust
-Adjust for card size
 Advance
 Advanced diagnostics
 Advanced filters…
 Agreed price
 Agreement drafts
-Alerts & radar
 Align
-All
 All lines
-Allow photos
+Allocated
 Amount
 Another merchant shares this name — add a label to tell them apart.
 Any
@@ -42,9 +42,12 @@ Any merchant
 Any zone
 App language
 Apple Health sync
+Apple Wallet Integration
 Apply
 Apply suggestion
 Applying this insight accelerates this target timeline significantly.
+Archive
+Archived
 Attachment
 Auto-location for mileage
 Avatar & identity
@@ -55,12 +58,14 @@ Background photo
 Backup invoices
 Backup reminders
 Bank Transfer
+Banks, family loans, and informal lenders — all in one place.
 Barter & trade
 Barter & trade logger
 Barter / exchange
 Barter details
 Basics
 Bill from completed work
+Bill reminders
 Biometric access
 Blue
 Brain recommendation
@@ -69,9 +74,8 @@ Brand
 Brand Color
 Brand identity
 Breakdown
-Budget method
+Budget setup
 Built-in tools for professionals
-Business Card Pro Studio
 Business Profile
 Business classification
 Business details
@@ -85,28 +89,21 @@ Bux Shape
 Bux Shapes
 BuxMuse Vault Active
 BuxMuse intelligence
-Cancel
 Canonical name
 Captured scan preview
 Card text
 Cash & barter
+Cash & trade
 Cash Drawer
-Categories
 Category
 Category breakdown
 Change category
 Charts, lines, insights & actions
-Choose background photo
-Choose from photos
 Choose icon
-Choose photo
-Choose photo from library
 Choose workspace
 Clear
 Clear all filters
-Clear background
 Clear filters
-Clear pad
 Clear preset (custom only)
 Client
 Client Info
@@ -115,17 +112,16 @@ Client signature (in person only)
 Close
 Color
 Colors
+Consumer debt
 Contact
-Contact QR code
 Continue
 Contract settings
 Contribution date
-Copy key
-Copy scope-change email
 Corners
 Country / Region
 Create Invoice
 Create category
+Create household
 Create invoice
 Create project
 Creative Energy
@@ -135,12 +131,11 @@ Crimson
 Cross-workspace flows
 Currency configuration
 Current
+Current balance
 Current saved
 Custom
-Custom colors
 Custom envelope profiles
 Customer
-Customize only
 Cyan
 Daily average
 Daily digest
@@ -149,30 +144,30 @@ Data Guard mode
 Date
 Dates
 Deadline
+Debt details
+Default set-aside guide
 Defaults for new agreements
 Delete
 Delete Goal & Discard savings data
 Delete data
 Delete expense
-Deliverables
 Density
 Design
 Details
 Detected pattern warnings
 Detected progress threats
-Dismiss
 Display Currency
 Display currency
+Divide this purchase into 2–5 category lines.
 Done
-Down
 Drafts
 Dual-cash drawer
+Due date reminders
 Duplicate
 ENTER CASH AMOUNT
 Edge strips (hero size)
 Edit
 Edit Goal
-Edit in Bux Photo Lab
 Edit transaction
 Education
 Emerald
@@ -182,7 +177,9 @@ Encrypted backup
 Entertainment
 Envelope
 Envelope categories
+Exclude from spending
 Expense
+Expense quick actions
 Expenses
 Export & share
 Export PDF
@@ -195,14 +192,16 @@ Fill strength
 Fills merchant, amount, date & notes automatically
 Finished early
 First recorded
+Fixed payment
+Fixed payments & subscriptions
 Font
 Fonts
 Frame
-Front
 Full Tax Studio
 Full Tax Studio in Pro
 Galactic
 Generate PDF
+Get Started
 Get structural forecast and potential acceleration timeline AI insights.
 Global locale
 Goal
@@ -221,7 +220,9 @@ Heat zone
 Hex
 High Stress Alert
 Horizon
+Household
 Housing
+How BuxMuse works
 How did this feel?
 How did you pay? (optional)
 How do you get paid?
@@ -231,8 +232,9 @@ How you charge
 I earn money on my own
 I set money aside
 Identity
-Import from Photo Library
+Import History
 Import into agreement
+Import your agreement
 Income
 Income & payday profile
 Indigo
@@ -241,38 +243,46 @@ Intelligence insights
 Intelligence rules
 Interface
 Internal notes
+Invite member
 Invoice
 Invoice Bill-To Details
 Invoice Details
 Invoice Notes
+Invoice Preview
 Invoice identity & address
+Invoices & travel
 Invoicing defaults
 Job
 Job costs
 Job pockets
 Jobs
+Keep iCloud
+Keep this device
+Keeps this in your ledger but leaves it out of spend totals and charts.
 Largest purchases
 Layer fade
 Layers
+Leave household
 Legal footer
+Lender
 Line Items
 Line item
+Link as paycheck
 Link store (optional)
 Linked
 Linked job
 List icon
-Log
 Log Cash Transaction
-Log Physical Cash
 Log Subscription as Cancelled
-Log expense
+Log debt
+Log each payment with Add Income on the home tab. Leave the cap at zero to use your full logged income.
+Log payment
 Log to Project
 Log trip
+Log your first debt
 Logo Position
 Long-press & drag to weave the web · tap for territory detail
 Look
-Manage categories
-Manage merchants
 Manual account type
 Manual tuning (Simple & Pro)
 Mark paid
@@ -282,21 +292,23 @@ Master BuxMuse in 3 simple steps
 Merchant
 Merchant data
 Merchant keywords
-Merchants
 Merge…
 Metric Details
 Mileage Log
 Mileage rate
 Milestone
 Milestones
+Minimum payment
 Mint
 Money & timing
 Money Map
 Money in
 Monthly
-Monthly Budget limit
 Monthly Burn Rate
+Monthly due date
 Monthly summary
+More alerts
+More options
 My year summary
 Name
 Name settings
@@ -304,48 +316,51 @@ New
 Nexus bridge
 Night sleep duration
 No Active Budget Profile
-No Notifications
 No active savings goals yet.
 No active subscriptions. Tapping quick action opens Subscription Hub.
 No alerts. You're all caught up.
+No bank connection needed. Everything stays on your phone.
 No category subscription metrics available.
 No clients yet. Add your first client to track health and lifetime value.
 No data available.
+No debts yet
 No deduction opportunities yet. Log receipts to unlock suggestions.
-No expenses in this workspace
-No expenses logged yet
 No insights yet.
-No matches
 No merchant data available.
 No merchants match your search.
 No owner transfers logged yet. Use Nexus bridge when adding an entry.
+No payments logged yet.
 No price on this job yet.
 No pricing or billing risks detected.
 No projects yet.
+No recent transaction trend data available.
 No specific workspace
 No transactions logged in this range.
 No transactions yet. Add an expense to see activity here.
 No upcoming renewals scheduled
+None
+None yet
 Not cash or barter
 Not now
 Note
 Notes
-Notifications
+Notify me before subscriptions and fixed payments are due
 Numbering
 Ocean
+On-device insights
 Only if you want a shop logo — e.g. Amazon for a refund. Otherwise the category icon shows in your list.
 Opacity
-Open Settings
 Open full Money Map
 Open full territory detail
 Open insight detail
-Open mileage log
+Optional spending cap
 Options
 Orange
 Order
+Original balance
 Other
-Out of scope
 Outstanding
+Overview
 Owner transfer
 PAID INFLOW · 6 MO
 PIN passcode
@@ -354,10 +369,12 @@ Paid total
 Parsing receipt details...
 Payment
 Payment Link
+Payment history
+Payment log
 Payment method keywords
 Payment source tracking
 Payment status
-Payment terms
+Payoff estimate
 Person
 Personal
 Photo
@@ -365,25 +382,21 @@ Photo (optional)
 Photo access
 Photo access settings
 Photo position
-Photo tuning
 Pick
 Pick what matches you — due dates and reminders update right away.
-Pick with Photos picker
 Pink
 Planner milestones
 Popular
 Preview
-Preview full terms
 Price & quote
 Print size
 Priority
+Priority alerts
 Privacy
 Privacy shield
-Pro Studio feature
+Pro Studio income
 Pro territories show merchants, scope radar, invoices, mileage, and more as you enable Studio tools.
-Profile
 Profile details
-Profile settings
 Project
 Project plan
 Purple
@@ -401,11 +414,10 @@ Receive Cash (Income)
 Recent
 Recent set-asides
 Recent transactions
-Recurring
+Record payment
 Recurring only
 Red
 Redirect suggested amount
-Redo
 Refresh QR
 Refunds only
 Regional & Budget
@@ -413,16 +425,15 @@ Regional rules
 Registration
 Remind me before renewal
 Remind me every
-Remove photo
+Reminders
 Renewal is based on the expense date.
-Rent, utilities, subscriptions you pay outside the subscription toggle.
+Rent, utilities, Netflix, and other repeating bills
 Reopen project
 Repeats regularly
-Reset
-Reset map layout
-Reset selection
 Restaurants
+Restore
 Restore backup
+Review conflicts
 Rotate
 SELECT CASH DRAWER
 Sakura
@@ -432,58 +443,54 @@ Save
 Save & send
 Save & stop
 Save Money
-Save as my default terms
 Save card
-Save note
 Scan Receipt
 Scan paper receipt
-Scan receipt
-Scope
 Scope & deliverables
 Scope Radar
 See Studio in Settings
 See all
 See more
+See what you have left to spend this month.
 See your progress
 Seed physical cash balances
-Select
 Selected
 Self-employed?
 Send
 Send card
 Send only
 Send quote
-Set
+Set a monthly budget
 Set aside for tax
 Set aside · track · due soon · year summary
 Set deadline
-Set photo background
 Set up your baseline preferences
-Settings
 Shapes
-Share
 Share agreement PDF
 Share agreement text
-Share card
 Share year summary
 Share your card
+Shared envelope profile
 Shopping
+Show archived debts
 Show on card
 Sign-off note (optional)
 Simple
+Simple Studio income
 Skip
+Skip tour
 Smart savings redirections
 Source workspace uses the picker above.
 Spend Cash
 Spend Cash (Expense)
 Spending heat zones
+Split across categories
 Split across workspaces
 Standard
 Standard entry
-Start Using BuxMuse
+Start a household
 Status
 Status & activation
-Stopwatch
 Storage
 Stroke W
 Studio Suite
@@ -492,7 +499,6 @@ Studio tools
 Style
 Subjective stress zone
 Subscription
-Subscription Hub
 Subscription-like
 Subscriptions
 Suggested Actions:
@@ -502,13 +508,14 @@ Sunset
 Supported providers
 Switch to Sunset Theme
 Switchboard
-Sync from card
+Sync with iCloud
 Synced
 TRANSACTION NOTES
 Tap a merchant to review details. Changes save automatically.
 Tap the chart or a row below to filter
 Tap to change merchant
 Tap to fix
+Tap trend to inspect peaks
 Target
 Tax Mode
 Tax Profile
@@ -521,39 +528,48 @@ Tax savings
 Teal
 Template
 Template Style
+Terms
 Terms & conditions
 This Quarter
 This month
 Time entries below are your task log for this project.
 Time entry
-Timeline
 Titanium
 Tools
+Top Category
+Top Merchant
 Top categories
 Top insights
 Top merchants
+Top outflows
+Total owed
 Total spend
 Totals Preview
+Track bank loans, credit cards, family loans, and informal lenders.
+Track consumer debt
+Track credit cards, loans, and other balances in one place.
+Track what you owe
 Transactions
 Transport
 Travel
 Trend
 Trend over time
 Try a different merchant, note, or filter.
+Turn on
+Turn on & log debt
 Turn on Studio for invoices, mileage, and tax estimates — optional, in Settings.
+Turn on consumer debt tracking to see balances, reminders, and payoff insights.
 Type
 Type scale
 Typography
 Unassigned
 Unassigned expenses
-Undo
-Unlock with Face ID / Touch ID
-Up
-Upgrade to Pro Studio
+Unlock Studio
 Use app default
+Use for rent, utilities, or other bills that repeat on a schedule.
 Utilities
 Visual theme
-Vs last mo
+Vs last period
 Waiting on
 Watermark
 Weekly
@@ -571,13 +587,14 @@ Workspace
 Workspace budget
 Workspace mode
 Yellow
-You can adjust budgeting start dates, income sources, and weekly tracking targets at any time in Settings.
+You can adjust your pay cycle, budget counts, optional spending cap, and budget warnings anytime in Settings.
 You owe
 Your Studio workspace is empty
 Your active workspaces
+Your agreement document
 Your card
-Your financial details are kept strictly offline and secure inside the BuxMuse Brain.
 Your financial landscape
+Your household
 Your money. Your rules. Offline, always.
 Your numbers
 Your own terms
@@ -587,5 +604,7 @@ Your region
 Your signature (worker)
 Your stress index has breached the 0.85 threshold. We suggest enabling Sunset mode to reduce cognitive overload and ocular strain.
 Your subscriptions are fully optimized.
+\(Int((amount / total) * 100))%
 battery
+iCloud sync
 saved

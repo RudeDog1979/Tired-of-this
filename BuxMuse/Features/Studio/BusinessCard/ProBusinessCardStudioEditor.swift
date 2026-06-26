@@ -591,16 +591,16 @@ struct ProBusinessCardEditorView: View {
     private func photoEditMenu(_ design: ProBusinessCardDesign) -> some View {
         Menu {
             if design.options.showsPhoto && design.style.photoScale != .off {
-                Button("Your photo") { beginPhotoStudio(for: .profilePhoto, design: design) }
+                Button(BusinessCardL10n.line("Your photo", locale: appSettingsManager.interfaceLocale)) { beginPhotoStudio(for: .profilePhoto, design: design) }
             }
             if design.options.showsLogo {
-                Button("Business logo") { beginPhotoStudio(for: .logo, design: design) }
+                Button(BusinessCardL10n.line("Business logo", locale: appSettingsManager.interfaceLocale)) { beginPhotoStudio(for: .logo, design: design) }
             }
             if design.style.hasBackgroundPhoto {
-                Button("Background photo") { beginPhotoStudio(for: .backgroundPhoto, design: design) }
+                Button(BusinessCardL10n.line("Background photo", locale: appSettingsManager.interfaceLocale)) { beginPhotoStudio(for: .backgroundPhoto, design: design) }
             }
             if availablePhotoTargets(for: design).isEmpty {
-                Button("Add your photo") { pickTarget = .portrait }
+                Button(BusinessCardL10n.line("Add your photo", locale: appSettingsManager.interfaceLocale)) { pickTarget = .portrait }
             }
         } label: {
             previewActionButtonLabel(
@@ -734,6 +734,7 @@ struct ProBusinessCardEditorView: View {
                 syncDraftChanges()
             }
             .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
             lookSection(design)
             fontGallerySection(design)
             typographySection(design)
@@ -926,7 +927,7 @@ struct ProBusinessCardEditorView: View {
                     } else {
                         BuxFormRowDivider()
                         Button { pickTarget = .background } label: {
-                            Label("Choose background photo", systemImage: "photo.fill.on.rectangle.fill")
+                            Label(BusinessCardL10n.line("Choose background photo", locale: appSettingsManager.interfaceLocale), systemImage: "photo.fill.on.rectangle.fill")
                                 .buxFormFieldPadding()
                         }
                     }
@@ -1026,7 +1027,13 @@ struct ProBusinessCardEditorView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             BuxCatalogDynamicText(key: "Scan to save contact")
                                 .font(.system(size: 12, weight: .semibold))
-                            Text(design.content.name.isEmpty ? "Add a name in Text tab" : design.content.name)
+                            Group {
+                                if design.content.name.isEmpty {
+                                    BuxCatalogDynamicText(key: "Add a name in Text tab")
+                                } else {
+                                    Text(design.content.name)
+                                }
+                            }
                                 .font(.system(size: 11))
                                 .foregroundStyle(.secondary)
                         }
@@ -1060,7 +1067,16 @@ struct ProBusinessCardEditorView: View {
                     if design.content.photoPath == nil { pickTarget = .portrait }
                     else { beginPhotoStudio(for: .profilePhoto, design: design) }
                 } label: {
-                    Label(design.content.photoPath == nil ? "Add photo" : "Bux Photo Lab", systemImage: "camera.filters")
+                    Label {
+                        Text(
+                            BuxCatalogLabel.string(
+                                design.content.photoPath == nil ? "Add photo" : "Bux Photo Lab",
+                                locale: appSettingsManager.interfaceLocale
+                            )
+                        )
+                    } icon: {
+                        Image(systemName: "camera.filters")
+                    }
                         .buxFormFieldPadding()
                 }
             }
@@ -1076,7 +1092,16 @@ struct ProBusinessCardEditorView: View {
                     if studioStore.profile.logoData == nil { pickTarget = .logo }
                     else { beginPhotoStudio(for: .logo, design: design) }
                 } label: {
-                    Label(studioStore.profile.logoData == nil ? "Add logo" : "Edit logo in Bux Photo Lab", systemImage: "briefcase.fill")
+                    Label {
+                        Text(
+                            BuxCatalogLabel.string(
+                                studioStore.profile.logoData == nil ? "Add logo" : "Edit logo in Bux Photo Lab",
+                                locale: appSettingsManager.interfaceLocale
+                            )
+                        )
+                    } icon: {
+                        Image(systemName: "briefcase.fill")
+                    }
                         .buxFormFieldPadding()
                 }
             }
@@ -1125,18 +1150,18 @@ struct ProBusinessCardEditorView: View {
         BuxThemedCardForm {
             BuxFormSection(title: "Background photo") {
                 Button { pickTarget = .background } label: {
-                    Label("Set photo background", systemImage: "photo.fill").buxFormFieldPadding()
+                    Label(BusinessCardL10n.line("Set photo background", locale: appSettingsManager.interfaceLocale), systemImage: "photo.fill").buxFormFieldPadding()
                 }
                 if design.style.hasBackgroundPhoto {
                     BuxFormRowDivider()
                     slider("Opacity", binding(\.style.backgroundPhotoOpacity), range: 0.3...1)
                     BuxFormRowDivider()
                     Button { beginPhotoStudio(for: .backgroundPhoto, design: design) } label: {
-                        Label("Edit in Bux Photo Lab", systemImage: "camera.filters").buxFormFieldPadding()
+                        Label(BusinessCardL10n.line("Edit in Bux Photo Lab", locale: appSettingsManager.interfaceLocale), systemImage: "camera.filters").buxFormFieldPadding()
                     }
                     BuxFormRowDivider()
                     Button(role: .destructive) { clearBackgroundPhoto() } label: {
-                        Label("Clear background", systemImage: "trash").buxFormFieldPadding()
+                        Label(BusinessCardL10n.line("Clear background", locale: appSettingsManager.interfaceLocale), systemImage: "trash").buxFormFieldPadding()
                     }
                 }
             }
@@ -1201,7 +1226,7 @@ struct ProBusinessCardEditorView: View {
                     Button {
                         ProBusinessCardShareActions.shareCard(design: design, logoData: studioStore.profile.logoData)
                     } label: {
-                        Label("Share card", systemImage: "square.and.arrow.up")
+                        Label(BusinessCardL10n.line("Share card", locale: appSettingsManager.interfaceLocale), systemImage: "square.and.arrow.up")
                             .font(.system(size: 15, weight: .semibold))
                             .buxFormFieldPadding()
                     }
@@ -1541,6 +1566,7 @@ private struct ProBusinessCardShareSheet: UIViewControllerRepresentable {
 
 private struct BusinessCardImmersivePreviewView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let design: ProBusinessCardDesign
     let logoData: Data?
@@ -1551,7 +1577,7 @@ private struct BusinessCardImmersivePreviewView: View {
             Color(red: 0.06, green: 0.06, blue: 0.07).ignoresSafeArea()
             VStack(spacing: 16) {
                 HStack {
-                    Button("Close") { dismiss() }
+                    Button(BuxCatalogLabel.string("Close", locale: appSettingsManager.interfaceLocale)) { dismiss() }
                         .foregroundStyle(.white)
                     Spacer()
                     Text(

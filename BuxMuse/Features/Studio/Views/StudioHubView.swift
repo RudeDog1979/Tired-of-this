@@ -47,6 +47,9 @@ struct StudioHubView: View {
     @State private var navigateTaxEnvelope = false
     @State private var hubAppeared = false
 
+    /// iPad split re-mounts the hub on sidebar return — bounce cards once per session only.
+    private static var padSplitHubEntranceConsumed = false
+
     private var display: StudioHubDisplay {
         studioBrain.hubDisplay
     }
@@ -96,8 +99,10 @@ struct StudioHubView: View {
 
     private var studioHubLayer: some View {
         ZStack {
-                BuxLandingTintBackground()
-                    .ignoresSafeArea()
+                if !usesPadSplitLayout {
+                    BuxLandingTintBackground()
+                        .ignoresSafeArea()
+                }
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
@@ -134,7 +139,7 @@ struct StudioHubView: View {
                             }
                             .environmentObject(themeManager)
                             .environmentObject(appSettingsManager)
-                            .padding(.horizontal, BuxTokens.marginRegular)
+                            .buxPadStudioSectionInset()
                             .buxScreenEntrance(index: 1, isVisible: hubAppeared)
                         }
 
@@ -142,7 +147,7 @@ struct StudioHubView: View {
                             TaxSavingsHubHeroSection {
                                 navigateTaxEnvelope = true
                             }
-                            .padding(.horizontal, BuxTokens.marginRegular)
+                            .buxPadStudioSectionInset()
                             .buxScreenEntrance(index: 2, isVisible: hubAppeared)
                         }
 
@@ -176,14 +181,14 @@ struct StudioHubView: View {
                         ) { suggestion in
                             proInvoicePrefill = suggestion
                         }
-                        .padding(.horizontal, BuxTokens.marginRegular)
+                        .buxPadStudioSectionInset()
                         .buxScreenEntrance(index: 5, isVisible: hubAppeared)
 
                         StudioInsightsHubSection(
                             snapshot: studioInsightsSnapshot,
                             onOpenDashboard: { navigateToInsights = true }
                         )
-                        .padding(.horizontal, BuxTokens.marginRegular)
+                        .buxPadStudioSectionInset()
                         .buxScreenEntrance(index: 5, isVisible: hubAppeared)
 
                         StudioInvoicesSection(display: display.invoicesSummary) { navigateToInvoices = true }
@@ -228,10 +233,7 @@ struct StudioHubView: View {
             .onAppear {
                 studioTimer.attach(store: store)
                 presentLogTimeIfRequested()
-                guard !hubAppeared else { return }
-                withAnimation(BuxMotion.bounce) {
-                    hubAppeared = true
-                }
+                activateHubEntranceIfNeeded()
             }
             .onChange(of: navigationCoordinator.openStudioLogTimeRequest) { _, _ in
                 presentLogTimeIfRequested()
@@ -388,6 +390,20 @@ struct StudioHubView: View {
     private func presentLogTimeIfRequested() {
         guard navigationCoordinator.consumeStudioLogTimeRequest() else { return }
         showTimeTracker = true
+    }
+
+    private func activateHubEntranceIfNeeded() {
+        guard !hubAppeared else { return }
+        if usesPadSplitLayout {
+            if Self.padSplitHubEntranceConsumed {
+                hubAppeared = true
+                return
+            }
+            Self.padSplitHubEntranceConsumed = true
+        }
+        withAnimation(BuxMotion.bounce) {
+            hubAppeared = true
+        }
     }
 
     private var quickActionsSection: some View {

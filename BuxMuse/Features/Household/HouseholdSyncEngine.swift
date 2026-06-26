@@ -281,10 +281,17 @@ enum HouseholdSyncError: LocalizedError {
     case missingShareRoot
 
     var errorDescription: String? {
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         switch self {
-        case .invalidName: return "Enter a household name."
-        case .missingShareURL: return "Could not create invite link."
-        case .missingShareRoot: return "Could not read household share details from iCloud."
+        case .invalidName:
+            return BuxLocalizedString.string("Enter a household name.", locale: locale)
+        case .missingShareURL:
+            return BuxLocalizedString.string("Could not create invite link.", locale: locale)
+        case .missingShareRoot:
+            return BuxLocalizedString.string(
+                "Could not read household share details from iCloud.",
+                locale: locale
+            )
         }
     }
 }

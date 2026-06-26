@@ -81,7 +81,7 @@ struct StudioProjectsListView: View {
                 .onDelete(perform: deleteProject)
             }
         }
-        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
+        .studioProToolScrollTopInset()
         .studioThemedListRows()
     }
 
@@ -108,7 +108,13 @@ struct StudioProjectsListView: View {
                     }
                 }
 
-                Text(clientName ?? "Independent Project")
+                Group {
+                    if clientName != nil {
+                        Text(clientName!)
+                    } else {
+                        BuxCatalogDynamicText(key: "Independent Project")
+                    }
+                }
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
 
@@ -607,7 +613,10 @@ struct StudioProjectDetailView: View {
                         projectName: project.name,
                         clientName: store.clients.first(where: { $0.id == project.clientId })?.name ?? "Client"
                     )) {
-                        Label("Copy scope-change email", systemImage: "envelope.fill")
+                        Label(
+                            BuxCatalogLabel.string("Copy scope-change email", locale: appSettingsManager.interfaceLocale),
+                            systemImage: "envelope.fill"
+                        )
                             .font(.system(size: 12, weight: .bold))
                     }
                 }
@@ -628,14 +637,31 @@ struct StudioProjectDetailView: View {
             }
 
             VStack(alignment: .leading, spacing: 10) {
-                Text(existing == nil ? "No agreement yet for this project." : "\(existing!.statusDisplayLabel) · \(existing!.title)")
+                Group {
+                    if existing == nil {
+                        BuxCatalogDynamicText(key: "No agreement yet for this project.")
+                    } else {
+                        Text(
+                            BuxLocalizedString.format(
+                                "%@ · %@",
+                                locale: appSettingsManager.interfaceLocale,
+                                StudioAgreementL10n.line(existing!.statusDisplayLabel, locale: appSettingsManager.interfaceLocale),
+                                existing!.title
+                            )
+                        )
+                    }
+                }
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
 
                 Button {
                     showAgreementEditor = true
                 } label: {
-                    Label(existing == nil ? "Create agreement draft" : "Edit agreement draft", systemImage: "doc.text.fill")
+                    Label {
+                        BuxCatalogText.text(existing == nil ? "Create agreement draft" : "Edit agreement draft")
+                    } icon: {
+                        Image(systemName: "doc.text.fill")
+                    }
                         .font(.system(size: 12, weight: .bold))
                 }
             }
@@ -730,7 +756,13 @@ struct StudioProjectDetailView: View {
                 ForEach(project.timeEntries) { entry in
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(entry.notes.isEmpty ? "Consulting work" : entry.notes)
+                            Group {
+                                if entry.notes.isEmpty {
+                                    BuxCatalogDynamicText(key: "Consulting work")
+                                } else {
+                                    Text(entry.notes)
+                                }
+                            }
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             Text(formattedDate(entry.startTime))
@@ -747,7 +779,7 @@ struct StudioProjectDetailView: View {
                         )
                             .font(.system(size: 13, weight: .semibold))
                         
-                        Text(entry.isBillable ? "Billable" : "Admin")
+                        BuxCatalogDynamicText(key: entry.isBillable ? "Billable" : "Admin")
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(entry.isBillable ? .green : .gray)
                             .padding(.horizontal, 6)
@@ -762,7 +794,10 @@ struct StudioProjectDetailView: View {
                         Button(role: .destructive) {
                             timeEntryPendingDelete = entry
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label(
+                                BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale),
+                                systemImage: "trash"
+                            )
                         }
                     }
                 }
@@ -826,9 +861,7 @@ struct StudioProjectDetailView: View {
     }
     
     private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        BuxDisplayDate.monthDayYear(from: date, locale: appSettingsManager.interfaceLocale)
     }
 }
 
@@ -872,7 +905,10 @@ struct ActiveTimeTrackerView: View {
         if let projectId = resolvedProjectId,
            StudioWorkDealHelpers.needsClientApproval(projectId: projectId, studioStore: store) {
             StudioWorkDealApprovalBanner(
-                message: "No client approval on file for this project. Logging time is allowed — capture agreement when you can."
+                message: BuxCatalogLabel.string(
+                    "No client approval on file for this project. Logging time is allowed — capture agreement when you can.",
+                    locale: appSettingsManager.interfaceLocale
+                )
             )
             .padding(.horizontal, BuxTokens.marginRegular)
         }
@@ -1188,7 +1224,11 @@ struct ActiveTimeTrackerView: View {
         guard let project = store.projects.first(where: { $0.id == resolvedProjectId }),
               project.budgetedHours > 0 else { return nil }
         let duration = StudioTimerSession.formattedDuration(project.budgetedHours * 3600)
-        return "Use project budget (\(duration))"
+        return BuxLocalizedString.format(
+            "Use project budget (%@)",
+            locale: appSettingsManager.interfaceLocale,
+            duration
+        )
     }
 
     private func applyBudgetedHoursShortcut() {
@@ -1202,23 +1242,35 @@ struct ActiveTimeTrackerView: View {
     }
 
     private func proWorkClockAlertTitle(_ alert: StudioTimerJobAlert) -> String {
+        let locale = appSettingsManager.interfaceLocale
         switch alert {
         case .none: return ""
-        case .approaching: return "Almost at your estimate"
-        case .atGoal: return "Estimate reached"
-        case .overtime: return "Overtime"
+        case .approaching: return BuxCatalogLabel.string("Almost at your estimate", locale: locale)
+        case .atGoal: return BuxCatalogLabel.string("Estimate reached", locale: locale)
+        case .overtime: return BuxCatalogLabel.string("Overtime", locale: locale)
         }
     }
 
     private func proWorkClockAlertMessage(_ alert: StudioTimerJobAlert) -> String {
+        let locale = appSettingsManager.interfaceLocale
         switch alert {
         case .none: return ""
         case .approaching(let minutesLeft):
-            return "About \(minutesLeft) min left on this job."
+            return BuxLocalizedString.format(
+                "About %lld min left on this job.",
+                locale: locale,
+                minutesLeft
+            )
         case .atGoal:
-            return "Still working? Add time below or finish when done."
+            return BuxLocalizedString.string(
+                "Still working? Add time below or finish when done.",
+                locale: locale
+            )
         case .overtime:
-            return "You're past the goal — extend or finish when done."
+            return BuxLocalizedString.string(
+                "You're past the goal — extend or finish when done.",
+                locale: locale
+            )
         }
     }
 
@@ -1616,13 +1668,23 @@ struct StudioProjectEditorSheet: View {
     }
 
     private var billingHelpText: String {
+        let locale = appSettingsManager.interfaceLocale
         switch billingChoice {
         case .hourly:
-            return "Revenue = hourly rate × billable hours logged on this project."
+            return BuxLocalizedString.string(
+                "Revenue = hourly rate × billable hours logged on this project.",
+                locale: locale
+            )
         case .fixedPrice:
-            return "Revenue stays the fixed price — still log time to track margin and scope."
+            return BuxLocalizedString.string(
+                "Revenue stays the fixed price — still log time to track margin and scope.",
+                locale: locale
+            )
         case .both:
-            return "Revenue uses the fixed price; hourly rate is kept for reference and invoices."
+            return BuxLocalizedString.string(
+                "Revenue uses the fixed price; hourly rate is kept for reference and invoices.",
+                locale: locale
+            )
         }
     }
 

@@ -11,6 +11,7 @@ struct BusinessCardPhotoLabView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     let design: ProBusinessCardDesign
     let logoData: Data?
@@ -35,9 +36,9 @@ struct BusinessCardPhotoLabView: View {
             .buxCatalogNavigationTitle("Bux Photo Lab")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Apply") {
+                    Button(BuxCatalogLabel.string("Apply", locale: appSettingsManager.interfaceLocale)) {
                         if let renderedImage { onApply(renderedImage) }
                         dismiss()
                     }

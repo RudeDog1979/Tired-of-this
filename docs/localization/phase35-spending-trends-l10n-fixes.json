@@ -1,0 +1,26 @@
+{
+  "Total This Week": {
+    "es-419": "Total de esta semana",
+    "es-ES": "Total de esta semana"
+  },
+  "Total This Month": {
+    "es-419": "Total de este mes",
+    "es-ES": "Total de este mes"
+  },
+  "Total This Year": {
+    "es-419": "Total de este año",
+    "es-ES": "Total de este año"
+  },
+  "Include in spending": {
+    "es-419": "Incluir en gastos",
+    "es-ES": "Incluir en gastos"
+  },
+  "Exclude from spending": {
+    "es-419": "Excluir de gastos",
+    "es-ES": "Excluir de gastos"
+  },
+  "Intelligence insights": {
+    "es-419": "Información inteligente",
+    "es-ES": "Información inteligente"
+  }
+}

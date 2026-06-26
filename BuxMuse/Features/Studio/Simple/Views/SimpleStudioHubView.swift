@@ -26,6 +26,10 @@ struct SimpleStudioHubView: View {
     @ObservedObject private var studioTimer = StudioTimerController.shared
 
     @State private var hubAppeared = false
+
+    /// iPad split re-mounts the hub on sidebar return — bounce cards once per session only.
+    private static var padSplitHubEntranceConsumed = false
+
     @State private var showLogTime = false
     @State private var isFabExpanded = false
     @State private var showLogMoney = false
@@ -74,8 +78,10 @@ struct SimpleStudioHubView: View {
 
     private var simpleHubLayer: some View {
         ZStack(alignment: .bottomTrailing) {
-                BuxLandingTintBackground()
-                    .ignoresSafeArea()
+                if !usesPadSplitLayout {
+                    BuxLandingTintBackground()
+                        .ignoresSafeArea()
+                }
 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
@@ -258,8 +264,7 @@ struct SimpleStudioHubView: View {
                 studioTimer.attach(simpleStore: simpleStudioStore)
                 simpleStudioBrain.refreshAll()
                 presentLogTimeIfRequested()
-                guard !hubAppeared else { return }
-                withAnimation(BuxMotion.bounce) { hubAppeared = true }
+                activateHubEntranceIfNeeded()
             }
             .onChange(of: navigationCoordinator.openStudioLogTimeRequest) { _, _ in
                 presentLogTimeIfRequested()
@@ -573,6 +578,20 @@ struct SimpleStudioHubView: View {
     private func presentLogTimeIfRequested() {
         guard navigationCoordinator.consumeStudioLogTimeRequest() else { return }
         showLogTime = true
+    }
+
+    private func activateHubEntranceIfNeeded() {
+        guard !hubAppeared else { return }
+        if usesPadSplitLayout {
+            if Self.padSplitHubEntranceConsumed {
+                hubAppeared = true
+                return
+            }
+            Self.padSplitHubEntranceConsumed = true
+        }
+        withAnimation(BuxMotion.bounce) {
+            hubAppeared = true
+        }
     }
 
     private func closeFabAnimated() {

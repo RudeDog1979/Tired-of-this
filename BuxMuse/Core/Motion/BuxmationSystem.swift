@@ -456,7 +456,8 @@ struct BuxHeroQuickActionButton<Icon: View>: View {
                 .font(titleFont)
                 .foregroundStyle(titleColor)
                 .lineLimit(1)
-                .minimumScaleFactor(1.0)
+                .minimumScaleFactor(0.72)
+                .allowsTightening(true)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)

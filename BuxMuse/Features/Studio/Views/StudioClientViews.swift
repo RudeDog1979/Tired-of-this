@@ -75,7 +75,7 @@ struct StudioClientsListView: View {
                 .onDelete(perform: deleteClient)
             }
         }
-        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
+        .studioProToolScrollTopInset()
         .studioThemedListRows()
     }
 
@@ -266,7 +266,7 @@ struct StudioClientDetailView: View {
                     BuxCatalogDynamicText(key: "Stress Indicator")
                         .font(.system(size: 11))
                         .buxLabelSecondary()
-                    Text(analysis.health.stressScore > 50 ? "High Risk" : "Normal")
+                    BuxCatalogDynamicText(key: analysis.health.stressScore > 50 ? "High Risk" : "Normal")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(analysis.health.stressScore > 50 ? .orange : .green)
                 }
@@ -437,8 +437,6 @@ struct StudioClientDetailView: View {
     }
     
     private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        BuxDisplayDate.monthDayYear(from: date, locale: appSettingsManager.interfaceLocale)
     }
 }

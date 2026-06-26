@@ -21,9 +21,9 @@ private struct BuxPadBusinessCardUIScreenMitigation: ViewModifier {
         content
             .frame(
                 maxWidth: containerWidth > 0 ? containerWidth : nil,
-                maxHeight: containerHeight > 0 ? containerHeight : nil
+                maxHeight: containerHeight > 0 ? containerHeight : nil,
+                alignment: .top
             )
-            .clipped()
     }
 }
 
@@ -53,7 +53,7 @@ extension View {
         modifier(BuxPadDashboardUIScreenMitigation())
     }
 
-    /// Clamps Business Card studio to the active window scene bounds.
+    /// Bounds Business Card studio to the active scene column — never clip; hero rim/shadow paints outside.
     func buxPadBusinessCardUIScreenMitigation() -> some View {
         modifier(BuxPadBusinessCardUIScreenMitigation())
     }

@@ -390,7 +390,7 @@ enum SimpleStudioProMigration {
 
         var client = studioStore.clients[index]
         let prefix = entry.kind == .advanceReceived ? "Advance" : "Loan"
-        let line = "\(prefix): \(entry.amount) on \(entry.createdAt.formatted(date: .abbreviated, time: .omitted))"
+        let line = "\(prefix): \(entry.amount) on \(BuxDisplayDate.monthDay(from: entry.createdAt, locale: BuxInterfaceLocale.currentInterfaceLocale))"
         client.notes = client.notes.isEmpty ? line : "\(client.notes)\n\(line)"
         studioStore.updateClient(client)
     }

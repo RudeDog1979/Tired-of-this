@@ -50,14 +50,19 @@ struct BuxToolbarIconButton: View {
 // MARK: - Role buttons — Apple owns ✕ and ✓ on iOS 26
 
 struct BuxToolbarCancelButton: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let action: () -> Void
 
     var body: some View {
         if BuxPlatform.supportsCloseRole, #available(iOS 26, *) {
             Button(role: .close, action: action)
-                .accessibilityLabel("Cancel")
+                .accessibilityLabel(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale))
         } else {
-            BuxToolbarIconButton(systemName: "xmark", accessibilityLabel: "Cancel", action: action)
+            BuxToolbarIconButton(
+                systemName: "xmark",
+                accessibilityLabel: BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale),
+                action: action
+            )
         }
     }
 }
@@ -141,6 +146,7 @@ struct BuxNavIconButton: View {
 struct BuxToolbarBellButton: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let action: () -> Void
     var unreadCount: Int = 0
 
@@ -160,7 +166,7 @@ struct BuxToolbarBellButton: View {
             }
         }
         .buttonStyle(.borderless)
-        .accessibilityLabel("Notifications")
+        .accessibilityLabel(BuxCatalogLabel.string("Notifications", locale: appSettingsManager.interfaceLocale))
     }
 }
 
@@ -291,6 +297,7 @@ struct BuxProfileToolbarLabel: View {
 }
 
 struct BuxProfileToolbarMenu<MenuContent: View>: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ViewBuilder var menuContent: () -> MenuContent
 
     var body: some View {
@@ -299,13 +306,14 @@ struct BuxProfileToolbarMenu<MenuContent: View>: View {
         } label: {
             BuxProfileToolbarLabel()
         }
-        .accessibilityLabel("Profile")
+        .accessibilityLabel(BuxCatalogLabel.string("Profile", locale: appSettingsManager.interfaceLocale))
     }
 }
 
 typealias BuxProfileToolbarAvatar = BuxProfileToolbarLabel
 
 struct BuxProfileToolbarButton: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
     let action: () -> Void
 
     var body: some View {
@@ -313,6 +321,6 @@ struct BuxProfileToolbarButton: View {
             BuxProfileToolbarLabel()
         }
         .buttonStyle(.borderless)
-        .accessibilityLabel("Profile")
+        .accessibilityLabel(BuxCatalogLabel.string("Profile", locale: appSettingsManager.interfaceLocale))
     }
 }

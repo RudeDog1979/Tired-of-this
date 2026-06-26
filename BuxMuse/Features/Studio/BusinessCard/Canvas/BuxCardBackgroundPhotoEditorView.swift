@@ -135,10 +135,10 @@ struct BuxCardBackgroundPhotoEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Apply", action: applyCurrentMode)
+                    Button(BuxCatalogLabel.string("Apply", locale: appSettingsManager.interfaceLocale), action: applyCurrentMode)
                         .fontWeight(.semibold)
                 }
             }
@@ -285,7 +285,7 @@ struct BuxCardBackgroundPhotoEditorView: View {
                     Slider(value: $freeSelectionScale, in: 0.35...1)
                         .tint(controlTint)
                 }
-                Button("Reset selection") { resetFreeformSession() }
+                Button(BuxCatalogLabel.string("Reset selection", locale: appSettingsManager.interfaceLocale)) { resetFreeformSession() }
                     .font(.system(size: 13, weight: .semibold))
                     .buttonStyle(.bordered)
                     .tint(controlTint)
@@ -295,9 +295,9 @@ struct BuxCardBackgroundPhotoEditorView: View {
 
     private var editHistoryButtonRow: some View {
         HStack(spacing: 8) {
-            historyButton("Undo", icon: "arrow.uturn.backward", enabled: canUndo, action: undoEdit)
-            historyButton("Redo", icon: "arrow.uturn.forward", enabled: canRedo, action: redoEdit)
-            historyButton("Reset", icon: "arrow.counterclockwise", enabled: true, action: resetEdit)
+            historyButton(BuxCatalogLabel.string("Undo", locale: appSettingsManager.interfaceLocale), icon: "arrow.uturn.backward", enabled: canUndo, action: undoEdit)
+            historyButton(BuxCatalogLabel.string("Redo", locale: appSettingsManager.interfaceLocale), icon: "arrow.uturn.forward", enabled: canRedo, action: redoEdit)
+            historyButton(BuxCatalogLabel.string("Reset", locale: appSettingsManager.interfaceLocale), icon: "arrow.counterclockwise", enabled: true, action: resetEdit)
         }
     }
 

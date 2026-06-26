@@ -43,14 +43,14 @@ struct CardLayerPanel: View {
                     }
                     .swipeActions(edge: .trailing) {
                         if !layer.isLocked {
-                            Button { reorder(.front, layer) } label: { Label("Front", systemImage: "square.3.layers.3d.top.filled") }
-                            Button { reorder(.forward, layer) } label: { Label("Up", systemImage: "arrow.up") }
+                            Button { reorder(.front, layer) } label: { Label(BuxCatalogLabel.string("Front", locale: appSettingsManager.interfaceLocale), systemImage: "square.3.layers.3d.top.filled") }
+                            Button { reorder(.forward, layer) } label: { Label(BuxCatalogLabel.string("Up", locale: appSettingsManager.interfaceLocale), systemImage: "arrow.up") }
                         }
                     }
                     .swipeActions(edge: .leading) {
                         if !layer.isLocked {
-                            Button { reorder(.backward, layer) } label: { Label("Down", systemImage: "arrow.down") }
-                            Button { reorder(.back, layer) } label: { Label("Back", systemImage: "square.3.layers.3d.bottom.filled") }
+                            Button { reorder(.backward, layer) } label: { Label(BuxCatalogLabel.string("Down", locale: appSettingsManager.interfaceLocale), systemImage: "arrow.down") }
+                            Button { reorder(.back, layer) } label: { Label(BuxCatalogLabel.string("Back", locale: appSettingsManager.interfaceLocale), systemImage: "square.3.layers.3d.bottom.filled") }
                         }
                     }
                 }

@@ -122,7 +122,8 @@ struct StudioAgreementBuilderView: View {
             Text(draft.formattedShareText(
                 clientName: resolvedClientName,
                 projectName: resolvedProjectName,
-                providerName: resolvedProviderName
+                providerName: resolvedProviderName,
+                locale: appSettingsManager.interfaceLocale
             ))
             .font(.system(size: 12, weight: .regular))
             .buxLabelSecondary()

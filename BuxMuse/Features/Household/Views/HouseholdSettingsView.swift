@@ -120,7 +120,10 @@ struct HouseholdSettingsView: View {
             HStack {
                 BuxCatalogText.text("Name")
                 Spacer()
-                Text(store.householdDisplayName ?? "Household")
+                Text(
+                    store.householdDisplayName
+                        ?? BuxCatalogLabel.string("Household", locale: appSettingsManager.interfaceLocale)
+                )
                     .foregroundStyle(.secondary)
             }
             .buxFormFieldPadding()
@@ -202,7 +205,7 @@ struct HouseholdSettingsView: View {
         case .syncing:
             return BuxCatalogLabel.string("Syncing…", locale: locale)
         case .lastSynced(let date):
-            return BuxCatalogLabel.string("Synced", locale: locale) + " · " + date.formatted(date: .omitted, time: .shortened)
+            return BuxCatalogLabel.string("Synced", locale: locale) + " · " + BuxDisplayDate.dateAndTime(from: date, locale: locale)
         case .error:
             return BuxCatalogLabel.string("Sync issue", locale: locale)
         }

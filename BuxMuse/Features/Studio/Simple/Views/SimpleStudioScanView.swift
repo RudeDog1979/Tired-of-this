@@ -165,7 +165,7 @@ struct SimpleStudioScanView: View {
                     }
 
                     PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                        Label("Choose from photos", systemImage: "photo.on.rectangle.angled")
+                        Label(BuxCatalogLabel.string("Choose from photos", locale: appSettingsManager.interfaceLocale), systemImage: "photo.on.rectangle.angled")
                             .font(.system(size: 15, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }

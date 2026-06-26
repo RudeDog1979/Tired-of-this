@@ -43,7 +43,7 @@ struct StudioDiscoveryCard: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Dismiss")
+                .accessibilityLabel(BuxCatalogLabel.string("Dismiss", locale: appSettingsManager.interfaceLocale))
             }
 
             Button {

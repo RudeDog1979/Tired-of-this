@@ -528,6 +528,14 @@ struct DashboardView: View {
                     isPillSectionExpanded = false
                 }
             }
+            .onAppear {
+                if BuxPadIdiom.isPad {
+                    suppressCategoryCardEntrance = false
+                    if !navigationCoordinator.isScreenLoaded {
+                        navigationCoordinator.isScreenLoaded = true
+                    }
+                }
+            }
             .onChange(of: tutorialCoordinator.currentStep?.id) { _, stepID in
                 handleTutorialStepChange(stepID)
             }
@@ -1121,7 +1129,7 @@ private struct DashboardHeroSection: View {
                             BuxUserAvatarView(size: heroAvatarSize)
                         }
                         .buttonStyle(BuxmationPressCardStyle())
-                        .accessibilityLabel("Profile settings")
+                        .accessibilityLabel(BuxCatalogLabel.string("Profile settings", locale: appSettingsManager.interfaceLocale))
 
                         Text(settingsStore.resolvedDisplayName)
                             .font(.system(size: collapseValue(start: 16, end: 14), weight: .bold))

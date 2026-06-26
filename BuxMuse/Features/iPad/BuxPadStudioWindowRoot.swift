@@ -103,20 +103,18 @@ private struct BuxPadStudioWindowContent: View {
         ZStack {
             BuxLandingTintBackground()
                 .ignoresSafeArea()
+                .animation(nil, value: studioSelection)
 
             NavigationSplitView(columnVisibility: $columnVisibility) {
                 BuxPadStudioSidebar(selection: $studioSelection)
                     .buxPadSplitColumnEnvironment(container, padBrain: padNavigationBrain)
                     .buxPadSplitSidebarColumnWidth(layoutMode: layoutMode)
             } detail: {
-                Group {
-                    if let studioSelection {
-                        BuxPadStudioDetailRouter(destination: studioSelection)
-                    } else {
-                        ZStack {
-                            BuxLandingTintBackground()
-                                .ignoresSafeArea()
-
+                BuxPadSplitDetailCanvas(selection: studioSelection) {
+                    Group {
+                        if let studioSelection {
+                            BuxPadStudioDetailRouter(destination: studioSelection)
+                        } else {
                             BuxPadDetailEmptyState(
                                 title: "Studio",
                                 systemImage: "briefcase.fill",
@@ -124,11 +122,13 @@ private struct BuxPadStudioWindowContent: View {
                             )
                         }
                     }
+                    .buxPadSplitDetailTransition()
                 }
                 .buxPadSplitColumnEnvironment(container, padBrain: padNavigationBrain)
                 .environment(\.buxPadStudioUsesSplitLayout, true)
                 .buxPadStudioSplitDetailChrome()
             }
+            .buxPadSplitDetailNavigationAnimation(value: studioSelection)
             .navigationSplitViewStyle(.balanced)
             .toolbarBackground(.hidden, for: .navigationBar)
         }

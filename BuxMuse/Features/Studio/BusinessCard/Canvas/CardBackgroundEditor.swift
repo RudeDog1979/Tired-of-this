@@ -45,25 +45,25 @@ struct CardBackgroundEditor: View {
                     background.style = .photo
                     onPickPhoto()
                 } label: {
-                    Label("Choose photo from library", systemImage: "photo.on.rectangle.angled")
+                    Label(BuxCatalogLabel.string("Choose photo from library", locale: appSettingsManager.interfaceLocale), systemImage: "photo.on.rectangle.angled")
                 }
 
                 PhotosPicker(selection: $photoPickerItem, matching: .images) {
-                    Label("Pick with Photos picker", systemImage: "photo.badge.plus")
+                    Label(BuxCatalogLabel.string("Pick with Photos picker", locale: appSettingsManager.interfaceLocale), systemImage: "photo.badge.plus")
                 }
 
                 if background.photoPath != nil {
                     Button {
                         onAdjustPhoto?()
                     } label: {
-                        Label("Adjust for card size", systemImage: "arrow.up.left.and.arrow.down.right")
+                        Label(BuxCatalogLabel.string("Adjust for card size", locale: appSettingsManager.interfaceLocale), systemImage: "arrow.up.left.and.arrow.down.right")
                     }
                     Button(role: .destructive) {
                         background.photoPath = nil
                         background.style = .solid
                         onChange()
                     } label: {
-                        Label("Remove photo", systemImage: "trash")
+                        Label(BuxCatalogLabel.string("Remove photo", locale: appSettingsManager.interfaceLocale), systemImage: "trash")
                     }
                 }
             } header: {
@@ -83,7 +83,7 @@ struct CardBackgroundEditor: View {
                 }
             }
 
-            Section("Colors") {
+            Section {
                 BuxDesignerColorFormRow(title: "Background", hex: $background.solidHex, brandPalette: brandPalette, onChange: onChange)
                 BuxDesignerColorFormRow(title: "Accent", hex: $background.accentHex, brandPalette: brandPalette, onChange: onChange)
                 if background.overlayHex != nil {
@@ -97,7 +97,7 @@ struct CardBackgroundEditor: View {
                         onChange: onChange
                     )
                 } else {
-                    Button("Add overlay tint") {
+                    Button(BuxCatalogLabel.string("Add overlay tint", locale: appSettingsManager.interfaceLocale)) {
                         background.overlayHex = "#000000"
                         background.overlayOpacity = 0.25
                         onChange()
@@ -106,37 +106,41 @@ struct CardBackgroundEditor: View {
                 if background.overlayHex != nil {
                     Slider(value: $background.overlayOpacity, in: 0...0.85)
                         .onChange(of: background.overlayOpacity) { _, _ in onChange() }
-                    LabeledContent("Overlay strength") {
+                    LabeledContent(BuxCatalogLabel.string("Overlay strength", locale: appSettingsManager.interfaceLocale)) {
                         Text(
                             BuxLocalizedString.format(
                                 "%lld%%",
-                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                locale: appSettingsManager.interfaceLocale,
                                 Int(background.overlayOpacity * 100)
                             )
                         )
                     }
                 }
+            } header: {
+                BuxCatalogDynamicText(key: "Colors")
             }
 
             if background.style == .photo || background.photoPath != nil {
-                Section("Photo tuning") {
+                Section {
                     Slider(value: $background.photoOpacity, in: 0.2...1)
                         .onChange(of: background.photoOpacity) { _, _ in onChange() }
-                    LabeledContent("Photo opacity") {
+                    LabeledContent(BuxCatalogLabel.string("Photo opacity", locale: appSettingsManager.interfaceLocale)) {
                         Text(
                             BuxLocalizedString.format(
                                 "%lld%%",
-                                locale: BuxInterfaceLocale.currentInterfaceLocale,
+                                locale: appSettingsManager.interfaceLocale,
                                 Int(background.photoOpacity * 100)
                             )
                         )
                     }
                     Slider(value: $background.saturation, in: 0...2)
                         .onChange(of: background.saturation) { _, _ in onChange() }
-                    LabeledContent("Saturation") { Text(String(format: "%.1f", background.saturation)) }
+                    LabeledContent(BuxCatalogLabel.string("Saturation", locale: appSettingsManager.interfaceLocale)) { Text(String(format: "%.1f", background.saturation)) }
                     Slider(value: $background.brightness, in: -0.5...0.5)
                         .onChange(of: background.brightness) { _, _ in onChange() }
-                    LabeledContent("Brightness") { Text(String(format: "%.2f", background.brightness)) }
+                    LabeledContent(BuxCatalogLabel.string("Brightness", locale: appSettingsManager.interfaceLocale)) { Text(String(format: "%.2f", background.brightness)) }
+                } header: {
+                    BuxCatalogDynamicText(key: "Photo tuning")
                 }
             }
         }

@@ -26,6 +26,7 @@ struct PersonalExpensePayload: Codable, Equatable, Identifiable {
     var splitLines: [ExpenseSplitLineRecord]
     var householdScope: HouseholdScope
     var incomeRole: String?
+    var financeKitTransactionId: String?
     var isExcludedFromSpending: Bool?
     var createdAt: Date
     var updatedAt: Date
@@ -50,6 +51,7 @@ struct PersonalExpensePayload: Codable, Equatable, Identifiable {
         splitLines = record.splitLines
         householdScope = record.householdScope
         incomeRole = record.incomeRole
+        financeKitTransactionId = record.financeKitTransactionId
         isExcludedFromSpending = record.isExcludedFromSpending
         createdAt = record.createdAt
         updatedAt = record.updatedAt
@@ -57,7 +59,7 @@ struct PersonalExpensePayload: Codable, Equatable, Identifiable {
     }
 
     func toExpenseRecord() -> ExpenseRecord {
-        ExpenseRecord(
+        var expense = ExpenseRecord(
             id: id,
             name: name,
             amountValue: amountValue,
@@ -80,6 +82,8 @@ struct PersonalExpensePayload: Codable, Equatable, Identifiable {
             incomeRole: incomeRole,
             isExcludedFromSpending: isExcludedFromSpending ?? false
         )
+        expense.financeKitTransactionId = financeKitTransactionId
+        return expense
     }
 }
 
@@ -118,9 +122,15 @@ enum PersonalCloudSyncError: LocalizedError {
     case disabled
 
     var errorDescription: String? {
+        let locale = BuxInterfaceLocale.currentInterfaceLocale
         switch self {
-        case .noAccount: return "Sign in to iCloud with Apple to sync across your iPhone and iPad."
-        case .disabled: return "iCloud sync is turned off."
+        case .noAccount:
+            return BuxLocalizedString.string(
+                "Sign in to iCloud with Apple to sync across your iPhone and iPad.",
+                locale: locale
+            )
+        case .disabled:
+            return BuxLocalizedString.string("iCloud sync is turned off.", locale: locale)
         }
     }
 }

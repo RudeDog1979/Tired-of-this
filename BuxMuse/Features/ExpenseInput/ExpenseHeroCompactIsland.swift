@@ -36,6 +36,17 @@ enum ExpenseHeroIslandLayout {
     static var heroReservedHeight: CGFloat {
         expandedIslandSlotHeight
     }
+
+    /// iPhone landscape — nav search drawer + expense scope chips sit above pinned hero.
+    static let landscapePhoneSearchDrawerClearance: CGFloat = 88
+
+    static func heroReservedHeight(landscapePhone: Bool) -> CGFloat {
+        expandedIslandSlotHeight + (landscapePhone ? landscapePhoneSearchDrawerClearance : 0)
+    }
+
+    static func heroOverlayHeight(landscapePhone: Bool) -> CGFloat {
+        heroReservedHeight(landscapePhone: landscapePhone)
+    }
 }
 
 struct ExpenseHeroCompactIsland: View, Equatable {
@@ -209,7 +220,7 @@ struct ExpenseHeroCompactIsland: View, Equatable {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Expense summary")
+        .accessibilityLabel(BuxCatalogLabel.string("Expense summary", locale: appSettingsManager.interfaceLocale))
         .accessibilityHint("Shows expanded summary at top")
     }
 }
@@ -217,6 +228,7 @@ struct ExpenseHeroCompactIsland: View, Equatable {
 // MARK: - iPhone pinned overlay (GPU-friendly collapse)
 
 struct ExpenseHeroIslandOverlay: View {
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var expenseCarouselSession = ExpenseCarouselSession.shared
@@ -227,6 +239,28 @@ struct ExpenseHeroIslandOverlay: View {
     let pageCount: Int
     let heroRowInsets: EdgeInsets
     let onExpand: () -> Void
+    var onOpenSpendingTrends: (() -> Void)? = nil
+
+    /// iPhone landscape — hero slot covers most of the viewport; overlay must not eat vertical scroll.
+    private var isLandscapePhone: Bool {
+        verticalSizeClass == .compact
+    }
+
+    private var isPillInteractive: Bool {
+        progress > 0.55
+    }
+
+    private var overlayAcceptsHitTesting: Bool {
+        isLandscapePhone ? isPillInteractive : true
+    }
+
+    private var heroAcceptsHitTesting: Bool {
+        !isLandscapePhone && progress < 0.4
+    }
+
+    private var landscapeSearchClearance: CGFloat {
+        isLandscapePhone ? ExpenseHeroIslandLayout.landscapePhoneSearchDrawerClearance : 0
+    }
 
     private var progress: CGFloat {
         BuxScrollCollapseMath.progress(
@@ -273,12 +307,18 @@ struct ExpenseHeroIslandOverlay: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
-            ExpensesHeroCarouselHost(
+        VStack(spacing: 0) {
+            Color.clear
+                .frame(height: landscapeSearchClearance)
+                .allowsHitTesting(false)
+
+            ZStack(alignment: .top) {
+                ExpensesHeroCarouselHost(
                 header: header,
                 summary: summary,
                 formatAmount: { appSettingsManager.format($0) },
-                playRequest: expenseCarouselSession.playRequest
+                playRequest: expenseCarouselSession.playRequest,
+                onOpenSpendingTrends: onOpenSpendingTrends
             )
             .equatable()
             .environmentObject(themeManager)
@@ -290,7 +330,7 @@ struct ExpenseHeroIslandOverlay: View {
                 anchor: .top
             )
             .opacity(heroOpacity)
-            .allowsHitTesting(progress < 0.4)
+            .allowsHitTesting(heroAcceptsHitTesting)
 
             ExpenseHeroCompactIsland(
                 header: header,
@@ -306,14 +346,16 @@ struct ExpenseHeroIslandOverlay: View {
             .scaleEffect(x: pillScaleX, y: pillScaleY, anchor: .top)
             .offset(y: pillLift)
             .opacity(pillOpacity)
-            .allowsHitTesting(progress > 0.55)
+            .allowsHitTesting(isPillInteractive)
+            }
+            .padding(heroRowInsets)
+            .padding(.bottom, 16)
+            .buxPadExpenseCardRail()
+            .padding(.horizontal, BuxLayout.marginHorizontal)
+            .padding(.top, BuxTokens.tight)
         }
-        .padding(heroRowInsets)
-        .padding(.bottom, 16)
-        .buxPadExpenseCardRail()
-        .padding(.horizontal, BuxLayout.marginHorizontal)
-        .padding(.top, BuxTokens.tight)
-        .frame(height: ExpenseHeroIslandLayout.expandedIslandSlotHeight, alignment: .top)
+        .frame(height: ExpenseHeroIslandLayout.heroOverlayHeight(landscapePhone: isLandscapePhone), alignment: .top)
+        .allowsHitTesting(overlayAcceptsHitTesting)
         .compositingGroup()
         .clipped()
     }

@@ -67,12 +67,9 @@ struct DashboardDebtSummaryCard: View {
                         )
 
                         if let nextDue = debtEngine.nextDueDate {
-                            let formatter = DateFormatter()
-                            let _ = formatter.locale = appSettingsManager.interfaceLocale
-                            let _ = formatter.dateStyle = .medium
                             metricChip(
                                 titleKey: "Next due",
-                                value: formatter.string(from: nextDue)
+                                value: BuxDisplayDate.monthDayYear(from: nextDue, locale: appSettingsManager.interfaceLocale)
                             )
                         }
                     }

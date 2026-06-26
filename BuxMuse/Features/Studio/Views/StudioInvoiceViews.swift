@@ -135,7 +135,7 @@ struct StudioInvoicesListView: View {
                 }
             }
         }
-        .contentMargins(.top, StudioProToolHeaderLayout.topInset, for: .scrollContent)
+        .studioProToolScrollTopInset()
         .studioThemedListRows()
     }
 
@@ -152,7 +152,7 @@ struct StudioInvoicesListView: View {
             }
 
             Menu {
-                Button("All") { statusFilter = nil }
+                Button(BuxCatalogLabel.string("All", locale: appSettingsManager.interfaceLocale)) { statusFilter = nil }
                 ForEach(InvoiceStatus.allCases) { status in
                     Button(status.catalogLabel(locale: appSettingsManager.interfaceLocale)) {
                         statusFilter = status
@@ -528,7 +528,13 @@ struct StudioInvoiceDetailView: View {
                                 BuxCatalogDynamicText(key: "CLIENT")
                                     .font(.system(size: 10, weight: .semibold))
                                     .buxLabelSecondary()
-                                Text(client?.name ?? "Unknown Client")
+                                Group {
+                                    if let name = client?.name {
+                                        Text(name)
+                                    } else {
+                                        BuxCatalogDynamicText(key: "Unknown Client")
+                                    }
+                                }
                                     .font(.system(size: 14, weight: .bold))
                             }
                             Spacer()
@@ -601,7 +607,7 @@ struct StudioInvoiceDetailView: View {
         .navigationTitle(invoice.invoiceNumber)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Edit") { showEdit = true }
+                Button(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale)) { showEdit = true }
                     .buxToolbarTextActionStyle(accent: themeManager.contrastAccentColor(for: colorScheme))
             }
         }
@@ -639,7 +645,8 @@ struct StudioInvoiceDetailView: View {
                 profile: store.profile,
                 settings: store.invoiceSettings,
                 taxProfile: store.taxProfile,
-                countryCode: appSettingsManager.selectedCountry.id
+                countryCode: appSettingsManager.selectedCountry.id,
+                locale: appSettingsManager.interfaceLocale
             )
         }
 

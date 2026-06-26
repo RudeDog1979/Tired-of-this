@@ -94,7 +94,10 @@ struct SubscriptionRiskAnalyzerView: View {
     }
 
     private func refreshCache() {
-        cachedRisks = SubscriptionHubSectionCache.detectedRisks(from: subscriptions)
+        cachedRisks = SubscriptionHubSectionCache.detectedRisks(
+            from: subscriptions,
+            locale: appSettingsManager.interfaceLocale
+        )
     }
 
     private func severityColor(_ severity: String) -> Color {

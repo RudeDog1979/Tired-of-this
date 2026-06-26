@@ -36,6 +36,7 @@ enum StudioFeatureGate {
 
 struct ProFeatureBadge: View {
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var compact: Bool = true
 
@@ -61,7 +62,8 @@ struct ProFeatureBadge: View {
                 Capsule()
                     .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
             )
-            .accessibilityLabel("Pro Studio feature")
+            .fixedSize(horizontal: true, vertical: true)
+            .accessibilityLabel(BuxCatalogLabel.string("Pro Studio feature", locale: appSettingsManager.interfaceLocale))
     }
 }
 

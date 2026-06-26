@@ -1,0 +1,10 @@
+{
+  "Tax Source": {
+    "es-419": "Origen del impuesto",
+    "es-ES": "Origen del impuesto"
+  },
+  "Keeps this in your ledger but leaves it out of spend totals and charts.": {
+    "es-419": "Lo guarda en tu registro pero lo excluye de totales y gráficos de gasto.",
+    "es-ES": "Lo guarda en tu registro pero lo excluye de totales y gráficos de gasto."
+  }
+}

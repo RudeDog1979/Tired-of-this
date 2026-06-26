@@ -175,7 +175,8 @@ struct SimpleStudioInvoiceDetailView: View {
                 profile: studioStore.profile,
                 settings: studioStore.invoiceSettings,
                 taxProfile: studioStore.taxProfile,
-                countryCode: appSettingsManager.selectedCountry.id
+                countryCode: appSettingsManager.selectedCountry.id,
+                locale: appSettingsManager.interfaceLocale
             )
         }
         guard let data else { return }
@@ -223,9 +224,7 @@ struct SimpleStudioInvoiceDetailView: View {
     }
 
     private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        BuxDisplayDate.monthDayYear(from: date, locale: appSettingsManager.interfaceLocale)
     }
 
     private func sendReminder(for invoice: SimpleInvoice) {

@@ -15,14 +15,14 @@ public enum StudioInvoiceSuggestionReason: String, Codable, Sendable, CaseIterab
     case hourlyLoggedTime
     case agreementLinked
 
-    public var chipLabel: String {
+    public func chipLabel(locale: Locale) -> String {
         switch self {
-        case .billableHours: return "Billable hours"
-        case .newHoursSinceInvoice: return "New hours"
-        case .projectExpenses: return "Expenses"
-        case .jobBalanceDue: return "Still owed"
-        case .hourlyLoggedTime: return "Hours logged"
-        case .agreementLinked: return "Agreement"
+        case .billableHours: return BuxCatalogLabel.string("Billable hours", locale: locale)
+        case .newHoursSinceInvoice: return BuxCatalogLabel.string("New hours", locale: locale)
+        case .projectExpenses: return BuxCatalogLabel.string("Expenses", locale: locale)
+        case .jobBalanceDue: return BuxCatalogLabel.string("Still owed", locale: locale)
+        case .hourlyLoggedTime: return BuxCatalogLabel.string("Hours logged", locale: locale)
+        case .agreementLinked: return BuxCatalogLabel.string("Agreement", locale: locale)
         }
     }
 }
@@ -137,22 +137,26 @@ enum StudioInvoiceSuggestionEngine {
 
     // MARK: - Pro
 
-    static func proSuggestions(store: StudioStore) -> [StudioInvoiceSuggestion] {
-        store.projects.compactMap { projectSuggestion(project: $0, store: store) }
+    static func proSuggestions(
+        store: StudioStore,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
+    ) -> [StudioInvoiceSuggestion] {
+        store.projects.compactMap { projectSuggestion(project: $0, store: store, locale: locale) }
             .sorted { $0.amount > $1.amount }
     }
 
     /// Completed projects for this client — used when picking a job to populate a manual invoice.
     static func completedProjectPicks(
         for clientId: UUID,
-        store: StudioStore
+        store: StudioStore,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> [ClientProjectInvoicePick] {
         store.projects
             .filter { $0.clientId == clientId && $0.resolvedStatus == .completed }
             .sorted { ($0.endDate ?? $0.startDate) > ($1.endDate ?? $0.startDate) }
             .compactMap { project in
-                guard let draft = invoiceDraft(for: project, store: store)
-                    ?? fallbackCompletedProjectDraft(project: project, store: store) else {
+                guard let draft = invoiceDraft(for: project, store: store, locale: locale)
+                    ?? fallbackCompletedProjectDraft(project: project, store: store, locale: locale) else {
                     return nil
                 }
                 return ClientProjectInvoicePick(
@@ -168,14 +172,16 @@ enum StudioInvoiceSuggestionEngine {
 
     static func invoiceDraft(
         for project: StudioProject,
-        store: StudioStore
+        store: StudioStore,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> StudioInvoiceSuggestion? {
-        projectSuggestion(project: project, store: store)
+        projectSuggestion(project: project, store: store, locale: locale)
     }
 
     private static func fallbackCompletedProjectDraft(
         project: StudioProject,
-        store: StudioStore
+        store: StudioStore,
+        locale: Locale
     ) -> StudioInvoiceSuggestion? {
         guard project.resolvedStatus == .completed else { return nil }
 
@@ -183,7 +189,11 @@ enum StudioInvoiceSuggestionEngine {
         if let fixed = project.fixedFee, fixed > 0 {
             lineItems.append(
                 StudioInvoiceLineItem(
-                    description: "Project — \(project.name)",
+                    description: BuxLocalizedString.format(
+                        "Project — %@",
+                        locale: locale,
+                        project.name
+                    ),
                     quantity: 1,
                     unitPrice: fixed,
                     category: "Fixed"
@@ -195,7 +205,11 @@ enum StudioInvoiceSuggestionEngine {
                 let hours = analysis.billableTime / 3600.0
                 lineItems.append(
                     StudioInvoiceLineItem(
-                        description: "Billable time — \(project.name)",
+                        description: BuxLocalizedString.format(
+                            "Billable time — %@",
+                            locale: locale,
+                            project.name
+                        ),
                         quantity: hours,
                         unitPrice: rate,
                         category: "Time"
@@ -209,7 +223,7 @@ enum StudioInvoiceSuggestionEngine {
         let amount = lineItems.reduce(Decimal(0)) { $0 + Decimal($1.quantity) * $1.unitPrice }
         return StudioInvoiceSuggestion(
             title: project.name,
-            subtitle: "Completed project",
+            subtitle: BuxCatalogLabel.string("Completed project", locale: locale),
             amount: amount,
             lineItems: lineItems,
             clientId: project.clientId,
@@ -220,7 +234,8 @@ enum StudioInvoiceSuggestionEngine {
 
     private static func projectSuggestion(
         project: StudioProject,
-        store: StudioStore
+        store: StudioStore,
+        locale: Locale
     ) -> StudioInvoiceSuggestion? {
         let agreement = store.agreementDraft(forProjectId: project.id)
         let linkedInvoices = store.invoices.filter { inv in
@@ -249,8 +264,16 @@ enum StudioInvoiceSuggestionEngine {
                 lineItems.append(
                     StudioInvoiceLineItem(
                         description: lastInvoiceDate == nil
-                            ? "Billable time — \(project.name)"
-                            : "Additional time — \(project.name)",
+                            ? BuxLocalizedString.format(
+                                "Billable time — %@",
+                                locale: locale,
+                                project.name
+                            )
+                            : BuxLocalizedString.format(
+                                "Additional time — %@",
+                                locale: locale,
+                                project.name
+                            ),
                         quantity: hours,
                         unitPrice: rate,
                         category: "Time"
@@ -261,7 +284,11 @@ enum StudioInvoiceSuggestionEngine {
             reasons.append(.billableHours)
             lineItems.append(
                 StudioInvoiceLineItem(
-                    description: "Project fee — \(project.name)",
+                    description: BuxLocalizedString.format(
+                        "Project fee — %@",
+                        locale: locale,
+                        project.name
+                    ),
                     quantity: 1,
                     unitPrice: project.fixedFee!,
                     category: "Fixed"
@@ -274,7 +301,11 @@ enum StudioInvoiceSuggestionEngine {
             reasons.append(.projectExpenses)
             lineItems.append(
                 StudioInvoiceLineItem(
-                    description: "Project expenses — \(project.name)",
+                    description: BuxLocalizedString.format(
+                        "Project expenses — %@",
+                        locale: locale,
+                        project.name
+                    ),
                     quantity: 1,
                     unitPrice: expenseTotal,
                     category: "Expenses"
@@ -301,9 +332,9 @@ enum StudioInvoiceSuggestionEngine {
         if agreement != nil, !reasons.contains(.agreementLinked) {
             reasons.append(.agreementLinked)
         }
-        var subtitle = reasons.map(\.chipLabel).joined(separator: " · ")
+        var subtitle = reasons.map { $0.chipLabel(locale: locale) }.joined(separator: " · ")
         if let agreement, !agreement.paymentAmountNotes.isEmpty {
-            subtitle += " · per agreement"
+            subtitle += " · " + BuxCatalogLabel.string("per agreement", locale: locale)
         }
         return StudioInvoiceSuggestion(
             title: project.name,
@@ -365,18 +396,20 @@ enum StudioInvoiceSuggestionEngine {
 
     static func simpleSuggestions(
         store: SimpleStudioStore,
-        studioStore: StudioStore
+        studioStore: StudioStore,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> [SimpleInvoiceSuggestion] {
         store.entries
             .filter { $0.kind == .job }
-            .compactMap { simpleJobSuggestion(job: $0, store: store, studioStore: studioStore) }
+            .compactMap { simpleJobSuggestion(job: $0, store: store, studioStore: studioStore, locale: locale) }
             .sorted { $0.amount > $1.amount }
     }
 
     private static func simpleJobSuggestion(
         job: SimpleStudioEntry,
         store: SimpleStudioStore,
-        studioStore: StudioStore? = nil
+        studioStore: StudioStore? = nil,
+        locale: Locale = BuxInterfaceLocale.currentInterfaceLocale
     ) -> SimpleInvoiceSuggestion? {
         let agreement = studioStore.flatMap { StudioWorkDealHelpers.agreement(forJob: job, studioStore: $0) }
         let client = studioStore?.clients.first(where: {
@@ -398,7 +431,7 @@ enum StudioInvoiceSuggestionEngine {
         }
 
         var reasons: [StudioInvoiceSuggestionReason] = [.jobBalanceDue]
-        var subtitle = "Customer still owes you"
+        var subtitle = BuxCatalogLabel.string("Customer still owes you", locale: locale)
 
         let effectiveRate = StudioAgreementInvoiceLines.simpleHourlyRate(
             job: job,
@@ -411,12 +444,19 @@ enum StudioInvoiceSuggestionEngine {
            logged > 0 {
             reasons.append(.hourlyLoggedTime)
             let hours = SimpleStudioTimePayEngine.formattedHours(logged)
-            subtitle = "\(hours) logged at \(effectiveRate)/hr"
+            subtitle = BuxLocalizedString.format(
+                "%@ logged at %@/hr",
+                locale: locale,
+                hours,
+                "\(effectiveRate)"
+            )
         }
 
         if agreement != nil {
             reasons.append(.agreementLinked)
-            subtitle += draft.usedAgreement ? " · per agreement" : " · agreement on file"
+            subtitle += draft.usedAgreement
+                ? " · " + BuxCatalogLabel.string("per agreement", locale: locale)
+                : " · " + BuxCatalogLabel.string("agreement on file", locale: locale)
         }
 
         return SimpleInvoiceSuggestion(

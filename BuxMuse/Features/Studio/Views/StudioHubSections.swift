@@ -212,7 +212,7 @@ struct StudioInvoicesSection: View {
                                 "Next due: %@ · %@",
                                 locale: appSettingsManager.interfaceLocale,
                                 name,
-                                date.formatted(date: .abbreviated, time: .omitted)
+                                BuxDisplayDate.monthDay(from: date, locale: appSettingsManager.interfaceLocale)
                             )
                         )
                             .font(.system(size: 11, weight: .medium))

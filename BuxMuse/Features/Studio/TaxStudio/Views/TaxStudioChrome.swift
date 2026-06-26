@@ -598,10 +598,6 @@ enum TaxStudioTimelineGrouping {
         from events: [TaxStudioTimelineEventDisplay],
         locale: Locale
     ) -> [TaxStudioTimelineMonthGroup] {
-        let formatter = DateFormatter()
-        formatter.locale = locale
-        formatter.setLocalizedDateFormatFromTemplate("MMMM yyyy")
-
         var order: [String] = []
         var buckets: [String: [TaxStudioTimelineEventDisplay]] = [:]
 
@@ -618,7 +614,7 @@ enum TaxStudioTimelineGrouping {
             guard let monthEvents = buckets[key], let first = monthEvents.first else { return nil }
             return TaxStudioTimelineMonthGroup(
                 id: key,
-                monthLabel: formatter.string(from: first.date),
+                monthLabel: BuxDisplayDate.monthYear(from: first.date, locale: locale),
                 events: monthEvents
             )
         }

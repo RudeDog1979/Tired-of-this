@@ -283,7 +283,9 @@ struct MoneyMapCanvasView: View {
             VStack(alignment: .leading, spacing: 4) {
                 BuxCatalogText.text("Your financial landscape")
                     .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
-                Text(isLandscape ? "Landscape weave · tap territories" : "Tap a territory to explore")
+                BuxCatalogDynamicText(
+                    key: isLandscape ? "Landscape weave · tap territories" : "Tap a territory to explore"
+                )
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(themeManager.labelSecondary(for: colorScheme))
             }
@@ -304,7 +306,7 @@ struct MoneyMapCanvasView: View {
                 .background { BuxGlassCircleBackground(diameter: 34) }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Reset map layout")
+        .accessibilityLabel(BuxCatalogLabel.string("Reset map layout", locale: appSettingsManager.interfaceLocale))
     }
 
     private var miniFooter: some View {

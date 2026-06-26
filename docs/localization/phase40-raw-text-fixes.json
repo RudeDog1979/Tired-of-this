@@ -1,0 +1,250 @@
+{
+  "Owed from hours so far": {
+    "es-419": "Debes por horas hasta ahora",
+    "es-ES": "Debes por horas hasta ahora"
+  },
+  "Agreed price for the job": {
+    "es-419": "Precio acordado del trabajo",
+    "es-ES": "Precio acordado del trabajo"
+  },
+  "RUNNING": {
+    "es-419": "EN CURSO",
+    "es-ES": "EN CURSO"
+  },
+  "PAUSED": {
+    "es-419": "PAUSADO",
+    "es-ES": "PAUSADO"
+  },
+  "Tap to add notes & payment terms…": {
+    "es-419": "Toca para agregar notas y condiciones de pago…",
+    "es-ES": "Toca para añadir notas y condiciones de pago…"
+  },
+  "Tax added on top of line item prices": {
+    "es-419": "Impuesto sumado sobre los precios de línea",
+    "es-ES": "Impuesto sumado sobre los precios de línea"
+  },
+  "Tax extracted from line item prices": {
+    "es-419": "Impuesto incluido en los precios de línea",
+    "es-ES": "Impuesto incluido en los precios de línea"
+  },
+  "Unknown Client": {
+    "es-419": "Cliente desconocido",
+    "es-ES": "Cliente desconocido"
+  },
+  "Add a name in Text tab": {
+    "es-419": "Agrega un nombre en la pestaña Texto",
+    "es-ES": "Añade un nombre en la pestaña Texto"
+  },
+  "Landscape weave · tap territories": {
+    "es-419": "Vista horizontal · toca territorios",
+    "es-ES": "Vista horizontal · toca territorios"
+  },
+  "Tap a territory to explore": {
+    "es-419": "Toca un territorio para explorar",
+    "es-ES": "Toca un territorio para explorar"
+  },
+  "Independent Project": {
+    "es-419": "Proyecto independiente",
+    "es-ES": "Proyecto independiente"
+  },
+  "No agreement yet for this project.": {
+    "es-419": "Aún no hay acuerdo para este proyecto.",
+    "es-ES": "Aún no hay acuerdo para este proyecto."
+  },
+  "Create agreement draft": {
+    "es-419": "Crear borrador de acuerdo",
+    "es-ES": "Crear borrador de acuerdo"
+  },
+  "Edit agreement draft": {
+    "es-419": "Editar borrador de acuerdo",
+    "es-ES": "Editar borrador de acuerdo"
+  },
+  "Consulting work": {
+    "es-419": "Trabajo de consultoría",
+    "es-ES": "Trabajo de consultoría"
+  },
+  "Billable": {
+    "es-419": "Facturable",
+    "es-ES": "Facturable"
+  },
+  "Admin": {
+    "es-419": "Admin",
+    "es-ES": "Admin"
+  },
+  "High Risk": {
+    "es-419": "Alto riesgo",
+    "es-ES": "Alto riesgo"
+  },
+  "Normal": {
+    "es-419": "Normal",
+    "es-ES": "Normal"
+  },
+  "PAID": {
+    "es-419": "PAGADO",
+    "es-ES": "PAGADO"
+  },
+  "UNPAID": {
+    "es-419": "SIN PAGAR",
+    "es-ES": "SIN PAGAR"
+  },
+  "Preview": {
+    "es-419": "Vista previa",
+    "es-ES": "Vista previa"
+  },
+  "Customer": {
+    "es-419": "Cliente",
+    "es-ES": "Cliente"
+  },
+  "Log Physical Cash": {
+    "es-419": "Registrar efectivo físico",
+    "es-ES": "Registrar efectivo físico"
+  },
+  "Automatically sync and match transactions": {
+    "es-419": "Sincroniza y concilia transacciones automáticamente",
+    "es-ES": "Sincroniza y concilia transacciones automáticamente"
+  },
+  "Off — tap to connect Apple Wallet": {
+    "es-419": "Apagado — toca para conectar Apple Wallet",
+    "es-ES": "Apagado — toca para conectar Apple Wallet"
+  },
+  "Credit cards, loans, and payoff tracking": {
+    "es-419": "Tarjetas, préstamos y seguimiento de pagos",
+    "es-ES": "Tarjetas, préstamos y seguimiento de pagos"
+  },
+  "Off — turn on to track what you owe": {
+    "es-419": "Apagado — actívalo para registrar lo que debes",
+    "es-ES": "Apagado — actívalo para registrar lo que debes"
+  },
+  "Share expenses with family via iCloud": {
+    "es-419": "Comparte gastos con tu familia vía iCloud",
+    "es-ES": "Comparte gastos con tu familia vía iCloud"
+  },
+  "Active household": {
+    "es-419": "Hogar activo",
+    "es-ES": "Hogar activo"
+  },
+  "Stored in Apple's iCloud — BuxMuse cannot see it": {
+    "es-419": "Guardado en iCloud de Apple — BuxMuse no puede verlo",
+    "es-ES": "Guardado en iCloud de Apple — BuxMuse no puede verlo"
+  },
+  "Sync across iPhone and iPad via Apple's iCloud": {
+    "es-419": "Sincroniza iPhone e iPad vía iCloud de Apple",
+    "es-ES": "Sincroniza iPhone e iPad vía iCloud de Apple"
+  },
+  "Add photo": {
+    "es-419": "Agregar foto",
+    "es-ES": "Añadir foto"
+  },
+  "Bux Photo Lab": {
+    "es-419": "Bux Photo Lab",
+    "es-ES": "Bux Photo Lab"
+  },
+  "Add logo": {
+    "es-419": "Agregar logo",
+    "es-ES": "Añadir logo"
+  },
+  "Edit logo in Bux Photo Lab": {
+    "es-419": "Editar logo en Bux Photo Lab",
+    "es-ES": "Editar logo en Bux Photo Lab"
+  },
+  "Your Business": {
+    "es-419": "Tu negocio",
+    "es-ES": "Tu negocio"
+  },
+  "Triangles + diamond accents": {
+    "es-419": "Triángulos + acentos de diamante",
+    "es-ES": "Triángulos + acentos de diamante"
+  },
+  "Half blocks + chevron": {
+    "es-419": "Medios bloques + chevrón",
+    "es-ES": "Medios bloques + chevrón"
+  },
+  "Parallelogram + quarter circle": {
+    "es-419": "Paralelogramo + cuarto de círculo",
+    "es-ES": "Paralelogramo + cuarto de círculo"
+  },
+  "Strong bars + triangle": {
+    "es-419": "Barras fuertes + triángulo",
+    "es-ES": "Barras fuertes + triángulo"
+  },
+  "Geometric Card": {
+    "es-419": "Tarjeta geométrica",
+    "es-ES": "Tarjeta geométrica"
+  },
+  "Swiss Grid": {
+    "es-419": "Cuadrícula suiza",
+    "es-ES": "Cuadrícula suiza"
+  },
+  "Creative Stack": {
+    "es-419": "Apilado creativo",
+    "es-ES": "Apilado creativo"
+  },
+  "Trade Bold": {
+    "es-419": "Comercio audaz",
+    "es-ES": "Comercio audaz"
+  },
+  "Invoice not found": {
+    "es-419": "Factura no encontrada",
+    "es-ES": "Factura no encontrada"
+  },
+  "This invoice may have been removed.": {
+    "es-419": "Esta factura pudo haber sido eliminada.",
+    "es-ES": "Esta factura pudo haber sido eliminada."
+  },
+  "Enable Studio in Settings to use this window.": {
+    "es-419": "Activa Studio en Ajustes para usar esta ventana.",
+    "es-ES": "Activa Studio en Ajustes para usar esta ventana."
+  },
+  "Choose a tool from the sidebar.": {
+    "es-419": "Elige una herramienta en la barra lateral.",
+    "es-ES": "Elige una herramienta en la barra lateral."
+  },
+  "Select a transaction from the list.": {
+    "es-419": "Selecciona una transacción de la lista.",
+    "es-ES": "Selecciona una transacción de la lista."
+  },
+  "Choose a setting from the sidebar.": {
+    "es-419": "Elige un ajuste en la barra lateral.",
+    "es-ES": "Elige un ajuste en la barra lateral."
+  },
+  "Never lose your financial history": {
+    "es-419": "Nunca pierdas tu historial financiero",
+    "es-ES": "Nunca pierdas tu historial financiero"
+  },
+  "Draft scope bullets, deliverables, and sign-off notes for clients — stored locally on your device.": {
+    "es-419": "Redacta alcance, entregables y notas de aprobación para clientes — guardado localmente en tu dispositivo.",
+    "es-ES": "Redacta alcance, entregables y notas de aprobación para clientes — guardado localmente en tu dispositivo."
+  },
+  "Monitor hours and revision budgets on Studio projects. Get in-app alerts and ready-to-send scope change notices.": {
+    "es-419": "Supervisa horas y presupuesto de revisiones en proyectos Studio. Recibe alertas en la app y avisos de cambio de alcance listos para enviar.",
+    "es-ES": "Supervisa horas y presupuesto de revisiones en proyectos Studio. Recibe alertas en la app y avisos de cambio de alcance listos para enviar."
+  },
+  "You get paid on your own": {
+    "es-419": "Cobras por tu cuenta",
+    "es-ES": "Cobras por tu cuenta"
+  },
+  "BuxMuse Intelligence uses tax rules for the country in your app settings — on your device.": {
+    "es-419": "BuxMuse Intelligence usa reglas fiscales del país en tus ajustes — en tu dispositivo.",
+    "es-ES": "BuxMuse Intelligence usa reglas fiscales del país en tus ajustes — en tu dispositivo."
+  },
+  "We suggest how much to set aside": {
+    "es-419": "Sugerimos cuánto apartar",
+    "es-ES": "Sugerimos cuánto apartar"
+  },
+  "Based on what you log and BuxMuse Intelligence for your country — kept on your device.": {
+    "es-419": "Según lo que registras y BuxMuse Intelligence para tu país — en tu dispositivo.",
+    "es-ES": "Según lo que registras y BuxMuse Intelligence para tu país — en tu dispositivo."
+  },
+  "You log what you set aside": {
+    "es-419": "Registras lo que apartas",
+    "es-ES": "Registras lo que apartas"
+  },
+  "After logging pay, tap Add — or use I set money aside anytime. BuxMuse tracks the total; it does not hold your money.": {
+    "es-419": "Después de registrar un pago, toca Agregar — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero.",
+    "es-ES": "Después de registrar un pago, toca Añadir — o usa Aparté dinero cuando quieras. BuxMuse lleva el total; no guarda tu dinero."
+  },
+  "Open an invoice on iPad, then present it on the external display.": {
+    "es-419": "Abre una factura en iPad y preséntala en la pantalla externa.",
+    "es-ES": "Abre una factura en iPad y preséntala en la pantalla externa."
+  }
+}

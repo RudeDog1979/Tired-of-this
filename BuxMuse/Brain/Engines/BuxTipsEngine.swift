@@ -92,7 +92,7 @@ final class BuxTipsEngine {
     }
 
     func dailyTip(for countryCode: String) -> DailyTipDisplay {
-        let payload = payload ?? loadBundledPayload() ?? emptyPayload()
+        let payload = payload ?? loadBundledPayload() ?? emptyPayload(locale: BuxInterfaceLocale.currentInterfaceLocale)
         let userCountry = countryCode.uppercased()
         let availableKeys = Set(payload.regions.keys)
         let contentRegion = BuxNewsRegionMapper.contentRegion(for: userCountry, availableKeys: availableKeys)
@@ -241,14 +241,34 @@ final class BuxTipsEngine {
         return try? JSONDecoder().decode(BuxMuseNewsPayload.self, from: data)
     }
 
-    private func emptyPayload() -> BuxMuseNewsPayload {
+    private func emptyPayload(locale: Locale) -> BuxMuseNewsPayload {
         BuxMuseNewsPayload(
             regions: [
                 "DEFAULT": BuxNewsRegion(
-                    home_tip: "For cheaper flights, search for fares on Tuesday or Wednesday afternoons.",
-                    scam: BuxNewsAlertItem(title: "Romance Scams", desc: "Be wary of dating-app contacts who quickly ask for money."),
-                    alert: BuxNewsAlertItem(title: "Phishing DMs", desc: "Avoid unsolicited social media links, even from known contacts."),
-                    ticker: ["Global markets show mixed reactions to economic data."]
+                    home_tip: BuxLocalizedString.string(
+                        "For cheaper flights, search for fares on Tuesday or Wednesday afternoons.",
+                        locale: locale
+                    ),
+                    scam: BuxNewsAlertItem(
+                        title: BuxLocalizedString.string("Romance Scams", locale: locale),
+                        desc: BuxLocalizedString.string(
+                            "Be wary of dating-app contacts who quickly ask for money.",
+                            locale: locale
+                        )
+                    ),
+                    alert: BuxNewsAlertItem(
+                        title: BuxLocalizedString.string("Phishing DMs", locale: locale),
+                        desc: BuxLocalizedString.string(
+                            "Avoid unsolicited social media links, even from known contacts.",
+                            locale: locale
+                        )
+                    ),
+                    ticker: [
+                        BuxLocalizedString.string(
+                            "Global markets show mixed reactions to economic data.",
+                            locale: locale
+                        )
+                    ]
                 )
             ],
             updatedAt: nil,

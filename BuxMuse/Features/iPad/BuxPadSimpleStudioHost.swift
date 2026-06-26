@@ -38,17 +38,22 @@ struct BuxPadSimpleStudioHost: View {
         ZStack {
             BuxLandingTintBackground()
                 .ignoresSafeArea()
+                .animation(nil, value: selection)
 
             NavigationSplitView(columnVisibility: $columnVisibility) {
                 BuxPadSimpleStudioSidebar(selection: $selection)
                     .buxPadSplitColumnEnvironment(container, padBrain: padNavigationBrain)
                     .buxPadSplitSidebarColumnWidth(layoutMode: layoutMode)
             } detail: {
-                simpleDetailColumn
-                    .buxPadSplitColumnEnvironment(container, padBrain: padNavigationBrain)
-                    .environment(\.buxPadStudioUsesSplitLayout, true)
-                    .buxPadStudioSplitDetailChrome()
+                BuxPadSplitDetailCanvas(selection: selection) {
+                    simpleDetailColumn
+                        .buxPadSplitDetailTransition()
+                }
+                .buxPadSplitColumnEnvironment(container, padBrain: padNavigationBrain)
+                .environment(\.buxPadStudioUsesSplitLayout, true)
+                .buxPadStudioSplitDetailChrome()
             }
+            .buxPadSplitDetailNavigationAnimation(value: selection)
             .navigationSplitViewStyle(.balanced)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -80,16 +85,11 @@ struct BuxPadSimpleStudioHost: View {
                 .environmentObject(taxEnvelopeBrain)
                 .environmentObject(appDataManager)
         } else {
-            ZStack {
-                BuxLandingTintBackground()
-                    .ignoresSafeArea()
-
-                BuxPadDetailEmptyState(
-                    title: "Simple Studio",
-                    systemImage: "briefcase.fill",
-                    message: "Choose a tool from the sidebar."
-                )
-            }
+            BuxPadDetailEmptyState(
+                title: "Simple Studio",
+                systemImage: "briefcase.fill",
+                message: "Choose a tool from the sidebar."
+            )
         }
     }
 

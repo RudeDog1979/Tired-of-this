@@ -1,0 +1,242 @@
+{
+  "Active — includes Simple Studio": {
+    "es-419": "Activo — incluye Simple Studio",
+    "es-ES": "Activo — incluye Simple Studio"
+  },
+  "Unlocked on this Apple ID": {
+    "es-419": "Desbloqueado en este Apple ID",
+    "es-ES": "Desbloqueado en este Apple ID"
+  },
+  "Add-on · requires BuxMuse · one-time unlock": {
+    "es-419": "Complemento · requiere BuxMuse · compra única",
+    "es-ES": "Complemento · requiere BuxMuse · compra única"
+  },
+  "Theme, colors, motion": {
+    "es-419": "Tema, colores, animaciones",
+    "es-ES": "Tema, colores, animaciones"
+  },
+  "Currency code, formatting": {
+    "es-419": "Código de moneda, formato",
+    "es-ES": "Código de moneda, formato"
+  },
+  "Encrypted archive, export, restore": {
+    "es-419": "Archivo cifrado, exportar, restaurar",
+    "es-ES": "Archivo cifrado, exportar, restaurar"
+  },
+  "Version, privacy, credits": {
+    "es-419": "Versión, privacidad, créditos",
+    "es-ES": "Versión, privacidad, créditos"
+  },
+  "Tags for cards, PayPal, Klarna, and more": {
+    "es-419": "Etiquetas para tarjetas, PayPal, Klarna y más",
+    "es-ES": "Etiquetas para tarjetas, PayPal, Klarna y más"
+  },
+  "Catch unpaid scope creep early": {
+    "es-419": "Detecta a tiempo el aumento de alcance sin pagar",
+    "es-ES": "Detecta a tiempo el aumento de alcance sin pagar"
+  },
+  "Draft client terms before you send": {
+    "es-419": "Redacta términos del cliente antes de enviar",
+    "es-ES": "Redacta términos del cliente antes de enviar"
+  },
+  "Burnout guard for heavy weeks": {
+    "es-419": "Protección contra burnout en semanas pesadas",
+    "es-ES": "Protección contra burnout en semanas pesadas"
+  },
+  "Number: %@": {
+    "es-419": "Número: %@",
+    "es-ES": "Número: %@"
+  },
+  "Date: %@": {
+    "es-419": "Fecha: %@",
+    "es-ES": "Fecha: %@"
+  },
+  "Due Date: %@": {
+    "es-419": "Vencimiento: %@",
+    "es-ES": "Vencimiento: %@"
+  },
+  "BILL TO": {
+    "es-419": "FACTURAR A",
+    "es-ES": "FACTURAR A"
+  },
+  "Payment Terms / Notes:": {
+    "es-419": "Condiciones de pago / Notas:",
+    "es-ES": "Condiciones de pago / Notas:"
+  },
+  "Payment is due within %lld days of invoice date.": {
+    "es-419": "El pago vence dentro de %lld días desde la fecha de la factura.",
+    "es-ES": "El pago vence dentro de %lld días desde la fecha de la factura."
+  },
+  "Bank / Payment Details:": {
+    "es-419": "Banco / Datos de pago:",
+    "es-ES": "Banco / Datos de pago:"
+  },
+  "Business Name": {
+    "es-419": "Nombre del negocio",
+    "es-ES": "Nombre del negocio"
+  },
+  "Import from Photo Library": {
+    "es-419": "Importar desde Fotos",
+    "es-ES": "Importar desde Fotos"
+  },
+  "Choose from photos": {
+    "es-419": "Elegir de Fotos",
+    "es-ES": "Elegir de Fotos"
+  },
+  "Custom colors": {
+    "es-419": "Colores personalizados",
+    "es-ES": "Colores personalizados"
+  },
+  "Stopwatch": {
+    "es-419": "Cronómetro",
+    "es-ES": "Cronómetro"
+  },
+  "Business Card Pro Studio": {
+    "es-419": "Business Card Pro Studio",
+    "es-ES": "Business Card Pro Studio"
+  },
+  "No price on this job yet — send a quote first. You can still log time.": {
+    "es-419": "Este trabajo aún no tiene precio — envía una cotización primero. Igual puedes registrar tiempo.",
+    "es-ES": "Este trabajo aún no tiene precio — envía una cotización primero. Igual puedes registrar tiempo."
+  },
+  "Sync from card": {
+    "es-419": "Sincronizar desde tarjeta",
+    "es-ES": "Sincronizar desde tarjeta"
+  },
+  "Customize only": {
+    "es-419": "Solo personalizar",
+    "es-ES": "Solo personalizar"
+  },
+  "Income + SE": {
+    "es-419": "Ingresos + autónomo",
+    "es-ES": "Ingresos + autónomo"
+  },
+  "Collected − paid": {
+    "es-419": "Cobrado − pagado",
+    "es-ES": "Cobrado − pagado"
+  },
+  "Not registered": {
+    "es-419": "No registrado",
+    "es-ES": "No registrado"
+  },
+  "Tax health": {
+    "es-419": "Salud fiscal",
+    "es-ES": "Salud fiscal"
+  },
+  "Elevated": {
+    "es-419": "Elevado",
+    "es-ES": "Elevado"
+  },
+  "Projected taxable income": {
+    "es-419": "Ingreso imponible proyectado",
+    "es-ES": "Ingreso imponible proyectado"
+  },
+  "12 months": {
+    "es-419": "12 meses",
+    "es-ES": "12 meses"
+  },
+  "Projected tax owed": {
+    "es-419": "Impuesto proyectado",
+    "es-ES": "Impuesto proyectado"
+  },
+  "At current rates": {
+    "es-419": "Con tasas actuales",
+    "es-ES": "Con tasas actuales"
+  },
+  "Projected ETR": {
+    "es-419": "TIE proyectada",
+    "es-ES": "TIE proyectada"
+  },
+  "Effective tax rate": {
+    "es-419": "Tasa efectiva de impuesto",
+    "es-ES": "Tasa efectiva de impuesto"
+  },
+  "Income velocity": {
+    "es-419": "Velocidad de ingresos",
+    "es-ES": "Velocidad de ingresos"
+  },
+  "Expense velocity": {
+    "es-419": "Velocidad de gastos",
+    "es-ES": "Velocidad de gastos"
+  },
+  "Per month": {
+    "es-419": "Por mes",
+    "es-ES": "Por mes"
+  },
+  "Runway after tax": {
+    "es-419": "Reserva después de impuestos",
+    "es-ES": "Reserva después de impuestos"
+  },
+  "Agreed price: %@": {
+    "es-419": "Precio acordado: %@",
+    "es-ES": "Precio acordado: %@"
+  },
+  "Hourly rate: %@ / hr": {
+    "es-419": "Tarifa por hora: %@ / h",
+    "es-ES": "Tarifa por hora: %@ / h"
+  },
+  "Amount discussed: %@": {
+    "es-419": "Monto acordado: %@",
+    "es-ES": "Monto acordado: %@"
+  },
+  "Planned time on site: %lld h %lld min": {
+    "es-419": "Tiempo planificado en sitio: %lld h %lld min",
+    "es-ES": "Tiempo planificado en sitio: %lld h %lld min"
+  },
+  "Planned time on site: %lld h": {
+    "es-419": "Tiempo planificado en sitio: %lld h",
+    "es-ES": "Tiempo planificado en sitio: %lld h"
+  },
+  "Planned time on site: %lld min": {
+    "es-419": "Tiempo planificado en sitio: %lld min",
+    "es-ES": "Tiempo planificado en sitio: %lld min"
+  },
+  "Billable time — %@": {
+    "es-419": "Tiempo facturable — %@",
+    "es-ES": "Tiempo facturable — %@"
+  },
+  "Project fee — %@": {
+    "es-419": "Tarifa del proyecto — %@",
+    "es-ES": "Tarifa del proyecto — %@"
+  },
+  "Project expenses — %@": {
+    "es-419": "Gastos del proyecto — %@",
+    "es-ES": "Gastos del proyecto — %@"
+  },
+  "Fixed fee: %@": {
+    "es-419": "Tarifa fija: %@",
+    "es-ES": "Tarifa fija: %@"
+  },
+  "Hourly: %@ / hr": {
+    "es-419": "Por hora: %@ / h",
+    "es-ES": "Por hora: %@ / h"
+  },
+  "Start: %@": {
+    "es-419": "Inicio: %@",
+    "es-ES": "Inicio: %@"
+  },
+  "End: %@": {
+    "es-419": "Fin: %@",
+    "es-ES": "Fin: %@"
+  },
+  "Budget: %@ hours": {
+    "es-419": "Presupuesto: %@ horas",
+    "es-ES": "Presupuesto: %@ horas"
+  },
+  "Included revisions: %lld": {
+    "es-419": "Revisiones incluidas: %lld",
+    "es-ES": "Revisiones incluidas: %lld"
+  },
+  "Payment due within %lld days of invoice.": {
+    "es-419": "Pago vence dentro de %lld días de la factura.",
+    "es-ES": "Pago vence dentro de %lld días de la factura."
+  },
+  "Work delivered within agreed scope and revision limits.": {
+    "es-419": "Trabajo entregado dentro del alcance acordado y límites de revisión.",
+    "es-ES": "Trabajo entregado dentro del alcance acordado y límites de revisión."
+  },
+  "%@ agreement": {
+    "es-419": "Acuerdo de %@",
+    "es-ES": "Acuerdo de %@"
+  }
+}

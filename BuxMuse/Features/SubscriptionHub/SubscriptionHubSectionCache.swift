@@ -10,7 +10,7 @@ import Foundation
 enum SubscriptionHubSectionCache {
     typealias RiskRow = (subName: String, risk: SubscriptionRisk)
 
-    static func detectedRisks(from subscriptions: [SubscriptionInfo]) -> [RiskRow] {
+    static func detectedRisks(from subscriptions: [SubscriptionInfo], locale: Locale) -> [RiskRow] {
         var list: [RiskRow] = []
         for sub in subscriptions {
             for risk in sub.risks {
@@ -25,12 +25,21 @@ enum SubscriptionHubSectionCache {
         }
 
         if activeVideoServices.count >= 3 {
+            let serviceList = activeVideoServices.map { $0.capitalized }.joined(separator: ", ")
             let overlayRisk = SubscriptionRisk(
                 type: .overlappingFeatures,
-                description: "You have \(activeVideoServices.count) active video streams (\(activeVideoServices.map { $0.capitalized }.joined(separator: ", "))). Consider consolidating.",
+                description: BuxLocalizedString.format(
+                    "You have %lld active video streams (%@). Consider consolidating.",
+                    locale: locale,
+                    activeVideoServices.count,
+                    serviceList
+                ),
                 severity: "medium"
             )
-            list.append((subName: "Video Bundles", risk: overlayRisk))
+            list.append((
+                subName: BuxCatalogLabel.string("Video Bundles", locale: locale),
+                risk: overlayRisk
+            ))
         }
 
         return list
@@ -38,7 +47,8 @@ enum SubscriptionHubSectionCache {
 
     static func opportunities(
         from subscriptions: [SubscriptionInfo],
-        settingsManager: AppSettingsManager
+        settingsManager: AppSettingsManager,
+        locale: Locale
     ) -> [SavingsOpportunityItem] {
         var items: [SavingsOpportunityItem] = []
 
@@ -50,8 +60,16 @@ enum SubscriptionHubSectionCache {
             if isZombie {
                 items.append(SavingsOpportunityItem(
                     merchantName: sub.merchantName,
-                    description: "Zombie subscription: Unused in 60 days.",
-                    savingsPhrase: "Cancel \(sub.merchantName) → save \(settingsManager.format(yearlyVal))/year",
+                    description: BuxLocalizedString.string(
+                        "Zombie subscription: Unused in 60 days.",
+                        locale: locale
+                    ),
+                    savingsPhrase: BuxLocalizedString.format(
+                        "Cancel %@ → save %@/year",
+                        locale: locale,
+                        sub.merchantName,
+                        settingsManager.format(yearlyVal)
+                    ),
                     monthlySavings: val,
                     yearlySavings: yearlyVal
                 ))
@@ -61,16 +79,30 @@ enum SubscriptionHubSectionCache {
             if lowerName.contains("netflix") {
                 items.append(SavingsOpportunityItem(
                     merchantName: sub.merchantName,
-                    description: "Netflix premium has cheaper ad-supported tiers.",
-                    savingsPhrase: "Downgrade tier → save \(settingsManager.format(val - 6.99))/month",
+                    description: BuxLocalizedString.string(
+                        "Netflix premium has cheaper ad-supported tiers.",
+                        locale: locale
+                    ),
+                    savingsPhrase: BuxLocalizedString.format(
+                        "Downgrade tier → save %@/month",
+                        locale: locale,
+                        settingsManager.format(val - 6.99)
+                    ),
                     monthlySavings: val - 6.99,
                     yearlySavings: (val - 6.99) * 12
                 ))
             } else if lowerName.contains("spotify") {
                 items.append(SavingsOpportunityItem(
                     merchantName: sub.merchantName,
-                    description: "Billed through Apple App Store (15% markup).",
-                    savingsPhrase: "Subscribe direct → save \(settingsManager.format(val * 0.15))/month",
+                    description: BuxLocalizedString.string(
+                        "Billed through Apple App Store (15% markup).",
+                        locale: locale
+                    ),
+                    savingsPhrase: BuxLocalizedString.format(
+                        "Subscribe direct → save %@/month",
+                        locale: locale,
+                        settingsManager.format(val * 0.15)
+                    ),
                     monthlySavings: val * 0.15,
                     yearlySavings: (val * 0.15) * 12
                 ))
@@ -80,9 +112,16 @@ enum SubscriptionHubSectionCache {
         if subscriptions.count >= 4 && items.isEmpty {
             let sampleVal: Decimal = 15.0
             items.append(SavingsOpportunityItem(
-                merchantName: "Consolidated Bundles",
-                description: "Overlapping subscriptions detected.",
-                savingsPhrase: "Consolidate active services → save \(settingsManager.format(sampleVal * 12))/year",
+                merchantName: BuxCatalogLabel.string("Consolidated Bundles", locale: locale),
+                description: BuxLocalizedString.string(
+                    "Overlapping subscriptions detected.",
+                    locale: locale
+                ),
+                savingsPhrase: BuxLocalizedString.format(
+                    "Consolidate active services → save %@/year",
+                    locale: locale,
+                    settingsManager.format(sampleVal * 12)
+                ),
                 monthlySavings: sampleVal,
                 yearlySavings: sampleVal * 12
             ))

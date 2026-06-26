@@ -9,7 +9,6 @@ import SwiftUI
 
 struct StudioInvoiceArchiveView: View {
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
@@ -54,55 +53,49 @@ struct StudioInvoiceArchiveView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            if usesPadSplitLayout {
-                BuxLandingTintBackground()
-                    .ignoresSafeArea()
-            } else {
-                themeManager.screenBackground(for: colorScheme)
-                    .ignoresSafeArea()
-            }
+        StudioThemedListBackdrop {
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: BuxTokens.block) {
+                        StudioProToolScreenHeader(titleKey: "Backup invoices")
+                            .studioProToolScrollPlacement()
 
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: BuxTokens.block) {
-                    StudioProToolScreenHeader(titleKey: "Backup invoices")
-                        .studioProToolScrollPlacement()
+                        Group {
+                            heroCard
 
-                    Group {
-                        heroCard
-
-                        if !hasAnyInvoices {
-                            emptyStateCard
-                        } else {
-                            if !simpleRows.isEmpty {
-                                tierSection(
-                                    titleKey: "Simple Studio",
-                                    icon: "leaf.fill",
-                                    tint: .orange,
-                                    rows: simpleRows
-                                )
+                            if !hasAnyInvoices {
+                                emptyStateCard
+                            } else {
+                                if !simpleRows.isEmpty {
+                                    tierSection(
+                                        titleKey: "Simple Studio",
+                                        icon: "leaf.fill",
+                                        tint: .orange,
+                                        rows: simpleRows
+                                    )
+                                }
+                                if !proRows.isEmpty {
+                                    tierSection(
+                                        titleKey: "Pro Studio",
+                                        icon: "sparkles",
+                                        tint: accent,
+                                        rows: proRows
+                                    )
+                                }
                             }
-                            if !proRows.isEmpty {
-                                tierSection(
-                                    titleKey: "Pro Studio",
-                                    icon: "sparkles",
-                                    tint: accent,
-                                    rows: proRows
-                                )
-                            }
+
+                            privacyFootnote
                         }
-
-                        privacyFootnote
+                        .buxPadStudioSectionInset()
                     }
-                    .padding(.horizontal, BuxTokens.marginRegular)
+                    .padding(.bottom, 100)
                 }
-                .studioProToolScreenScrollChrome()
-                .padding(.bottom, 100)
-            }
+                .studioProToolScrollTopInset()
+                .buxSoftScrollChrome()
 
-            exportFAB
+                exportFAB
+            }
         }
-        .environment(\.studioEnhancedTint, true)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .buxRootNavigationChrome()

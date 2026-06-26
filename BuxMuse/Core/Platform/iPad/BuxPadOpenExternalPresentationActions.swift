@@ -7,13 +7,14 @@ import SwiftUI
 
 struct BuxPadPresentMoneyMapOnDisplayButton: View {
     @EnvironmentObject private var padBrain: BuxPadNavigationBrain
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     var body: some View {
         if BuxPadIdiom.isPad, padBrain.externalDisplayConnection.isConnected {
             Button {
                 padBrain.requestExternalPresentation(.moneyMap)
             } label: {
-                Label("Present Money Map on Display", systemImage: "display")
+                Label(BuxCatalogLabel.string("Present Money Map on Display", locale: appSettingsManager.interfaceLocale), systemImage: "display")
             }
         }
     }
@@ -30,7 +31,7 @@ struct BuxPadPresentInvoiceOnDisplayButton: View {
             Button {
                 presentLatestInvoice()
             } label: {
-                Label("Present Invoice on Display", systemImage: "doc.richtext.fill")
+                Label(BuxCatalogLabel.string("Present Invoice on Display", locale: appSettingsManager.interfaceLocale), systemImage: "doc.richtext.fill")
             }
             .disabled(studioStore.invoices.isEmpty && padBrain.externalInvoiceContext == nil)
         }
@@ -51,13 +52,15 @@ struct BuxPadPresentInvoiceOnDisplayButton: View {
 }
 
 struct BuxPadExternalDisplayMenu: View {
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
+
     var body: some View {
         if BuxPadIdiom.isPad {
             Menu {
                 BuxPadPresentMoneyMapOnDisplayButton()
                 BuxPadPresentInvoiceOnDisplayButton()
             } label: {
-                Label("External Display", systemImage: "display.2")
+                Label(BuxCatalogLabel.string("External Display", locale: appSettingsManager.interfaceLocale), systemImage: "display.2")
             }
         }
     }

@@ -270,9 +270,7 @@ struct SubscriptionDetailView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "MMM dd, yyyy"
-        return fmt.string(from: date)
+        BuxDisplayDate.monthDayYear(from: date, locale: appSettingsManager.interfaceLocale)
     }
 }
 

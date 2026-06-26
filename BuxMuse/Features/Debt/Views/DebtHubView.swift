@@ -132,17 +132,17 @@ struct DebtHubView: View {
                 Image(systemName: "brain.head.profile.fill")
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(accent.opacity(0.85))
-                    .accessibilityLabel("On-device intelligence")
+                    .accessibilityLabel(BuxCatalogLabel.string("On-device intelligence", locale: appSettingsManager.interfaceLocale))
             }
 
             HStack(spacing: 12) {
                 heroMetric(titleKey: "Paid this month", value: appSettingsManager.format(debtEngine.paidThisMonth))
                 heroMetric(titleKey: "Active debts", value: "\(debtEngine.activeDebts.count)")
                 if let nextDue = debtEngine.nextDueDate {
-                    let formatter = DateFormatter()
-                    let _ = formatter.locale = appSettingsManager.interfaceLocale
-                    let _ = formatter.dateStyle = .medium
-                    heroMetric(titleKey: "Next due", value: formatter.string(from: nextDue))
+                    heroMetric(
+                        titleKey: "Next due",
+                        value: BuxDisplayDate.monthDayYear(from: nextDue, locale: appSettingsManager.interfaceLocale)
+                    )
                 }
             }
         }

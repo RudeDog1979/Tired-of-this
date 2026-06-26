@@ -15,6 +15,7 @@ struct BusinessCardEditorRoute: Identifiable, Hashable {
 
 struct ProBusinessCardStudioView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxPadStudioUsesSplitLayout) private var usesPadSplitLayout
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var studioStore: StudioStore
@@ -34,8 +35,10 @@ struct ProBusinessCardStudioView: View {
 
     var body: some View {
         ZStack {
-            BuxLandingTintBackground()
-                .ignoresSafeArea()
+            if !usesPadSplitLayout {
+                BuxLandingTintBackground()
+                    .ignoresSafeArea()
+            }
 
             ScrollView(showsIndicators: false) {
                 LazyVStack(alignment: .leading, spacing: BuxTokens.block) {
@@ -45,9 +48,10 @@ struct ProBusinessCardStudioView: View {
                     designsGrid
                 }
                 .padding(.horizontal, BuxTokens.marginRegular)
-                .padding(.vertical, BuxTokens.section)
+                .padding(.top, BuxLayout.expenseHeroShadowBleed)
+                .padding(.bottom, BuxTokens.section)
             }
-            .buxRootScrollEdgeChrome()
+            .scrollClipDisabled()
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
@@ -68,7 +72,11 @@ struct ProBusinessCardStudioView: View {
         .onAppear {
             studioStore.purgeEphemeralBusinessCardDesigns()
             studioStore.ensureBusinessCardLibrary(simpleCard: simpleStudioStore.businessCard)
-            featuredTemplate = studioStore.businessCardLibrary.savedDesigns.first?.template ?? .logoMark
+            var transaction = SwiftUI.Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                featuredTemplate = Self.featuredTemplates.first ?? .classic
+            }
         }
         .alert(
             BuxCatalogLabel.string("Delete this design?", locale: appSettingsManager.interfaceLocale),
@@ -93,6 +101,7 @@ struct ProBusinessCardStudioView: View {
             VStack(alignment: .leading, spacing: 14) {
                 BusinessCardStudioHeader()
                     .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
 
                 BuxCatalogDynamicText(key: "Design print-ready cards in minutes — geometric templates, Bux Canvas, photo lab, and export to PDF or vCard.")
                     .font(.system(size: 14, weight: .medium))
@@ -356,7 +365,7 @@ struct BusinessCardYourDesignsLibraryView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 if isSelecting {
-                    Button("Cancel") {
+                    Button(BuxCatalogLabel.string("Cancel", locale: appSettingsManager.interfaceLocale)) {
                         isSelecting = false
                         selectedIDs = []
                     }
@@ -364,12 +373,12 @@ struct BusinessCardYourDesignsLibraryView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 if isSelecting {
-                    Button("Delete", role: .destructive) {
+                    Button(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), role: .destructive) {
                         showDeleteConfirm = true
                     }
                     .disabled(selectedIDs.isEmpty)
                 } else if !sortedDesigns.isEmpty {
-                    Button("Select") {
+                    Button(BuxCatalogLabel.string("Select", locale: appSettingsManager.interfaceLocale)) {
                         isSelecting = true
                     }
                 }
@@ -490,7 +499,11 @@ struct BusinessCardDesignGridTile: View {
                                 .clipShape(Circle())
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel(isPrimaryBrand ? "Primary for invoices" : "Set as primary for invoices")
+                        .accessibilityLabel(
+                            isPrimaryBrand
+                                ? BuxCatalogLabel.string("Primary for invoices", locale: appSettingsManager.interfaceLocale)
+                                : BuxCatalogLabel.string("Set as primary for invoices", locale: appSettingsManager.interfaceLocale)
+                        )
                         .padding(8)
                     }
                 }
@@ -531,10 +544,10 @@ struct BusinessCardDesignGridTile: View {
                 Spacer(minLength: 0)
                 if !selectionMode {
                     Menu {
-                        Button("Edit", action: onEdit)
-                        Button("Share", action: onShare)
-                        Button("Duplicate", action: onDuplicate)
-                        Button("Delete", role: .destructive, action: onDelete)
+                        Button(BuxCatalogLabel.string("Edit", locale: appSettingsManager.interfaceLocale), action: onEdit)
+                        Button(BuxCatalogLabel.string("Share", locale: appSettingsManager.interfaceLocale), action: onShare)
+                        Button(BuxCatalogLabel.string("Duplicate", locale: appSettingsManager.interfaceLocale), action: onDuplicate)
+                        Button(BuxCatalogLabel.string("Delete", locale: appSettingsManager.interfaceLocale), role: .destructive, action: onDelete)
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .font(.system(size: 18))

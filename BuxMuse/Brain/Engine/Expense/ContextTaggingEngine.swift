@@ -8,8 +8,10 @@
 import Foundation
 
 struct ContextTaggingEngine {
-    static func analyze(context: String?) -> String? {
-        guard let context = context?.lowercased() else { return nil }
-        return "Context: \(context.capitalized)"
+    static func analyze(context: String?, locale: Locale = BuxInterfaceLocale.currentInterfaceLocale) -> String? {
+        guard let context = context?.trimmingCharacters(in: .whitespacesAndNewlines), !context.isEmpty else {
+            return nil
+        }
+        return BuxLocalizedString.format("Context: %@", locale: locale, context)
     }
 }

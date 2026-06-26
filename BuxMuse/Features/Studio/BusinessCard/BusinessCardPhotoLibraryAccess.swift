@@ -67,6 +67,7 @@ enum BusinessCardPhotoLibraryAccess {
 struct BusinessCardPhotoAccessBanner: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var appSettingsManager: AppSettingsManager
 
     @State private var status = BusinessCardPhotoLibraryAccess.currentStatus()
 
@@ -79,7 +80,7 @@ struct BusinessCardPhotoAccessBanner: View {
                         .foregroundStyle(.secondary)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Button("Open Settings") {
+                    Button(BuxCatalogLabel.string("Open Settings", locale: appSettingsManager.interfaceLocale)) {
                         BusinessCardPhotoLibraryAccess.openSettings()
                     }
                     .buxFormFieldPadding()
@@ -93,7 +94,7 @@ struct BusinessCardPhotoAccessBanner: View {
                         .foregroundStyle(.secondary)
                         .buxFormFieldPadding()
                     BuxFormRowDivider()
-                    Button("Allow photos") {
+                    Button(BuxCatalogLabel.string("Allow photos", locale: appSettingsManager.interfaceLocale)) {
                         Task {
                             status = await BusinessCardPhotoLibraryAccess.requestAccess()
                         }
@@ -115,7 +116,7 @@ struct BusinessCardPhotoAccessBanner: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button("Settings") { BusinessCardPhotoLibraryAccess.openSettings() }
+                Button(BuxCatalogLabel.string("Settings", locale: appSettingsManager.interfaceLocale)) { BusinessCardPhotoLibraryAccess.openSettings() }
                     .font(.system(size: 12, weight: .semibold))
             }
             .padding(.vertical, 4)

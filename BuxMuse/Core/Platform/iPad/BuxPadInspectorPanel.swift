@@ -40,7 +40,7 @@ struct BuxPadInspectorPanel<Content: View>: View {
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture(perform: onDismiss)
-                    .accessibilityLabel("Dismiss")
+                    .accessibilityLabel(BuxCatalogLabel.string("Dismiss", locale: BuxInterfaceLocale.currentInterfaceLocale))
 
                 content()
                     .frame(width: panelWidth)

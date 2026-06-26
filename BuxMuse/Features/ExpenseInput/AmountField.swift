@@ -29,7 +29,7 @@ struct AmountField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(kind == .income ? "Income amount" : "Amount")
+            BuxCatalogText.text(kind == .income ? "Income amount" : "Amount")
                 .buxSectionLabelStyle(color: themeManager.sectionHeaderColor(for: colorScheme))
 
             HStack(spacing: 8) {
