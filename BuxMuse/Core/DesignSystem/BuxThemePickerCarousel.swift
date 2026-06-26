@@ -36,6 +36,8 @@ struct BuxCarouselScrollClipModifier: ViewModifier {
 enum ThemeSwatchCardLayout {
     case grid
     case carousel
+    /// Appearance settings row — accent-sized column with gradient square swatch.
+    case appearanceRow
 }
 
 // MARK: - Swatch surface (carousel avoids clipShape so scale/shadow can breathe)
@@ -82,6 +84,15 @@ struct ThemeSwatchCardChromeModifier: ViewModifier {
                     x: 0,
                     y: 4
                 )
+        case .appearanceRow:
+            content
+                .settingsThemedCardChrome(cornerRadius: cornerRadius)
+                .overlay {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .stroke(accentColor, lineWidth: 2)
+                    }
+                }
         }
     }
 }
@@ -146,7 +157,51 @@ struct BuxThemePreviewStrip: View {
     }
 }
 
-// MARK: - Brand theme carousel
+// MARK: - Appearance settings preset slot (fixed height — horizontal swap)
+
+enum BuxAppearancePresetSlot {
+    /// Shared height for accent row and brand row (label + description + swatch scroll).
+    static let slotHeight: CGFloat = 188
+}
+
+/// Brand theme row — same footprint as `BuxAccentPickerCarousel`, gradient square swatches.
+struct BuxAppearanceThemeRow: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+    @ObservedObject private var store = SettingsStore.shared
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            BuxCatalogDynamicText(key: "Full themed surfaces, hero gradients, and preset chrome across the app.")
+                .font(.system(size: 12, weight: .medium))
+                .buxLabelSecondary()
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, BuxLayout.section)
+                .padding(.top, 4)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 12) {
+                    ForEach(AppTheme.all) { theme in
+                        ThemeSwatchCard(
+                            theme: theme,
+                            isSelected: themeManager.current.id == theme.id,
+                            layout: .appearanceRow,
+                            onTap: {
+                                store.persistThemeSelection(theme, themeManager: themeManager)
+                            }
+                        )
+                        .frame(width: 88)
+                    }
+                }
+                .scrollTargetLayout()
+                .padding(.vertical, 8)
+            }
+            .buxHorizontalCarouselLane(.formCard)
+        }
+        .padding(.bottom, 4)
+    }
+}
+
+// MARK: - Brand theme carousel (full editorial — other entry points)
 
 struct BuxThemePickerCarousel: View {
     @EnvironmentObject private var themeManager: ThemeManager
@@ -181,7 +236,7 @@ struct BuxThemePickerCarousel: View {
             .scrollTargetLayout()
             .padding(.vertical, 14)
         }
-        .buxViewAlignedHorizontalCarousel()
+        .buxHorizontalCarouselLane(.screen())
     }
 }
 
@@ -216,14 +271,13 @@ struct BuxAccentPickerCarousel: View {
                     }
                 }
                 .scrollTargetLayout()
-                .padding(.horizontal, BuxLayout.section)
                 .padding(.vertical, 8)
             }
 
             scroll
-                .modifier(BuxHorizontalSnapScrollModifier())
-                .buxPadViewAlignedHorizontalCarousel()
+                .buxHorizontalCarouselLane(.formCard)
         }
+        .padding(.bottom, 4)
     }
 }
 

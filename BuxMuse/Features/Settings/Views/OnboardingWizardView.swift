@@ -564,7 +564,7 @@ struct OnboardingWizardView: View {
                         } label: {
                             Text(BuxCatalogLabel.string("Frequency", locale: appSettingsManager.interfaceLocale))
                         }
-                        .pickerStyle(.segmented)
+                        .buxThemedSegmentedPicker()
 
                         if store.autoBackupFrequency == .custom {
                             HStack {

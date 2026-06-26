@@ -46,9 +46,8 @@ struct ExpenseCategoryPickerView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 categoryChipRow
-                    .padding(.horizontal, 4)
             }
-            .buxHorizontalScrollEdgeFade(background: themeManager.cardFill(for: colorScheme))
+            .buxHorizontalCarouselLane(.embedded())
         }
         .padding(.vertical, emphasizeOnAppear && emphasisPulse ? 4 : 0)
         .background(

@@ -117,12 +117,12 @@ struct ExpenseTabView: View {
             }
             .tutorialAnchor(.expensesTabHeader, coordinator: tutorialCoordinator)
             .buxPadExpenseSplitNavigationChrome()
-            .toolbar { expenseToolbar }
             .modifier(ExpenseSearchModifier(
                 searchText: $listModel.filters.searchText,
                 searchScope: $listModel.searchScope,
                 isSearchPresented: $isExpenseSearchPresented
             ))
+            .toolbar { expenseToolbar }
             .navigationDestination(for: ExpenseArchiveMonth.self) { archive in
                 ExpenseMonthArchiveView(
                     monthStart: archive.monthStart,
@@ -311,15 +311,10 @@ struct ExpenseTabView: View {
 
     @ToolbarContentBuilder
     private var expenseToolbar: some ToolbarContent {
-        ToolbarItemGroup(placement: .topBarTrailing) {
-            expenseManageMenu
-            if !showsExpenseEmptyState {
-                expenseFilterMenu
+        if usesPadSplitLayout {
+            if #available(iOS 26.0, *) {
+                DefaultToolbarItem(kind: .search, placement: .topBarTrailing)
             }
-        }
-
-        if #available(iOS 26.0, *), !showsExpenseEmptyState {
-            ToolbarSpacer(.fixed, placement: .topBarTrailing)
         }
 
         ToolbarItem(placement: .topBarTrailing) {
@@ -332,6 +327,17 @@ struct ExpenseTabView: View {
                     }
                 }
             )
+        }
+
+        if #available(iOS 26.0, *) {
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+        }
+
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            expenseManageMenu
+            if !showsExpenseEmptyState {
+                expenseFilterMenu
+            }
         }
     }
 

@@ -35,7 +35,7 @@ struct DashboardFeatureInsightStrips: View {
                 }
                 .scrollTargetLayout()
             }
-            .buxViewAlignedHorizontalCarousel()
+            .buxHorizontalCarouselLane(.screen())
         }
     }
 

@@ -353,21 +353,23 @@ extension View {
         modifier(BuxScrollEdgeMaskModifier(edges: edges, fadeSize: size))
     }
 
+    /// Deprecated for horizontal carousels — use `buxHorizontalCarouselLane` in BuxLayout instead.
     func buxHorizontalScrollEdgeFade(background: Color, width: CGFloat = 20) -> some View {
         modifier(BuxHorizontalScrollEdgeFadeModifier(fadeWidth: width))
     }
 
-    /// Soft trailing edge for horizontal carousels — overlay vignette, not a content mask.
-    func buxTrailingScrollEdgeVignette(background: Color, width: CGFloat = 12) -> some View {
-        modifier(BuxTrailingScrollEdgeVignetteModifier(background: background, width: width))
-    }
-
+    /// Deprecated for horizontal carousels — use `buxHorizontalCarouselLane` in BuxLayout instead.
     func buxThemedHorizontalScrollEdgeFade(
         themeManager: ThemeManager,
         colorScheme: ColorScheme,
         width: CGFloat = 20
     ) -> some View {
         buxHorizontalScrollEdgeFade(background: .clear, width: width)
+    }
+
+    /// Soft trailing edge overlay — not for horizontal carousels (use `buxHorizontalCarouselLane`).
+    func buxTrailingScrollEdgeVignette(background: Color, width: CGFloat = 12) -> some View {
+        modifier(BuxTrailingScrollEdgeVignetteModifier(background: background, width: width))
     }
 
     /// Soft drop shadow on chrome bars (tab bar, save bar) — not on scroll content.
@@ -381,11 +383,17 @@ extension View {
     }
 }
 
-// MARK: - Navigation drawer search (visible by default; scroll up to minimize)
+// MARK: - Navigation drawer search (iPad studio rail; iPad expenses use system toolbar search)
 
 private enum BuxPadDrawerSearchLayout {
+    /// Full custom search + scope rail (Studio split).
     static func usesRailSearch(studioSplit: Bool, expenseSplit: Bool) -> Bool {
-        BuxPadIdiom.isPad && (studioSplit || expenseSplit)
+        BuxPadIdiom.isPad && studioSplit
+    }
+
+    /// iPad Expenses — system toolbar search (trailing, grouped with menus); scopes inside search UI.
+    static func usesExpenseToolbarSearch(studioSplit: Bool, expenseSplit: Bool) -> Bool {
+        BuxPadIdiom.isPad && expenseSplit && !studioSplit
     }
 }
 
@@ -493,6 +501,46 @@ private struct BuxPadRailDrawerSearchInsetModifier<ScopeContent: View>: ViewModi
     }
 }
 
+/// iPad Expenses — native toolbar search + scopes; placement handled in `ExpenseTabView` toolbar.
+private struct BuxPadExpenseToolbarSearchModifier<Scope: Hashable, ScopeContent: View>: ViewModifier {
+    @Environment(\.buxSemanticTheme) private var semantic
+
+    @Binding var searchText: String
+    @Binding var isPresented: Bool
+    @Binding var selection: Scope
+    let prompt: String
+    @ViewBuilder var scopes: () -> ScopeContent
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .searchable(
+                    text: $searchText,
+                    isPresented: $isPresented,
+                    placement: .toolbar,
+                    prompt: Text(prompt)
+                )
+                .searchScopes($selection) {
+                    scopes()
+                }
+                .searchToolbarBehavior(.minimize)
+                .tint(semantic.accent)
+        } else {
+            content
+                .searchable(
+                    text: $searchText,
+                    isPresented: $isPresented,
+                    placement: .toolbar,
+                    prompt: Text(prompt)
+                )
+                .searchScopes($selection) {
+                    scopes()
+                }
+                .tint(semantic.accent)
+        }
+    }
+}
+
 // MARK: - Centered top bar (true screen-center title)
 
 struct BuxCenteredTopBar<Leading: View, Trailing: View>: View {
@@ -573,6 +621,10 @@ struct BuxDrawerScopeModifier<Scope: Hashable, ScopeContent: View>: ViewModifier
         BuxPadDrawerSearchLayout.usesRailSearch(studioSplit: studioSplit, expenseSplit: expenseSplit)
     }
 
+    private var usesPadExpenseToolbarSearch: Bool {
+        BuxPadDrawerSearchLayout.usesExpenseToolbarSearch(studioSplit: studioSplit, expenseSplit: expenseSplit)
+    }
+
     func body(content: Content) -> some View {
         if usesPadSplitRailSearch {
             content
@@ -585,11 +637,19 @@ struct BuxDrawerScopeModifier<Scope: Hashable, ScopeContent: View>: ViewModifier
                             Picker("", selection: $selection) {
                                 scopes()
                             }
-                            .pickerStyle(.segmented)
-                            .labelsHidden()
+                            .buxThemedSegmentedPicker()
                         }
                     )
                 )
+        } else if usesPadExpenseToolbarSearch {
+            content
+                .modifier(BuxPadExpenseToolbarSearchModifier(
+                    searchText: $searchText,
+                    isPresented: $isPresented,
+                    selection: $selection,
+                    prompt: prompt,
+                    scopes: scopes
+                ))
         } else {
             content
                 .modifier(BuxDrawerSearchModifier(

@@ -189,8 +189,7 @@ struct BackupRestoreSettingsView: View {
                         BuxCatalogText.text("Monthly").tag(AutoBackupFrequency.monthly)
                         BuxCatalogText.text("Custom").tag(AutoBackupFrequency.custom)
                     }
-                    .pickerStyle(.segmented)
-                    .tint(themeManager.contrastAccentColor(for: colorScheme))
+                    .buxThemedSegmentedPicker()
                     .buxFormFieldPadding()
 
                     if store.autoBackupFrequency == .custom {

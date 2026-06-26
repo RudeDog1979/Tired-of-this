@@ -755,7 +755,7 @@ struct MileageEntrySheet: View {
                 Text(p.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(p)
             }
         }
-        .pickerStyle(.segmented)
+        .buxThemedSegmentedPicker()
         .padding(BuxLayout.section)
         .buxFormSectionCard(cornerRadius: 16)
     }

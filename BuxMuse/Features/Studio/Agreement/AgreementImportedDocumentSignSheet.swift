@@ -354,8 +354,6 @@ struct AgreementImportedDocumentSignSheet: View {
                     Text(mode.catalogTitle(locale: locale)).tag(mode)
                 }
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
             .frame(width: BuxPadIdiom.isPad ? 156 : 128)
             .buxThemedSegmentedPicker()
             .colorScheme(.dark)

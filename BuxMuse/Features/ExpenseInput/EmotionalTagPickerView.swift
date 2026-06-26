@@ -23,7 +23,7 @@ struct EmotionalTagPickerView: View {
             }
             .padding(.vertical, 4)
         }
-        .buxHorizontalScrollEdgeFade(background: themeManager.cardFill(for: colorScheme))
+        .buxHorizontalCarouselLane(.embedded())
     }
 
     private func chip(for tag: EmotionalTag) -> some View {

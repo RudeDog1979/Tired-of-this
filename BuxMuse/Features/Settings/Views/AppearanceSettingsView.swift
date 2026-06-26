@@ -14,12 +14,20 @@ struct AppearanceSettingsView: View {
     @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ObservedObject private var store = SettingsStore.shared
 
-    private var glassChromeSubtitle: String {
-        BuxCatalogLabel.string(
-            store.brandThemesEnabled
-                ? "Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)"
-                : "Liquid Glass tab bar and icon buttons (cards stay neutral)",
-            locale: appSettingsManager.interfaceLocale
+    private var landingBackdropLockedByBrandThemes: Bool {
+        store.brandThemesEnabled
+    }
+
+    private var landingBackdropBinding: Binding<Bool> {
+        Binding(
+            get: {
+                if landingBackdropLockedByBrandThemes { return true }
+                return store.landingBackdropEnabled
+            },
+            set: { newValue in
+                guard !landingBackdropLockedByBrandThemes else { return }
+                store.landingBackdropEnabled = newValue
+            }
         )
     }
 
@@ -27,32 +35,8 @@ struct AppearanceSettingsView: View {
         BuxThemedCardForm {
             themePresetPicker
 
-            BuxFormSection(title: "Interface") {
-                interfaceSectionContent
-            }
-            .brandThemesToggleStableLayout(store.brandThemesEnabled)
-
-            if BuxPadIdiom.isPad {
-                BuxFormSection(title: "Expense quick actions") {
-                    BuxSettingsMenuPickerRow(
-                        titleKey: "iPad FAB shortcut",
-                        selection: $store.ipadFabShortcut
-                    ) {
-                        ForEach(DashboardFabPadShortcut.availableShortcuts(studioEnabled: store.studioEnabled)) { shortcut in
-                            BuxCatalogDynamicText(key: shortcut.titleKey)
-                                .tag(shortcut)
-                        }
-                    }
-                }
-                .brandThemesToggleStableLayout(store.brandThemesEnabled)
-            }
-
-            BuxFormSection(title: "Dashboard greeting") {
-                greetingSectionContent
-            }
-            .brandThemesToggleStableLayout(store.brandThemesEnabled)
+            appearanceSectionsBelowThemePicker
         }
-        .animation(BuxMotion.brandThemesToggle, value: store.brandThemesEnabled)
         .tutorialAnchor(.settingsAppearanceDetail, coordinator: tutorialCoordinator)
         .buxCatalogNavigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
@@ -68,7 +52,7 @@ struct AppearanceSettingsView: View {
             store.applyBrandThemesAppearance(to: themeManager)
             store.save()
         }
-        .onChange(of: store.brandThemesEnabled) { _, enabled in
+        .onChange(of: store.brandThemesEnabled) { _, _ in
             store.applyBrandThemesAppearance(to: themeManager)
             store.save()
         }
@@ -89,6 +73,39 @@ struct AppearanceSettingsView: View {
         )
     }
 
+    /// Sections below the theme picker — move as one rigid block; row interiors stay locked.
+    @ViewBuilder
+    private var appearanceSectionsBelowThemePicker: some View {
+        VStack(alignment: .leading, spacing: BuxLayout.section) {
+            BuxFormSection(title: "Interface") {
+                interfaceSectionContent
+            }
+
+            if BuxPadIdiom.isPad {
+                BuxFormSection(title: "Expense quick actions") {
+                    BuxSettingsMenuPickerRow(
+                        titleKey: "iPad FAB shortcut",
+                        selection: $store.ipadFabShortcut
+                    ) {
+                        ForEach(DashboardFabPadShortcut.availableShortcuts(studioEnabled: store.studioEnabled)) { shortcut in
+                            BuxCatalogDynamicText(key: shortcut.titleKey)
+                                .tag(shortcut)
+                        }
+                    }
+                }
+            }
+
+            BuxFormSection(title: "Dashboard greeting") {
+                greetingSectionContent
+            }
+        }
+        .environment(\.buxInstantAppearanceSectionChrome, true)
+        .animation(nil, value: store.brandThemesEnabled)
+        .transaction(value: store.brandThemesEnabled) { transaction in
+            transaction.disablesAnimations = true
+        }
+    }
+
     @ViewBuilder
     private var interfaceSectionContent: some View {
         BuxSettingsToggleRow(
@@ -105,24 +122,26 @@ struct AppearanceSettingsView: View {
             }
         }
 
-        Group {
-            if !store.brandThemesEnabled {
-                BuxFormRowDivider()
+        BuxFormRowDivider()
 
-                BuxSettingsToggleRow(
-                    titleKey: "Landing backdrop glow",
-                    subtitleKey: "Top-left ambient light and card edge shine — off uses plain iOS surfaces",
-                    isOn: $store.landingBackdropEnabled
-                )
-            }
-        }
-        .transition(.opacity)
+        AppearanceLandingBackdropToggleRow(
+            isLocked: landingBackdropLockedByBrandThemes,
+            isOn: landingBackdropBinding,
+            neutralSubtitle: BuxCatalogLabel.string(
+                "Top-left ambient light and card edge shine — off uses plain iOS surfaces",
+                locale: appSettingsManager.interfaceLocale
+            ),
+            lockedSubtitle: BuxCatalogLabel.string(
+                "Included with brand design presets",
+                locale: appSettingsManager.interfaceLocale
+            )
+        )
 
         BuxFormRowDivider()
 
         BuxSettingsToggleRow(
             titleKey: "Glass navigation chrome",
-            subtitleText: glassChromeSubtitle,
+            subtitleKey: "Liquid Glass tab bar and icon buttons (cards stay mesh-tinted)",
             isOn: $store.useGlassmorphism
         )
 
@@ -179,41 +198,111 @@ struct AppearanceSettingsView: View {
 
     @ViewBuilder
     private var themePresetPicker: some View {
-        ZStack(alignment: .top) {
+        ZStack(alignment: .topLeading) {
             if store.brandThemesEnabled {
-                VStack(alignment: .leading, spacing: BuxLayout.tight) {
-                    BuxFormSectionLabel(title: "Brand design presets")
-                    BuxThemePickerCarousel()
-                }
-                .compositingGroup()
-                .transition(
-                    .asymmetric(
-                        insertion: .opacity.combined(with: .move(edge: .top)),
-                        removal: .opacity.combined(with: .move(edge: .top))
-                    )
-                )
+                brandPresetPickerSection
+                    .transition(appearanceBrandPresetTransition)
             } else {
-                BuxFormSection(title: "Accent color") {
-                    BuxAccentPickerCarousel()
-                }
-                .compositingGroup()
-                .transition(
-                    .asymmetric(
-                        insertion: .opacity.combined(with: .move(edge: .top)),
-                        removal: .opacity.combined(with: .move(edge: .top))
-                    )
-                )
+                accentPresetPickerSection
+                    .transition(appearanceAccentPresetTransition)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .top)
-        .clipped()
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(height: BuxAppearancePresetSlot.slotHeight, alignment: .top)
+        .compositingGroup()
+        .animation(BuxMotion.brandThemesToggle, value: store.brandThemesEnabled)
+        .buxProMotionBoost(on: store.brandThemesEnabled)
+    }
+
+    /// Brand enters from the right; leaves to the right when accent pushes back.
+    private var appearanceBrandPresetTransition: AnyTransition {
+        .asymmetric(
+            insertion: .move(edge: .trailing).combined(with: .opacity),
+            removal: .move(edge: .trailing).combined(with: .opacity)
+        )
+    }
+
+    /// Accent enters from the left; leaves to the left when brand pushes in.
+    private var appearanceAccentPresetTransition: AnyTransition {
+        .asymmetric(
+            insertion: .move(edge: .leading).combined(with: .opacity),
+            removal: .move(edge: .leading).combined(with: .opacity)
+        )
+    }
+
+    private var accentPresetPickerSection: some View {
+        BuxFormSection(title: "Accent color") {
+            BuxAccentPickerCarousel()
+        }
+    }
+
+    private var brandPresetPickerSection: some View {
+        BuxFormSection(title: "Brand design presets") {
+            BuxAppearanceThemeRow()
+        }
     }
 }
 
-private extension View {
-    /// Keeps labels and rows from jittering while the preset block falls in/out.
-    func brandThemesToggleStableLayout(_ brandThemesEnabled: Bool) -> some View {
-        animation(nil, value: brandThemesEnabled)
+// MARK: - Landing backdrop row (fixed subtitle slot — no layout shift on brand toggle)
+
+private enum AppearanceLandingBackdropLayout {
+    /// Reserved for two subtitle lines at 12pt — keeps Interface rows from jumping.
+    static let subtitleSlotHeight: CGFloat = 34
+}
+
+private struct AppearanceLandingBackdropToggleRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxSettingsUsesStackedRows) private var usesStackedRows
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    let isLocked: Bool
+    @Binding var isOn: Bool
+    let neutralSubtitle: String
+    let lockedSubtitle: String
+
+    var body: some View {
+        Group {
+            if usesStackedRows {
+                VStack(alignment: .leading, spacing: 10) {
+                    labelBlock
+                    Toggle("", isOn: $isOn)
+                        .labelsHidden()
+                        .tint(themeManager.contrastAccentColor(for: colorScheme))
+                }
+            } else {
+                Toggle(isOn: $isOn) {
+                    labelBlock
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .tint(themeManager.contrastAccentColor(for: colorScheme))
+            }
+        }
+        .buxFormFieldPadding()
+        .disabled(isLocked)
+        .opacity(isLocked ? 0.42 : 1)
+    }
+
+    private var labelBlock: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            BuxCatalogDynamicText(key: "Landing backdrop glow")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                .fixedSize(horizontal: false, vertical: true)
+                .layoutPriority(1)
+
+            ZStack(alignment: .topLeading) {
+                Text(neutralSubtitle)
+                    .opacity(isLocked ? 0 : 1)
+                Text(lockedSubtitle)
+                    .opacity(isLocked ? 1 : 0)
+            }
+            .font(.system(size: 12, weight: .medium))
+            .buxLabelSecondary()
+            .lineLimit(2)
+            .minimumScaleFactor(0.85)
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, minHeight: AppearanceLandingBackdropLayout.subtitleSlotHeight, alignment: .topLeading)
+        }
     }
 }
 

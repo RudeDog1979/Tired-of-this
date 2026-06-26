@@ -70,6 +70,7 @@ private struct BuxThemedInputPlateModifier: ViewModifier {
                             )
                         }
                     }
+                    .buxAnimateThemeColors(themeId: themeManager.current.id)
             }
     }
 }
@@ -119,6 +120,7 @@ private struct BuxThemedFormStyleModifier: ViewModifier {
                 RoundedRectangle(cornerRadius: BuxLayout.cornerGrouped, style: .continuous)
                     .strokeBorder(themeManager.themedCardStroke(for: colorScheme), lineWidth: 0.5)
             )
+            .buxAnimateThemeColors(themeId: themeManager.current.id)
     }
 }
 

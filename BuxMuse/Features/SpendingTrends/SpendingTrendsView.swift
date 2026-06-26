@@ -17,7 +17,7 @@ struct SpendingTrendsView: View {
     var initialMonthStart: Date?
 
     @StateObject private var store = SpendingTrendsStore()
-    @ObservedObject private var animationSession = SpendingTrendsAnimationSession.shared
+    private let animationSession = SpendingTrendsAnimationSession.shared
     @State private var breakdownMode: SpendingTrendsBreakdownMode = .category
     @State private var customCategories: [ExpenseCategoryRecord] = []
     @State private var drillContext: SpendingTrendsDrillContext?
@@ -99,7 +99,7 @@ struct SpendingTrendsView: View {
                 Text(period.catalogTitle(locale: locale)).tag(period)
             }
         }
-        .pickerStyle(.segmented)
+        .buxThemedSegmentedPicker()
     }
 
     @ViewBuilder
@@ -186,13 +186,7 @@ struct SpendingTrendsView: View {
     private func playChartEntranceIfNeeded(for anchorId: String) {
         guard animationSession.shouldAnimate(anchorId) else { return }
         animationSession.requestEntrance(for: anchorId)
-        if BuxMotion.reducedMotion {
-            animationSession.finishEntrance(for: anchorId)
-            return
-        }
-        withAnimation(BuxChartMotion.entrance) {
-            animationSession.commitProgress(1, for: anchorId)
-        }
+        animationSession.commitProgress(1, for: anchorId)
     }
 }
 
@@ -212,11 +206,12 @@ private struct SpendingTrendsPeriodPage: View, Equatable {
     let onSelectBucket: (SpendingTrendBarBucket) -> Void
     let onSelectRow: (SpendingTrendBreakdownRow) -> Void
 
+    @State private var animateTotalSpent: Double = 0
+
     static func == (lhs: SpendingTrendsPeriodPage, rhs: SpendingTrendsPeriodPage) -> Bool {
         lhs.anchor == rhs.anchor &&
         lhs.display == rhs.display &&
         lhs.breakdownMode == rhs.breakdownMode &&
-        lhs.chartProgress == rhs.chartProgress &&
         lhs.customCategories.map(\.id) == rhs.customCategories.map(\.id)
     }
 
@@ -227,6 +222,12 @@ private struct SpendingTrendsPeriodPage: View, Equatable {
             breakdownPicker
             breakdownSection
         }
+        .onAppear {
+            animateTotalSpent = display.totalSpent
+        }
+        .onChange(of: display.totalSpent) { _, newValue in
+            animateTotalSpent = newValue
+        }
     }
 
     private var breakdownPicker: some View {
@@ -235,7 +236,7 @@ private struct SpendingTrendsPeriodPage: View, Equatable {
                 Text(mode.catalogTitle(locale: locale)).tag(mode)
             }
         }
-        .pickerStyle(.segmented)
+        .buxThemedSegmentedPicker()
     }
 
     private var heroCard: some View {
@@ -249,9 +250,11 @@ private struct SpendingTrendsPeriodPage: View, Equatable {
                 .foregroundStyle(.secondary)
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(formatAmount(Decimal(display.totalSpent)))
+                Text(formatAmount(Decimal(animateTotalSpent)))
                     .font(.system(size: 36, weight: .bold, design: .rounded))
                     .foregroundStyle(themeManager.labelPrimary(for: colorScheme))
+                    .contentTransition(.numericText())
+                    .animation(.easeInOut(duration: 0.65), value: animateTotalSpent)
 
                 if display.changeAmount != 0 {
                     Image(systemName: display.changeAmount > 0 ? "arrow.up.right.circle.fill" : "arrow.down.right.circle.fill")

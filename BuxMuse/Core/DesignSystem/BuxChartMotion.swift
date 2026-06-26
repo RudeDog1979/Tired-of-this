@@ -192,6 +192,7 @@ extension View {
 enum BuxChartRevealAxis {
     case horizontal
     case radial
+    case vertical
 }
 
 /// Rasterize chart once, animate mask only. Modifier is NOT Animatable — avoids Swift Charts redraw per frame.
@@ -210,6 +211,7 @@ private struct BuxGPUChartRevealModifier: ViewModifier {
         switch axis {
         case .horizontal: return .leading
         case .radial: return .center
+        case .vertical: return .bottom
         }
     }
 }
@@ -232,6 +234,9 @@ private struct BuxGPURevealMask: View, Animatable {
         case .radial:
             Circle()
                 .scaleEffect(max(0.0001, progress))
+        case .vertical:
+            Rectangle()
+                .scaleEffect(x: 1, y: max(0.0001, progress), anchor: .bottom)
         }
     }
 }

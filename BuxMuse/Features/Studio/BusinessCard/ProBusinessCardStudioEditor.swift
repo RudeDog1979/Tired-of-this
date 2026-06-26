@@ -775,9 +775,8 @@ struct ProBusinessCardEditorView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, 2)
             }
-            .buxThemedHorizontalScrollEdgeFade(themeManager: themeManager, colorScheme: colorScheme, width: 20)
+            .buxHorizontalCarouselLane(.embedded())
         }
     }
 
@@ -836,10 +835,8 @@ struct ProBusinessCardEditorView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.horizontal, BuxTokens.marginRegular)
                 }
-                .buxThemedHorizontalScrollEdgeFade(themeManager: themeManager, colorScheme: colorScheme, width: 20)
-                .padding(.horizontal, -BuxTokens.marginRegular)
+                .buxHorizontalCarouselLane(.embedded(horizontalInset: BuxTokens.marginRegular))
             }
         }
     }

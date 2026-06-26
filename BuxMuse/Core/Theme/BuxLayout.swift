@@ -154,13 +154,24 @@ extension View {
         }
     }
 
+    func buxHorizontalCarouselLane(
+        _ lane: BuxHorizontalCarouselLane = .screen(),
+        verticalInset: CGFloat = 8
+    ) -> some View {
+        modifier(BuxHorizontalCarouselLaneModifier(lane: lane, verticalInset: verticalInset))
+    }
+
     /// View-aligned horizontal carousel — matches Subscription Hub renewals / Apple Music snap.
-    func buxViewAlignedHorizontalCarousel() -> some View {
-        scrollClipDisabled()
-            .scrollTargetBehavior(.viewAligned)
-            .safeAreaPadding(.horizontal, BuxLayout.marginHorizontal)
-            .safeAreaPadding(.vertical, 8)
-            .padding(.horizontal, -BuxLayout.marginHorizontal)
+    func buxViewAlignedHorizontalCarousel(
+        horizontalInset: CGFloat = BuxLayout.marginHorizontal,
+        verticalInset: CGFloat = 8
+    ) -> some View {
+        buxHorizontalCarouselLane(.screen(horizontalInset: horizontalInset), verticalInset: verticalInset)
+    }
+
+    /// Horizontal snap inside a `BuxFormSection` card — `BuxLayout.section` inset; no bleed into card chrome.
+    func buxFormSectionHorizontalCarousel(verticalInset: CGFloat = 8) -> some View {
+        buxHorizontalCarouselLane(.formCard, verticalInset: verticalInset)
     }
 
     /// iPad: `buxViewAlignedHorizontalCarousel()`. iPhone: no-op — callers keep existing chrome.
@@ -171,6 +182,46 @@ extension View {
     /// iPad: marks scroll children for view-aligned snap. iPhone: no-op.
     func buxPadScrollTargetLayout() -> some View {
         modifier(BuxPadScrollTargetLayoutModifier())
+    }
+}
+
+// MARK: - Horizontal carousel lanes (no edge blur — screen bleed vs form inset)
+
+enum BuxHorizontalCarouselLane: Equatable {
+    /// Open canvas — dashboard pill, subscription hub (bleed to screen margins).
+    case screen(horizontalInset: CGFloat = BuxLayout.marginHorizontal)
+    /// Inside `BuxFormSection` card — `BuxLayout.section` inset; no bleed into card chrome.
+    case formCard
+    /// Studio toolbars, chip rows, tight strips inside panels.
+    case embedded(horizontalInset: CGFloat = BuxLayout.section)
+}
+
+private struct BuxHorizontalCarouselLaneModifier: ViewModifier {
+    let lane: BuxHorizontalCarouselLane
+    let verticalInset: CGFloat
+
+    func body(content: Content) -> some View {
+        switch lane {
+        case .screen(let horizontalInset):
+            content
+                .scrollClipDisabled()
+                .scrollTargetBehavior(.viewAligned)
+                .safeAreaPadding(.horizontal, horizontalInset)
+                .safeAreaPadding(.vertical, verticalInset)
+                .padding(.horizontal, -horizontalInset)
+        case .formCard:
+            content
+                .scrollClipDisabled()
+                .scrollTargetBehavior(.viewAligned)
+                .padding(.horizontal, BuxLayout.section)
+                .safeAreaPadding(.vertical, verticalInset)
+        case .embedded(let horizontalInset):
+            content
+                .scrollClipDisabled()
+                .scrollTargetBehavior(.viewAligned)
+                .padding(.horizontal, horizontalInset)
+                .safeAreaPadding(.vertical, verticalInset)
+        }
     }
 }
 

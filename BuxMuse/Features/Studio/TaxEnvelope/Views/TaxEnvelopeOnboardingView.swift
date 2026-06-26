@@ -84,7 +84,7 @@ struct TaxEnvelopeOnboardingView: View {
                     Text(BuxCatalogLabel.string("Monthly", locale: locale)).tag("monthly")
                     Text(BuxCatalogLabel.string("Per job", locale: locale)).tag("perJob")
                 }
-                .pickerStyle(.segmented)
+                .buxThemedSegmentedPicker()
             }
         case 2:
             onboardingCard(
@@ -117,7 +117,7 @@ struct TaxEnvelopeOnboardingView: View {
                                 .tag(schedule)
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .buxThemedSegmentedPicker()
                     Text(
                         BuxLocalizedString.format(
                             "Typical in %@: %@. Pick what matches you.",

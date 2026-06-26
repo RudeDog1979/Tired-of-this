@@ -5,6 +5,7 @@
 
 import Combine
 import Foundation
+import SwiftUI
 
 @MainActor
 final class SpendingTrendsStore: ObservableObject {
@@ -31,30 +32,60 @@ final class SpendingTrendsStore: ObservableObject {
         let discovered = await brain.discoverSpendingTrendsAnchors(period: period)
         guard bootstrapToken == token else { return }
 
-        anchors = discovered
-        selectedAnchorId = resolveInitialAnchorId(
+        let resolvedId = resolveInitialAnchorId(
             in: discovered,
             initialMonthStart: initialMonthStart
         )
 
+        // Preload display for the initial selected anchor before assigning anchors
+        if let resolvedId,
+           let anchor = discovered.first(where: { $0.id == resolvedId }) {
+            if displays[anchor.id] == nil {
+                if let display = await brain.fetchSpendingTrendsDisplay(anchor: anchor, locale: locale) {
+                    guard bootstrapToken == token else { return }
+                    var transaction = SwiftUI.Transaction()
+                    transaction.disablesAnimations = true
+                    SwiftUI.withTransaction(transaction) {
+                        displays[anchor.id] = display
+                        touchCache(anchor.id)
+                    }
+                }
+            }
+        }
+
+        var transaction = SwiftUI.Transaction()
+        transaction.disablesAnimations = true
+        SwiftUI.withTransaction(transaction) {
+            anchors = discovered
+            selectedAnchorId = resolvedId
+        }
+
         guard let anchor = selectedAnchor else { return }
-        await loadDisplay(for: anchor, brain: brain, locale: locale, force: false)
         prefetchNeighbors(around: anchor, brain: brain, locale: locale)
     }
 
     func setPeriod(_ newPeriod: SpendingTrendsPeriod, brain: BuxMuseBrain, locale: Locale) async {
         guard newPeriod != period else { return }
-        period = newPeriod
-        displays = [:]
-        cacheOrder = []
-        loadTasks.values.forEach { $0.cancel() }
-        loadTasks = [:]
+        
+        var transaction = SwiftUI.Transaction()
+        transaction.disablesAnimations = true
+        SwiftUI.withTransaction(transaction) {
+            period = newPeriod
+            cacheOrder = []
+            loadTasks.values.forEach { $0.cancel() }
+            loadTasks = [:]
+        }
+        
         await bootstrap(brain: brain, locale: locale)
     }
 
     func selectAnchor(_ anchorId: String, brain: BuxMuseBrain, locale: Locale) {
         guard selectedAnchorId != anchorId else { return }
-        selectedAnchorId = anchorId
+        var transaction = SwiftUI.Transaction()
+        transaction.disablesAnimations = true
+        SwiftUI.withTransaction(transaction) {
+            selectedAnchorId = anchorId
+        }
         guard let anchor = anchors.first(where: { $0.id == anchorId }) else { return }
         prefetchNeighbors(around: anchor, brain: brain, locale: locale)
         if displays[anchor.id] == nil {
@@ -79,8 +110,12 @@ final class SpendingTrendsStore: ObservableObject {
         let task = Task {
             guard let display = await brain.fetchSpendingTrendsDisplay(anchor: anchor, locale: locale) else { return }
             guard !Task.isCancelled else { return }
-            displays[anchor.id] = display
-            touchCache(anchor.id)
+            var transaction = SwiftUI.Transaction()
+            transaction.disablesAnimations = true
+            SwiftUI.withTransaction(transaction) {
+                displays[anchor.id] = display
+                touchCache(anchor.id)
+            }
         }
         loadTasks[anchor.id] = task
         await task.value
@@ -102,7 +137,11 @@ final class SpendingTrendsStore: ObservableObject {
             guard let anchor = anchors.first(where: { $0.id == key }) else { continue }
             guard let display = await brain.fetchSpendingTrendsDisplay(anchor: anchor, locale: locale) else { continue }
             guard !Task.isCancelled else { return }
-            displays[key] = display
+            var transaction = SwiftUI.Transaction()
+            transaction.disablesAnimations = true
+            SwiftUI.withTransaction(transaction) {
+                displays[key] = display
+            }
         }
     }
 

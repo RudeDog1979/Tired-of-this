@@ -74,7 +74,7 @@ struct BusinessCardLayeredCarousel<Item: Hashable, Label: View>: View {
 
         if BuxPadIdiom.isPad {
             scroll
-                .buxViewAlignedHorizontalCarousel()
+                .buxHorizontalCarouselLane(.screen())
                 .scrollPosition(id: $activeID)
                 .frame(height: height)
         } else {

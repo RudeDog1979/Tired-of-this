@@ -14,7 +14,6 @@ struct SpendingTrendBarChart: View {
     var body: some View {
         SpendingTrendBarChartLayer(buckets: buckets, onSelectBucket: onSelectBucket)
             .equatable()
-            .buxGPUChartReveal(progress: progress)
     }
 }
 
@@ -22,12 +21,17 @@ private struct SpendingTrendBarChartLayer: View, Equatable {
     let buckets: [SpendingTrendBarBucket]
     let onSelectBucket: ((SpendingTrendBarBucket) -> Void)?
 
+    @State private var animateProgress: Double = 0
+
     static func == (lhs: SpendingTrendBarChartLayer, rhs: SpendingTrendBarChartLayer) -> Bool {
         lhs.buckets == rhs.buckets
     }
 
     var body: some View {
-        Chart {
+        let maxAmount = buckets.map(\.amount).max() ?? 100
+        let yDomain = 0...max(1, maxAmount)
+
+        return Chart {
             ForEach(buckets) { bucket in
                 BarMark(
                     x: .value("Period", bucket.shortLabel),
@@ -37,6 +41,12 @@ private struct SpendingTrendBarChartLayer: View, Equatable {
                 .cornerRadius(8)
                 .opacity(bucket.amount > 0 ? 1 : 0.35)
             }
+        }
+        .chartYScale(domain: yDomain)
+        .chartPlotStyle { plotContent in
+            plotContent
+                .buxGPUChartReveal(progress: animateProgress, axis: .vertical)
+                .drawingGroup()
         }
         .chartYAxis {
             AxisMarks(position: .leading) { _ in
@@ -55,6 +65,10 @@ private struct SpendingTrendBarChartLayer: View, Equatable {
             }
         }
         .frame(height: 220)
+        .animation(.easeOut(duration: 0.65), value: animateProgress)
+        .onAppear {
+            animateProgress = 1
+        }
         .overlay {
             GeometryReader { geometry in
                 HStack(spacing: 0) {
@@ -69,7 +83,6 @@ private struct SpendingTrendBarChartLayer: View, Equatable {
                 }
             }
         }
-        .modifier(ExpenseChartRasterizationModifier(enabled: true))
     }
 
     private func barGradient(for index: Int) -> LinearGradient {

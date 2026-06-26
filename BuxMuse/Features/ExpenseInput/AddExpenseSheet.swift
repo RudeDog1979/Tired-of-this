@@ -907,7 +907,7 @@ struct AddExpenseSheet: View {
                     Text(BuxCatalogLabel.string(scope.catalogKey, locale: locale)).tag(scope)
                 }
             }
-            .pickerStyle(.segmented)
+            .buxThemedSegmentedPicker()
             .padding(BuxLayout.section)
             .expensesThemedCardChrome(cornerRadius: 20)
         }
@@ -1092,7 +1092,7 @@ struct AddExpenseSheet: View {
                     }
                     BuxCatalogText.text("Owner transfer").tag(SynergyBridgeEntryMode.dividendTransfer)
                 }
-                .pickerStyle(.segmented)
+                .buxThemedSegmentedPicker()
 
                 if viewModel.bridgeEntryMode == .split {
                     Picker(loc("Secondary workspace"), selection: bridgeSecondarySelection) {

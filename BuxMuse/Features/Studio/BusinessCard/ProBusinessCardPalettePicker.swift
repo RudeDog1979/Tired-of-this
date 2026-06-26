@@ -17,10 +17,6 @@ struct ProBusinessCardPalettePicker: View {
 
     @State private var showCustomSheet = false
 
-    private var fadeBackground: Color {
-        themeManager.cardFill(for: colorScheme)
-    }
-
     var body: some View {
         BuxThemedCardForm {
             BuxFormSection(title: "Colors") {
@@ -31,10 +27,9 @@ struct ProBusinessCardPalettePicker: View {
                             presetButton(preset)
                         }
                     }
-                    .padding(.horizontal, BuxLayout.section)
                     .padding(.vertical, 6)
                 }
-                .buxHorizontalScrollEdgeFade(background: fadeBackground, width: 16)
+                .buxHorizontalCarouselLane(.formCard)
             }
         }
         .sheet(isPresented: $showCustomSheet) {

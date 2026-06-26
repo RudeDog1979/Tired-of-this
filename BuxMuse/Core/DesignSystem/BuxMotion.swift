@@ -4,6 +4,8 @@
 //
 
 import SwiftUI
+import QuartzCore
+import UIKit
 
 enum BuxMotion {
     static var reducedMotion: Bool {
@@ -81,8 +83,20 @@ enum BuxMotion {
     }
 
     /// Brand themes on/off — preset block reveal in Appearance settings.
+    /// Uses continuous spring smoothing so ProMotion can interpolate every refresh.
     static var brandThemesToggle: Animation {
-        reducedMotion ? .easeInOut(duration: 0.28) : .easeInOut(duration: 0.52)
+        if reducedMotion {
+            return .easeInOut(duration: 0.28)
+        }
+        if #available(iOS 17.0, *) {
+            return .smooth(duration: 0.52, extraBounce: 0)
+        }
+        return .spring(response: 0.46, dampingFraction: 0.9, blendDuration: 0)
+    }
+
+    /// Wall-clock span for brand-theme preset swap — matches `brandThemesToggle`.
+    static var brandThemesToggleDuration: TimeInterval {
+        reducedMotion ? 0.28 : 0.54
     }
 
     /// Brand theme crossfade — smooth, ~1s ease.
@@ -102,10 +116,106 @@ enum BuxMotion {
     }
 }
 
+// MARK: - ProMotion boost (animation window only — no idle FPS lock)
+
+private final class BuxProMotionBoostAnchorView: UIView {
+    private var displayLink: CADisplayLink?
+    private var boostUntil: CFTimeInterval = 0
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        backgroundColor = .clear
+        isHidden = true
+
+        let link = CADisplayLink(target: self, selector: #selector(tick))
+        if #available(iOS 15.0, *) {
+            let maxFPS = Float(UIScreen.main.maximumFramesPerSecond)
+            link.preferredFrameRateRange = CAFrameRateRange(
+                minimum: 60,
+                maximum: max(60, maxFPS),
+                preferred: max(60, maxFPS)
+            )
+        }
+        link.add(to: .main, forMode: .common)
+        link.isPaused = true
+        displayLink = link
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
+
+    deinit {
+        displayLink?.invalidate()
+    }
+
+    func boost(for duration: TimeInterval) {
+        boostUntil = CACurrentMediaTime() + duration
+        displayLink?.isPaused = false
+    }
+
+    @objc private func tick() {
+        guard CACurrentMediaTime() >= boostUntil else { return }
+        displayLink?.isPaused = true
+    }
+}
+
+private struct BuxProMotionBoostRepresentable<T: Equatable>: UIViewRepresentable {
+    let trigger: T
+    let duration: TimeInterval
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    func makeUIView(context: Context) -> BuxProMotionBoostAnchorView {
+        BuxProMotionBoostAnchorView()
+    }
+
+    func updateUIView(_ uiView: BuxProMotionBoostAnchorView, context: Context) {
+        let coordinator = context.coordinator
+        if let last = coordinator.lastTrigger as? T, last != trigger {
+            uiView.boost(for: duration)
+        }
+        coordinator.lastTrigger = trigger
+    }
+
+    final class Coordinator {
+        var lastTrigger: Any?
+    }
+}
+
+extension View {
+    /// Nudges the display to use full ProMotion headroom while `trigger` animates — pauses when idle.
+    func buxProMotionBoost<T: Equatable>(
+        on trigger: T,
+        duration: TimeInterval = BuxMotion.brandThemesToggleDuration
+    ) -> some View {
+        background {
+            BuxProMotionBoostRepresentable(trigger: trigger, duration: duration)
+                .allowsHitTesting(false)
+        }
+    }
+}
+
+private struct BuxInstantAppearanceSectionChromeKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// When true, form section card fills/strokes snap instantly (Appearance settings rows below theme picker).
+    var buxInstantAppearanceSectionChrome: Bool {
+        get { self[BuxInstantAppearanceSectionChromeKey.self] }
+        set { self[BuxInstantAppearanceSectionChromeKey.self] = newValue }
+    }
+}
+
 extension View {
     /// Locks frames, shadows, and typography during brand-theme changes.
     func buxStableThemeLayout(themeId: String) -> some View {
-        animation(nil, value: themeId)
+        self
     }
 
     /// Crossfades theme-driven colors without shifting layout.
@@ -117,11 +227,18 @@ extension View {
 private struct BuxAnimateAppearanceColorsModifier: ViewModifier {
     let themeId: String
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.buxInstantAppearanceSectionChrome) private var instantAppearanceSectionChrome
+    @ObservedObject private var settings = SettingsStore.shared
 
     func body(content: Content) -> some View {
-        content
-            .animation(BuxMotion.themeCrossfade, value: themeId)
-            .animation(BuxMotion.themeCrossfade, value: colorScheme)
+        if instantAppearanceSectionChrome {
+            content
+        } else {
+            content
+                .animation(BuxMotion.themeCrossfade, value: themeId)
+                .animation(BuxMotion.themeCrossfade, value: colorScheme)
+                .animation(BuxMotion.themeCrossfade, value: settings.brandThemesEnabled)
+        }
     }
 }
 

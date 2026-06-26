@@ -126,7 +126,7 @@ struct SimpleStudioJobQuoteSheet: View {
                                         Text(style.localizedPlainTitle(locale: appSettingsManager.interfaceLocale)).tag(style)
                                     }
                                 }
-                                .pickerStyle(.segmented)
+                                .buxThemedSegmentedPicker()
                                 .padding(.horizontal, BuxTokens.section)
                                 .padding(.vertical, 10)
 
@@ -227,7 +227,7 @@ struct SimpleStudioJobQuoteSheet: View {
                                         Text(mode.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(mode)
                                     }
                                 }
-                                .pickerStyle(.segmented)
+                                .buxThemedSegmentedPicker()
                                 .buxFormFieldPadding()
                                 .onChange(of: paymentMode) { _, mode in
                                     if mode == .waiting {

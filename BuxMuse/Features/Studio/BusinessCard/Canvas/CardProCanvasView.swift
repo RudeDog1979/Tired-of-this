@@ -120,6 +120,9 @@ struct CardProCanvasView: View {
             showSafeZone = design.editorPreferences?.showSafeZone ?? true
             showSnapGuides = design.editorPreferences?.showSnapGuides ?? true
         }
+        .onChange(of: selectedID) { _, _ in
+            resetGestureOrigins()
+        }
         .sheet(isPresented: $showLayerPanel) {
             NavigationStack {
                 CardLayerPanel(
@@ -270,7 +273,7 @@ struct CardProCanvasView: View {
                     layers: doc.layers,
                     selectedID: $selectedID,
                     backgroundSelected: $backgroundSelected,
-                    onSelect: { _ in dragOrigin = nil }
+                    onSelect: { _ in resetGestureOrigins() }
                 )
                 .environmentObject(themeManager)
             }
@@ -284,6 +287,7 @@ struct CardProCanvasView: View {
                 ) {
                     backgroundSelected = true
                     selectedID = nil
+                    resetGestureOrigins()
                 }
                 railButton("Add text", icon: "text.badge.plus") { addTextLayer() }
                 railButton("Shapes", icon: "triangle.fill") { showShapePicker = true }
@@ -441,12 +445,6 @@ struct CardProCanvasView: View {
                 let frame = layer.transform.frame(in: cardSize)
                 let layerID = layer.id
 
-                Color.clear
-                    .frame(width: frame.width, height: frame.height)
-                    .rotationEffect(.degrees(layer.transform.rotation))
-                    .position(x: frame.midX, y: frame.midY)
-                    .gesture(layerPinchRotateGesture(layerID: layerID))
-
                 BuxCanvasSelectionChrome(
                     frame: frame,
                     accent: themeManager.contrastAccentColor(for: colorScheme),
@@ -456,43 +454,44 @@ struct CardProCanvasView: View {
                     onResize: { newSize in applyResize(layerID: layerID, newSize: newSize, cardSize: cardSize) },
                     onResizeEnd: { canvasToolbarDidChange() },
                     onRotate: { applyRotation(layerID: layerID, degrees: $0) },
-                    onRotateEnd: { canvasToolbarDidChange() }
+                    onRotateEnd: { canvasToolbarDidChange() },
+                    onPinch: { applyPinch(layerID: layerID, magnification: $0) },
+                    onPinchEnd: { finishPinchGesture() },
+                    onPinchRotate: { applyPinchRotation(layerID: layerID, angle: $0) },
+                    onPinchRotateEnd: { finishPinchRotateGesture() }
                 )
             }
         }
     }
 
-    private func layerPinchRotateGesture(layerID: UUID) -> some Gesture {
-        SimultaneousGesture(
-            MagnificationGesture()
-                .onChanged { magnification in
-                    guard var layer = design.canvasDocument?.layer(id: layerID), !layer.isLocked else { return }
-                    if pinchOriginScale == nil { pinchOriginScale = layer.transform.scale }
-                    guard let originScale = pinchOriginScale else { return }
-                    layer.transform.scale = BuxCanvasLayerTransformMath.clampScale(originScale * magnification)
-                    mutateCanvas { $0.updateLayer(layer) }
-                }
-                .onEnded { _ in
-                    pinchOriginScale = nil
-                    mutateCanvas { $0.markCustomized() }
-                    canvasToolbarDidChange()
-                },
-            RotateGesture()
-                .onChanged { value in
-                    guard var layer = design.canvasDocument?.layer(id: layerID), !layer.isLocked else { return }
-                    if rotateOriginDegrees == nil { rotateOriginDegrees = layer.transform.rotation }
-                    guard let originDegrees = rotateOriginDegrees else { return }
-                    layer.transform.rotation = BuxCanvasLayerTransformMath.snapRotation(
-                        originDegrees + value.rotation.degrees
-                    )
-                    mutateCanvas { $0.updateLayer(layer) }
-                }
-                .onEnded { _ in
-                    rotateOriginDegrees = nil
-                    mutateCanvas { $0.markCustomized() }
-                    canvasToolbarDidChange()
-                }
+    private func applyPinch(layerID: UUID, magnification: CGFloat) {
+        guard var layer = design.canvasDocument?.layer(id: layerID), !layer.isLocked else { return }
+        if pinchOriginScale == nil { pinchOriginScale = layer.transform.scale }
+        guard let originScale = pinchOriginScale else { return }
+        layer.transform.scale = BuxCanvasLayerTransformMath.clampScale(originScale * Double(magnification))
+        mutateCanvasDuringGesture { $0.updateLayer(layer) }
+    }
+
+    private func finishPinchGesture() {
+        pinchOriginScale = nil
+        mutateCanvas { $0.markCustomized() }
+        canvasToolbarDidChange()
+    }
+
+    private func applyPinchRotation(layerID: UUID, angle: Angle) {
+        guard var layer = design.canvasDocument?.layer(id: layerID), !layer.isLocked else { return }
+        if rotateOriginDegrees == nil { rotateOriginDegrees = layer.transform.rotation }
+        guard let originDegrees = rotateOriginDegrees else { return }
+        layer.transform.rotation = BuxCanvasLayerTransformMath.snapRotation(
+            originDegrees + angle.degrees
         )
+        mutateCanvasDuringGesture { $0.updateLayer(layer) }
+    }
+
+    private func finishPinchRotateGesture() {
+        rotateOriginDegrees = nil
+        mutateCanvas { $0.markCustomized() }
+        canvasToolbarDidChange()
     }
 
     private var backgroundPhotoTools: some View {
@@ -746,7 +745,7 @@ struct CardProCanvasView: View {
         guard let origin = dragOrigin else { return }
         layer.transform.centerX = clamp(origin.centerX + Double(translation.width / cardSize.width))
         layer.transform.centerY = clamp(origin.centerY + Double(translation.height / cardSize.height))
-        mutateCanvas { $0.updateLayer(layer) }
+        mutateCanvasDuringGesture { $0.updateLayer(layer) }
     }
 
     private func finishMoveGesture() {
@@ -864,6 +863,21 @@ struct CardProCanvasView: View {
         design.updatedAt = Date()
     }
 
+    /// Avoids implicit layout animations while a finger gesture is updating the canvas.
+    private func mutateCanvasDuringGesture(_ update: (inout CardCanvasDocument) -> Void) {
+        var transaction = SwiftUI.Transaction()
+        transaction.disablesAnimations = true
+        SwiftUI.withTransaction(transaction) {
+            mutateCanvas(update)
+        }
+    }
+
+    private func resetGestureOrigins() {
+        dragOrigin = nil
+        pinchOriginScale = nil
+        rotateOriginDegrees = nil
+    }
+
     private func canvasToolbarDidChange() {
         snapshotForUndo()
         design = CardCanvasSync.syncLegacyStyle(from: design)
@@ -873,13 +887,13 @@ struct CardProCanvasView: View {
         guard var layer = design.canvasDocument?.layer(id: layerID) else { return }
         layer.transform.width = max(0.04, Double(newSize.width / cardSize.width) / layer.transform.scale)
         layer.transform.height = max(0.04, Double(newSize.height / cardSize.height) / layer.transform.scale)
-        mutateCanvas { $0.updateLayer(layer); $0.markCustomized() }
+        mutateCanvasDuringGesture { $0.updateLayer(layer); $0.markCustomized() }
     }
 
     private func applyRotation(layerID: UUID, degrees: Double) {
         guard var layer = design.canvasDocument?.layer(id: layerID) else { return }
         layer.transform.rotation = BuxCanvasLayerTransformMath.snapRotation(degrees)
-        mutateCanvas { $0.updateLayer(layer) }
+        mutateCanvasDuringGesture { $0.updateLayer(layer) }
     }
 
     private func handleCanvasTap(at location: CGPoint, cardSize: CGSize) {
@@ -888,11 +902,11 @@ struct CardProCanvasView: View {
         if let hit = CardCanvasHitTester.hitTest(point: CGPoint(x: nx, y: ny), in: document) {
             selectedID = hit
             backgroundSelected = false
-            dragOrigin = nil
+            resetGestureOrigins()
         } else {
             selectedID = nil
             backgroundSelected = true
-            dragOrigin = nil
+            resetGestureOrigins()
         }
     }
 
@@ -1085,14 +1099,14 @@ struct CardProCanvasView: View {
         guard let doc = design.canvasDocument, let prev = undoManager.undo(current: doc) else { return }
         design.canvasDocument = prev
         design = CardCanvasSync.syncLegacyStyle(from: design)
-        dragOrigin = nil
+        resetGestureOrigins()
     }
 
     private func redo() {
         guard let doc = design.canvasDocument, let next = undoManager.redo(current: doc) else { return }
         design.canvasDocument = next
         design = CardCanvasSync.syncLegacyStyle(from: design)
-        dragOrigin = nil
+        resetGestureOrigins()
     }
 
     private func canvasToggleRow(title: String, isOn: Binding<Bool>) -> some View {

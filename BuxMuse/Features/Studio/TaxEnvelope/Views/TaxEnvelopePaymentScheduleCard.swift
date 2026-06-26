@@ -31,7 +31,7 @@ struct TaxEnvelopePaymentScheduleCard: View {
                             .tag(schedule)
                     }
                 }
-                .pickerStyle(.segmented)
+                .buxThemedSegmentedPicker()
 
                 if let catalogDefault {
                     Text(

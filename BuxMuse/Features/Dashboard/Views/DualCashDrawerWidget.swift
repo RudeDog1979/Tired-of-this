@@ -188,7 +188,7 @@ struct QuickCashDrawerAdjustSheet: View {
                     BuxCatalogText.text("Receive Cash (Income)").tag(true)
                     BuxCatalogText.text("Spend Cash (Expense)").tag(false)
                 }
-                .pickerStyle(.segmented)
+                .buxThemedSegmentedPicker()
                 .padding(.horizontal)
                 
                 // Select Wallet drawer

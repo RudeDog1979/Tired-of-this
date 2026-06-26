@@ -316,7 +316,6 @@ struct StudioTaxReferenceView: View {
                     Text(type.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(type)
                 }
             }
-            .pickerStyle(.segmented)
             .buxThemedSegmentedPicker()
             Text(taxIncomeType.catalogSummaryLabel(locale: appSettingsManager.interfaceLocale))
                 .font(.system(size: 11, weight: .medium))
@@ -366,7 +365,7 @@ struct StudioTaxReferenceView: View {
                 BuxCatalogDynamicText(key: "Quarterly").tag("quarterly")
                 BuxCatalogDynamicText(key: "Annually").tag("annually")
             }
-            .pickerStyle(.segmented)
+            .buxThemedSegmentedPicker()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BuxLayout.section)

@@ -1543,7 +1543,7 @@ struct StudioProjectEditorSheet: View {
                                     Text(choice.catalogLabel(locale: appSettingsManager.interfaceLocale)).tag(choice)
                                 }
                             }
-                            .pickerStyle(.segmented)
+                            .buxThemedSegmentedPicker()
                             .padding(.horizontal, BuxTokens.section)
                             .padding(.vertical, 10)
 

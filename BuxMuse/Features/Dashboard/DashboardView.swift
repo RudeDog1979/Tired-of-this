@@ -796,7 +796,7 @@ private struct DashboardCategoryPillSection: View {
                                     }
                                     .scrollTargetLayout()
                                 }
-                                .buxViewAlignedHorizontalCarousel()
+                                .buxHorizontalCarouselLane(.screen())
                                 .transition(.buxCategorySlide(direction: categorySlideDirection))
                             } else if navigationCoordinator.activeCategoryPill == "Subscriptions" {
                                 let activeSubs = financialBridge.activeSubscriptions()
@@ -851,7 +851,7 @@ private struct DashboardCategoryPillSection: View {
                                             }
                                             .scrollTargetLayout()
                                         }
-                                        .buxViewAlignedHorizontalCarousel()
+                                        .buxHorizontalCarouselLane(.screen())
                                     }
                                 }
                                 .transition(.buxCategorySlide(direction: categorySlideDirection))

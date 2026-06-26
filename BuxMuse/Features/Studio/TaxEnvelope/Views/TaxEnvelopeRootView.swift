@@ -139,7 +139,7 @@ struct TaxEnvelopeRootView: View {
                 Text(tab.label(locale: locale)).tag(tab)
             }
         }
-        .pickerStyle(.segmented)
+        .buxThemedSegmentedPicker()
     }
 
     @ViewBuilder

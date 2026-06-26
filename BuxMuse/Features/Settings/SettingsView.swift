@@ -568,13 +568,23 @@ struct ThemeSwatchCard: View {
     }
 
     private var cardCornerRadius: CGFloat {
-        layout == .carousel ? 20 : 22
+        switch layout {
+        case .carousel: 20
+        case .grid: 22
+        case .appearanceRow: 18
+        }
+    }
+
+    private var swatchSpacing: CGFloat {
+        layout == .grid ? 12 : (layout == .appearanceRow ? 8 : 10)
     }
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: layout == .carousel ? 10 : 12) {
-                if layout == .carousel {
+            VStack(spacing: swatchSpacing) {
+                if layout == .appearanceRow {
+                    appearanceRowSwatch
+                } else if layout == .carousel {
                     ZStack(alignment: .bottomTrailing) {
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .fill(
@@ -631,7 +641,7 @@ struct ThemeSwatchCard: View {
                 }
 
                 Text(theme.localizedName(locale: appSettingsManager.interfaceLocale))
-                    .font(.system(size: layout == .carousel ? 12 : 13, weight: .bold))
+                    .font(.system(size: labelFontSize, weight: labelWeight))
                     .foregroundColor(isSelected
                         ? themeManager.labelPrimary(for: colorScheme)
                         : themeManager.labelSecondary(for: colorScheme))
@@ -639,7 +649,7 @@ struct ThemeSwatchCard: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.85)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 6)
+                    .padding(.horizontal, layout == .grid ? 6 : 0)
 
                 if layout == .carousel {
                     Image(systemName: "checkmark.circle.fill")
@@ -649,8 +659,8 @@ struct ThemeSwatchCard: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, layout == .carousel ? 12 : 20)
-            .padding(.horizontal, layout == .carousel ? 12 : 0)
+            .padding(.vertical, verticalPadding)
+            .padding(.horizontal, horizontalPadding)
             .modifier(
                 ThemeSwatchCardChromeModifier(
                     layout: layout,
@@ -661,10 +671,97 @@ struct ThemeSwatchCard: View {
             )
         }
         .buttonStyle(BuxMicroShrinkStyle())
-        .padding(.vertical, layout == .carousel ? 4 : 0)
-        .scaleEffect(isSelected ? (layout == .carousel ? 1.03 : 1.02) : 1.0)
+        .padding(.vertical, outerVerticalPadding)
+        .scaleEffect(isSelected ? selectionScale : 1.0)
         .animation(.buxBounce, value: isSelected)
         .buxStableThemeLayout(themeId: themeManager.current.id)
+    }
+
+    private var labelFontSize: CGFloat {
+        switch layout {
+        case .appearanceRow: 11
+        case .carousel: 12
+        case .grid: 13
+        }
+    }
+
+    private var labelWeight: Font.Weight {
+        if layout == .appearanceRow {
+            return isSelected ? .semibold : .medium
+        }
+        return .bold
+    }
+
+    private var verticalPadding: CGFloat {
+        switch layout {
+        case .appearanceRow, .carousel: 12
+        case .grid: 20
+        }
+    }
+
+    private var horizontalPadding: CGFloat {
+        layout == .carousel ? 12 : 0
+    }
+
+    private var outerVerticalPadding: CGFloat {
+        layout == .grid ? 0 : 4
+    }
+
+    private var selectionScale: CGFloat {
+        switch layout {
+        case .appearanceRow, .carousel: 1.03
+        case .grid: 1.02
+        }
+    }
+
+    @ViewBuilder
+    private var appearanceRowSwatch: some View {
+        ZStack(alignment: .bottomTrailing) {
+            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: heroGradient,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 48, height: 48)
+                .shadow(
+                    color: theme.accentColor.opacity(isSelected ? 0.32 : 0.16),
+                    radius: isSelected ? 8 : 4,
+                    x: 0,
+                    y: isSelected ? 3 : 2
+                )
+                .overlay {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            .strokeBorder(Color.white, lineWidth: 2.5)
+                    }
+                }
+                .overlay {
+                    Group {
+                        if isSelected {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundStyle(.white)
+                        } else {
+                            Image(systemName: theme.icon)
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.white.opacity(0.95))
+                        }
+                    }
+                }
+
+            Circle()
+                .fill(theme.accentColor)
+                .frame(width: 10, height: 10)
+                .overlay {
+                    Circle()
+                        .strokeBorder(Color.white.opacity(0.9), lineWidth: 1)
+                }
+                .padding(4)
+        }
+        .frame(width: 48, height: 48)
     }
 }
 

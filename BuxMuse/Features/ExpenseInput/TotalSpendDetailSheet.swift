@@ -272,8 +272,7 @@ struct TotalSpendDetailSheet: View {
                 Text(range.localizedTitle(locale: appSettingsManager.interfaceLocale)).tag(range)
             }
         }
-        .pickerStyle(.segmented)
-        .tint(themeManager.contrastAccentColor(for: colorScheme))
+        .buxThemedSegmentedPicker()
     }
 
     // MARK: - Chart Section

@@ -477,7 +477,7 @@ private struct SimpleScanChipEditorSheet: View {
                     BuxCatalogDynamicText(key: "Partial").tag(SimplePaymentStatus.partial)
                     BuxCatalogDynamicText(key: "Still waiting").tag(SimplePaymentStatus.unpaid)
                 }
-                .pickerStyle(.segmented)
+                .buxThemedSegmentedPicker()
                 .buxFormFieldPadding()
             }
         }

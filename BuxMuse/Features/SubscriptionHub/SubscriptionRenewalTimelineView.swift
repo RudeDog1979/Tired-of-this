@@ -40,7 +40,7 @@ struct SubscriptionRenewalTimelineView: View {
                     }
                     .scrollTargetLayout()
                 }
-                .buxViewAlignedHorizontalCarousel()
+                .buxHorizontalCarouselLane(.screen())
             }
         }
     }

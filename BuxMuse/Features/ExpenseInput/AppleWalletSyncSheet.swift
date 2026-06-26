@@ -98,7 +98,7 @@ struct AppleWalletSyncSheet: View {
                                     Text(range.localizedDisplayName(locale: appSettingsManager.interfaceLocale)).tag(range)
                                 }
                             }
-                            .pickerStyle(.segmented)
+                            .buxThemedSegmentedPicker()
                             .padding(.horizontal, 20)
                         }
                         
