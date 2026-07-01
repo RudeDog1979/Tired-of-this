@@ -11879,6 +11879,52 @@
         }
       }
     },
+    "Auto-renewable subscription · renews every month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada mes"
+          }
+        }
+      }
+    },
+    "Auto-renewable subscription · renews every year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada año"
+          }
+        }
+      }
+    },
     "Auto-adjust from history" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -59781,6 +59827,29 @@
         }
       }
     },
+    "Payment will be charged to your Apple ID account. Subscription automatically renews unless canceled at least 24 hours before the end of the current period." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
+          }
+        }
+      }
+    },
     "Payment & money" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -63098,6 +63167,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aviso de privacidad"
+          }
+        }
+      }
+    },
+    "Privacy Policy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidad"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidad"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidad"
           }
         }
       }
@@ -85704,6 +85796,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Términos y condiciones"
+          }
+        }
+      }
+    },
+    "Terms of Use" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Términos de uso"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Términos de uso"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Términos de uso"
           }
         }
       }

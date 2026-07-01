@@ -17,11 +17,36 @@ BuxMuse does not use in-app chat or a BuxMuse login. We cannot see your expenses
 
 ## Getting started
 
-### First launch
+### First launch setup
+
+On first open, BuxMuse shows a **5-card onboarding wizard**. You can **Skip** at any time before the last card. Nothing requires a BuxMuse account. You can replay it anytime from **Settings → Replay onboarding guide**.
+
+**01 — Confirm region & currency**  
+On the **Regional & budget** card, review country/region and display currency (BuxMuse detects your device automatically). Change them if needed.
+
+**02 — Set your budget baseline (optional)**  
+Turn on **consumer debt** tracking if you want it. Set an **optional spending cap**, or leave it at zero to use your full logged income.
+
+**03 — Learn about Studio (optional)**  
+The **Studio suite** card explains Simple and Pro Studio. No purchase required during setup — activate later in **Settings → Studio**.
+
+**04 — Turn on backup & security (optional)**  
+On **Backup & protection**, optionally enable Face ID / Touch ID, a passcode, and local backup reminders. Your data stays on this device until you export a backup or turn on iCloud sync.
+
+**05 — Get started & take the tour**  
+Tap **Get Started**. An interactive app tour may start automatically. Then start your **7-day free trial** to unlock the app and log your first income from Home.
+
+**Later (not required at first launch)**
+
+- **iCloud sync** — **Settings → iCloud sync** when you want a second device
+- **Categories** — choose when adding income or expenses
+- **Wallet import** — optional in Expenses when you need it
+
+### Install & explore
 
 1. **Install** BuxMuse from the App Store or TestFlight.
-2. Complete the **onboarding** wizard — region, currency, and monthly budget. BuxMuse detects your device region on first launch.
-3. Explore **Home**, **Expenses**, **Goals**, and **Settings**. Use the optional **app tour** if offered after onboarding.
+2. Complete the **onboarding wizard** above.
+3. Explore **Home**, **Expenses**, **Goals**, and **Settings** after the optional app tour.
 
 ### Your 7-day free trial
 
@@ -202,4 +227,4 @@ Manage all purchases with your **Apple ID**. BuxMuse cannot change billing or is
 
 BuxMuse is published by **Rodolfo Zorrilla Pena**.
 
-*Last updated: 24 June 2026*
+*Last updated: 26 June 2026*

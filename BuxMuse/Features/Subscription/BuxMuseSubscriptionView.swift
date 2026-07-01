@@ -104,6 +104,9 @@ struct BuxMuseSubscriptionView: View {
             }
             enterpriseBlock
             footerBlock
+            BuxSubscriptionLegalLinks()
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
             restoreButton
         }
     }
@@ -258,15 +261,10 @@ struct BuxMuseSubscriptionView: View {
             subtitle: baseAppSubtitle,
             priceID: baseBillingPeriod.baseProductID,
             badge: baseAppBadge,
-            bullets: [
-                "Budgets, expenses, goals, and insights",
-                purchaseManager.baseIntroOfferEligible
-                    ? "7-day free trial, then billed through Apple"
-                    : "Required for app access",
-                "Studio add-ons are optional and sold separately"
-            ],
+            bullets: baseAppBullets,
             buttonTitle: baseAppButtonTitle,
             isSubscribed: purchaseManager.baseSubscriptionActive,
+            showsSubscriptionLegalFooter: true,
             action: { Task { await purchaseBaseApp() } }
         )
         .id(baseBillingPeriod)
@@ -303,6 +301,19 @@ struct BuxMuseSubscriptionView: View {
         return baseBillingPeriod == .yearly
             ? BuxCatalogLabel.string("Full app · £14.99/year", locale: appSettingsManager.interfaceLocale)
             : BuxCatalogLabel.string("Full app · £1.99/month", locale: appSettingsManager.interfaceLocale)
+    }
+
+    private var baseAppBullets: [String] {
+        [
+            "Budgets, expenses, goals, and insights",
+            purchaseManager.baseIntroOfferEligible
+                ? "7-day free trial, then billed through Apple"
+                : "Required for app access",
+            baseBillingPeriod == .yearly
+                ? "Auto-renewable subscription · renews every year"
+                : "Auto-renewable subscription · renews every month",
+            "Studio add-ons are optional and sold separately"
+        ]
     }
 
     private var enterpriseBlock: some View {
@@ -360,6 +371,7 @@ struct BuxMuseSubscriptionView: View {
         buttonTitle: String,
         isSecondary: Bool = false,
         isSubscribed: Bool = false,
+        showsSubscriptionLegalFooter: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -415,6 +427,18 @@ struct BuxMuseSubscriptionView: View {
                 action: action
             )
             .environmentObject(themeManager)
+
+            if showsSubscriptionLegalFooter {
+                BuxSubscriptionLegalLinks(layout: .stacked)
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .padding(.top, 4)
+
+                BuxSubscriptionAutoRenewDisclosure()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .padding(.top, 2)
+            }
         }
         .padding(BuxTokens.marginRegular)
         .frame(maxWidth: .infinity, alignment: .leading)

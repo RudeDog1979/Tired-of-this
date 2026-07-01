@@ -88,6 +88,12 @@ struct AboutSettingsView: View {
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                             }
+
+                            Divider().padding(.vertical, 4)
+
+                            BuxSubscriptionLegalLinks()
+                                .environmentObject(themeManager)
+                                .environmentObject(appSettingsManager)
                         }
                         .padding(20)
                         .settingsThemedCardChrome(cornerRadius: 20)
