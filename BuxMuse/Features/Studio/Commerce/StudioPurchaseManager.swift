@@ -148,6 +148,7 @@ final class StudioPurchaseManager: ObservableObject {
 
     func loadProducts() async {
         isLoadingProducts = true
+        lastErrorMessage = nil
         defer {
             isLoadingProducts = false
             didLoadProducts = true
@@ -197,6 +198,19 @@ final class StudioPurchaseManager: ObservableObject {
         }
 
         print("🏪 [StoreKit] refreshEntitlements() ended. baseSub=\(baseSub), simpleOneTime=\(simpleOneTime), pro=\(pro)")
+        
+        // Safeguard for Xcode StoreKit testing bug: if the local database is corrupted (fopen failed),
+        // currentEntitlements returns empty. We preserve any active state granted during this session.
+        if !baseSub && self.baseSubscriptionActive {
+            baseSub = true
+        }
+        if !simpleOneTime && self.ownsSimpleOneTimePurchase {
+            simpleOneTime = true
+        }
+        if !pro && self.proSubscriptionActive {
+            pro = true
+        }
+
         baseSubscriptionActive = baseSub
         ownsSimpleOneTimePurchase = simpleOneTime
         proSubscriptionActive = pro

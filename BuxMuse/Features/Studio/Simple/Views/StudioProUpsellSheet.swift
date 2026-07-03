@@ -131,6 +131,17 @@ struct StudioProUpsellSheet: View {
                     ) {
                         dismiss()
                     }
+
+                    VStack(spacing: 12) {
+                        BuxSubscriptionLegalLinks(layout: .horizontal)
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                        
+                        BuxSubscriptionAutoRenewDisclosure()
+                            .environmentObject(themeManager)
+                            .environmentObject(appSettingsManager)
+                    }
+                    .padding(.top, BuxTokens.tight)
                 }
                 .padding(.horizontal, BuxTokens.marginRegular)
 

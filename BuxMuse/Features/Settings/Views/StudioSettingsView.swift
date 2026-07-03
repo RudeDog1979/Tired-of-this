@@ -364,6 +364,20 @@ struct StudioSettingsView: View {
                 }
                 .disabled(purchaseManager.isRestoring)
                 .buxFormFieldPadding()
+
+                BuxFormRowDivider()
+
+                VStack(spacing: 8) {
+                    BuxSubscriptionLegalLinks(layout: .horizontal)
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+
+                    BuxSubscriptionAutoRenewDisclosure()
+                        .environmentObject(themeManager)
+                        .environmentObject(appSettingsManager)
+                }
+                .padding(.vertical, BuxTokens.tight)
+                .padding(.horizontal, BuxTokens.marginRegular)
             }
         }
         .tutorialAnchor(.settingsStudioDetail, coordinator: tutorialCoordinator)
