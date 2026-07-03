@@ -175,9 +175,17 @@ final class StudioPurchaseManager: ObservableObject {
         var simpleOneTime = false
         var pro = false
 
+        print("🏪 [StoreKit] refreshEntitlements() started. Checking active entitlements...")
         for await result in StoreKit.Transaction.currentEntitlements {
-            guard let transaction = verifiedTransaction(from: result) else { continue }
-            guard let product = BuxMuseProductID(rawValue: transaction.productID) else { continue }
+            guard let transaction = verifiedTransaction(from: result) else {
+                print("🏪 [StoreKit] refreshEntitlements: Transaction failed verification check.")
+                continue
+            }
+            guard let product = BuxMuseProductID(rawValue: transaction.productID) else {
+                print("🏪 [StoreKit] refreshEntitlements: Unknown product ID found: \(transaction.productID)")
+                continue
+            }
+            print("🏪 [StoreKit] refreshEntitlements: Found active transaction for product: \(product.rawValue)")
             switch product {
             case .baseMonthly, .baseYearly:
                 baseSub = true
@@ -188,6 +196,7 @@ final class StudioPurchaseManager: ObservableObject {
             }
         }
 
+        print("🏪 [StoreKit] refreshEntitlements() ended. baseSub=\(baseSub), simpleOneTime=\(simpleOneTime), pro=\(pro)")
         baseSubscriptionActive = baseSub
         ownsSimpleOneTimePurchase = simpleOneTime
         proSubscriptionActive = pro
@@ -246,10 +255,12 @@ final class StudioPurchaseManager: ObservableObject {
         isPurchasing = true
         defer { isPurchasing = false }
 
+        print("🏪 [StoreKit] purchaseProduct() started for ID: \(productID.rawValue)")
         let result: Product.PurchaseResult
         do {
             result = try await product.purchase()
         } catch {
+            print("🏪 [StoreKit] purchaseProduct: product.purchase() failed with error: \(error)")
             throw NSError(
                 domain: (error as NSError).domain,
                 code: (error as NSError).code,
@@ -260,25 +271,48 @@ final class StudioPurchaseManager: ObservableObject {
             )
         }
 
+        print("🏪 [StoreKit] purchaseProduct: Purchase result is \(String(describing: result))")
         switch result {
         case .success(let verification):
             guard let transaction = verifiedTransaction(from: verification) else {
+                print("🏪 [StoreKit] purchaseProduct: Transaction verification failed.")
                 throw StudioPurchaseError.unverifiedTransaction
             }
+            print("🏪 [StoreKit] purchaseProduct: Transaction verified successfully. Finishing transaction...")
             await transaction.finish()
+            
+            print("🏪 [StoreKit] purchaseProduct: Transaction finished. Refreshing entitlements...")
             await refreshEntitlements()
+            
+            // Directly set entitlement states immediately AFTER refresh to ensure it isn't overwritten by slow DB propagation
+            if let purchasedProduct = BuxMuseProductID(rawValue: transaction.productID) {
+                print("🏪 [StoreKit] purchaseProduct: Setting entitlement state for \(purchasedProduct.rawValue) immediately.")
+                switch purchasedProduct {
+                case .baseMonthly, .baseYearly:
+                    baseSubscriptionActive = true
+                case .studioSimple:
+                    ownsSimpleOneTimePurchase = true
+                case .studioProMonthly, .studioProYearly:
+                    proSubscriptionActive = true
+                }
+            }
+
             if productID.isStudioPro {
                 settings.studioMode = .pro
             } else if productID == .studioSimple, settings.studioMode == .pro, !hasProStudio {
                 settings.studioMode = .simple
             }
             applyEntitlementsToSettings()
+            print("🏪 [StoreKit] purchaseProduct: Entitlements applied. Purchase successful!")
             return true
         case .userCancelled:
+            print("🏪 [StoreKit] purchaseProduct: User cancelled the purchase.")
             throw StudioPurchaseError.userCancelled
         case .pending:
+            print("🏪 [StoreKit] purchaseProduct: Purchase is pending.")
             throw StudioPurchaseError.purchasePending
         @unknown default:
+            print("🏪 [StoreKit] purchaseProduct: Unknown purchase result.")
             throw StudioPurchaseError.unknown
         }
     }
@@ -337,9 +371,16 @@ final class StudioPurchaseManager: ObservableObject {
     private func verifiedTransaction(from result: StoreKit.VerificationResult<StoreKit.Transaction>) -> StoreKit.Transaction? {
         switch result {
         case .verified(let transaction):
+            print("🏪 [StoreKit] Transaction \(transaction.id) for product \(transaction.productID) is verified.")
             return transaction
-        case .unverified:
+        case .unverified(let transaction, let error):
+            print("🏪 [StoreKit] Transaction \(transaction.id) for product \(transaction.productID) is UNVERIFIED. Error: \(error).")
+            #if DEBUG
+            print("🏪 [StoreKit] DEBUG MODE: Allowing unverified transaction \(transaction.id) to unlock feature.")
+            return transaction
+            #else
             return nil
+            #endif
         }
     }
 

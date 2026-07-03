@@ -250,6 +250,9 @@
 							com.apple.HealthKit = {
 								enabled = 1;
 							};
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
 						};
 					};
 					E23C9AA62FB312CF006982E0 = {
