@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import HealthKit
 
 public struct BurnoutDashboardWidget: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -54,32 +53,19 @@ public struct BurnoutDashboardWidget: View {
                 
                 Spacer()
                 
-                if !settings.healthKitSyncEnabled {
-                    Button(action: {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-                            isEditingSliders.toggle()
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "slider.horizontal.3")
-                            BuxCatalogText.text(isEditingSliders ? "Done" : "Tune")
-                        }
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                Button(action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                        isEditingSliders.toggle()
                     }
-                    .buttonStyle(BuxMicroShrinkStyle())
-                } else {
+                }) {
                     HStack(spacing: 4) {
-                        Image(systemName: "applewatch.side.right")
-                        BuxCatalogText.text("Synced")
+                        Image(systemName: "slider.horizontal.3")
+                        BuxCatalogText.text(isEditingSliders ? "Done" : "Tune")
                     }
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.green.opacity(0.85))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(Color.green.opacity(0.12))
-                    .clipShape(Capsule())
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 }
+                .buttonStyle(BuxMicroShrinkStyle())
             }
             .padding(.horizontal, 4)
             
@@ -172,7 +158,7 @@ public struct BurnoutDashboardWidget: View {
             }
             .padding(.vertical, 4)
             
-            if isEditingSliders && !settings.healthKitSyncEnabled {
+            if isEditingSliders {
                 Divider().opacity(0.08)
                     .transition(.opacity)
                 

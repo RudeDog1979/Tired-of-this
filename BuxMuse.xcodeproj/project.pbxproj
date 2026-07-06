@@ -247,9 +247,6 @@
 					E23C9A942FB312CE006982E0 = {
 						CreatedOnToolsVersion = 26.4.1;
 						SystemCapabilities = {
-							com.apple.HealthKit = {
-								enabled = 1;
-							};
 							com.apple.InAppPurchase = {
 								enabled = 1;
 							};
@@ -519,8 +516,6 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "BuxMuse needs camera access to scan physical receipts and documents.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "BuxMuse secures your local financial summaries with Face ID authentication.";
 				INFOPLIST_KEY_NSFinancialDataUsageDescription = "BuxMuse reads transactions from Apple Wallet only when you turn on Wallet sync, to categorize spending and show balances in your ledger. Your financial data stays on your device and is not sold or shared.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "BuxMuse does not write health data; this permission is reserved for future wellness integrations.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "BuxMuse uses your location to fill start or end addresses when logging business mileage.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "BuxMuse needs photo library access to let you select stored receipt images.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -564,8 +559,6 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "BuxMuse needs camera access to scan physical receipts and documents.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "BuxMuse secures your local financial summaries with Face ID authentication.";
 				INFOPLIST_KEY_NSFinancialDataUsageDescription = "BuxMuse reads transactions from Apple Wallet only when you turn on Wallet sync, to categorize spending and show balances in your ledger. Your financial data stays on your device and is not sold or shared.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "BuxMuse does not write health data; this permission is reserved for future wellness integrations.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "BuxMuse uses your location to fill start or end addresses when logging business mileage.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "BuxMuse needs photo library access to let you select stored receipt images.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;

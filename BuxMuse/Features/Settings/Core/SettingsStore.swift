@@ -231,8 +231,6 @@ public final class SettingsStore: ObservableObject {
     
     // MARK: - Workspace Preferences Settings
     @Published public var burnoutGuardEnabled: Bool = true
-    @Published public var healthKitSyncEnabled: Bool = false
-    @Published public var hasAcknowledgedHealthKitDisclaimer: Bool = false
     @Published public var manualSleepHours: Double = 7.5
     @Published public var manualStressLevel: Double = 5.0
     
@@ -620,8 +618,6 @@ public final class SettingsStore: ObservableObject {
         let quietHoursEndHour: Int
         let quietHoursEndMinute: Int
         let burnoutGuardEnabled: Bool?
-        let healthKitSyncEnabled: Bool?
-        let hasAcknowledgedHealthKitDisclaimer: Bool?
         let manualSleepHours: Double?
         let manualStressLevel: Double?
         
@@ -675,7 +671,7 @@ public final class SettingsStore: ObservableObject {
             case studioInvoiceRemindersEnabled, freelanceInvoiceRemindersEnabled
             case taxDeadlineRemindersEnabled, dailySummaryEnabled
             case quietHoursStartHour, quietHoursStartMinute, quietHoursEndHour, quietHoursEndMinute
-            case burnoutGuardEnabled, healthKitSyncEnabled, hasAcknowledgedHealthKitDisclaimer, manualSleepHours, manualStressLevel
+            case burnoutGuardEnabled, manualSleepHours, manualStressLevel
             case biometricLockEnabled, requireBiometricOnLaunch, lockAfterInactivityMinutes
             case privacyBlurInAppSwitching, cancelledSubscriptionMerchants
             case allowLocalBackups, autoBackupFrequency, customBackupIntervalDays, hasCompletedOnboarding
@@ -762,8 +758,6 @@ public final class SettingsStore: ObservableObject {
             quietHoursEndHour = try c.decode(Int.self, forKey: .quietHoursEndHour)
             quietHoursEndMinute = try c.decode(Int.self, forKey: .quietHoursEndMinute)
             self.burnoutGuardEnabled = try c.decodeIfPresent(Bool.self, forKey: .burnoutGuardEnabled) ?? true
-            self.healthKitSyncEnabled = try c.decodeIfPresent(Bool.self, forKey: .healthKitSyncEnabled) ?? false
-            self.hasAcknowledgedHealthKitDisclaimer = try c.decodeIfPresent(Bool.self, forKey: .hasAcknowledgedHealthKitDisclaimer) ?? false
             self.manualSleepHours = try c.decodeIfPresent(Double.self, forKey: .manualSleepHours) ?? 7.5
             self.manualStressLevel = try c.decodeIfPresent(Double.self, forKey: .manualStressLevel) ?? 5.0
             biometricLockEnabled = try c.decode(Bool.self, forKey: .biometricLockEnabled)
@@ -844,8 +838,6 @@ public final class SettingsStore: ObservableObject {
             quietHoursEndHour: Int,
             quietHoursEndMinute: Int,
             burnoutGuardEnabled: Bool?,
-            healthKitSyncEnabled: Bool?,
-            hasAcknowledgedHealthKitDisclaimer: Bool?,
             manualSleepHours: Double?,
             manualStressLevel: Double?,
             biometricLockEnabled: Bool,
@@ -923,8 +915,6 @@ public final class SettingsStore: ObservableObject {
             self.quietHoursEndHour = quietHoursEndHour
             self.quietHoursEndMinute = quietHoursEndMinute
             self.burnoutGuardEnabled = burnoutGuardEnabled ?? true
-            self.healthKitSyncEnabled = healthKitSyncEnabled ?? false
-            self.hasAcknowledgedHealthKitDisclaimer = hasAcknowledgedHealthKitDisclaimer ?? false
             self.manualSleepHours = manualSleepHours ?? 7.5
             self.manualStressLevel = manualStressLevel ?? 5.0
             self.biometricLockEnabled = biometricLockEnabled
@@ -1005,8 +995,6 @@ public final class SettingsStore: ObservableObject {
             try c.encode(quietHoursEndHour, forKey: .quietHoursEndHour)
             try c.encode(quietHoursEndMinute, forKey: .quietHoursEndMinute)
             try c.encode(burnoutGuardEnabled, forKey: .burnoutGuardEnabled)
-            try c.encode(healthKitSyncEnabled, forKey: .healthKitSyncEnabled)
-            try c.encode(hasAcknowledgedHealthKitDisclaimer, forKey: .hasAcknowledgedHealthKitDisclaimer)
             try c.encode(manualSleepHours, forKey: .manualSleepHours)
             try c.encode(manualStressLevel, forKey: .manualStressLevel)
             try c.encode(biometricLockEnabled, forKey: .biometricLockEnabled)
@@ -1117,8 +1105,6 @@ public final class SettingsStore: ObservableObject {
                 self.quietHoursEndHour = payload.quietHoursEndHour
                 self.quietHoursEndMinute = payload.quietHoursEndMinute
                 self.burnoutGuardEnabled = payload.burnoutGuardEnabled ?? true
-                self.healthKitSyncEnabled = payload.healthKitSyncEnabled ?? false
-                self.hasAcknowledgedHealthKitDisclaimer = payload.hasAcknowledgedHealthKitDisclaimer ?? false
                 self.manualSleepHours = payload.manualSleepHours ?? 7.5
                 self.manualStressLevel = payload.manualStressLevel ?? 5.0
                 
@@ -1205,8 +1191,6 @@ public final class SettingsStore: ObservableObject {
         self.premiumTrialStartDate = nil
         self.notificationsEnabled = true
         self.burnoutGuardEnabled = true
-        self.healthKitSyncEnabled = false
-        self.hasAcknowledgedHealthKitDisclaimer = false
         self.manualSleepHours = 7.5
         self.manualStressLevel = 5.0
         self.biometricLockEnabled = false
@@ -1418,8 +1402,6 @@ public final class SettingsStore: ObservableObject {
             quietHoursEndHour: quietHoursEndHour,
             quietHoursEndMinute: quietHoursEndMinute,
             burnoutGuardEnabled: burnoutGuardEnabled,
-            healthKitSyncEnabled: healthKitSyncEnabled,
-            hasAcknowledgedHealthKitDisclaimer: hasAcknowledgedHealthKitDisclaimer,
             manualSleepHours: manualSleepHours,
             manualStressLevel: manualStressLevel,
             biometricLockEnabled: biometricLockEnabled,

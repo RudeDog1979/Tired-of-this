@@ -1,0 +1,250 @@
+{
+  "%@ · then %@": {
+    "es-419": "%@ · luego %@",
+    "es-ES": "%@ · luego %@"
+  },
+  "%@/month": {
+    "es-419": "%@/mes",
+    "es-ES": "%@/mes"
+  },
+  "%@/year": {
+    "es-419": "%@/año",
+    "es-ES": "%@/año"
+  },
+  "%lld days remaining — cancel anytime in Settings before renewal.": {
+    "es-419": "%lld días restantes — cancela cuando quieras en Ajustes antes de la renovación.",
+    "es-ES": "%lld días restantes — cancela cuando quieras en Ajustes antes de la renovación."
+  },
+  "%lld days remaining — subscribe anytime to keep access after the trial.": {
+    "es-419": "%lld días restantes — suscríbete cuando quieras para mantener el acceso después de la prueba.",
+    "es-ES": "%lld días restantes — suscríbete cuando quieras para mantener el acceso después de la prueba."
+  },
+  "%lld-day free trial": {
+    "es-419": "Prueba gratuita de %lld días",
+    "es-ES": "Prueba gratuita de %lld días"
+  },
+  "%lld-month free trial": {
+    "es-419": "Prueba gratuita de %lld meses",
+    "es-ES": "Prueba gratuita de %lld meses"
+  },
+  "%lld-week free trial": {
+    "es-419": "Prueba gratuita de %lld semanas",
+    "es-ES": "Prueba gratuita de %lld semanas"
+  },
+  "%lld-year free trial": {
+    "es-419": "Prueba gratuita de %lld años",
+    "es-ES": "Prueba gratuita de %lld años"
+  },
+  "7-day free trial, then billed through Apple": {
+    "es-419": "Prueba gratuita de 7 días, luego se factura por Apple",
+    "es-ES": "Prueba gratuita de 7 días, luego se factura a través de Apple"
+  },
+  "Add-on · requires BuxMuse · includes Simple · %@": {
+    "es-419": "Complemento · requiere BuxMuse · incluye Simple · %@",
+    "es-ES": "Complemento · requiere BuxMuse · incluye Simple · %@"
+  },
+  "Add-on · requires BuxMuse · includes Simple · billed monthly": {
+    "es-419": "Complemento · requiere BuxMuse · incluye Simple · facturación mensual",
+    "es-ES": "Complemento · requiere BuxMuse · incluye Simple · facturación mensual"
+  },
+  "Add-on · requires BuxMuse · includes Simple · billed yearly": {
+    "es-419": "Complemento · requiere BuxMuse · incluye Simple · facturación anual",
+    "es-ES": "Complemento · requiere BuxMuse · incluye Simple · facturación anual"
+  },
+  "Add-on · requires BuxMuse · includes Simple · request a Simple refund from Apple after upgrading": {
+    "es-419": "Complemento · requiere BuxMuse · incluye Simple · solicita un reembolso de Simple a Apple después de actualizar",
+    "es-ES": "Complemento · requiere BuxMuse · incluye Simple · solicita un reembolso de Simple a Apple después de actualizar"
+  },
+  "Add-on · requires BuxMuse · includes Simple · trial active": {
+    "es-419": "Complemento · requiere BuxMuse · incluye Simple · prueba activa",
+    "es-ES": "Complemento · requiere BuxMuse · incluye Simple · prueba activa"
+  },
+  "Budgets, expenses, goals, and insights": {
+    "es-419": "Presupuestos, gastos, metas e información",
+    "es-ES": "Presupuestos, gastos, metas e información"
+  },
+  "BuxMuse billing": {
+    "es-419": "Facturación de BuxMuse",
+    "es-ES": "Facturación de BuxMuse"
+  },
+  "Contact sales": {
+    "es-419": "Contactar ventas",
+    "es-ES": "Contactar ventas"
+  },
+  "Everything in Simple Studio": {
+    "es-419": "Todo lo de Simple Studio",
+    "es-ES": "Todo lo de Simple Studio"
+  },
+  "Free trial": {
+    "es-419": "Prueba gratuita",
+    "es-ES": "Prueba gratuita"
+  },
+  "Includes Simple": {
+    "es-419": "Incluye Simple",
+    "es-ES": "Incluye Simple"
+  },
+  "Mileage and payment tracking": {
+    "es-419": "Seguimiento de kilometraje y pagos",
+    "es-ES": "Seguimiento de kilometaje y pagos"
+  },
+  "Monthly subscription · includes Simple": {
+    "es-419": "Suscripción mensual · incluye Simple",
+    "es-ES": "Suscripción mensual · incluye Simple"
+  },
+  "No BuxMuse accounts. Your data stays on this device. Optional sync via your Apple ID.": {
+    "es-419": "Sin cuentas de BuxMuse. Tus datos se quedan en este dispositivo. Sincronización opcional con tu Apple ID.",
+    "es-ES": "Sin cuentas de BuxMuse. Tus datos permanecen en este dispositivo. Sincronización opcional con tu Apple ID."
+  },
+  "One-time unlock · requires BuxMuse": {
+    "es-419": "Compra única · requiere BuxMuse",
+    "es-ES": "Compra única · requiere BuxMuse"
+  },
+  "Optional add-ons": {
+    "es-419": "Complementos opcionales",
+    "es-ES": "Complementos opcionales"
+  },
+  "Owned": {
+    "es-419": "Adquirido",
+    "es-ES": "Adquirido"
+  },
+  "Pro Studio active": {
+    "es-419": "Pro Studio activo",
+    "es-ES": "Pro Studio activo"
+  },
+  "Pro Studio billing": {
+    "es-419": "Facturación de Pro Studio",
+    "es-ES": "Facturación de Pro Studio"
+  },
+  "Pro Studio is active on this Apple ID, but BuxMuse is required to open the app.": {
+    "es-419": "Pro Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app.",
+    "es-ES": "Pro Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app."
+  },
+  "Pro includes everything in Simple — upgrade when you need tax tools and unlimited projects.": {
+    "es-419": "Pro incluye todo lo de Simple — actualiza cuando necesites herramientas fiscales y proyectos ilimitados.",
+    "es-ES": "Pro incluye todo lo de Simple — actualiza cuando necesites herramientas fiscales y proyectos ilimitados."
+  },
+  "Pro trial active": {
+    "es-419": "Prueba Pro activa",
+    "es-ES": "Prueba Pro activa"
+  },
+  "Required": {
+    "es-419": "Requerido",
+    "es-ES": "Requerido"
+  },
+  "Required for app access": {
+    "es-419": "Requerido para acceder a la app",
+    "es-ES": "Requerido para acceder a la app"
+  },
+  "Restore purchases": {
+    "es-419": "Restaurar compras",
+    "es-ES": "Restaurar compras"
+  },
+  "Simple Studio for invoices and a work ledger — or Pro Studio for tax tools, PDF design, and unlimited projects.": {
+    "es-419": "Simple Studio para facturas y un libro de trabajo — o Pro Studio para herramientas fiscales, diseño de PDF y proyectos ilimitados.",
+    "es-ES": "Simple Studio para facturas y un libro de trabajo — o Pro Studio para herramientas fiscales, diseño de PDF y proyectos ilimitados."
+  },
+  "Simple Studio is active on this Apple ID, but BuxMuse is required to open the app.": {
+    "es-419": "Simple Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app.",
+    "es-ES": "Simple Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app."
+  },
+  "Start 7-day Pro trial": {
+    "es-419": "Iniciar prueba Pro de 7 días",
+    "es-ES": "Iniciar prueba Pro de 7 días"
+  },
+  "Start 7-day free trial": {
+    "es-419": "Iniciar prueba gratuita de 7 días",
+    "es-ES": "Iniciar prueba gratuita de 7 días"
+  },
+  "Start your 7-day free trial to continue using BuxMuse.": {
+    "es-419": "Inicia tu prueba gratuita de 7 días para seguir usando BuxMuse.",
+    "es-ES": "Inicia tu prueba gratuita de 7 días para seguir usando BuxMuse."
+  },
+  "Studio add-ons are available after BuxMuse is active.": {
+    "es-419": "Los complementos de Studio están disponibles cuando BuxMuse esté activo.",
+    "es-ES": "Los complementos de Studio están disponibles cuando BuxMuse esté activo."
+  },
+  "Studio add-ons are optional and sold separately": {
+    "es-419": "Los complementos de Studio son opcionales y se venden por separado",
+    "es-ES": "Los complementos de Studio son opcionales y se venden por separado"
+  },
+  "Studio add-ons require an active BuxMuse subscription. They do not replace it.": {
+    "es-419": "Los complementos de Studio requieren una suscripción activa de BuxMuse. No la reemplazan.",
+    "es-ES": "Los complementos de Studio requieren una suscripción activa de BuxMuse. No la sustituyen."
+  },
+  "Subscribe — %@": {
+    "es-419": "Suscribirse — %@",
+    "es-ES": "Suscribirse — %@"
+  },
+  "Subscribe to Pro — %@": {
+    "es-419": "Suscribirse a Pro — %@",
+    "es-ES": "Suscribirse a Pro — %@"
+  },
+  "Subscribe to continue": {
+    "es-419": "Suscríbete para continuar",
+    "es-ES": "Suscríbete para continuar"
+  },
+  "Subscribe to continue using BuxMuse.": {
+    "es-419": "Suscríbete para seguir usando BuxMuse.",
+    "es-ES": "Suscríbete para seguir usando BuxMuse."
+  },
+  "Tax Studio and PDF designer": {
+    "es-419": "Tax Studio y diseñador de PDF",
+    "es-ES": "Tax Studio y diseñador de PDF"
+  },
+  "Teams & enterprise": {
+    "es-419": "Equipos y empresas",
+    "es-ES": "Equipos y empresas"
+  },
+  "Then %@. Cancel anytime in Settings.": {
+    "es-419": "Luego %@. Cancela cuando quieras en Ajustes.",
+    "es-ES": "Luego %@. Cancela cuando quieras en Ajustes."
+  },
+  "Trial active": {
+    "es-419": "Prueba activa",
+    "es-ES": "Prueba activa"
+  },
+  "Try BuxMuse free for 7 days. Studio add-ons are optional.": {
+    "es-419": "Prueba BuxMuse gratis por 7 días. Los complementos de Studio son opcionales.",
+    "es-ES": "Prueba BuxMuse gratis durante 7 días. Los complementos de Studio son opcionales."
+  },
+  "Unlimited projects and Pro work tools": {
+    "es-419": "Proyectos ilimitados y herramientas Pro de trabajo",
+    "es-ES": "Proyectos ilimitados y herramientas Pro de trabajo"
+  },
+  "Unlock Simple — %@": {
+    "es-419": "Desbloquear Simple — %@",
+    "es-ES": "Desbloquear Simple — %@"
+  },
+  "Up to 3 workspaces": {
+    "es-419": "Hasta 3 espacios de trabajo",
+    "es-ES": "Hasta 3 espacios de trabajo"
+  },
+  "Volume licensing, onboarding, and custom invoicing — contact us.": {
+    "es-419": "Licencias por volumen, incorporación y facturación personalizada — contáctanos.",
+    "es-ES": "Licencias por volumen, incorporación y facturación personalizada — contáctanos."
+  },
+  "Work ledger and basic invoices": {
+    "es-419": "Libro de trabajo y facturas básicas",
+    "es-ES": "Libro de trabajo y facturas básicas"
+  },
+  "Yearly subscription · includes Simple": {
+    "es-419": "Suscripción anual · incluye Simple",
+    "es-ES": "Suscripción anual · incluye Simple"
+  },
+  "Your 7-day trial is active": {
+    "es-419": "Tu prueba de 7 días está activa",
+    "es-ES": "Tu prueba de 7 días está activa"
+  },
+  "Your BuxMuse free trial is active": {
+    "es-419": "Tu prueba gratuita de BuxMuse está activa",
+    "es-ES": "Tu prueba gratuita de BuxMuse está activa"
+  },
+  "Your BuxMuse subscription is active.": {
+    "es-419": "Tu suscripción de BuxMuse está activa.",
+    "es-ES": "Tu suscripción de BuxMuse está activa."
+  },
+  "£1.99/month or £14.99/year for the full app. Studio is optional.": {
+    "es-419": "£1,99/mes o £14,99/año por la app completa. Studio es opcional.",
+    "es-ES": "£1,99/mes o £14,99/año por la app completa. Studio es opcional."
+  }
+}

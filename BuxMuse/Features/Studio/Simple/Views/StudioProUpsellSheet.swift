@@ -30,7 +30,6 @@ struct StudioProUpsellSheet: View {
         case scopeCreepRadar
         case agreementScratchpad
         case hustleUnlimited
-        case burnoutHealthKit
 
         var id: String { rawValue }
 
@@ -42,7 +41,6 @@ struct StudioProUpsellSheet: View {
             case .scopeCreepRadar: return "Anti-Scope Creep Radar"
             case .agreementScratchpad: return "Agreement Scratchpad"
             case .hustleUnlimited: return "Unlimited gig workspaces"
-            case .burnoutHealthKit: return "HealthKit sleep sync"
             }
         }
 
@@ -60,8 +58,6 @@ struct StudioProUpsellSheet: View {
                 return "Draft lightweight client agreements, import your own PDF or photo to mark up and sign, and keep sign-off records on your device."
             case .hustleUnlimited:
                 return "Simple Studio supports 3 active gig workspaces. Pro unlocks unlimited side-hustle ledgers with full filtering across Home, Expenses, and Studio."
-            case .burnoutHealthKit:
-                return "Sync sleep duration from Apple Health for automatic Creative Energy scoring — no manual sliders required."
             }
         }
 
@@ -73,7 +69,6 @@ struct StudioProUpsellSheet: View {
             case .scopeCreepRadar: return "scope"
             case .agreementScratchpad: return "doc.text.fill"
             case .hustleUnlimited: return "briefcase.fill"
-            case .burnoutHealthKit: return "applewatch.side.right"
             }
         }
     }

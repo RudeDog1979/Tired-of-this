@@ -1,6 +1,6 @@
 # BuxMuse Privacy Policy
 
-**Last updated:** 26 June 2026  
+**Last updated:** 6 July 2026  
 **Contact:** support@buxmuse.com  
 **App:** BuxMuse (`com.buxmuse.app`)  
 **Publisher:** Rodolfo Zorrilla Pena
@@ -9,7 +9,7 @@
 
 ## Summary
 
-BuxMuse is an **offline-first** personal finance and studio companion for iPhone and iPad. We do **not** require a BuxMuse account. We do **not** operate a BuxMuse cloud that stores your expenses, receipts, budgets, or health data.
+BuxMuse is an **offline-first** personal finance and studio companion for iPhone and iPad. We do **not** require a BuxMuse account. We do **not** operate a BuxMuse cloud that stores your expenses, receipts, or budgets.
 
 Your financial information stays on your device unless **you** choose optional Apple iCloud sync, household sharing with people you invite, or export an encrypted backup file yourself.
 
@@ -57,18 +57,6 @@ If you turn on **Sync with iCloud** or **Household sharing**, BuxMuse uses **App
 - **Household sharing** is limited to people you explicitly invite through Apple’s sharing flow.
 
 You can turn iCloud sync off at any time in Settings. Deleting local data while sync is on may affect copies stored in iCloud, depending on the options you choose in the app.
-
----
-
-## Apple Health (optional)
-
-If you enable **HealthKit sleep sync** (Burnout guard / Creative Energy features), BuxMuse reads **sleep analysis** from Apple Health **on your device only** to improve burnout and energy insights shown in the app.
-
-- BuxMuse does **not** sell or share Health data.  
-- BuxMuse does **not** upload Health data to BuxMuse servers.  
-- BuxMuse does not write health data to Apple Health.
-
-You can turn this off anytime in BuxMuse Settings or in **Settings → Privacy & Security → Health → BuxMuse** on your device.
 
 ---
 
@@ -131,7 +119,7 @@ Because your data stays on your device by default, you control it through the ap
 
 - Delete the app to remove local data stored in the app sandbox  
 - Use in-app backup, restore, and reset tools  
-- Turn off iCloud sync or Health access at any time  
+- Turn off iCloud sync at any time  
 - Contact us with privacy questions at **support@buxmuse.com**
 
 If you are in the UK, EEA, or other regions with privacy laws, you may contact us at the email above to ask about your data. Because BuxMuse does not operate a user account system or central database of your finances, we generally cannot access your on-device or iCloud-stored data unless you send it to us.

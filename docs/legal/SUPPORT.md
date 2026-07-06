@@ -69,7 +69,6 @@ Tap **Get Started**. An interactive app tour may start automatically. Then start
 | **Studio (Simple or Pro)** | Settings → Studio | Sold separately; requires an active BuxMuse subscription |
 | **Personal iCloud sync** | Settings → iCloud sync | Optional; uses your private iCloud via Apple CloudKit |
 | **Apple Wallet import** | Expenses (when enabled) | You pick which transactions to import |
-| **HealthKit sleep** | Pro Studio → Creative Energy | Optional; read-only on your device |
 | **Face ID lock** | Settings → Security | Optional app lock |
 
 ### Studio add-ons (optional)
@@ -137,8 +136,8 @@ Purchase an add-on under **Settings → Subscription**, then turn Studio on in *
 **Does BuxMuse sell my data?**  
 No. See our [Privacy Policy](https://buxmuse.com/privacy-policy).
 
-**Why does BuxMuse ask for Camera, Photos, Health, or Location?**  
-Only when you use those features (receipt scan, optional sleep sync, optional mileage location). You can deny permission and still use the rest of the app.
+**Why does BuxMuse ask for Camera, Photos, or Location?**  
+Only when you use those features (receipt scan, optional mileage location). You can deny permission and still use the rest of the app.
 
 ---
 
@@ -168,6 +167,9 @@ Only when you use those features (receipt scan, optional sleep sync, optional mi
 | **Cannot find `.buxmuse` file** | Check Files or iCloud Drive where you saved the export. |
 | **Restore failed** | Ensure the file is a valid BuxMuse backup. Try exporting a fresh backup from the source device. |
 
+| **Studio tools missing** | Confirm **BuxMuse** subscription is active and the correct Studio tier is purchased. Enable Studio in **Settings → Studio**. |
+| **Creative Energy score missing or looks wrong** | Turn on **Settings → Advanced → Workload & energy** (or **Studio → Workload & Energy**). Enable the Creative Energy widget and set **Default sleep hours** and **Stress level** with the manual sliders — BuxMuse does not sync from Apple Health. Open **Home → Money Map** to view the card. Log work/studio hours so workload signals can update the score. |
+
 ### Receipt scan & Wallet import
 
 | Problem | What to try |
@@ -175,13 +177,6 @@ Only when you use those features (receipt scan, optional sleep sync, optional mi
 | **Camera or Photos denied** | **Settings → BuxMuse → Camera / Photos** → Allow. |
 | **Wallet import missing** | Enable Wallet sync in BuxMuse Settings if available. Requires a supported device and iOS version. You choose transactions each time — there is no background bank sync. |
 | **Scanned amount wrong** | Edit the expense before saving. OCR is a helper, not a guarantee. |
-
-### HealthKit (Pro)
-
-| Problem | What to try |
-|--------|-------------|
-| **Sleep data not showing** | Enable Health access in **Settings → Health → Data Access → BuxMuse**. Ensure sleep data exists in Apple Health. |
-| **Health prompt never appeared** | Open **Pro Studio → Creative Energy** and follow the in-app consent flow. |
 
 ### App lock
 
@@ -227,4 +222,4 @@ Manage all purchases with your **Apple ID**. BuxMuse cannot change billing or is
 
 BuxMuse is published by **Rodolfo Zorrilla Pena**.
 
-*Last updated: 26 June 2026*
+*Last updated: 6 July 2026*

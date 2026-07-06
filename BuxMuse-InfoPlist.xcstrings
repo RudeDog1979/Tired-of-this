@@ -59,64 +59,6 @@
         }
       }
     },
-    "NSHealthShareUsageDescription" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BuxMuse reads sleep data from Apple Health to improve your Creative Energy score when you enable HealthKit sync."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BuxMuse lee datos de sueño de Apple Health para mejorar tu puntuación de Energía Creativa cuando activas la sincronización con HealthKit."
-          }
-        },
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BuxMuse lee datos de sueño de Apple Health para mejorar tu puntuación de Energía Creativa cuando activas la sincronización con HealthKit."
-          }
-        },
-        "es-ES" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BuxMuse lee datos de sueño de Apple Health para mejorar tu puntuación de Energía Creativa cuando activas la sincronización con HealthKit."
-          }
-        }
-      }
-    },
-    "NSHealthUpdateUsageDescription" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BuxMuse does not write health data; this permission is reserved for future wellness integrations."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BuxMuse no escribe datos de salud; este permiso está reservado para futuras integraciones de bienestar."
-          }
-        },
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BuxMuse no escribe datos de salud; este permiso está reservado para futuras integraciones de bienestar."
-          }
-        },
-        "es-ES" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BuxMuse no escribe datos de salud; este permiso está reservado para futuras integraciones de bienestar."
-          }
-        }
-      }
-    },
     "NSLocationWhenInUseUsageDescription" : {
       "extractionState" : "manual",
       "localizations" : {

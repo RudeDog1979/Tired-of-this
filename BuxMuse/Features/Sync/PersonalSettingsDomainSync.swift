@@ -84,8 +84,6 @@ struct SettingsNotificationsDomain: Codable, Equatable {
     var quietHoursEndHour: Int
     var quietHoursEndMinute: Int
     var burnoutGuardEnabled: Bool
-    var healthKitSyncEnabled: Bool
-    var hasAcknowledgedHealthKitDisclaimer: Bool
     var manualSleepHours: Double
     var manualStressLevel: Double
 }
@@ -544,8 +542,6 @@ enum PersonalSettingsDomainSync {
                 quietHoursEndHour: store.quietHoursEndHour,
                 quietHoursEndMinute: store.quietHoursEndMinute,
                 burnoutGuardEnabled: store.burnoutGuardEnabled,
-                healthKitSyncEnabled: store.healthKitSyncEnabled,
-                hasAcknowledgedHealthKitDisclaimer: store.hasAcknowledgedHealthKitDisclaimer,
                 manualSleepHours: store.manualSleepHours,
                 manualStressLevel: store.manualStressLevel
             ))
@@ -685,8 +681,6 @@ enum PersonalSettingsDomainSync {
             store.quietHoursEndHour = payload.quietHoursEndHour
             store.quietHoursEndMinute = payload.quietHoursEndMinute
             store.burnoutGuardEnabled = payload.burnoutGuardEnabled
-            store.healthKitSyncEnabled = payload.healthKitSyncEnabled
-            store.hasAcknowledgedHealthKitDisclaimer = payload.hasAcknowledgedHealthKitDisclaimer
             store.manualSleepHours = payload.manualSleepHours
             store.manualStressLevel = payload.manualStressLevel
         case .security:

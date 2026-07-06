@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 import UIKit
 import UserNotifications
 
@@ -29,7 +28,6 @@ public struct BuxDiagnosticReport: Codable, Equatable, Sendable {
 
     public struct Permissions: Codable, Equatable, Sendable {
         public var notifications: String
-        public var healthKitSleep: String
     }
 
     public let schemaVersion: Int
@@ -81,7 +79,6 @@ public enum BuxDiagnosticExportEngine {
             studioMode: settings.studioMode.rawValue,
             featureFlags: [
                 "burnoutGuardEnabled": settings.burnoutGuardEnabled,
-                "healthKitSyncEnabled": settings.healthKitSyncEnabled,
                 "dataGuardModeEnabled": settings.dataGuardModeEnabled,
                 "studioEnabled": settings.studioEnabled,
                 "sideHustleMatrixEnabled": settings.sideHustleMatrixEnabled,
@@ -103,10 +100,9 @@ public enum BuxDiagnosticExportEngine {
                 total: storage.totalBytes
             ),
             permissions: .init(
-                notifications: notificationStatus,
-                healthKitSleep: healthKitAuthLabel()
+                notifications: notificationStatus
             ),
-            privacyNote: "This diagnostic report contains no personal financial data, names, amounts, or Health samples. BuxMuse does not receive this file — you choose where to share it."
+            privacyNote: "This diagnostic report contains no personal financial data, names, amounts, or health samples. BuxMuse does not receive this file — you choose where to share it."
         )
     }
 
@@ -142,19 +138,6 @@ public enum BuxDiagnosticExportEngine {
         case .notDetermined: return "not_determined"
         case .provisional: return "provisional"
         case .ephemeral: return "ephemeral"
-        @unknown default: return "unknown"
-        }
-    }
-
-    private static func healthKitAuthLabel() -> String {
-        guard HKHealthStore.isHealthDataAvailable(),
-              let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
-            return "unavailable"
-        }
-        switch HKHealthStore().authorizationStatus(for: sleepType) {
-        case .notDetermined: return "not_determined"
-        case .sharingDenied: return "denied"
-        case .sharingAuthorized: return "authorized"
         @unknown default: return "unknown"
         }
     }

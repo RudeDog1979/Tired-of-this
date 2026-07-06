@@ -34,28 +34,13 @@ struct BuxMuseSubscriptionView: View {
     }
 
     private var subscriptionContent: some View {
-        Group {
-            if isBlocking {
-                ScrollView {
-                    subscriptionStack
-                        .padding(.horizontal, BuxTokens.marginRegular)
-                        .padding(.vertical, BuxTokens.section)
-                }
-                .background {
-                    BuxLandingTintBackground()
-                }
-                .background(themeManager.screenBackground(for: colorScheme))
-            } else {
-                ScrollView(showsIndicators: false) {
-                    subscriptionStack
-                        .buxScreenContentMargins()
-                        .padding(.top, BuxLayout.tight)
-                        .padding(.bottom, 32)
-                }
-                .buxSettingsDrillInChrome()
-                .scrollDismissesKeyboard(.interactively)
-            }
+        ZStack {
+            BuxLandingTintBackground()
+                .ignoresSafeArea()
+
+            subscriptionScroll
         }
+        .buxPushedNavigationChrome()
         .buxCatalogNavigationTitle(isBlocking ? "Subscribe to continue" : "Subscription")
         .navigationBarTitleDisplayMode(.inline)
         .alert(
@@ -74,6 +59,18 @@ struct BuxMuseSubscriptionView: View {
         .task {
             await purchaseManager.loadProducts()
         }
+    }
+
+    private var subscriptionScroll: some View {
+        ScrollView(showsIndicators: false) {
+            subscriptionStack
+                .padding(.top, BuxLayout.tight)
+                .padding(.bottom, 32)
+        }
+        .buxScrollContentMargins()
+        .scrollContentBackground(.hidden)
+        .buxSettingsDrillInChrome()
+        .scrollDismissesKeyboard(.interactively)
     }
 
     private var subscriptionStack: some View {

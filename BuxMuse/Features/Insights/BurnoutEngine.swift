@@ -3,11 +3,10 @@
 //  BuxMuse
 //  Features/Insights/
 //
-//  Local, deterministic, and HealthKit-integrated Burnout & Creative Energy tracker.
+//  Local, deterministic Burnout & Creative Energy tracker (manual sleep/stress inputs).
 //
 
 import Foundation
-import HealthKit
 import Combine
 
 public struct BurnoutInsightData: Codable, Equatable {
@@ -41,33 +40,9 @@ public final class BurnoutEngine: ObservableObject {
     
     @Published public private(set) var currentStatus = BurnoutInsightData()
     
-    private let healthStore = HKHealthStore()
-    
     private init() {}
     
-    /// Requests authorization for sleep analysis and HRV if needed.
-    public func requestHealthKitAuthorization() async -> Bool {
-        guard HKHealthStore.isHealthDataAvailable() else { return false }
-        guard Bundle.main.object(forInfoDictionaryKey: "NSHealthShareUsageDescription") != nil else {
-            print("BurnoutEngine: NSHealthShareUsageDescription missing from Info.plist")
-            return false
-        }
-        
-        guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
-            return false
-        }
-        
-        let typesToRead: Set<HKObjectType> = [sleepType]
-        
-        do {
-            try await healthStore.requestAuthorization(toShare: [], read: typesToRead)
-            return true
-        } catch {
-            return false
-        }
-    }
-    
-    /// Recalculates stats using local project hours, emotions on transactions, and either HealthKit or SettingsStore manual overrides.
+    /// Recalculates stats using local project hours, emotions on transactions, and manual sleep/stress sliders.
     public func recalculate(
         projects: [StudioProject],
         transactions: [Transaction],
@@ -76,17 +51,8 @@ public final class BurnoutEngine: ObservableObject {
         let workHours = calculateTrackedHoursThisWeek(projects: projects)
         let stressExpenses = countStressExpensesThisWeek(transactions: transactions)
         
-        var sleepHours = settings.manualSleepHours
+        let sleepHours = settings.manualSleepHours
         let stressLevel = settings.manualStressLevel
-        
-        // If HealthKit sync is active and authorized, query average sleep duration
-        if settings.healthKitSyncEnabled,
-           SettingsStore.shared.studioMode == .pro,
-           HKHealthStore.isHealthDataAvailable() {
-            if let queriedSleep = await fetchAverageSleepHoursThisWeek() {
-                sleepHours = queriedSleep
-            }
-        }
         
         // Deterministic Burnout Index Calculation:
         // stressIndex represents systemic pressure: work intensity + financial anxiety tags weighted against rest.
@@ -149,60 +115,5 @@ public final class BurnoutEngine: ObservableObject {
             }
         }
         return count
-    }
-    
-    /// Queries the HealthKit store for sleep analysis samples over the past week and averages the daily duration in hours.
-    private func fetchAverageSleepHoursThisWeek() async -> Double? {
-        guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
-            return nil
-        }
-        
-        let calendar = Calendar.current
-        let now = Date()
-        let oneWeekAgo = calendar.date(byAdding: .day, value: -7, to: now)!
-        
-        let predicate = HKQuery.predicateForSamples(withStart: oneWeekAgo, end: now, options: .strictStartDate)
-        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
-        
-        return await withCheckedContinuation { continuation in
-            let query = HKSampleQuery(
-                sampleType: sleepType,
-                predicate: predicate,
-                limit: 100,
-                sortDescriptors: [sortDescriptor]
-            ) { _, samples, error in
-                guard error == nil, let sleepSamples = samples as? [HKCategorySample], !sleepSamples.isEmpty else {
-                    continuation.resume(returning: nil)
-                    return
-                }
-                
-                // Aggregate sleep analysis value samples representing actual rest time (.asleep)
-                var dailySleepDurations: [Date: TimeInterval] = [:]
-                
-                for sample in sleepSamples {
-                    // Only count periods categorized as asleep (asleepCore, asleepDeep, asleepREM or generic asleep)
-                    let isAsleep = sample.value == HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue ||
-                                   sample.value == HKCategoryValueSleepAnalysis.asleepCore.rawValue ||
-                                   sample.value == HKCategoryValueSleepAnalysis.asleepDeep.rawValue ||
-                                   sample.value == HKCategoryValueSleepAnalysis.asleepREM.rawValue
-                    
-                    if isAsleep {
-                        let duration = sample.endDate.timeIntervalSince(sample.startDate)
-                        let dayStart = calendar.startOfDay(for: sample.startDate)
-                        dailySleepDurations[dayStart, default: 0] += duration
-                    }
-                }
-                
-                guard !dailySleepDurations.isEmpty else {
-                    continuation.resume(returning: nil)
-                    return
-                }
-                
-                let totalDurations = dailySleepDurations.values.reduce(0, +)
-                let avgHours = (totalDurations / Double(dailySleepDurations.count)) / 3600.0
-                continuation.resume(returning: avgHours)
-            }
-            self.healthStore.execute(query)
-        }
     }
 }

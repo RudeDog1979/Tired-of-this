@@ -869,6 +869,29 @@
         }
       }
     },
+    "%@ · then %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · luego %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · luego %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · luego %@"
+          }
+        }
+      }
+    },
     "%@ · typical %@" : {
       "comment" : "A secondary line of text in the country picker, showing the country code and currency code.",
       "extractionState" : "stale",
@@ -2018,6 +2041,52 @@
         }
       }
     },
+    "%@/month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/mes"
+          }
+        }
+      }
+    },
+    "%@/year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/año"
+          }
+        }
+      }
+    },
     "%@%lld°" : {
       "comment" : "A button that rotates a layer by a given angle. The angle is prefixed with a plus sign if it's positive.",
       "extractionState" : "stale",
@@ -2477,6 +2546,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld días"
+          }
+        }
+      }
+    },
+    "%lld days remaining — cancel anytime in Settings before renewal." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días restantes — cancela cuando quieras en Ajustes antes de la renovación."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días restantes — cancela cuando quieras en Ajustes antes de la renovación."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días restantes — cancela cuando quieras en Ajustes antes de la renovación."
+          }
+        }
+      }
+    },
+    "%lld days remaining — subscribe anytime to keep access after the trial." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días restantes — suscríbete cuando quieras para mantener el acceso después de la prueba."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días restantes — suscríbete cuando quieras para mantener el acceso después de la prueba."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días restantes — suscríbete cuando quieras para mantener el acceso después de la prueba."
           }
         }
       }
@@ -3581,6 +3696,98 @@
         }
       }
     },
+    "%lld-day free trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld días"
+          }
+        }
+      }
+    },
+    "%lld-month free trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld meses"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld meses"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld meses"
+          }
+        }
+      }
+    },
+    "%lld-week free trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld semanas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld semanas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld semanas"
+          }
+        }
+      }
+    },
+    "%lld-year free trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld años"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld años"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de %lld años"
+          }
+        }
+      }
+    },
     "%lld/10" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4308,6 +4515,29 @@
         }
       }
     },
+    "£1.99/month or £14.99/year for the full app. Studio is optional." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "£1,99/mes o £14,99/año por la app completa. Studio es opcional."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "£1,99/mes o £14,99/año por la app completa. Studio es opcional."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "£1,99/mes o £14,99/año por la app completa. Studio es opcional."
+          }
+        }
+      }
+    },
     "₿" : {
       "comment" : "The Bitcoin symbol.",
       "isCommentAutoGenerated" : true
@@ -4796,6 +5026,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "7 días"
+          }
+        }
+      }
+    },
+    "7-day free trial, then billed through Apple" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de 7 días, luego se factura a través de Apple"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de 7 días, luego se factura por Apple"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita de 7 días, luego se factura a través de Apple"
           }
         }
       }
@@ -7723,6 +7976,121 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Complemento — facturas y herramientas de trabajo"
+          }
+        }
+      }
+    },
+    "Add-on · requires BuxMuse · includes Simple · %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · %@"
+          }
+        }
+      }
+    },
+    "Add-on · requires BuxMuse · includes Simple · billed monthly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · facturación mensual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · facturación mensual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · facturación mensual"
+          }
+        }
+      }
+    },
+    "Add-on · requires BuxMuse · includes Simple · billed yearly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · facturación anual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · facturación anual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · facturación anual"
+          }
+        }
+      }
+    },
+    "Add-on · requires BuxMuse · includes Simple · request a Simple refund from Apple after upgrading" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · solicita un reembolso de Simple a Apple después de actualizar"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · solicita un reembolso de Simple a Apple después de actualizar"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · solicita un reembolso de Simple a Apple después de actualizar"
+          }
+        }
+      }
+    },
+    "Add-on · requires BuxMuse · includes Simple · trial active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · prueba activa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · prueba activa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complemento · requiere BuxMuse · incluye Simple · prueba activa"
           }
         }
       }
@@ -11879,52 +12247,6 @@
         }
       }
     },
-    "Auto-renewable subscription · renews every month" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suscripción autorenovable · se renueva cada mes"
-          }
-        },
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suscripción autorenovable · se renueva cada mes"
-          }
-        },
-        "es-ES" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suscripción autorenovable · se renueva cada mes"
-          }
-        }
-      }
-    },
-    "Auto-renewable subscription · renews every year" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suscripción autorenovable · se renueva cada año"
-          }
-        },
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suscripción autorenovable · se renueva cada año"
-          }
-        },
-        "es-ES" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suscripción autorenovable · se renueva cada año"
-          }
-        }
-      }
-    },
     "Auto-adjust from history" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12061,6 +12383,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Patrón de numeración automática"
+          }
+        }
+      }
+    },
+    "Auto-renewable subscription · renews every month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada mes"
+          }
+        }
+      }
+    },
+    "Auto-renewable subscription · renews every year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción autorenovable · se renueva cada año"
           }
         }
       }
@@ -15475,6 +15843,29 @@
         }
       }
     },
+    "Budgets, expenses, goals, and insights" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presupuestos, gastos, metas e información"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presupuestos, gastos, metas e información"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presupuestos, gastos, metas e información"
+          }
+        }
+      }
+    },
     "Build a 3-week streak of consecutive contributions." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16487,6 +16878,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recordatorio de copia de seguridad de BuxMuse"
+          }
+        }
+      }
+    },
+    "BuxMuse billing" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación de BuxMuse"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación de BuxMuse"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación de BuxMuse"
           }
         }
       }
@@ -21695,6 +22109,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Código QR de contacto"
+          }
+        }
+      }
+    },
+    "Contact sales" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contactar ventas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contactar ventas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contactar ventas"
           }
         }
       }
@@ -32846,6 +33283,29 @@
         }
       }
     },
+    "Everything in Simple Studio" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo lo de Simple Studio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo lo de Simple Studio"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo lo de Simple Studio"
+          }
+        }
+      }
+    },
     "Example: agreed 2 hours at your hourly rate — set 2 h here and the clock pauses at 2 h." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -35733,6 +36193,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Región libre"
+          }
+        }
+      }
+    },
+    "Free trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita"
           }
         }
       }
@@ -41574,6 +42057,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Incluye Pro Studio"
+          }
+        }
+      }
+    },
+    "Includes Simple" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye Simple"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye Simple"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye Simple"
           }
         }
       }
@@ -49050,6 +49556,29 @@
         }
       }
     },
+    "Manual tuning" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajuste manual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajuste manual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajuste manual"
+          }
+        }
+      }
+    },
     "Manual tuning (Simple & Pro)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -50681,6 +51210,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kilometraje"
+          }
+        }
+      }
+    },
+    "Mileage and payment tracking" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguimiento de kilometaje y pagos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguimiento de kilometraje y pagos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguimiento de kilometaje y pagos"
           }
         }
       }
@@ -53446,6 +53998,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No necesitas conectar el banco. Todo queda en tu teléfono."
+          }
+        }
+      }
+    },
+    "No BuxMuse accounts. Your data stays on this device. Optional sync via your Apple ID." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin cuentas de BuxMuse. Tus datos permanecen en este dispositivo. Sincronización opcional con tu Apple ID."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin cuentas de BuxMuse. Tus datos se quedan en este dispositivo. Sincronización opcional con tu Apple ID."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin cuentas de BuxMuse. Tus datos permanecen en este dispositivo. Sincronización opcional con tu Apple ID."
           }
         }
       }
@@ -57553,6 +58128,29 @@
         }
       }
     },
+    "Optional add-ons" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complementos opcionales"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complementos opcionales"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complementos opcionales"
+          }
+        }
+      }
+    },
     "Optional details" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -58667,6 +59265,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "me debe"
+          }
+        }
+      }
+    },
+    "Owned" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adquirido"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adquirido"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adquirido"
           }
         }
       }
@@ -59827,29 +60448,6 @@
         }
       }
     },
-    "Payment will be charged to your Apple ID account. Subscription automatically renews unless canceled at least 24 hours before the end of the current period." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
-          }
-        },
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
-          }
-        },
-        "es-ES" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
-          }
-        }
-      }
-    },
     "Payment & money" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -60494,6 +61092,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "pago a"
+          }
+        }
+      }
+    },
+    "Payment will be charged to your Apple ID account. Subscription automatically renews unless canceled at least 24 hours before the end of the current period." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pago se cargará a tu cuenta de Apple ID. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes del final del periodo actual."
           }
         }
       }
@@ -63358,6 +63979,29 @@
         }
       }
     },
+    "Pro includes everything in Simple — upgrade when you need tax tools and unlimited projects." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro incluye todo lo de Simple — actualiza cuando necesites herramientas fiscales y proyectos ilimitados."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro incluye todo lo de Simple — actualiza cuando necesites herramientas fiscales y proyectos ilimitados."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro incluye todo lo de Simple — actualiza cuando necesites herramientas fiscales y proyectos ilimitados."
+          }
+        }
+      }
+    },
     "Pro scope guardrails — projects near or over budgeted hours light up on the map." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -63502,6 +64146,52 @@
         }
       }
     },
+    "Pro Studio active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro Studio activo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro Studio activo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro Studio activo"
+          }
+        }
+      }
+    },
+    "Pro Studio billing" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación de Pro Studio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación de Pro Studio"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación de Pro Studio"
+          }
+        }
+      }
+    },
     "Pro Studio feature" : {
       "comment" : "A description of a Pro Studio feature.",
       "extractionState" : "stale",
@@ -63546,6 +64236,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ingresos de Pro Studio"
+          }
+        }
+      }
+    },
+    "Pro Studio is active on this Apple ID, but BuxMuse is required to open the app." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app."
           }
         }
       }
@@ -63619,6 +64332,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nivel Pro"
+          }
+        }
+      }
+    },
+    "Pro trial active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba Pro activa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba Pro activa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba Pro activa"
           }
         }
       }
@@ -68400,6 +69136,52 @@
         }
       }
     },
+    "Required" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requerido"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requerido"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requerido"
+          }
+        }
+      }
+    },
+    "Required for app access" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requerido para acceder a la app"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requerido para acceder a la app"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requerido para acceder a la app"
+          }
+        }
+      }
+    },
     "Required income" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -68745,6 +69527,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Restauración completa"
+          }
+        }
+      }
+    },
+    "Restore purchases" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar compras"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar compras"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar compras"
           }
         }
       }
@@ -77272,6 +78077,29 @@
         }
       }
     },
+    "Simple Studio for invoices and a work ledger — or Pro Studio for tax tools, PDF design, and unlimited projects." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio para facturas y un libro de trabajo — o Pro Studio para herramientas fiscales, diseño de PDF y proyectos ilimitados."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio para facturas y un libro de trabajo — o Pro Studio para herramientas fiscales, diseño de PDF y proyectos ilimitados."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio para facturas y un libro de trabajo — o Pro Studio para herramientas fiscales, diseño de PDF y proyectos ilimitados."
+          }
+        }
+      }
+    },
     "Simple Studio income" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -77291,6 +78119,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ingresos de Simple Studio"
+          }
+        }
+      }
+    },
+    "Simple Studio is active on this Apple ID, but BuxMuse is required to open the app." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está activo en este Apple ID, pero se requiere BuxMuse para abrir la app."
           }
         }
       }
@@ -77684,6 +78535,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sueño %@h"
+          }
+        }
+      }
+    },
+    "Sleep and stress values stay on this iPhone. Adjust them anytime from Home → Money Map or here in Settings." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los valores de sueño y estrés permanecen en este iPhone. Ajústalos cuando quieras desde Inicio → Mapa del dinero o aquí en Ajustes."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los valores de sueño y estrés se quedan en este iPhone. Ajústalos cuando quieras desde Inicio → Mapa del dinero o aquí en Ajustes."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los valores de sueño y estrés permanecen en este iPhone. Ajústalos cuando quieras desde Inicio → Mapa del dinero o aquí en Ajustes."
           }
         }
       }
@@ -79546,6 +80420,52 @@
         }
       }
     },
+    "Start 7-day free trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar prueba gratuita de 7 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar prueba gratuita de 7 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar prueba gratuita de 7 días"
+          }
+        }
+      }
+    },
+    "Start 7-day Pro trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar prueba Pro de 7 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar prueba Pro de 7 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar prueba Pro de 7 días"
+          }
+        }
+      }
+    },
     "Start a household" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -79774,6 +80694,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comenzar a usar BuxMuse"
+          }
+        }
+      }
+    },
+    "Start your 7-day free trial to continue using BuxMuse." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia tu prueba gratuita de 7 días para seguir usando BuxMuse."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia tu prueba gratuita de 7 días para seguir usando BuxMuse."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia tu prueba gratuita de 7 días para seguir usando BuxMuse."
           }
         }
       }
@@ -80962,6 +81905,75 @@
         }
       }
     },
+    "Studio add-ons are available after BuxMuse is active." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio están disponibles cuando BuxMuse esté activo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio están disponibles cuando BuxMuse esté activo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio están disponibles cuando BuxMuse esté activo."
+          }
+        }
+      }
+    },
+    "Studio add-ons are optional and sold separately" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio son opcionales y se venden por separado"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio son opcionales y se venden por separado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio son opcionales y se venden por separado"
+          }
+        }
+      }
+    },
+    "Studio add-ons require an active BuxMuse subscription. They do not replace it." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio requieren una suscripción activa de BuxMuse. No la sustituyen."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio requieren una suscripción activa de BuxMuse. No la reemplazan."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los complementos de Studio requieren una suscripción activa de BuxMuse. No la sustituyen."
+          }
+        }
+      }
+    },
     "Studio adds work tracking, simple invoices, and job pockets. Turn it on when you need it — Home and Expenses stay the same." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -81474,6 +82486,29 @@
         }
       }
     },
+    "Subscribe — %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscribirse — %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscribirse — %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscribirse — %@"
+          }
+        }
+      }
+    },
     "Subscribe direct → save %@/month" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -81493,6 +82528,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suscríbete directo → ahorra %@/mes"
+          }
+        }
+      }
+    },
+    "Subscribe to continue" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete para continuar"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete para continuar"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete para continuar"
+          }
+        }
+      }
+    },
+    "Subscribe to continue using BuxMuse." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete para seguir usando BuxMuse."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete para seguir usando BuxMuse."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete para seguir usando BuxMuse."
+          }
+        }
+      }
+    },
+    "Subscribe to Pro — %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscribirse a Pro — %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscribirse a Pro — %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscribirse a Pro — %@"
           }
         }
       }
@@ -84755,6 +85859,29 @@
         }
       }
     },
+    "Tax Studio and PDF designer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax Studio y diseñador de PDF"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax Studio y diseñador de PDF"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax Studio y diseñador de PDF"
+          }
+        }
+      }
+    },
     "Tax studio Pro" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -85606,6 +86733,29 @@
         }
       }
     },
+    "Teams & enterprise" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Equipos y empresas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Equipos y empresas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Equipos y empresas"
+          }
+        }
+      }
+    },
     "Technical mesh accents" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -86189,6 +87339,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Temas"
+          }
+        }
+      }
+    },
+    "Then %@. Cancel anytime in Settings." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luego %@. Cancela cuando quieras en Ajustes."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luego %@. Cancela cuando quieras en Ajustes."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luego %@. Cancela cuando quieras en Ajustes."
           }
         }
       }
@@ -90522,6 +91695,29 @@
         }
       }
     },
+    "Trial active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba activa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba activa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba activa"
+          }
+        }
+      }
+    },
     "Trial end date" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -90896,6 +92092,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prueba a preguntar así"
+          }
+        }
+      }
+    },
+    "Try BuxMuse free for 7 days. Studio add-ons are optional." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse gratis durante 7 días. Los complementos de Studio son opcionales."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse gratis por 7 días. Los complementos de Studio son opcionales."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse gratis durante 7 días. Los complementos de Studio son opcionales."
           }
         }
       }
@@ -91889,6 +93108,29 @@
         }
       }
     },
+    "Unlimited projects and Pro work tools" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proyectos ilimitados y herramientas Pro de trabajo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proyectos ilimitados y herramientas Pro de trabajo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proyectos ilimitados y herramientas Pro de trabajo"
+          }
+        }
+      }
+    },
     "Unlimited, categorized & auto" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -91985,6 +93227,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Desbloquear matriz Pro Studio"
+          }
+        }
+      }
+    },
+    "Unlock Simple — %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquear Simple — %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquear Simple — %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquear Simple — %@"
           }
         }
       }
@@ -92296,6 +93561,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hasta 3 clientes"
+          }
+        }
+      }
+    },
+    "Up to 3 workspaces" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasta 3 espacios de trabajo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasta 3 espacios de trabajo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasta 3 espacios de trabajo"
           }
         }
       }
@@ -93782,6 +95070,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vivos"
+          }
+        }
+      }
+    },
+    "Volume licensing, onboarding, and custom invoicing — contact us." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licencias por volumen, incorporación y facturación personalizada — contáctanos."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licencias por volumen, incorporación y facturación personalizada — contáctanos."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licencias por volumen, incorporación y facturación personalizada — contáctanos."
           }
         }
       }
@@ -96208,6 +97519,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ingresos de trabajo"
+          }
+        }
+      }
+    },
+    "Work ledger and basic invoices" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libro de trabajo y facturas básicas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libro de trabajo y facturas básicas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libro de trabajo y facturas básicas"
           }
         }
       }
@@ -98810,6 +100144,29 @@
         }
       }
     },
+    "Your 7-day trial is active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba de 7 días está activa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba de 7 días está activa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba de 7 días está activa"
+          }
+        }
+      }
+    },
     "Your active workspaces" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -99092,6 +100449,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu base de datos, ajustes y copia de iCloud de BuxMuse se han borrado. Este dispositivo se ha restablecido a valores iniciales."
+          }
+        }
+      }
+    },
+    "Your BuxMuse free trial is active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba gratuita de BuxMuse está activa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba gratuita de BuxMuse está activa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba gratuita de BuxMuse está activa"
+          }
+        }
+      }
+    },
+    "Your BuxMuse subscription is active." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción de BuxMuse está activa."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción de BuxMuse está activa."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción de BuxMuse está activa."
           }
         }
       }

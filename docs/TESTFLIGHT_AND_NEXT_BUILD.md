@@ -1,6 +1,24 @@
 # BuxMuse — TestFlight handoff & next agent
 
-Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Connect ready (local commit; upload via Xcode)
+Last updated: **2026-07-06** — **HealthKit removed** (Creative Energy manual-only); privacy policy + website copy aligned. Prior release note: **1.0.9 (build 10)**.
+
+---
+
+## HealthKit removed (2026-07-06)
+
+Creative Energy / burnout guard is **manual-only** (sleep + stress sliders on device). HealthKit is **not** in the build.
+
+| Area | Action |
+|------|--------|
+| **Code** | `HealthKitConsentSheet` deleted; `BurnoutEngine` uses manual inputs only; no `import HealthKit` in app target |
+| **Entitlements** | `com.apple.developer.healthkit` removed from `BuxMuse.entitlements` |
+| **Info.plist** | `NSHealthShareUsageDescription` / `NSHealthUpdateUsageDescription` removed from build settings |
+| **Developer portal** | **Disable HealthKit** on App ID `com.buxmuse.app` |
+| **App Store Connect** | App Privacy: remove **Health & Fitness**; review notes mention manual Creative Energy only |
+| **Privacy policy / website** | Remove Apple Health section; update homepage Pro Studio bullet (no “sleep tracker sync”) |
+| **Device QA** | Settings → Advanced → Workload & energy → tune sliders; Home Money Map → Creative Energy card |
+
+See `docs/APP_STORE_CONNECT_PRIVACY.md` and `docs/DEVELOPER_PORTAL_SETUP.md`.
 
 ---
 
@@ -46,11 +64,11 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 ## App Store Connect — 1.0.9 checklist (human)
 
 1. **CloudKit Dashboard (Production)** — deploy personal sync record types + indexes used by `PersonalCloudSyncEngine` (same as Development schema).
-2. **Developer portal** — App ID `com.buxmuse.app`: HealthKit + **iCloud** (CloudKit container `iCloud.com.buxmuse.app`); widget App ID unchanged.
+2. **Developer portal** — App ID `com.buxmuse.app`: **iCloud only** (CloudKit container `iCloud.com.buxmuse.app`); **HealthKit disabled**; widget App ID unchanged.
 3. **Xcode** — Archive **1.0.9 (10)** → Distribute → App Store Connect.
 4. **App Store Connect** — new version **1.0.9**; paste **What’s New** (below); complete App Privacy (see `docs/APP_STORE_CONNECT_PRIVACY.md` — includes optional iCloud sync note).
 5. **Privacy policy URL** — host `docs/legal/PRIVACY_POLICY.md`; mention optional iCloud sync stores data in the user’s private iCloud, not on BuxMuse servers.
-6. **Review notes** — offline-first, no account; optional iCloud sync uses user’s private CloudKit container; HealthKit optional on-device only.
+6. **Review notes** — offline-first, no account; optional iCloud sync uses user’s private CloudKit container; Creative Energy uses manual on-device sliders only (no HealthKit).
 7. **Device QA before submit**
    - Fresh install → onboarding → app tour (tab bar must not cover coach marks).
    - Enable iCloud sync on device A → add budget/expense → device B pull.
@@ -89,7 +107,7 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 
 | Topic | Decision | Notes |
 |--------|----------|--------|
-| **HealthKit** | **Yes — keep in build** | Pro-gated sleep sync stays. Enable **HealthKit** on App ID `com.buxmuse.app` in Developer portal + Xcode Signing & Capabilities. Publish a **privacy policy URL** (required). App Privacy labels: health processed on-device, not collected by BuxMuse servers. **Post-launch:** pre-auth disclaimer sheet (“no account, data stays on device”). |
+| **HealthKit** | **Removed** | Creative Energy is manual-only (`BurnoutGuardSettingsView` sleep/stress sliders). **Do not** enable HealthKit on App ID or in Xcode. Remove Health & Fitness from App Privacy. Privacy policy and marketing must not mention sleep sync or Apple Health. |
 | **Onboarding** | **Shipped — 5-card wizard** | First launch: `RootView` full-screen cover when `hasCompletedOnboarding == false`. Cards: Welcome, Setup (region/budget), Studio, Backup, Tutorial. Settings → **Replay onboarding guide**. |
 | **Default appearance** | **Clean Apple** | `brandThemesEnabled = false`, `landingBackdropEnabled = true`, system accent (blue). Neutral `standardNeutral` theme on launch via `applyBrandThemesAppearance`. |
 | **Region / currency** | **Device on first boot** | No saved country → `CountryCatalog.detectedFromDevice()` sets country, currency, and UI language. **Do not** let empty Studio defaults (US/USD) or fresh SwiftData prefs (USD) override detection — fixed in `migrateLegacyFreelanceLocale` + brain hydration. |
@@ -136,7 +154,7 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 
 ### 8. Build 2 — privacy, storage, invoice archive (2026-06-05)
 
-- **Health pre-auth:** `HealthKitConsentSheet.swift`, `hasAcknowledgedHealthKitDisclaimer` in `SettingsStore`.
+- **Health pre-auth:** ~~`HealthKitConsentSheet.swift`~~ **removed** with HealthKit (2026-07-06). Creative Energy uses manual tuning only.
 - **Diagnostic export:** `BuxDiagnosticExportEngine.swift` + About → Export diagnostic report (`BuxDiagnosticExportTests`).
 - **Storage dashboard:** `BuxStorageAuditEngine.swift` — Data → Storage sizes (receipts/scans, logos, DB, silent backups).
 - **Backup reminder on launch:** `AppContainer` calls `BackupNotificationScheduler.reschedule`.
@@ -152,7 +170,7 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 
 ### 7. TestFlight & launch prep (2026-06-03 → 2026-06-04)
 
-- HealthKit signing, privacy descriptors, bundle ID migration, first-boot region detection.
+- Bundle ID migration, first-boot region detection; ~~HealthKit signing~~ HealthKit removed (2026-07-06).
 - **SettingsStore** launch crash fix (init cycle with `HustleManager`; `didSet` guarded until `isLoaded`).
 - Swift 6 agreement clause loading, merchant logo cache safety, localization/format-crash fixes.
 - Spanish translations pass on Simple Studio sheets + settings chrome.
@@ -163,11 +181,11 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 
 ### TestFlight / App Store (human — blocking release)
 
-1. **developer.apple.com** — App IDs; HealthKit on main app; profiles for app + widget.
+1. **developer.apple.com** — App IDs; **HealthKit off** on main app; iCloud + profiles for app + widget.
 2. **Xcode** — Team signing, Archive → Distribute → TestFlight.
 3. **App Store Connect** — New app `com.buxmuse.app`, privacy questionnaire, **Privacy Policy URL**, “What to test” notes.
 4. **Privacy policy** — Replace placeholders in `docs/legal/PRIVACY_POLICY.md` (`[your support email]`, company name).
-5. **Device QA** — Delete old `com.rodolfo.BuxMuse` install; install Build 1; exercise camera, photos, notifications, Health (Pro), backup share to iCloud Drive, onboarding first-run, Simple Studio sheets, receipt scan → Add Expense.
+5. **Device QA** — Delete old `com.rodolfo.BuxMuse` install; install latest build; exercise camera, photos, notifications, **Creative Energy manual sliders** (Settings → Workload & energy), backup share to iCloud Drive, onboarding first-run, Simple Studio sheets, receipt scan → Add Expense.
 6. **Verify launch** — Console: `SettingsStore: successfully loaded settings.` Home uses neutral Apple chrome + backdrop rim.
 
 ### Bug-fix / polish candidates (code — ask before changing)
@@ -186,7 +204,7 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 | Feature | Status | Where today |
 |---------|--------|-------------|
 | **Scheduled backup reminder** | ✅ **Implemented** | `BackupNotificationScheduler.swift` — re-scheduled on app launch (`AppContainer`) + Settings/onboarding toggles. |
-| **Health pre-auth sheet** | ✅ **Implemented** | `HealthKitConsentSheet.swift` + `BurnoutGuardSettingsView` — in-app disclaimer before system Health dialog; persistent on-device privacy footnote. |
+| **Health pre-auth sheet** | ❌ **Removed** | HealthKit removed (2026-07-06). `HealthKitConsentSheet.swift` deleted; `BurnoutGuardSettingsView` is manual tuning only. |
 | **Diagnostic export (no PII)** | ✅ **Implemented** | `BuxDiagnosticExportEngine.swift` + About → Export diagnostic report (counts/flags only; user-controlled Share sheet). |
 | **Receipt ZIP + storage dashboard** | ✅ **Implemented** (storage only) | `BuxStorageAuditEngine.swift` — Data → Storage sizes. Receipt ZIP **removed** from Data; export lives in Studio → Tools → **Backup invoices**. |
 | **Invoice archive (Phase A)** | ✅ **Implemented** | `StudioInvoiceArchiveView.swift`, `StudioInvoiceArchiveEngine.swift` — Simple + Pro lists, PDF+PNG ZIP, optional receipt photos, tier-scoped delete with linked-twin warning. |
@@ -211,7 +229,7 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 
 ### Build 2 — implemented (2026-06-05)
 
-- **Plan A:** `HealthKitConsentSheet`, `hasAcknowledgedHealthKitDisclaimer` in `SettingsStore`.
+- **Plan A:** ~~`HealthKitConsentSheet`~~ removed with HealthKit (2026-07-06).
 - **Plan B:** `BuxDiagnosticExportEngine` + About → Export diagnostic report.
 - **Plan C:** Storage dashboard in Data settings (receipt ZIP moved to Studio invoice archive).
 - **Plan D:** `BackupNotificationScheduler.reschedule` on app boot.
@@ -233,25 +251,27 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 
 ### Build 2 — draft plans (superseded — kept for reference)
 
-#### Plan A — Health pre-authorization sheet
+#### Plan A — Health pre-authorization sheet (superseded — HealthKit removed 2026-07-06)
 
-**Goal:** Show an in-app disclaimer *before* the system HealthKit permission dialog when Pro user enables “Sync sleep from HealthKit”.
+**Status:** **Not applicable.** HealthKit and `HealthKitConsentSheet` were removed. Creative Energy uses manual sleep/stress sliders in `BurnoutGuardSettingsView`.
 
-**Current behaviour:** `BurnoutGuardSettingsView.healthKitBinding` → immediate `BurnoutEngine.requestHealthKitAuthorization()`.
+~~**Goal:** Show an in-app disclaimer *before* the system HealthKit permission dialog when Pro user enables “Sync sleep from HealthKit”.~~
 
-**Proposed UX:**
+~~**Current behaviour:** `BurnoutGuardSettingsView.healthKitBinding` → immediate `BurnoutEngine.requestHealthKitAuthorization()`.~~
 
-1. User flips HealthKit toggle ON.
-2. Present **`HealthKitConsentSheet`** (modal): plain-language bullets — reads sleep analysis only, on-device, never uploaded, can disable anytime, link to privacy policy.
-3. Primary: **“Continue to Apple Health”** → call existing `BurnoutEngine.requestHealthKitAuthorization()`.
-4. Secondary: **“Not now”** → leave toggle off.
-5. Under the toggle (persistent): short privacy footnote + “Open Health settings” link when denied.
+~~**Proposed UX:**~~
 
-**Settings to add (optional):** `hasAcknowledgedHealthKitDisclaimer: Bool` — skip sheet on re-enable after first ack.
+~~1. User flips HealthKit toggle ON.~~
+~~2. Present **`HealthKitConsentSheet`** (modal): plain-language bullets — reads sleep analysis only, on-device, never uploaded, can disable anytime, link to privacy policy.~~
+~~3. Primary: **“Continue to Apple Health”** → call existing `BurnoutEngine.requestHealthKitAuthorization()`.~~
+~~4. Secondary: **“Not now”** → leave toggle off.~~
+~~5. Under the toggle (persistent): short privacy footnote + “Open Health settings” link when denied.~~
 
-**Files:** `BurnoutGuardSettingsView.swift`, new `HealthKitConsentSheet.swift`, `SettingsStore.swift`, `Localizable.xcstrings`, `docs/legal/PRIVACY_POLICY.md` (anchor link).
+~~**Settings to add (optional):** `hasAcknowledgedHealthKitDisclaimer: Bool` — skip sheet on re-enable after first ack.~~
 
-**Acceptance:** System Health dialog never appears without user confirming in-app sheet first; denied state still shows Settings guidance.
+~~**Files:** `BurnoutGuardSettingsView.swift`, new `HealthKitConsentSheet.swift`, `SettingsStore.swift`, `Localizable.xcstrings`, `docs/legal/PRIVACY_POLICY.md` (anchor link).~~
+
+~~**Acceptance:** System Health dialog never appears without user confirming in-app sheet first; denied state still shows Settings guidance.~~
 
 **Effort:** ~0.5–1 day.
 
@@ -259,14 +279,14 @@ Last updated: **2026-06-14** — **Release 1.0.9 (build 10)** — App Store Conn
 
 #### Plan B — Opt-in diagnostic export (no PII)
 
-**Goal:** Support/troubleshooting bundle the user explicitly shares — **no expenses, names, receipts, or Health samples**.
+**Goal:** Support/troubleshooting bundle the user explicitly shares — **no expenses, names, receipts, or health samples**.
 
 **Current behaviour:** Debug overlay toggles in `AboutSettingsView`; `DataSettingsView.generateJSONDump()` exports real user data — **not** suitable as diagnostics.
 
 **Proposed UX:**
 
 1. Settings → About → **“Export diagnostic report”** (separate from JSON data export).
-2. Builds a `.json` or `.txt` file with: app version/build, iOS version, device model (generic), locale/currency, feature flags, Studio mode, storage summary counts (record counts only), last error logs if any, notification auth status, HealthKit auth status (authorized/denied, not values), SwiftData store name, cache sizes (bytes only).
+2. Builds a `.json` or `.txt` file with: app version/build, iOS version, device model (generic), locale/currency, feature flags, Studio mode, storage summary counts (record counts only), last error logs if any, notification auth status, SwiftData store name, cache sizes (bytes only).
 3. Share via `UIActivityViewController` / `ShareLink`.
 4. Confirmation alert: “This report contains no personal financial data.”
 
@@ -373,7 +393,7 @@ Only if you want hardening, not net-new capability:
 | Backup | `BackupRestoreSettingsView.swift`, `BackupNotificationScheduler.swift` |
 | Storage / privacy engines | `BuxMuse/Core/Privacy/` (`BuxStorageAuditEngine`, `BuxDiagnosticExportEngine`, `StudioInvoiceArchiveEngine`, `BuxReceiptZIPExporter`) |
 | Invoice archive UI | `StudioInvoiceArchiveView.swift`, `StudioHubView.swift`, `SimpleStudioHubView.swift` |
-| Health UI | `BurnoutGuardSettingsView.swift`, `HealthKitConsentSheet.swift` |
+| Creative Energy UI | `BurnoutGuardSettingsView.swift`, `BurnoutDashboardWidget.swift`, `BurnoutEngine.swift` |
 | Receipt OCR | `StudioEngines.swift` (`StudioReceiptEngine`), `StudioReceiptViews.swift` |
 | Add expense + scan | `AddExpenseSheet.swift`, `AddExpenseViewModel.swift`, `ExpenseSheetMode.swift` |
 | FAB / animations | `DashboardView.swift` (`closeFabAnd`), `SimpleStudioHubView.swift` (FAB) |
@@ -383,7 +403,7 @@ Only if you want hardening, not net-new capability:
 - Portal checklist: `docs/DEVELOPER_PORTAL_SETUP.md`
 - App Store Connect privacy answers: `docs/APP_STORE_CONNECT_PRIVACY.md`
 - Hostable privacy policy draft: `docs/legal/PRIVACY_POLICY.md` (replace contact/company placeholders)
-- Entitlements: `BuxMuse.entitlements` (HealthKit), `BuxMuse/PrivacyInfo.xcprivacy`
+- Entitlements: `BuxMuse.entitlements` (no HealthKit; iCloud/CloudKit), `BuxMuse/PrivacyInfo.xcprivacy`
 
 ## If appearance looks wrong on a test device
 
