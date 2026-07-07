@@ -20,12 +20,12 @@
       "internalID" : "BUX_STUDIO_SIMPLE",
       "localizations" : [
         {
-          "description" : "Simple Studio — work ledger, invoices, and up to 3 workspaces. Requires an active BuxMuse subscription.",
+          "description" : "One-time Simple Studio add-on. BuxMuse sub required.",
           "displayName" : "Simple Studio",
           "locale" : "en_GB"
         }
       ],
-      "productID" : "com.buxmuse.app.studio.simple",
+      "productID" : "com.buxmuse.app.studio.simple.v2",
       "referenceName" : "Simple Studio",
       "type" : "NonConsumable"
     }
@@ -97,7 +97,7 @@
               "locale" : "en_GB"
             }
           ],
-          "productID" : "com.buxmuse.app.premium.monthly",
+          "productID" : "com.buxmuse.app.premium.monthly.v2",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "BuxMuse Monthly",
           "subscriptionGroupID" : "BUX_PREMIUM_GROUP",
@@ -141,7 +141,7 @@
               "locale" : "en_GB"
             }
           ],
-          "productID" : "com.buxmuse.app.premium.yearly",
+          "productID" : "com.buxmuse.app.premium.yearly.v2",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "BuxMuse Yearly",
           "subscriptionGroupID" : "BUX_PREMIUM_GROUP",
@@ -198,7 +198,7 @@
               "locale" : "en_GB"
             }
           ],
-          "productID" : "com.buxmuse.app.studio.pro.monthly",
+          "productID" : "com.buxmuse.app.studio.pro.monthly.v2",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Pro Studio Monthly",
           "subscriptionGroupID" : "BUX_STUDIO_PRO_GROUP",
@@ -242,7 +242,7 @@
               "locale" : "en_GB"
             }
           ],
-          "productID" : "com.buxmuse.app.studio.pro.yearly",
+          "productID" : "com.buxmuse.app.studio.pro.yearly.v2",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Pro Studio Yearly",
           "subscriptionGroupID" : "BUX_STUDIO_PRO_GROUP",

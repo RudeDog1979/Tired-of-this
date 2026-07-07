@@ -182,7 +182,7 @@ final class StudioPurchaseManager: ObservableObject {
                 print("🏪 [StoreKit] refreshEntitlements: Transaction failed verification check.")
                 continue
             }
-            guard let product = BuxMuseProductID(rawValue: transaction.productID) else {
+            guard let product = BuxMuseProductID.fromStoreProductID(transaction.productID) else {
                 print("🏪 [StoreKit] refreshEntitlements: Unknown product ID found: \(transaction.productID)")
                 continue
             }
@@ -299,7 +299,7 @@ final class StudioPurchaseManager: ObservableObject {
             await refreshEntitlements()
             
             // Directly set entitlement states immediately AFTER refresh to ensure it isn't overwritten by slow DB propagation
-            if let purchasedProduct = BuxMuseProductID(rawValue: transaction.productID) {
+            if let purchasedProduct = BuxMuseProductID.fromStoreProductID(transaction.productID) {
                 print("🏪 [StoreKit] purchaseProduct: Setting entitlement state for \(purchasedProduct.rawValue) immediately.")
                 switch purchasedProduct {
                 case .baseMonthly, .baseYearly:

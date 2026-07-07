@@ -6,13 +6,26 @@
 import Foundation
 
 enum BuxMuseProductID: String, CaseIterable, Sendable {
-    /// Base BuxMuse app — monthly. Store ID retains legacy `premium` segment.
-    case baseMonthly = "com.buxmuse.app.premium.monthly"
-    /// Base BuxMuse app — yearly.
-    case baseYearly = "com.buxmuse.app.premium.yearly"
-    case studioSimple = "com.buxmuse.app.studio.simple"
-    case studioProMonthly = "com.buxmuse.app.studio.pro.monthly"
-    case studioProYearly = "com.buxmuse.app.studio.pro.yearly"
+    /// Base BuxMuse app — monthly (v2, App Store Connect recreation).
+    case baseMonthly = "com.buxmuse.app.premium.monthly.v2"
+    /// Base BuxMuse app — yearly (v2).
+    case baseYearly = "com.buxmuse.app.premium.yearly.v2"
+    case studioSimple = "com.buxmuse.app.studio.simple.v2"
+    case studioProMonthly = "com.buxmuse.app.studio.pro.monthly.v2"
+    case studioProYearly = "com.buxmuse.app.studio.pro.yearly.v2"
+
+    /// Maps App Store / StoreKit product IDs (including deleted legacy IDs) to entitlements.
+    static func fromStoreProductID(_ rawValue: String) -> BuxMuseProductID? {
+        if let match = BuxMuseProductID(rawValue: rawValue) { return match }
+        switch rawValue {
+        case "com.buxmuse.app.premium.monthly": return .baseMonthly
+        case "com.buxmuse.app.premium.yearly": return .baseYearly
+        case "com.buxmuse.app.studio.simple": return .studioSimple
+        case "com.buxmuse.app.studio.pro.monthly": return .studioProMonthly
+        case "com.buxmuse.app.studio.pro.yearly": return .studioProYearly
+        default: return nil
+        }
+    }
 
     static let baseAppProducts: [BuxMuseProductID] = [.baseMonthly, .baseYearly]
     static let studioProProducts: [BuxMuseProductID] = [.studioProMonthly, .studioProYearly]
