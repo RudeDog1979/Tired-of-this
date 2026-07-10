@@ -6,6 +6,11 @@
 import Foundation
 import SwiftUI
 
+enum TutorialCoachMarkCardPlacement {
+    case bottom
+    case screenCenter
+}
+
 enum TutorialAnchorID: String, Hashable, CaseIterable {
     case homeBudgetRing
     case homeIncomeButton
@@ -63,6 +68,17 @@ extension TutorialAnchorID {
             return true
         default:
             return false
+        }
+    }
+
+    /// Where the coach-mark card sits relative to the screen (default: bottom dock).
+    var coachMarkCardPlacement: TutorialCoachMarkCardPlacement {
+        switch self {
+        case .settingsStudioDetail:
+            // Toggle sits mid-screen after scroll; bottom card covers the highlight.
+            return .screenCenter
+        default:
+            return .bottom
         }
     }
 }

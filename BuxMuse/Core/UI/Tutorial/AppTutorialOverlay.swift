@@ -45,10 +45,12 @@ struct TutorialCoachMarkOverlayLayer: View {
                         )
                     }
 
-                    coachMarkCard(step: step, cardWidth: BuxCoachMarkCalloutLayout.cardWidth(for: geometry.size.width))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, calloutBottomInset(safeInsets: geometry.safeAreaInsets))
+                    coachMarkCard(
+                        step: step,
+                        cardWidth: BuxCoachMarkCalloutLayout.cardWidth(for: geometry.size.width),
+                        placement: step.anchor?.coachMarkCardPlacement ?? .bottom,
+                        safeInsets: geometry.safeAreaInsets
+                    )
                 }
                 .onAppear {
                     scheduleFreeze(step: step, globalHighlight: globalHighlight(for: step.anchor))
@@ -118,9 +120,14 @@ struct TutorialCoachMarkOverlayLayer: View {
     }
 
     @ViewBuilder
-    private func coachMarkCard(step: TutorialStepDefinition, cardWidth: CGFloat) -> some View {
+    private func coachMarkCard(
+        step: TutorialStepDefinition,
+        cardWidth: CGFloat,
+        placement: TutorialCoachMarkCardPlacement,
+        safeInsets: EdgeInsets
+    ) -> some View {
         let fill = themeManager.cardFill(for: colorScheme)
-        BuxCoachMarkPopover(
+        let card = BuxCoachMarkPopover(
             progressLabel: coordinator.stepProgressLabel,
             titleKey: step.titleKey,
             bodyKey: step.bodyKey,
@@ -138,6 +145,18 @@ struct TutorialCoachMarkOverlayLayer: View {
                 .shadow(color: .black.opacity(0.16), radius: 14, y: 6)
         )
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+        switch placement {
+        case .bottom:
+            card
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .padding(.horizontal, 16)
+                .padding(.bottom, calloutBottomInset(safeInsets: safeInsets))
+        case .screenCenter:
+            card
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(.horizontal, 16)
+        }
     }
 }
 
