@@ -1118,6 +1118,29 @@
         }
       }
     },
+    "%@ available" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ disponible"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ disponible"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ disponible"
+          }
+        }
+      }
+    },
     "%@ carries the largest balance — extra payments there reduce total interest fastest." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1819,6 +1842,29 @@
         }
       }
     },
+    "%@, then billed through Apple" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, luego se factura a través de Apple"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, luego se factura a través de Apple"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, luego se factura a través de Apple"
+          }
+        }
+      }
+    },
     "%@:" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1993,6 +2039,75 @@
         }
       }
     },
+    "%@/%lld months" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/%lld meses"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/%lld meses"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/%lld meses"
+          }
+        }
+      }
+    },
+    "%@/%lld years" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/%lld años"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/%lld años"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/%lld años"
+          }
+        }
+      }
+    },
+    "%@/day" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/día"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/día"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/día"
+          }
+        }
+      }
+    },
     "%@/hr" : {
       "comment" : "A label displaying the hourly rate for a project.",
       "extractionState" : "stale",
@@ -2041,6 +2156,29 @@
         }
       }
     },
+    "%@/mo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/mes"
+          }
+        }
+      }
+    },
     "%@/month" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2064,7 +2202,76 @@
         }
       }
     },
+    "%@/week" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/semana"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/semana"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/semana"
+          }
+        }
+      }
+    },
+    "%@/wk" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/sem"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/sem"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/sem"
+          }
+        }
+      }
+    },
     "%@/year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/año"
+          }
+        }
+      }
+    },
+    "%@/yr" : {
       "extractionState" : "stale",
       "localizations" : {
         "es" : {
@@ -6342,6 +6549,29 @@
         }
       }
     },
+    "Active — includes all Standard features" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activo — incluye todas las funciones Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activo — incluye todas las funciones Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activo — incluye todas las funciones Standard"
+          }
+        }
+      }
+    },
     "Active — includes Simple Studio" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8302,6 +8532,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dirección o código postal"
+          }
+        }
+      }
+    },
+    "Adds invoices and work tools on a separate tab. Pro tools need BuxMuse Pro." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade facturas y herramientas de trabajo en una pestaña aparte. Las herramientas Pro requieren BuxMuse Pro."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade facturas y herramientas de trabajo en una pestaña aparte. Las herramientas Pro requieren BuxMuse Pro."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade facturas y herramientas de trabajo en una pestaña aparte. Las herramientas Pro requieren BuxMuse Pro."
           }
         }
       }
@@ -10766,6 +11019,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Radar contra cambios de alcance"
+          }
+        }
+      }
+    },
+    "Anti-Scope Creep Radar & Agreement Scratchpad" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar anti-scope creep y borrador de acuerdos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar anti-scope creep y borrador de acuerdos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar anti-scope creep y borrador de acuerdos"
           }
         }
       }
@@ -16163,6 +16439,29 @@
         }
       }
     },
+    "Business Card Studio — templates, QR & print-ready cards" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Business Card Studio — plantillas, QR y tarjetas listas para imprimir"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Business Card Studio — plantillas, QR y tarjetas listas para imprimir"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Business Card Studio — plantillas, QR y tarjetas listas para imprimir"
+          }
+        }
+      }
+    },
     "Business Card Studio with templates" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16837,7 +17136,6 @@
       }
     },
     "BuxMuse" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -17326,6 +17624,98 @@
         }
       }
     },
+    "BuxMuse Pro" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro"
+          }
+        }
+      }
+    },
+    "BuxMuse Pro active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro activo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro activo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro activo"
+          }
+        }
+      }
+    },
+    "BuxMuse Pro billing" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación BuxMuse Pro"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación BuxMuse Pro"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facturación BuxMuse Pro"
+          }
+        }
+      }
+    },
+    "BuxMuse Pro is active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro está activo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro está activo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Pro está activo"
+          }
+        }
+      }
+    },
     "BuxMuse recovery key (keep private):\n\\(key)\n\nBackup file saved separately." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -17368,6 +17758,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BuxMuse muestra un resumen de tu actividad total de trueque en la pestaña Estadísticas — valor total estimado y número de intercambios."
+          }
+        }
+      }
+    },
+    "BuxMuse Standard" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard"
+          }
+        }
+      }
+    },
+    "BuxMuse Standard includes personal finance and Simple Studio." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard incluye finanzas personales y Simple Studio."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard incluye finanzas personales y Simple Studio."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard incluye finanzas personales y Simple Studio."
+          }
+        }
+      }
+    },
+    "BuxMuse Standard is active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard está activo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard está activo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuxMuse Standard está activo"
           }
         }
       }
@@ -22675,6 +23134,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copiar correo electrónico de cambio de alcance"
+          }
+        }
+      }
+    },
+    "Core access to BuxMuse" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acceso principal a BuxMuse"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acceso principal a BuxMuse"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acceso principal a BuxMuse"
           }
         }
       }
@@ -36220,6 +36702,29 @@
         }
       }
     },
+    "Free trial available" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita disponible"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita disponible"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita disponible"
+          }
+        }
+      }
+    },
     "Freelance & creative" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -42038,6 +42543,144 @@
         }
       }
     },
+    "Included with BuxMuse Standard" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluido con BuxMuse Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluido con BuxMuse Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluido con BuxMuse Standard"
+          }
+        }
+      }
+    },
+    "Included with Standard" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluido con Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluido con Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluido con Standard"
+          }
+        }
+      }
+    },
+    "Includes all standard BuxMuse features" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todas las funciones de BuxMuse Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todas las funciones de BuxMuse Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todas las funciones de BuxMuse Standard"
+          }
+        }
+      }
+    },
+    "Includes all Standard BuxMuse features" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todas las funciones de BuxMuse Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todas las funciones de BuxMuse Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todas las funciones de BuxMuse Standard"
+          }
+        }
+      }
+    },
+    "Includes all Standard features · billed monthly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todo Standard · facturación mensual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todo Standard · facturación mensual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todo Standard · facturación mensual"
+          }
+        }
+      }
+    },
+    "Includes all Standard features · billed yearly" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todo Standard · facturación anual"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todo Standard · facturación anual"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye todo Standard · facturación anual"
+          }
+        }
+      }
+    },
     "Includes Pro Studio" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -42103,6 +42746,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Incluye Simple Studio"
+          }
+        }
+      }
+    },
+    "Includes Standard" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluye Standard"
           }
         }
       }
@@ -43647,6 +44313,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "marca de factura"
+          }
+        }
+      }
+    },
+    "Invoice designer with brand templates" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas con plantillas de marca"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas con plantillas de marca"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas con plantillas de marca"
+          }
+        }
+      }
+    },
+    "Invoice designer, business cards, Tax Studio & more" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas, tarjetas, Tax Studio y más"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas, tarjetas, Tax Studio y más"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas, tarjetas, Tax Studio y más"
+          }
+        }
+      }
+    },
+    "Invoice designer, business cards, Tax Studio & more." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas, tarjetas, Tax Studio y más."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas, tarjetas, Tax Studio y más."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diseñador de facturas, tarjetas, Tax Studio y más."
           }
         }
       }
@@ -48405,6 +49140,29 @@
         }
       }
     },
+    "Log what you spend after income so the ring stays meaningful. Tap Next anytime — no need to open the form." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que gastas después del ingreso para que el anillo tenga sentido. Toca Siguiente cuando quieras — no hace falta abrir el formulario."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que gastas después del ingreso para que el anillo tenga sentido. Toca Siguiente cuando quieras — no hace falta abrir el formulario."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra lo que gastas después del ingreso para que el anillo tenga sentido. Toca Siguiente cuando quieras — no hace falta abrir el formulario."
+          }
+        }
+      }
+    },
     "Log what you spend. Do this after income so the ring stays meaningful." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -52410,6 +53168,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suscripción mensual · incluye Simple"
+          }
+        }
+      }
+    },
+    "Monthly subscription · includes Standard" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción mensual · incluye Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción mensual · incluye Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción mensual · incluye Standard"
           }
         }
       }
@@ -64050,6 +64831,29 @@
         }
       }
     },
+    "Pro Search across clients, jobs & invoices" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Búsqueda Pro en clientes, trabajos y facturas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Búsqueda Pro en clientes, trabajos y facturas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Búsqueda Pro en clientes, trabajos y facturas"
+          }
+        }
+      }
+    },
     "Pro Search across your whole studio" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -64947,6 +65751,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PLANIFICADOR DE PROYECTOS"
+          }
+        }
+      }
+    },
+    "Project planner & Studio Insights" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planificador de proyectos e Insights de Studio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planificador de proyectos e Insights de Studio"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planificador de proyectos e Insights de Studio"
           }
         }
       }
@@ -78146,6 +78973,75 @@
         }
       }
     },
+    "Simple Studio is included with your plan. Open Studio in Settings and turn on the Studio tab when you want work tools — or tap Next to skip." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Abre Studio en Ajustes y activa la pestaña cuando quieras herramientas de trabajo — o toca Siguiente para saltarlo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Abre Studio en Ajustes y activa la pestaña cuando quieras herramientas de trabajo — o toca Siguiente para saltarlo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Abre Studio en Ajustes y activa la pestaña cuando quieras herramientas de trabajo — o toca Siguiente para saltarlo."
+          }
+        }
+      }
+    },
+    "Simple Studio is included with your plan. Turn it on from this card when you want invoices and work tools — or skip and keep Home clean." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Actívalo desde esta tarjeta cuando quieras facturas y herramientas de trabajo — o sáltalo y deja Inicio limpio."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Actívalo desde esta tarjeta cuando quieras facturas y herramientas de trabajo — o sáltalo y deja Inicio limpio."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Actívalo desde esta tarjeta cuando quieras facturas y herramientas de trabajo — o sáltalo y deja Inicio limpio."
+          }
+        }
+      }
+    },
+    "Simple Studio is included with your plan. Turn it on in Settings when you want invoices and work tools." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Actívalo en Ajustes cuando quieras facturas y herramientas de trabajo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Actívalo en Ajustes cuando quieras facturas y herramientas de trabajo."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple Studio está incluido en tu plan. Actívalo en Ajustes cuando quieras facturas y herramientas de trabajo."
+          }
+        }
+      }
+    },
     "Simple Studio item conflict" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -80286,19 +81182,111 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estándar"
+            "value" : "Standard"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estándar"
+            "value" : "Standard"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estándar"
+            "value" : "Standard"
+          }
+        }
+      }
+    },
+    "Standard · %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@"
+          }
+        }
+      }
+    },
+    "Standard · %@/month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@/mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@/mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@/mes"
+          }
+        }
+      }
+    },
+    "Standard · %@/year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@/año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@/año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · %@/año"
+          }
+        }
+      }
+    },
+    "Standard · personal finance + Simple Studio" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · finanzas personales + Simple Studio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · finanzas personales + Simple Studio"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard · finanzas personales + Simple Studio"
           }
         }
       }
@@ -80372,6 +81360,52 @@
         }
       }
     },
+    "Standard includes Simple Studio. Turn it on anytime in Settings → Studio when you want work tools. Pro is an optional upgrade." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard incluye Simple Studio. Actívalo cuando quieras en Ajustes → Studio. Pro es una mejora opcional."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard incluye Simple Studio. Actívalo cuando quieras en Ajustes → Studio. Pro es una mejora opcional."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard incluye Simple Studio. Actívalo cuando quieras en Ajustes → Studio. Pro es una mejora opcional."
+          }
+        }
+      }
+    },
+    "Standard or Pro plans" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planes Standard o Pro"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planes Standard o Pro"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planes Standard o Pro"
+          }
+        }
+      }
+    },
     "Star" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -80416,6 +81450,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inicio"
+          }
+        }
+      }
+    },
+    "Start %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar %@"
           }
         }
       }
@@ -80485,6 +81542,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Crear un hogar"
+          }
+        }
+      }
+    },
+    "Start free trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar prueba gratuita"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar prueba gratuita"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar prueba gratuita"
           }
         }
       }
@@ -80694,6 +81774,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comenzar a usar BuxMuse"
+          }
+        }
+      }
+    },
+    "Start your %@ to continue using BuxMuse." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza tu %@ para seguir usando BuxMuse."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza tu %@ para seguir usando BuxMuse."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza tu %@ para seguir usando BuxMuse."
           }
         }
       }
@@ -82532,6 +83635,29 @@
         }
       }
     },
+    "Subscribe to BuxMuse Standard to unlock the app and Simple Studio." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete a BuxMuse Standard para desbloquear la app y Simple Studio."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete a BuxMuse Standard para desbloquear la app y Simple Studio."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete a BuxMuse Standard para desbloquear la app y Simple Studio."
+          }
+        }
+      }
+    },
     "Subscribe to continue" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -84282,6 +85408,29 @@
         }
       }
     },
+    "Tap here anytime you get paid. For now, tap Next to continue — you do not need to enter anything." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca aquí cuando te paguen. Por ahora, toca Siguiente para continuar — no hace falta escribir nada."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca aquí cuando te paguen. Por ahora, toca Siguiente para continuar — no hace falta escribir nada."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca aquí cuando te paguen. Por ahora, toca Siguiente para continuar — no hace falta escribir nada."
+          }
+        }
+      }
+    },
     "Tap here when you get paid. Each payment grows what you have left this period." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -85855,6 +87004,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Estudio fiscal"
+          }
+        }
+      }
+    },
+    "Tax Studio — deductions, mileage & estimates" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax Studio — deducciones, kilometraje y estimaciones"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax Studio — deducciones, kilometraje y estimaciones"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tax Studio — deducciones, kilometraje y estimaciones"
           }
         }
       }
@@ -92119,6 +93291,52 @@
         }
       }
     },
+    "Try BuxMuse Standard free — %@. Includes Simple Studio." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse Standard gratis — %@. Incluye Simple Studio."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse Standard gratis — %@. Incluye Simple Studio."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse Standard gratis — %@. Incluye Simple Studio."
+          }
+        }
+      }
+    },
+    "Try BuxMuse Standard free for 7 days. Includes Simple Studio." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse Standard gratis 7 días. Incluye Simple Studio."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse Standard gratis 7 días. Incluye Simple Studio."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba BuxMuse Standard gratis 7 días. Incluye Simple Studio."
+          }
+        }
+      }
+    },
     "Try capping your next visit here to 10% less." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -92419,6 +93637,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Activa Simple o Pro Studio, conecta ingresos de trabajo a Inicio y gestiona facturas e impuestos."
+          }
+        }
+      }
+    },
+    "Turn on Studio" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar Studio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar Studio"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar Studio"
           }
         }
       }
@@ -93083,6 +94324,29 @@
         }
       }
     },
+    "Unlimited gig workspaces (Simple caps at 3)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espacios de trabajo ilimitados (Simple limita a 3)"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espacios de trabajo ilimitados (Simple limita a 3)"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espacios de trabajo ilimitados (Simple limita a 3)"
+          }
+        }
+      }
+    },
     "Unlimited multi-gig workspaces unlocked" : {
       "comment" : "A description of the benefits of using the full version of the app.",
       "extractionState" : "stale",
@@ -93296,6 +94560,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Desbloquear Studio"
+          }
+        }
+      }
+    },
+    "Unlock Tax Studio, PDF invoices, unlimited projects, and all Pro tools. Includes everything in Standard." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquea Tax Studio, facturas PDF, proyectos ilimitados y todas las herramientas Pro. Incluye todo Standard."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquea Tax Studio, facturas PDF, proyectos ilimitados y todas las herramientas Pro. Incluye todo Standard."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquea Tax Studio, facturas PDF, proyectos ilimitados y todas las herramientas Pro. Incluye todo Standard."
           }
         }
       }
@@ -93889,25 +95176,186 @@
         }
       }
     },
+    "Upgrade for invoice designer, Business Card Studio, Tax Studio, unlimited workspaces, and every Pro tool. Includes everything in Standard." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora para diseñador de facturas, Business Card Studio, Tax Studio, espacios ilimitados y todas las herramientas Pro. Incluye todo Standard."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora para diseñador de facturas, Business Card Studio, Tax Studio, espacios ilimitados y todas las herramientas Pro. Incluye todo Standard."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora para diseñador de facturas, Business Card Studio, Tax Studio, espacios ilimitados y todas las herramientas Pro. Incluye todo Standard."
+          }
+        }
+      }
+    },
+    "Upgrade to BuxMuse Pro" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro"
+          }
+        }
+      }
+    },
+    "Upgrade to BuxMuse Pro — %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@"
+          }
+        }
+      }
+    },
+    "Upgrade to BuxMuse Pro — %@/mo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@/mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@/mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@/mes"
+          }
+        }
+      }
+    },
+    "Upgrade to BuxMuse Pro — %@/yr" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@/año"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@/año"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejorar a BuxMuse Pro — %@/año"
+          }
+        }
+      }
+    },
+    "Upgrade to BuxMuse Pro for invoice designer, Business Card Studio, Tax Studio, unlimited workspaces, and every Pro tool." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora a BuxMuse Pro para diseñador de facturas, Business Card Studio, Tax Studio, espacios ilimitados y todas las herramientas Pro."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora a BuxMuse Pro para diseñador de facturas, Business Card Studio, Tax Studio, espacios ilimitados y todas las herramientas Pro."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora a BuxMuse Pro para diseñador de facturas, Business Card Studio, Tax Studio, espacios ilimitados y todas las herramientas Pro."
+          }
+        }
+      }
+    },
+    "Upgrade to BuxMuse Pro for Tax Studio, PDF invoices, unlimited projects, and all Pro tools." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora a BuxMuse Pro para Tax Studio, facturas PDF, proyectos ilimitados y todas las herramientas Pro."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora a BuxMuse Pro para Tax Studio, facturas PDF, proyectos ilimitados y todas las herramientas Pro."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejora a BuxMuse Pro para Tax Studio, facturas PDF, proyectos ilimitados y todas las herramientas Pro."
+          }
+        }
+      }
+    },
     "Upgrade to Pro" : {
       "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pasar a Pro"
+            "value" : "Mejorar a Pro"
           }
         },
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pasar a Pro"
+            "value" : "Mejorar a Pro"
           }
         },
         "es-ES" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pasar a Pro"
+            "value" : "Mejorar a Pro"
           }
         }
       }
@@ -98316,6 +99764,29 @@
         }
       }
     },
+    "Yearly subscription · includes Standard" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción anual · incluye Standard"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción anual · incluye Standard"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscripción anual · incluye Standard"
+          }
+        }
+      }
+    },
     "Yellow" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -100476,6 +101947,52 @@
         }
       }
     },
+    "Your BuxMuse Pro subscription is active." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción BuxMuse Pro está activa."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción BuxMuse Pro está activa."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción BuxMuse Pro está activa."
+          }
+        }
+      }
+    },
+    "Your BuxMuse Standard subscription is active." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción BuxMuse Standard está activa."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción BuxMuse Standard está activa."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu suscripción BuxMuse Standard está activa."
+          }
+        }
+      }
+    },
     "Your BuxMuse subscription is active." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -100706,6 +102223,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu panorama financiero"
+          }
+        }
+      }
+    },
+    "Your free trial is active" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba gratuita está activa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba gratuita está activa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu prueba gratuita está activa"
           }
         }
       }

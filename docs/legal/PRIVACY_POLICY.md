@@ -36,7 +36,7 @@ You can delete local data by removing the app or using in-app reset and backup t
 BuxMuse offers **auto-renewable subscriptions** and **optional in-app purchases** (Studio add-ons) through the **Apple App Store**.
 
 - **Billing:** Apple processes all payments. BuxMuse does not receive or store your payment card details.  
-- **Products:** A BuxMuse subscription is required for ongoing app access after any free trial period shown in the app. Simple Studio and Pro Studio are optional add-ons sold separately; they require an active BuxMuse subscription.  
+- **Products:** BuxMuse offers two auto-renewable subscription tiers. **Standard** unlocks the personal-finance app and Simple Studio. **Pro** includes everything in Standard plus Pro Studio tools. Access after any free trial is through an active subscription purchased via Apple.  
 - **Trials and pricing:** Free trials, prices, and renewal terms are shown in the app before you purchase and may vary by country.  
 - **Manage or cancel:** Open **Settings → [your name] → Subscriptions** on your iPhone or iPad, or use **Manage Subscriptions** in the App Store.  
 - **Refunds:** Refund requests are handled by Apple under Apple’s policies.

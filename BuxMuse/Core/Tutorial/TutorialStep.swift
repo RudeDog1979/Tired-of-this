@@ -47,7 +47,15 @@ struct TutorialStepDefinition: Identifiable, Equatable {
 }
 
 enum TutorialCoreSteps {
-    static func all(studioEnabled: Bool) -> [TutorialStepDefinition] {
+    /// - Parameters:
+    ///   - studioEnabled: Studio tab is on.
+    ///   - studioEntitled: User has Standard/Pro (or legacy) entitlement for Simple Studio.
+    ///   - showStudioDiscovery: Home discovery card is visible (not dismissed).
+    static func all(
+        studioEnabled: Bool,
+        studioEntitled: Bool = false,
+        showStudioDiscovery: Bool = false
+    ) -> [TutorialStepDefinition] {
         var steps: [TutorialStepDefinition] = [
             TutorialStepDefinition(
                 id: "home.welcome",
@@ -59,21 +67,14 @@ enum TutorialCoreSteps {
             TutorialStepDefinition(
                 id: "home.income",
                 titleKey: "Log income",
-                bodyKey: "Tap here when you get paid. Each payment grows what you have left this period.",
+                bodyKey: "Tap here anytime you get paid. For now, tap Next to continue — you do not need to enter anything.",
                 anchor: .homeIncomeButton,
                 onEnter: .selectTab(.home)
             ),
             TutorialStepDefinition(
-                id: "home.incomeSheet",
-                titleKey: "Income entry",
-                bodyKey: "Enter what you earned. Try it now or tap Next — both are fine.",
-                anchor: .addIncomeAmount,
-                onEnter: .presentSheet(.openAddIncome)
-            ),
-            TutorialStepDefinition(
                 id: "home.expense",
                 titleKey: "Add expenses",
-                bodyKey: "Log what you spend. Do this after income so the ring stays meaningful.",
+                bodyKey: "Log what you spend after income so the ring stays meaningful. Tap Next anytime — no need to open the form.",
                 anchor: .homeExpenseButton,
                 onEnter: .selectTab(.home)
             ),
@@ -83,31 +84,6 @@ enum TutorialCoreSteps {
                 bodyKey: "Optional. Turn on consumer debt tracking to log loans, cards, and informal lenders.",
                 anchor: .homeDebtDiscovery,
                 onEnter: .selectTab(.home)
-            ),
-            TutorialStepDefinition(
-                id: "expense.sheetIntro",
-                titleKey: "Merchant",
-                bodyKey: "Name the store. Pick a suggestion or add a new one.",
-                anchor: .addExpenseMerchant,
-                onEnter: .presentSheet(.openAddExpense)
-            ),
-            TutorialStepDefinition(
-                id: "expense.category",
-                titleKey: "Category",
-                bodyKey: "Organizes spending. Housing and utilities are essentials — they do not shrink your fun-money ring.",
-                anchor: .addExpenseCategory
-            ),
-            TutorialStepDefinition(
-                id: "expense.scan",
-                titleKey: "Receipt scan",
-                bodyKey: "Optional. On-device OCR fills merchant, date, and total.",
-                anchor: .addExpenseScan
-            ),
-            TutorialStepDefinition(
-                id: "expense.save",
-                titleKey: "Save",
-                bodyKey: "Your expense appears on Home and in Expenses. Next is fine without saving.",
-                anchor: .addExpenseSave
             ),
             TutorialStepDefinition(
                 id: "settings.intro",
@@ -172,6 +148,29 @@ enum TutorialCoreSteps {
                     requiresStudio: true
                 ),
             ])
+        } else if studioEntitled {
+            // Opt-in coach-mark: entitled but tab still off.
+            if showStudioDiscovery {
+                steps.append(
+                    TutorialStepDefinition(
+                        id: "home.studioEnable",
+                        titleKey: "Turn on Studio",
+                        bodyKey: "Simple Studio is included with your plan. Turn it on from this card when you want invoices and work tools — or skip and keep Home clean.",
+                        anchor: .homeStudioDiscovery,
+                        onEnter: .selectTab(.home)
+                    )
+                )
+            } else {
+                steps.append(
+                    TutorialStepDefinition(
+                        id: "settings.studioEnable",
+                        titleKey: "Turn on Studio",
+                        bodyKey: "Simple Studio is included with your plan. Open Studio in Settings and turn on the Studio tab when you want work tools — or tap Next to skip.",
+                        anchor: .settingsStudioRow,
+                        onEnter: .showSettingsOverview
+                    )
+                )
+            }
         }
 
         steps.append(contentsOf: [

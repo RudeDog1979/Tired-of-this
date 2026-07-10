@@ -1,62 +1,9 @@
 //
 //  StudioPurchaseChooser.swift
-//  BuxMuse — Simple Studio or Pro Studio (one path at a time + cross-upsell).
+//  BuxMuse — Pro upgrade chooser (Standard already includes Simple Studio).
 //
 
 import SwiftUI
-
-/// Shared copy: Studio IAPs sit on top of BuxMuse and never replace base app access.
-struct StudioAddOnRequirementNotice: View {
-    enum Presentation {
-        case inline
-        case callout
-    }
-
-    @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject private var themeManager: ThemeManager
-    @EnvironmentObject private var appSettingsManager: AppSettingsManager
-
-    var presentation: Presentation = .inline
-
-    var body: some View {
-        let content = HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "info.circle.fill")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                .padding(.top, 1)
-
-            BuxCatalogDynamicText(key: "Studio add-ons require an active BuxMuse subscription. They do not replace it.")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme).opacity(0.88))
-                .fixedSize(horizontal: false, vertical: true)
-                .multilineTextAlignment(.leading)
-        }
-
-        switch presentation {
-        case .inline:
-            content
-        case .callout:
-            content
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(themeManager.contrastAccentColor(for: colorScheme).opacity(colorScheme == .dark ? 0.12 : 0.08))
-                )
-                .overlay {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(themeManager.contrastAccentColor(for: colorScheme).opacity(0.18), lineWidth: 1)
-                }
-        }
-    }
-}
-
-enum StudioPurchaseTier: String, CaseIterable, Identifiable {
-    case simple
-    case pro
-
-    var id: String { rawValue }
-}
 
 struct StudioPurchaseChooser: View {
     enum Style {
@@ -71,113 +18,19 @@ struct StudioPurchaseChooser: View {
 
     let style: Style
     @Binding var billingPeriod: BuxMuseBillingPeriod
-    var onPurchaseSimple: () async throws -> Void
     var onPurchasePro: () async throws -> Void
     var onError: (String) -> Void = { _ in }
 
-    @State private var selectedTier: StudioPurchaseTier = .simple
-
     var body: some View {
         VStack(alignment: .leading, spacing: style == .settingsList ? BuxTokens.section : BuxTokens.tight) {
-            tierIntro
-
             if purchaseManager.hasProStudio {
                 ownedStatusCard(
-                    title: "Pro Studio",
-                    subtitle: "Active — includes Simple Studio",
+                    title: "BuxMuse Pro",
+                    subtitle: "Active — includes all Standard features",
                     badge: "Active"
                 )
-            } else if purchaseManager.hasSimpleStudio {
-                ownedStatusCard(
-                    title: "Simple Studio",
-                    subtitle: "Unlocked on this Apple ID",
-                    badge: "Owned"
-                )
-                proOnlyCard
             } else {
-                tierPicker
-                activeTierContent
-                crossUpsellLink
-            }
-        }
-        .onAppear {
-            if purchaseManager.hasSimpleStudio && !purchaseManager.hasProStudio {
-                selectedTier = .pro
-            }
-        }
-    }
-
-    private var tierIntro: some View {
-        Group {
-            if style == .subscriptionCards {
-                BuxSectionHeader(title: BuxCatalogLabel.string("Studio add-ons", locale: appSettingsManager.interfaceLocale))
-                    .environmentObject(themeManager)
-                BuxCatalogDynamicText(key: "Simple Studio for invoices and a work ledger — or Pro Studio for tax tools, PDF design, and unlimited projects.")
-                    .font(.system(size: 12, weight: .medium))
-                    .buxLabelSecondary()
-                    .fixedSize(horizontal: false, vertical: true)
-                StudioAddOnRequirementNotice(presentation: .inline)
-                    .environmentObject(themeManager)
-                    .environmentObject(appSettingsManager)
-                    .padding(.top, 4)
-            } else {
-                BuxCatalogDynamicText(key: "Pick Simple for invoices and a work ledger, or Pro for tax tools and unlimited projects.")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme).opacity(0.9))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.leading)
-                    .buxFormFieldPadding()
-
-                StudioAddOnRequirementNotice(presentation: .callout)
-                    .environmentObject(themeManager)
-                    .environmentObject(appSettingsManager)
-                    .buxFormFieldPadding()
-            }
-        }
-    }
-
-    private var tierPicker: some View {
-        BuxSegmentedCapsuleSelector(leadingSelected: selectedTier == .simple) {
-            Button {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-                    selectedTier = .simple
-                }
-            } label: {
-                BuxSegmentedCapsuleSegment(
-                    title: BuxCatalogLabel.string("Simple", locale: appSettingsManager.interfaceLocale),
-                    isSelected: selectedTier == .simple
-                )
-            }
-            .buttonStyle(.plain)
-        } trailing: {
-            Button {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-                    selectedTier = .pro
-                }
-            } label: {
-                BuxSegmentedCapsuleSegment(
-                    title: BuxCatalogLabel.string("Pro", locale: appSettingsManager.interfaceLocale),
-                    isSelected: selectedTier == .pro,
-                    trailingAccessory: AnyView(ProFeatureBadge(compact: true))
-                )
-            }
-            .buttonStyle(.plain)
-        }
-        .environmentObject(themeManager)
-        .modifier(StudioChooserFieldPadding(style: style))
-    }
-
-    @ViewBuilder
-    private var activeTierContent: some View {
-        switch selectedTier {
-        case .simple:
-            if style == .subscriptionCards {
-                simpleSubscriptionCard
-            } else {
-                simpleSettingsPanel
-            }
-        case .pro:
-            VStack(alignment: .leading, spacing: BuxTokens.tight) {
+                tierIntro
                 proBillingToggle
                 if style == .subscriptionCards {
                     proSubscriptionCard
@@ -188,77 +41,40 @@ struct StudioPurchaseChooser: View {
         }
     }
 
-    @ViewBuilder
-    private var proBillingToggle: some View {
-        if selectedTier == .pro || style == .subscriptionCards {
-            BuxBillingPeriodToggle(
-                billingPeriod: $billingPeriod,
-                caption: style == .settingsList ? nil : "Pro Studio billing"
-            )
-            .environmentObject(themeManager)
-            .environmentObject(appSettingsManager)
-            .modifier(StudioChooserFieldPadding(style: style))
-        }
-    }
-
-    private var crossUpsellLink: some View {
-        Button {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-                selectedTier = selectedTier == .simple ? .pro : .simple
-            }
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: selectedTier == .simple ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                Text(selectedTier == .simple
-                     ? BuxCatalogLabel.string("Need tax tools? See Pro Studio", locale: appSettingsManager.interfaceLocale)
-                     : BuxCatalogLabel.string("Just need invoices? See Simple Studio", locale: appSettingsManager.interfaceLocale))
-                    .font(.system(size: 13, weight: .semibold))
+    private var tierIntro: some View {
+        Group {
+            if style == .subscriptionCards {
+                BuxCatalogDynamicText(key: "Upgrade for invoice designer, Business Card Studio, Tax Studio, unlimited workspaces, and every Pro tool. Includes everything in Standard.")
+                    .font(.system(size: 12, weight: .medium))
+                    .buxLabelSecondary()
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                BuxCatalogDynamicText(key: "Upgrade to BuxMuse Pro for invoice designer, Business Card Studio, Tax Studio, unlimited workspaces, and every Pro tool.")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme).opacity(0.9))
+                    .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
+                    .buxFormFieldPadding()
             }
-            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.vertical, 4)
         }
-        .buttonStyle(.plain)
+    }
+
+    private var proBillingToggle: some View {
+        BuxBillingPeriodToggle(
+            billingPeriod: $billingPeriod,
+            caption: style == .settingsList ? nil : "BuxMuse Pro billing"
+        )
+        .environmentObject(themeManager)
+        .environmentObject(appSettingsManager)
         .modifier(StudioChooserFieldPadding(style: style))
-    }
-
-    // MARK: - Subscription cards
-
-    private var simpleCardSubtitle: String {
-        BuxCatalogLabel.string(
-            "Add-on · requires BuxMuse · one-time unlock",
-            locale: appSettingsManager.interfaceLocale
-        )
-    }
-
-    private var simpleSubscriptionCard: some View {
-        StudioPricingCard(
-            title: "Simple Studio",
-            subtitle: simpleCardSubtitle,
-            priceID: .studioSimple,
-            badge: nil,
-            bullets: [
-                "Work ledger and basic invoices",
-                "Up to 3 workspaces",
-                "Mileage and payment tracking"
-            ],
-            buttonTitle: simpleButtonTitle,
-            isSecondary: true,
-            isEnabled: !purchaseManager.isPurchasing
-                && !purchaseManager.isLoadingProducts
-                && !(purchaseManager.didLoadProducts && purchaseManager.products.isEmpty),
-            action: { Task { await runPurchase(onPurchaseSimple) } }
-        )
     }
 
     private var proSubscriptionCard: some View {
         StudioPricingCard(
-            title: "Pro Studio",
+            title: "BuxMuse Pro",
             subtitle: proCardSubtitle,
-            priceID: billingPeriod.studioProProductID,
-            badge: "Includes Simple",
+            priceID: billingPeriod.proProductID,
+            badge: "Includes Standard",
             bullets: proCardBullets,
             buttonTitle: proButtonTitle,
             isSecondary: true,
@@ -270,53 +86,15 @@ struct StudioPurchaseChooser: View {
         .id(billingPeriod)
     }
 
-    private var proOnlyCard: some View {
-        Group {
-            proBillingToggle
-            if style == .subscriptionCards {
-                proSubscriptionCard
-            } else {
-                proSettingsPanel
-            }
-            crossUpsellToProOnly
-        }
-    }
-
-    private var crossUpsellToProOnly: some View {
-        BuxCatalogDynamicText(key: "Pro includes everything in Simple — upgrade when you need tax tools and unlimited projects.")
-            .font(.system(size: 12, weight: .medium))
-            .buxLabelSecondary()
-            .fixedSize(horizontal: false, vertical: true)
-            .modifier(StudioChooserFieldPadding(style: style))
-    }
-
-    // MARK: - Settings panels
-
-    private var simpleSettingsPanel: some View {
-        settingsProductPanel(
-            title: "Simple Studio",
-            showsProBadge: false,
-            priceID: .studioSimple,
-            bullets: [
-                "Work ledger and basic invoices",
-                "Up to 3 workspaces",
-                "Mileage and payment tracking"
-            ],
-            billingNote: "One-time unlock · requires BuxMuse",
-            buttonTitle: simpleButtonTitle,
-            action: { Task { await runPurchase(onPurchaseSimple) } }
-        )
-    }
-
     private var proSettingsPanel: some View {
         settingsProductPanel(
-            title: "Pro Studio",
+            title: "BuxMuse Pro",
             showsProBadge: true,
-            priceID: billingPeriod.studioProProductID,
+            priceID: billingPeriod.proProductID,
             bullets: proCardBullets,
             billingNote: billingPeriod == .yearly
-                ? "Yearly subscription · includes Simple"
-                : "Monthly subscription · includes Simple",
+                ? "Yearly subscription · includes Standard"
+                : "Monthly subscription · includes Standard",
             buttonTitle: proButtonTitle,
             action: { Task { await runPurchase(onPurchasePro) } }
         )
@@ -348,7 +126,10 @@ struct StudioPurchaseChooser: View {
                         .buxLabelSecondary()
                 }
                 Spacer(minLength: 8)
-                if let price = purchaseManager.displayPrice(for: priceID) {
+                if let price = purchaseManager.pricePerPeriodLabel(
+                    for: priceID,
+                    locale: appSettingsManager.interfaceLocale
+                ) ?? purchaseManager.displayPrice(for: priceID) {
                     Text(price)
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -374,7 +155,7 @@ struct StudioPurchaseChooser: View {
 
             BuxButton(
                 title: buttonTitle,
-                systemImage: "plus.circle.fill",
+                systemImage: "sparkles",
                 role: .secondary,
                 expands: true,
                 isEnabled: !purchaseManager.isPurchasing
@@ -422,75 +203,36 @@ struct StudioPurchaseChooser: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.cardFill(for: colorScheme))
         .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
-        .padding(.horizontal, style == .settingsList ? 0 : 0)
     }
 
     private var proCardSubtitle: String {
         let locale = appSettingsManager.interfaceLocale
-        if purchaseManager.proInIntroductoryOffer {
-            return BuxCatalogLabel.string(
-                "Add-on · requires BuxMuse · includes Simple · trial active",
-                locale: locale
-            )
-        }
-        if purchaseManager.proIntroOfferEligible {
-            if let trial = purchaseManager.trialLengthLabel(
-                for: billingPeriod.studioProProductID,
-                locale: locale
-            ) {
-                return BuxLocalizedString.format(
-                    "Add-on · requires BuxMuse · includes Simple · %@",
-                    locale: locale,
-                    trial
-                )
-            }
-        }
-        if purchaseManager.ownsSimpleOneTimePurchase {
-            return BuxCatalogLabel.string(
-                "Add-on · requires BuxMuse · includes Simple · request a Simple refund from Apple after upgrading",
-                locale: locale
-            )
-        }
         return billingPeriod == .yearly
-            ? BuxCatalogLabel.string(
-                "Add-on · requires BuxMuse · includes Simple · billed yearly",
-                locale: locale
-            )
-            : BuxCatalogLabel.string(
-                "Add-on · requires BuxMuse · includes Simple · billed monthly",
-                locale: locale
-            )
+            ? BuxCatalogLabel.string("Includes all Standard features · billed yearly", locale: locale)
+            : BuxCatalogLabel.string("Includes all Standard features · billed monthly", locale: locale)
     }
 
     private var proCardBullets: [String] {
         [
-            "Everything in Simple Studio",
-            "Tax Studio and PDF designer",
-            "Unlimited projects and Pro work tools"
+            "Includes all Standard BuxMuse features",
+            "Invoice designer with brand templates",
+            "Business Card Studio — templates, QR & print-ready cards",
+            "Tax Studio — deductions, mileage & estimates",
+            "Unlimited gig workspaces (Simple caps at 3)",
+            "Anti-Scope Creep Radar & Agreement Scratchpad",
+            "Pro Search across clients, jobs & invoices",
+            "Project planner & Studio Insights"
         ]
-    }
-
-    private var simpleButtonTitle: String {
-        if let price = purchaseManager.displayPrice(for: .studioSimple) {
-            return BuxLocalizedString.format("Unlock Simple — %@", locale: appSettingsManager.interfaceLocale, price)
-        }
-        return BuxCatalogLabel.string("Unlock Simple Studio", locale: appSettingsManager.interfaceLocale)
     }
 
     private var proButtonTitle: String {
         if purchaseManager.hasProStudio {
-            if purchaseManager.proInIntroductoryOffer {
-                return BuxCatalogLabel.string("Pro trial active", locale: appSettingsManager.interfaceLocale)
-            }
-            return BuxCatalogLabel.string("Pro Studio active", locale: appSettingsManager.interfaceLocale)
+            return BuxCatalogLabel.string("BuxMuse Pro active", locale: appSettingsManager.interfaceLocale)
         }
-        if purchaseManager.proIntroOfferEligible {
-            return BuxCatalogLabel.string("Start 7-day Pro trial", locale: appSettingsManager.interfaceLocale)
-        }
-        if let price = purchaseManager.displayPrice(for: billingPeriod.studioProProductID) {
-            return BuxLocalizedString.format("Subscribe to Pro — %@", locale: appSettingsManager.interfaceLocale, price)
-        }
-        return BuxCatalogLabel.string("Subscribe to Pro Studio", locale: appSettingsManager.interfaceLocale)
+        return BuxStoreKitPriceCopy.upgradeToProCTA(
+            for: purchaseManager.product(for: billingPeriod.proProductID),
+            locale: appSettingsManager.interfaceLocale
+        )
     }
 
     private func runPurchase(_ action: () async throws -> Void) async {
@@ -559,7 +301,10 @@ private struct StudioPricingCard: View {
                 }
             }
 
-            if let price = purchaseManager.displayPrice(for: priceID) {
+            if let price = purchaseManager.pricePerPeriodLabel(
+                for: priceID,
+                locale: appSettingsManager.interfaceLocale
+            ) ?? purchaseManager.displayPrice(for: priceID) {
                 Text(price)
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -580,13 +325,23 @@ private struct StudioPricingCard: View {
 
             BuxButton(
                 title: buttonTitle,
-                systemImage: isSecondary ? "plus.circle.fill" : "sparkles",
+                systemImage: isSecondary ? "sparkles" : "sparkles",
                 role: isSecondary ? .secondary : .primary,
                 expands: true,
                 isEnabled: isEnabled,
                 action: action
             )
             .environmentObject(themeManager)
+
+            BuxSubscriptionLegalLinks(layout: .stacked)
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .padding(.top, 4)
+
+            BuxSubscriptionAutoRenewDisclosure()
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .padding(.top, 2)
         }
         .padding(BuxTokens.marginRegular)
         .frame(maxWidth: .infinity, alignment: .leading)

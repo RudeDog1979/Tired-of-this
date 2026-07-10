@@ -7,14 +7,15 @@ import Foundation
 
 @MainActor
 enum StudioPurchaseFlow {
-    static func purchaseSimple(
+    static func purchaseStandard(
         navigationCoordinator: NavigationCoordinator? = nil,
-        purchaseManager: StudioPurchaseManager? = nil
+        purchaseManager: StudioPurchaseManager? = nil,
+        period: BuxMuseBillingPeriod = .yearly
     ) async throws {
         let manager = purchaseManager ?? StudioPurchaseManager.shared
-        _ = try await manager.purchase(.simple)
-        guard manager.hasSimpleStudio else { return }
-        enableStudioTab(navigationCoordinator: navigationCoordinator)
+        _ = try await manager.purchaseStandardSubscription(period: period)
+        // Studio tab stays off until the user opts in (Settings / discovery → unlock animation).
+        _ = navigationCoordinator
     }
 
     static func purchasePro(
@@ -28,18 +29,22 @@ enum StudioPurchaseFlow {
     ) async throws {
         let manager = purchaseManager ?? StudioPurchaseManager.shared
         let settingsStore = settings ?? SettingsStore.shared
-        _ = try await manager.purchase(period.studioProProductID)
+        _ = try await manager.purchaseProSubscription(period: period)
         guard manager.hasProStudio else { return }
-        _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
-            simpleStore: simpleStore,
-            studioStore: studioStore,
-            settings: settingsStore,
-            currencyCode: appSettingsManager.selectedCurrency.id
-        )
-        enableStudioTab(navigationCoordinator: navigationCoordinator)
+        // Only migrate Simple→Pro data if Studio is already enabled; do not force the tab on.
+        if settingsStore.studioEnabled {
+            _ = SimpleStudioUpgradeCoordinator.upgradeToPro(
+                simpleStore: simpleStore,
+                studioStore: studioStore,
+                settings: settingsStore,
+                currencyCode: appSettingsManager.selectedCurrency.id
+            )
+        }
+        _ = navigationCoordinator
     }
 
-    private static func enableStudioTab(navigationCoordinator: NavigationCoordinator?) {
+    /// Call when the user explicitly turns on Studio (Settings toggle / discovery).
+    static func enableStudioTab(navigationCoordinator: NavigationCoordinator?) {
         guard !SettingsStore.shared.studioEnabled else { return }
         if let navigationCoordinator {
             navigationCoordinator.beginStudioUnlock()

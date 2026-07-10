@@ -162,7 +162,8 @@ struct SettingsView: View {
                 OnboardingWizardView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
-                    .buxThemedSheetContent()
+                    .buxThemedPresentation()
+                    .buxInterfaceLocale()
             }
         }
     }

@@ -56,7 +56,15 @@ final class AppTutorialCoordinator: ObservableObject {
         guard settingsStore.hasCompletedOnboarding else { return }
         if !restart, settingsStore.appTourFinished || settingsStore.appTourSkipped { return }
 
-        steps = TutorialCoreSteps.all(studioEnabled: settingsStore.studioEnabled)
+        let studioEntitled = StudioPurchaseManager.shared.hasSimpleStudio
+        let showDiscovery = !settingsStore.studioEnabled
+            && !settingsStore.studioDiscoveryOfferDismissed
+            && studioEntitled
+        steps = TutorialCoreSteps.all(
+            studioEnabled: settingsStore.studioEnabled,
+            studioEntitled: studioEntitled,
+            showStudioDiscovery: showDiscovery
+        )
         currentStepIndex = 0
         isActive = true
         settingsStore.appTourPendingAutoStart = false
@@ -119,16 +127,8 @@ final class AppTutorialCoordinator: ObservableObject {
 
     func handleAnchorTap(_ id: TutorialAnchorID) {
         guard isActive, currentStep?.anchor == id else { return }
-        switch id {
-        case .homeIncomeButton:
-            pendingDashboardSheet = .openAddIncome
-            advanceNext()
-        case .homeExpenseButton:
-            pendingDashboardSheet = .openAddExpense
-            advanceNext()
-        default:
-            advanceNext()
-        }
+        // Show-only tour: never trap the user in a sheet. Next / tap just advances.
+        advanceNext()
     }
 
     func consumeDashboardSheetRequest() -> TutorialSheetAction {

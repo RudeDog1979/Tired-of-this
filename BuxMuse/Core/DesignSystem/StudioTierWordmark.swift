@@ -61,7 +61,7 @@ struct StudioTierWordmark: View {
     }
 
     private var heroTaglineLine: some View {
-        BuxCatalogDynamicText(key: "Full tax, PDF invoices, analytics")
+        BuxCatalogDynamicText(key: "Invoice designer, business cards, Tax Studio & more")
             .font(.system(size: 12, weight: .medium))
             .foregroundStyle(.secondary)
     }

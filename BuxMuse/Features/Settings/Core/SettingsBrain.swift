@@ -383,13 +383,19 @@ public final class SettingsBrain {
                 Int64(purchaseManager.premiumTrialDaysRemaining)
             )
         }
+        if purchaseManager.hasProStudio {
+            return BuxLocalizedString.string("BuxMuse Pro is active", locale: locale)
+        }
         if purchaseManager.baseSubscriptionActive {
-            return BuxLocalizedString.string("BuxMuse is active", locale: locale)
+            return BuxLocalizedString.string("BuxMuse Standard is active", locale: locale)
         }
         if purchaseManager.baseIntroOfferEligible {
-            return BuxLocalizedString.string("7-day free trial available", locale: locale)
+            return BuxStoreKitIntroOfferCopy.trialAvailableSettingsSubtitle(
+                for: purchaseManager.product(for: .standardMonthly),
+                locale: locale
+            )
         }
-        return BuxLocalizedString.string("£1.99/mo or £14.99/yr", locale: locale)
+        return BuxLocalizedString.string("Standard or Pro plans", locale: locale)
     }
 
     private static func subscriptionSettingsTrailing(locale: Locale) -> String {
@@ -397,7 +403,7 @@ public final class SettingsBrain {
         if purchaseManager.baseInIntroductoryOffer || purchaseManager.isLegacyLocalTrialActive {
             return BuxLocalizedString.format("%lldd", locale: locale, Int64(purchaseManager.premiumTrialDaysRemaining))
         }
-        if purchaseManager.baseSubscriptionActive {
+        if purchaseManager.baseSubscriptionActive || purchaseManager.hasProStudio {
             return BuxLocalizedString.string("Active", locale: locale)
         }
         if purchaseManager.baseIntroOfferEligible {
@@ -409,7 +415,7 @@ public final class SettingsBrain {
     private static func studioSettingsSubtitle(store: SettingsStore, locale: Locale) -> String {
         let purchaseManager = StudioPurchaseManager.shared
         if !purchaseManager.hasActiveSubscription {
-            return BuxLocalizedString.string("Requires BuxMuse subscription", locale: locale)
+            return BuxLocalizedString.string("Included with BuxMuse Standard", locale: locale)
         }
         if purchaseManager.hasProStudio {
             return BuxLocalizedString.string("Pro — business profile, invoices, tax", locale: locale)
@@ -417,7 +423,7 @@ public final class SettingsBrain {
         if purchaseManager.hasSimpleStudio {
             return BuxLocalizedString.string("Simple — invoices and work ledger", locale: locale)
         }
-        return BuxLocalizedString.string("Add-on — invoices and work tools", locale: locale)
+        return BuxLocalizedString.string("Included with Standard", locale: locale)
     }
 
     private static func studioSettingsTrailing(store: SettingsStore, locale: Locale) -> String {

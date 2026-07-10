@@ -24,7 +24,7 @@ enum TutorialCoachMarkLayer {
 
     private static func isDashboardAnchor(_ anchor: TutorialAnchorID) -> Bool {
         switch anchor {
-        case .homeBudgetRing, .homeIncomeButton, .homeExpenseButton, .homeFinish:
+        case .homeBudgetRing, .homeIncomeButton, .homeExpenseButton, .homeDebtDiscovery, .homeStudioDiscovery, .homeFinish:
             return true
         default:
             return false
@@ -146,13 +146,14 @@ private func scrollTutorialAnchor(
     guard coordinator.isActive, let anchor = coordinator.currentStep?.anchor else { return }
     guard coordinator.currentStep?.id == stepID else { return }
 
+    let scrollAnchor = anchor.tutorialScrollAnchor
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
         withAnimation(.none) {
-            proxy.scrollTo(anchor.rawValue, anchor: .center)
+            proxy.scrollTo(anchor.rawValue, anchor: scrollAnchor)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             withAnimation(.none) {
-                proxy.scrollTo(anchor.rawValue, anchor: .center)
+                proxy.scrollTo(anchor.rawValue, anchor: scrollAnchor)
             }
         }
     }

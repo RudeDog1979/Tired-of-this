@@ -4,12 +4,14 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum TutorialAnchorID: String, Hashable, CaseIterable {
     case homeBudgetRing
     case homeIncomeButton
     case homeExpenseButton
     case homeDebtDiscovery
+    case homeStudioDiscovery
     case addIncomeAmount
     case addExpenseMerchant
     case addExpenseCategory
@@ -31,6 +33,19 @@ enum TutorialAnchorID: String, Hashable, CaseIterable {
 }
 
 extension TutorialAnchorID {
+    /// Where `ScrollViewProxy.scrollTo` should place this anchor in the visible viewport.
+    var tutorialScrollAnchor: UnitPoint {
+        switch self {
+        case .settingsStudioDetail:
+            // Keep the Studio tab toggle above the coach-mark card (Upgrade section sits above it).
+            return UnitPoint(x: 0.5, y: 0.32)
+        case .settingsBudgetPayPeriod, .settingsAppearanceDetail, .settingsBackupDetail:
+            return .top
+        default:
+            return .center
+        }
+    }
+
     /// Anchors inside Add Expense / Add Income sheets — overlay must render in the sheet, not under it.
     var hostsInSheet: Bool {
         switch self {

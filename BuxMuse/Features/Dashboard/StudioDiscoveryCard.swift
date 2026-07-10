@@ -12,6 +12,7 @@ struct StudioDiscoveryCard: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @EnvironmentObject private var navigationCoordinator: NavigationCoordinator
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ObservedObject private var store = SettingsStore.shared
 
     var body: some View {
@@ -25,7 +26,7 @@ struct StudioDiscoveryCard: View {
                     BuxCatalogText.text("Self-employed?")
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    BuxCatalogText.text("Turn on Studio for invoices, mileage, and tax estimates — optional, in Settings.")
+                    BuxCatalogText.text("Simple Studio is included with your plan. Turn it on in Settings when you want invoices and work tools.")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(themeManager.labelSecondary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
@@ -64,5 +65,6 @@ struct StudioDiscoveryCard: View {
         }
         .padding(14)
         .dashboardMaterialCardChrome(.outlined)
+        .tutorialAnchor(.homeStudioDiscovery, coordinator: tutorialCoordinator)
     }
 }

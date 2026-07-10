@@ -235,9 +235,13 @@ final class NavigationCoordinator: ObservableObject {
         studioUnlockAwaitingCommit = false
         withAnimation(.easeInOut(duration: 0.55)) {
             SettingsStore.shared.studioEnabled = true
-            SettingsStore.shared.studioMode = .simple
+            SettingsStore.shared.studioMode = StudioPurchaseManager.shared.hasProStudio ? .pro : .simple
         }
         SettingsStore.shared.save()
+        if StudioPurchaseManager.shared.hasProStudio {
+            // Ensure Pro mode data path is ready when unlocking with an existing Pro entitlement.
+            StudioPurchaseManager.shared.applyEntitlementsToSettings()
+        }
     }
 
     func finishStudioUnlockPresentation() {

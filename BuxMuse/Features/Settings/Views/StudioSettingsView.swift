@@ -36,7 +36,9 @@ struct StudioSettingsView: View {
 
     var body: some View {
         BuxThemedCardForm {
-            if !purchaseManager.hasSimpleStudio {
+            if !purchaseManager.hasActiveSubscription {
+                studioPurchaseSection
+            } else if !purchaseManager.hasProStudio {
                 studioPurchaseSection
             } else if !store.studioEnabled {
                 BuxFormSection {
@@ -55,7 +57,7 @@ struct StudioSettingsView: View {
                             BuxCatalogDynamicText(key: "Show Studio tab")
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                            BuxCatalogDynamicText(key: "Simple work ledger or full Pro tools")
+                            BuxCatalogDynamicText(key: "Adds invoices and work tools on a separate tab. Pro tools need BuxMuse Pro.")
                                 .font(.system(size: 11))
                                 .buxLabelSecondary()
                         }
@@ -294,14 +296,9 @@ struct StudioSettingsView: View {
     }
 
     private var studioPurchaseSection: some View {
-        BuxFormSection(title: "Unlock Studio") {
+        BuxFormSection(title: purchaseManager.hasActiveSubscription ? "Upgrade to Pro" : "Unlock Studio") {
             if !purchaseManager.hasActiveSubscription {
-                StudioAddOnRequirementNotice()
-                    .environmentObject(themeManager)
-                    .environmentObject(appSettingsManager)
-                    .buxFormFieldPadding()
-
-                BuxCatalogDynamicText(key: "Subscribe to BuxMuse first — Studio alone won't unlock the app.")
+                BuxCatalogDynamicText(key: "Subscribe to BuxMuse Standard to unlock the app and Simple Studio.")
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
                     .fixedSize(horizontal: false, vertical: true)
@@ -322,16 +319,10 @@ struct StudioSettingsView: View {
                     }
                 }
                 .buxFormFieldPadding()
-            } else {
+            } else if !purchaseManager.hasProStudio {
                 StudioPurchaseChooser(
                     style: .settingsList,
                     billingPeriod: $studioBillingPeriod,
-                    onPurchaseSimple: {
-                        try await StudioPurchaseFlow.purchaseSimple(
-                            navigationCoordinator: navigationCoordinator,
-                            purchaseManager: purchaseManager
-                        )
-                    },
                     onPurchasePro: {
                         try await StudioPurchaseFlow.purchasePro(
                             simpleStore: simpleStudioStore,
@@ -350,20 +341,10 @@ struct StudioSettingsView: View {
 
                 BuxFormRowDivider()
 
-                Button {
-                    Task { await purchaseManager.restorePurchases() }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "arrow.clockwise")
-                        BuxCatalogDynamicText(key: "Restore purchases")
-                    }
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
-                }
-                .disabled(purchaseManager.isRestoring)
-                .buxFormFieldPadding()
+                BuxRestorePurchasesButton()
+                    .environmentObject(themeManager)
+                    .environmentObject(appSettingsManager)
+                    .buxFormFieldPadding()
 
                 BuxFormRowDivider()
 
@@ -380,7 +361,6 @@ struct StudioSettingsView: View {
                 .padding(.horizontal, BuxTokens.marginRegular)
             }
         }
-        .tutorialAnchor(.settingsStudioDetail, coordinator: tutorialCoordinator)
     }
 
     private var studioModeBinding: Binding<StudioMode> {

@@ -1,0 +1,34 @@
+{
+  "Start %@": {
+    "es-419": "Empezar %@",
+    "es-ES": "Empezar %@"
+  },
+  "Start free trial": {
+    "es-419": "Empezar prueba gratuita",
+    "es-ES": "Empezar prueba gratuita"
+  },
+  "%@, then billed through Apple": {
+    "es-419": "%@, luego se factura a través de Apple",
+    "es-ES": "%@, luego se factura a través de Apple"
+  },
+  "Start your %@ to continue using BuxMuse.": {
+    "es-419": "Empieza tu %@ para seguir usando BuxMuse.",
+    "es-ES": "Empieza tu %@ para seguir usando BuxMuse."
+  },
+  "Try BuxMuse Standard free — %@. Includes Simple Studio.": {
+    "es-419": "Prueba BuxMuse Standard gratis — %@. Incluye Simple Studio.",
+    "es-ES": "Prueba BuxMuse Standard gratis — %@. Incluye Simple Studio."
+  },
+  "%@ available": {
+    "es-419": "%@ disponible",
+    "es-ES": "%@ disponible"
+  },
+  "Free trial available": {
+    "es-419": "Prueba gratuita disponible",
+    "es-ES": "Prueba gratuita disponible"
+  },
+  "Your free trial is active": {
+    "es-419": "Tu prueba gratuita está activa",
+    "es-ES": "Tu prueba gratuita está activa"
+  }
+}

@@ -1,6 +1,6 @@
 //
 //  StudioPurchaseManager.swift
-//  BuxMuse — StoreKit 2: base app subscription, Apple intro trials, Studio add-ons.
+//  BuxMuse — StoreKit 2: Standard / Pro two-tier subscriptions.
 //
 
 import Combine
@@ -49,19 +49,25 @@ enum BuxMuseBillingPeriod: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var baseProductID: BuxMuseProductID {
+    var standardProductID: BuxMuseProductID {
         switch self {
-        case .monthly: return .baseMonthly
-        case .yearly: return .baseYearly
+        case .monthly: return .standardMonthly
+        case .yearly: return .standardYearly
         }
     }
 
-    var studioProProductID: BuxMuseProductID {
+    /// Legacy alias for Standard product ID.
+    var baseProductID: BuxMuseProductID { standardProductID }
+
+    var proProductID: BuxMuseProductID {
         switch self {
-        case .monthly: return .studioProMonthly
-        case .yearly: return .studioProYearly
+        case .monthly: return .proMonthly
+        case .yearly: return .proYearly
         }
     }
+
+    /// Legacy alias for Pro product ID.
+    var studioProProductID: BuxMuseProductID { proProductID }
 }
 
 typealias PremiumBillingPeriod = BuxMuseBillingPeriod
@@ -71,8 +77,9 @@ final class StudioPurchaseManager: ObservableObject {
     static let shared = StudioPurchaseManager()
 
     @Published private(set) var products: [StoreKit.Product] = []
+    /// Active Standard (or legacy base) subscription.
     @Published private(set) var baseSubscriptionActive = false
-    @Published private(set) var ownsSimpleOneTimePurchase = false
+    /// Active Pro subscription (implies Standard).
     @Published private(set) var proSubscriptionActive = false
     @Published private(set) var isLoadingProducts = false
     @Published private(set) var isPurchasing = false
@@ -83,6 +90,7 @@ final class StudioPurchaseManager: ObservableObject {
     @Published private(set) var baseIntroOfferEligible = false
     @Published private(set) var baseInIntroductoryOffer = false
     @Published private(set) var baseIntroOfferDaysRemaining: Int?
+    /// Pro has no intro offer in the two-tier model; kept for API compatibility (always false).
     @Published private(set) var proIntroOfferEligible = false
     @Published private(set) var proInIntroductoryOffer = false
     @Published private(set) var proIntroOfferDaysRemaining: Int?
@@ -111,15 +119,18 @@ final class StudioPurchaseManager: ObservableObject {
         settings.premiumTrialDaysRemaining
     }
 
-    /// Full app access: active BuxMuse sub, legacy local trial, or grandfathered install.
+    /// Standard or Pro (or legacy grandfather) — full app access.
     var hasActiveSubscription: Bool {
-        baseSubscriptionActive || settings.isPremiumTrialActive || settings.premiumLegacyEntitled
+        baseSubscriptionActive || proSubscriptionActive || settings.isPremiumTrialActive || settings.premiumLegacyEntitled
     }
 
-    /// Simple Studio while BuxMuse is active (Pro sub includes Simple).
+    /// Alias: Standard-tier access (Pro implies Standard).
+    var hasStandardAccess: Bool { hasActiveSubscription }
+
+    /// Simple Studio is included with Standard (and Pro).
     var hasSimpleStudio: Bool {
         guard hasActiveSubscription else { return false }
-        return ownsSimpleOneTimePurchase || proSubscriptionActive || settings.studioLegacySimpleEntitled
+        return true
     }
 
     var hasProStudio: Bool {
@@ -132,7 +143,16 @@ final class StudioPurchaseManager: ObservableObject {
     }
 
     func displayPrice(for id: BuxMuseProductID) -> String? {
-        product(for: id)?.displayPrice
+        BuxStoreKitPriceCopy.displayPrice(for: product(for: id))
+    }
+
+    /// Localized price + period from StoreKit (e.g. "$4.99/month"). Nil until products load.
+    func pricePerPeriodLabel(for id: BuxMuseProductID, locale: Locale) -> String? {
+        BuxStoreKitPriceCopy.pricePerPeriodLabel(for: product(for: id), locale: locale)
+    }
+
+    func compactPricePerPeriodLabel(for id: BuxMuseProductID, locale: Locale) -> String? {
+        BuxStoreKitPriceCopy.compactPricePerPeriodLabel(for: product(for: id), locale: locale)
     }
 
     // MARK: - Lifecycle
@@ -172,8 +192,7 @@ final class StudioPurchaseManager: ObservableObject {
     }
 
     func refreshEntitlements() async {
-        var baseSub = false
-        var simpleOneTime = false
+        var standard = false
         var pro = false
 
         print("🏪 [StoreKit] refreshEntitlements() started. Checking active entitlements...")
@@ -186,33 +205,27 @@ final class StudioPurchaseManager: ObservableObject {
                 print("🏪 [StoreKit] refreshEntitlements: Unknown product ID found: \(transaction.productID)")
                 continue
             }
-            print("🏪 [StoreKit] refreshEntitlements: Found active transaction for product: \(product.rawValue)")
-            switch product {
-            case .baseMonthly, .baseYearly:
-                baseSub = true
-            case .studioSimple:
-                simpleOneTime = true
-            case .studioProMonthly, .studioProYearly:
+            print("🏪 [StoreKit] refreshEntitlements: Found active transaction for product: \(product.rawValue) (raw: \(transaction.productID))")
+            if product.isPro {
                 pro = true
+                standard = true
+            } else if product.isStandard {
+                standard = true
             }
         }
 
-        print("🏪 [StoreKit] refreshEntitlements() ended. baseSub=\(baseSub), simpleOneTime=\(simpleOneTime), pro=\(pro)")
-        
-        // Safeguard for Xcode StoreKit testing bug: if the local database is corrupted (fopen failed),
-        // currentEntitlements returns empty. We preserve any active state granted during this session.
-        if !baseSub && self.baseSubscriptionActive {
-            baseSub = true
-        }
-        if !simpleOneTime && self.ownsSimpleOneTimePurchase {
-            simpleOneTime = true
+        print("🏪 [StoreKit] refreshEntitlements() ended. standard=\(standard), pro=\(pro)")
+
+        // Safeguard for Xcode StoreKit testing: preserve session entitlements if DB is empty.
+        if !standard && self.baseSubscriptionActive {
+            standard = true
         }
         if !pro && self.proSubscriptionActive {
             pro = true
+            standard = true
         }
 
-        baseSubscriptionActive = baseSub
-        ownsSimpleOneTimePurchase = simpleOneTime
+        baseSubscriptionActive = standard
         proSubscriptionActive = pro
         entitlementsDidLoad = true
         applyEntitlementsToSettings()
@@ -240,13 +253,6 @@ final class StudioPurchaseManager: ObservableObject {
 
     @discardableResult
     func purchase(_ productID: BuxMuseProductID) async throws -> Bool {
-        if productID == .studioSimple, !hasActiveSubscription {
-            throw StudioPurchaseError.subscriptionRequired
-        }
-        if productID.isStudioPro, !hasActiveSubscription {
-            throw StudioPurchaseError.subscriptionRequired
-        }
-
         guard let product = product(for: productID) else {
             await loadProducts()
             guard let retryProduct = product(for: productID) else {
@@ -257,12 +263,22 @@ final class StudioPurchaseManager: ObservableObject {
         return try await purchaseProduct(product, productID: productID)
     }
 
-    func purchaseBaseSubscription(period: BuxMuseBillingPeriod) async throws -> Bool {
-        try await purchase(period.baseProductID)
+    func purchaseStandardSubscription(period: BuxMuseBillingPeriod) async throws -> Bool {
+        try await purchase(period.standardProductID)
     }
 
+    /// Legacy alias.
+    func purchaseBaseSubscription(period: BuxMuseBillingPeriod) async throws -> Bool {
+        try await purchaseStandardSubscription(period: period)
+    }
+
+    func purchaseProSubscription(period: BuxMuseBillingPeriod) async throws -> Bool {
+        try await purchase(period.proProductID)
+    }
+
+    /// Legacy alias.
     func purchaseProStudio(period: BuxMuseBillingPeriod) async throws -> Bool {
-        try await purchase(period.studioProProductID)
+        try await purchaseProSubscription(period: period)
     }
 
     private func purchaseProduct(_ product: StoreKit.Product, productID: BuxMuseProductID) async throws -> Bool {
@@ -294,26 +310,25 @@ final class StudioPurchaseManager: ObservableObject {
             }
             print("🏪 [StoreKit] purchaseProduct: Transaction verified successfully. Finishing transaction...")
             await transaction.finish()
-            
+
             print("🏪 [StoreKit] purchaseProduct: Transaction finished. Refreshing entitlements...")
             await refreshEntitlements()
-            
-            // Directly set entitlement states immediately AFTER refresh to ensure it isn't overwritten by slow DB propagation
+
             if let purchasedProduct = BuxMuseProductID.fromStoreProductID(transaction.productID) {
                 print("🏪 [StoreKit] purchaseProduct: Setting entitlement state for \(purchasedProduct.rawValue) immediately.")
-                switch purchasedProduct {
-                case .baseMonthly, .baseYearly:
-                    baseSubscriptionActive = true
-                case .studioSimple:
-                    ownsSimpleOneTimePurchase = true
-                case .studioProMonthly, .studioProYearly:
+                if purchasedProduct.isPro {
                     proSubscriptionActive = true
+                    baseSubscriptionActive = true
+                } else if purchasedProduct.isStandard {
+                    baseSubscriptionActive = true
                 }
             }
 
-            if productID.isStudioPro {
+            // Entitlement only — do not auto-enable the Studio tab. User opts in via
+            // Settings / discovery so the blueprint unlock animation can play.
+            if productID.isPro {
                 settings.studioMode = .pro
-            } else if productID == .studioSimple, settings.studioMode == .pro, !hasProStudio {
+            } else if productID.isStandard, !hasProStudio {
                 settings.studioMode = .simple
             }
             applyEntitlementsToSettings()
@@ -334,9 +349,8 @@ final class StudioPurchaseManager: ObservableObject {
     func applyEntitlementsToSettings() {
         guard entitlementsDidLoad else { return }
 
-        guard hasSimpleStudio else {
-            // Keep Studio on for legacy/pre-IAP installs until the user explicitly turns it off.
-            if settings.studioLegacySimpleEntitled || settings.studioLegacyProEntitled {
+        guard hasActiveSubscription else {
+            if settings.studioLegacySimpleEntitled || settings.studioLegacyProEntitled || settings.premiumLegacyEntitled {
                 return
             }
             if settings.studioEnabled {
@@ -346,13 +360,12 @@ final class StudioPurchaseManager: ObservableObject {
             return
         }
 
+        // Keep studioMode aligned with entitlements, but leave studioEnabled as a
+        // user preference (opt-in) so the tab does not appear until they enable it.
         if hasProStudio {
             settings.studioMode = .pro
         } else if settings.studioMode == .pro {
             settings.studioMode = .simple
-        }
-        if !settings.studioEnabled {
-            settings.studioEnabled = true
         }
         settings.save()
     }
@@ -400,18 +413,16 @@ final class StudioPurchaseManager: ObservableObject {
 
     private func refreshSubscriptionOfferState() async {
         baseIntroOfferEligible = await BuxStoreKitIntroOfferCopy.isEligibleForIntroOffer(
-            product: product(for: .baseMonthly)
+            product: product(for: .standardMonthly)
         )
-        let baseStatus = await activeIntroOfferStatus(for: [.baseMonthly, .baseYearly])
+        let baseStatus = await activeIntroOfferStatus(for: [.standardMonthly, .standardYearly])
         baseInIntroductoryOffer = baseStatus.isActive
         baseIntroOfferDaysRemaining = baseStatus.daysRemaining
 
-        proIntroOfferEligible = await BuxStoreKitIntroOfferCopy.isEligibleForIntroOffer(
-            product: product(for: .studioProMonthly)
-        )
-        let proStatus = await activeIntroOfferStatus(for: [.studioProMonthly, .studioProYearly])
-        proInIntroductoryOffer = proStatus.isActive
-        proIntroOfferDaysRemaining = proStatus.daysRemaining
+        // Pro has no free trial in the two-tier model.
+        proIntroOfferEligible = false
+        proInIntroductoryOffer = false
+        proIntroOfferDaysRemaining = nil
     }
 
     private func activeIntroOfferStatus(for productIDs: [BuxMuseProductID]) async -> BuxStoreKitIntroOfferCopy.ActiveIntroOfferStatus {
@@ -438,9 +449,12 @@ extension StudioPurchaseManager {
     var premiumSubscriptionActive: Bool { baseSubscriptionActive }
     var isPremiumTrialActive: Bool { baseInIntroductoryOffer || isLegacyLocalTrialActive }
     var premiumTrialDaysRemaining: Int { baseIntroOfferDaysRemaining ?? legacyLocalTrialDaysRemaining }
-    var purchasedSimple: Bool { ownsSimpleOneTimePurchase || proSubscriptionActive }
+    /// Simple is included with Standard; kept for older call sites.
+    var purchasedSimple: Bool { hasSimpleStudio }
+    /// Legacy: Simple was a one-time IAP. Always false for new purchases; restore may map to Standard.
+    var ownsSimpleOneTimePurchase: Bool { false }
 
     func purchasePremium(period: BuxMuseBillingPeriod) async throws -> Bool {
-        try await purchaseBaseSubscription(period: period)
+        try await purchaseStandardSubscription(period: period)
     }
 }

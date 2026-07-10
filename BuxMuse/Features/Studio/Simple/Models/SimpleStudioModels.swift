@@ -27,7 +27,7 @@ public enum StudioMode: String, Codable, CaseIterable, Identifiable, Sendable {
         case .simple:
             return "Track jobs, advances, and who owes you — free."
         case .pro:
-            return "Full tax, PDF invoices, projects, and analytics."
+            return "Invoice designer, business cards, Tax Studio & more."
         }
     }
 

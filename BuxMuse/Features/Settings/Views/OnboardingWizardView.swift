@@ -49,6 +49,8 @@ struct OnboardingWizardView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .navigationBarHidden(true)
             .task {
                 // Wait for sheet presentation to finish so user actually SEES the animation
                 try? await Task.sleep(nanoseconds: 400_000_000) // 0.4s
@@ -476,7 +478,7 @@ struct OnboardingWizardView: View {
                     Image(systemName: "gearshape.fill")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                    Text(BuxCatalogLabel.string("Activate Studio in Settings → Work → Studio. Simple and Pro are separate purchases.", locale: appSettingsManager.interfaceLocale))
+                    Text(BuxCatalogLabel.string("Standard includes Simple Studio. Turn it on anytime in Settings → Studio when you want work tools. Pro is an optional upgrade.", locale: appSettingsManager.interfaceLocale))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(themeManager.labelPrimary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)

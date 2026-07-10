@@ -1,0 +1,42 @@
+{
+  "%@/mo": {
+    "es-419": "%@/mes",
+    "es-ES": "%@/mes"
+  },
+  "%@/yr": {
+    "es-419": "%@/año",
+    "es-ES": "%@/año"
+  },
+  "%@/wk": {
+    "es-419": "%@/sem",
+    "es-ES": "%@/sem"
+  },
+  "%@/day": {
+    "es-419": "%@/día",
+    "es-ES": "%@/día"
+  },
+  "%@/week": {
+    "es-419": "%@/semana",
+    "es-ES": "%@/semana"
+  },
+  "%@/%lld months": {
+    "es-419": "%@/%lld meses",
+    "es-ES": "%@/%lld meses"
+  },
+  "%@/%lld years": {
+    "es-419": "%@/%lld años",
+    "es-ES": "%@/%lld años"
+  },
+  "Standard · %@": {
+    "es-419": "Standard · %@",
+    "es-ES": "Standard · %@"
+  },
+  "Upgrade to BuxMuse Pro — %@": {
+    "es-419": "Mejorar a BuxMuse Pro — %@",
+    "es-ES": "Mejorar a BuxMuse Pro — %@"
+  },
+  "Subscribe — %@": {
+    "es-419": "Suscribirse — %@",
+    "es-ES": "Suscribirse — %@"
+  }
+}

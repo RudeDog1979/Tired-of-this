@@ -163,10 +163,29 @@ struct BuxFormRowDivider: View {
 }
 
 struct BuxThemedCardForm<Content: View>: View {
+    @Environment(\.isSettingsContext) private var isSettingsContext
     @Environment(\.studioEnhancedTint) private var studioEnhancedTint
+    @EnvironmentObject private var tutorialCoordinator: AppTutorialCoordinator
     @ViewBuilder var content: () -> Content
 
     var body: some View {
+        Group {
+            if isSettingsContext {
+                ScrollViewReader { scrollProxy in
+                    themedCardScroll
+                        .scrollDisabled(tutorialCoordinator.isActive)
+                        .tutorialScrollToActiveAnchor(
+                            coordinator: tutorialCoordinator,
+                            proxy: scrollProxy
+                        )
+                }
+            } else {
+                themedCardScroll
+            }
+        }
+    }
+
+    private var themedCardScroll: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: BuxLayout.section) {
                 content()

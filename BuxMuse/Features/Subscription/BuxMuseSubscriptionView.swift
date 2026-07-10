@@ -1,6 +1,6 @@
 //
 //  BuxMuseSubscriptionView.swift
-//  BuxMuse — Base app subscription paywall + Studio add-ons.
+//  BuxMuse — Standard / Pro two-tier subscription paywall.
 //
 
 import SwiftUI
@@ -12,10 +12,10 @@ struct BuxMuseSubscriptionView: View {
     @ObservedObject private var purchaseManager = StudioPurchaseManager.shared
     @ObservedObject private var settingsStore = SettingsStore.shared
 
-    /// Full-screen paywall when trial expired. When false, embed in Settings navigation.
+    /// Full-screen paywall when access is locked. When false, embed in Settings navigation.
     var isBlocking: Bool = false
 
-    @State private var baseBillingPeriod: BuxMuseBillingPeriod = .yearly
+    @State private var standardBillingPeriod: BuxMuseBillingPeriod = .yearly
     @State private var proBillingPeriod: BuxMuseBillingPeriod = .monthly
     @State private var errorMessage: String?
     @State private var didAnimateYearly = false
@@ -80,26 +80,18 @@ struct BuxMuseSubscriptionView: View {
                 productsUnavailableBanner
             }
             billingToggle
-            baseAppCard
-            if isBlocking && !hasStudioPurchaseAccess {
-                studioUnavailableFootnote
-                if hasStudioEntitlementWithoutBaseAccess {
-                    studioEntitlementWithoutBaseNotice
-                }
-            }
-            if hasStudioPurchaseAccess {
-                optionalAddOnsDivider
+            standardCard
+            if purchaseManager.hasActiveSubscription && !purchaseManager.hasProStudio {
+                proUpgradeDivider
                 StudioPurchaseChooser(
                     style: .subscriptionCards,
                     billingPeriod: $proBillingPeriod,
-                    onPurchaseSimple: { try await StudioPurchaseFlow.purchaseSimple(purchaseManager: purchaseManager) },
-                    onPurchasePro: { _ = try await purchaseManager.purchaseProStudio(period: proBillingPeriod) },
+                    onPurchasePro: { _ = try await purchaseManager.purchaseProSubscription(period: proBillingPeriod) },
                     onError: { errorMessage = $0 }
                 )
                 .environmentObject(themeManager)
                 .environmentObject(appSettingsManager)
             }
-            enterpriseBlock
             footerBlock
             BuxSubscriptionLegalLinks()
                 .environmentObject(themeManager)
@@ -146,7 +138,7 @@ struct BuxMuseSubscriptionView: View {
                     .font(.system(size: 12, weight: .medium))
                     .buxLabelSecondary()
                 } else if let afterTrial = purchaseManager.subscribeAfterTrialLabel(
-                    for: baseBillingPeriod.baseProductID,
+                    for: standardBillingPeriod.standardProductID,
                     locale: appSettingsManager.interfaceLocale
                 ) {
                     Text(afterTrial)
@@ -154,7 +146,8 @@ struct BuxMuseSubscriptionView: View {
                         .buxLabelSecondary()
                 }
             } else if settingsStore.isPremiumTrialActive {
-                BuxCatalogDynamicText(key: "Your 7-day trial is active")
+                // Legacy local trial (pre–StoreKit intro) — duration from remaining days, not a hardcoded "7".
+                BuxCatalogDynamicText(key: "Your free trial is active")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
                 Text(BuxLocalizedString.format(
@@ -165,175 +158,116 @@ struct BuxMuseSubscriptionView: View {
                 .font(.system(size: 12, weight: .medium))
                 .buxLabelSecondary()
             } else if isBlocking {
-                if purchaseManager.baseIntroOfferEligible {
-                    BuxCatalogDynamicText(key: "Start your 7-day free trial to continue using BuxMuse.")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                } else {
-                    BuxCatalogDynamicText(key: "Subscribe to continue using BuxMuse.")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                }
+                Text(blockingHeaderText)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+            } else if purchaseManager.hasProStudio {
+                BuxCatalogDynamicText(key: "Your BuxMuse Pro subscription is active.")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             } else if purchaseManager.baseSubscriptionActive {
-                BuxCatalogDynamicText(key: "Your BuxMuse subscription is active.")
+                BuxCatalogDynamicText(key: "Your BuxMuse Standard subscription is active.")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
             } else if purchaseManager.baseIntroOfferEligible {
-                BuxCatalogDynamicText(key: "Try BuxMuse free for 7 days. Studio add-ons are optional.")
-                    .font(.system(size: 13, weight: .medium))
-                    .buxLabelSecondary()
+                Text(BuxStoreKitIntroOfferCopy.tryStandardFreeHeader(
+                    for: purchaseManager.product(for: standardBillingPeriod.standardProductID),
+                    locale: appSettingsManager.interfaceLocale
+                ))
+                .font(.system(size: 13, weight: .medium))
+                .buxLabelSecondary()
             } else {
-                BuxCatalogDynamicText(key: "£1.99/month or £14.99/year for the full app. Studio is optional.")
+                BuxCatalogDynamicText(key: "BuxMuse Standard includes personal finance and Simple Studio.")
                     .font(.system(size: 13, weight: .medium))
                     .buxLabelSecondary()
             }
         }
     }
 
-    private var hasStudioPurchaseAccess: Bool {
-        purchaseManager.hasActiveSubscription
+    private var blockingHeaderText: String {
+        let product = purchaseManager.product(for: standardBillingPeriod.standardProductID)
+        if purchaseManager.baseIntroOfferEligible {
+            return BuxStoreKitIntroOfferCopy.startTrialToContinueHeader(
+                for: product,
+                locale: appSettingsManager.interfaceLocale
+            )
+        }
+        return BuxCatalogLabel.string("Subscribe to continue using BuxMuse.", locale: appSettingsManager.interfaceLocale)
     }
 
-    private var hasStudioEntitlementWithoutBaseAccess: Bool {
-        purchaseManager.proSubscriptionActive
-            || purchaseManager.ownsSimpleOneTimePurchase
-            || settingsStore.studioLegacySimpleEntitled
-            || settingsStore.studioLegacyProEntitled
+    private var standardBadge: String? {
+        if purchaseManager.baseSubscriptionActive || purchaseManager.hasProStudio {
+            return nil
+        }
+        return "Standard"
     }
 
-    private var baseAppBadge: String? {
-        purchaseManager.baseSubscriptionActive ? nil : "Required"
-    }
-
-    private var optionalAddOnsDivider: some View {
+    private var proUpgradeDivider: some View {
         VStack(alignment: .leading, spacing: BuxTokens.tight) {
             Divider()
                 .padding(.vertical, 4)
-            BuxCatalogDynamicText(key: "Optional add-ons")
+            BuxCatalogDynamicText(key: "Upgrade to Pro")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(themeManager.labelPrimary(for: colorScheme))
         }
     }
 
-    private var studioUnavailableFootnote: some View {
-        BuxCatalogDynamicText(key: "Studio add-ons are available after BuxMuse is active.")
-            .font(.system(size: 12, weight: .medium))
-            .buxLabelSecondary()
-            .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private var studioEntitlementWithoutBaseNotice: some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(systemName: "exclamationmark.circle.fill")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                .padding(.top, 1)
-            BuxCatalogDynamicText(
-                key: purchaseManager.proSubscriptionActive || settingsStore.studioLegacyProEntitled
-                    ? "Pro Studio is active on this Apple ID, but BuxMuse is required to open the app."
-                    : "Simple Studio is active on this Apple ID, but BuxMuse is required to open the app."
-            )
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-            .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(BuxTokens.marginRegular)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(themeManager.cardFill(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
-    }
-
     private var billingToggle: some View {
         BuxBillingPeriodToggle(
-            billingPeriod: $baseBillingPeriod,
+            billingPeriod: $standardBillingPeriod,
             caption: "BuxMuse billing"
         )
         .environmentObject(themeManager)
         .environmentObject(appSettingsManager)
     }
 
-    private var baseAppCard: some View {
+    private var standardCard: some View {
         pricingCard(
-            title: "BuxMuse",
-            subtitle: baseAppSubtitle,
-            priceID: baseBillingPeriod.baseProductID,
-            badge: baseAppBadge,
-            bullets: baseAppBullets,
-            buttonTitle: baseAppButtonTitle,
-            isSubscribed: purchaseManager.baseSubscriptionActive,
+            title: "BuxMuse Standard",
+            subtitle: standardSubtitle,
+            priceID: standardBillingPeriod.standardProductID,
+            badge: standardBadge,
+            bullets: standardBullets,
+            buttonTitle: standardButtonTitle,
+            isSubscribed: purchaseManager.baseSubscriptionActive || purchaseManager.hasProStudio,
             showsSubscriptionLegalFooter: true,
-            action: { Task { await purchaseBaseApp() } }
+            action: { Task { await purchaseStandard() } }
         )
-        .id(baseBillingPeriod)
-        .scaleEffect(didAnimateYearly && baseBillingPeriod == .yearly ? 1.01 : 1)
-        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: baseBillingPeriod)
-        .onChange(of: baseBillingPeriod) { _, newValue in
+        .id(standardBillingPeriod)
+        .scaleEffect(didAnimateYearly && standardBillingPeriod == .yearly ? 1.01 : 1)
+        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: standardBillingPeriod)
+        .onChange(of: standardBillingPeriod) { _, newValue in
             if newValue == .yearly { didAnimateYearly = true }
         }
     }
 
-    private var baseAppSubtitle: String {
-        if purchaseManager.baseIntroOfferEligible,
-           let trial = purchaseManager.trialLengthLabel(
-            for: baseBillingPeriod.baseProductID,
+    private var standardSubtitle: String {
+        BuxStoreKitPriceCopy.standardSubtitle(
+            product: purchaseManager.product(for: standardBillingPeriod.standardProductID),
+            introEligible: purchaseManager.baseIntroOfferEligible,
             locale: appSettingsManager.interfaceLocale
-           ) {
-            if let price = purchaseManager.displayPrice(for: baseBillingPeriod.baseProductID) {
-                return BuxLocalizedString.format(
-                    "%@ · then %@",
-                    locale: appSettingsManager.interfaceLocale,
-                    trial,
-                    baseBillingPeriod == .yearly
-                        ? BuxLocalizedString.format("%@/year", locale: appSettingsManager.interfaceLocale, price)
-                        : BuxLocalizedString.format("%@/month", locale: appSettingsManager.interfaceLocale, price)
-                )
-            }
-            return trial
-        }
-        if let price = purchaseManager.displayPrice(for: baseBillingPeriod.baseProductID) {
-            return baseBillingPeriod == .yearly
-                ? BuxLocalizedString.format("Full app · %@/year", locale: appSettingsManager.interfaceLocale, price)
-                : BuxLocalizedString.format("Full app · %@/month", locale: appSettingsManager.interfaceLocale, price)
-        }
-        return baseBillingPeriod == .yearly
-            ? BuxCatalogLabel.string("Full app · £14.99/year", locale: appSettingsManager.interfaceLocale)
-            : BuxCatalogLabel.string("Full app · £1.99/month", locale: appSettingsManager.interfaceLocale)
+        )
     }
 
-    private var baseAppBullets: [String] {
-        [
+    private var standardBullets: [String] {
+        let locale = appSettingsManager.interfaceLocale
+        let product = purchaseManager.product(for: standardBillingPeriod.standardProductID)
+        var bullets = [
             "Budgets, expenses, goals, and insights",
-            purchaseManager.baseIntroOfferEligible
-                ? "7-day free trial, then billed through Apple"
-                : "Required for app access",
-            baseBillingPeriod == .yearly
-                ? "Auto-renewable subscription · renews every year"
-                : "Auto-renewable subscription · renews every month",
-            "Studio add-ons are optional and sold separately"
+            "Includes Simple Studio"
         ]
-    }
-
-    private var enterpriseBlock: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            BuxCatalogDynamicText(key: "Teams & enterprise")
-                .font(.system(size: 13, weight: .bold))
-                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-            BuxCatalogDynamicText(key: "Volume licensing, onboarding, and custom invoicing — contact us.")
-                .font(.system(size: 12, weight: .medium))
-                .buxLabelSecondary()
-            Link(destination: URL(string: "mailto:hello@buxmuse.app?subject=BuxMuse%20Enterprise")!) {
-                HStack(spacing: 6) {
-                    Image(systemName: "envelope.fill")
-                    BuxCatalogDynamicText(key: "Contact sales")
-                }
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-            }
+        if purchaseManager.baseIntroOfferEligible,
+           let trialBullet = BuxStoreKitIntroOfferCopy.trialThenBilledBullet(for: product, locale: locale) {
+            bullets.append(trialBullet)
+        } else {
+            bullets.append("Core access to BuxMuse")
         }
-        .padding(BuxTokens.marginRegular)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(themeManager.cardFill(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: BuxTokens.Radius.card, style: .continuous))
+        bullets.append(
+            standardBillingPeriod == .yearly
+                ? "Auto-renewable subscription · renews every year"
+                : "Auto-renewable subscription · renews every month"
+        )
+        return bullets
     }
 
     private var footerBlock: some View {
@@ -345,18 +279,9 @@ struct BuxMuseSubscriptionView: View {
     }
 
     private var restoreButton: some View {
-        Button {
-            Task { await purchaseManager.restorePurchases() }
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "arrow.clockwise")
-                BuxCatalogDynamicText(key: "Restore purchases")
-            }
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
-            .frame(maxWidth: .infinity)
-        }
-        .disabled(purchaseManager.isRestoring)
+        BuxRestorePurchasesButton()
+            .environmentObject(themeManager)
+            .environmentObject(appSettingsManager)
     }
 
     private func pricingCard(
@@ -393,7 +318,10 @@ struct BuxMuseSubscriptionView: View {
                 }
             }
 
-            if let price = purchaseManager.displayPrice(for: priceID) {
+            if let price = purchaseManager.pricePerPeriodLabel(
+                for: priceID,
+                locale: appSettingsManager.interfaceLocale
+            ) ?? purchaseManager.displayPrice(for: priceID) {
                 Text(price)
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundColor(themeManager.labelPrimary(for: colorScheme))
@@ -449,26 +377,24 @@ struct BuxMuseSubscriptionView: View {
         }
     }
 
-    private var baseAppButtonTitle: String {
-        if purchaseManager.baseSubscriptionActive {
+    private var standardButtonTitle: String {
+        if purchaseManager.hasProStudio || purchaseManager.baseSubscriptionActive {
             if purchaseManager.baseInIntroductoryOffer {
                 return BuxCatalogLabel.string("Trial active", locale: appSettingsManager.interfaceLocale)
             }
             return BuxCatalogLabel.string("Subscribed", locale: appSettingsManager.interfaceLocale)
         }
-        if purchaseManager.baseIntroOfferEligible {
-            return BuxCatalogLabel.string("Start 7-day free trial", locale: appSettingsManager.interfaceLocale)
-        }
-        if let price = purchaseManager.displayPrice(for: baseBillingPeriod.baseProductID) {
-            return BuxLocalizedString.format("Subscribe — %@", locale: appSettingsManager.interfaceLocale, price)
-        }
-        return BuxCatalogLabel.string("Subscribe", locale: appSettingsManager.interfaceLocale)
+        return BuxStoreKitPriceCopy.subscribeOrTrialCTA(
+            for: purchaseManager.product(for: standardBillingPeriod.standardProductID),
+            introEligible: purchaseManager.baseIntroOfferEligible,
+            locale: appSettingsManager.interfaceLocale
+        )
     }
 
-    private func purchaseBaseApp() async {
-        guard !purchaseManager.baseSubscriptionActive else { return }
+    private func purchaseStandard() async {
+        guard !purchaseManager.baseSubscriptionActive, !purchaseManager.hasProStudio else { return }
         do {
-            _ = try await purchaseManager.purchaseBaseSubscription(period: baseBillingPeriod)
+            _ = try await purchaseManager.purchaseStandardSubscription(period: standardBillingPeriod)
         } catch StudioPurchaseError.userCancelled {
             return
         } catch {

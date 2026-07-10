@@ -469,6 +469,7 @@ struct DashboardView: View {
                             StudioDiscoveryCard()
                                 .environmentObject(themeManager)
                                 .environmentObject(navigationCoordinator)
+                                .environmentObject(tutorialCoordinator)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
 
@@ -676,19 +677,11 @@ struct DashboardView: View {
 
     private func handleTutorialStepChange(_ stepID: String?) {
         guard tutorialCoordinator.isActive else { return }
-        switch stepID {
-        case "home.incomeSheet":
-            activeSheet = .addExpense(.addIncome)
-        case "expense.sheetIntro":
-            activeSheet = .addExpense(.add)
-        case "settings.intro", "settings.budget", "settings.budgetDetail", "settings.studio",
-             "settings.appearance", "settings.backup", "home.expensesTab", "studio.tab",
-             "studio.simpleMoney", "home.finish":
-            activeSheet = nil
-            brain.scheduleSnapshotRefresh()
-        default:
-            break
-        }
+        // Never leave Add Income / Add Expense open across steps — that strands the coach mark.
+        guard activeSheet != nil else { return }
+        activeSheet = nil
+        brain.scheduleSnapshotRefresh()
+        _ = stepID
     }
 }
 

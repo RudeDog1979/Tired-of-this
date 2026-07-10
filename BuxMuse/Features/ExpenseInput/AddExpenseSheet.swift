@@ -214,7 +214,10 @@ struct AddExpenseSheet: View {
                 }
                 .buxDetailScrollChrome()
                 .scrollDismissesKeyboard(.interactively)
-                .scrollDisabled(tutorialCoordinator.isActive)
+                .scrollDisabled(
+                    tutorialCoordinator.isActive
+                        && (tutorialCoordinator.currentStep?.anchor?.hostsInSheet == true)
+                )
                 .tutorialScrollToActiveAnchor(coordinator: tutorialCoordinator, proxy: scrollProxy)
                 }
             }

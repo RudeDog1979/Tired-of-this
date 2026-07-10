@@ -30,18 +30,7 @@ struct BuxAppLockOverlay: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
-                Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 48))
-                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-
-                Image("BuxMuseLogo")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: 200)
-
-                BuxCatalogDynamicText(key: "BuxMuse Vault Active")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                BuxVaultSplashBrandStack(showsTitle: true)
 
                 BuxCatalogDynamicText(key: "Authenticate to continue")
                     .font(.system(size: 13, weight: .medium))

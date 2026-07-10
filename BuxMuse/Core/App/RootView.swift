@@ -30,16 +30,35 @@ struct RootView: View {
     @State private var hasUnlockedThisSession = false
     @State private var didEnterBackground = false
 
-    private var hasAppAccess: Bool {
-        if !settingsStore.hasCompletedOnboarding { return true }
-        return purchaseManager.hasActiveSubscription
+    private enum RootSurface {
+        case appShell
+        case entitlementCheck
+        case paywall
+    }
+
+    /// Routes cold open after onboarding: wait for StoreKit before showing the paywall.
+    private var rootSurface: RootSurface {
+        if !settingsStore.hasCompletedOnboarding {
+            return .appShell
+        }
+        if purchaseManager.hasActiveSubscription {
+            return .appShell
+        }
+        if !purchaseManager.entitlementsDidLoad {
+            return .entitlementCheck
+        }
+        return .paywall
     }
 
     var body: some View {
         Group {
-            if hasAppAccess {
+            switch rootSurface {
+            case .appShell:
                 premiumGatedAppShell
-            } else {
+            case .entitlementCheck:
+                BuxVaultSplashView()
+                    .environmentObject(themeManager)
+            case .paywall:
                 BuxMuseSubscriptionView(isBlocking: true)
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
@@ -117,7 +136,8 @@ struct RootView: View {
                 OnboardingWizardView()
                     .environmentObject(themeManager)
                     .environmentObject(appSettingsManager)
-                    .buxThemedSheetContent()
+                    .buxThemedPresentation()
+                    .buxInterfaceLocale()
             }
             .onChange(of: settingsStore.hasCompletedOnboarding) { _, completed in
                 guard completed else { return }
@@ -437,23 +457,8 @@ struct RootView: View {
         }
 
         if settingsStore.privacyBlurInAppSwitching && (scenePhase == .inactive || scenePhase == .background) {
-            Color.clear
-                .background(.ultraThickMaterial)
-                .ignoresSafeArea()
-                .overlay(
-                    VStack(spacing: 16) {
-                        Image(systemName: "lock.shield.fill")
-                            .font(.system(size: 48))
-                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                        Image("BuxMuseLogo")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: 200)
-                        BuxCatalogText.text("BuxMuse Vault Active")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    }
-                )
+            BuxVaultSplashView(showsTitle: true)
+                .environmentObject(themeManager)
                 .transition(.opacity)
                 .zIndex(999)
         }
@@ -553,23 +558,8 @@ struct RootView: View {
         }
 
         if settingsStore.privacyBlurInAppSwitching && (scenePhase == .inactive || scenePhase == .background) {
-            Color.clear
-                .background(.ultraThickMaterial)
-                .ignoresSafeArea()
-                .overlay(
-                    VStack(spacing: 16) {
-                        Image(systemName: "lock.shield.fill")
-                            .font(.system(size: 48))
-                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
-                        Image("BuxMuseLogo")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: 200)
-                        BuxCatalogText.text("BuxMuse Vault Active")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
-                    }
-                )
+            BuxVaultSplashView(showsTitle: true)
+                .environmentObject(themeManager)
                 .transition(.opacity)
                 .zIndex(999)
         }
