@@ -142,6 +142,11 @@ struct RootView: View {
             .onChange(of: settingsStore.hasCompletedOnboarding) { _, completed in
                 guard completed else { return }
                 container.tutorialCoordinator.consumeAutoStartIfNeeded()
+                recordPresenceIfEligible()
+            }
+            .onChange(of: purchaseManager.hasActiveSubscription) { _, isActive in
+                guard isActive else { return }
+                recordPresenceIfEligible()
             }
             .onChange(of: navigationCoordinator.showStudioUnlockAnimation) { _, isShowing in
                 if !isShowing {
@@ -174,6 +179,7 @@ struct RootView: View {
                 }
                 evaluateAppLock(forceOnLaunch: true)
                 container.tutorialCoordinator.consumeAutoStartIfNeeded()
+                recordPresenceIfEligible()
             }
             .onChange(of: scenePhase) { _, newPhase in
                 switch newPhase {
@@ -185,6 +191,7 @@ struct RootView: View {
                     StudioTimerDisplayMonitor.shared.handleSceneBecameInactive()
                 case .active:
                     StudioTimerDisplayMonitor.shared.handleSceneBecameActive()
+                    recordPresenceIfEligible()
                     if settingsStore.personalCloudSyncEnabled {
                         Task { await PersonalCloudSyncEngine.shared.syncNow() }
                     }
@@ -627,6 +634,13 @@ struct RootView: View {
         hasUnlockedThisSession = true
         lastUnlockDate = Date()
         isAppLocked = false
+    }
+
+    private func recordPresenceIfEligible() {
+        BuxPresenceStreakStore.shared.recordOpenIfEligible(
+            hasCompletedOnboarding: settingsStore.hasCompletedOnboarding,
+            hasActiveSubscription: purchaseManager.hasActiveSubscription
+        )
     }
 }
 

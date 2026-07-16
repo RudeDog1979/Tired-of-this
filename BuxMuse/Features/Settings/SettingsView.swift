@@ -104,29 +104,37 @@ struct SettingsView: View {
             .environment(\.isSettingsContext, true)
             .onChange(of: navigationCoordinator.openStudioSettingsRequest) { _, requested in
                 guard requested else { return }
-                settingsPath.append(SettingsDestinationType.studio)
-                _ = navigationCoordinator.consumeStudioSettingsRequest()
+                routeToStudioSettings()
             }
             .onChange(of: navigationCoordinator.openPaymentSettingsRequest) { _, requested in
                 guard requested else { return }
-                settingsPath.append(SettingsDestinationType.paymentSources)
-                _ = navigationCoordinator.consumePaymentSettingsRequest()
+                routeToPaymentSettings()
             }
             .onChange(of: navigationCoordinator.openDebtsSettingsRequest) { _, requested in
                 guard requested else { return }
-                settingsPath.append(SettingsDestinationType.debts)
-                _ = navigationCoordinator.consumeDebtsSettingsRequest()
+                routeToDebtsSettings()
             }
             .onChange(of: navigationCoordinator.openProfileSettingsRequest) { _, requested in
                 guard requested else { return }
-                settingsPath.append(SettingsDestinationType.profile)
-                _ = navigationCoordinator.consumeProfileSettingsRequest()
+                routeToProfileSettings()
             }
             .onChange(of: navigationCoordinator.openAppearanceSettingsRequest) { _, requested in
                 guard requested else { return }
                 routeToAppearanceSettings()
             }
             .onAppear {
+                if navigationCoordinator.openProfileSettingsRequest {
+                    routeToProfileSettings()
+                }
+                if navigationCoordinator.openStudioSettingsRequest {
+                    routeToStudioSettings()
+                }
+                if navigationCoordinator.openPaymentSettingsRequest {
+                    routeToPaymentSettings()
+                }
+                if navigationCoordinator.openDebtsSettingsRequest {
+                    routeToDebtsSettings()
+                }
                 if navigationCoordinator.openAppearanceSettingsRequest {
                     routeToAppearanceSettings()
                 }
@@ -173,6 +181,31 @@ struct SettingsView: View {
         settingsPath.append(SettingsDestinationType.appearance)
         _ = navigationCoordinator.consumeAppearanceSettingsRequest()
         _ = navigationCoordinator.takePendingSettingsDestination()
+    }
+
+    private func routeToProfileSettings() {
+        settingsPath = NavigationPath()
+        settingsPath.append(SettingsDestinationType.profile)
+        _ = navigationCoordinator.consumeProfileSettingsRequest()
+        _ = navigationCoordinator.takePendingSettingsDestination()
+    }
+
+    private func routeToStudioSettings() {
+        settingsPath = NavigationPath()
+        settingsPath.append(SettingsDestinationType.studio)
+        _ = navigationCoordinator.consumeStudioSettingsRequest()
+    }
+
+    private func routeToPaymentSettings() {
+        settingsPath = NavigationPath()
+        settingsPath.append(SettingsDestinationType.paymentSources)
+        _ = navigationCoordinator.consumePaymentSettingsRequest()
+    }
+
+    private func routeToDebtsSettings() {
+        settingsPath = NavigationPath()
+        settingsPath.append(SettingsDestinationType.debts)
+        _ = navigationCoordinator.consumeDebtsSettingsRequest()
     }
 
     private func routeTutorialSettingsNavigation() {

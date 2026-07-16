@@ -137,6 +137,27 @@ struct SettingsGreetingDomain: Codable, Equatable {
     var greetingHeaderEnabled: Bool
     var greetingShowIcon: Bool
     var greetingFontStyle: GreetingFontStyle
+    var showVaultTitleOnHomeAvatar: Bool
+
+    init(
+        greetingHeaderEnabled: Bool,
+        greetingShowIcon: Bool,
+        greetingFontStyle: GreetingFontStyle,
+        showVaultTitleOnHomeAvatar: Bool
+    ) {
+        self.greetingHeaderEnabled = greetingHeaderEnabled
+        self.greetingShowIcon = greetingShowIcon
+        self.greetingFontStyle = greetingFontStyle
+        self.showVaultTitleOnHomeAvatar = showVaultTitleOnHomeAvatar
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        greetingHeaderEnabled = try c.decode(Bool.self, forKey: .greetingHeaderEnabled)
+        greetingShowIcon = try c.decode(Bool.self, forKey: .greetingShowIcon)
+        greetingFontStyle = try c.decode(GreetingFontStyle.self, forKey: .greetingFontStyle)
+        showVaultTitleOnHomeAvatar = try c.decodeIfPresent(Bool.self, forKey: .showVaultTitleOnHomeAvatar) ?? false
+    }
 }
 
 struct SettingsSubscriptionsDomain: Codable, Equatable {
@@ -594,7 +615,8 @@ enum PersonalSettingsDomainSync {
             return try encoder.encode(SettingsGreetingDomain(
                 greetingHeaderEnabled: store.greetingHeaderEnabled,
                 greetingShowIcon: store.greetingShowIcon,
-                greetingFontStyle: store.greetingFontStyle
+                greetingFontStyle: store.greetingFontStyle,
+                showVaultTitleOnHomeAvatar: store.showVaultTitleOnHomeAvatar
             ))
         case .subscriptions:
             return try encoder.encode(SettingsSubscriptionsDomain(
@@ -728,6 +750,7 @@ enum PersonalSettingsDomainSync {
             store.greetingHeaderEnabled = payload.greetingHeaderEnabled
             store.greetingShowIcon = payload.greetingShowIcon
             store.greetingFontStyle = payload.greetingFontStyle
+            store.showVaultTitleOnHomeAvatar = payload.showVaultTitleOnHomeAvatar
         case .subscriptions:
             guard let payload = try? decoder.decode(SettingsSubscriptionsDomain.self, from: record.data) else { return }
             store.cancelledSubscriptionMerchants = payload.cancelledSubscriptionMerchants

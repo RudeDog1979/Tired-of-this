@@ -1,0 +1,166 @@
+{
+  "PRESENCE": {
+    "es-419": "PRESENCIA",
+    "es-ES": "PRESENCIA"
+  },
+  "You showed up for your money today.": {
+    "es-419": "Hoy apareciste por tu dinero.",
+    "es-ES": "Hoy apareciste por tu dinero."
+  },
+  "Day %lld of 7": {
+    "es-419": "Día %lld de 7",
+    "es-ES": "Día %lld de 7"
+  },
+  "Best streak · %lld days": {
+    "es-419": "Mejor racha · %lld días",
+    "es-ES": "Mejor racha · %lld días"
+  },
+  "New title: %@": {
+    "es-419": "Nuevo título: %@",
+    "es-ES": "Nuevo título: %@"
+  },
+  "View titles": {
+    "es-419": "Ver títulos",
+    "es-ES": "Ver títulos"
+  },
+  "Vault Titles": {
+    "es-419": "Títulos del Vault",
+    "es-ES": "Títulos del Vault"
+  },
+  "Titles for days you opened BuxMuse": {
+    "es-419": "Títulos por los días que abriste BuxMuse",
+    "es-ES": "Títulos por los días que abriste BuxMuse"
+  },
+  "Your titles": {
+    "es-419": "Tus títulos",
+    "es-ES": "Tus títulos"
+  },
+  "Streak %lld · Best %lld": {
+    "es-419": "Racha %lld · Mejor %lld",
+    "es-ES": "Racha %lld · Mejor %lld"
+  },
+  "%lld of %lld unlocked": {
+    "es-419": "%lld de %lld desbloqueados",
+    "es-ES": "%lld de %lld desbloqueados"
+  },
+  "Penny Pincher": {
+    "es-419": "Ahorrador de centavos",
+    "es-ES": "Ahorrador de céntimos"
+  },
+  "Expense Explorer": {
+    "es-419": "Explorador de gastos",
+    "es-ES": "Explorador de gastos"
+  },
+  "Receipt Wrangler": {
+    "es-419": "Domador de recibos",
+    "es-ES": "Domador de recibos"
+  },
+  "Budget Boss": {
+    "es-419": "Jefe del presupuesto",
+    "es-ES": "Jefe del presupuesto"
+  },
+  "Coin Collector": {
+    "es-419": "Coleccionista de monedas",
+    "es-ES": "Coleccionista de monedas"
+  },
+  "Bill Breaker": {
+    "es-419": "Rompefacturas",
+    "es-ES": "Rompefacturas"
+  },
+  "Savings Samurai": {
+    "es-419": "Samurái del ahorro",
+    "es-ES": "Samurái del ahorro"
+  },
+  "Debt Destroyer": {
+    "es-419": "Destructor de deudas",
+    "es-ES": "Destructor de deudas"
+  },
+  "Wealth Warrior": {
+    "es-419": "Guerrero de la riqueza",
+    "es-ES": "Guerrero de la riqueza"
+  },
+  "Cash King": {
+    "es-419": "Rey del efectivo",
+    "es-ES": "Rey del efectivo"
+  },
+  "Golden Goal": {
+    "es-419": "Meta dorada",
+    "es-ES": "Meta dorada"
+  },
+  "Estate Emperor": {
+    "es-419": "Emperador del patrimonio",
+    "es-ES": "Emperador del patrimonio"
+  },
+  "First open": {
+    "es-419": "Primera apertura",
+    "es-ES": "Primera apertura"
+  },
+  "3-day streak": {
+    "es-419": "Racha de 3 días",
+    "es-ES": "Racha de 3 días"
+  },
+  "7-day streak": {
+    "es-419": "Racha de 7 días",
+    "es-ES": "Racha de 7 días"
+  },
+  "14-day streak": {
+    "es-419": "Racha de 14 días",
+    "es-ES": "Racha de 14 días"
+  },
+  "30-day streak": {
+    "es-419": "Racha de 30 días",
+    "es-ES": "Racha de 30 días"
+  },
+  "60-day streak": {
+    "es-419": "Racha de 60 días",
+    "es-ES": "Racha de 60 días"
+  },
+  "90-day streak": {
+    "es-419": "Racha de 90 días",
+    "es-ES": "Racha de 90 días"
+  },
+  "100 open days": {
+    "es-419": "100 días de apertura",
+    "es-ES": "100 días de apertura"
+  },
+  "180-day streak": {
+    "es-419": "Racha de 180 días",
+    "es-ES": "Racha de 180 días"
+  },
+  "365-day streak": {
+    "es-419": "Racha de 365 días",
+    "es-ES": "Racha de 365 días"
+  },
+  "12 different months": {
+    "es-419": "12 meses distintos",
+    "es-ES": "12 meses distintos"
+  },
+  "Cash King + Golden Goal": {
+    "es-419": "Rey del efectivo + Meta dorada",
+    "es-ES": "Rey del efectivo + Meta dorada"
+  },
+  "Earned %@": {
+    "es-419": "Logrado %@",
+    "es-ES": "Conseguido %@"
+  },
+  "Earned": {
+    "es-419": "Logrado",
+    "es-ES": "Conseguido"
+  },
+  "Continue": {
+    "es-419": "Continuar",
+    "es-ES": "Continuar"
+  },
+  "Done": {
+    "es-419": "Listo",
+    "es-ES": "Listo"
+  },
+  "Show title on Home avatar": {
+    "es-419": "Mostrar título en el avatar de Inicio",
+    "es-ES": "Mostrar título en el avatar de Inicio"
+  },
+  "Keeps the wallet hero clean when off. Titles always live here.": {
+    "es-419": "Con esto desactivado, el héroe de la billetera se ve más limpio. Los títulos siempre viven aquí.",
+    "es-ES": "Con esto desactivado, el héroe de la billetera se ve más limpio. Los títulos siempre viven aquí."
+  }
+}

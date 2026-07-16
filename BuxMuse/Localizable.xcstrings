@@ -2803,6 +2803,29 @@
         }
       }
     },
+    "%lld days to go" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltan %lld días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltan %lld días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltan %lld días"
+          }
+        }
+      }
+    },
     "%lld days until next tax deadline" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3260,6 +3283,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld movimientos · %lld territorios"
+          }
+        }
+      }
+    },
+    "%lld of %lld unlocked" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de %lld desbloqueados"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de %lld desbloqueados"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de %lld desbloqueados"
           }
         }
       }
@@ -3991,6 +4037,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prueba gratuita de %lld años"
+          }
+        }
+      }
+    },
+    "%lld/%lld days" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/%lld días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/%lld días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/%lld días"
           }
         }
       }
@@ -5023,6 +5092,29 @@
         }
       }
     },
+    "3-day streak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 3 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 3 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 3 días"
+          }
+        }
+      }
+    },
     "3. Payday Budget Meters" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5260,6 +5352,29 @@
         }
       }
     },
+    "7-day streak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 7 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 7 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 7 días"
+          }
+        }
+      }
+    },
     "7-day trend" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5279,6 +5394,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tendencia 7 días"
+          }
+        }
+      }
+    },
+    "12 different months" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 meses distintos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 meses distintos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 meses distintos"
           }
         }
       }
@@ -5373,6 +5511,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "14 días"
+          }
+        }
+      }
+    },
+    "14-day streak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 14 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 14 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 14 días"
           }
         }
       }
@@ -5538,6 +5699,29 @@
         }
       }
     },
+    "30-day streak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 30 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 30 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 30 días"
+          }
+        }
+      }
+    },
     "31-day" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5586,6 +5770,29 @@
         }
       }
     },
+    "60-day streak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 60 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 60 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 60 días"
+          }
+        }
+      }
+    },
     "90 days" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5628,6 +5835,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "90 días"
+          }
+        }
+      }
+    },
+    "90-day streak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 90 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 90 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 90 días"
+          }
+        }
+      }
+    },
+    "100 open days" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 días de apertura"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 días de apertura"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 días de apertura"
           }
         }
       }
@@ -5680,6 +5933,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "100% privado: tus datos nunca salen de este dispositivo"
+          }
+        }
+      }
+    },
+    "180-day streak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 180 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 180 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 180 días"
+          }
+        }
+      }
+    },
+    "365-day streak" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 365 días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 365 días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de 365 días"
           }
         }
       }
@@ -13522,6 +13821,29 @@
         }
       }
     },
+    "Badges for days you opened BuxMuse" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insignias por los días que abriste BuxMuse"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insignias por los días que abriste BuxMuse"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insignias por los días que abriste BuxMuse"
+          }
+        }
+      }
+    },
     "Balance breakdown" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -14602,6 +14924,29 @@
         }
       }
     },
+    "Best streak · %lld days" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejor racha · %lld días"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejor racha · %lld días"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejor racha · %lld días"
+          }
+        }
+      }
+    },
     "bi-weekly" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -14667,6 +15012,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BIC / SWIFT (opcional)"
+          }
+        }
+      }
+    },
+    "Bill Breaker" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rompefacturas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rompefacturas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rompefacturas"
           }
         }
       }
@@ -15718,6 +16086,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Las alertas de presupuesto, renovaciones y recordatorios de Studio aparecerán aquí."
+          }
+        }
+      }
+    },
+    "Budget Boss" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jefe del presupuesto"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jefe del presupuesto"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jefe del presupuesto"
           }
         }
       }
@@ -19026,6 +19417,52 @@
         }
       }
     },
+    "Cash King" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rey del efectivo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rey del efectivo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rey del efectivo"
+          }
+        }
+      }
+    },
+    "Cash King + Golden Goal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rey del efectivo + Meta dorada"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rey del efectivo + Meta dorada"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rey del efectivo + Meta dorada"
+          }
+        }
+      }
+    },
     "Cash on" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -21536,6 +21973,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Asesor"
+          }
+        }
+      }
+    },
+    "Coin Collector" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleccionista de monedas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleccionista de monedas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleccionista de monedas"
           }
         }
       }
@@ -26347,6 +26807,52 @@
         }
       }
     },
+    "Day %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día %lld"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día %lld"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día %lld"
+          }
+        }
+      }
+    },
+    "Day %lld of 7" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día %lld de 7"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día %lld de 7"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día %lld de 7"
+          }
+        }
+      }
+    },
     "days" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -26485,6 +26991,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Centro de deudas"
+          }
+        }
+      }
+    },
+    "Debt Destroyer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destructor de deudas"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destructor de deudas"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destructor de deudas"
           }
         }
       }
@@ -30144,6 +30673,52 @@
         }
       }
     },
+    "Earned" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguido"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logrado"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguido"
+          }
+        }
+      }
+    },
+    "Earned %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguido %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logrado %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguido %@"
+          }
+        }
+      }
+    },
     "Edge strips (hero size)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -33065,6 +33640,29 @@
         }
       }
     },
+    "Estate Emperor" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emperador del patrimonio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emperador del patrimonio"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emperador del patrimonio"
+          }
+        }
+      }
+    },
     "este mes" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -34083,6 +34681,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Detalles de gastos"
+          }
+        }
+      }
+    },
+    "Expense Explorer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorador de gastos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorador de gastos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorador de gastos"
           }
         }
       }
@@ -35927,6 +36548,29 @@
         }
       }
     },
+    "First open" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primera apertura"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primera apertura"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primera apertura"
+          }
+        }
+      }
+    },
     "First recorded" : {
       "comment" : "A label displayed underneath the price history graph.",
       "extractionState" : "stale",
@@ -37310,6 +37954,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Historial completo, búsqueda, filtros y desglose por comercio."
+          }
+        }
+      }
+    },
+    "Full Month" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes completo"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes completo"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes completo"
           }
         }
       }
@@ -38733,6 +39400,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oro"
+          }
+        }
+      }
+    },
+    "Golden Goal" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta dorada"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta dorada"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta dorada"
           }
         }
       }
@@ -45864,6 +46554,29 @@
         }
       }
     },
+    "Keeps the wallet hero clean when off. Titles always live here." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con esto desactivado, el héroe de la billetera se ve más limpio. Los títulos siempre viven aquí."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con esto desactivado, el héroe de la billetera se ve más limpio. Los títulos siempre viven aquí."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con esto desactivado, el héroe de la billetera se ve más limpio. Los títulos siempre viven aquí."
+          }
+        }
+      }
+    },
     "Keeps this in your ledger but leaves it out of spend totals and charts." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -52823,6 +53536,29 @@
         }
       }
     },
+    "Month Keeper" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardián del mes"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardián del mes"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardián del mes"
+          }
+        }
+      }
+    },
     "Month spend" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -54039,6 +54775,29 @@
         }
       }
     },
+    "New badge: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva insignia: %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva insignia: %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva insignia: %@"
+          }
+        }
+      }
+    },
     "New budget rule" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -54307,6 +55066,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nueva ventana de Studio"
+          }
+        }
+      }
+    },
+    "New title: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo título: %@"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo título: %@"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo título: %@"
           }
         }
       }
@@ -62078,6 +62860,29 @@
         }
       }
     },
+    "Penny Pincher" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorrador de céntimos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorrador de centavos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahorrador de céntimos"
+          }
+        }
+      }
+    },
     "people" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -63961,6 +64766,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prepara comidas semanales el domingo para ahorrar en restaurantes."
+          }
+        }
+      }
+    },
+    "PRESENCE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PRESENCIA"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PRESENCIA"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PRESENCIA"
+          }
+        }
+      }
+    },
+    "Presence streak day %lld of 7. Best %lld days." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de presencia: día %lld de 7. Mejor %lld días."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de presencia: día %lld de 7. Mejor %lld días."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha de presencia: día %lld de 7. Mejor %lld días."
           }
         }
       }
@@ -68080,6 +68931,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escáner de tickets"
+          }
+        }
+      }
+    },
+    "Receipt Wrangler" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domador de recibos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domador de recibos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domador de recibos"
           }
         }
       }
@@ -73159,6 +74033,29 @@
         }
       }
     },
+    "Savings Samurai" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samurái del ahorro"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samurái del ahorro"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samurái del ahorro"
+          }
+        }
+      }
+    },
     "Savings velocity scenarios" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -77921,6 +78818,29 @@
         }
       }
     },
+    "Show title on Home avatar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar título en el avatar de Inicio"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar título en el avatar de Inicio"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar título en el avatar de Inicio"
+          }
+        }
+      }
+    },
     "Show unassigned when filtering" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -80156,6 +81076,29 @@
         }
       }
     },
+    "Spark" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chispa"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chispa"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chispa"
+          }
+        }
+      }
+    },
     "Spend Cash" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -82062,6 +83005,29 @@
         }
       }
     },
+    "Steady" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Constante"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Constante"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Constante"
+          }
+        }
+      }
+    },
     "Step %lld of %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -82428,6 +83394,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardado en iCloud de Apple — BuxMuse no puede verlo"
+          }
+        }
+      }
+    },
+    "Streak %lld · Best %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha %lld · Mejor %lld"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha %lld · Mejor %lld"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha %lld · Mejor %lld"
           }
         }
       }
@@ -90443,6 +91432,29 @@
         }
       }
     },
+    "Titles for days you opened BuxMuse" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos por los días que abriste BuxMuse"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos por los días que abriste BuxMuse"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos por los días que abriste BuxMuse"
+          }
+        }
+      }
+    },
     "To" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -96213,6 +97225,29 @@
         }
       }
     },
+    "Vault Titles" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos del Vault"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos del Vault"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos del Vault"
+          }
+        }
+      }
+    },
     "Verify if the price change is due to a plan upgrade or extra tax fees." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -96382,6 +97417,29 @@
         }
       }
     },
+    "View badges" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver insignias"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver insignias"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver insignias"
+          }
+        }
+      }
+    },
     "View deal" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -96401,6 +97459,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver acuerdo"
+          }
+        }
+      }
+    },
+    "View titles" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver títulos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver títulos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver títulos"
           }
         }
       }
@@ -97329,6 +98410,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Débil"
+          }
+        }
+      }
+    },
+    "Wealth Warrior" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guerrero de la riqueza"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guerrero de la riqueza"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guerrero de la riqueza"
           }
         }
       }
@@ -100969,6 +102073,29 @@
         }
       }
     },
+    "You showed up for your money today." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy apareciste por tu dinero."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy apareciste por tu dinero."
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy apareciste por tu dinero."
+          }
+        }
+      }
+    },
     "You spend less during rainy days." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -103146,6 +104273,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SUS NORMAS TRIBUTARIAS"
+          }
+        }
+      }
+    },
+    "Your titles" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus títulos"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus títulos"
+          }
+        },
+        "es-ES" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus títulos"
           }
         }
       }

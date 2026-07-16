@@ -12,6 +12,8 @@ struct ProfileSettingsView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var appSettingsManager: AppSettingsManager
     @ObservedObject private var store = SettingsStore.shared
+    @ObservedObject private var presence = BuxPresenceStreakStore.shared
+    @State private var showTitlesSheet = false
 
     @State private var firstName = ""
     @State private var lastName = ""
@@ -24,6 +26,7 @@ struct ProfileSettingsView: View {
     @State private var photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
 
     private var locale: Locale { appSettingsManager.interfaceLocale }
+    private var accent: Color { themeManager.contrastAccentColor(for: colorScheme) }
 
     private func loc(_ key: String) -> String {
         BuxCatalogLabel.string(key, locale: locale)
@@ -45,6 +48,11 @@ struct ProfileSettingsView: View {
                         BuxCatalogDynamicText(key: "Saved locally on your device.")
                             .font(.system(size: 12))
                             .buxLabelSecondary()
+                        if let title = presence.highestTitle {
+                            Text("\(title.emoji) \(loc(title.titleKey))")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(accent)
+                        }
                         if loadFailed {
                             BuxCatalogDynamicText(key: "Couldn't load that photo — try another image.")
                                 .font(.system(size: 10, weight: .medium))
@@ -53,6 +61,53 @@ struct ProfileSettingsView: View {
                     }
                 }
                 .buxFormFieldPadding()
+            }
+
+            BuxFormSection(title: "Vault Titles") {
+                Toggle(isOn: $store.showVaultTitleOnHomeAvatar) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        BuxCatalogDynamicText(key: "Show title on Home avatar")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                        BuxCatalogDynamicText(key: "Keeps the wallet hero clean when off. Titles always live here.")
+                            .font(.system(size: 12, weight: .medium))
+                            .buxLabelSecondary()
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .tint(accent)
+                .buxFormFieldPadding()
+
+                BuxFormRowDivider()
+
+                Button {
+                    showTitlesSheet = true
+                } label: {
+                    HStack(spacing: 12) {
+                        if let title = presence.highestTitle {
+                            Text(title.emoji)
+                                .font(.system(size: 22))
+                        } else {
+                            Image(systemName: "seal")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(accent)
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            BuxCatalogDynamicText(key: "Your titles")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(themeManager.labelPrimary(for: colorScheme))
+                            Text(titlesRowSubtitle)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(themeManager.labelSecondary(for: colorScheme))
+                    }
+                }
+                .buxFormFieldPadding()
+                .buxSettingsRowInteraction()
             }
 
             BuxFormSection(title: "Name settings") {
@@ -142,6 +197,7 @@ struct ProfileSettingsView: View {
         .onChange(of: firstName) { _, _ in saveProfile() }
         .onChange(of: lastName) { _, _ in saveProfile() }
         .onChange(of: preferredNameStyle) { _, _ in saveProfile() }
+        .onChange(of: store.showVaultTitleOnHomeAvatar) { _, _ in store.save() }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             photoStatus = BusinessCardPhotoLibraryAccess.currentStatus()
         }
@@ -175,27 +231,72 @@ struct ProfileSettingsView: View {
                 .buxThemedSheetContent()
             }
         }
+        .sheet(isPresented: $showTitlesSheet) {
+            PresenceTitlesSheet()
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .buxThemedSheetContent()
+        }
+    }
+
+    private var titlesRowSubtitle: String {
+        let unlocked = presence.state.unlockedTitles.count
+        let total = BuxPresenceTitleID.allCases.count
+        let streak = BuxLocalizedString.format(
+            "Streak %lld · Best %lld",
+            locale: locale,
+            Int64(presence.currentLength),
+            Int64(presence.bestLength)
+        )
+        let count = BuxLocalizedString.format(
+            "%lld of %lld unlocked",
+            locale: locale,
+            Int64(unlocked),
+            Int64(total)
+        )
+        return "\(streak) · \(count)"
     }
 
     @ViewBuilder
     private var avatarPreview: some View {
-        if let data = selectedAvatarData, let img = UIImage(data: data) {
-            Image(uiImage: img)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 72, height: 72)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(themeManager.current.accentColor, lineWidth: 2))
-        } else {
-            ZStack {
-                Circle()
-                    .fill(themeManager.current.accentColor.opacity(0.15))
-                    .frame(width: 72, height: 72)
-                Image(systemName: "person.fill")
-                    .font(.system(size: 32))
-                    .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+        ZStack(alignment: .topTrailing) {
+            Group {
+                if let data = selectedAvatarData, let img = UIImage(data: data) {
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 72, height: 72)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(themeManager.current.accentColor, lineWidth: 2))
+                } else {
+                    ZStack {
+                        Circle()
+                            .fill(themeManager.current.accentColor.opacity(0.15))
+                            .frame(width: 72, height: 72)
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(themeManager.contrastAccentColor(for: colorScheme))
+                    }
+                }
+            }
+
+            if let title = presence.highestTitle {
+                Text(title.emoji)
+                    .font(.system(size: 16))
+                    .padding(4)
+                    .background {
+                        Circle()
+                            .fill(themeManager.cardFill(for: colorScheme))
+                            .shadow(color: .black.opacity(0.12), radius: 2, y: 1)
+                    }
+                    .overlay {
+                        Circle()
+                            .strokeBorder(accent.opacity(0.25), lineWidth: 1)
+                    }
+                    .offset(x: 6, y: -4)
             }
         }
+        .frame(width: 72, height: 72)
     }
 
     private func saveProfile() {

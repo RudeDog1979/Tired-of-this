@@ -256,6 +256,30 @@ struct BuxPadSettingsHost: View {
                 padNavigationBrain.selectedSettingsPath = destination.rawValue
             }
 
+            if navigationCoordinator.openProfileSettingsRequest {
+                selectedDestination = .profile
+                padNavigationBrain.selectedSettingsPath = SettingsDestinationType.profile.rawValue
+                _ = navigationCoordinator.consumeProfileSettingsRequest()
+            }
+
+            if navigationCoordinator.openStudioSettingsRequest {
+                selectedDestination = .studio
+                padNavigationBrain.selectedSettingsPath = SettingsDestinationType.studio.rawValue
+                _ = navigationCoordinator.consumeStudioSettingsRequest()
+            }
+
+            if navigationCoordinator.openPaymentSettingsRequest {
+                selectedDestination = .paymentSources
+                padNavigationBrain.selectedSettingsPath = SettingsDestinationType.paymentSources.rawValue
+                _ = navigationCoordinator.consumePaymentSettingsRequest()
+            }
+
+            if navigationCoordinator.openDebtsSettingsRequest {
+                selectedDestination = .debts
+                padNavigationBrain.selectedSettingsPath = SettingsDestinationType.debts.rawValue
+                _ = navigationCoordinator.consumeDebtsSettingsRequest()
+            }
+
             if navigationCoordinator.openAppearanceSettingsRequest {
                 selectedDestination = .appearance
                 padNavigationBrain.selectedSettingsPath = SettingsDestinationType.appearance.rawValue

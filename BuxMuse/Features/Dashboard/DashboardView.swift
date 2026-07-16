@@ -27,6 +27,7 @@ struct DashboardView: View {
 
     @ObservedObject private var settingsStore = SettingsStore.shared
     @ObservedObject private var simpleStudioStore = SimpleStudioStore.shared
+    @ObservedObject private var presenceStore = BuxPresenceStreakStore.shared
 
     var transactionNamespace: Namespace.ID
 
@@ -564,6 +565,18 @@ struct DashboardView: View {
                     brain.markDailyTipSeen()
                 }
                 .zIndex(20)
+            }
+
+            if presenceStore.showDailyPopup {
+                PresencePopupView(
+                    onContinue: {},
+                    onViewTitles: {
+                        navigationCoordinator.openProfileSettings()
+                    }
+                )
+                .environmentObject(themeManager)
+                .environmentObject(appSettingsManager)
+                .zIndex(25)
             }
         }
         .coordinateSpace(name: "dashboardOverlay")
@@ -1339,10 +1352,41 @@ struct BuxUserAvatarView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
     @ObservedObject private var settings = SettingsStore.shared
+    @ObservedObject private var presence = BuxPresenceStreakStore.shared
 
     var size: CGFloat = 44
+    /// Notification-dot style Vault Title pin (highest unlocked).
+    var showsTitlePin: Bool = true
 
     var body: some View {
+        ZStack(alignment: .topTrailing) {
+            avatarBase
+            if showsTitlePin, settings.showVaultTitleOnHomeAvatar, let title = presence.highestTitle {
+                Text(title.emoji)
+                    .font(.system(size: max(11, size * 0.36)))
+                    .padding(max(2, size * 0.06))
+                    .background {
+                        Circle()
+                            .fill(themeManager.cardFill(for: colorScheme))
+                            .shadow(color: .black.opacity(colorScheme == .dark ? 0.35 : 0.12), radius: 2, y: 1)
+                    }
+                    .overlay {
+                        Circle()
+                            .strokeBorder(
+                                themeManager.contrastAccentColor(for: colorScheme).opacity(0.25),
+                                lineWidth: 1
+                            )
+                    }
+                    .offset(x: size * 0.12, y: -size * 0.1)
+                    .accessibilityHidden(true)
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    @ViewBuilder
+    private var avatarBase: some View {
         if let data = settings.profileAvatarData, let img = UIImage(data: data) {
             Image(uiImage: img)
                 .resizable()
@@ -1367,6 +1411,13 @@ struct BuxUserAvatarView: View {
                     .foregroundStyle(themeManager.contrastAccentColor(for: colorScheme))
             }
         }
+    }
+
+    private var accessibilityLabel: String {
+        if settings.showVaultTitleOnHomeAvatar, let title = presence.highestTitle {
+            return "\(title.titleKey)"
+        }
+        return "Profile"
     }
 }
 

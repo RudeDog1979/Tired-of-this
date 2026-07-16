@@ -482,6 +482,8 @@ public final class SettingsStore: ObservableObject {
     @Published public var greetingHeaderEnabled: Bool = true
     @Published public var greetingShowIcon: Bool = true
     @Published public var greetingFontStyle: GreetingFontStyle = .playful
+    /// When false (default), Vault Title emoji pin stays in Profile only — keeps Home hero quieter.
+    @Published public var showVaultTitleOnHomeAvatar: Bool = false
     
     // MARK: - Onboarding Settings
     @Published public var hasCompletedOnboarding: Bool = false
@@ -641,6 +643,7 @@ public final class SettingsStore: ObservableObject {
         let greetingHeaderEnabled: Bool?
         let greetingShowIcon: Bool?
         let greetingFontStyle: GreetingFontStyle?
+        let showVaultTitleOnHomeAvatar: Bool?
         let householdCloudRecordName: String?
         let householdShareURL: String?
         let sharedEnvelopeProfileId: UUID?
@@ -678,7 +681,7 @@ public final class SettingsStore: ObservableObject {
             case includeStudioDataInExports, includeFreelanceDataInExports
             case includeAnalyticsInExports, lastExportDate
             case enableDebugOverlay, showPerformanceMetrics
-            case greetingHeaderEnabled, greetingShowIcon, greetingFontStyle
+            case greetingHeaderEnabled, greetingShowIcon, greetingFontStyle, showVaultTitleOnHomeAvatar
             case householdCloudRecordName, householdShareURL, sharedEnvelopeProfileId, householdDisplayName
             case householdSharedZoneName, householdSharedZoneOwner
             case personalCloudSyncEnabled
@@ -778,6 +781,7 @@ public final class SettingsStore: ObservableObject {
             greetingHeaderEnabled = try c.decodeIfPresent(Bool.self, forKey: .greetingHeaderEnabled)
             greetingShowIcon = try c.decodeIfPresent(Bool.self, forKey: .greetingShowIcon)
             greetingFontStyle = try c.decodeIfPresent(GreetingFontStyle.self, forKey: .greetingFontStyle)
+            showVaultTitleOnHomeAvatar = try c.decodeIfPresent(Bool.self, forKey: .showVaultTitleOnHomeAvatar)
             householdCloudRecordName = try c.decodeIfPresent(String.self, forKey: .householdCloudRecordName)
             householdShareURL = try c.decodeIfPresent(String.self, forKey: .householdShareURL)
             sharedEnvelopeProfileId = try c.decodeIfPresent(UUID.self, forKey: .sharedEnvelopeProfileId)
@@ -857,6 +861,7 @@ public final class SettingsStore: ObservableObject {
             greetingHeaderEnabled: Bool?,
             greetingShowIcon: Bool?,
             greetingFontStyle: GreetingFontStyle?,
+            showVaultTitleOnHomeAvatar: Bool? = nil,
             householdCloudRecordName: String? = nil,
             householdShareURL: String? = nil,
             sharedEnvelopeProfileId: UUID? = nil,
@@ -934,6 +939,7 @@ public final class SettingsStore: ObservableObject {
             self.greetingHeaderEnabled = greetingHeaderEnabled ?? true
             self.greetingShowIcon = greetingShowIcon ?? true
             self.greetingFontStyle = greetingFontStyle ?? .playful
+            self.showVaultTitleOnHomeAvatar = showVaultTitleOnHomeAvatar ?? false
             self.householdCloudRecordName = householdCloudRecordName
             self.householdShareURL = householdShareURL
             self.sharedEnvelopeProfileId = sharedEnvelopeProfileId
@@ -1014,6 +1020,7 @@ public final class SettingsStore: ObservableObject {
             try c.encodeIfPresent(greetingHeaderEnabled, forKey: .greetingHeaderEnabled)
             try c.encodeIfPresent(greetingShowIcon, forKey: .greetingShowIcon)
             try c.encodeIfPresent(greetingFontStyle, forKey: .greetingFontStyle)
+            try c.encodeIfPresent(showVaultTitleOnHomeAvatar, forKey: .showVaultTitleOnHomeAvatar)
             try c.encodeIfPresent(householdCloudRecordName, forKey: .householdCloudRecordName)
             try c.encodeIfPresent(householdShareURL, forKey: .householdShareURL)
             try c.encodeIfPresent(sharedEnvelopeProfileId, forKey: .sharedEnvelopeProfileId)
@@ -1128,6 +1135,7 @@ public final class SettingsStore: ObservableObject {
                 self.greetingHeaderEnabled = payload.greetingHeaderEnabled ?? true
                 self.greetingShowIcon = payload.greetingShowIcon ?? true
                 self.greetingFontStyle = payload.greetingFontStyle ?? .playful
+                self.showVaultTitleOnHomeAvatar = payload.showVaultTitleOnHomeAvatar ?? false
                 self.householdCloudRecordName = payload.householdCloudRecordName
                 self.householdShareURL = payload.householdShareURL
                 self.sharedEnvelopeProfileId = payload.sharedEnvelopeProfileId
@@ -1230,6 +1238,7 @@ public final class SettingsStore: ObservableObject {
         self.greetingHeaderEnabled = true
         self.greetingShowIcon = true
         self.greetingFontStyle = .playful
+        self.showVaultTitleOnHomeAvatar = false
         resetAppTourProgress()
         loadInvoicePaymentPreferences()
         loadMileagePreferences()
@@ -1421,6 +1430,7 @@ public final class SettingsStore: ObservableObject {
             greetingHeaderEnabled: greetingHeaderEnabled,
             greetingShowIcon: greetingShowIcon,
             greetingFontStyle: greetingFontStyle,
+            showVaultTitleOnHomeAvatar: showVaultTitleOnHomeAvatar,
             householdCloudRecordName: householdCloudRecordName,
             householdShareURL: householdShareURL,
             sharedEnvelopeProfileId: sharedEnvelopeProfileId,
@@ -1457,6 +1467,9 @@ public final class SettingsStore: ObservableObject {
         }
         isLoaded = false
         seedDefaults()
+        Task { @MainActor in
+            BuxPresenceStreakStore.shared.resetAll()
+        }
     }
 
     public func exportArchiveSettingsData() -> Data? {

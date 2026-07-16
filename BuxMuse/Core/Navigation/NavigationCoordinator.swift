@@ -181,6 +181,7 @@ final class NavigationCoordinator: ObservableObject {
     }
 
     func openProfileSettings() {
+        pendingSettingsDestination = .profile
         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
             selectedTab = .settings
             openProfileSettingsRequest = true
